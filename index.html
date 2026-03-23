@@ -7,6 +7,32 @@
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: 'Segoe UI', Arial, sans-serif; background: #f4f6f9; color: #222; line-height: 1.7; }
+
+    /* LOGIN GATE */
+    #login-gate {
+      position: fixed; inset: 0; background: #1a0a2e;
+      display: flex; align-items: center; justify-content: center; z-index: 9999;
+    }
+    #login-box {
+      background: white; border-radius: 12px; padding: 40px 48px;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.5); width: 100%; max-width: 400px; text-align: center;
+    }
+    #login-box h2 { color: #7b2d8b; margin-bottom: 6px; font-size: 1.4rem; }
+    #login-box p { color: #666; font-size: 0.9rem; margin-bottom: 24px; }
+    #login-box input {
+      width: 100%; padding: 10px 14px; margin-bottom: 14px;
+      border: 1px solid #ddd; border-radius: 6px; font-size: 1rem; outline: none;
+    }
+    #login-box input:focus { border-color: #7b2d8b; }
+    #login-box button {
+      width: 100%; padding: 12px; background: #7b2d8b; color: white;
+      border: none; border-radius: 6px; font-size: 1rem; cursor: pointer; font-weight: bold;
+    }
+    #login-box button:hover { background: #5a1f6b; }
+    #login-error { color: #dc3545; font-size: 0.85rem; margin-top: 10px; display: none; }
+    #main-content { display: none; }
+
+    /* MAIN STYLES */
     header { background: #7b2d8b; color: white; padding: 32px 40px; }
     header h1 { font-size: 2rem; }
     header p { font-size: 1rem; opacity: 0.85; margin-top: 6px; }
@@ -29,7 +55,6 @@
     .cmd-block .comment { color: #6c7086; font-style: italic; }
     .cmd-block .success { color: #a6e3a1; }
     .cmd-block .error { color: #f38ba8; }
-    .cmd-block .warning { color: #fab387; }
     .step { display: flex; gap: 16px; align-items: flex-start; margin-bottom: 16px; }
     .step-num { background: #7b2d8b; color: white; border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.85rem; flex-shrink: 0; margin-top: 2px; }
     .step-content { flex: 1; }
@@ -48,6 +73,21 @@
   </style>
 </head>
 <body>
+
+<!-- LOGIN GATE -->
+<div id="login-gate">
+  <div id="login-box">
+    <h2>Extreme Networks</h2>
+    <p>5320 Onboarding Guide &mdash; Team Access</p>
+    <input type="text" id="username" placeholder="Username" autocomplete="username" />
+    <input type="password" id="password" placeholder="Password" autocomplete="current-password" />
+    <button onclick="checkLogin()">Sign In</button>
+    <div id="login-error">Invalid username or password. Please try again.</div>
+  </div>
+</div>
+
+<!-- MAIN CONTENT (hidden until login) -->
+<div id="main-content">
 <header>
   <h1>Extreme Networks 5320 &mdash; Onboarding Guide</h1>
   <p>Complete session record: Serial Console &rarr; Login Recovery &rarr; Factory Reset &rarr; EXOS Migration &rarr; XIQ Onboarding</p>
@@ -162,4 +202,27 @@
   </section>
 </div>
 <footer>Extreme Networks 5320 Onboarding Guide &nbsp;|&nbsp; March 23, 2026 &nbsp;|&nbsp; khursheedkhanaiforgood-ai<br><small>Future: automated agent-driven onboarding for additional 5320 switches</small></footer>
-</body></html>
+</div>
+
+<script>
+  function checkLogin() {
+    var u = document.getElementById('username').value;
+    var p = document.getElementById('password').value;
+    if (u === 'admin' && p === 'Extreme01!!') {
+      document.getElementById('login-gate').style.display = 'none';
+      document.getElementById('main-content').style.display = 'block';
+      sessionStorage.setItem('auth', '1');
+    } else {
+      document.getElementById('login-error').style.display = 'block';
+    }
+  }
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') checkLogin();
+  });
+  if (sessionStorage.getItem('auth') === '1') {
+    document.getElementById('login-gate').style.display = 'none';
+    document.getElementById('main-content').style.display = 'block';
+  }
+</script>
+</body>
+</html>
