@@ -10,6 +10,29 @@ from agent.console_analyzer import ConsoleAnalyzer
 from agent.operator_ui import OperatorUI, console
 
 
+def _prompt_already_onboarded(ui: OperatorUI) -> str:
+    """Show menu when switch is detected as already onboarded. Returns chosen action."""
+    console.print()
+    console.print("[bold yellow]━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[/bold yellow]")
+    console.print("[bold green]  Switch detected: already running EXOS[/bold green]")
+    console.print("[bold yellow]━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[/bold yellow]")
+    console.print()
+    console.print("This switch appears to be fully onboarded (EXOS active, no ZTP+ journey seen).")
+    console.print()
+    console.print("What would you like to do?")
+    console.print()
+    console.print("  [bold cyan]1[/bold cyan]  Monitor only      — watch console activity, no onboarding guidance")
+    console.print("  [bold cyan]2[/bold cyan]  Re-onboard        — guide through factory reset → ZTP+ → EXOS from scratch")
+    console.print("  [bold cyan]3[/bold cyan]  Exit              — quit the agent")
+    console.print()
+
+    while True:
+        choice = click.prompt("Enter choice", default="1")
+        if choice in ("1", "2", "3"):
+            return choice
+        console.print("[red]Please enter 1, 2, or 3[/red]")
+
+
 @click.command()
 @click.option('--port', default=None, help='Serial port path (auto-detected if not set)')
 @click.option('--verbose', is_flag=True, help='Verbose output')
@@ -56,6 +79,7 @@ def main(port: str | None, verbose: bool):
     # ── Step 3: Main Loop ───────────────────────────────────────────────────
     PERIODIC_ANALYSIS_INTERVAL = 30.0  # seconds
     last_analysis_time = time.monotonic()
+    monitor_only = False  # set True if user chooses "monitor only" for already-onboarded switch
 
     try:
         while True:
@@ -67,6 +91,33 @@ def main(port: str | None, verbose: bool):
 
                 if transition:
                     ui.update_state(state_machine.current_state, state_machine.os_context)
+
+                    # ── Already-onboarded detection ──────────────────────────
+                    if state_machine.likely_already_onboarded:
+                        monitor.stop()
+                        choice = _prompt_already_onboarded(ui)
+                        if choice == "3":
+                            console.print("[yellow]Exiting.[/yellow]")
+                            return
+                        elif choice == "2":
+                            console.print()
+                            console.print("[bold]Re-onboarding selected.[/bold] Resuming guidance from current state...")
+                            console.print(
+                                "[dim]To factory reset: log in as admin, then run:[/dim]\n"
+                                "[bold cyan]  delete /intflash/primary.cfg[/bold cyan]\n"
+                                "[dim]then[/dim] [bold cyan]reboot[/bold cyan]"
+                            )
+                            monitor_only = False
+                        else:
+                            monitor_only = True
+                            console.print("[green]Monitor-only mode. Watching console...[/green]")
+                        monitor.start()
+                        last_analysis_time = time.monotonic()
+                        continue
+
+                    if monitor_only:
+                        continue
+
                     # State changed — ask Claude what to do
                     instruction = analyzer.analyze(
                         console_buffer=monitor.get_raw_buffer(config.buffer_size),

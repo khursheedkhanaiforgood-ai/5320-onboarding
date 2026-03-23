@@ -91,6 +91,35 @@ def test_boot_complete_flag():
     assert sm.boot_complete is True
 
 
+def test_already_onboarded_detected():
+    """Switch lands on EXOS login prompt without any ZTP+/DHCP/XIQ states."""
+    sm = StateMachine()
+    # Simulate connecting to a switch already running EXOS
+    sm.process_lines(["Starting Extreme Networks Switch Engine 33.5.2b118"])
+    sm.process_lines(["login:"])
+    assert sm.current_state == SwitchState.EXOS_LOGIN_PROMPT
+    assert sm.likely_already_onboarded is True
+
+
+def test_already_onboarded_not_triggered_after_fresh_onboarding():
+    """Switch goes through full ZTP+ flow — should NOT be flagged as already onboarded."""
+    sm = StateMachine()
+    sm.process_lines(["Booting in Zero Touch Deployment Mode"])
+    sm.process_lines(["IQAgent successfully connected to XIQ."])
+    sm.process_lines(["Downloading summit_arm-33.5.2.118.xos started."])
+    sm.process_lines(["Starting Extreme Networks Switch Engine 33.5.2b118"])
+    sm.process_lines(["login:"])
+    assert sm.current_state == SwitchState.EXOS_LOGIN_PROMPT
+    assert sm.likely_already_onboarded is False
+
+
+def test_already_onboarded_not_triggered_before_exos():
+    """Property is False when state has not yet reached an EXOS active state."""
+    sm = StateMachine()
+    sm.process_lines(["U-Boot 2022.10"])
+    assert sm.likely_already_onboarded is False
+
+
 def test_full_sequence():
     """Simulate a full onboarding sequence."""
     sm = StateMachine()

@@ -41,6 +41,25 @@ class StateTransition:
     timestamp: float
 
 
+# States that confirm active onboarding is in progress (not already-onboarded)
+_ONBOARDING_IN_PROGRESS_STATES = frozenset({
+    SwitchState.ZTD_MODE,
+    SwitchState.DHCP_ACQUIRING,
+    SwitchState.XIQ_CONNECTING,
+    SwitchState.FIRMWARE_DOWNLOADING,
+    SwitchState.FIRMWARE_INSTALLING,
+})
+
+# Landing in any of these without prior onboarding states = already onboarded
+_EXOS_ACTIVE_STATES = frozenset({
+    SwitchState.EXOS_LOGIN_PROMPT,
+    SwitchState.EXOS_LOGGED_IN,
+    SwitchState.EXOS_SETUP_WIZARD,
+    SwitchState.EXOS_SAVE_CONFIG,
+    SwitchState.ONBOARDED,
+})
+
+
 class StateMachine:
     """Regex-based state machine. No API calls — fast local pattern matching."""
 
@@ -49,6 +68,7 @@ class StateMachine:
         self._os_context = OSContext.UNKNOWN
         self._state_entered_at = time.monotonic()
         self._boot_complete = False
+        self._seen_states: set[SwitchState] = set()
         # Import here to avoid circular imports
         self._patterns = None
         self._os_patterns = None
@@ -72,6 +92,17 @@ class StateMachine:
     @property
     def boot_complete(self) -> bool:
         return self._boot_complete
+
+    @property
+    def likely_already_onboarded(self) -> bool:
+        """True if the switch is already running EXOS with no onboarding journey seen.
+
+        Detected when we land on an EXOS-active state without ever having seen
+        ZTD, DHCP, XIQ, or firmware states that indicate onboarding in progress.
+        """
+        if self._state not in _EXOS_ACTIVE_STATES:
+            return False
+        return not self._seen_states.intersection(_ONBOARDING_IN_PROGRESS_STATES)
 
     def time_in_state(self) -> float:
         """Seconds since last state transition."""
@@ -100,6 +131,7 @@ class StateMachine:
                     trigger_line=line.strip(),
                     timestamp=time.monotonic(),
                 )
+                self._seen_states.add(new_state)
                 self._state = new_state
                 self._state_entered_at = time.monotonic()
                 self._boot_complete = False  # reset on new state
