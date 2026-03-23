@@ -35,7 +35,8 @@ def _prompt_already_onboarded(ui: OperatorUI) -> str:
         console.print("[red]Please enter 1, 2, or 3[/red]")
 
 
-LOGFILE = "/tmp/screenlog.0"
+SESSION_NAME = "5320console"
+LOGFILE = "/tmp/5320console.log"
 
 
 @click.command()
@@ -69,39 +70,37 @@ def main(port: str | None, verbose: bool):
     ui.set_port(detected_port)
     console.print(f"[green]Port detected: {detected_port}[/green]")
 
-    # ── Step 2: Open switch console in a new Terminal window ────────────────
-    # Kill whatever process is holding the port (lsof is reliable across session types)
-    result = subprocess.run(
-        ["lsof", "-t", detected_port], capture_output=True, text=True
-    )
+    # ── Step 2: Start background screen session with logging ─────────────────
+    # Kill anything holding the port
+    result = subprocess.run(["lsof", "-t", detected_port], capture_output=True, text=True)
     for pid in result.stdout.strip().splitlines():
         subprocess.run(["kill", pid.strip()], capture_output=True)
     time.sleep(1.0)
 
-    # Remove stale logfile so we only see fresh output
+    # Kill any leftover session with same name
+    subprocess.run(["screen", "-X", "-S", SESSION_NAME, "quit"], capture_output=True)
+    time.sleep(0.5)
+
+    # Remove stale logfile
     if os.path.exists(LOGFILE):
         os.remove(LOGFILE)
 
-    screen_cmd = f"cd /tmp && TERM=vt100 screen -L {detected_port} {config.baud_rate}"
-    console.print("[dim]Opening switch console in a new Terminal window...[/dim]")
-    subprocess.Popen(
-        ["osascript", "-e", f'tell application "Terminal" to do script "{screen_cmd}"'],
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL,
+    # Start detached named screen session with logging to known file
+    subprocess.run([
+        "screen", "-dmS", SESSION_NAME,
+        "-L", "-Logfile", LOGFILE,
+        detected_port, str(config.baud_rate),
+    ], capture_output=True)
+    time.sleep(1.0)
+
+    # Send a carriage return to wake the switch and get a prompt
+    subprocess.run(["screen", "-X", "-S", SESSION_NAME, "stuff", "\r"], capture_output=True)
+
+    console.print(
+        f"\n[bold green]Switch console running in background.[/bold green]\n"
+        f"[dim]To type commands on the switch, open any terminal and run:[/dim]\n"
+        f"[bold cyan]  screen -r {SESSION_NAME}[/bold cyan]\n"
     )
-
-    # Wait for the logfile to appear (screen creates it when it starts)
-    console.print("[dim]Waiting for console session to start...[/dim]")
-    for _ in range(30):
-        if os.path.exists(LOGFILE):
-            break
-        time.sleep(0.5)
-    else:
-        console.print("[red]Timed out waiting for screen session. Did the Terminal window open?[/red]")
-        console.print(f"[yellow]Run manually in any terminal: {screen_cmd}[/yellow]")
-        click.pause(info="Press Enter when the screen session is open...")
-
-    console.print("[green]Console session active — watching for switch output...[/green]\n")
 
     # ── Step 3: Start Logfile Monitor ───────────────────────────────────────
     monitor = LogfileMonitor(LOGFILE, config.buffer_size)

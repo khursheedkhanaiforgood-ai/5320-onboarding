@@ -22,7 +22,7 @@ class LogfileMonitor:
         TERM=vt100 screen -L -Logfile /tmp/5320_console.log /dev/cu.usbserial-XXXX 115200
     """
 
-    DEFAULT_LOGFILE = "/tmp/screenlog.0"
+    DEFAULT_LOGFILE = "/tmp/5320console.log"
 
     def __init__(self, logfile: str = DEFAULT_LOGFILE, buffer_size: int = 4000):
         self._logfile = logfile
