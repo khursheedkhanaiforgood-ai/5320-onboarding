@@ -1,5 +1,7 @@
 """Entry point for the Extreme Networks 5320 automated onboarding agent."""
 import time
+import os
+import subprocess
 import click
 
 from agent.config import load_config
@@ -66,26 +68,40 @@ def main(port: str | None, verbose: bool):
 
     ui.set_port(detected_port)
     console.print(f"[green]Port detected: {detected_port}[/green]")
-    console.print()
-    console.print("[bold yellow]ACTION REQUIRED — open a second terminal and run:[/bold yellow]")
-    console.print(
-        f"[bold cyan]  cd /tmp && TERM=vt100 screen -L {detected_port} {config.baud_rate}[/bold cyan]"
-    )
-    console.print()
-    console.print("[dim]That window is where you type commands on the switch.[/dim]")
-    console.print(f"[dim]screen logs to {LOGFILE} — this agent reads that file.[/dim]")
-    console.print()
-    click.pause(info="Press Enter here once the screen session is open...")
-    console.print()
 
-    # ── Step 2: Start Logfile Monitor ───────────────────────────────────────
+    # ── Step 2: Open switch console in a new Terminal window ────────────────
+    # Remove stale logfile so we only see fresh output
+    if os.path.exists(LOGFILE):
+        os.remove(LOGFILE)
+
+    screen_cmd = f"cd /tmp && TERM=vt100 screen -L {detected_port} {config.baud_rate}"
+    console.print("[dim]Opening switch console in a new Terminal window...[/dim]")
+    subprocess.Popen([
+        "osascript", "-e",
+        f'tell application "Terminal" to do script "{screen_cmd}"'
+    ])
+
+    # Wait for the logfile to appear (screen creates it when it starts)
+    console.print("[dim]Waiting for console session to start...[/dim]")
+    for _ in range(30):
+        if os.path.exists(LOGFILE):
+            break
+        time.sleep(0.5)
+    else:
+        console.print("[red]Timed out waiting for screen session. Did the Terminal window open?[/red]")
+        console.print(f"[yellow]Run manually in any terminal: {screen_cmd}[/yellow]")
+        click.pause(info="Press Enter when the screen session is open...")
+
+    console.print("[green]Console session active — watching for switch output...[/green]\n")
+
+    # ── Step 3: Start Logfile Monitor ───────────────────────────────────────
     monitor = LogfileMonitor(LOGFILE, config.buffer_size)
     monitor.start()
 
     state_machine = StateMachine()
     analyzer = ConsoleAnalyzer(config.api_key, config.model)
 
-    # ── Step 3: Main Loop ───────────────────────────────────────────────────
+    # ── Step 4: Main Loop ───────────────────────────────────────────────────
     PERIODIC_ANALYSIS_INTERVAL = 30.0  # seconds
     last_analysis_time = time.monotonic()
     monitor_only = False  # set True if user chooses "monitor only" for already-onboarded switch
