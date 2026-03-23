@@ -70,16 +70,21 @@ def main(port: str | None, verbose: bool):
     console.print(f"[green]Port detected: {detected_port}[/green]")
 
     # ── Step 2: Open switch console in a new Terminal window ────────────────
+    # Kill any existing screen session holding this port so we get a clean start
+    subprocess.run(["pkill", "-f", f"screen.*{detected_port}"], capture_output=True)
+    time.sleep(0.8)
+
     # Remove stale logfile so we only see fresh output
     if os.path.exists(LOGFILE):
         os.remove(LOGFILE)
 
     screen_cmd = f"cd /tmp && TERM=vt100 screen -L {detected_port} {config.baud_rate}"
     console.print("[dim]Opening switch console in a new Terminal window...[/dim]")
-    subprocess.Popen([
-        "osascript", "-e",
-        f'tell application "Terminal" to do script "{screen_cmd}"'
-    ])
+    subprocess.Popen(
+        ["osascript", "-e", f'tell application "Terminal" to do script "{screen_cmd}"'],
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+    )
 
     # Wait for the logfile to appear (screen creates it when it starts)
     console.print("[dim]Waiting for console session to start...[/dim]")
