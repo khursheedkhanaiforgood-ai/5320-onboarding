@@ -70,9 +70,13 @@ def main(port: str | None, verbose: bool):
     console.print(f"[green]Port detected: {detected_port}[/green]")
 
     # ── Step 2: Open switch console in a new Terminal window ────────────────
-    # Kill any existing screen session holding this port so we get a clean start
-    subprocess.run(["pkill", "-f", f"screen.*{detected_port}"], capture_output=True)
-    time.sleep(0.8)
+    # Kill whatever process is holding the port (lsof is reliable across session types)
+    result = subprocess.run(
+        ["lsof", "-t", detected_port], capture_output=True, text=True
+    )
+    for pid in result.stdout.strip().splitlines():
+        subprocess.run(["kill", pid.strip()], capture_output=True)
+    time.sleep(1.0)
 
     # Remove stale logfile so we only see fresh output
     if os.path.exists(LOGFILE):
