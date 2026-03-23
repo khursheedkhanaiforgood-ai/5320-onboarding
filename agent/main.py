@@ -33,7 +33,7 @@ def _prompt_already_onboarded(ui: OperatorUI) -> str:
         console.print("[red]Please enter 1, 2, or 3[/red]")
 
 
-LOGFILE = LogfileMonitor.DEFAULT_LOGFILE
+LOGFILE = "/tmp/screenlog.0"
 
 
 @click.command()
@@ -69,11 +69,11 @@ def main(port: str | None, verbose: bool):
     console.print()
     console.print("[bold yellow]ACTION REQUIRED — open a second terminal and run:[/bold yellow]")
     console.print(
-        f"[bold cyan]  TERM=vt100 screen -L -Logfile {LOGFILE} {detected_port} {config.baud_rate}[/bold cyan]"
+        f"[bold cyan]  cd /tmp && TERM=vt100 screen -L {detected_port} {config.baud_rate}[/bold cyan]"
     )
     console.print()
     console.print("[dim]That window is where you type commands on the switch.[/dim]")
-    console.print(f"[dim]This agent reads the screen log at {LOGFILE}[/dim]")
+    console.print(f"[dim]screen logs to {LOGFILE} — this agent reads that file.[/dim]")
     console.print()
     click.pause(info="Press Enter here once the screen session is open...")
     console.print()
