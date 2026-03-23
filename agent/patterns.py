@@ -13,7 +13,6 @@ STATE_PATTERNS: dict[SwitchState, list[re.Pattern]] = {
         re.compile(r'Starting kernel'),
         re.compile(r'Loading KLM'),
         re.compile(r'Starting vsp application'),
-        re.compile(r'Starting Extreme Networks Switch Engine'),
         re.compile(r'LifeCycle: INFO'),
         re.compile(r'Partitioning Disk Device'),
     ],
