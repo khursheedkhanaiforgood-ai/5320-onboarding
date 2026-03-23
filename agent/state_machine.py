@@ -1,0 +1,123 @@
+"""State machine for tracking Extreme 5320 switch onboarding progress."""
+import time
+from dataclasses import dataclass
+from enum import Enum, auto
+
+
+class SwitchState(Enum):
+    UNKNOWN = auto()
+    UBOOT = auto()
+    BOOT_LOG_SCROLLING = auto()
+    FE_LOGIN_PROMPT = auto()
+    FE_LOGIN_BLOCKED = auto()
+    FE_PASSWORD_CHANGE = auto()
+    FE_LOGGED_IN = auto()
+    FE_PRIVILEGED = auto()
+    ZTD_MODE = auto()
+    DHCP_ACQUIRING = auto()
+    XIQ_CONNECTING = auto()
+    FIRMWARE_DOWNLOADING = auto()
+    FIRMWARE_INSTALLING = auto()
+    EXOS_BOOT = auto()
+    EXOS_LOGIN_PROMPT = auto()
+    EXOS_SETUP_WIZARD = auto()
+    EXOS_LOGGED_IN = auto()
+    EXOS_SAVE_CONFIG = auto()
+    ONBOARDED = auto()
+    ERROR = auto()
+
+
+class OSContext(Enum):
+    UNKNOWN = auto()
+    FABRIC_ENGINE = auto()
+    EXOS = auto()
+
+
+@dataclass
+class StateTransition:
+    old_state: SwitchState
+    new_state: SwitchState
+    trigger_line: str
+    timestamp: float
+
+
+class StateMachine:
+    """Regex-based state machine. No API calls — fast local pattern matching."""
+
+    def __init__(self):
+        self._state = SwitchState.UNKNOWN
+        self._os_context = OSContext.UNKNOWN
+        self._state_entered_at = time.monotonic()
+        self._boot_complete = False
+        # Import here to avoid circular imports
+        self._patterns = None
+        self._os_patterns = None
+        self._boot_patterns = None
+
+    def _load_patterns(self):
+        if self._patterns is None:
+            from agent.patterns import STATE_PATTERNS, OS_PATTERNS, BOOT_COMPLETE_PATTERNS
+            self._patterns = STATE_PATTERNS
+            self._os_patterns = OS_PATTERNS
+            self._boot_patterns = BOOT_COMPLETE_PATTERNS
+
+    @property
+    def current_state(self) -> SwitchState:
+        return self._state
+
+    @property
+    def os_context(self) -> OSContext:
+        return self._os_context
+
+    @property
+    def boot_complete(self) -> bool:
+        return self._boot_complete
+
+    def time_in_state(self) -> float:
+        """Seconds since last state transition."""
+        return time.monotonic() - self._state_entered_at
+
+    def process_lines(self, lines: list[str]) -> StateTransition | None:
+        """Process new console lines. Returns StateTransition if state changed."""
+        self._load_patterns()
+
+        transition = None
+        for line in lines:
+            # Update OS context
+            self._update_os_context(line)
+
+            # Check boot complete
+            for pattern in self._boot_patterns:
+                if pattern.search(line):
+                    self._boot_complete = True
+
+            # Detect new state
+            new_state = self._detect_state(line)
+            if new_state and new_state != self._state:
+                transition = StateTransition(
+                    old_state=self._state,
+                    new_state=new_state,
+                    trigger_line=line.strip(),
+                    timestamp=time.monotonic(),
+                )
+                self._state = new_state
+                self._state_entered_at = time.monotonic()
+                self._boot_complete = False  # reset on new state
+
+        return transition
+
+    def _detect_state(self, line: str) -> SwitchState | None:
+        for state, patterns in self._patterns.items():
+            for pattern in patterns:
+                if pattern.search(line):
+                    return state
+        return None
+
+    def _update_os_context(self, line: str):
+        if self._os_context != OSContext.UNKNOWN:
+            return  # Once set, don't change
+        for context, patterns in self._os_patterns.items():
+            for pattern in patterns:
+                if pattern.search(line):
+                    self._os_context = context
+                    return
