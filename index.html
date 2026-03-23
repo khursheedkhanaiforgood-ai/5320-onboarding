@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Extreme Networks 5320 Onboarding Guide</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', Arial, sans-serif; background: #f4f6f9; color: #222; line-height: 1.7; }
+    header { background: #7b2d8b; color: white; padding: 32px 40px; }
+    header h1 { font-size: 2rem; }
+    header p { font-size: 1rem; opacity: 0.85; margin-top: 6px; }
+    nav { background: #5a1f6b; padding: 12px 40px; position: sticky; top: 0; z-index: 100; }
+    nav a { color: #f0c0ff; text-decoration: none; margin-right: 20px; font-size: 0.9rem; }
+    nav a:hover { color: white; text-decoration: underline; }
+    .container { max-width: 1100px; margin: 0 auto; padding: 30px 20px; }
+    .info-box { background: #fff; border-left: 5px solid #7b2d8b; border-radius: 6px; padding: 20px 24px; margin-bottom: 24px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+    .info-box h3 { color: #7b2d8b; margin-bottom: 10px; }
+    .info-box table { width: 100%; border-collapse: collapse; }
+    .info-box table td { padding: 5px 10px; border-bottom: 1px solid #eee; }
+    .info-box table td:first-child { font-weight: bold; width: 220px; color: #555; }
+    section { background: white; border-radius: 8px; padding: 28px 32px; margin-bottom: 28px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+    section h2 { color: #7b2d8b; font-size: 1.3rem; border-bottom: 2px solid #f0e0f5; padding-bottom: 10px; margin-bottom: 18px; }
+    section h3 { color: #444; font-size: 1rem; margin: 16px 0 8px; }
+    p { margin-bottom: 12px; }
+    .cmd-block { background: #1e1e2e; color: #cdd6f4; border-radius: 6px; padding: 14px 18px; font-family: 'Courier New', monospace; font-size: 0.88rem; margin: 10px 0 16px; overflow-x: auto; }
+    .cmd-block .cmd { color: #89dceb; }
+    .cmd-block .output { color: #cdd6f4; opacity: 0.8; }
+    .cmd-block .comment { color: #6c7086; font-style: italic; }
+    .cmd-block .success { color: #a6e3a1; }
+    .cmd-block .error { color: #f38ba8; }
+    .cmd-block .warning { color: #fab387; }
+    .step { display: flex; gap: 16px; align-items: flex-start; margin-bottom: 16px; }
+    .step-num { background: #7b2d8b; color: white; border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.85rem; flex-shrink: 0; margin-top: 2px; }
+    .step-content { flex: 1; }
+    .badge { display: inline-block; padding: 2px 10px; border-radius: 20px; font-size: 0.78rem; font-weight: bold; margin-left: 8px; vertical-align: middle; }
+    .badge-success { background: #d4edda; color: #155724; }
+    .badge-fail { background: #f8d7da; color: #721c24; }
+    .badge-info { background: #d1ecf1; color: #0c5460; }
+    .toc { background: #f8f0fc; border-radius: 8px; padding: 20px 28px; margin-bottom: 28px; }
+    .toc h2 { color: #7b2d8b; margin-bottom: 12px; font-size: 1.1rem; }
+    .toc ol { padding-left: 20px; }
+    .toc li { margin: 6px 0; }
+    .toc a { color: #7b2d8b; text-decoration: none; }
+    .key-finding { background: #fff8e1; border-left: 4px solid #ffc107; border-radius: 4px; padding: 12px 16px; margin: 10px 0; }
+    .key-finding strong { color: #856404; }
+    footer { background: #7b2d8b; color: white; text-align: center; padding: 20px; font-size: 0.85rem; margin-top: 40px; }
+  </style>
+</head>
+<body>
+<header>
+  <h1>Extreme Networks 5320 &mdash; Onboarding Guide</h1>
+  <p>Complete session record: Serial Console &rarr; Login Recovery &rarr; Factory Reset &rarr; EXOS Migration &rarr; XIQ Onboarding</p>
+  <p style="margin-top:8px;font-size:0.85rem;opacity:0.7;">Session Date: March 23, 2026 &nbsp;|&nbsp; Switch: 5320-16P-2MXT-2X</p>
+</header>
+<nav>
+  <a href="#switch-info">Switch Info</a>
+  <a href="#tools">Tools</a>
+  <a href="#serial">Serial Console</a>
+  <a href="#login-issues">Login Issues</a>
+  <a href="#factory-reset">Factory Reset</a>
+  <a href="#firmware">Firmware Migration</a>
+  <a href="#exos-setup">EXOS Setup</a>
+  <a href="#xiq">XIQ Onboarding</a>
+  <a href="#commands">Command Reference</a>
+</nav>
+<div class="container">
+  <div class="toc"><h2>Table of Contents</h2><ol>
+    <li><a href="#switch-info">Switch Information</a></li>
+    <li><a href="#tools">Tools Required</a></li>
+    <li><a href="#serial">Serial Console Connection</a></li>
+    <li><a href="#login-issues">Login Issues &amp; Root Cause</a></li>
+    <li><a href="#factory-reset">Factory Reset</a></li>
+    <li><a href="#firmware">Firmware Migration</a></li>
+    <li><a href="#exos-setup">EXOS Setup Wizard</a></li>
+    <li><a href="#xiq">XIQ Onboarding</a></li>
+    <li><a href="#commands">Command Reference</a></li>
+  </ol></div>
+  <div class="info-box" id="switch-info"><h3>Switch Information</h3><table>
+    <tr><td>Model</td><td>5320-16P-2MXT-2X</td></tr>
+    <tr><td>Initial Firmware</td><td>Fabric Engine 9.2.0.0_B888 (Pre-GA)</td></tr>
+    <tr><td>Final Firmware</td><td>EXOS SwitchEngine 33.5.2b118</td></tr>
+    <tr><td>Serial Baud Rate</td><td>115200</td></tr>
+    <tr><td>Fabric Engine Login</td><td>rwa / rwa</td></tr>
+    <tr><td>EXOS Default Login</td><td>admin / (blank)</td></tr>
+    <tr><td>Management IP (DHCP)</td><td>192.168.0.23</td></tr>
+    <tr><td>XIQ URL</td><td>https://oh-hac.extremecloudiq.com</td></tr>
+    <tr><td>Config File</td><td>primary.cfg</td></tr>
+  </table></div>
+  <section id="tools"><h2>Tools Required</h2>
+    <div class="step"><div class="step-num">1</div><div class="step-content"><h3>Hardware</h3><p>USB-C to USB-A adapter + USB-to-Serial (RJ45 console) cable.</p></div></div>
+    <div class="step"><div class="step-num">2</div><div class="step-content"><h3>macOS Serial Connection</h3>
+      <div class="cmd-block"><span class="comment"># Detect port</span><br><span class="cmd">ls /dev/cu.*</span><br><br><span class="comment"># Connect</span><br><span class="cmd">TERM=vt100 screen /dev/cu.usbserial-XXXXXXXX 115200</span></div>
+      <div class="key-finding"><strong>Key Finding:</strong> PuTTY on macOS cannot set serial parameters. Use screen. Baud = 115200.</div>
+    </div></div>
+  </section>
+  <section id="login-issues"><h2>Login Issues &amp; Root Cause</h2>
+    <div class="step"><div class="step-num">1</div><div class="step-content"><h3>admin blocked from console <span class="badge badge-fail">FAIL</span></h3>
+      <div class="cmd-block"><span class="error">Blocked unauthorized ACLI access for user admin from console port</span></div>
+      <div class="key-finding"><strong>Root Cause:</strong> Fabric Engine 9.2 Pre-GA blocks admin from ACLI console by design.</div>
+    </div></div>
+    <div class="step"><div class="step-num">2</div><div class="step-content"><h3>rwa / rwa works <span class="badge badge-success">SUCCESS</span></h3>
+      <div class="cmd-block"><span class="cmd">Login: rwa</span><br><span class="cmd">Password: rwa</span><br><span class="success">5320-16P-2MXT-2X-FabricEngine:1&gt;</span></div>
+      <div class="key-finding"><strong>Key Finding:</strong> rwa/rwa is the legacy VOSS default inherited from Avaya/Nortel.</div>
+    </div></div>
+  </section>
+  <section id="factory-reset"><h2>Factory Reset via Config Deletion</h2>
+    <p>No reset button on 5320-16P. VOSS Rescue mode did not bypass config. Solution: delete config file directly.</p>
+    <div class="step"><div class="step-num">1</div><div class="step-content"><h3>Delete config and reboot</h3>
+      <div class="cmd-block"><span class="cmd">enable</span><br><span class="cmd">delete /intflash/config.cfg</span><br><span class="output">Are you sure (y/n) ? </span><span class="cmd">y</span><br><span class="cmd">boot</span><br><span class="output">Are you sure? </span><span class="cmd">y</span></div>
+    </div></div>
+    <div class="step"><div class="step-num">2</div><div class="step-content"><h3>Factory reset confirmed <span class="badge badge-success">SUCCESS</span></h3>
+      <div class="cmd-block"><span class="success">Booting in Zero Touch Deployment Mode</span><br><span class="success">ZTP+ is enabled</span></div>
+    </div></div>
+  </section>
+  <section id="firmware"><h2>XIQ Firmware Migration: Fabric Engine &rarr; EXOS</h2>
+    <div class="step"><div class="step-num">1</div><div class="step-content"><h3>Plug port 1 into internet-connected network</h3>
+      <div class="cmd-block"><span class="success">DHCP Address 192.168.0.23 added to mgmt-vlan</span><br><span class="success">Cloud IQ Agent is connected to Cloud IQ Manager</span><br><span class="success">Downloading summit_arm-33.5.2.118.xos started.</span><br><span class="success">Chassis reboot initiated from ExtremeCloud IQ</span></div>
+      <div class="key-finding"><strong>Key Finding:</strong> No dedicated MGMT port. Plug any RJ45 port into internet network. ZTP+ handles the rest.</div>
+    </div></div>
+  </section>
+  <section id="exos-setup"><h2>EXOS Initial Setup Wizard</h2>
+    <div class="cmd-block"><span class="cmd">login: admin</span><br><span class="comment">password: [blank]</span></div>
+    <table style="width:100%;border-collapse:collapse;margin-top:10px;">
+      <thead><tr style="background:#f0e0f5;"><th style="padding:8px;border:1px solid #ddd;">Question</th><th style="padding:8px;border:1px solid #ddd;">Answer</th><th style="padding:8px;border:1px solid #ddd;">Reason</th></tr></thead>
+      <tbody>
+        <tr><td style="padding:8px;border:1px solid #ddd;">Disable auto-provision?</td><td style="padding:8px;border:1px solid #ddd;"><b>N</b></td><td style="padding:8px;border:1px solid #ddd;">Keep DHCP/ZTP+</td></tr>
+        <tr><td style="padding:8px;border:1px solid #ddd;">Disable MSTP?</td><td style="padding:8px;border:1px solid #ddd;"><b>N</b></td><td style="padding:8px;border:1px solid #ddd;">Keep broadcast storm protection</td></tr>
+        <tr><td style="padding:8px;border:1px solid #ddd;">Enhanced security?</td><td style="padding:8px;border:1px solid #ddd;"><b>N</b></td><td style="padding:8px;border:1px solid #ddd;">Not required</td></tr>
+        <tr><td style="padding:8px;border:1px solid #ddd;">Disable Telnet?</td><td style="padding:8px;border:1px solid #ddd;"><b>N</b></td><td style="padding:8px;border:1px solid #ddd;">Keep Telnet + SSH</td></tr>
+        <tr><td style="padding:8px;border:1px solid #ddd;">Enable SNMPv1/v2c?</td><td style="padding:8px;border:1px solid #ddd;"><b>Y</b></td><td style="padding:8px;border:1px solid #ddd;">Monitoring</td></tr>
+        <tr><td style="padding:8px;border:1px solid #ddd;">Enable SNMPv3?</td><td style="padding:8px;border:1px solid #ddd;"><b>Y</b></td><td style="padding:8px;border:1px solid #ddd;">Encrypted SNMP</td></tr>
+        <tr><td style="padding:8px;border:1px solid #ddd;">Disable unconfigured ports?</td><td style="padding:8px;border:1px solid #ddd;"><b>N</b></td><td style="padding:8px;border:1px solid #ddd;">Keep all ports active</td></tr>
+        <tr><td style="padding:8px;border:1px solid #ddd;">Configure failsafe account?</td><td style="padding:8px;border:1px solid #ddd;"><b>Y</b></td><td style="padding:8px;border:1px solid #ddd;">Emergency local login</td></tr>
+      </tbody>
+    </table>
+    <div class="cmd-block" style="margin-top:16px;"><span class="cmd">save configuration</span><br><span class="success">Configuration saved to primary.cfg successfully.</span></div>
+  </section>
+  <section id="xiq"><h2>XIQ Onboarding Confirmation</h2>
+    <div class="key-finding" style="border-color:#28a745;background:#d4edda;"><strong style="color:#155724;">SUCCESS:</strong> Switch appeared online in ExtremeCloud IQ after EXOS boot and ZTP+ reconnection.</div>
+  </section>
+  <section id="commands"><h2>Full Command Reference &mdash; Linked List</h2>
+    <ol style="padding-left:20px;margin-top:16px;">
+      <li style="margin-bottom:10px;"><strong>Detect serial port</strong><br><code>ls /dev/cu.*</code> <span class="badge badge-info">Mac Terminal</span></li>
+      <li style="margin-bottom:10px;"><strong>Connect at 9600 (wrong)</strong><br><code>screen /dev/cu.usbserial-A9VKJO11 9600</code> <span class="badge badge-fail">BLANK</span></li>
+      <li style="margin-bottom:10px;"><strong>Connect at 115200 (correct)</strong><br><code>TERM=vt100 screen /dev/cu.usbserial-A9VKJO11 115200</code> <span class="badge badge-success">CONNECTED</span></li>
+      <li style="margin-bottom:10px;"><strong>Login admin/blank</strong><br><code>admin [Enter] [Enter]</code> <span class="badge badge-fail">BLOCKED</span></li>
+      <li style="margin-bottom:10px;"><strong>Login rwa/rwa</strong><br><code>rwa [Enter] rwa [Enter]</code> <span class="badge badge-success">LOGGED IN</span></li>
+      <li style="margin-bottom:10px;"><strong>Privileged mode</strong><br><code>enable</code></li>
+      <li style="margin-bottom:10px;"><strong>Delete config</strong><br><code>delete /intflash/config.cfg</code> &rarr; <code>y</code> <span class="badge badge-success">DELETED</span></li>
+      <li style="margin-bottom:10px;"><strong>Reboot</strong><br><code>boot</code> &rarr; <code>y</code></li>
+      <li style="margin-bottom:10px;"><strong>Login rwa after reset</strong><br><code>rwa / rwa / [new-password]</code> <span class="badge badge-success">LOGGED IN</span></li>
+      <li style="margin-bottom:10px;"><strong>Plug port 1 into internet</strong><br><span class="badge badge-info">PHYSICAL</span> <span class="badge badge-success">DHCP assigned</span></li>
+      <li style="margin-bottom:10px;"><strong>ZTP+ connects to XIQ</strong><br><span class="badge badge-info">AUTOMATIC</span> <span class="badge badge-success">XIQ CONNECTED</span></li>
+      <li style="margin-bottom:10px;"><strong>XIQ pushes EXOS firmware</strong><br><span class="badge badge-info">AUTOMATIC &mdash; 33.5.2.118</span></li>
+      <li style="margin-bottom:10px;"><strong>Switch reboots to EXOS</strong><br><span class="badge badge-info">AUTOMATIC</span></li>
+      <li style="margin-bottom:10px;"><strong>Login admin/blank on EXOS</strong><br><code>admin [Enter] [Enter]</code> <span class="badge badge-success">LOGGED IN</span></li>
+      <li style="margin-bottom:10px;"><strong>Complete setup wizard</strong><br><span class="badge badge-info">Interactive</span></li>
+      <li style="margin-bottom:10px;"><strong>Save config</strong><br><code>save configuration</code> &rarr; <code>Yes</code> <span class="badge badge-success">SAVED</span></li>
+      <li style="margin-bottom:10px;"><strong>Verify in XIQ</strong><br><span class="badge badge-success">ONBOARDED</span></li>
+    </ol>
+  </section>
+</div>
+<footer>Extreme Networks 5320 Onboarding Guide &nbsp;|&nbsp; March 23, 2026 &nbsp;|&nbsp; khursheedkhanaiforgood-ai<br><small>Future: automated agent-driven onboarding for additional 5320 switches</small></footer>
+</body></html>
