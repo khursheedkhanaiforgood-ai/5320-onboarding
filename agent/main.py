@@ -4,7 +4,7 @@ import click
 
 from agent.config import load_config
 from agent.port_detector import wait_for_port, scan_ports, select_port
-from agent.serial_monitor import SerialMonitor
+from agent.serial_monitor import LogfileMonitor
 from agent.state_machine import StateMachine, SwitchState
 from agent.console_analyzer import ConsoleAnalyzer
 from agent.operator_ui import OperatorUI, console
@@ -31,6 +31,9 @@ def _prompt_already_onboarded(ui: OperatorUI) -> str:
         if choice in ("1", "2", "3"):
             return choice
         console.print("[red]Please enter 1, 2, or 3[/red]")
+
+
+LOGFILE = LogfileMonitor.DEFAULT_LOGFILE
 
 
 @click.command()
@@ -62,15 +65,21 @@ def main(port: str | None, verbose: bool):
             )
 
     ui.set_port(detected_port)
-    console.print(f"[green]Connected to: {detected_port}[/green]")
+    console.print(f"[green]Port detected: {detected_port}[/green]")
+    console.print()
+    console.print("[bold yellow]ACTION REQUIRED — open a second terminal and run:[/bold yellow]")
     console.print(
-        "[yellow]Open a second terminal and run:[/yellow]\n"
-        f"[bold cyan]  TERM=vt100 screen {detected_port} {config.baud_rate}[/bold cyan]\n"
-        "[dim]Type commands there when instructed. This window guides you.[/dim]\n"
+        f"[bold cyan]  TERM=vt100 screen -L -Logfile {LOGFILE} {detected_port} {config.baud_rate}[/bold cyan]"
     )
+    console.print()
+    console.print("[dim]That window is where you type commands on the switch.[/dim]")
+    console.print(f"[dim]This agent reads the screen log at {LOGFILE}[/dim]")
+    console.print()
+    click.pause(info="Press Enter here once the screen session is open...")
+    console.print()
 
-    # ── Step 2: Start Serial Monitor ────────────────────────────────────────
-    monitor = SerialMonitor(detected_port, config.baud_rate, config.buffer_size)
+    # ── Step 2: Start Logfile Monitor ───────────────────────────────────────
+    monitor = LogfileMonitor(LOGFILE, config.buffer_size)
     monitor.start()
 
     state_machine = StateMachine()
