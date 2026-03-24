@@ -135,6 +135,7 @@ class StateMachine:
                 self._state = new_state
                 self._state_entered_at = time.monotonic()
                 self._boot_complete = False  # reset on new state
+                self._infer_os_from_state(new_state)
 
         return transition
 
@@ -153,3 +154,21 @@ class StateMachine:
                 if pattern.search(line):
                     self._os_context = context
                     return
+
+    def _infer_os_from_state(self, state: SwitchState):
+        """Infer OS context from state when line patterns don't match."""
+        exos_states = {
+            SwitchState.EXOS_BOOT, SwitchState.EXOS_LOGIN_PROMPT,
+            SwitchState.EXOS_SETUP_WIZARD, SwitchState.EXOS_LOGGED_IN,
+            SwitchState.EXOS_SAVE_CONFIG, SwitchState.ONBOARDED,
+        }
+        fe_states = {
+            SwitchState.FE_LOGIN_PROMPT, SwitchState.FE_LOGIN_BLOCKED,
+            SwitchState.FE_PASSWORD_CHANGE, SwitchState.FE_LOGGED_IN,
+            SwitchState.FE_PRIVILEGED,
+        }
+        if self._os_context == OSContext.UNKNOWN:
+            if state in exos_states:
+                self._os_context = OSContext.EXOS
+            elif state in fe_states:
+                self._os_context = OSContext.FABRIC_ENGINE
