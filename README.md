@@ -316,9 +316,13 @@ sudo usermod -aG dialout $USER
 
 ---
 
-## Tutorial
+## Documentation
 
-A complete build tutorial documenting the full design process, every prompt, and every bug fix is at [`docs/agent_tutorial.html`](docs/agent_tutorial.html).
+| Guide | Description |
+|---|---|
+| [`docs/deploy.html`](docs/deploy.html) | Step-by-step deployment on a fresh MacBook — from clone to first run |
+| [`docs/agent_tutorial.html`](docs/agent_tutorial.html) | Full build tutorial — every prompt, every bug fix, architecture walkthrough |
+| [`docs/onboarding.html`](docs/onboarding.html) | Live session record — Fabric Engine factory reset through EXOS migration |
 
 ---
 

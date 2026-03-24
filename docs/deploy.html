@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>5320 Onboarding Agent — Deployment Guide</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; background: #0f172a; color: #e2e8f0; min-height: 100vh; padding: 48px 24px; }
+  .container { max-width: 760px; margin: 0 auto; }
+
+  .page-header { margin-bottom: 44px; padding-bottom: 20px; border-bottom: 2px solid #7c3aed; }
+  .page-header h1 { font-size: 1.7rem; color: #a78bfa; margin-bottom: 6px; }
+  .page-header p { color: #64748b; font-size: 0.9rem; line-height: 1.7; }
+
+  h2 { font-size: 1.1rem; color: #a78bfa; margin: 40px 0 18px; padding-bottom: 8px; border-bottom: 1px solid #334155; display: flex; align-items: center; gap: 10px; }
+  h2 .num { background: #7c3aed; color: #fff; border-radius: 50%; width: 26px; height: 26px; display: inline-flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 700; flex-shrink: 0; }
+
+  p { color: #94a3b8; font-size: 0.9rem; line-height: 1.75; margin-bottom: 12px; }
+  ul, ol { color: #94a3b8; font-size: 0.9rem; line-height: 1.75; padding-left: 20px; margin-bottom: 12px; }
+  li { margin-bottom: 6px; }
+  strong { color: #e2e8f0; }
+
+  pre {
+    background: #0d1117; border: 1px solid #334155; border-radius: 8px;
+    padding: 16px 20px; margin: 14px 0; overflow-x: auto;
+    font-family: 'SF Mono', 'Fira Code', monospace; font-size: 0.83rem;
+    color: #a5f3fc; line-height: 1.6;
+  }
+  code { font-family: 'SF Mono', 'Fira Code', monospace; font-size: 0.83rem; background: #1e293b; color: #a78bfa; padding: 2px 6px; border-radius: 4px; }
+
+  .callout { background: #1e293b; border-left: 4px solid #7c3aed; border-radius: 0 8px 8px 0; padding: 14px 18px; margin: 16px 0; }
+  .callout.warn { border-left-color: #f59e0b; }
+  .callout.warn p, .callout.warn li { color: #fcd34d; }
+  .callout p, .callout li { color: #94a3b8; margin-bottom: 0; }
+  .callout strong { color: #e2e8f0; }
+
+  table { width: 100%; border-collapse: collapse; margin: 14px 0; font-size: 0.85rem; }
+  th { background: #1e293b; color: #a78bfa; text-align: left; padding: 10px 14px; border-bottom: 2px solid #334155; }
+  td { padding: 9px 14px; border-bottom: 1px solid #1e293b; color: #94a3b8; }
+  tr:hover td { background: #1e293b44; }
+  td:first-child { color: #e2e8f0; font-family: 'SF Mono', monospace; font-size: 0.8rem; }
+
+  .step-grid { display: grid; gap: 0; }
+  .step { display: flex; gap: 16px; padding: 18px 0; border-bottom: 1px solid #1e293b; }
+  .step:last-child { border-bottom: none; }
+  .step-num { background: #1e293b; border: 2px solid #334155; color: #a78bfa; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; font-size: 0.82rem; font-weight: 700; flex-shrink: 0; margin-top: 2px; }
+  .step-body h3 { font-size: 0.95rem; color: #e2e8f0; margin-bottom: 6px; }
+  .step-body p { margin-bottom: 6px; }
+  .step-body pre { margin-top: 10px; }
+
+  .back { display: inline-block; margin-bottom: 28px; color: #60a5fa; font-size: 0.82rem; text-decoration: none; }
+  .back:hover { text-decoration: underline; }
+
+  /* Print */
+  @media print {
+    body { background: #fff; color: #111; }
+    .back { display: none; }
+    .container { max-width: 100%; }
+    h2 { color: #4c1d95 !important; border-color: #4c1d95 !important; }
+    h2 .num { background: #4c1d95; }
+    h3 { color: #333; }
+    pre { background: #f1f5f9; color: #111; border: 1px solid #cbd5e1; }
+    code { background: #e5e7eb; color: #4c1d95; }
+    .callout { background: #f8fafc; border-left-color: #4c1d95; }
+    .callout p, .callout li { color: #111; }
+    .callout.warn { border-left-color: #b45309; }
+    .callout.warn p { color: #b45309; }
+    th { background: #4c1d95; color: #fff; }
+    td { border-bottom: 1px solid #e5e7eb; color: #111; }
+    td:first-child { color: #4c1d95; }
+    .step-num { background: #e5e7eb; border-color: #4c1d95; color: #4c1d95; }
+    p, ul, ol, li { color: #111; }
+    .page-header h1 { color: #4c1d95; }
+    .page-header p { color: #555; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <a class="back" href="index.html">&#8592; Back to docs</a>
+
+  <div class="page-header">
+    <h1>Deployment Guide</h1>
+    <p>How to get the 5320 Onboarding Agent running on a fresh MacBook — from zero to connected in under 10 minutes.</p>
+  </div>
+
+  <!-- Prerequisites -->
+  <h2><span class="num">0</span> What You Need Before You Start</h2>
+
+  <table>
+    <tr><th>Item</th><th>Notes</th></tr>
+    <tr><td>MacBook (Apple Silicon or Intel)</td><td>macOS Ventura 13+ recommended; older versions work</td></tr>
+    <tr><td>Python 3.11 or newer</td><td>Check: <code>python3 --version</code> in Terminal</td></tr>
+    <tr><td>Anthropic API key</td><td>Get one at <strong>console.anthropic.com</strong> → API Keys</td></tr>
+    <tr><td>USB-C serial console cable</td><td>FTDI chip or Prolific PL2303 — both work on macOS</td></tr>
+    <tr><td>Extreme Networks 5320 switch</td><td>Powered on, RJ45 console port accessible</td></tr>
+    <tr><td>Internet connection</td><td>Required for Claude API calls and XIQ ZTP+</td></tr>
+  </table>
+
+  <div class="callout warn">
+    <p><strong>No Python 3.11?</strong> Install it from <strong>python.org/downloads</strong> or via Homebrew: <code>brew install python@3.11</code></p>
+  </div>
+
+  <!-- Step 1 -->
+  <h2><span class="num">1</span> Install Homebrew (if not already installed)</h2>
+  <p>Homebrew is the macOS package manager. Skip this step if you already have it (<code>brew --version</code> returns a version number).</p>
+  <pre>/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"</pre>
+  <p>Follow the on-screen prompts. When it finishes, close and reopen Terminal.</p>
+
+  <!-- Step 2 -->
+  <h2><span class="num">2</span> Clone the Repository</h2>
+  <p>Open Terminal and run:</p>
+  <pre>git clone https://github.com/khursheedkhanaiforgood-ai/5320-onboarding.git
+cd 5320-onboarding</pre>
+  <p>This downloads all agent code into a folder called <code>5320-onboarding</code> and moves you into it.</p>
+
+  <!-- Step 3 -->
+  <h2><span class="num">3</span> Create a Python Virtual Environment</h2>
+  <p>A virtual environment keeps this project's dependencies isolated from the rest of your Mac.</p>
+  <pre>python3 -m venv .venv
+source .venv/bin/activate</pre>
+  <p>You'll see <code>(.venv)</code> appear at the start of your Terminal prompt — that confirms it's active.</p>
+  <div class="callout">
+    <p><strong>Every time you open a new Terminal window</strong> to run the agent, you must activate the environment again with <code>source .venv/bin/activate</code> from inside the <code>5320-onboarding</code> folder.</p>
+  </div>
+
+  <!-- Step 4 -->
+  <h2><span class="num">4</span> Install Dependencies</h2>
+  <pre>pip install -r requirements.txt</pre>
+  <p>This installs everything the agent needs: the Anthropic SDK, Rich terminal UI library, pyserial, and python-dotenv. Takes about 30 seconds on a fast connection.</p>
+
+  <!-- Step 5 -->
+  <h2><span class="num">5</span> Configure Your API Key</h2>
+  <pre>cp .env.example .env</pre>
+  <p>Open the <code>.env</code> file in any text editor (TextEdit, VS Code, nano — your choice) and fill in your Anthropic API key:</p>
+  <pre>ANTHROPIC_API_KEY=sk-ant-api03-...your-key-here...</pre>
+  <p>Leave all other values at their defaults. The serial port is auto-detected.</p>
+  <div class="callout warn">
+    <p><strong>Never commit <code>.env</code> to Git.</strong> It's already in <code>.gitignore</code> — just don't override that. Your API key is private.</p>
+  </div>
+
+  <!-- Step 6 -->
+  <h2><span class="num">6</span> Connect the Switch</h2>
+  <div class="step-grid">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <h3>Plug in the serial cable</h3>
+        <p>USB-C end into your Mac. RJ45 end into the <strong>CON</strong> or <strong>CONSOLE</strong> port on the front of the 5320.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <h3>Verify macOS detects the cable</h3>
+        <pre>ls /dev/cu.usbserial-* /dev/cu.usbmodem* 2>/dev/null</pre>
+        <p>You should see something like <code>/dev/cu.usbserial-A9VKJO11</code>. If nothing appears, try a different USB-C port or check the cable driver (FTDI or Prolific drivers are free downloads if needed).</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-body">
+        <h3>Power on the switch</h3>
+        <p>If it's already powered on, that's fine — the agent will pick up wherever the switch is in its boot sequence.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 7 -->
+  <h2><span class="num">7</span> Run the Agent</h2>
+  <pre>python3 -m agent.main</pre>
+  <p>The agent will:</p>
+  <ol>
+    <li>Auto-detect the USB-serial port (prompts you to choose if multiple cables are plugged in)</li>
+    <li>Open a new Terminal window running <code>screen</code> connected to the switch console</li>
+    <li>Start monitoring the console and displaying instructions in the original window</li>
+  </ol>
+  <p><strong>Two Terminal windows will be open:</strong></p>
+  <ul>
+    <li><strong>Agent window</strong> (original) — shows status, current state, and instructions</li>
+    <li><strong>Console window</strong> (new) — shows raw switch output; you type commands here</li>
+  </ul>
+  <div class="callout">
+    <p><strong>Optional flags:</strong></p>
+    <pre>python3 -m agent.main --port /dev/cu.usbserial-A9VKJO11   # specify port manually
+python3 -m agent.main --verbose                            # extra debug output</pre>
+  </div>
+
+  <!-- Step 8 -->
+  <h2><span class="num">8</span> What Happens Next</h2>
+
+  <p>The agent will detect which situation applies and guide you accordingly:</p>
+
+  <table>
+    <tr><th>Switch State</th><th>What the Agent Does</th></tr>
+    <tr><td>Fresh / Fabric Engine</td><td>Guides you step by step through factory reset → ZTP+ → EXOS migration</td></tr>
+    <tr><td>Already running EXOS</td><td>Auto-logs in, captures full config, saves a tabbed HTML report, opens it in your browser</td></tr>
+  </table>
+
+  <p>For the fresh onboarding path, just follow the instructions shown in the agent window. The agent tells you exactly what to type and why at each step.</p>
+
+  <!-- Step 9 -->
+  <h2><span class="num">9</span> Stopping the Agent</h2>
+  <p>Press <strong>Ctrl-C</strong> in the agent window at any time. The agent automatically:</p>
+  <ul>
+    <li>Sends <code>screen quit</code> to close the console Terminal window</li>
+    <li>Releases the serial port so no manual cleanup is needed</li>
+  </ul>
+  <p>After the already-onboarded flow completes, you'll also be offered:</p>
+  <ul>
+    <li><strong>Option 1 — Exit:</strong> closes everything cleanly</li>
+    <li><strong>Option 2 — Direct config mode:</strong> keeps the screen session open for manual commands</li>
+  </ul>
+
+  <!-- Credentials -->
+  <h2><span class="num">10</span> Switch Credentials Reference</h2>
+  <table>
+    <tr><th>Situation</th><th>Username</th><th>Password</th></tr>
+    <tr><td>Fabric Engine (Pre-GA firmware)</td><td>rwa</td><td>rwa</td></tr>
+    <tr><td>EXOS — fresh after factory reset / ZTP+</td><td>admin</td><td><em>(blank — just press Enter)</em></td></tr>
+    <tr><td>EXOS — already onboarded via XIQ</td><td>admin</td><td>Extreme01!!</td></tr>
+  </table>
+
+  <!-- Troubleshooting -->
+  <h2><span class="num">11</span> Troubleshooting</h2>
+
+  <table>
+    <tr><th>Symptom</th><th>Fix</th></tr>
+    <tr><td><code>No serial ports found</code></td><td>Check USB-C cable is plugged in; run <code>ls /dev/cu.usbserial-*</code> to confirm macOS sees it</td></tr>
+    <tr><td><code>ModuleNotFoundError</code></td><td>Virtual environment not active — run <code>source .venv/bin/activate</code> first</td></tr>
+    <tr><td><code>AuthenticationError</code> from Anthropic</td><td>API key in <code>.env</code> is wrong or missing — double-check it at console.anthropic.com</td></tr>
+    <tr><td>Screen window doesn't open</td><td>Run <code>which screen</code> — if empty, install with <code>brew install screen</code></td></tr>
+    <tr><td>Agent exits immediately</td><td>Run with <code>--verbose</code> to see the full error message</td></tr>
+    <tr><td>Port busy error on second run</td><td>Agent cleanup handles this automatically; if it persists, run <code>screen -ls</code> and <code>screen -X -S &lt;id&gt; quit</code></td></tr>
+  </table>
+
+  <div style="margin-top:48px;padding-top:20px;border-top:1px solid #1e293b;text-align:center">
+    <p style="color:#475569;font-size:0.78rem">Built with Claude Code — March 2026 &nbsp;|&nbsp; <a href="index.html" style="color:#60a5fa;text-decoration:none">Back to docs</a></p>
+  </div>
+
+</div>
+</body>
+</html>
