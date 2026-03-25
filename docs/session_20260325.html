@@ -27,9 +27,34 @@
          font-family: 'Fira Mono', 'Courier New', monospace; font-size: 0.82rem;
          line-height: 1.6; color: #7dd3fc; white-space: pre-wrap; word-break: break-word;
          flex: 1; overflow: auto; }
+
+  /* LOGIN GATE */
+  #login-gate { position:fixed;inset:0;background:#0f172a;display:flex;align-items:center;justify-content:center;z-index:9999; }
+  #login-box { background:#1e293b;border:1px solid #7c3aed;border-radius:12px;padding:40px 48px;box-shadow:0 8px 40px rgba(0,0,0,0.6);width:100%;max-width:400px;text-align:center; }
+  #login-box h2 { color:#a78bfa;margin-bottom:6px;font-size:1.4rem; }
+  #login-box p { color:#64748b;font-size:0.9rem;margin-bottom:24px; }
+  #login-box input { width:100%;padding:10px 14px;margin-bottom:14px;border:1px solid #334155;border-radius:6px;font-size:1rem;outline:none;background:#0f172a;color:#e2e8f0; }
+  #login-box input:focus { border-color:#7c3aed; }
+  #login-box button { width:100%;padding:12px;background:#7c3aed;color:white;border:none;border-radius:6px;font-size:1rem;cursor:pointer;font-weight:bold; }
+  #login-box button:hover { background:#6d28d9; }
+  #login-error { color:#f87171;font-size:0.85rem;margin-top:10px;display:none; }
+  #main-content { display:none; }
 </style>
 </head>
 <body>
+
+<!-- LOGIN GATE -->
+<div id="login-gate">
+  <div id="login-box">
+    <h2>Extreme Networks</h2>
+    <p>5320 Session Report &mdash; March 25, 2026</p>
+    <input type="text" id="username" placeholder="Username" autocomplete="username" />
+    <input type="password" id="password" placeholder="Password" autocomplete="current-password" />
+    <button onclick="checkLogin()">Sign In</button>
+    <div id="login-error">Invalid username or password.</div>
+  </div>
+</div>
+<div id="main-content">
 <div style="background:#7c3aed;color:#fff;padding:10px 32px;font-size:0.85rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px"><span><strong>Khursheed Khan</strong> &mdash; Onboarding Session</span><span>March 25, 2026 &nbsp;|&nbsp; 3:00 PM Pacific &nbsp;|&nbsp; EXOS SwitchEngine 33.5.2</span></div>
 <header>
   <h1>Extreme Networks 5320-16P-2MXT-2X-SwitchEngine — Configuration Report</h1>
@@ -1633,6 +1658,27 @@ enable web https
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
     document.getElementById(id).style.display = 'flex';
     document.getElementById('btn-' + id).classList.add('active');
+  }
+</script>
+</div>
+<script>
+  function checkLogin() {
+    var u = document.getElementById('username').value;
+    var p = document.getElementById('password').value;
+    if (u === 'admin' && p === 'Extreme01!!') {
+      document.getElementById('login-gate').style.display = 'none';
+      document.getElementById('main-content').style.display = 'flex';
+      document.getElementById('main-content').style.flexDirection = 'column';
+      sessionStorage.setItem('auth25','1');
+    } else {
+      document.getElementById('login-error').style.display = 'block';
+    }
+  }
+  document.addEventListener('keydown', function(e){ if(e.key==='Enter') checkLogin(); });
+  if (sessionStorage.getItem('auth25')==='1') {
+    document.getElementById('login-gate').style.display = 'none';
+    document.getElementById('main-content').style.display = 'flex';
+    document.getElementById('main-content').style.flexDirection = 'column';
   }
 </script>
 </body>
