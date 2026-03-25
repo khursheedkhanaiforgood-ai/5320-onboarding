@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>5320 Onboarding Agent</title>
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <h1>Extreme Networks 5320</h1>
+    <span class="subtitle">Onboarding Agent</span>
+  </div>
+  <div class="header-right">
+    <span class="bridge-badge" id="bridge-badge">&#9679; Bridge Disconnected</span>
+    <span class="state-badge" id="state-badge">UNKNOWN</span>
+  </div>
+</header>
+
+<div class="layout">
+
+  <!-- Left: Live Console Feed -->
+  <div class="pane" id="pane-console">
+    <div class="pane-header">
+      <span>&#9655; Switch Console</span>
+      <button class="btn-sm" id="btn-autoscroll" onclick="toggleAutoscroll()">Auto-scroll ON</button>
+    </div>
+    <pre id="console-out"></pre>
+    <div class="manual-bar">
+      <input type="text" id="manual-cmd" placeholder="Type command and press Enter..." autocomplete="off"/>
+    </div>
+  </div>
+
+  <!-- Right: Agent Instructions + Prompt -->
+  <div class="pane" id="pane-agent">
+    <div class="pane-header"><span>&#129302; Agent Instructions</span></div>
+    <div class="agent-body" id="agent-body">
+      <div class="waiting" id="waiting-msg">
+        <p>Waiting for bridge to connect...</p>
+        <p class="dim">Run <code>python3 bridge/bridge.py --server wss://&lt;this-url&gt; --token &lt;token&gt;</code> on the Mac connected to the switch.</p>
+      </div>
+      <div id="instruction-card" style="display:none">
+        <div class="instr-action" id="instr-action"></div>
+        <div class="instr-command" id="instr-command-wrap" style="display:none">
+          <code id="instr-command"></code>
+          <button class="btn-copy" onclick="copyCommand()">Copy</button>
+        </div>
+        <div class="instr-explanation" id="instr-explanation"></div>
+        <div class="instr-tags" id="instr-tags"></div>
+      </div>
+    </div>
+
+    <!-- Prompt modal area -->
+    <div class="prompt-area" id="prompt-area" style="display:none">
+      <div class="prompt-box">
+        <p class="prompt-text" id="prompt-text"></p>
+        <div class="prompt-options" id="prompt-options"></div>
+      </div>
+    </div>
+
+    <!-- Log strip -->
+    <div class="log-strip" id="log-strip"></div>
+  </div>
+
+</div>
+
+<!-- Report download overlay -->
+<div id="report-overlay" style="display:none">
+  <div class="report-box">
+    <h2>&#10003; Configuration Captured</h2>
+    <p>The switch configuration report is ready.</p>
+    <a id="report-link" class="btn-download" download>Download Report</a>
+    <button class="btn-sm" onclick="document.getElementById('report-overlay').style.display='none'">Dismiss</button>
+  </div>
+</div>
+
+<script src="/static/app.js"></script>
+</body>
+</html>
