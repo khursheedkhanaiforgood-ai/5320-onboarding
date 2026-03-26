@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AP3000 Onboarding — March 26, 2026 | Khursheed Khan</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Segoe UI', Arial, sans-serif; background: #0f172a; color: #e2e8f0; display: flex; min-height: 100vh; }
+/* Sidebar */
+nav { position: fixed; left: 0; top: 0; width: 220px; height: 100vh; background: #0d1117; border-right: 1px solid #1e293b; overflow-y: auto; padding: 20px 0; z-index: 100; }
+nav .nav-title { color: #7c3aed; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; padding: 0 20px 16px; border-bottom: 1px solid #1e293b; margin-bottom: 12px; }
+nav a { display: block; padding: 7px 20px; color: #64748b; font-size: 0.82rem; text-decoration: none; border-left: 3px solid transparent; transition: all 0.15s; line-height: 1.4; }
+nav a:hover, nav a.active { color: #a78bfa; border-left-color: #7c3aed; background: #1e293b; }
+/* Main */
+main { margin-left: 220px; max-width: 980px; padding: 48px 40px; flex: 1; }
+/* Header */
+.page-header { margin-bottom: 48px; }
+.page-header h1 { font-size: 2rem; color: #a78bfa; margin-bottom: 8px; }
+.page-header .meta { color: #64748b; font-size: 0.88rem; margin-bottom: 4px; }
+.page-header .subtitle { color: #94a3b8; font-size: 0.95rem; line-height: 1.6; }
+/* Sections */
+section { margin-bottom: 60px; scroll-margin-top: 24px; }
+h2 { font-size: 1.4rem; color: #a78bfa; margin-bottom: 6px; padding-bottom: 10px; border-bottom: 1px solid #1e293b; }
+h3 { font-size: 1.05rem; color: #c4b5fd; margin: 24px 0 12px; }
+p { color: #94a3b8; font-size: 0.92rem; line-height: 1.7; margin-bottom: 12px; }
+/* Phase label */
+.phase-label { display: inline-block; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #7c3aed; margin-bottom: 8px; }
+/* Cards / boxes */
+.card { background: #1e293b; border: 1px solid #334155; border-radius: 8px; padding: 20px 24px; margin: 16px 0; }
+.box-purple { border-color: #7c3aed; background: #1a1035; }
+.box-amber { border-color: #f59e0b; background: #1a1200; }
+.box-green { border-color: #10b981; background: #052019; }
+.box-red { border-color: #ef4444; background: #1a0505; }
+.box-title { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 10px; }
+.box-title.purple { color: #a78bfa; }
+.box-title.amber { color: #fcd34d; }
+.box-title.green { color: #34d399; }
+.box-title.red { color: #f87171; }
+/* Code blocks */
+pre { border-radius: 6px; padding: 16px; font-size: 0.82rem; line-height: 1.6; overflow-x: auto; margin: 12px 0; font-family: 'SF Mono', 'Fira Code', monospace; }
+pre.mac { background: #0d1117; border-left: 3px solid #34d399; color: #34d399; }
+pre.switch { background: #0d1117; border-left: 3px solid #67e8f9; color: #67e8f9; }
+pre.cmd { background: #1e293b; border-left: 3px solid #a78bfa; color: #a78bfa; }
+.err { color: #f87171; }
+.ok { color: #34d399; }
+.dim { color: #475569; }
+/* Tables */
+table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.85rem; }
+th { background: #1e293b; color: #a78bfa; font-weight: 600; padding: 10px 12px; text-align: left; border-bottom: 2px solid #334155; }
+td { padding: 9px 12px; border-bottom: 1px solid #1e293b; color: #94a3b8; vertical-align: top; }
+tr:hover td { background: #1e293b44; }
+td code, th code { background: #0d1117; color: #67e8f9; padding: 2px 6px; border-radius: 3px; font-size: 0.8rem; font-family: 'SF Mono', monospace; }
+/* Inline code */
+code { background: #1e293b; color: #67e8f9; padding: 2px 6px; border-radius: 3px; font-size: 0.82rem; font-family: 'SF Mono', monospace; }
+/* LED dots */
+.led-orange { display: inline-block; width: 12px; height: 12px; background: #f97316; border-radius: 50%; box-shadow: 0 0 6px #f97316; margin-right: 6px; vertical-align: middle; }
+.led-white { display: inline-block; width: 12px; height: 12px; background: #f1f5f9; border-radius: 50%; box-shadow: 0 0 6px #f1f5f9; margin-right: 6px; vertical-align: middle; }
+.led-green { display: inline-block; width: 12px; height: 12px; background: #34d399; border-radius: 50%; box-shadow: 0 0 6px #34d399; margin-right: 6px; vertical-align: middle; }
+/* Device table */
+.device-row { display: flex; gap: 16px; flex-wrap: wrap; margin: 16px 0; }
+.device-card { background: #1e293b; border: 1px solid #334155; border-radius: 8px; padding: 16px 18px; flex: 1; min-width: 200px; }
+.device-card .device-name { font-size: 0.88rem; font-weight: 600; color: #a78bfa; margin-bottom: 8px; }
+.device-card .device-detail { font-size: 0.78rem; color: #64748b; line-height: 1.7; }
+.device-card .device-detail strong { color: #94a3b8; }
+/* SVG flowchart container */
+.flowchart { background: #1e293b; border: 1px solid #334155; border-radius: 8px; padding: 24px; overflow-x: auto; margin: 16px 0; }
+/* Footer */
+footer { margin-top: 80px; padding-top: 24px; border-top: 1px solid #1e293b; text-align: center; }
+footer p { color: #475569; font-size: 0.78rem; }
+footer a { color: #60a5fa; font-size: 0.82rem; margin: 0 10px; text-decoration: none; }
+footer a:hover { text-decoration: underline; }
+/* Print */
+@media print {
+  nav { display: none; }
+  main { margin-left: 0; padding: 24px; }
+  body { background: #fff; color: #111; }
+  h2 { color: #4c1d95; }
+  pre { border: 1px solid #ccc; background: #f8f8f8 !important; color: #111 !important; }
+  .card { border: 1px solid #ccc; background: #f9f9f9 !important; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-title">AP Onboarding<br>Mar 26, 2026</div>
+  <a href="#overview">Overview &amp; Context</a>
+  <a href="#flowchart">Session Flowchart</a>
+  <a href="#ssh">1 &middot; SSH to Switch</a>
+  <a href="#assessment">2 &middot; VLAN Assessment</a>
+  <a href="#naming">3 &middot; VLAN Naming</a>
+  <a href="#ports">4 &middot; Port Configuration</a>
+  <a href="#poe">5 &middot; PoE Enablement</a>
+  <a href="#discovery">6 &middot; AP Discovery</a>
+  <a href="#xiq">7 &middot; XIQ Adoption</a>
+  <a href="#glossary">Command Glossary</a>
+</nav>
+
+<main>
+
+<div class="page-header">
+  <div class="meta">Khursheed Khan &nbsp;&middot;&nbsp; March 26, 2026 &nbsp;&middot;&nbsp; Extreme Networks</div>
+  <h1>AP3000 Onboarding Guide</h1>
+  <p class="subtitle">Complete session record: 5320-16P-2MXT-2X switch configuration via CLI &rarr; VLAN design &rarr; PoE &rarr; IP discovery &rarr; ExtremeCloud IQ adoption. Two AP3000s deployed on ports 3 and 5.</p>
+</div>
+
+<!-- OVERVIEW -->
+<section id="overview">
+  <div class="phase-label">Context</div>
+  <h2>Overview &amp; Context</h2>
+
+  <p><strong style="color:#e2e8f0">Yesterday (March 25, 2026)</strong> &mdash; The 5320 was onboarded using an AI-assisted agent: factory reset from Fabric Engine 9.2 to EXOS SwitchEngine 33.5.2 via ZTP+. During that session, four VLANs were created (VLAN_0010 through VLAN_0040) and the switch management IP was set to 192.168.0.24/24 on the Default VLAN. The switch is connected to a home router at 192.168.0.1 which provides DHCP for the 192.168.0.0/24 subnet.</p>
+
+  <p><strong style="color:#e2e8f0">Today (March 26, 2026)</strong> &mdash; Two Extreme AP3000 access points are being onboarded. The goal: cable them to ports 3 and 5, power them via PoE, rename the VLANs descriptively, configure the port VLAN membership (tagged/untagged), verify PoE delivery, discover the AP IP addresses, and adopt both APs into ExtremeCloud IQ with a Network Policy mapping three SSIDs to VLANs 20/30/40.</p>
+
+  <p><strong style="color:#e2e8f0">VLAN Design</strong> &mdash; Four VLANs are planned: Default (1) for switch management and AP provisioning, Mgmt (10) reserved by EXOS for the OOB management port, Corporate (20) for corporate WiFi clients, Guest (30) for guest WiFi, and IoT (40) for IoT devices. Ports 3 and 5 carry the Default VLAN untagged (so APs get DHCP) plus Corporate/Guest/IoT tagged (for multi-SSID after XIQ adoption).</p>
+
+  <h3>Device Reference</h3>
+  <div class="device-row">
+    <div class="device-card" style="border-color:#7c3aed">
+      <div class="device-name">Switch (Primary)</div>
+      <div class="device-detail">
+        <strong>Model:</strong> 5320-16P-2MXT-2X<br>
+        <strong>IP:</strong> 192.168.0.24<br>
+        <strong>MAC:</strong> D8:E0:16:3B:54:00<br>
+        <strong>OS:</strong> EXOS SwitchEngine 33.5.2<br>
+        <strong>Serial:</strong> FJ012544G-00483
+      </div>
+    </div>
+    <div class="device-card" style="border-color:#7c3aed">
+      <div class="device-name">Switch (Secondary)</div>
+      <div class="device-detail">
+        <strong>Model:</strong> 5320-16P-2MXT-2X<br>
+        <strong>IP:</strong> 192.168.0.28<br>
+        <strong>MAC:</strong> D8:E0:16:37:6C:00<br>
+        <strong>OS:</strong> EXOS SwitchEngine 33.5.2<br>
+        <strong>Serial:</strong> FJ012544G-00233
+      </div>
+    </div>
+    <div class="device-card" style="border-color:#10b981">
+      <div class="device-name">AP1 &mdash; AH-556680</div>
+      <div class="device-detail">
+        <strong>Model:</strong> AP3000<br>
+        <strong>IP:</strong> 192.168.0.26<br>
+        <strong>MAC:</strong> 00:E6:0E:55:66:80<br>
+        <strong>Port:</strong> 3<br>
+        <strong>Serial:</strong> HA012519Y-10623<br>
+        <strong>IQ Engine:</strong> 10.6.0.0
+      </div>
+    </div>
+    <div class="device-card" style="border-color:#10b981">
+      <div class="device-name">AP2 &mdash; AH-565780</div>
+      <div class="device-detail">
+        <strong>Model:</strong> AP3000<br>
+        <strong>IP:</strong> 192.168.0.25<br>
+        <strong>MAC:</strong> 00:E6:0E:56:57:80<br>
+        <strong>Port:</strong> 5<br>
+        <strong>Serial:</strong> HA012519Y-11587<br>
+        <strong>IQ Engine:</strong> 10.6.0.0
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FLOWCHART -->
+<section id="flowchart">
+  <div class="phase-label">Architecture</div>
+  <h2>Session Flowchart &mdash; Major Milestones</h2>
+  <div class="flowchart">
+    <svg viewBox="0 0 900 520" width="100%" style="min-width:700px">
+      <defs>
+        <marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+          <path d="M0,0 L0,6 L8,3 z" fill="#475569"/>
+        </marker>
+        <marker id="arr-g" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+          <path d="M0,0 L0,6 L8,3 z" fill="#34d399"/>
+        </marker>
+      </defs>
+
+      <!-- Row 1 -->
+      <rect x="10" y="20" width="130" height="50" rx="6" fill="#2d1b69" stroke="#7c3aed" stroke-width="1.5"/>
+      <text x="75" y="40" text-anchor="middle" fill="#a78bfa" font-size="11" font-weight="600">SSH to 5320</text>
+      <text x="75" y="57" text-anchor="middle" fill="#7c3aed" font-size="10">+HostKeyAlgorithms</text>
+
+      <line x1="140" y1="45" x2="165" y2="45" stroke="#475569" stroke-width="1.5" marker-end="url(#arr)"/>
+
+      <rect x="165" y="20" width="130" height="50" rx="6" fill="#2d1b69" stroke="#7c3aed" stroke-width="1.5"/>
+      <text x="230" y="40" text-anchor="middle" fill="#a78bfa" font-size="11" font-weight="600">Assess VLANs</text>
+      <text x="230" y="57" text-anchor="middle" fill="#7c3aed" font-size="10">show vlan detail</text>
+
+      <line x1="295" y1="45" x2="320" y2="45" stroke="#475569" stroke-width="1.5" marker-end="url(#arr)"/>
+
+      <rect x="320" y="20" width="130" height="50" rx="6" fill="#2d1b69" stroke="#f59e0b" stroke-width="1.5"/>
+      <text x="385" y="40" text-anchor="middle" fill="#fcd34d" font-size="11" font-weight="600">Name VLANs</text>
+      <text x="385" y="57" text-anchor="middle" fill="#f59e0b" font-size="10">Hit reserved keyword!</text>
+
+      <line x1="450" y1="45" x2="475" y2="45" stroke="#475569" stroke-width="1.5" marker-end="url(#arr)"/>
+
+      <rect x="475" y="20" width="130" height="50" rx="6" fill="#2d1b69" stroke="#7c3aed" stroke-width="1.5"/>
+      <text x="540" y="40" text-anchor="middle" fill="#a78bfa" font-size="11" font-weight="600">Configure Ports</text>
+      <text x="540" y="57" text-anchor="middle" fill="#7c3aed" font-size="10">Ports 3 &amp; 5 tagged</text>
+
+      <line x1="605" y1="45" x2="630" y2="45" stroke="#475569" stroke-width="1.5" marker-end="url(#arr)"/>
+
+      <rect x="630" y="20" width="130" height="50" rx="6" fill="#2d1b69" stroke="#7c3aed" stroke-width="1.5"/>
+      <text x="695" y="40" text-anchor="middle" fill="#a78bfa" font-size="11" font-weight="600">Enable PoE</text>
+      <text x="695" y="57" text-anchor="middle" fill="#7c3aed" font-size="10">ports 3,5 searching</text>
+
+      <!-- Lesson callout -->
+      <rect x="300" y="95" width="190" height="52" rx="4" fill="#1a1200" stroke="#f59e0b" stroke-width="1" stroke-dasharray="4,2"/>
+      <text x="395" y="112" text-anchor="middle" fill="#fcd34d" font-size="9.5" font-weight="700">LESSON: Reserved Keywords</text>
+      <text x="395" y="127" text-anchor="middle" fill="#92400e" font-size="9">'Management' &amp; 'Mgmt' are</text>
+      <text x="395" y="140" text-anchor="middle" fill="#92400e" font-size="9">reserved by EXOS — use 'APMgmt'</text>
+      <line x1="385" y1="70" x2="385" y2="95" stroke="#f59e0b" stroke-width="1" stroke-dasharray="3,2"/>
+
+      <!-- Row 2 -->
+      <rect x="10" y="185" width="130" height="50" rx="6" fill="#1a1200" stroke="#f59e0b" stroke-width="1.5"/>
+      <text x="75" y="205" text-anchor="middle" fill="#fcd34d" font-size="11" font-weight="600">Plug In AP3000s</text>
+      <text x="75" y="222" text-anchor="middle" fill="#f59e0b" font-size="10">Ports 3 &amp; 5</text>
+
+      <line x1="140" y1="210" x2="165" y2="210" stroke="#475569" stroke-width="1.5" marker-end="url(#arr)"/>
+
+      <rect x="165" y="185" width="130" height="50" rx="6" fill="#052019" stroke="#10b981" stroke-width="1.5"/>
+      <text x="230" y="205" text-anchor="middle" fill="#34d399" font-size="11" font-weight="600">PoE Delivering</text>
+      <text x="230" y="222" text-anchor="middle" fill="#10b981" font-size="10">class4 · 54V · ~2.5W</text>
+
+      <line x1="295" y1="210" x2="320" y2="210" stroke="#34d399" stroke-width="1.5" marker-end="url(#arr-g)"/>
+
+      <rect x="320" y="185" width="130" height="50" rx="6" fill="#052019" stroke="#10b981" stroke-width="1.5"/>
+      <text x="385" y="205" text-anchor="middle" fill="#34d399" font-size="11" font-weight="600">FDB: MACs Learned</text>
+      <text x="385" y="222" text-anchor="middle" fill="#10b981" font-size="10">00:e6:0e OUI = Aerohive</text>
+
+      <line x1="450" y1="210" x2="475" y2="210" stroke="#34d399" stroke-width="1.5" marker-end="url(#arr-g)"/>
+
+      <rect x="475" y="185" width="130" height="50" rx="6" fill="#2d1b69" stroke="#7c3aed" stroke-width="1.5"/>
+      <text x="540" y="205" text-anchor="middle" fill="#a78bfa" font-size="11" font-weight="600">nmap -sn Scan</text>
+      <text x="540" y="222" text-anchor="middle" fill="#7c3aed" font-size="10">192.168.0.0/24</text>
+
+      <line x1="605" y1="210" x2="630" y2="210" stroke="#34d399" stroke-width="1.5" marker-end="url(#arr-g)"/>
+
+      <rect x="630" y="185" width="130" height="50" rx="6" fill="#052019" stroke="#10b981" stroke-width="1.5"/>
+      <text x="695" y="205" text-anchor="middle" fill="#34d399" font-size="11" font-weight="600">APs at .25 &amp; .26</text>
+      <text x="695" y="222" text-anchor="middle" fill="#10b981" font-size="10">Ping confirmed</text>
+
+      <!-- Connector row1 to row2 -->
+      <line x1="695" y1="70" x2="695" y2="155" stroke="#475569" stroke-width="1.5"/>
+      <line x1="695" y1="155" x2="75" y2="155" stroke="#475569" stroke-width="1.5"/>
+      <line x1="75" y1="155" x2="75" y2="185" stroke="#475569" stroke-width="1.5" marker-end="url(#arr)"/>
+
+      <!-- Row 3 -->
+      <rect x="165" y="340" width="140" height="50" rx="6" fill="#052019" stroke="#10b981" stroke-width="1.5"/>
+      <text x="235" y="360" text-anchor="middle" fill="#34d399" font-size="11" font-weight="600">XIQ Adoption</text>
+      <text x="235" y="377" text-anchor="middle" fill="#10b981" font-size="10">Both APs MANAGED</text>
+
+      <line x1="305" y1="365" x2="330" y2="365" stroke="#34d399" stroke-width="1.5" marker-end="url(#arr-g)"/>
+
+      <rect x="330" y="340" width="140" height="50" rx="6" fill="#052019" stroke="#10b981" stroke-width="1.5"/>
+      <text x="400" y="360" text-anchor="middle" fill="#34d399" font-size="11" font-weight="600">Network Policy</text>
+      <text x="400" y="377" text-anchor="middle" fill="#10b981" font-size="10">3 SSIDs → VLANs 20/30/40</text>
+
+      <line x1="470" y1="365" x2="495" y2="365" stroke="#34d399" stroke-width="1.5" marker-end="url(#arr-g)"/>
+
+      <rect x="495" y="340" width="140" height="50" rx="6" fill="#052019" stroke="#10b981" stroke-width="2"/>
+      <text x="565" y="360" text-anchor="middle" fill="#34d399" font-size="11" font-weight="700">APs ONLINE</text>
+      <text x="565" y="377" text-anchor="middle" fill="#10b981" font-size="10">Config pushed · IQ Engine 10.6</text>
+
+      <!-- Connector row2 to row3 -->
+      <line x1="695" y1="235" x2="695" y2="300" stroke="#34d399" stroke-width="1.5"/>
+      <line x1="695" y1="300" x2="235" y2="300" stroke="#34d399" stroke-width="1.5"/>
+      <line x1="235" y1="300" x2="235" y2="340" stroke="#34d399" stroke-width="1.5" marker-end="url(#arr-g)"/>
+
+      <!-- Legend -->
+      <rect x="10" y="430" width="880" height="75" rx="4" fill="#0d1117" stroke="#1e293b" stroke-width="1"/>
+      <text x="20" y="448" fill="#475569" font-size="10" font-weight="700">LEGEND</text>
+      <rect x="20" y="458" width="12" height="12" rx="2" fill="#2d1b69" stroke="#7c3aed"/>
+      <text x="38" y="469" fill="#64748b" font-size="10">CLI / Configuration step</text>
+      <rect x="170" y="458" width="12" height="12" rx="2" fill="#1a1200" stroke="#f59e0b"/>
+      <text x="188" y="469" fill="#64748b" font-size="10">Physical action / Warning</text>
+      <rect x="350" y="458" width="12" height="12" rx="2" fill="#052019" stroke="#10b981"/>
+      <text x="368" y="469" fill="#64748b" font-size="10">Success / Confirmed</text>
+      <text x="20" y="492" fill="#64748b" font-size="9">Flow: SSH to switch → assess state → name VLANs → configure ports → enable PoE → plug in APs → discover IPs → XIQ adoption → policy pushed</text>
+    </svg>
+  </div>
+</section>
+
+<!-- SSH -->
+<section id="ssh">
+  <div class="phase-label">Phase 1</div>
+  <h2>SSH to the Switch</h2>
+
+  <p>The session began by SSHing to the primary 5320 at 192.168.0.24. Both switches immediately rejected the connection with a host key negotiation error.</p>
+
+  <div class="card box-red">
+    <div class="box-title red">Error &mdash; SSH Host Key Negotiation Failure</div>
+    <pre class="mac">Last login: Wed Mar 25 15:46:00 on ttys008
+khukhan@EXT-L63PXM76R6 ~ % ssh admin@192.168.0.24
+<span class="err">Unable to negotiate with 192.168.0.24 port 22: no matching host key type found. Their offer: ssh-rsa</span>
+khukhan@EXT-L63PXM76R6 ~ % ssh admin@192.168.0.28
+<span class="err">Unable to negotiate with 192.168.0.28 port 22: no matching host key type found. Their offer: ssh-rsa</span></pre>
+  </div>
+
+  <div class="card box-purple">
+    <div class="box-title purple">Why This Happens</div>
+    <p>macOS ships with a modern OpenSSH client that removed <code>ssh-rsa</code> from the default list of accepted host key algorithms for security reasons (SHA-1 based). EXOS SwitchEngine 33.5.2 only offers <code>ssh-rsa</code>. The fix: explicitly re-enable it with command-line flags.</p>
+  </div>
+
+  <h3>Fix &mdash; Add HostKeyAlgorithms Flags</h3>
+  <pre class="cmd">ssh -o HostKeyAlgorithms=+ssh-rsa -o PubkeyAcceptedAlgorithms=+ssh-rsa admin@192.168.0.24</pre>
+
+  <h3>Successful Connection</h3>
+  <pre class="mac">khukhan@EXT-L63PXM76R6 ~ % ssh -o HostKeyAlgorithms=+ssh-rsa -o PubkeyAcceptedAlgorithms=+ssh-rsa admin@192.168.0.24
+admin@192.168.0.24's password:
+Extreme Networks Switch Engine
+Copyright (C) 1996-2025 Extreme Networks, Inc. All rights reserved.
+
+Press the &lt;tab&gt; or '?' key at any time for completions.
+Remember to save your configuration changes.
+
+There have been 2 successful logins since last reboot and 1 failed login since last successful login.
+Last successful login was on: Wed Mar 25 13:53:58 2026
+
+Warning: This system is connected to ExtremeCloud IQ!
+         Do not make changes directly from this CLI unless you know they
+         do not conflict with configuration managed by ExtremeCloud IQ.
+
+* 5320-16P-2MXT-2X-SwitchEngine.1 #</pre>
+
+  <div class="card box-amber">
+    <div class="box-title amber">Note: XIQ Warning</div>
+    <p>The banner warns that the switch is connected to ExtremeCloud IQ. Since XIQ does not yet manage the VLAN or port configuration (no Network Policy was assigned), CLI changes are safe at this stage.</p>
+  </div>
+</section>
+
+<!-- ASSESSMENT -->
+<section id="assessment">
+  <div class="phase-label">Phase 2</div>
+  <h2>VLAN &amp; Port Assessment</h2>
+
+  <p>Before changing anything, we ran three commands to understand the current state &mdash; VLANs, port status, and detailed port membership.</p>
+
+  <h3>Command: <code>show vlan</code></h3>
+  <pre class="switch">* 5320-16P-2MXT-2X-SwitchEngine.1 # show vlan
+Untagged ports auto-move: Inform
+-----------------------------------------------------------------------------------------------
+Name            VID  Protocol Addr       Flags                         Proto  Ports  Virtual
+-----------------------------------------------------------------------------------------------
+Default         1    192.168.0.24   /24  ------------T--------------   ANY    1 /20  VR-Default
+VLAN_0010       10   --------------------------------T--------------   ANY    1 /1   VR-Default
+VLAN_0020       20   --------------------------------T--------------   ANY    1 /3   VR-Default
+VLAN_0030       30   --------------------------------T--------------   ANY    1 /3   VR-Default
+VLAN_0040       40   --------------------------------T--------------   ANY    1 /3   VR-Default
+-----------------------------------------------------------------------------------------------
+Total number of VLAN(s) : 5</pre>
+
+  <div class="card">
+    <div class="box-title purple">Interpretation</div>
+    <p>5 VLANs exist. Default VLAN carries the switch management IP 192.168.0.24/24 and spans all 20 ports. VLANs 10/20/30/40 were created in the previous session but have generic names and no IP addresses. Port counts show only 1 active port (port 1 = uplink) &mdash; no APs connected yet.</p>
+  </div>
+
+  <h3>Command: <code>show port information</code></h3>
+  <pre class="switch">* 5320-16P-2MXT-2X-SwitchEngine.2 # show port information
+Port      Flags               Link       VLAN
+========================================================================================
+1         Em------e--fMB---x- active        5
+2         Em------e--fMB---x- ready         4
+3         Em------e--fMB---x- ready         4
+4         Em------e--fMB---x- ready         1
+5         Em------e--fMB---x- ready         1
+6-18      Em------e--fMB---x- ready         1
+19        Em------e--fMB---x- NotPresent    1
+20        Em------e--fMB---x- NotPresent    1
+========================================================================================</pre>
+
+  <div class="card">
+    <div class="box-title purple">Interpretation</div>
+    <p>Port 1 (uplink to router): active, member of all 5 VLANs. Ports 2&ndash;3: ready, 4 VLANs each (previously configured with 20/30/40 tagged). Ports 4&ndash;18: only Default VLAN. Ports 19&ndash;20: SFP+ slots, nothing installed. Our target AP ports 3 and 5 are ready but no link yet.</p>
+  </div>
+
+  <h3>Command: <code>show vlan detail</code> &mdash; Key Findings</h3>
+  <pre class="switch">Default VLAN (1):
+  Untag: *1, 2b, 3b, 4b, 5b, 6b ... 20b   &larr; all ports untagged, port 1 active
+
+VLAN_0010 (10):
+  Tag: *1                                   &larr; only port 1 tagged
+
+VLAN_0020 (20):
+  Tag: *1, 2b, 3b                           &larr; ports 1/2/3 tagged
+
+VLAN_0030 (30):
+  Tag: *1, 2b, 3b
+
+VLAN_0040 (40):
+  Tag: *1, 2b, 3b</pre>
+
+  <div class="card">
+    <div class="box-title purple">Key Finding</div>
+    <p>Port 3 already has VLANs 20/30/40 tagged (from a previous session). Port 5 only has Default VLAN. VLAN 10 is tagged only on port 1 (the uplink). Neither port 3 nor port 5 is configured as an AP trunk port yet.</p>
+  </div>
+</section>
+
+<!-- NAMING -->
+<section id="naming">
+  <div class="phase-label">Phase 3</div>
+  <h2>Naming the VLANs</h2>
+
+  <p>The VLANs had generic names (VLAN_0010 etc). We attempted to rename them to descriptive names and hit EXOS reserved keyword restrictions.</p>
+
+  <h3>Attempts and Errors</h3>
+  <pre class="switch">* 5320-16P-2MXT-2X-SwitchEngine.4 # create vlan Management tag 10
+                                                         ^
+<span class="err">%% Invalid name detected at '^' marker.
+%% Name cannot be a reserved keyword.</span>
+
+* 5320-16P-2MXT-2X-SwitchEngine.5 # configure vlan VLAN_0010 name Management
+                                                                           ^
+<span class="err">%% Invalid name detected at '^' marker.
+%% Name cannot be a reserved keyword.</span>
+
+* 5320-16P-2MXT-2X-SwitchEngine.7 # configure vlan VLAN_0010 name Mgmt
+<span class="ok">&larr; Accepted (no error) &mdash; but this was a mistake!</span>
+
+* 5320-16P-2MXT-2X-SwitchEngine.8 # configure vlan VLAN_0020 name Corportate
+<span class="ok">&larr; Accepted (note: typo &mdash; Corportate)</span>
+
+* 5320-16P-2MXT-2X-SwitchEngine.9 # configure vlan VLAN0030 name Guest
+                                                       ^
+<span class="err">%% Invalid input detected at '^' marker.
+%% A number within the range of 1-4094 is expected.</span>
+
+* 5320-16P-2MXT-2X-SwitchEngine.10 # configure vlan VLAN_0030 name Guest
+<span class="ok">&larr; Accepted (underscore required in VLAN_0030)</span>
+
+* 5320-16P-2MXT-2X-SwitchEngine.11 # configure vlan VLAN_0040 name IoT</pre>
+
+  <div class="card box-amber">
+    <div class="box-title amber">The Mgmt Trap</div>
+    <p>Renaming VLAN_0010 to "Mgmt" was accepted by EXOS but locked the VLAN to the physical OOB management port. Subsequent attempts to use it failed:</p>
+    <pre class="switch">* .14 # configure vlan Mgmt add ports 3 untagged
+<span class="err">Error: Cannot configure VLAN Mgmt!</span>
+
+* .17 # configure vlan Mgmt name APMgmt
+<span class="err">Error: Cannot configure VLAN Mgmt</span>
+
+* .19 # delete vlan Mgmt
+<span class="err">Error: VLAN "Mgmt" cannot be deleted from the system!</span></pre>
+    <p style="margin-top:10px">The <code>show vlan detail</code> output revealed the reason: <code>Untag: Mgmt-port on is down</code> &mdash; the 5320 has a dedicated physical OOB management port and "Mgmt" is permanently bound to it.</p>
+  </div>
+
+  <h3>Fixes Applied</h3>
+  <pre class="switch">* 5320-16P-2MXT-2X-SwitchEngine.20 # configure vlan Corportate name Corporate
+<span class="ok">&larr; Fixed the typo</span></pre>
+
+  <div class="card box-purple">
+    <div class="box-title purple">Lesson: EXOS Reserved VLAN Names</div>
+    <p>In EXOS SwitchEngine, <strong style="color:#e2e8f0">Management</strong> and <strong style="color:#e2e8f0">Mgmt</strong> are reserved keywords tied to the physical OOB management port. They cannot be used as names for data VLANs. Use descriptive alternatives: <code>APMgmt</code>, <code>WifiMgmt</code>, <code>AccessMgmt</code>.</p>
+    <p style="margin-top:8px">The "Mgmt" VLAN (VID 10) in this deployment is permanently locked &mdash; it cannot be deleted, renamed, or have data ports added. AP management uses the Default VLAN for provisioning instead.</p>
+  </div>
+
+  <h3>Final VLAN State</h3>
+  <pre class="switch">* 5320-16P-2MXT-2X-SwitchEngine.21 # show vlan
+Name            VID  Addr              Ports Active
+Corporate       20                     4     1
+Default         1    192.168.0.24/24   19    1
+Guest           30                     4     1
+IoT             40                     4     1
+Mgmt            10                     1     1  &larr; OOB port only, locked</pre>
+
+  <table>
+    <tr><th>VLAN Name</th><th>VID</th><th>Purpose</th><th>Notes</th></tr>
+    <tr><td>Default</td><td>1</td><td>Switch mgmt + AP provisioning</td><td>IP 192.168.0.24/24, DHCP from home router</td></tr>
+    <tr><td>Mgmt</td><td>10</td><td>OOB management port</td><td><strong style="color:#f87171">LOCKED</strong> &mdash; cannot add data ports</td></tr>
+    <tr><td>Corporate</td><td>20</td><td>Corporate WiFi clients</td><td>Tagged on ports 1, 2, 3, 5</td></tr>
+    <tr><td>Guest</td><td>30</td><td>Guest WiFi clients</td><td>Tagged on ports 1, 2, 3, 5</td></tr>
+    <tr><td>IoT</td><td>40</td><td>IoT devices</td><td>Tagged on ports 1, 2, 3, 5</td></tr>
+  </table>
+</section>
+
+<!-- PORTS -->
+<section id="ports">
+  <div class="phase-label">Phase 4</div>
+  <h2>Port Configuration &mdash; Tagged vs Untagged</h2>
+
+  <div class="card box-purple">
+    <div class="box-title purple">Concept: Untagged vs Tagged</div>
+    <p><strong style="color:#e2e8f0">Untagged</strong> &mdash; The port strips the 802.1Q VLAN tag before sending frames out. The connected device receives plain Ethernet and needs no VLAN awareness. Used for the native/provisioning VLAN. <em>Only one untagged VLAN is allowed per port.</em></p>
+    <p style="margin-top:8px"><strong style="color:#e2e8f0">Tagged</strong> &mdash; Frames carry the 802.1Q VLAN tag intact. The connected device (the AP) must understand VLANs. Used for data VLANs that APs map to SSIDs. Multiple tagged VLANs per port are allowed.</p>
+    <p style="margin-top:8px"><strong style="color:#e2e8f0">Why Default VLAN untagged for AP provisioning?</strong> &mdash; The home router provides DHCP on 192.168.0.0/24 and connects to port 1 untagged on Default VLAN. APs on Default VLAN (untagged) get a 192.168.0.x IP from the home router, reach the internet, and connect to XIQ cloud for adoption. After adoption, XIQ pushes Corporate/Guest/IoT SSID config which uses the tagged VLANs.</p>
+  </div>
+
+  <h3>Commands Executed</h3>
+  <pre class="switch">* .13 # configure vlan Default delete ports 3
+<span class="ok">&larr; Remove port 3 from Default VLAN (to swap untagged)</span>
+
+* .15 # configure vlan Mgmt add ports 3 untagged
+<span class="err">Error: Cannot configure VLAN Mgmt!  &larr; Mgmt VLAN is locked to OOB port</span>
+
+* .35 # configure vlan Default add ports 3 untagged
+<span class="ok">&larr; Add port 3 back to Default VLAN untagged (correct fix)</span>
+
+* .22 # configure vlan Corporate add ports 5 tagged
+* .23 # configure vlan Guest add ports 5 tagged
+* .24 # configure vlan IoT add ports 5 tagged
+<span class="ok">&larr; Port 5 gets all data VLANs tagged (port 3 already had them)</span>
+
+* .25 # enable inline-power ports 3,5
+<span class="ok">&larr; PoE activated on both AP ports</span></pre>
+
+  <h3>Final Port Layout</h3>
+  <pre class="switch">PORT 3 — AP1 (AH-556680, .26)        PORT 5 — AP2 (AH-565780, .25)
+-------------------------------------  -------------------------------------
+Default (1)    UNTAGGED  &larr; DHCP      Default (1)    UNTAGGED  &larr; DHCP
+Corporate (20) TAGGED    &larr; SSID      Corporate (20) TAGGED    &larr; SSID
+Guest (30)     TAGGED    &larr; SSID      Guest (30)     TAGGED    &larr; SSID
+IoT (40)       TAGGED    &larr; SSID      IoT (40)       TAGGED    &larr; SSID
+PoE: Enabled                           PoE: Enabled
+
+AP boots &rarr; Default VLAN (untagged) &rarr; DHCP &rarr; 192.168.0.x &rarr; reaches XIQ
+After adoption &rarr; Corporate SSID maps VLAN tag 20 &rarr; Corporate VLAN
+               &rarr; Guest SSID maps VLAN tag 30 &rarr; Guest VLAN
+               &rarr; IoT SSID maps VLAN tag 40 &rarr; IoT VLAN</pre>
+
+  <h3>Verification: <code>show vlan detail</code></h3>
+  <pre class="switch">Corporate (VID 20):  Tag: *1, 2b, 3b, 5b   &larr; ports 3 and 5 tagged &#10003;
+Default   (VID 1):   Untag: *1, 2b, 4b, 5b, 6b...20b  &larr; port 5 untagged &#10003;
+Guest     (VID 30):  Tag: *1, 2b, 3b, 5b   &#10003;
+IoT       (VID 40):  Tag: *1, 2b, 3b, 5b   &#10003;
+Mgmt      (VID 10):  Untag: Mgmt-port on is down  &larr; OOB port confirmed</pre>
+</section>
+
+<!-- POE -->
+<section id="poe">
+  <div class="phase-label">Phase 5</div>
+  <h2>PoE Enablement</h2>
+
+  <p>The AP3000 is a PoE-powered device. The 5320-16P-2MXT-2X has a 180W PoE budget across 16 ports. PoE must be explicitly enabled per port.</p>
+
+  <h3>System PoE Status</h3>
+  <pre class="switch">* .31 # show inline-power
+
+                Inline Power System Information
+Configured                 : Enabled
+Power Usage Threshold      : 70 percent
+Disconnect Precedence      : deny-port
+Inline Power budget        : Maximum
+Firmware Status    Power (Watts Budgeted)  Power (Watts Measured)
+Operational         180 W                   0 W</pre>
+
+  <h3>Correct Syntax Discovery</h3>
+  <pre class="switch">* .32 # show inline power ports 3       &larr; space instead of hyphen
+<span class="err">%% Invalid input detected</span>
+* .33 # show inline-power ports 3       &larr; hyphen correct but 'ports N' not supported
+<span class="err">%% Invalid input detected</span>
+* .36 # show inline-power detail        &larr; 'detail' not a valid keyword
+<span class="err">%% Invalid input detected</span>
+* .37 # show inline-power ?
+  configuration   Show configuration
+  info            Port information      &larr; correct subcommand
+  stats           statistics
+
+* .38 # show inline-power info ports 3,5   &larr; comma-separated ports works here!</pre>
+
+  <h3>PoE State Progression</h3>
+  <table>
+    <tr><th>Time</th><th>Port 3</th><th>Port 5</th><th>Event</th></tr>
+    <tr><td>After enable command</td><td>searching</td><td>searching</td><td>PoE active, waiting for device</td></tr>
+    <tr><td>AP1 plugged in (port 3)</td><td><span class="ok">delivering class4<br>54V &middot; 45mA &middot; 2.4W</span></td><td>searching</td><td>AP1 booting</td></tr>
+    <tr><td>AP2 plugged in (port 5)</td><td><span class="ok">delivering class4<br>54V &middot; 38mA &middot; 2.0W</span></td><td><span class="ok">delivering class4<br>53.9V &middot; 48mA &middot; 2.5W</span></td><td>Both APs booting</td></tr>
+  </table>
+
+  <div class="card">
+    <div class="box-title purple">PoE Class 4 Explained</div>
+    <p>Class 4 = IEEE 802.3at (PoE+), up to 30W allocated per port. Initial draw of 2&ndash;2.5W is normal during early boot sequence. Full AP3000 power consumption under load is typically 12&ndash;15W. The 5320's 180W budget supports up to ~12 simultaneous Class 4 APs at full load.</p>
+  </div>
+</section>
+
+<!-- DISCOVERY -->
+<section id="discovery">
+  <div class="phase-label">Phase 6</div>
+  <h2>Discovering AP IP Addresses</h2>
+
+  <p>APs are booting and getting DHCP from the home router. The switch does not run a DHCP server for the Default VLAN, so we used a three-step approach to find the AP IPs.</p>
+
+  <h3>Step 1 &mdash; Switch FDB (MAC addresses)</h3>
+  <pre class="switch">* .43 # show fdb ports 3
+MAC                          VLAN Name( Tag)  Age  Flags   Port
+----------------------------------------------------------------------
+<span class="ok">00:e6:0e:55:66:80</span>             Default(0001)  0043  d m      3
+
+* .44 # show fdb ports 5
+<span class="ok">00:e6:0e:56:57:80</span>             Default(0001)  0046  d m      5</pre>
+
+  <div class="card">
+    <div class="box-title purple">FDB Explained</div>
+    <p>The Forwarding Database records MAC addresses as soon as a device sends any Ethernet frame. OUI <code>00:e6:0e</code> = Extreme Networks / Aerohive &mdash; confirms these are the AP3000s. The IPs are not yet known at Layer 2.</p>
+  </div>
+
+  <h3>Step 2 &mdash; Switch ARP (no AP IPs here)</h3>
+  <pre class="switch">* .42 # show iparp
+VR-Default  192.168.0.1   58:13:d3:9c:c1:ee   Port 1  &larr; home router
+VR-Default  192.168.0.3   00:58:28:f3:b0:10   Port 1
+VR-Default  192.168.0.6   00:58:28:57:69:21   Port 1
+VR-Default  192.168.0.7   50:a0:30:07:50:96   Port 1
+<span class="dim">&larr; AP IPs not here: switch has IP forwarding disabled on Default VLAN,
+  so it only tracks ARP for its own management communications via port 1</span></pre>
+
+  <h3>Step 3 &mdash; Mac Terminal: nmap Scan</h3>
+  <pre class="mac">khukhan@EXT-L63PXM76R6 ~ % arp -a
+<span class="dim">&larr; Only router and switch visible &mdash; Mac hasn't talked to APs yet</span>
+
+khukhan@EXT-L63PXM76R6 ~ % ping -c 3 192.168.0.255
+<span class="dim">&larr; Broadcast ping &mdash; triggers ARP replies from some devices, but not APs</span>
+
+khukhan@EXT-L63PXM76R6 ~ % brew install nmap
+/opt/homebrew/Cellar/nmap/7.98_1: 844 files, 30.3MB
+
+khukhan@EXT-L63PXM76R6 ~ % nmap -sn 192.168.0.0/24
+Starting Nmap 7.98 at 2026-03-26 09:51 -0700
+Nmap scan report for 192.168.0.1    Host is up (0.0050s latency).
+Nmap scan report for 192.168.0.3    Host is up (0.0052s latency).
+Nmap scan report for 192.168.0.6    Host is up (0.044s latency).
+Nmap scan report for 192.168.0.7    Host is up (0.000063s latency).
+Nmap scan report for 192.168.0.24   Host is up (0.00065s latency).
+<span class="ok">Nmap scan report for 192.168.0.25   Host is up (0.010s latency).   &larr; AP2!</span>
+<span class="ok">Nmap scan report for 192.168.0.26   Host is up (0.0018s latency).  &larr; AP1!</span>
+Nmap scan report for 192.168.0.28   Host is up (0.0033s latency).  &larr; 2nd switch
+Nmap done: 256 IP addresses (8 hosts up) scanned in 25.45 seconds
+
+khukhan@EXT-L63PXM76R6 ~ % arp -a
+<span class="ok">? (192.168.0.25) at 0:e6:e:56:57:80 on en8   &larr; AP2 MAC confirmed</span>
+<span class="ok">? (192.168.0.26) at 0:e6:e:55:66:80 on en8   &larr; AP1 MAC confirmed</span>
+? (192.168.0.28) at d8:e0:16:37:6c:0 on en8  &larr; 2nd 5320 switch</pre>
+
+  <div class="card box-green">
+    <div class="box-title green">What nmap -sn Does</div>
+    <p>Network Mapper ping scan. Sends multiple probe types to every IP in the /24 range (256 addresses): ICMP echo request, TCP SYN to port 443, TCP ACK to port 80, ICMP timestamp request. Reports all hosts responding to any probe. Much more reliable than a simple broadcast ping alone.</p>
+  </div>
+
+  <h3>MAC-to-IP Mapping Confirmed</h3>
+  <table>
+    <tr><th>IP Address</th><th>MAC Address</th><th>Switch Port</th><th>Device</th></tr>
+    <tr><td>192.168.0.26</td><td>00:E6:0E:55:66:80</td><td>Port 3</td><td>AP3000 AH-556680 (serial HA012519Y-10623)</td></tr>
+    <tr><td>192.168.0.25</td><td>00:E6:0E:56:57:80</td><td>Port 5</td><td>AP3000 AH-565780 (serial HA012519Y-11587)</td></tr>
+  </table>
+
+  <h3>Ping Verification</h3>
+  <pre class="mac">khukhan@EXT-L63PXM76R6 ~ % ping -c 3 192.168.0.26
+64 bytes from 192.168.0.26: icmp_seq=0 ttl=64 time=2.311 ms
+64 bytes from 192.168.0.26: icmp_seq=1 ttl=64 time=1.262 ms
+64 bytes from 192.168.0.26: icmp_seq=2 ttl=64 time=1.080 ms
+<span class="ok">3 packets transmitted, 3 packets received, 0.0% packet loss</span>
+
+khukhan@EXT-L63PXM76R6 ~ % ping -c 3 192.168.0.25
+<span class="ok">3 packets transmitted, 3 packets received, 0.0% packet loss</span></pre>
+</section>
+
+<!-- XIQ -->
+<section id="xiq">
+  <div class="phase-label">Phase 7</div>
+  <h2>ExtremeCloud IQ Adoption</h2>
+
+  <p>Both APs are reachable on the network. The AP3000 automatically contacts XIQ redirector servers on boot. Since the serial numbers were pre-loaded into the XIQ tenant, the APs appear for adoption.</p>
+
+  <h3>AP LED Status Guide</h3>
+  <table>
+    <tr><th>LED</th><th>State</th><th>Meaning</th></tr>
+    <tr><td><span class="led-orange"></span> Solid Orange</td><td>Connecting</td><td>Booting / attempting to connect to XIQ cloud</td></tr>
+    <tr><td><span class="led-white"></span> Solid White</td><td>Managed</td><td>Connected to XIQ, under cloud management</td></tr>
+    <tr><td><span class="led-green"></span> Solid Green</td><td>Active</td><td>Connected to XIQ, clients associated</td></tr>
+  </table>
+
+  <h3>Adoption Timeline</h3>
+  <table>
+    <tr><th>Event</th><th>AP1 (.26)</th><th>AP2 (.25)</th></tr>
+    <tr><td>PoE delivering</td><td><span class="led-orange"></span> Orange solid</td><td><span class="led-orange"></span> Orange solid</td></tr>
+    <tr><td>First contacts XIQ</td><td><span class="led-white"></span> White solid</td><td><span class="led-orange"></span> Still orange</td></tr>
+    <tr><td>XIQ shows MANAGED</td><td><span class="ok">192.168.0.26 ONLINE</span></td><td>Pending</td></tr>
+    <tr><td>AP2 connects</td><td><span class="ok">MANAGED</span></td><td><span class="led-white"></span> White solid</td></tr>
+    <tr><td>Both online</td><td><span class="ok">MANAGED &#10003;</span></td><td><span class="ok">MANAGED &#10003;</span></td></tr>
+  </table>
+
+  <h3>XIQ Device Inventory</h3>
+  <div style="display:flex;gap:16px;flex-wrap:wrap;margin:16px 0">
+    <div class="card box-green" style="flex:1;min-width:260px">
+      <div class="box-title green">AH-556680 &mdash; Port 3</div>
+      <table style="margin:0">
+        <tr><td>IP</td><td style="color:#e2e8f0">192.168.0.26</td></tr>
+        <tr><td>MAC</td><td style="color:#e2e8f0">00:E6:0E:55:66:80</td></tr>
+        <tr><td>Serial</td><td style="color:#e2e8f0">HA012519Y-10623</td></tr>
+        <tr><td>Model</td><td style="color:#e2e8f0">AP3000</td></tr>
+        <tr><td>IQ Engine</td><td style="color:#e2e8f0">10.6.0.0</td></tr>
+        <tr><td>Status</td><td><span class="ok">MANAGED</span></td></tr>
+      </table>
+    </div>
+    <div class="card box-green" style="flex:1;min-width:260px">
+      <div class="box-title green">AH-565780 &mdash; Port 5</div>
+      <table style="margin:0">
+        <tr><td>IP</td><td style="color:#e2e8f0">192.168.0.25</td></tr>
+        <tr><td>MAC</td><td style="color:#e2e8f0">00:E6:0E:56:57:80</td></tr>
+        <tr><td>Serial</td><td style="color:#e2e8f0">HA012519Y-11587</td></tr>
+        <tr><td>Model</td><td style="color:#e2e8f0">AP3000</td></tr>
+        <tr><td>IQ Engine</td><td style="color:#e2e8f0">10.6.0.0</td></tr>
+        <tr><td>Status</td><td><span class="ok">MANAGED</span></td></tr>
+      </table>
+    </div>
+  </div>
+
+  <h3>Network Policy &mdash; Creation Steps</h3>
+  <ol style="color:#94a3b8;font-size:0.9rem;line-height:2;padding-left:20px;margin-bottom:16px">
+    <li>XIQ &rarr; <strong style="color:#e2e8f0">Configure &rarr; Network Policies &rarr; Add Network Policy</strong></li>
+    <li>Name: <code>5320-Home-Policy</code> &rarr; Next</li>
+    <li>Add Wireless Network: <strong style="color:#e2e8f0">Corporate</strong> &middot; WPA2-PSK &middot; VLAN <code>20</code> &rarr; Save</li>
+    <li>Add Wireless Network: <strong style="color:#e2e8f0">Guest</strong> &middot; WPA2-PSK &middot; VLAN <code>30</code> &rarr; Save</li>
+    <li>Add Wireless Network: <strong style="color:#e2e8f0">IoT</strong> &middot; WPA2-PSK &middot; VLAN <code>40</code> &rarr; Save</li>
+    <li>Monitor &rarr; Devices &rarr; Select both APs &rarr; <strong style="color:#e2e8f0">Actions &rarr; Assign Network Policy</strong> &rarr; 5320-Home-Policy</li>
+    <li>Click <strong style="color:#e2e8f0">Update Devices</strong> &rarr; APs reboot briefly &rarr; SSIDs broadcast</li>
+  </ol>
+
+  <h3>SSID to VLAN Mapping</h3>
+  <table>
+    <tr><th>SSID</th><th>Security</th><th>VLAN Tag</th><th>Switch VLAN</th></tr>
+    <tr><td>Corporate</td><td>WPA2-PSK</td><td>20</td><td>Corporate</td></tr>
+    <tr><td>Guest</td><td>WPA2-PSK</td><td>30</td><td>Guest</td></tr>
+    <tr><td>IoT</td><td>WPA2-PSK</td><td>40</td><td>IoT</td></tr>
+  </table>
+</section>
+
+<!-- GLOSSARY -->
+<section id="glossary">
+  <div class="phase-label">Reference</div>
+  <h2>Command Glossary</h2>
+
+  <h3>Switch CLI &mdash; EXOS SwitchEngine</h3>
+  <table>
+    <tr><th>Command</th><th>What It Does</th><th>Notes</th></tr>
+    <tr><td><code>show vlan</code></td><td>Lists all VLANs: name, VID, IP, flags, port counts</td><td>Quick overview</td></tr>
+    <tr><td><code>show vlan detail</code></td><td>Per-VLAN detail: exact port membership, tagged/untagged state</td><td>Use to verify port assignments</td></tr>
+    <tr><td><code>show port information</code></td><td>All ports: link state, VLAN count, enabled flags</td><td>Shows active/ready/NotPresent</td></tr>
+    <tr><td><code>configure vlan VLAN_0010 name Mgmt</code></td><td>Rename VLAN_0010 to Mgmt</td><td><strong style="color:#f87171">Trap:</strong> "Mgmt" locks VLAN to OOB port</td></tr>
+    <tr><td><code>configure vlan Corportate name Corporate</code></td><td>Rename a VLAN (typo fix)</td><td>Non-reserved names work fine</td></tr>
+    <tr><td><code>configure vlan Default delete ports 3</code></td><td>Remove port 3 from Default VLAN</td><td>Remove old untagged before adding new</td></tr>
+    <tr><td><code>configure vlan Default add ports 3 untagged</code></td><td>Add port 3 as untagged member of Default VLAN</td><td>One untagged VLAN per port maximum</td></tr>
+    <tr><td><code>configure vlan Corporate add ports 5 tagged</code></td><td>Add port 5 as tagged member of Corporate VLAN</td><td>Multiple tagged VLANs per port allowed</td></tr>
+    <tr><td><code>enable inline-power ports 3,5</code></td><td>Enable PoE on ports 3 and 5</td><td>Required for AP power delivery</td></tr>
+    <tr><td><code>show inline-power</code></td><td>System PoE summary &mdash; budget and current draw</td><td>180W total on 5320-16P</td></tr>
+    <tr><td><code>show inline-power info ports 3,5</code></td><td>Per-port PoE: state, class, voltage, current, watts</td><td>States: searching &rarr; delivering</td></tr>
+    <tr><td><code>show fdb ports 3</code></td><td>Show MAC addresses learned on port 3</td><td>Confirms device is connected at Layer 2</td></tr>
+    <tr><td><code>show iparp</code></td><td>Switch ARP table &mdash; IP-to-MAC mappings</td><td>Only shows IPs switch communicates with</td></tr>
+    <tr><td><code>show dhcp-server lease vlan Default</code></td><td>Would show DHCP leases if switch is DHCP server</td><td>Error &mdash; home router is DHCP server here</td></tr>
+    <tr><td><code>delete vlan Mgmt</code></td><td>Attempt to delete Mgmt VLAN</td><td>Error &mdash; system-protected OOB VLAN</td></tr>
+    <tr><td><code>show inline-power ?</code></td><td>Show available subcommands</td><td>Use <code>info</code> for per-port data</td></tr>
+  </table>
+
+  <h3>Mac Terminal Commands</h3>
+  <table>
+    <tr><th>Command</th><th>What It Does</th><th>Notes</th></tr>
+    <tr><td><code>ssh admin@192.168.0.24</code></td><td>SSH to switch</td><td>Fails on modern macOS &mdash; ssh-rsa dropped</td></tr>
+    <tr><td><code>ssh -o HostKeyAlgorithms=+ssh-rsa<br>-o PubkeyAcceptedAlgorithms=+ssh-rsa<br>admin@192.168.0.24</code></td><td>SSH with legacy key algorithm re-enabled</td><td>Fix for EXOS switches on modern macOS</td></tr>
+    <tr><td><code>arp -a</code></td><td>Show ARP cache &mdash; all IP-to-MAC mappings seen recently</td><td>Only shows devices Mac has communicated with</td></tr>
+    <tr><td><code>ping -c 3 192.168.0.255</code></td><td>Ping broadcast address, 3 packets</td><td>Triggers ARP replies from some devices</td></tr>
+    <tr><td><code>ping -c 3 192.168.0.26</code></td><td>Ping specific IP, send exactly 3 packets then stop</td><td><code>-c 3</code> = count; without it runs forever</td></tr>
+    <tr><td><code>brew install nmap</code></td><td>Install Network Mapper via Homebrew</td><td>One-time install</td></tr>
+    <tr><td><code>nmap -sn 192.168.0.0/24</code></td><td>Ping scan entire /24 subnet &mdash; find all live hosts</td><td><code>-sn</code> = no port scan, host discovery only</td></tr>
+  </table>
+</section>
+
+<footer>
+  <p>Generated March 26, 2026 &nbsp;&middot;&nbsp; Khursheed Khan &nbsp;&middot;&nbsp; Extreme Networks &nbsp;&middot;&nbsp; Built with Claude Code</p>
+  <div style="margin-top:10px">
+    <a href="index.html">&larr; Back to Docs Home</a>
+    <a href="session_summary_20260325.html">Session Summary Mar 25</a>
+    <a href="onboarding.html">5320 Onboarding Guide</a>
+  </div>
+</footer>
+
+</main>
+
+<script>
+// Sticky sidebar active link tracking
+const sections = document.querySelectorAll('section[id]');
+const navLinks = document.querySelectorAll('nav a');
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      navLinks.forEach(l => l.classList.remove('active'));
+      const active = document.querySelector('nav a[href="#' + entry.target.id + '"]');
+      if (active) active.classList.add('active');
+    }
+  });
+}, { rootMargin: '-20% 0px -75% 0px' });
+sections.forEach(s => observer.observe(s));
+</script>
+
+</body>
+</html>
