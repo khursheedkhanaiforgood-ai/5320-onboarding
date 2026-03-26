@@ -87,6 +87,7 @@ footer a:hover { text-decoration: underline; }
   <div class="nav-title">AP Onboarding<br>Mar 26, 2026</div>
   <a href="#overview">Overview &amp; Context</a>
   <a href="#flowchart">Session Flowchart</a>
+  <a href="#routing">Network Architecture</a>
   <a href="#ssh">1 &middot; SSH to Switch</a>
   <a href="#assessment">2 &middot; VLAN Assessment</a>
   <a href="#naming">3 &middot; VLAN Naming</a>
@@ -285,6 +286,162 @@ footer a:hover { text-decoration: underline; }
 </section>
 
 <!-- SSH -->
+<!-- ROUTING ARCHITECTURE -->
+<section id="routing">
+  <div class="phase-label">Network Design</div>
+  <h2>VLAN Routing &amp; DHCP Architecture</h2>
+
+  <p>Each wireless SSID maps to a VLAN. When a client connects, the AP tags its traffic with the VLAN ID and sends it to the 5320. The switch acts as the <strong style="color:#e2e8f0">gateway</strong> for each VLAN, runs the <strong style="color:#e2e8f0">DHCP server</strong> that assigns client IPs, and <strong style="color:#e2e8f0">routes</strong> traffic to the internet via the home router.</p>
+
+  <div class="flowchart">
+    <svg viewBox="0 0 860 480" width="100%" style="min-width:680px">
+      <defs>
+        <marker id="a2" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#475569"/></marker>
+        <marker id="a2g" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#34d399"/></marker>
+        <marker id="a2p" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#a78bfa"/></marker>
+        <marker id="a2a" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#f59e0b"/></marker>
+        <marker id="a2b" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#67e8f9"/></marker>
+      </defs>
+
+      <!-- ===== CLIENT DEVICES (left) ===== -->
+      <rect x="10" y="60" width="110" height="38" rx="5" fill="#1e293b" stroke="#475569" stroke-width="1"/>
+      <text x="65" y="74" text-anchor="middle" fill="#94a3b8" font-size="10" font-weight="600">📱 Phone / Laptop</text>
+      <text x="65" y="89" text-anchor="middle" fill="#64748b" font-size="9">Corporate client</text>
+
+      <rect x="10" y="190" width="110" height="38" rx="5" fill="#1e293b" stroke="#475569" stroke-width="1"/>
+      <text x="65" y="204" text-anchor="middle" fill="#94a3b8" font-size="10" font-weight="600">📱 Phone / Laptop</text>
+      <text x="65" y="219" text-anchor="middle" fill="#64748b" font-size="9">Guest client</text>
+
+      <rect x="10" y="320" width="110" height="38" rx="5" fill="#1e293b" stroke="#475569" stroke-width="1"/>
+      <text x="65" y="334" text-anchor="middle" fill="#94a3b8" font-size="10" font-weight="600">🔌 IoT Device</text>
+      <text x="65" y="349" text-anchor="middle" fill="#64748b" font-size="9">IoT client</text>
+
+      <!-- ===== AP3000 (center-left) ===== -->
+      <rect x="165" y="30" width="130" height="370" rx="8" fill="#0d1117" stroke="#334155" stroke-width="1.5"/>
+      <text x="230" y="52" text-anchor="middle" fill="#64748b" font-size="10" font-weight="700" text-decoration="underline">AP3000</text>
+
+      <!-- Corporate SSID -->
+      <rect x="175" y="62" width="110" height="36" rx="4" fill="#1e1035" stroke="#7c3aed" stroke-width="1.5"/>
+      <text x="230" y="76" text-anchor="middle" fill="#a78bfa" font-size="10" font-weight="600">Corporate SSID</text>
+      <text x="230" y="90" text-anchor="middle" fill="#7c3aed" font-size="9">WPA2 → tag VLAN 20</text>
+
+      <!-- Guest SSID -->
+      <rect x="175" y="192" width="110" height="36" rx="4" fill="#1a1200" stroke="#f59e0b" stroke-width="1.5"/>
+      <text x="230" y="206" text-anchor="middle" fill="#fcd34d" font-size="10" font-weight="600">Guest SSID</text>
+      <text x="230" y="220" text-anchor="middle" fill="#f59e0b" font-size="9">WPA2 → tag VLAN 30</text>
+
+      <!-- IoT SSID -->
+      <rect x="175" y="322" width="110" height="36" rx="4" fill="#052019" stroke="#10b981" stroke-width="1.5"/>
+      <text x="230" y="336" text-anchor="middle" fill="#34d399" font-size="10" font-weight="600">IoT SSID</text>
+      <text x="230" y="350" text-anchor="middle" fill="#10b981" font-size="9">WPA2 → tag VLAN 40</text>
+
+      <!-- Client → AP arrows -->
+      <line x1="120" y1="79" x2="175" y2="79" stroke="#7c3aed" stroke-width="1.5" marker-end="url(#a2p)"/>
+      <line x1="120" y1="209" x2="175" y2="209" stroke="#f59e0b" stroke-width="1.5" marker-end="url(#a2a)"/>
+      <line x1="120" y1="339" x2="175" y2="339" stroke="#10b981" stroke-width="1.5" marker-end="url(#a2g)"/>
+
+      <!-- AP trunk line -->
+      <line x1="285" y1="79" x2="330" y2="79" stroke="#7c3aed" stroke-width="1.5" marker-end="url(#a2p)"/>
+      <line x1="285" y1="209" x2="330" y2="209" stroke="#f59e0b" stroke-width="1.5" marker-end="url(#a2a)"/>
+      <line x1="285" y1="339" x2="330" y2="339" stroke="#10b981" stroke-width="1.5" marker-end="url(#a2g)"/>
+
+      <!-- Trunk label -->
+      <text x="307" y="168" text-anchor="middle" fill="#475569" font-size="8.5">802.1Q</text>
+      <text x="307" y="178" text-anchor="middle" fill="#475569" font-size="8.5">Trunk</text>
+
+      <!-- ===== 5320 SWITCH (center) ===== -->
+      <rect x="330" y="20" width="230" height="400" rx="8" fill="#0d1117" stroke="#a78bfa" stroke-width="2"/>
+      <text x="445" y="42" text-anchor="middle" fill="#a78bfa" font-size="11" font-weight="700">5320 Switch</text>
+      <text x="445" y="56" text-anchor="middle" fill="#475569" font-size="9">EXOS SwitchEngine 33.5.2</text>
+
+      <!-- VLAN 20 gateway box -->
+      <rect x="340" y="62" width="210" height="70" rx="5" fill="#1e1035" stroke="#7c3aed" stroke-width="1.5"/>
+      <text x="445" y="78" text-anchor="middle" fill="#a78bfa" font-size="10" font-weight="700">VLAN 20 — Corporate</text>
+      <text x="445" y="93" text-anchor="middle" fill="#64748b" font-size="9">Gateway: 10.20.0.1/24</text>
+      <text x="445" y="107" text-anchor="middle" fill="#64748b" font-size="9">DHCP Pool: 10.20.0.100 – 200</text>
+      <text x="445" y="121" text-anchor="middle" fill="#7c3aed" font-size="9">DNS: 8.8.8.8  Lease: 1hr</text>
+
+      <!-- VLAN 30 gateway box -->
+      <rect x="340" y="192" width="210" height="70" rx="5" fill="#1a1200" stroke="#f59e0b" stroke-width="1.5"/>
+      <text x="445" y="208" text-anchor="middle" fill="#fcd34d" font-size="10" font-weight="700">VLAN 30 — Guest</text>
+      <text x="445" y="223" text-anchor="middle" fill="#64748b" font-size="9">Gateway: 10.30.0.1/24</text>
+      <text x="445" y="237" text-anchor="middle" fill="#64748b" font-size="9">DHCP Pool: 10.30.0.100 – 200</text>
+      <text x="445" y="251" text-anchor="middle" fill="#f59e0b" font-size="9">DNS: 8.8.8.8  Lease: 1hr</text>
+
+      <!-- VLAN 40 gateway box -->
+      <rect x="340" y="322" width="210" height="70" rx="5" fill="#052019" stroke="#10b981" stroke-width="1.5"/>
+      <text x="445" y="338" text-anchor="middle" fill="#34d399" font-size="10" font-weight="700">VLAN 40 — IoT</text>
+      <text x="445" y="353" text-anchor="middle" fill="#64748b" font-size="9">Gateway: 10.40.0.1/24</text>
+      <text x="445" y="367" text-anchor="middle" fill="#64748b" font-size="9">DHCP Pool: 10.40.0.100 – 200</text>
+      <text x="445" y="381" text-anchor="middle" fill="#10b981" font-size="9">DNS: 8.8.8.8  Lease: 1hr</text>
+
+      <!-- IP Forwarding label inside switch -->
+      <rect x="355" y="152" width="180" height="30" rx="4" fill="#1e293b" stroke="#334155"/>
+      <text x="445" y="163" text-anchor="middle" fill="#94a3b8" font-size="9" font-weight="600">⇅ IP Forwarding Enabled</text>
+      <text x="445" y="176" text-anchor="middle" fill="#64748b" font-size="8.5">Routes between VLANs + to Default</text>
+
+      <rect x="355" y="282" width="180" height="30" rx="4" fill="#1e293b" stroke="#334155"/>
+      <text x="445" y="293" text-anchor="middle" fill="#94a3b8" font-size="9" font-weight="600">⇅ IP Forwarding Enabled</text>
+      <text x="445" y="306" text-anchor="middle" fill="#64748b" font-size="8.5">Routes between VLANs + to Default</text>
+
+      <!-- Default VLAN box at bottom of switch -->
+      <rect x="340" y="405" width="210" height="40" rx="5" fill="#1e293b" stroke="#67e8f9" stroke-width="1.5"/>
+      <text x="445" y="421" text-anchor="middle" fill="#67e8f9" font-size="10" font-weight="700">Default VLAN (1)</text>
+      <text x="445" y="436" text-anchor="middle" fill="#64748b" font-size="9">192.168.0.24 → port 1 uplink</text>
+
+      <!-- VLANs → Default VLAN (routing down) -->
+      <line x1="445" y1="132" x2="445" y2="152" stroke="#475569" stroke-width="1" stroke-dasharray="3,2"/>
+      <line x1="445" y1="262" x2="445" y2="282" stroke="#475569" stroke-width="1" stroke-dasharray="3,2"/>
+      <line x1="445" y1="392" x2="445" y2="405" stroke="#475569" stroke-width="1" stroke-dasharray="3,2"/>
+
+      <!-- ===== HOME ROUTER (right) ===== -->
+      <rect x="610" y="185" width="130" height="60" rx="8" fill="#1e293b" stroke="#67e8f9" stroke-width="2"/>
+      <text x="675" y="206" text-anchor="middle" fill="#67e8f9" font-size="11" font-weight="700">Home Router</text>
+      <text x="675" y="221" text-anchor="middle" fill="#94a3b8" font-size="9">192.168.0.1</text>
+      <text x="675" y="235" text-anchor="middle" fill="#64748b" font-size="9">NAT / Default GW</text>
+
+      <!-- Switch Default → Router -->
+      <line x1="560" y1="425" x2="675" y2="425" stroke="#67e8f9" stroke-width="1.5"/>
+      <line x1="675" y1="425" x2="675" y2="245" stroke="#67e8f9" stroke-width="1.5" marker-end="url(#a2b)"/>
+      <text x="617" y="418" text-anchor="middle" fill="#475569" font-size="8.5">192.168.0.0/24</text>
+      <text x="617" y="430" text-anchor="middle" fill="#475569" font-size="8.5">default route</text>
+
+      <!-- ===== INTERNET (far right) ===== -->
+      <rect x="610" y="60" width="130" height="60" rx="8" fill="#1e293b" stroke="#34d399" stroke-width="2"/>
+      <text x="675" y="82" text-anchor="middle" fill="#34d399" font-size="11" font-weight="700">🌐 Internet</text>
+      <text x="675" y="97" text-anchor="middle" fill="#94a3b8" font-size="9">XIQ Cloud</text>
+      <text x="675" y="111" text-anchor="middle" fill="#64748b" font-size="9">DNS / Services</text>
+
+      <!-- Router → Internet -->
+      <line x1="675" y1="185" x2="675" y2="120" stroke="#34d399" stroke-width="2" marker-end="url(#a2g)"/>
+      <text x="688" y="158" fill="#475569" font-size="8.5">NAT</text>
+
+      <!-- Legend -->
+      <rect x="10" y="420" width="310" height="55" rx="4" fill="#0d1117" stroke="#1e293b"/>
+      <text x="20" y="436" fill="#475569" font-size="9" font-weight="700">DATA FLOW</text>
+      <line x1="20" y1="448" x2="45" y2="448" stroke="#7c3aed" stroke-width="2"/>
+      <text x="50" y="452" fill="#64748b" font-size="9">Corporate (VLAN 20)</text>
+      <line x1="20" y1="463" x2="45" y2="463" stroke="#f59e0b" stroke-width="2"/>
+      <text x="50" y="467" fill="#64748b" font-size="9">Guest (VLAN 30)</text>
+      <line x1="160" y1="448" x2="185" y2="448" stroke="#10b981" stroke-width="2"/>
+      <text x="190" y="452" fill="#64748b" font-size="9">IoT (VLAN 40)</text>
+      <line x1="160" y1="463" x2="185" y2="463" stroke="#67e8f9" stroke-width="2"/>
+      <text x="190" y="467" fill="#64748b" font-size="9">Default / Uplink</text>
+    </svg>
+  </div>
+
+  <h3>How the Data Flow Works</h3>
+  <table>
+    <tr><th>Step</th><th>What Happens</th></tr>
+    <tr><td>1. Client associates</td><td>Phone/laptop connects to Corporate, Guest, or IoT SSID on the AP3000</td></tr>
+    <tr><td>2. AP tags traffic</td><td>AP3000 tags all frames from that client with the VLAN ID (20, 30, or 40) and sends them tagged up the trunk to port 3 or 5</td></tr>
+    <tr><td>3. DHCP request</td><td>Client broadcasts DHCP Discover — switch intercepts it on the correct VLAN interface and responds from its built-in DHCP server</td></tr>
+    <tr><td>4. IP assigned</td><td>Switch assigns the client an IP from the pool (e.g. 10.30.0.105 for a Guest client) with gateway 10.30.0.1 and DNS 8.8.8.8</td></tr>
+    <tr><td>5. Routing</td><td>Client sends traffic to its default gateway (10.30.0.1 = switch VLAN 30 interface). Switch routes to Default VLAN and forwards out port 1</td></tr>
+    <tr><td>6. NAT to internet</td><td>Home router receives traffic, NATs the source IP to its WAN IP, and forwards to internet</td></tr>
+  </table>
+</section>
+
 <section id="ssh">
   <div class="phase-label">Phase 1</div>
   <h2>SSH to the Switch</h2>
