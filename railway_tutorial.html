@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>5320 Agent — Railway Deployment Tutorial</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Segoe UI',Arial,sans-serif;background:#0f172a;color:#e2e8f0;display:flex;min-height:100vh}
+
+  /* Sidebar */
+  nav{width:260px;min-width:260px;background:#1e293b;border-right:1px solid #334155;padding:0;position:sticky;top:0;height:100vh;overflow-y:auto;display:flex;flex-direction:column;flex-shrink:0}
+  .nav-logo{padding:20px 20px 16px;border-bottom:1px solid #334155}
+  .nav-logo h1{font-size:0.88rem;color:#fcd34d;line-height:1.45;font-weight:700}
+  .nav-logo p{font-size:0.7rem;color:#64748b;margin-top:3px}
+  .nav-label{padding:14px 20px 3px;font-size:0.65rem;text-transform:uppercase;letter-spacing:0.1em;color:#475569;font-weight:700}
+  nav a{display:block;padding:7px 20px;font-size:0.8rem;color:#94a3b8;text-decoration:none;border-left:3px solid transparent;transition:all .15s;line-height:1.4}
+  nav a:hover{color:#e2e8f0;background:#0f172a}
+  nav a.active{color:#fcd34d;border-left-color:#f59e0b;background:#0f172a}
+  nav a.sub{padding-left:30px;font-size:0.76rem}
+  .nav-refs{margin-top:auto;padding:14px 20px;border-top:1px solid #334155}
+  .nav-refs p{font-size:0.7rem;color:#64748b;margin-bottom:5px}
+  .nav-refs a{display:inline;padding:0;border:none;font-size:0.73rem;color:#60a5fa;text-decoration:none}
+  .nav-refs a:hover{text-decoration:underline}
+
+  /* Main */
+  main{flex:1;padding:44px 60px 80px;overflow-x:hidden;max-width:1000px}
+
+  .page-header{margin-bottom:44px;padding-bottom:22px;border-bottom:2px solid #f59e0b}
+  .page-header h1{font-size:1.7rem;color:#fcd34d;margin-bottom:8px}
+  .page-header .meta{font-size:0.82rem;color:#64748b;display:flex;gap:20px;flex-wrap:wrap}
+  .page-header .meta span{display:flex;align-items:center;gap:5px}
+
+  section{margin-bottom:60px}
+  h2{font-size:1.15rem;color:#fcd34d;margin-bottom:20px;padding-bottom:10px;border-bottom:1px solid #44330a;display:flex;align-items:center;gap:10px}
+  h2 .sec-num{background:#f59e0b;color:#0f172a;border-radius:6px;padding:2px 9px;font-size:0.78rem;font-weight:800}
+  h3{font-size:0.95rem;color:#e2e8f0;margin:20px 0 10px}
+  p{color:#94a3b8;font-size:0.88rem;line-height:1.75;margin-bottom:12px}
+  ul,ol{color:#94a3b8;font-size:0.88rem;line-height:1.75;padding-left:20px;margin-bottom:12px}
+  li{margin-bottom:5px}
+  strong{color:#e2e8f0}
+  a{color:#60a5fa;text-decoration:none}
+  a:hover{text-decoration:underline}
+
+  pre{background:#0d1117;border:1px solid #334155;border-radius:8px;padding:14px 18px;margin:12px 0;font-family:'SF Mono','Fira Code',monospace;font-size:0.8rem;color:#a5f3fc;line-height:1.6;overflow-x:auto;white-space:pre-wrap}
+  code{font-family:'SF Mono','Fira Code',monospace;font-size:0.8rem;background:#1e293b;color:#fcd34d;padding:2px 6px;border-radius:4px}
+
+  /* Chat bubbles */
+  .chat{display:flex;flex-direction:column;gap:18px;margin:24px 0}
+  .bubble{border-radius:12px;padding:16px 20px;max-width:100%;position:relative}
+  .bubble-you{background:#1c1506;border:1px solid #92400e;border-radius:12px 12px 12px 2px}
+  .bubble-you .avatar{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+  .bubble-you .avatar .av{background:#f59e0b;color:#0f172a;border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:800;flex-shrink:0}
+  .bubble-you .label{font-size:0.7rem;font-weight:700;color:#d97706;text-transform:uppercase;letter-spacing:0.07em}
+  .bubble-you .num{font-size:0.68rem;color:#92400e;margin-left:auto}
+  .bubble-you p{color:#fde68a;font-size:0.88rem;line-height:1.7;margin:0}
+  .bubble-cc{background:#1e293b;border:1px solid #334155;border-radius:12px 12px 2px 12px}
+  .bubble-cc .avatar{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+  .bubble-cc .avatar .av{background:#f59e0b;color:#0f172a;border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:800;flex-shrink:0}
+  .bubble-cc .label{font-size:0.7rem;font-weight:700;color:#f59e0b;text-transform:uppercase;letter-spacing:0.07em}
+  .bubble-cc p{color:#94a3b8;font-size:0.88rem;line-height:1.75;margin-bottom:8px}
+  .bubble-cc p:last-child{margin-bottom:0}
+  .bubble-cc ul{color:#94a3b8;font-size:0.88rem;line-height:1.75;padding-left:18px;margin-bottom:8px}
+  .bubble-cc code{background:#0d1117;color:#fcd34d}
+  .bubble-cc pre{margin:8px 0}
+
+  /* Phase divider */
+  .phase-divider{background:linear-gradient(90deg,#f59e0b,#d97706);color:#0f172a;font-size:0.78rem;font-weight:800;text-transform:uppercase;letter-spacing:0.12em;padding:8px 20px;border-radius:6px;margin:36px 0 8px;display:inline-block}
+
+  /* Arch table */
+  .arch-table{width:100%;border-collapse:collapse;margin:14px 0;font-size:0.85rem}
+  .arch-table th{background:#1c1506;color:#fcd34d;text-align:left;padding:10px 14px;border-bottom:2px solid #44330a}
+  .arch-table td{padding:9px 14px;border-bottom:1px solid #1e293b;color:#94a3b8;vertical-align:top}
+  .arch-table td:first-child{color:#fcd34d;font-family:'SF Mono',monospace;font-size:0.8rem;white-space:nowrap}
+
+  /* Why table */
+  .why-table td:first-child{color:#94a3b8;font-family:inherit;font-size:0.85rem}
+  .yes{color:#34d399!important;font-weight:700}
+  .no{color:#f87171!important}
+
+  @media print{
+    nav{display:none!important}
+    body{background:#fff;color:#111;display:block}
+    main{padding:20px;max-width:100%}
+    h2{color:#b45309!important;border-color:#b45309!important}
+    .bubble-you{background:#fef3c7;border-color:#d97706}
+    .bubble-you p{color:#111}
+    .bubble-cc{background:#f8fafc;border-color:#cbd5e1}
+    .bubble-cc p,.bubble-cc li{color:#111}
+    pre{background:#f1f5f9!important;color:#111!important}
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">
+    <h1>Railway Deployment<br>Tutorial</h1>
+    <p>5320 Onboarding Agent — Cloud Build</p>
+  </div>
+  <div class="nav-label">Sections</div>
+  <a href="#why">1. Why Railway?</a>
+  <a href="#architecture">2. Architecture</a>
+  <a href="#files">3. What Was Built</a>
+  <a href="#build">4. Build Journey</a>
+  <a class="sub" href="#phase1">Phase 1 — Design</a>
+  <a class="sub" href="#phase2">Phase 2 — Code</a>
+  <a class="sub" href="#phase3">Phase 3 — Deploy</a>
+  <a href="#deploy-steps">5. Deploy Steps</a>
+  <a href="#running">6. Running Today</a>
+  <div class="nav-refs">
+    <p>Part of the 5320 docs</p>
+    <a href="index.html">&#8592; Docs Home</a><br><br>
+    <a href="agent_tutorial.html">Agent Build Tutorial &#8599;</a>
+  </div>
+</nav>
+
+<main>
+
+  <div class="page-header">
+    <h1>Railway Deployment Tutorial</h1>
+    <div class="meta">
+      <span>&#128197; March 25, 2026</span>
+      <span>&#129302; Built with Claude Code</span>
+      <span>&#9729; Railway &bull; FastAPI &bull; WebSocket</span>
+    </div>
+  </div>
+
+  <!-- ── 1. WHY ── -->
+  <section id="why">
+    <h2><span class="sec-num">1</span> Why Railway?</h2>
+    <p>The original agent runs entirely on a local Mac — the operator reads instructions in a terminal and types commands in a screen session. This works perfectly for a solo operator. But it has one hard limit: <strong>only the person holding the Mac can see what's happening.</strong></p>
+    <p>Railway unlocks the use case where a field tech is physically at the switch site and an engineer needs to guide them remotely — or where a manager needs to observe a live onboarding session from a browser.</p>
+    <table class="arch-table why-table">
+      <tr><th>Scenario</th><th>Local</th><th>Railway</th></tr>
+      <tr><td>Solo operator, own Mac</td><td class="yes">✓ Perfect</td><td class="no">Overkill</td></tr>
+      <tr><td>Manager watches live from browser</td><td class="no">✗</td><td class="yes">✓</td></tr>
+      <tr><td>Field tech onsite, engineer remote</td><td class="no">✗</td><td class="yes">✓</td></tr>
+      <tr><td>No API key needed by field tech</td><td class="no">✗ Each user needs one</td><td class="yes">✓ One key on server</td></tr>
+      <tr><td>Audit trail — central session log</td><td class="no">✗ Local only</td><td class="yes">✓ Visible to all</td></tr>
+    </table>
+  </section>
+
+  <!-- ── 2. ARCHITECTURE ── -->
+  <section id="architecture">
+    <h2><span class="sec-num">2</span> Architecture</h2>
+    <p>The key insight: you cannot access a physical USB serial port from a cloud server. The solution is a <strong>hybrid architecture</strong> — a tiny local bridge script handles the serial I/O, and everything else (state machine, Claude API, web UI) runs on Railway.</p>
+    <pre>
+User's Mac (field tech)              Railway (cloud)
+─────────────────────────            ──────────────────────────────
+bridge.py                            FastAPI server
+  ├── opens /dev/cu.usbserial-*       ├── session_manager.py
+  ├── reads serial @ 115200 baud      │     ├── StateMachine (20 states)
+  ├── streams lines → wss://          │     ├── ConsoleAnalyzer (Claude API)
+  └── writes commands ← wss://        │     └── HTML report builder
+                                      ├── /ws/bridge  (bridge endpoint)
+                                      ├── /ws/ui      (browser endpoint)
+                                      └── static/     (web UI)
+                                            ├── index.html
+                                            ├── style.css
+                                            └── app.js
+
+Browser (engineer / observer)
+  └── opens https://app.railway.app
+        ├── Left pane: live switch console
+        ├── Right pane: agent instructions
+        └── Prompts: yes/no buttons for XIQ confirm etc.
+    </pre>
+
+    <h3>WebSocket Message Protocol</h3>
+    <table class="arch-table">
+      <tr><th>Direction</th><th>Message Type</th><th>Purpose</th></tr>
+      <tr><td>Bridge → Server</td><td>serial_line</td><td>One decoded line from the switch console</td></tr>
+      <tr><td>Bridge → Server</td><td>bridge_hello</td><td>Identifies the bridge (hostname, port, baud)</td></tr>
+      <tr><td>Server → Bridge</td><td>serial_send</td><td>Command to write to the serial port</td></tr>
+      <tr><td>Server → UI</td><td>console_line</td><td>Forward serial line to browser</td></tr>
+      <tr><td>Server → UI</td><td>instruction</td><td>Claude's action/command/explanation</td></tr>
+      <tr><td>Server → UI</td><td>state_update</td><td>Current state machine state</td></tr>
+      <tr><td>Server → UI</td><td>prompt</td><td>Ask operator a yes/no question</td></tr>
+      <tr><td>Server → UI</td><td>report_ready</td><td>HTML report as download blob</td></tr>
+      <tr><td>UI → Server</td><td>prompt_response</td><td>Operator's answer to a prompt</td></tr>
+      <tr><td>UI → Server</td><td>manual_command</td><td>Command typed in the browser input bar</td></tr>
+    </table>
+  </section>
+
+  <!-- ── 3. FILES ── -->
+  <section id="files">
+    <h2><span class="sec-num">3</span> What Was Built</h2>
+    <table class="arch-table">
+      <tr><th>File</th><th>What it does</th></tr>
+      <tr><td>bridge/bridge.py</td><td>~150 lines. Auto-detects serial port, opens pyserial, streams lines to Railway via WebSocket, writes received commands back to switch. Auto-reconnects with exponential backoff.</td></tr>
+      <tr><td>bridge/requirements.txt</td><td>Two packages only: <code>pyserial</code> + <code>websockets</code></td></tr>
+      <tr><td>server/app.py</td><td>FastAPI entry point. Mounts <code>/ws/bridge</code> and <code>/ws/ui</code> WebSocket endpoints, serves static files, validates bridge token.</td></tr>
+      <tr><td>server/config.py</td><td>Reads <code>ANTHROPIC_API_KEY</code> and <code>BRIDGE_TOKEN</code> from Railway env vars.</td></tr>
+      <tr><td>server/serial_proxy.py</td><td>Abstraction layer. Provides the same <code>get_lines()</code> / <code>get_raw_buffer()</code> interface as the original <code>LogfileMonitor</code> — so session_manager doesn't care that I/O goes over a network.</td></tr>
+      <tr><td>server/session_manager.py</td><td>Async port of <code>main.py</code>. <code>time.sleep()</code> → <code>await asyncio.sleep()</code>. <code>click.prompt()</code> → WebSocket prompt messages. <code>screen -X stuff</code> → <code>serial_proxy.send_command()</code>. HTML report sent as download blob instead of saved to local disk.</td></tr>
+      <tr><td>server/static/index.html</td><td>Two-pane web UI. Left: scrolling console. Right: instruction card + prompt area.</td></tr>
+      <tr><td>server/static/app.js</td><td>Vanilla JS WebSocket client. Handles all message types, renders instruction cards, shows prompt buttons, generates report download blob.</td></tr>
+      <tr><td>server/static/style.css</td><td>Dark theme matching the existing config report style.</td></tr>
+      <tr><td>railway.toml</td><td>Tells Railway: <code>uvicorn server.app:app --host 0.0.0.0 --port $PORT</code></td></tr>
+      <tr><td>requirements.txt (root)</td><td>Copy of server requirements at repo root — required for Nixpacks auto-detection.</td></tr>
+    </table>
+  </section>
+
+  <!-- ── 4. BUILD JOURNEY ── -->
+  <section id="build">
+    <h2><span class="sec-num">4</span> Build Journey</h2>
+    <p>The entire Railway feature was built in a single Claude Code session on March 25, 2026. Here is every prompt and what happened.</p>
+
+    <div class="phase-divider">Phase 1 — Design Decision</div>
+    <div class="chat">
+      <div class="bubble bubble-you">
+        <div class="avatar"><div class="av">K</div><span class="label">Khursheed Khan</span><span class="num">#1</span></div>
+        <p>Now, I am wondering, for those who cannot or do not or may not be able to create this agent on their mac. Can you create a branch of this program and use my railway to publish online? Meaning, can this agent be run online and somehow be able to capture whatever is connected to the console on the user's mac?</p>
+      </div>
+      <div class="bubble bubble-cc">
+        <div class="avatar"><div class="av">C</div><span class="label">Claude Code</span></div>
+        <p>Gave an honest answer before building: the serial port is physical hardware — no cloud server can reach a USB device plugged into someone's laptop. Proposed a hybrid architecture where a tiny <code>bridge.py</code> on the Mac handles serial I/O and everything else (state machine, Claude API, web UI) runs on Railway. Presented a comparison table showing when Railway adds value vs. when local is simpler. Asked if the user wanted to proceed.</p>
+      </div>
+
+      <div class="bubble bubble-you">
+        <div class="avatar"><div class="av">K</div><span class="label">Khursheed Khan</span><span class="num">#2</span></div>
+        <p>Yes pls</p>
+      </div>
+      <div class="bubble bubble-cc">
+        <div class="avatar"><div class="av">C</div><span class="label">Claude Code</span></div>
+        <p>Invoked the <code>planner</code> agent first to design the full 8-phase architecture before writing a single line of code. The plan covered: file structure, WebSocket message protocol (10 message types), which existing modules to reuse vs rewrite, bridge reconnection strategy, pagination handling, Railway deployment config, and edge cases (port busy, multi-client, long firmware downloads).</p>
+      </div>
+    </div>
+
+    <div class="phase-divider">Phase 2 — Code</div>
+    <div class="chat">
+      <div class="bubble bubble-cc">
+        <div class="avatar"><div class="av">C</div><span class="label">Claude Code — What was built</span></div>
+        <p>Created <code>feature/railway</code> branch. Built all 18 files in sequence:</p>
+        <ul>
+          <li>Directory structure: <code>bridge/</code>, <code>server/</code>, <code>server/agent/</code>, <code>server/static/</code></li>
+          <li>Copied <code>state_machine.py</code>, <code>patterns.py</code>, <code>console_analyzer.py</code> into <code>server/agent/</code> and fixed imports to relative paths</li>
+          <li><code>bridge/bridge.py</code> — serial reader thread + async WebSocket sender/receiver + exponential backoff reconnection</li>
+          <li><code>server/serial_proxy.py</code> — <code>asyncio.Queue</code> + rolling deque, same interface as <code>LogfileMonitor</code></li>
+          <li><code>server/session_manager.py</code> — full async port of <code>main.py</code>; all <code>time.sleep</code> → <code>await asyncio.sleep</code>, all <code>click.prompt</code> → WebSocket prompt messages with <code>asyncio.Event</code> awaiting responses</li>
+          <li><code>server/app.py</code> — FastAPI with <code>/ws/bridge</code> (token-authenticated) and <code>/ws/ui</code> endpoints; shared <code>SessionManager</code> singleton</li>
+          <li><code>server/static/</code> — two-pane dark-themed vanilla JS web UI</li>
+          <li><code>railway.toml</code> + <code>Procfile</code> + <code>railway.json</code></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="phase-divider">Phase 3 — Deploy Debugging</div>
+    <div class="chat">
+      <div class="bubble bubble-you">
+        <div class="avatar"><div class="av">K</div><span class="label">Khursheed Khan</span><span class="num">#3</span></div>
+        <p>Are you testing them before you commit to Git and before it is picked up by Railway?</p>
+      </div>
+      <div class="bubble bubble-cc">
+        <div class="avatar"><div class="av">C</div><span class="label">Claude Code</span></div>
+        <p>Honest answer: No — Docker and nixpacks CLI were not installed locally, so the Railway build environment could not be simulated. Three failed deployments resulted from guessing at the Nixpacks environment:</p>
+        <ul>
+          <li><strong>Attempt 1:</strong> <code>railway.json</code> with custom install phase → <em>Railpack: no start command detected</em></li>
+          <li><strong>Attempt 2:</strong> <code>nixpacks.toml</code> → ignored by Railway</li>
+          <li><strong>Attempt 3:</strong> <code>railway.toml</code> with <code>pip install</code> → <em>pip: command not found</em></li>
+          <li><strong>Attempt 4:</strong> <code>pip3</code> → <em>pip3: command not found</em></li>
+          <li><strong>Attempt 5:</strong> <code>/opt/venv/bin/pip</code> → still failed</li>
+          <li><strong>Fix:</strong> removed custom install phase entirely, copied <code>requirements.txt</code> to repo root so Nixpacks auto-detected it, kept only <code>startCommand</code> in <code>railway.toml</code>. Build succeeded.</li>
+        </ul>
+        <p><strong>Lesson:</strong> Nixpacks works best when you let it auto-detect. Override only the start command, not the install phase.</p>
+      </div>
+
+      <div class="bubble bubble-you">
+        <div class="avatar"><div class="av">K</div><span class="label">Khursheed Khan</span><span class="num">#4</span></div>
+        <p>Successful deployment, now where is the webpage from Railway?</p>
+      </div>
+      <div class="bubble bubble-cc">
+        <div class="avatar"><div class="av">C</div><span class="label">Claude Code</span></div>
+        <p>Instructed: Railway project → service → <strong>Settings → Networking → Generate Domain</strong>. Railway provides a public HTTPS URL. The web UI is then accessible at that URL from any browser.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── 5. DEPLOY STEPS ── -->
+  <section id="deploy-steps">
+    <h2><span class="sec-num">5</span> Deploy Steps — Complete Reference</h2>
+
+    <h3>Server (Admin — done once)</h3>
+    <ol>
+      <li>Go to <strong>railway.app</strong> → New Project → Deploy from GitHub</li>
+      <li>Select repo <code>khursheedkhanaiforgood-ai/5320-onboarding</code>, branch <strong>feature/railway</strong></li>
+      <li>Railway → service → <strong>Variables</strong> → add <code>ANTHROPIC_API_KEY</code> and <code>BRIDGE_TOKEN</code></li>
+      <li>Railway → service → <strong>Settings → Networking → Generate Domain</strong></li>
+      <li>Share the URL and <code>BRIDGE_TOKEN</code> value with field techs</li>
+    </ol>
+
+    <h3>Bridge (Field Tech — run per session)</h3>
+    <pre>pip install pyserial websockets
+python3 bridge/bridge.py --server wss://YOUR-APP.railway.app --token YOUR_TOKEN</pre>
+
+    <h3>Observer (Engineer — any browser)</h3>
+    <pre>https://YOUR-APP.railway.app</pre>
+  </section>
+
+  <!-- ── 6. RUNNING TODAY ── -->
+  <section id="running">
+    <h2><span class="sec-num">6</span> Running Today</h2>
+    <p>The Railway deployment is live at:</p>
+    <pre>https://5320-onboarding-production.up.railway.app</pre>
+    <p>To connect a switch session:</p>
+    <pre>pip install pyserial websockets
+python3 ~/5320-onboarding/bridge/bridge.py \
+  --server wss://5320-onboarding-production.up.railway.app \
+  --token 5320bridge</pre>
+    <div style="margin-top:8px;background:#1c1506;border:1px solid #92400e;border-radius:8px;padding:14px 18px">
+      <p style="color:#fcd34d;font-size:0.85rem;margin:0"><strong>Note:</strong> Change the <code>BRIDGE_TOKEN</code> set to <code>5320bridge</code> — update this if you ever rotate the token in Railway → Variables.</p>
+    </div>
+
+    <div style="margin-top:48px;padding-top:20px;border-top:1px solid #44330a;text-align:center">
+      <p style="color:#475569;font-size:0.78rem">Built with Claude Code — March 25, 2026 &nbsp;|&nbsp;
+        <a href="deploy.html#tab-railway" style="color:#f59e0b">Deployment Guide &#8599;</a>
+        &nbsp;|&nbsp; <a href="agent_tutorial.html" style="color:#a78bfa">Agent Build Tutorial &#8599;</a>
+        &nbsp;|&nbsp; <a href="index.html" style="color:#60a5fa">Docs Home</a></p>
+    </div>
+  </section>
+
+</main>
+
+<script>
+  const sections = document.querySelectorAll('section[id]');
+  const navLinks = document.querySelectorAll('nav a[href^="#"]');
+  window.addEventListener('scroll', () => {
+    let current = '';
+    sections.forEach(s => { if (window.scrollY >= s.offsetTop - 80) current = s.id; });
+    navLinks.forEach(a => {
+      a.classList.toggle('active', a.getAttribute('href') === '#' + current);
+    });
+  }, { passive: true });
+</script>
+</body>
+</html>

@@ -1,0 +1,1415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>5320 Onboarding Agent — Build Tutorial</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Segoe UI',Arial,sans-serif;background:#0f172a;color:#e2e8f0;display:flex;min-height:100vh}
+
+  /* ── Sidebar ── */
+  nav{width:268px;min-width:268px;background:#1e293b;border-right:1px solid #334155;padding:0;position:sticky;top:0;height:100vh;overflow-y:auto;display:flex;flex-direction:column;flex-shrink:0}
+  .nav-logo{padding:20px 20px 16px;border-bottom:1px solid #334155}
+  .nav-logo h1{font-size:0.92rem;color:#a78bfa;line-height:1.45;font-weight:700}
+  .nav-logo p{font-size:0.7rem;color:#64748b;margin-top:3px}
+  .nav-label{padding:14px 20px 3px;font-size:0.65rem;text-transform:uppercase;letter-spacing:0.1em;color:#475569;font-weight:700}
+  nav a{display:block;padding:7px 20px;font-size:0.8rem;color:#94a3b8;text-decoration:none;border-left:3px solid transparent;transition:all .15s;line-height:1.4}
+  nav a:hover{color:#e2e8f0;background:#0f172a}
+  nav a.active{color:#a78bfa;border-left-color:#7c3aed;background:#0f172a}
+  nav a.sub{padding-left:30px;font-size:0.76rem}
+  .nav-refs{margin-top:auto;padding:14px 20px;border-top:1px solid #334155}
+  .nav-refs p{font-size:0.7rem;color:#64748b;margin-bottom:5px}
+  .nav-refs a{display:inline;padding:0;border:none;font-size:0.73rem;color:#60a5fa;text-decoration:none}
+  .nav-refs a:hover{text-decoration:underline}
+
+  /* ── Main ── */
+  main{flex:1;padding:44px 60px 80px;overflow-x:hidden;max-width:1000px}
+
+  /* Page header */
+  .page-header{margin-bottom:44px;padding-bottom:22px;border-bottom:2px solid #7c3aed}
+  .page-header h1{font-size:1.9rem;color:#a78bfa;margin-bottom:6px}
+  .page-header .sub{color:#94a3b8;font-size:0.95rem;line-height:1.65;max-width:720px}
+  .page-header .ref-row{margin-top:14px;display:flex;gap:18px;flex-wrap:wrap}
+  .page-header .ref-row a{font-size:0.8rem;color:#60a5fa;text-decoration:none}
+  .page-header .ref-row a:hover{text-decoration:underline}
+
+  /* Sections */
+  section{margin-bottom:56px}
+  h2{font-size:1.3rem;color:#a78bfa;margin-bottom:18px;padding-bottom:8px;border-bottom:1px solid #1e293b}
+  h3{font-size:0.97rem;color:#7dd3fc;margin:26px 0 10px;font-weight:600}
+  p{color:#cbd5e1;line-height:1.7;margin-bottom:12px;font-size:0.91rem}
+  ul,ol{padding-left:22px;margin-bottom:14px}
+  li{color:#cbd5e1;line-height:1.7;font-size:0.91rem;margin-bottom:4px}
+  strong{color:#e2e8f0}
+  code{background:#1e293b;border:1px solid #334155;border-radius:3px;padding:1px 6px;font-family:'Fira Mono','Courier New',monospace;font-size:0.8rem;color:#7dd3fc}
+  pre{background:#0a0f1e;border:1px solid #334155;border-radius:6px;padding:16px 20px;font-family:'Fira Mono','Courier New',monospace;font-size:0.8rem;color:#7dd3fc;white-space:pre-wrap;word-break:break-word;line-height:1.6;margin-bottom:16px;overflow-x:auto}
+  table{border-collapse:collapse;width:100%;margin-bottom:20px;font-size:0.87rem}
+  th{background:#1e293b;color:#a78bfa;padding:10px 14px;text-align:left;font-size:0.76rem;text-transform:uppercase;letter-spacing:.05em;border-bottom:2px solid #334155}
+  td{padding:9px 14px;border-bottom:1px solid #1e293b;color:#cbd5e1;vertical-align:top}
+  tr:hover td{background:rgba(30,41,59,.35)}
+
+  /* Principle card */
+  .card{background:#1e293b;border:1px solid #334155;border-radius:8px;padding:18px 20px;margin-bottom:14px}
+  .card.p{border-left:4px solid #7c3aed}
+  .card h4{color:#a78bfa;font-size:0.9rem;margin-bottom:6px;font-weight:600}
+
+  /* Phase badge */
+  .phase{display:inline-block;background:#7c3aed;color:#fff;font-size:0.7rem;font-weight:700;padding:3px 10px;border-radius:10px;margin-right:8px;vertical-align:middle}
+
+  /* Tags */
+  .tag{display:inline-block;border:1px solid;border-radius:10px;font-size:0.68rem;padding:1px 8px;margin-right:4px}
+  .tag.fix{background:#1c1f08;border-color:#a3e635;color:#a3e635}
+  .tag.arch{background:#0f1c2e;border-color:#60a5fa;color:#60a5fa}
+  .tag.ux{background:#1c0f2e;border-color:#c4b5fd;color:#c4b5fd}
+
+  /* ── Conversation cards ── */
+  .exchange{margin-bottom:32px}
+
+  /* User bubble */
+  .user-bubble{display:flex;align-items:flex-start;gap:12px;margin-bottom:10px}
+  .user-avatar{flex-shrink:0;width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#f59e0b,#d97706);display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:700;color:#fff}
+  .user-meta{flex:1}
+  .user-header{display:flex;align-items:baseline;gap:8px;margin-bottom:4px}
+  .user-name{font-size:0.75rem;font-weight:700;color:#f59e0b;text-transform:uppercase;letter-spacing:.05em}
+  .prompt-num{font-size:0.7rem;color:#78716c;background:#1c1708;border:1px solid #44403c;padding:1px 7px;border-radius:8px}
+  .user-text{background:#1c1a0f;border:1px solid #44403c;border-radius:4px 12px 12px 12px;padding:12px 16px;color:#fde68a;font-size:0.9rem;line-height:1.65}
+
+  /* Claude response bubble */
+  .claude-bubble{display:flex;align-items:flex-start;gap:12px;margin-left:24px}
+  .claude-avatar{flex-shrink:0;width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#7c3aed,#4f46e5);display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:700;color:#fff}
+  .claude-meta{flex:1}
+  .claude-header{display:flex;align-items:baseline;gap:8px;margin-bottom:4px;flex-wrap:wrap}
+  .claude-name{font-size:0.75rem;font-weight:700;color:#a78bfa;text-transform:uppercase;letter-spacing:.05em}
+  .claude-body{background:#12192b;border:1px solid #334155;border-radius:4px 12px 12px 12px;padding:14px 18px}
+  .claude-body h4{color:#86efac;font-size:0.75rem;text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;font-weight:700}
+  .claude-body ul{padding-left:18px;margin-bottom:0}
+  .claude-body li{color:#cbd5e1;line-height:1.7;font-size:0.88rem;margin-bottom:6px}
+  .claude-body li strong{color:#e2e8f0}
+  .claude-body code{font-size:0.78rem}
+
+  /* Divider between phases */
+  .phase-divider{display:flex;align-items:center;gap:12px;margin:40px 0 28px}
+  .phase-divider::before,.phase-divider::after{content:'';flex:1;height:1px;background:#1e293b}
+
+  /* ── Print / PDF ── */
+  @media print {
+    nav { display: none !important; }
+    body { background: #fff; color: #111; display: block; }
+    main { padding: 20px; max-width: 100%; }
+    .page-header h1 { color: #4c1d95; }
+    .page-header p { color: #555; }
+    section { page-break-inside: avoid; }
+    h2 { color: #4c1d95 !important; border-color: #4c1d95 !important; }
+    h3 { color: #333 !important; }
+    .bubble-you { background: #fef3c7; border-color: #d97706; }
+    .bubble-you .avatar { background: #d97706; color: #fff; }
+    .bubble-you .label { color: #92400e; }
+    .bubble-you p { color: #111; }
+    .bubble-cc { background: #f5f3ff; border-color: #7c3aed; }
+    .bubble-cc .avatar { background: #7c3aed; color: #fff; }
+    .bubble-cc .label { color: #5b21b6; }
+    .bubble-cc p, .bubble-cc li { color: #111; }
+    .bubble-cc code { background: #e5e7eb; color: #111; }
+    pre { background: #f1f5f9 !important; color: #111 !important; border: 1px solid #cbd5e1; }
+    table { border-collapse: collapse; width: 100%; }
+    th { background: #4c1d95 !important; color: #fff !important; }
+    td { border: 1px solid #cbd5e1; color: #111; }
+    .phase-divider { background: #4c1d95; color: #fff; }
+    a { color: #4c1d95; }
+    .tag { background: #e5e7eb; color: #111; }
+    .kd-table td:first-child { color: #4c1d95; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">
+    <h1>5320 Onboarding Agent</h1>
+    <p>Build Tutorial &mdash; March 2026</p>
+  </div>
+
+  <span class="nav-label">Overview</span>
+  <a href="#goal">1&nbsp;&nbsp;Project Goal</a>
+  <a href="#principles">2&nbsp;&nbsp;Architectural Principles</a>
+  <a href="#modules">3&nbsp;&nbsp;Module Architecture</a>
+  <a href="#diagram">4&nbsp;&nbsp;Architecture Diagram</a>
+  <a href="#states">5&nbsp;&nbsp;The 20-State Machine</a>
+
+  <span class="nav-label">Build Journey</span>
+  <a href="#phase1">Phase 1 &mdash; Foundation</a>
+  <a href="#phase2">Phase 2 &mdash; Serial &amp; Console</a>
+  <a href="#phase3">Phase 3 &mdash; Onboarded Detection</a>
+  <a href="#phase4">Phase 4 &mdash; Capture &amp; HTML</a>
+  <a href="#phase5">Phase 5 &mdash; UX &amp; Reliability</a>
+  <a href="#phase6">Phase 6 &mdash; Docs &amp; Publishing</a>
+
+  <span class="nav-label">Reference</span>
+  <a href="#decisions">Key Technical Decisions</a>
+  <a href="#tests">Test Coverage</a>
+  <a href="#running">Running Today</a>
+
+  <div class="nav-refs">
+    <p>Claude Code Resources</p>
+    <a href="https://github.com/shanraisshan/claude-code-best-practice" target="_blank">Best Practices Repo &#8599;</a><br><br>
+    <a href="https://github.com/affaan-m/everything-claude-code" target="_blank">Everything Claude Code &#8599;</a>
+  </div>
+</nav>
+
+<main>
+
+  <div class="page-header">
+    <h1>5320 Onboarding Agent &mdash; Build Tutorial</h1>
+    <p class="sub">A complete record of how an AI-assisted network switch onboarding agent was designed and built through live field testing on an Extreme Networks 5320-16P-2MXT-2X. Every prompt, every bug, every architectural decision &mdash; in sequence.</p>
+    <div class="ref-row">
+      <a href="https://github.com/shanraisshan/claude-code-best-practice" target="_blank">&#128216;&nbsp;Claude Code Best Practices &#8599;</a>
+      <a href="https://github.com/affaan-m/everything-claude-code" target="_blank">&#129520;&nbsp;Everything Claude Code &#8599;</a>
+    </div>
+  </div>
+
+  <!-- ═══════════ SECTION 1 ═══════════ -->
+  <section id="goal">
+    <h2>1. Project Goal</h2>
+    <p>An Extreme Networks 5320-16P-2MXT-2X arrives from the factory running <strong>Fabric Engine Pre-GA firmware</strong>. To put it into production it must be migrated to <strong>EXOS SwitchEngine</strong> via Extreme&rsquo;s cloud zero-touch provisioning platform (XIQ ZTP+). The process requires factory resetting the switch, letting it phone home to XIQ, receiving a firmware push, rebooting into EXOS, completing a setup wizard, and saving configuration.</p>
+    <p>The goal was to build a single-command AI agent that:</p>
+    <ul>
+      <li>Watches the serial console in real time &mdash; no manual attention needed between steps</li>
+      <li>Detects each phase with local regex patterns in microseconds &mdash; no API latency during critical boot sequences</li>
+      <li>Calls Claude (Anthropic API) only on state transitions &mdash; plain-English instructions for the operator</li>
+      <li>Detects when a switch is <em>already onboarded</em> and pivots to a configuration verification and capture workflow</li>
+      <li>Produces a self-contained dark-themed HTML report with tabs, opened automatically in the browser</li>
+    </ul>
+  </section>
+
+  <!-- ═══════════ SECTION 2 ═══════════ -->
+  <section id="principles">
+    <h2>2. Architectural Principles</h2>
+    <p>These four principles were established before a single line of code was written and held through every iteration:</p>
+
+    <div class="card p">
+      <h4>Read-only on the wire</h4>
+      <p>The agent never opens the serial port for writing. It tails a logfile written by a <code>screen</code> session that the human operator controls. This eliminates <code>[Errno 16] Resource busy</code> errors entirely &mdash; only one process (<code>screen</code>) ever holds the port exclusively.</p>
+    </div>
+    <div class="card p">
+      <h4>Regex-first, Claude-second</h4>
+      <p>A local 20-state machine classifies every console line with compiled regex patterns in microseconds. Claude is invoked via API only on state transitions &mdash; roughly once every few minutes during onboarding. Token cost is negligible; latency is invisible during fast phases like U-Boot and firmware install.</p>
+    </div>
+    <div class="card p">
+      <h4>Human stays in control</h4>
+      <p>The agent displays instructions; the human types commands in a separate Terminal window. Auto-send mode (<code>screen -X stuff</code>) is used only in the already-onboarded verification flow &mdash; a clearly bounded, read-only operation with no misconfiguration risk.</p>
+    </div>
+    <div class="card p">
+      <h4>Single rolling buffer</h4>
+      <p>Console output is stored in a 4000-character rolling deque. Only this window is sent to Claude &mdash; never the full session log. This bounds token spend and keeps context focused on the current switch state.</p>
+    </div>
+  </section>
+
+  <!-- ═══════════ SECTION 3 ═══════════ -->
+  <section id="modules">
+    <h2>3. Module Architecture</h2>
+    <pre>agent/
+  main.py              Entry point &mdash; port detection, main loop, already-onboarded verification flow
+  config.py            Loads .env / CLI flags into a typed config object
+  port_detector.py     Auto-scans USB-serial ports on macOS and Linux
+  serial_monitor.py    LogfileMonitor (tails screen logfile) + SerialMonitor (direct serial, fallback)
+  state_machine.py     20-state regex engine, _seen_states tracking, likely_already_onboarded detection
+  patterns.py          Compiled regex patterns for all 20 states + OS context (FE vs EXOS)
+  console_analyzer.py  Claude API integration &mdash; called on state transitions only
+  operator_ui.py       Rich terminal UI &mdash; status panel + instruction panel
+  prompts/
+    system_prompt.md   Full switch knowledge base fed to Claude on every API call
+tests/
+  test_state_machine.py   21 unit tests &mdash; all states, transitions, already-onboarded logic
+  test_port_detector.py   Port scan and selection tests</pre>
+
+    <h3>Key internal functions in main.py</h3>
+    <table>
+      <tr><th>Function</th><th>Purpose</th></tr>
+      <tr><td><code>_wait_for_state()</code></td><td>Blocks until state machine reaches a target state. Checks current state immediately before blocking &mdash; avoids hang when already in target.</td></tr>
+      <tr><td><code>_wait_for_settle()</code></td><td>Waits for console activity to START, then for it to go quiet for <code>settle</code> seconds. Adapts to actual output speed &mdash; never fires on stale queue.</td></tr>
+      <tr><td><code>_wait_for_settle_escape()</code></td><td>Like <code>_wait_for_settle</code> but sends Space automatically when <code>--More--</code> is detected &mdash; used for <code>show port configuration</code>.</td></tr>
+      <tr><td><code>_find_screen_session()</code></td><td>Uses <code>lsof -t port</code> + <code>screen -ls</code> to find the screen session ID holding the serial port.</td></tr>
+      <tr><td><code>_send_to_screen()</code></td><td>Sends a command + Enter to a screen session via <code>screen -X stuff</code>.</td></tr>
+      <tr><td><code>_run_command()</code></td><td>Full auto-send sequence: flush queue &rarr; blank CR &rarr; 400ms &rarr; flush &rarr; capture start_pos &rarr; send command &rarr; wait settle &rarr; read logfile.</td></tr>
+      <tr><td><code>_filter_port_config()</code></td><td>Strips port lines with no active link from <code>show port configuration</code> output before HTML generation.</td></tr>
+      <tr><td><code>_parse_switch_info()</code></td><td>Regex extraction of SysName, System Type, firmware, and MAC from <code>show switch</code> output for the HTML report header.</td></tr>
+      <tr><td><code>_build_html_report()</code></td><td>Generates self-contained dark-themed HTML with switch metadata header, tabbed layout, and per-tab scrollable <code>&lt;pre&gt;</code> blocks.</td></tr>
+      <tr><td><code>_run_onboarded_verification()</code></td><td>Full already-onboarded flow: login &rarr; XIQ banner &rarr; disable paging &rarr; 6 captures &rarr; filter &rarr; HTML &rarr; browser.</td></tr>
+    </table>
+  </section>
+
+  <!-- ═══════════ SECTION 4 ═══════════ -->
+  <section id="diagram">
+    <h2>4. Architecture Diagram</h2>
+    <p>Four layers from physical hardware through to the HTML report output. <span style="color:#a78bfa">&#9670; Purple</span> arrows show the normal monitoring path; <span style="color:#f59e0b">&#9670; Amber dashes</span> show the already-onboarded verification path; <span style="color:#22c55e">&#9670; Green</span> arrows show the Claude API and report output flow.</p>
+
+    <svg viewBox="0 0 820 680" xmlns="http://www.w3.org/2000/svg"
+         style="width:100%;max-width:820px;display:block;margin:20px 0;font-family:'Segoe UI',Arial,sans-serif">
+      <defs>
+        <marker id="ap" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#7c3aed"/></marker>
+        <marker id="ag" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#22c55e"/></marker>
+        <marker id="aa" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#f59e0b"/></marker>
+        <marker id="ab" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#60a5fa"/></marker>
+      </defs>
+
+      <!-- Layer 1: Physical -->
+      <rect x="10" y="10" width="800" height="108" rx="7" fill="#0a0f1e" stroke="#334155" stroke-width="1"/>
+      <text x="22" y="29" font-size="9.5" fill="#475569" font-weight="700" letter-spacing="1">PHYSICAL LAYER</text>
+      <rect x="50" y="42" width="175" height="58" rx="6" fill="#1e293b" stroke="#7c3aed" stroke-width="1.5"/>
+      <text x="137" y="67" text-anchor="middle" font-size="13" fill="#a78bfa" font-weight="700">5320 Switch</text>
+      <text x="137" y="84" text-anchor="middle" font-size="9.5" fill="#64748b">Extreme Networks</text>
+      <line x1="225" y1="71" x2="330" y2="71" stroke="#7c3aed" stroke-width="1.5" marker-end="url(#ap)"/>
+      <text x="278" y="64" text-anchor="middle" font-size="9" fill="#64748b">RJ45 console cable</text>
+      <rect x="330" y="42" width="225" height="58" rx="6" fill="#1e293b" stroke="#7c3aed" stroke-width="1.5"/>
+      <text x="442" y="67" text-anchor="middle" font-size="13" fill="#a78bfa" font-weight="700">Mac</text>
+      <text x="442" y="84" text-anchor="middle" font-size="9.5" fill="#64748b">/dev/cu.usbserial-XXXX</text>
+
+      <!-- Layer 2: Process -->
+      <rect x="10" y="132" width="800" height="128" rx="7" fill="#0a0f1e" stroke="#334155" stroke-width="1"/>
+      <text x="22" y="150" font-size="9.5" fill="#475569" font-weight="700" letter-spacing="1">PROCESS LAYER  (macOS)</text>
+      <rect x="50" y="160" width="215" height="68" rx="6" fill="#1e293b" stroke="#60a5fa" stroke-width="1.5"/>
+      <text x="157" y="184" text-anchor="middle" font-size="12.5" fill="#7dd3fc" font-weight="700">screen&nbsp;-L</text>
+      <text x="157" y="200" text-anchor="middle" font-size="9.5" fill="#64748b">holds port O_RDWR</text>
+      <text x="157" y="216" text-anchor="middle" font-size="9.5" fill="#64748b">human types here</text>
+      <rect x="355" y="160" width="215" height="68" rx="6" fill="#1e293b" stroke="#60a5fa" stroke-width="1.5"/>
+      <text x="462" y="184" text-anchor="middle" font-size="12.5" fill="#7dd3fc" font-weight="700">/tmp/screenlog.0</text>
+      <text x="462" y="200" text-anchor="middle" font-size="9.5" fill="#64748b">rolling logfile</text>
+      <text x="462" y="216" text-anchor="middle" font-size="9.5" fill="#64748b">written by screen -L</text>
+      <!-- Mac down to screen -->
+      <line x1="442" y1="100" x2="442" y2="144" stroke="#334155" stroke-width="1" stroke-dasharray="3,3"/>
+      <line x1="442" y1="144" x2="157" y2="144" stroke="#334155" stroke-width="1" stroke-dasharray="3,3"/>
+      <line x1="157" y1="144" x2="157" y2="160" stroke="#334155" stroke-width="1.5" marker-end="url(#ab)"/>
+      <!-- screen to logfile -->
+      <line x1="265" y1="194" x2="353" y2="194" stroke="#60a5fa" stroke-width="1.5" marker-end="url(#ab)"/>
+      <text x="309" y="187" text-anchor="middle" font-size="8.5" fill="#60a5fa">writes</text>
+      <!-- auto-send back -->
+      <line x1="355" y1="218" x2="267" y2="218" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#aa)"/>
+      <text x="311" y="234" text-anchor="middle" font-size="8.5" fill="#f59e0b">screen&nbsp;-X&nbsp;stuff&nbsp;(auto-send)</text>
+
+      <!-- Layer 3: Agent -->
+      <rect x="10" y="274" width="800" height="228" rx="7" fill="#0a0f1e" stroke="#334155" stroke-width="1"/>
+      <text x="22" y="293" font-size="9.5" fill="#475569" font-weight="700" letter-spacing="1">AGENT LAYER</text>
+      <!-- LogfileMonitor -->
+      <rect x="50" y="302" width="195" height="55" rx="6" fill="#1e293b" stroke="#a78bfa" stroke-width="1.5"/>
+      <text x="147" y="326" text-anchor="middle" font-size="12" fill="#a78bfa" font-weight="700">LogfileMonitor</text>
+      <text x="147" y="344" text-anchor="middle" font-size="9.5" fill="#64748b">polls file every 50ms</text>
+      <!-- logfile down to LogfileMonitor -->
+      <line x1="462" y1="228" x2="462" y2="264" stroke="#7c3aed" stroke-width="1.5"/>
+      <line x1="462" y1="264" x2="147" y2="264" stroke="#7c3aed" stroke-width="1.5"/>
+      <line x1="147" y1="264" x2="147" y2="302" stroke="#7c3aed" stroke-width="1.5" marker-end="url(#ap)"/>
+      <!-- StateMachine -->
+      <rect x="305" y="295" width="215" height="80" rx="6" fill="#1e293b" stroke="#a78bfa" stroke-width="1.5"/>
+      <text x="412" y="320" text-anchor="middle" font-size="12" fill="#a78bfa" font-weight="700">StateMachine</text>
+      <text x="412" y="337" text-anchor="middle" font-size="9.5" fill="#64748b">20 regex states</text>
+      <text x="412" y="352" text-anchor="middle" font-size="9.5" fill="#64748b">_seen_states tracking</text>
+      <text x="412" y="367" text-anchor="middle" font-size="9.5" fill="#64748b">likely_already_onboarded</text>
+      <line x1="245" y1="329" x2="303" y2="329" stroke="#7c3aed" stroke-width="1.5" marker-end="url(#ap)"/>
+      <text x="274" y="321" text-anchor="middle" font-size="8.5" fill="#a78bfa">lines[]</text>
+      <!-- ConsoleAnalyzer -->
+      <rect x="585" y="295" width="195" height="80" rx="6" fill="#1e293b" stroke="#22c55e" stroke-width="1.5"/>
+      <text x="682" y="320" text-anchor="middle" font-size="12" fill="#86efac" font-weight="700">ConsoleAnalyzer</text>
+      <text x="682" y="337" text-anchor="middle" font-size="9.5" fill="#64748b">Claude API</text>
+      <text x="682" y="352" text-anchor="middle" font-size="9.5" fill="#64748b">on state transition only</text>
+      <text x="682" y="367" text-anchor="middle" font-size="9.5" fill="#64748b">4000-char rolling buffer</text>
+      <line x1="520" y1="335" x2="583" y2="335" stroke="#22c55e" stroke-width="1.5" marker-end="url(#ag)"/>
+      <text x="551" y="327" text-anchor="middle" font-size="8.5" fill="#86efac">transition</text>
+      <!-- OperatorUI -->
+      <rect x="305" y="425" width="215" height="55" rx="6" fill="#1e293b" stroke="#a78bfa" stroke-width="1.5"/>
+      <text x="412" y="449" text-anchor="middle" font-size="12" fill="#a78bfa" font-weight="700">OperatorUI</text>
+      <text x="412" y="466" text-anchor="middle" font-size="9.5" fill="#64748b">Rich terminal &mdash; human reads</text>
+      <!-- ConsoleAnalyzer down to OperatorUI -->
+      <line x1="682" y1="375" x2="682" y2="402" stroke="#22c55e" stroke-width="1.5"/>
+      <line x1="682" y1="402" x2="412" y2="402" stroke="#22c55e" stroke-width="1.5"/>
+      <line x1="412" y1="402" x2="412" y2="425" stroke="#22c55e" stroke-width="1.5" marker-end="url(#ag)"/>
+      <text x="600" y="398" text-anchor="middle" font-size="8.5" fill="#86efac">instruction text</text>
+
+      <!-- Layer 4: Verification -->
+      <rect x="10" y="516" width="800" height="148" rx="7" fill="#0a0f1e" stroke="#334155" stroke-width="1"/>
+      <text x="22" y="535" font-size="9.5" fill="#475569" font-weight="700" letter-spacing="1">VERIFICATION FLOW  (already-onboarded path)</text>
+      <!-- Arrow from SM down -->
+      <line x1="412" y1="375" x2="412" y2="502" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="5,3"/>
+      <line x1="412" y1="502" x2="120" y2="502" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="5,3"/>
+      <line x1="120" y1="502" x2="120" y2="516" stroke="#f59e0b" stroke-width="1.5" marker-end="url(#aa)" stroke-dasharray="0"/>
+      <text x="300" y="497" text-anchor="middle" font-size="8.5" fill="#f59e0b">likely_already_onboarded = True</text>
+      <!-- 4 step boxes -->
+      <rect x="38" y="546" width="162" height="44" rx="5" fill="#1c1708" stroke="#f59e0b" stroke-width="1"/>
+      <text x="119" y="564" text-anchor="middle" font-size="10" fill="#fcd34d" font-weight="700">1. auto-login</text>
+      <text x="119" y="579" text-anchor="middle" font-size="8.5" fill="#92400e">admin / Extreme01!!</text>
+      <rect x="220" y="546" width="162" height="44" rx="5" fill="#1c1708" stroke="#f59e0b" stroke-width="1"/>
+      <text x="301" y="564" text-anchor="middle" font-size="10" fill="#fcd34d" font-weight="700">2. show iqagent</text>
+      <text x="301" y="579" text-anchor="middle" font-size="8.5" fill="#92400e">XIQ status banner</text>
+      <rect x="402" y="546" width="180" height="44" rx="5" fill="#1c1708" stroke="#f59e0b" stroke-width="1"/>
+      <text x="492" y="564" text-anchor="middle" font-size="10" fill="#fcd34d" font-weight="700">3. 6 capture commands</text>
+      <text x="492" y="579" text-anchor="middle" font-size="8.5" fill="#92400e">auto-Space through --More--</text>
+      <rect x="602" y="546" width="170" height="44" rx="5" fill="#0d1f12" stroke="#22c55e" stroke-width="1"/>
+      <text x="687" y="564" text-anchor="middle" font-size="10" fill="#86efac" font-weight="700">4. HTML report</text>
+      <text x="687" y="579" text-anchor="middle" font-size="8.5" fill="#166534">tabbed &mdash; open in browser</text>
+      <!-- Step arrows -->
+      <line x1="200" y1="568" x2="218" y2="568" stroke="#f59e0b" stroke-width="1.5" marker-end="url(#aa)"/>
+      <line x1="382" y1="568" x2="400" y2="568" stroke="#f59e0b" stroke-width="1.5" marker-end="url(#aa)"/>
+      <line x1="582" y1="568" x2="600" y2="568" stroke="#22c55e" stroke-width="1.5" marker-end="url(#ag)"/>
+      <!-- filter note -->
+      <text x="492" y="615" text-anchor="middle" font-size="8.5" fill="#64748b">_filter_port_config() removes inactive ports before HTML</text>
+    </svg>
+  </section>
+
+  <!-- ═══════════ SECTION 5 ═══════════ -->
+  <section id="states">
+    <h2>5. The 20-State Machine</h2>
+    <table>
+      <tr><th>State</th><th>What it means</th></tr>
+      <tr><td><code>UNKNOWN</code></td><td>Initial state &mdash; no console output received yet</td></tr>
+      <tr><td><code>UBOOT</code></td><td>U-Boot bootloader banner detected</td></tr>
+      <tr><td><code>BOOT_LOG_SCROLLING</code></td><td>Kernel / application boot log streaming</td></tr>
+      <tr><td><code>FE_LOGIN_PROMPT</code></td><td>Fabric Engine <code>Login:</code> prompt visible</td></tr>
+      <tr><td><code>FE_LOGIN_BLOCKED</code></td><td>Admin login blocked by FE Pre-GA &mdash; must use <code>rwa</code>/<code>rwa</code></td></tr>
+      <tr><td><code>FE_PASSWORD_CHANGE</code></td><td>FE prompting for password change</td></tr>
+      <tr><td><code>FE_LOGGED_IN</code></td><td>FE unprivileged prompt (<code>&gt;</code>) detected</td></tr>
+      <tr><td><code>FE_PRIVILEGED</code></td><td>FE privileged prompt (<code>#</code>) detected</td></tr>
+      <tr><td><code>ZTD_MODE</code></td><td>&ldquo;Booting in Zero Touch Deployment Mode&rdquo; seen</td></tr>
+      <tr><td><code>DHCP_ACQUIRING</code></td><td>DHCP address assigned to management interface</td></tr>
+      <tr><td><code>XIQ_CONNECTING</code></td><td>IQAgent connected to ExtremeCloud IQ</td></tr>
+      <tr><td><code>FIRMWARE_DOWNLOADING</code></td><td>EXOS firmware download started</td></tr>
+      <tr><td><code>FIRMWARE_INSTALLING</code></td><td>Chassis reboot for firmware install initiated</td></tr>
+      <tr><td><code>EXOS_BOOT</code></td><td>&ldquo;Starting Extreme Networks Switch Engine&rdquo; detected</td></tr>
+      <tr><td><code>EXOS_LOGIN_PROMPT</code></td><td>EXOS <code>login:</code> prompt visible</td></tr>
+      <tr><td><code>EXOS_SETUP_WIZARD</code></td><td>EXOS first-boot setup wizard question detected</td></tr>
+      <tr><td><code>EXOS_LOGGED_IN</code></td><td>EXOS shell prompt detected &mdash; logged in</td></tr>
+      <tr><td><code>EXOS_SAVE_CONFIG</code></td><td>Save configuration command in progress</td></tr>
+      <tr><td><code>ONBOARDED</code></td><td>Configuration saved to primary.cfg &mdash; switch fully onboarded</td></tr>
+      <tr><td><code>ERROR</code></td><td>Error condition detected</td></tr>
+    </table>
+
+    <h3>Already-Onboarded Detection Logic</h3>
+    <div class="card">
+      <h4>_ONBOARDING_IN_PROGRESS_STATES</h4>
+      <p><code>ZTD_MODE, DHCP_ACQUIRING, XIQ_CONNECTING, FIRMWARE_DOWNLOADING, FIRMWARE_INSTALLING</code><br>If any of these were seen during the session, fresh onboarding was happening.</p>
+    </div>
+    <div class="card">
+      <h4>_EXOS_ACTIVE_STATES</h4>
+      <p><code>EXOS_LOGIN_PROMPT, EXOS_LOGGED_IN, EXOS_SETUP_WIZARD, EXOS_SAVE_CONFIG, ONBOARDED</code><br>Landing here <em>without</em> the onboarding states = already running EXOS when the agent connected.</p>
+    </div>
+    <p>The <code>likely_already_onboarded</code> property is a <strong>negative inference</strong>: absence of onboarding journey evidence + presence of an EXOS active state = already onboarded. The state machine records every state ever seen in <code>_seen_states: set[SwitchState]</code> to make this determination.</p>
+  </section>
+
+  <!-- ═══════════ BUILD JOURNEY ═══════════ -->
+
+  <section id="phase1">
+    <div class="phase-divider"><span class="phase">Phase 1</span> Foundation &amp; Testing</div>
+
+    <div class="exchange">
+      <div class="user-bubble">
+        <div class="user-avatar">You</div>
+        <div class="user-meta">
+          <div class="user-header"><span class="user-name">You</span><span class="prompt-num">#1</span></div>
+          <div class="user-text">Hold on. I need you to update the readme with the precise steps required to deploy this agent and configure the user&rsquo;s environments. Also, I have the already onboarded switch connected, I don&rsquo;t want to test this agent when I already have an onboarded switch. So, can you put some logic in that if a switch on a port is already onboarded to ask the user what he/she wants to do? First, make sure you know it is already onboarded?</div>
+        </div>
+      </div>
+      <div class="claude-bubble">
+        <div class="claude-avatar">CC</div>
+        <div class="claude-meta">
+          <div class="claude-header"><span class="claude-name">Claude Code</span><span class="tag arch">ARCHITECTURE</span><span class="tag fix">BUG FIX</span></div>
+          <div class="claude-body">
+            <h4>What was done</h4>
+            <ul>
+              <li>README rewritten with step-by-step setup: clone &rarr; venv &rarr; pip install &rarr; <code>.env</code> &rarr; connect switch &rarr; run</li>
+              <li>Added <code>likely_already_onboarded</code> property to <code>StateMachine</code> using two frozensets: <code>_ONBOARDING_IN_PROGRESS_STATES</code> and <code>_EXOS_ACTIVE_STATES</code>. A switch is &ldquo;already onboarded&rdquo; when it reaches an EXOS-active state without any ZTD/DHCP/XIQ/firmware states ever being seen.</li>
+              <li>Added <code>_infer_os_from_state()</code> called on every state transition &mdash; sets <code>OSContext.EXOS</code> even when the login prompt line alone doesn&rsquo;t contain OS keywords. This fixed the &ldquo;OS: UNKNOWN&rdquo; display bug.</li>
+              <li><strong>Critical pattern bug fixed:</strong> <code>Starting Extreme Networks Switch Engine</code> was present in both the <code>BOOT_LOG_SCROLLING</code> and <code>EXOS_BOOT</code> regex lists. Python dict ordering meant <code>BOOT_LOG_SCROLLING</code> always matched first &mdash; the switch could never reach <code>EXOS_BOOT</code>. Duplicate removed from <code>BOOT_LOG_SCROLLING</code>.</li>
+              <li>Fixed dependency typo in <code>requirements.txt</code>: <code>anthropicai&gt;=0.40.0</code> &rarr; <code>anthropic&gt;=0.40.0</code></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="exchange">
+      <div class="user-bubble">
+        <div class="user-avatar">You</div>
+        <div class="user-meta">
+          <div class="user-header"><span class="user-name">You</span><span class="prompt-num">#2</span></div>
+          <div class="user-text">So, now. What do I do to run the agent?</div>
+        </div>
+      </div>
+      <div class="claude-bubble">
+        <div class="claude-avatar">CC</div>
+        <div class="claude-meta">
+          <div class="claude-header"><span class="claude-name">Claude Code</span></div>
+          <div class="claude-body">
+            <h4>What was done</h4>
+            <ul>
+              <li>Explained the two-window model: agent terminal + separate <code>screen</code> session for the switch console</li>
+              <li>Documented the exact screen command: <code>TERM=vt100 screen /dev/cu.usbserial-XXXX 115200</code></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="exchange">
+      <div class="user-bubble">
+        <div class="user-avatar">You</div>
+        <div class="user-meta">
+          <div class="user-header"><span class="user-name">You</span><span class="prompt-num">#3</span></div>
+          <div class="user-text">Where is the Anthropic Key?</div>
+        </div>
+      </div>
+      <div class="claude-bubble">
+        <div class="claude-avatar">CC</div>
+        <div class="claude-meta">
+          <div class="claude-header"><span class="claude-name">Claude Code</span></div>
+          <div class="claude-body">
+            <h4>What was done</h4>
+            <ul>
+              <li>Pointed to <code>.env</code> (copied from <code>.env.example</code>). <code>ANTHROPIC_API_KEY</code> is the only required field &mdash; all others have working defaults.</li>
+              <li>Confirmed <code>.env</code> is in <code>.gitignore</code> and must never be committed to the repository.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="exchange">
+      <div class="user-bubble">
+        <div class="user-avatar">You</div>
+        <div class="user-meta">
+          <div class="user-header"><span class="user-name">You</span><span class="prompt-num">#4</span></div>
+          <div class="user-text">Execute txt editing to update .env</div>
+        </div>
+      </div>
+      <div class="claude-bubble">
+        <div class="claude-avatar">CC</div>
+        <div class="claude-meta">
+          <div class="claude-header"><span class="claude-name">Claude Code</span></div>
+          <div class="claude-body">
+            <h4>What was done</h4>
+            <ul>
+              <li>API key inserted into <code>.env</code> using the Edit tool directly &mdash; file stays local, never committed to git.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="exchange">
+      <div class="user-bubble">
+        <div class="user-avatar">You</div>
+        <div class="user-meta">
+          <div class="user-header"><span class="user-name">You</span><span class="prompt-num">#5</span></div>
+          <div class="user-text">Done, now tell me again the steps to launch the agent.</div>
+        </div>
+      </div>
+      <div class="claude-bubble">
+        <div class="claude-avatar">CC</div>
+        <div class="claude-meta">
+          <div class="claude-header"><span class="claude-name">Claude Code</span></div>
+          <div class="claude-body">
+            <h4>What was done</h4>
+            <ul>
+              <li>Confirmed the three-step launch: <code>source .venv/bin/activate</code> &rarr; <code>python3 -m agent.main</code> &rarr; open screen window in second terminal when prompted</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="phase2">
+    <div class="phase-divider"><span class="phase">Phase 2</span> Serial Port &amp; Console Automation</div>
+
+    <div class="exchange">
+      <div class="user-bubble">
+        <div class="user-avatar">You</div>
+        <div class="user-meta">
+          <div class="user-header"><span class="user-name">You</span><span class="prompt-num">#6</span></div>
+          <div class="user-text">[Errno 16] Resource busy &mdash; serial port error on startup</div>
+        </div>
+      </div>
+      <div class="claude-bubble">
+        <div class="claude-avatar">CC</div>
+        <div class="claude-meta">
+          <div class="claude-header"><span class="claude-name">Claude Code</span><span class="tag fix">BUG FIX</span><span class="tag arch">ARCHITECTURE</span></div>
+          <div class="claude-body">
+            <h4>Root cause and fix</h4>
+            <ul>
+              <li><code>pyserial</code> and <code>screen</code> both open the serial port with <code>O_RDWR</code>. Only one process can hold it exclusively at a time &mdash; an OS-level constraint.</li>
+              <li><strong>Solution:</strong> replaced <code>SerialMonitor</code> (direct pyserial) with <code>LogfileMonitor</code>. The agent now tails <code>/tmp/screenlog.0</code> &mdash; the logfile that <code>screen</code> writes &mdash; without ever touching the port. Zero port conflict.</li>
+              <li>macOS screen v4.00.03 does not support the <code>-Logfile</code> flag. Fix: <code>cd /tmp &amp;&amp; screen -L port baud</code> &mdash; logfile predictably lands at <code>/tmp/screenlog.0</code> in the working directory.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="exchange">
+      <div class="user-bubble">
+        <div class="user-avatar">You</div>
+        <div class="user-meta">
+          <div class="user-header"><span class="user-name">You</span><span class="prompt-num">#7</span></div>
+          <div class="user-text">No, too complicated. Begin from launching the agent again?</div>
+        </div>
+      </div>
+      <div class="claude-bubble">
+        <div class="claude-avatar">CC</div>
+        <div class="claude-meta">
+          <div class="claude-header"><span class="claude-name">Claude Code</span><span class="tag ux">UX</span></div>
+          <div class="claude-body">
+            <h4>Auto-opening the console window</h4>
+            <ul>
+              <li>Agent now opens the switch console Terminal window <strong>automatically</strong> using <code>osascript</code> (macOS AppleScript) &mdash; the operator runs one command and both windows appear.</li>
+              <li>Before opening: kills any process holding the port (<code>lsof -t port</code> &rarr; <code>kill PID</code>), removes stale <code>/tmp/screenlog.0</code>.</li>
+              <li>Waits up to 20 seconds for the logfile to appear before proceeding. If it doesn&rsquo;t appear, prints the manual screen command as a fallback.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="exchange">
+      <div class="user-bubble">
+        <div class="user-avatar">You</div>
+        <div class="user-meta">
+          <div class="user-header"><span class="user-name">You</span><span class="prompt-num">#8&ndash;9</span></div>
+          <div class="user-text">[screen is terminating] &mdash; [Agent timeout output showing osascript tab ID leaking to console]</div>
+        </div>
+      </div>
+      <div class="claude-bubble">
+        <div class="claude-avatar">CC</div>
+        <div class="claude-meta">
+          <div class="claude-header"><span class="claude-name">Claude Code</span><span class="tag fix">BUG FIX</span></div>
+          <div class="claude-body">
+            <h4>Two osascript bugs fixed</h4>
+            <ul>
+              <li><code>osascript</code> was printing <em>&ldquo;tab 1 of window id XXXX&rdquo;</em> to the agent console. Fixed: added <code>stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL</code> to the <code>Popen</code> call.</li>
+              <li>Stale screen session was not being killed: <code>pkill -f</code> pattern didn&rsquo;t match detached sessions. Changed to <code>lsof -t port</code> to get exact PIDs and kill them directly before opening a new session.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="exchange">
+      <div class="user-bubble">
+        <div class="user-avatar">You</div>
+        <div class="user-meta">
+          <div class="user-header"><span class="user-name">You</span><span class="prompt-num">#10</span></div>
+          <div class="user-text">Show me the switch output? Agent stopped.</div>
+        </div>
+      </div>
+      <div class="claude-bubble">
+        <div class="claude-avatar">CC</div>
+        <div class="claude-meta">
+          <div class="claude-header"><span class="claude-name">Claude Code</span><span class="tag fix">BUG FIX</span></div>
+          <div class="claude-body">
+            <h4>Two timing bugs fixed</h4>
+            <ul>
+              <li><strong>Stale queue race:</strong> <code>_wait_for_settle</code> was firing immediately on leftover lines from a previous command, returning before the new command&rsquo;s output arrived. Fixed: flush <code>monitor.get_lines()</code> in a loop before every <code>start_pos</code> capture.</li>
+              <li><strong>Already-in-state hang:</strong> <code>_wait_for_state</code> only checked state when new lines arrived. If the switch was already in the target state, it waited until timeout. Fixed: check <code>sm.current_state in targets</code> at the very top of the loop before blocking.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="exchange">
+      <div class="user-bubble">
+        <div class="user-avatar">You</div>
+        <div class="user-meta">
+          <div class="user-header"><span class="user-name">You</span><span class="prompt-num">#11</span></div>
+          <div class="user-text">No put in agent. I want to run the agent only.</div>
+        </div>
+      </div>
+      <div class="claude-bubble">
+        <div class="claude-avatar">CC</div>
+        <div class="claude-meta">
+          <div class="claude-header"><span class="claude-name">Claude Code</span><span class="tag arch">ARCHITECTURE</span></div>
+          <div class="claude-body">
+            <h4>Auto-send architecture built</h4>
+            <ul>
+              <li><code>_find_screen_session(port)</code> &mdash; uses <code>lsof -t port</code> to get the PID, then matches it against <code>screen -ls</code> output to find the session ID (e.g. <code>13864.5320console</code>)</li>
+              <li><code>_send_to_screen(session_id, cmd)</code> &mdash; runs <code>screen -X -S session_id stuff "cmd\r"</code> to inject keystrokes</li>
+              <li><code>_run_command()</code> &mdash; the full reliable sequence: flush queue &rarr; send blank CR &rarr; sleep 400ms &rarr; flush echoed CR &rarr; capture <code>start_pos</code> &rarr; send real command &rarr; <code>_wait_for_settle</code> &rarr; read logfile from <code>start_pos</code></li>
+              <li>The human operator no longer needs to type any commands during the verification flow &mdash; all 6 capture commands are sent automatically.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="exchange">
+      <div class="user-bubble">
+        <div class="user-avatar">You</div>
+        <div class="user-meta">
+          <div class="user-header"><span class="user-name">You</span><span class="prompt-num">#12</span></div>
+          <div class="user-text">[screen -r 5320console: no screen to resume]</div>
+        </div>
+      </div>
+      <div class="claude-bubble">
+        <div class="claude-avatar">CC</div>
+        <div class="claude-meta">
+          <div class="claude-header"><span class="claude-name">Claude Code</span><span class="tag fix">BUG FIX</span></div>
+          <div class="claude-body">
+            <h4>What was done</h4>
+            <ul>
+              <li>Session was created with a different name. The agent now uses <code>lsof -t port</code> to identify exactly which session holds the port &mdash; session name is irrelevant.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="phase3">
+    <div class="phase-divider"><span class="phase">Phase 3</span> Already-Onboarded Detection &amp; XIQ Status</div>
+
+    <div class="exchange">
+      <div class="user-bubble">
+        <div class="user-avatar">You</div>
+        <div class="user-meta">
+          <div class="user-header"><span class="user-name">You</span><span class="prompt-num">#13</span></div>
+          <div class="user-text">[Agent running but switch already opened without userid/password, XIQ NOT CONNECTED, config saved to ~/y]</div>
+        </div>
+      </div>
+      <div class="claude-bubble">
+        <div class="claude-avatar">CC</div>
+        <div class="claude-meta">
+          <div class="claude-header"><span class="claude-name">Claude Code</span><span class="tag fix">BUG FIX</span></div>
+          <div class="claude-body">
+            <h4>Multiple issues addressed</h4>
+            <ul>
+              <li>Login was being skipped because the agent checked <code>EXOS_LOGGED_IN</code> but the switch was at <code>EXOS_LOGIN_PROMPT</code> &mdash; login flow was not triggering correctly</li>
+              <li>XIQ status was showing NOT CONNECTED because <code>show iqagent</code> output was not being captured due to the stale-queue race condition</li>
+              <li>Config saved to <code>~/y</code> &mdash; user typed <code>y</code> thinking the filename prompt was yes/no. Prompt text rewritten to: <em>&ldquo;press Enter to accept default, or type a new name&rdquo;</em></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="exchange">
+      <div class="user-bubble">
+        <div class="user-avatar">You</div>
+        <div class="user-meta">
+          <div class="user-header"><span class="user-name">You</span><span class="prompt-num">#14</span></div>
+          <div class="user-text">I put admin and blank for password? [showing EXOS login output confirming XIQ connection warning]</div>
+        </div>
+      </div>
+      <div class="claude-bubble">
+        <div class="claude-avatar">CC</div>
+        <div class="claude-meta">
+          <div class="claude-header"><span class="claude-name">Claude Code</span></div>
+          <div class="claude-body">
+            <h4>What was done</h4>
+            <ul>
+              <li>Confirmed EXOS default login after ZTP+ migration is <code>admin</code> with blank password</li>
+              <li>The XIQ warning message visible on the switch confirmed the switch IS connected to XIQ &mdash; the agent&rsquo;s detection was the issue, not the switch itself</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="exchange">
+      <div class="user-bubble">
+        <div class="user-avatar">You</div>
+        <div class="user-meta">
+          <div class="user-header"><span class="user-name">You</span><span class="prompt-num">#15</span></div>
+          <div class="user-text">Again, switch already opened without userid or password? I see switch already connected to XIQ but it says otherwise here?</div>
+        </div>
+      </div>
+      <div class="claude-bubble">
+        <div class="claude-avatar">CC</div>
+        <div class="claude-meta">
+          <div class="claude-header"><span class="claude-name">Claude Code</span><span class="tag fix">BUG FIX</span></div>
+          <div class="claude-body">
+            <h4>XIQ status detection bug fixed</h4>
+            <ul>
+              <li>Root cause: stale-queue race left the queue drained before <code>start_pos</code> was set. The logfile read window started after the <code>show iqagent</code> output had already been written &mdash; so zero bytes were read.</li>
+              <li>Fix: flush the monitor queue immediately before capturing <code>start_pos</code>, not before sending the command.</li>
+              <li>Added user-confirmation fallback: if automated regex fails, agent shows the raw <code>show iqagent</code> output and asks <em>&ldquo;Is this switch showing as Connected in XIQ portal? (yes/no)&rdquo;</em></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="exchange">
+      <div class="user-bubble">
+        <div class="user-avatar">You</div>
+        <div class="user-meta">
+          <div class="user-header"><span class="user-name">You</span><span class="prompt-num">#16</span></div>
+          <div class="user-text">How do you know the switch that is connected is &lsquo;fully onboarded&rsquo;?</div>
+        </div>
+      </div>
+      <div class="claude-bubble">
+        <div class="claude-avatar">CC</div>
+        <div class="claude-meta">
+          <div class="claude-header"><span class="claude-name">Claude Code</span><span class="tag arch">ARCHITECTURE</span></div>
+          <div class="claude-body">
+            <h4>The negative-inference logic explained</h4>
+            <ul>
+              <li>The state machine records every state it has ever seen in <code>_seen_states: set[SwitchState]</code>. This is a permanent log for the duration of the session.</li>
+              <li>If the switch reaches an EXOS-active state (EXOS_LOGIN_PROMPT, EXOS_LOGGED_IN, etc.) without ZTD_MODE, DHCP_ACQUIRING, XIQ_CONNECTING, FIRMWARE_DOWNLOADING, or FIRMWARE_INSTALLING ever appearing &mdash; onboarding never happened during this session.</li>
+              <li><strong>Negative inference:</strong> absence of onboarding journey evidence + presence of EXOS active state = was already running EXOS when the agent connected.</li>
+              <li>This is conservative by design: it can only conclude &ldquo;already onboarded&rdquo; when it has positive evidence of EXOS AND zero evidence of a fresh onboarding flow.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="exchange">
+      <div class="user-bubble">
+        <div class="user-avatar">You</div>
+        <div class="user-meta">
+          <div class="user-header"><span class="user-name">You</span><span class="prompt-num">#17</span></div>
+          <div class="user-text">I am seeing this &mdash; [already onboarded menu with monitor/re-onboard/exit options]</div>
+        </div>
+      </div>
+      <div class="claude-bubble">
+        <div class="claude-avatar">CC</div>
+        <div class="claude-meta">
+          <div class="claude-header"><span class="claude-name">Claude Code</span></div>
+          <div class="claude-body">
+            <h4>What was done</h4>
+            <ul>
+              <li>Confirmed the detection logic was working correctly &mdash; the switch was already onboarded and the menu appeared as designed</li>
+              <li>The three-option menu (Monitor / Re-onboard / Exit) was later replaced with the full automated verification flow based on subsequent feedback</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="exchange">
+      <div class="user-bubble">
+        <div class="user-avatar">You</div>
+        <div class="user-meta">
+          <div class="user-header"><span class="user-name">You</span><span class="prompt-num">#18</span></div>
+          <div class="user-text">I am connected to XIQ I HAVE CONFIRMED</div>
+        </div>
+      </div>
+      <div class="claude-bubble">
+        <div class="claude-avatar">CC</div>
+        <div class="claude-meta">
+          <div class="claude-header"><span class="claude-name">Claude Code</span></div>
+          <div class="claude-body">
+            <h4>What was done</h4>
+            <ul>
+              <li>User confirmed XIQ connection via the portal. The user-confirmation fallback worked correctly &mdash; operator overrode the failed automated detection.</li>
+              <li>The fallback was retained in all future versions so operators can always override when ANSI escape sequences or timing issues confuse the regex.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="exchange">
+      <div class="user-bubble">
+        <div class="user-avatar">You</div>
+        <div class="user-meta">
+          <div class="user-header"><span class="user-name">You</span><span class="prompt-num">#19&ndash;21</span></div>
+          <div class="user-text">The .txt file is empty. I want you to show it in the agent? &mdash; Now, the userid/password still don&rsquo;t show up, for a reason? &mdash; Nope keep as is.</div>
+        </div>
+      </div>
+      <div class="claude-bubble">
+        <div class="claude-avatar">CC</div>
+        <div class="claude-meta">
+          <div class="claude-header"><span class="claude-name">Claude Code</span><span class="tag fix">BUG FIX</span></div>
+          <div class="claude-body">
+            <h4>Empty capture bug fixed; login display decision</h4>
+            <ul>
+              <li><strong>Empty file:</strong> <code>start_pos</code> was captured after reading the logfile from position 0 (for the XIQ check), placing the read window after the command output. Fixed by separating the XIQ check (reads full logfile from 0) from per-command capture (reads from <code>start_pos</code> set immediately before each command).</li>
+              <li>Added inline display option &mdash; operator can view captured text directly in the agent terminal.</li>
+              <li><strong>Login display:</strong> user preferred to keep the login as-is (admin sent automatically, no visible prompt) &mdash; decision accepted.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="exchange">
+      <div class="user-bubble">
+        <div class="user-avatar">You</div>
+        <div class="user-meta">
+          <div class="user-header"><span class="user-name">You</span><span class="prompt-num">#22</span></div>
+          <div class="user-text">But pls, check iqconfig and decide ahead of time if the switch is INDEED in XIQ, can you not?</div>
+        </div>
+      </div>
+      <div class="claude-bubble">
+        <div class="claude-avatar">CC</div>
+        <div class="claude-meta">
+          <div class="claude-header"><span class="claude-name">Claude Code</span><span class="tag ux">UX</span></div>
+          <div class="claude-body">
+            <h4>Proactive XIQ check</h4>
+            <ul>
+              <li>Moved <code>show iqagent</code> to the very beginning of the verification flow &mdash; before any other commands are run</li>
+              <li>Regex patterns expanded to match all known EXOS 33.x XIQ status message variants, including <code>CONNECTED TO XIQ</code> (the actual output format, matched case-insensitively)</li>
+              <li>Reads the entire logfile from position 0 after the command to maximise chances of capturing the status line regardless of timing</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="phase4">
+    <div class="phase-divider"><span class="phase">Phase 4</span> Configuration Capture &amp; HTML Report</div>
+
+    <div class="exchange">
+      <div class="user-bubble">
+        <div class="user-avatar">You</div>
+        <div class="user-meta">
+          <div class="user-header"><span class="user-name">You</span><span class="prompt-num">#23</span></div>
+          <div class="user-text">Can you store in html with sections pls so it is a linked list?</div>
+        </div>
+      </div>
+      <div class="claude-bubble">
+        <div class="claude-avatar">CC</div>
+        <div class="claude-meta">
+          <div class="claude-header"><span class="claude-name">Claude Code</span><span class="tag ux">UX</span></div>
+          <div class="claude-body">
+            <h4>HTML report &mdash; first version</h4>
+            <ul>
+              <li>Replaced plain text output with a self-contained HTML file &mdash; no external dependencies, works as a standalone attachment</li>
+              <li>Dark theme: background <code>#0f172a</code>, code blocks <code>#0a0f1e</code>, accent purple</li>
+              <li>Vertical layout with anchor-linked Table of Contents, per-section <code>&lt;pre&gt;</code> blocks, &ldquo;&uarr; Back to top&rdquo; links</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="exchange">
+      <div class="user-bubble">
+        <div class="user-avatar">You</div>
+        <div class="user-meta">
+          <div class="user-header"><span class="user-name">You</span><span class="prompt-num">#24</span></div>
+          <div class="user-text">Put a header on the file&hellip; switch name etc., when run etc.</div>
+        </div>
+      </div>
+      <div class="claude-bubble">
+        <div class="claude-avatar">CC</div>
+        <div class="claude-meta">
+          <div class="claude-header"><span class="claude-name">Claude Code</span><span class="tag ux">UX</span></div>
+          <div class="claude-body">
+            <h4>Switch metadata header</h4>
+            <ul>
+              <li>Added <code>_parse_switch_info()</code>: regex extraction of SysName, System Type, firmware version, and MAC address from <code>show switch</code> output</li>
+              <li>HTML header row: switch name, model, firmware, MAC, generation timestamp, XIQ status badge (green CONNECTED / red NOT CONFIRMED)</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="exchange">
+      <div class="user-bubble">
+        <div class="user-avatar">You</div>
+        <div class="user-meta">
+          <div class="user-header"><span class="user-name">You</span><span class="prompt-num">#25</span></div>
+          <div class="user-text">Fix this &mdash; 5320-16P-2MXT-2X-SwitchEngine.18 # <strong>how</strong> ipconfig</div>
+        </div>
+      </div>
+      <div class="claude-bubble">
+        <div class="claude-avatar">CC</div>
+        <div class="claude-meta">
+          <div class="claude-header"><span class="claude-name">Claude Code</span><span class="tag fix">BUG FIX</span></div>
+          <div class="claude-body">
+            <h4>First character drop fixed</h4>
+            <ul>
+              <li>Root cause: <code>screen -X stuff "show ipconfig\r"</code> drops the first character when sent immediately after the previous command completes. The switch received <code>how ipconfig</code>.</li>
+              <li>Fix: send a blank CR (<code>""</code> + <code>\r</code>) first, sleep 400ms, flush the echoed CR from the monitor queue, re-capture <code>start_pos</code>, then send the real command.</li>
+              <li>The 400ms blank-CR delay is applied universally in <code>_run_command()</code> &mdash; affects all commands equally. This resets screen&rsquo;s input buffer between every command.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="exchange">
+      <div class="user-bubble">
+        <div class="user-avatar">You</div>
+        <div class="user-meta">
+          <div class="user-header"><span class="user-name">You</span><span class="prompt-num">#26</span></div>
+          <div class="user-text">5320-16P-2MXT-2X-SwitchEngine.20 # <strong>how</strong> port configuration</div>
+        </div>
+      </div>
+      <div class="claude-bubble">
+        <div class="claude-avatar">CC</div>
+        <div class="claude-meta">
+          <div class="claude-header"><span class="claude-name">Claude Code</span></div>
+          <div class="claude-body">
+            <h4>What was done</h4>
+            <ul>
+              <li>Confirmed the same first-character drop issue affects all commands. The 400ms blank-CR delay already in place resolves it for <code>show port configuration</code> as well as all other capture commands.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="exchange">
+      <div class="user-bubble">
+        <div class="user-avatar">You</div>
+        <div class="user-meta">
+          <div class="user-header"><span class="user-name">You</span><span class="prompt-num">#27</span></div>
+          <div class="user-text">I want a banner up front when you check iqconfig to say if the switch is ALREADY on XIQ or not, can that be done?</div>
+        </div>
+      </div>
+      <div class="claude-bubble">
+        <div class="claude-avatar">CC</div>
+        <div class="claude-meta">
+          <div class="claude-header"><span class="claude-name">Claude Code</span><span class="tag ux">UX</span></div>
+          <div class="claude-body">
+            <h4>XIQ status banner</h4>
+            <ul>
+              <li>Added a prominent full-width banner displayed immediately after <code>show iqagent</code> completes &mdash; shown before any other output or capture begins</li>
+              <li>Green box: <code>&#10003;&nbsp;&nbsp;SWITCH IS CONNECTED TO EXTREMECLOUD IQ</code></li>
+              <li>Red box: <code>&#10007;&nbsp;&nbsp;SWITCH IS NOT CONFIRMED ON EXTREMECLOUD IQ</code></li>
+              <li>If red, the raw <code>show iqagent</code> output is displayed and the operator is asked to confirm manually before proceeding</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="exchange">
+      <div class="user-bubble">
+        <div class="user-avatar">You</div>
+        <div class="user-meta">
+          <div class="user-header"><span class="user-name">You</span><span class="prompt-num">#28</span></div>
+          <div class="user-text">5320-16P-2MXT-2X-SwitchEngine.27 # show port configuration &rarr; I have to ESC, make sure you capture the data in the html?</div>
+        </div>
+      </div>
+      <div class="claude-bubble">
+        <div class="claude-avatar">CC</div>
+        <div class="claude-meta">
+          <div class="claude-header"><span class="claude-name">Claude Code</span><span class="tag fix">BUG FIX</span></div>
+          <div class="claude-body">
+            <h4>Pagination fix</h4>
+            <ul>
+              <li>Root cause 1: <code>disable clipaging</code> is deprecated in EXOS 33.x. Changed to <code>disable cli paging</code> (the current command name). Added <code>time.sleep(1.0)</code> after this command to let the logfile flush before the first capture <code>start_pos</code> is set. This also fixed <code>show switch</code> returning 0 lines.</li>
+              <li>Root cause 2: Pressing Escape in a screen session aborts the EXOS output &mdash; all port data after the first page is lost before it can be captured.</li>
+              <li>Fix: implemented <code>_wait_for_settle_escape()</code> &mdash; watches the logfile for <code>--More--</code> during the settle wait and sends <strong>Space</strong> to advance to the next page. Repeats until all output is captured naturally. Only applied to <code>show port configuration</code>.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="phase5">
+    <div class="phase-divider"><span class="phase">Phase 5</span> UX, Login &amp; Reliability</div>
+
+    <div class="exchange">
+      <div class="user-bubble">
+        <div class="user-avatar">You</div>
+        <div class="user-meta">
+          <div class="user-header"><span class="user-name">You</span><span class="prompt-num">#29&ndash;30</span></div>
+          <div class="user-text">Also, can we publish this HTML online with admin/Extreme!011 credentials? &mdash; Sorry, admin/Extreme!11</div>
+        </div>
+      </div>
+      <div class="claude-bubble">
+        <div class="claude-avatar">CC</div>
+        <div class="claude-meta">
+          <div class="claude-header"><span class="claude-name">Claude Code</span><span class="tag ux">UX</span></div>
+          <div class="claude-body">
+            <h4>Credentials and publishing decision</h4>
+            <ul>
+              <li>Updated EXOS auto-login password to <code>Extreme!11</code> (later corrected to <code>Extreme01!!</code>)</li>
+              <li>Advised against publishing switch configuration to any public URL &mdash; the HTML contains VLANs, management access settings, full running config, and SNMP community strings. Sharing it publicly would expose network topology.</li>
+              <li>Built <code>_serve_report_on_lan()</code> instead: Python <code>http.server</code> on port 8080, auto-detects LAN IP via UDP socket trick, prints clickable URL, copies to clipboard via <code>pbcopy</code>. Anyone on the same network can view the report without it leaving the internal network.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="exchange">
+      <div class="user-bubble">
+        <div class="user-avatar">You</div>
+        <div class="user-meta">
+          <div class="user-header"><span class="user-name">You</span><span class="prompt-num">#31</span></div>
+          <div class="user-text">Yes, HTML and LAN Server Only.</div>
+        </div>
+      </div>
+      <div class="claude-bubble">
+        <div class="claude-avatar">CC</div>
+        <div class="claude-meta">
+          <div class="claude-header"><span class="claude-name">Claude Code</span><span class="tag ux">UX</span></div>
+          <div class="claude-body">
+            <h4>What was done</h4>
+            <ul>
+              <li>LAN server implemented as the sharing mechanism</li>
+              <li>Removed the inline text-dump display option &mdash; HTML is the single output format going forward</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="exchange">
+      <div class="user-bubble">
+        <div class="user-avatar">You</div>
+        <div class="user-meta">
+          <div class="user-header"><span class="user-name">You</span><span class="prompt-num">#32</span></div>
+          <div class="user-text">So are we good?</div>
+        </div>
+      </div>
+      <div class="claude-bubble">
+        <div class="claude-avatar">CC</div>
+        <div class="claude-meta">
+          <div class="claude-header"><span class="claude-name">Claude Code</span></div>
+          <div class="claude-body">
+            <h4>Status confirmation</h4>
+            <ul>
+              <li>Confirmed end-to-end flow ready: auto-open screen &rarr; detect already-onboarded &rarr; auto-login &rarr; XIQ banner &rarr; <code>disable cli paging</code> &rarr; 6 capture commands &rarr; HTML report &rarr; LAN server</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="exchange">
+      <div class="user-bubble">
+        <div class="user-avatar">You</div>
+        <div class="user-meta">
+          <div class="user-header"><span class="user-name">You</span><span class="prompt-num">#33</span></div>
+          <div class="user-text">show switch shows zero lines but I can see it is more than that, it is capturing but why is it showing zero?</div>
+        </div>
+      </div>
+      <div class="claude-bubble">
+        <div class="claude-avatar">CC</div>
+        <div class="claude-meta">
+          <div class="claude-header"><span class="claude-name">Claude Code</span><span class="tag fix">BUG FIX</span></div>
+          <div class="claude-body">
+            <h4>First-command capture race condition fixed</h4>
+            <ul>
+              <li>Root cause: <code>show switch</code> is the first and fastest capture command. The deprecation &ldquo;Info:&rdquo; message from the old <code>disable clipaging</code> command was still arriving at the logfile when <code>start_pos</code> was captured &mdash; placing the capture window after the <code>show switch</code> output had already been written.</li>
+              <li>Fix 1: changed command to <code>disable cli paging</code> (no deprecation noise output)</li>
+              <li>Fix 2: increased settle wait for the paging command to <code>2.0s</code></li>
+              <li>Fix 3: added <code>time.sleep(1.0)</code> after the paging command, before the capture loop starts &mdash; ensures all output from the paging command is fully in the logfile before <code>start_pos</code> is set</li>
+              <li>Fix 4: increased all capture settle times to <code>4.0s</code> for safety</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="exchange">
+      <div class="user-bubble">
+        <div class="user-avatar">You</div>
+        <div class="user-meta">
+          <div class="user-header"><span class="user-name">You</span><span class="prompt-num">#34</span></div>
+          <div class="user-text">I am sensing that admin followed by blank is the userid/password? But I had changed to admin/Extreme!11 not sure what is going on</div>
+        </div>
+      </div>
+      <div class="claude-bubble">
+        <div class="claude-avatar">CC</div>
+        <div class="claude-meta">
+          <div class="claude-header"><span class="claude-name">Claude Code</span><span class="tag fix">BUG FIX</span></div>
+          <div class="claude-body">
+            <h4>Login sequence timing bug</h4>
+            <ul>
+              <li>Root cause: EXOS was accepting <code>admin</code> with a blank password and logging in immediately. The agent then sent <code>Extreme!11</code> as an EXOS command (not as a password) &mdash; EXOS rejected it with <em>&ldquo;Invalid input detected at &lsquo;^&rsquo; marker.&rdquo;</em></li>
+              <li>Evidence on the switch console: <code>5320-...# Extreme!11</code> followed by <code>%% Invalid input detected</code></li>
+              <li>Fix: after sending <code>admin</code>, wait up to 10 seconds for <code>EXOS_LOGGED_IN</code>. If the switch logs in (blank password accepted), skip the password step entirely. Only send the password if still at the password prompt after 10 seconds.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="exchange">
+      <div class="user-bubble">
+        <div class="user-avatar">You</div>
+        <div class="user-meta">
+          <div class="user-header"><span class="user-name">You</span><span class="prompt-num">#35</span></div>
+          <div class="user-text">But the password for already onboarded switches will be Extreme01!!</div>
+        </div>
+      </div>
+      <div class="claude-bubble">
+        <div class="claude-avatar">CC</div>
+        <div class="claude-meta">
+          <div class="claude-header"><span class="claude-name">Claude Code</span></div>
+          <div class="claude-body">
+            <h4>What was done</h4>
+            <ul>
+              <li>Password updated to <code>Extreme01!!</code></li>
+              <li>Login flow finalised: (1) send <code>admin</code>, (2) wait up to 10s &mdash; if EXOS auto-logs in with blank password, done, (3) if still at password prompt after 10s, send <code>Extreme01!!</code>, (4) wait up to 20s more</li>
+              <li>This handles both switches with no password set yet and fully onboarded switches with the standard password</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="exchange">
+      <div class="user-bubble">
+        <div class="user-avatar">You</div>
+        <div class="user-meta">
+          <div class="user-header"><span class="user-name">You</span><span class="prompt-num">#36</span></div>
+          <div class="user-text">Now in the direct config mode, when I press 2 the loop starts again. I don&rsquo;t want that to happen.</div>
+        </div>
+      </div>
+      <div class="claude-bubble">
+        <div class="claude-avatar">CC</div>
+        <div class="claude-meta">
+          <div class="claude-header"><span class="claude-name">Claude Code</span><span class="tag fix">BUG FIX</span></div>
+          <div class="claude-body">
+            <h4>Verification loop re-entry bug</h4>
+            <ul>
+              <li>Root cause: <code>likely_already_onboarded</code> remains <code>True</code> permanently after verification. Every subsequent state transition re-entered <code>_run_onboarded_verification()</code>.</li>
+              <li>Fix: added <code>verification_done = False</code> flag before the main loop. Set to <code>True</code> immediately when <code>_run_onboarded_verification</code> returns &mdash; regardless of which choice (1 or 2) was made.</li>
+              <li>The already-onboarded check is now guarded by <code>and not verification_done</code>.</li>
+              <li>Choice 2 also sets <code>monitor_only = True</code> so no Claude analysis runs &mdash; the loop silently watches the console without re-triggering anything.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="exchange">
+      <div class="user-bubble">
+        <div class="user-avatar">You</div>
+        <div class="user-meta">
+          <div class="user-header"><span class="user-name">You</span><span class="prompt-num">#37</span></div>
+          <div class="user-text">For port configuration, if there is nothing on a port, can you omit it from the html and txt?</div>
+        </div>
+      </div>
+      <div class="claude-bubble">
+        <div class="claude-avatar">CC</div>
+        <div class="claude-meta">
+          <div class="claude-header"><span class="claude-name">Claude Code</span><span class="tag ux">UX</span></div>
+          <div class="claude-body">
+            <h4>Inactive port filtering</h4>
+            <ul>
+              <li>Added <code>_filter_port_config(text)</code>: scans the header row of the output to locate the link-state column position, then drops any port data line where the link-state field is <code>-</code>, <code>Inactive</code>, <code>Down</code>, or <code>Not Present</code></li>
+              <li>Falls back to checking if a line ends with <code>&nbsp;-</code> if the column position can&rsquo;t be determined from the header</li>
+              <li>Filter runs on the captured text before it is passed to <code>_build_html_report</code> &mdash; only active ports appear in the HTML Port Configuration tab</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="exchange">
+      <div class="user-bubble">
+        <div class="user-avatar">You</div>
+        <div class="user-meta">
+          <div class="user-header"><span class="user-name">You</span><span class="prompt-num">#38</span></div>
+          <div class="user-text">But you need to capture ALL the port details that are active.</div>
+        </div>
+      </div>
+      <div class="claude-bubble">
+        <div class="claude-avatar">CC</div>
+        <div class="claude-meta">
+          <div class="claude-header"><span class="claude-name">Claude Code</span><span class="tag fix">BUG FIX</span></div>
+          <div class="claude-body">
+            <h4>Space vs Escape</h4>
+            <ul>
+              <li>The initial pagination-dismissal implementation sent Escape (<code>\x1b</code>), which <strong>aborts</strong> remaining output. Ports after the first page were lost before the filter could run &mdash; the filter was receiving truncated data.</li>
+              <li>Fixed: changed <code>_wait_for_settle_escape</code> to send <code>" "</code> (Space) instead of <code>"\x1b"</code> (Escape)</li>
+              <li>Space advances to the next page, capturing all port data in full. The inactive-port filter then runs on the complete output and removes only the unconnected lines.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="exchange">
+      <div class="user-bubble">
+        <div class="user-avatar">You</div>
+        <div class="user-meta">
+          <div class="user-header"><span class="user-name">You</span><span class="prompt-num">#39</span></div>
+          <div class="user-text">When I kill the agent the tmp/ session to the switch should be terminated too. At this point it does not happen.</div>
+        </div>
+      </div>
+      <div class="claude-bubble">
+        <div class="claude-avatar">CC</div>
+        <div class="claude-meta">
+          <div class="claude-header"><span class="claude-name">Claude Code</span><span class="tag ux">UX</span></div>
+          <div class="claude-body">
+            <h4>Session cleanup on exit</h4>
+            <ul>
+              <li>Added to the <code>finally</code> block in <code>main()</code> so it always runs regardless of how the agent exits &mdash; Ctrl-C, choice 1, or any unhandled exception:</li>
+              <li><code>screen -X -S session_id quit</code> &mdash; gracefully quits the screen session. The Terminal window running screen closes automatically.</li>
+              <li><code>lsof -t port</code> &rarr; <code>kill PID</code> &mdash; cleans up any remaining process still holding the serial port.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="exchange">
+      <div class="user-bubble">
+        <div class="user-avatar">You</div>
+        <div class="user-meta">
+          <div class="user-header"><span class="user-name">You</span><span class="prompt-num">#40</span></div>
+          <div class="user-text">On the port configuration, don&rsquo;t wait for the user, pls escape and move on.</div>
+        </div>
+      </div>
+      <div class="claude-bubble">
+        <div class="claude-avatar">CC</div>
+        <div class="claude-meta">
+          <div class="claude-header"><span class="claude-name">Claude Code</span><span class="tag ux">UX</span></div>
+          <div class="claude-body">
+            <h4>Fully autonomous pagination</h4>
+            <ul>
+              <li>Implemented <code>_wait_for_settle_escape()</code> (called with <code>auto_escape=True</code> for <code>show port configuration</code> only)</li>
+              <li>During the settle wait, continuously reads new bytes written to the logfile. The moment <code>--More--</code> or <code>-- More --</code> appears (case-insensitive), sends Space to the screen session immediately &mdash; no user action needed.</li>
+              <li>Repeats for every page break until the full port table is captured and the output settles naturally.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="phase6">
+    <div class="phase-divider"><span class="phase">Phase 6</span> Tabbed HTML, Browser Open &amp; Publishing</div>
+
+    <div class="exchange">
+      <div class="user-bubble">
+        <div class="user-avatar">You</div>
+        <div class="user-meta">
+          <div class="user-header"><span class="user-name">You</span><span class="prompt-num">#41</span></div>
+          <div class="user-text">Now, I want you to do the same thing you did when I onboarded the switch the first time. I want you to prepare an HTML file with linked list of the entire process from the beginning of the architecture to now&hellip; so that I can use this as a tutorial for my team. Then, I want you to update the readme file for GitHub and make it very methodical based on the architectural principles. In the HTML for the tutorial, I want you to ensure ALL of my prompts are there in sequence with your explanations. The repos: https://github.com/shanraisshan/claude-code-best-practice and https://github.com/affaan-m/everything-claude-code</div>
+        </div>
+      </div>
+      <div class="claude-bubble">
+        <div class="claude-avatar">CC</div>
+        <div class="claude-meta">
+          <div class="claude-header"><span class="claude-name">Claude Code</span><span class="tag ux">UX</span></div>
+          <div class="claude-body">
+            <h4>Tutorial HTML and README written</h4>
+            <ul>
+              <li>Created <code>docs/agent_tutorial.html</code>: dark-themed tutorial with fixed sidebar navigation, 8 sections, all prompts in amber blockquotes with green resolution cards, reference links to both Claude Code repos</li>
+              <li>Rewrote <code>README.md</code> leading with the four architectural principles, ASCII data-flow diagram, both switch paths (fresh + already-onboarded), full module reference table, switch credentials table, test summary, link to both repos</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="exchange">
+      <div class="user-bubble">
+        <div class="user-avatar">You</div>
+        <div class="user-meta">
+          <div class="user-header"><span class="user-name">You</span><span class="prompt-num">#42</span></div>
+          <div class="user-text">Can you &lsquo;draw&rsquo; an architectural diagram for the ReadMe file and also in the tutorial? Also, is it possible to publish this tutorial on GitHub like we did the onboarding one?</div>
+        </div>
+      </div>
+      <div class="claude-bubble">
+        <div class="claude-avatar">CC</div>
+        <div class="claude-meta">
+          <div class="claude-header"><span class="claude-name">Claude Code</span><span class="tag ux">UX</span></div>
+          <div class="claude-body">
+            <h4>Architecture diagrams added; GitHub Pages setup</h4>
+            <ul>
+              <li><strong>README.md:</strong> full ASCII box-and-arrow diagram showing all four layers (Physical &rarr; Process &rarr; Agent &rarr; Verification Flow) with labelled arrows for every data path</li>
+              <li><strong>Tutorial HTML:</strong> inline SVG diagram with coloured arrows &mdash; purple for monitoring path, amber dashed for already-onboarded path, green for Claude API and report output. Four labelled layer backgrounds. Sits as its own Section 4 with sidebar nav link.</li>
+              <li><strong>GitHub Pages:</strong> created <code>docs/index.html</code> landing page linking both the onboarding guide (root <code>index.html</code>) and the tutorial. Configure GitHub Pages to serve from <code>/docs</code> on the branch. URLs: <code>/docs/</code> &rarr; landing page, <code>/docs/agent_tutorial.html</code> &rarr; tutorial.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="exchange">
+      <div class="user-bubble">
+        <div class="user-avatar">You</div>
+        <div class="user-meta">
+          <div class="user-header"><span class="user-name">You</span><span class="prompt-num">#43</span></div>
+          <div class="user-text">Update the tutorial with what you have just done. I liked your previous version of the prompts I gave you for some reason, it looked nicer and had the full context of my detailed comments to you. Can you get back to that one with the updated module architecture and architecture diagram? Also, make sure readme is updated.</div>
+        </div>
+      </div>
+      <div class="claude-bubble">
+        <div class="claude-avatar">CC</div>
+        <div class="claude-meta">
+          <div class="claude-header"><span class="claude-name">Claude Code</span><span class="tag ux">UX</span></div>
+          <div class="claude-body">
+            <h4>This version &mdash; complete rebuild of the tutorial</h4>
+            <ul>
+              <li>Rebuilt all 43 prompts as numbered chat-conversation cards &mdash; amber &ldquo;You&rdquo; bubble with exact prompt text, purple &ldquo;Claude Code&rdquo; response card with full detail</li>
+              <li>Updated module architecture table with all internal functions and their purpose</li>
+              <li>Retained the SVG architecture diagram (Section 4) and improved it with better spacing and a filter note</li>
+              <li>Created <code>docs/index.html</code> landing page linking both guides</li>
+              <li>README architecture diagram updated with full four-layer ASCII art including the verification flow sub-diagram</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ DECISIONS ═══════════ -->
+  <section id="decisions">
+    <h2>Key Technical Decisions</h2>
+    <table>
+      <tr><th>Decision</th><th>Alternative Considered</th><th>Why This Approach</th></tr>
+      <tr><td>LogfileMonitor (tail logfile)</td><td>Direct pyserial read</td><td>Only one process can hold the serial port exclusively. <code>screen</code> already owns it. Tailing the logfile is zero-conflict and lets the operator type freely.</td></tr>
+      <tr><td>Regex state machine &rarr; Claude on transition</td><td>Call Claude on every line</td><td>Regex runs in microseconds. Claude latency is 1&ndash;3 seconds. State machine filters 99% of lines &mdash; Claude only sees meaningful transitions. Token cost is negligible.</td></tr>
+      <tr><td>osascript to open Terminal</td><td>Manual instruction to operator</td><td>Zero operator setup steps. Session ID tracked automatically. Stale sessions killed before opening.</td></tr>
+      <tr><td>_wait_for_settle (activity then quiet)</td><td><code>time.sleep(N)</code> fixed delay</td><td>Fixed sleep is either too short (misses slow output) or too long (slows every command). Settle-based wait adapts to actual output speed.</td></tr>
+      <tr><td>Blank CR + 400ms before each command</td><td>Send command directly</td><td>screen drops the first character of a command sent immediately after the previous one. Without the delay: <code>show ipconfig</code> &rarr; <code>how ipconfig</code>.</td></tr>
+      <tr><td>Space to dismiss --More--</td><td>Escape key</td><td>Escape aborts all remaining output &mdash; ports after the first page are lost before the filter can run. Space advances to the next page, capturing everything.</td></tr>
+      <tr><td>verification_done flag</td><td>Re-check likely_already_onboarded</td><td>The property stays True permanently. Without the flag, every subsequent state transition re-enters the verification flow.</td></tr>
+      <tr><td>10s wait after username before sending password</td><td>Send username + password in sequence</td><td>EXOS can accept admin with blank password instantly. If the password is sent after login completes, EXOS treats it as a command &mdash; &ldquo;Invalid input&rdquo;.</td></tr>
+    </table>
+  </section>
+
+  <!-- ═══════════ TESTS ═══════════ -->
+  <section id="tests">
+    <h2>Test Coverage</h2>
+    <p>21 unit tests in <code>tests/test_state_machine.py</code> &mdash; all passing throughout every iteration:</p>
+    <ul>
+      <li>Initial state (<code>UNKNOWN</code>)</li>
+      <li>Individual detection for all major states: U-Boot, FE login, FE login blocked, FE logged in, ZTD, DHCP, XIQ connecting, firmware download, firmware install, EXOS boot, EXOS login, onboarded</li>
+      <li>Boot-complete flag lifecycle</li>
+      <li><code>likely_already_onboarded</code> &mdash; three scenarios: detected correctly, not triggered after full ZTP+ flow, not triggered before EXOS states</li>
+      <li>Full 14-step onboarding sequence in order from U-Boot to ONBOARDED</li>
+    </ul>
+    <p>The state machine was the one module that <strong>never broke</strong> across any change in the entire build. The test suite caught the duplicate pattern bug immediately in Phase 1.</p>
+    <pre>python3 -m pytest tests/ -v
+# 21 passed in 0.03s</pre>
+  </section>
+
+  <!-- ═══════════ RUNNING ═══════════ -->
+  <section id="running">
+    <h2>Running the Agent Today</h2>
+    <ol>
+      <li>Connect the USB-C serial console cable to the Mac and the switch console port (RJ45 labeled CON/CONSOLE)</li>
+      <li><code>cd /path/to/5320-onboarding-agent</code></li>
+      <li><code>source .venv/bin/activate</code></li>
+      <li><code>python3 -m agent.main</code></li>
+    </ol>
+    <p>The agent auto-detects the port, kills any stale session, opens a Terminal window with screen logging to <code>/tmp/screenlog.0</code>, and starts monitoring.</p>
+
+    <h3>The 6 Capture Commands (already-onboarded path)</h3>
+    <table>
+      <tr><th>Command</th><th>HTML Tab</th><th>What It Captures</th></tr>
+      <tr><td><code>show switch</code></td><td>Switch</td><td>Identity, firmware version, management IP, uptime, MAC</td></tr>
+      <tr><td><code>show ipconfig</code></td><td>Ipconfig</td><td>IP configuration &mdash; DHCP or static, mask, gateway, DNS</td></tr>
+      <tr><td><code>show vlan detail</code></td><td>Vlan Detail</td><td>All VLANs configured by XIQ &mdash; ports, tagging, IP</td></tr>
+      <tr><td><code>show port configuration</code></td><td>Port Configuration</td><td>Port modes and speeds (inactive ports filtered out automatically)</td></tr>
+      <tr><td><code>show management</code></td><td>Management</td><td>SSH, SNMP, Telnet, HTTP access settings</td></tr>
+      <tr><td><code>show configuration</code></td><td>Configuration</td><td>Full static running configuration</td></tr>
+    </table>
+  </section>
+
+</main>
+
+<script>
+  const secs = document.querySelectorAll('section[id]');
+  const links = document.querySelectorAll('nav a[href^="#"]');
+  window.addEventListener('scroll', () => {
+    let cur = '';
+    secs.forEach(s => { if (window.scrollY >= s.offsetTop - 110) cur = s.id; });
+    links.forEach(a => { a.classList.toggle('active', a.getAttribute('href') === '#' + cur); });
+  }, { passive: true });
+</script>
+</body>
+</html>
