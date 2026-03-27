@@ -1,0 +1,908 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>5320 Config Verification &amp; Troubleshooting — March 27, 2026</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Segoe UI', Arial, sans-serif; background: #0f172a; color: #e2e8f0; display: flex; min-height: 100vh; }
+nav { position: fixed; left: 0; top: 0; width: 230px; height: 100vh; background: #0d1117; border-right: 1px solid #1e293b; overflow-y: auto; padding: 20px 0; z-index: 100; }
+nav .nav-title { color: #7c3aed; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; padding: 0 18px 14px; border-bottom: 1px solid #1e293b; margin-bottom: 10px; }
+nav a { display: block; padding: 6px 18px; color: #64748b; font-size: 0.80rem; text-decoration: none; border-left: 3px solid transparent; transition: all 0.15s; line-height: 1.4; }
+nav a:hover, nav a.active { color: #a78bfa; border-left-color: #7c3aed; background: #1e293b; }
+nav .nav-section { padding: 10px 18px 4px; color: #334155; font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; }
+main { margin-left: 230px; max-width: 1020px; padding: 48px 40px; flex: 1; }
+.page-header { margin-bottom: 48px; }
+.page-header h1 { font-size: 1.9rem; color: #a78bfa; margin-bottom: 8px; }
+.page-header .meta { color: #64748b; font-size: 0.88rem; margin-bottom: 4px; }
+.page-header .subtitle { color: #94a3b8; font-size: 0.95rem; line-height: 1.6; }
+section { margin-bottom: 64px; scroll-margin-top: 24px; }
+h2 { font-size: 1.4rem; color: #a78bfa; margin-bottom: 6px; padding-bottom: 10px; border-bottom: 1px solid #1e293b; }
+h3 { font-size: 1.05rem; color: #c4b5fd; margin: 24px 0 12px; }
+h4 { font-size: 0.9rem; color: #94a3b8; margin: 18px 0 8px; font-weight: 600; }
+p { color: #94a3b8; font-size: 0.92rem; line-height: 1.7; margin-bottom: 12px; }
+.phase-label { display: inline-block; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #7c3aed; margin-bottom: 8px; }
+.card { background: #1e293b; border: 1px solid #334155; border-radius: 8px; padding: 20px 24px; margin: 16px 0; }
+.box-purple { border-color: #7c3aed; background: #1a1035; }
+.box-amber { border-color: #f59e0b; background: #1a1200; }
+.box-green { border-color: #10b981; background: #052019; }
+.box-red { border-color: #ef4444; background: #1a0505; }
+.box-blue { border-color: #3b82f6; background: #0c1a2e; }
+.box-title { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 10px; }
+.box-title.purple { color: #a78bfa; }
+.box-title.amber { color: #fcd34d; }
+.box-title.green { color: #34d399; }
+.box-title.red { color: #f87171; }
+.box-title.blue { color: #60a5fa; }
+pre { border-radius: 6px; padding: 16px; font-size: 0.80rem; line-height: 1.6; overflow-x: auto; margin: 12px 0; font-family: 'SF Mono', 'Fira Code', monospace; }
+pre.switch { background: #0d1117; border-left: 3px solid #67e8f9; color: #67e8f9; }
+pre.cmd { background: #0d1117; border-left: 3px solid #a78bfa; color: #a78bfa; }
+pre.config { background: #0d1117; border-left: 3px solid #34d399; color: #34d399; }
+pre.err { background: #0d1117; border-left: 3px solid #ef4444; color: #94a3b8; }
+.ok { color: #34d399; }
+.warn { color: #fcd34d; }
+.err-text { color: #f87171; }
+.dim { color: #475569; }
+.hi { color: #e2e8f0; font-weight: 600; }
+code { background: #1e293b; color: #67e8f9; padding: 2px 6px; border-radius: 3px; font-size: 0.82rem; font-family: 'SF Mono', monospace; }
+table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.84rem; }
+th { background: #1e293b; color: #a78bfa; font-weight: 600; padding: 10px 12px; text-align: left; border-bottom: 2px solid #334155; }
+td { padding: 9px 12px; border-bottom: 1px solid #1e293b; color: #94a3b8; vertical-align: top; }
+tr:hover td { background: #1e293b44; }
+td code { background: #0d1117; color: #67e8f9; padding: 2px 5px; border-radius: 3px; font-size: 0.78rem; }
+.badge { display: inline-block; font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 10px; }
+.badge-ok { background: #052019; color: #34d399; border: 1px solid #10b981; }
+.badge-warn { background: #1a1200; color: #fcd34d; border: 1px solid #f59e0b; }
+.badge-err { background: #1a0505; color: #f87171; border: 1px solid #ef4444; }
+.badge-info { background: #0c1a2e; color: #60a5fa; border: 1px solid #3b82f6; }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0; }
+@media (max-width: 700px) { .two-col { grid-template-columns: 1fr; } }
+.flow-box { background: #1e293b; border: 1px solid #334155; border-radius: 6px; padding: 14px 16px; font-size: 0.82rem; color: #94a3b8; }
+.flow-arrow { text-align: center; color: #475569; font-size: 1.2rem; margin: 4px 0; }
+footer { margin-top: 80px; padding-top: 24px; border-top: 1px solid #1e293b; text-align: center; }
+footer p { color: #475569; font-size: 0.78rem; }
+footer a { color: #60a5fa; font-size: 0.82rem; margin: 0 10px; text-decoration: none; }
+footer a:hover { text-decoration: underline; }
+@media print {
+  nav { display: none; }
+  main { margin-left: 0; padding: 24px; }
+  body { background: #fff; color: #111; }
+  h2 { color: #4c1d95; }
+  pre { border: 1px solid #ccc; background: #f8f8f8 !important; color: #111 !important; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-title">Config Verification<br>Mar 27, 2026</div>
+  <div class="nav-section">Overview</div>
+  <a href="#summary">Executive Summary</a>
+  <a href="#findings">Findings at a Glance</a>
+  <div class="nav-section">Switch Config</div>
+  <a href="#running">Running Configuration</a>
+  <a href="#vlans">VLAN State</a>
+  <a href="#ipconfig">IP Interfaces</a>
+  <a href="#routing">Routing Table</a>
+  <a href="#dhcp">DHCP Server State</a>
+  <a href="#poe">PoE &amp; FDB</a>
+  <a href="#arp">ARP Table</a>
+  <div class="nav-section">Root Cause</div>
+  <a href="#xiq-how">How 5320 Reaches XIQ</a>
+  <a href="#ap-dhcp">Why APs Got IPs</a>
+  <a href="#client-fail">Why Clients Can't Reach Internet</a>
+  <div class="nav-section">Issues &amp; Next Steps</div>
+  <a href="#issues">Issues Found</a>
+  <a href="#options">Fix Options</a>
+  <a href="#glossary">Command Reference</a>
+</nav>
+
+<main>
+
+<div class="page-header">
+  <div class="meta">Khursheed Khan &nbsp;&middot;&nbsp; March 27, 2026 &nbsp;&middot;&nbsp; Extreme Networks</div>
+  <h1>5320 Config Verification &amp; Connectivity Troubleshooting</h1>
+  <p class="subtitle">Complete analysis of the 5320 switch running configuration captured March 27, 2026. Covers VLAN state, IP interfaces, DHCP server, routing table, PoE, and a methodical root-cause analysis of why the APs reach XIQ and the internet while WiFi clients on VLANs 20 and 30 cannot pass data to the internet.</p>
+</div>
+
+<!-- EXECUTIVE SUMMARY -->
+<section id="summary">
+  <div class="phase-label">Overview</div>
+  <h2>Executive Summary</h2>
+
+  <p>The switch was configured over two days (March 26–27, 2026) via direct CLI. Four VLANs are active. The AP3000s are adopted in XIQ and broadcasting SSIDs. WiFi clients on Corporate (VLAN 20) and Guest (VLAN 30) receive DHCP addresses correctly from the switch but <strong class="hi">cannot reach the internet</strong>. IoT VLAN (40) has no IP address or DHCP configured yet.</p>
+
+  <div class="two-col">
+    <div class="card box-green">
+      <div class="box-title green">What Is Working</div>
+      <ul style="color:#6ee7b7;font-size:0.85rem;line-height:2;padding-left:16px">
+        <li>Switch management to internet (192.168.0.24) ✓</li>
+        <li>XIQ agent connectivity from switch ✓</li>
+        <li>Both AP3000s adopted in XIQ (MANAGED) ✓</li>
+        <li>PoE delivering ~4.9W on ports 3 and 5 ✓</li>
+        <li>DHCP server handing out IPs on Guest VLAN 30 ✓</li>
+        <li>DHCP server configured on Corporate VLAN 20 ✓</li>
+        <li>VLANs 20/30/40 tagged correctly on ports 1, 3, 5 ✓</li>
+        <li>Configuration saved to primary.cfg ✓</li>
+        <li>Routing table correct: 4 routes present ✓</li>
+      </ul>
+    </div>
+    <div class="card box-red">
+      <div class="box-title red">What Is Not Working / Missing</div>
+      <ul style="color:#fca5a5;font-size:0.85rem;line-height:2;padding-left:16px">
+        <li>WiFi clients cannot reach internet ✗</li>
+        <li>IoT VLAN (40): no IP address configured ✗</li>
+        <li>IoT VLAN (40): no DHCP server configured ✗</li>
+        <li>IoT VLAN (40): ipforwarding disabled ✗</li>
+        <li>Switch management IP obtained via DHCP (no static) ⚠</li>
+        <li>Port 5 not in STP scope for tagged VLANs ⚠</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- FINDINGS AT A GLANCE -->
+<section id="findings">
+  <div class="phase-label">Overview</div>
+  <h2>Findings at a Glance</h2>
+
+  <table>
+    <tr><th>Item</th><th>Expected</th><th>Actual</th><th>Status</th></tr>
+    <tr>
+      <td>Default VLAN IP</td>
+      <td>192.168.0.24/24, management</td>
+      <td>192.168.0.24/24 via DHCP from home router</td>
+      <td><span class="badge badge-ok">OK</span></td>
+    </tr>
+    <tr>
+      <td>Corporate VLAN IP</td>
+      <td>10.20.0.1/24, ipforwarding on</td>
+      <td>10.20.0.1/24, ipforwarding enabled ✓</td>
+      <td><span class="badge badge-ok">OK</span></td>
+    </tr>
+    <tr>
+      <td>Guest VLAN IP</td>
+      <td>10.30.0.1/24, ipforwarding on</td>
+      <td>10.30.0.1/24, ipforwarding enabled ✓</td>
+      <td><span class="badge badge-ok">OK</span></td>
+    </tr>
+    <tr>
+      <td>IoT VLAN IP</td>
+      <td>10.40.0.1/24, ipforwarding on</td>
+      <td><strong class="err-text">No IP configured. ipforwarding disabled.</strong></td>
+      <td><span class="badge badge-err">MISSING</span></td>
+    </tr>
+    <tr>
+      <td>DHCP — Guest</td>
+      <td>Pool 10.30.0.100–200, gateway, DNS, enabled ports 3,5</td>
+      <td>Configured and working — client 10.30.0.102 confirmed in ARP</td>
+      <td><span class="badge badge-ok">OK</span></td>
+    </tr>
+    <tr>
+      <td>DHCP — Corporate</td>
+      <td>Pool 10.20.0.100–200, gateway, DNS, enabled ports 3,5</td>
+      <td>Configured. No client IP in ARP yet (no test device connected).</td>
+      <td><span class="badge badge-ok">OK</span></td>
+    </tr>
+    <tr>
+      <td>DHCP — IoT</td>
+      <td>Pool 10.40.0.100–200</td>
+      <td><strong class="err-text">Not configured</strong></td>
+      <td><span class="badge badge-err">MISSING</span></td>
+    </tr>
+    <tr>
+      <td>Default route</td>
+      <td>0.0.0.0/0 via 192.168.0.1</td>
+      <td>0.0.0.0/0 via 192.168.0.1 (origin: BOOTP) ✓</td>
+      <td><span class="badge badge-ok">OK</span></td>
+    </tr>
+    <tr>
+      <td>Internet from switch mgmt</td>
+      <td>ping 8.8.8.8 succeeds</td>
+      <td>0% loss, ~5ms ✓</td>
+      <td><span class="badge badge-ok">OK</span></td>
+    </tr>
+    <tr>
+      <td>Internet from VLAN 30 gateway</td>
+      <td>ping 8.8.8.8 from 10.30.0.1 succeeds</td>
+      <td><strong class="err-text">100% loss — home router drops 10.x.x.x return traffic</strong></td>
+      <td><span class="badge badge-err">FAIL</span></td>
+    </tr>
+    <tr>
+      <td>XIQ agent connectivity</td>
+      <td>Switch connected to XIQ cloud</td>
+      <td>iqagent on VR-Default, switch shows as managed in XIQ ✓</td>
+      <td><span class="badge badge-ok">OK</span></td>
+    </tr>
+    <tr>
+      <td>PoE ports 3 and 5</td>
+      <td>Delivering class4</td>
+      <td>Both delivering class4, 54V, 91–92mA, ~4.9W ✓</td>
+      <td><span class="badge badge-ok">OK</span></td>
+    </tr>
+    <tr>
+      <td>VLAN tagging ports 3 &amp; 5</td>
+      <td>VLAN 20/30/40 tagged, VLAN 1 untagged</td>
+      <td>Correct — confirmed via show vlan detail ✓</td>
+      <td><span class="badge badge-ok">OK</span></td>
+    </tr>
+    <tr>
+      <td>Management IP stability</td>
+      <td>Ideally static</td>
+      <td>Switch is a DHCP client on Default VLAN — IP could change if home router reassigns</td>
+      <td><span class="badge badge-warn">REVIEW</span></td>
+    </tr>
+    <tr>
+      <td>Port 5 in STP</td>
+      <td>Port 5 in STP scope for tagged VLANs</td>
+      <td>STP config covers ports 1–3 only — port 5 added via CLI, outside STP scope</td>
+      <td><span class="badge badge-warn">MINOR</span></td>
+    </tr>
+  </table>
+</section>
+
+<!-- RUNNING CONFIGURATION -->
+<section id="running">
+  <div class="phase-label">Switch Config</div>
+  <h2>Running Configuration — <code>show configuration</code></h2>
+  <p>Captured March 27, 2026. Key sections extracted and annotated below. Full config verified from <code>primary.cfg</code> saved to flash.</p>
+
+  <h3>VLAN Module</h3>
+  <pre class="config">create vlan "Corporate"
+configure vlan Corporate tag 20
+create vlan "Guest"
+configure vlan Guest tag 30
+create vlan "IoT"
+configure vlan IoT tag 40
+
+configure vlan Corporate add ports 1-3,5 tagged       <span class="dim">&larr; ports 1,2,3,5 carry Corporate tagged</span>
+configure vlan Default   add ports 1-20  untagged      <span class="dim">&larr; ALL ports carry Default untagged (native)</span>
+configure vlan Guest     add ports 1-3,5 tagged        <span class="dim">&larr; ports 1,2,3,5 carry Guest tagged</span>
+configure vlan IoT       add ports 1-3,5 tagged        <span class="dim">&larr; ports 1,2,3,5 carry IoT tagged</span>
+
+configure vlan Corporate ipaddress 10.20.0.1 255.255.255.0
+enable ipforwarding vlan Corporate                     <span class="dim">&larr; L3 routing enabled ✓</span>
+configure vlan Guest     ipaddress 10.30.0.1 255.255.255.0
+enable ipforwarding vlan Guest                         <span class="dim">&larr; L3 routing enabled ✓</span>
+<span class="warn">&larr; MISSING: configure vlan IoT ipaddress 10.40.0.1/24</span>
+<span class="warn">&larr; MISSING: enable ipforwarding vlan IoT</span></pre>
+
+  <h3>Management / DHCP / DNS / NTP Module</h3>
+  <pre class="config">configure dns-client add name-server 1.0.0.1 vr VR-Default       <span class="dim">&larr; Cloudflare DNS</span>
+configure dns-client add name-server 208.67.220.220 vr VR-Default  <span class="dim">&larr; OpenDNS</span>
+
+configure sntp-client broadcast vr VR-Default
+configure sntp-client update-interval 16
+
+enable dhcp vlan Default          <span class="dim">&larr; switch itself is a DHCP CLIENT on Default VLAN</span>
+                                  <span class="dim">    gets 192.168.0.24 from home router dynamically</span>
+
+configure vlan Corporate dhcp-address-range 10.20.0.100 - 10.20.0.200
+configure vlan Corporate dhcp-lease-timer 3600
+configure vlan Corporate dhcp-options default-gateway 10.20.0.1
+configure vlan Corporate dhcp-options dns-server 8.8.8.8
+enable dhcp ports 3,5 vlan Corporate
+
+configure vlan Guest dhcp-address-range 10.30.0.100 - 10.30.0.200
+configure vlan Guest dhcp-lease-timer 3600
+configure vlan Guest dhcp-options default-gateway 10.30.0.1
+configure vlan Guest dhcp-options dns-server 8.8.8.8
+enable dhcp ports 3,5 vlan Guest
+<span class="warn">&larr; MISSING: IoT DHCP configuration entirely</span></pre>
+
+  <h3>XIQ Agent Module</h3>
+  <pre class="config">configure iqagent server vr VR-Default   <span class="dim">&larr; XIQ agent uses Default VLAN (192.168.0.24) to reach cloud</span></pre>
+
+  <h3>NTP Module</h3>
+  <pre class="config">enable ntp vr VR-Default
+configure ntp server add 0.aerohive.pool.ntp.org vr VR-Default
+configure ntp server add 1.aerohive.pool.ntp.org vr VR-Default
+configure ntp server add 2.aerohive.pool.ntp.org vr VR-Default
+configure ntp server add 3.aerohive.pool.ntp.org vr VR-Default
+<span class="dim">&larr; Aerohive/Extreme NTP pool — sourced from 192.168.0.24, home router NATs it</span></pre>
+
+  <h3>Security / DHCP Snooping</h3>
+  <pre class="config">configure trusted-ports 1-3 trust-for dhcp-server
+<span class="dim">&larr; DHCP snooping: only ports 1,2,3 are trusted for incoming DHCP server frames</span>
+<span class="dim">    Port 5 is NOT trusted — rogue DHCP server on port 5 would be blocked</span>
+<span class="dim">    Switch's own DHCP responses are outgoing, not affected by this setting</span></pre>
+
+  <h3>PoE Module</h3>
+  <pre class="config">disable inline-power ports 1   <span class="dim">&larr; port 1 (uplink) has PoE explicitly disabled — correct</span>
+<span class="dim">Ports 3 and 5: inline-power enabled (set by user, not shown in running config unless non-default)</span></pre>
+
+  <h3>STP Module</h3>
+  <pre class="config">configure stpd s0 add vlan Corporate ports 1-3 dot1d   <span class="dim">&larr; port 5 NOT in STP scope</span>
+configure stpd s0 add vlan Default   ports 1-2,4-20 dot1d
+configure stpd s0 add vlan Guest     ports 1-3 dot1d   <span class="dim">&larr; port 5 NOT in STP scope</span>
+configure stpd s0 add vlan IoT       ports 1-3 dot1d   <span class="dim">&larr; port 5 NOT in STP scope</span>
+configure stpd s0 add vlan Mgmt      ports 1 dot1d
+enable stpd s0</pre>
+
+  <div class="card box-amber">
+    <div class="box-title amber">STP &amp; Port 5 Note</div>
+    <p>Port 5 was added to Corporate/Guest/IoT VLANs via manual CLI but was not added to the STP instance. This means port 5 has no STP loop protection for those VLANs. In a simple single-switch topology this is functionally harmless, but in a multi-switch environment it could cause loops. To fix: <code>configure stpd s0 add vlan Corporate ports 5 dot1d</code> (and same for Guest, IoT).</p>
+  </div>
+</section>
+
+<!-- VLAN STATE -->
+<section id="vlans">
+  <div class="phase-label">Switch Config</div>
+  <h2>VLAN State — <code>show vlan detail</code></h2>
+
+  <table>
+    <tr><th>VLAN</th><th>Tag</th><th>IP / Forwarding</th><th>Active Ports</th><th>STP</th><th>Notes</th></tr>
+    <tr>
+      <td><strong class="hi">Default</strong></td>
+      <td>1</td>
+      <td>192.168.0.24/24<br><span class="badge badge-warn">Forwarding OFF</span> <span class="badge badge-info">BOOTP ON</span></td>
+      <td>Untag: <span class="ok">*1, *3, *5</span> active<br>Blocked: 2b, 4b, 6b–20b</td>
+      <td>s0 auto-bind</td>
+      <td>Management VLAN. ipforwarding disabled by design — switch does not route inter-VLAN via Default.</td>
+    </tr>
+    <tr>
+      <td><strong style="color:#a78bfa">Corporate</strong></td>
+      <td>20</td>
+      <td>10.20.0.1/24<br><span class="badge badge-ok">Forwarding ON</span></td>
+      <td>Tag: <span class="ok">*1, *3, *5</span> active<br>Blocked: 2b</td>
+      <td>s0 auto-bind</td>
+      <td>L3 routing enabled. DHCP server configured. ✓</td>
+    </tr>
+    <tr>
+      <td><strong style="color:#fcd34d">Guest</strong></td>
+      <td>30</td>
+      <td>10.30.0.1/24<br><span class="badge badge-ok">Forwarding ON</span></td>
+      <td>Tag: <span class="ok">*1, *3, *5</span> active<br>Blocked: 2b</td>
+      <td>s0 auto-bind</td>
+      <td>L3 routing enabled. DHCP confirmed working (client 10.30.0.102 in ARP). ✓</td>
+    </tr>
+    <tr>
+      <td><strong style="color:#34d399">IoT</strong></td>
+      <td>40</td>
+      <td><span class="err-text">NO IP ADDRESS</span><br><span class="badge badge-err">Forwarding OFF</span></td>
+      <td>Tag: <span class="ok">*1, *3, *5</span> active<br>Blocked: 2b</td>
+      <td>s0 auto-bind</td>
+      <td><strong class="err-text">Incomplete: no IP, no DHCP, no forwarding configured.</strong></td>
+    </tr>
+    <tr>
+      <td><strong class="dim">Mgmt</strong></td>
+      <td>10</td>
+      <td>No IP</td>
+      <td>Untag: OOB port (down)</td>
+      <td>s0 auto-bind</td>
+      <td>System-reserved OOB management port. Locked — cannot add data ports, delete, or rename.</td>
+    </tr>
+  </table>
+
+  <h3>Port Membership Summary</h3>
+  <table>
+    <tr><th>Port</th><th>Role</th><th>Untagged (native)</th><th>Tagged VLANs</th><th>Notes</th></tr>
+    <tr><td><strong class="hi">1</strong></td><td>Uplink to home router</td><td>Default (1)</td><td>Corporate 20, Guest 30, IoT 40</td><td>Active — 192.168.0.1 reachable ✓</td></tr>
+    <tr><td><strong class="hi">2</strong></td><td>Unused/spare</td><td>Default (1)</td><td>Corporate 20, Guest 30, IoT 40</td><td>Blocked by STP (b flag)</td></tr>
+    <tr><td><strong class="hi">3</strong></td><td>AP1 (AH-556680)</td><td>Default (1)</td><td>Corporate 20, Guest 30, IoT 40</td><td>Active — AP1 MAC in FDB ✓</td></tr>
+    <tr><td><strong class="hi">4</strong></td><td>Unused</td><td>Default (1)</td><td>—</td><td>No tagged VLANs, blocked by STP</td></tr>
+    <tr><td><strong class="hi">5</strong></td><td>AP2 (AH-565780)</td><td>Default (1)</td><td>Corporate 20, Guest 30, IoT 40</td><td>Active — AP2 MAC in FDB + WiFi client in ARP ✓</td></tr>
+    <tr><td><strong class="dim">6–20</strong></td><td>Unused access ports</td><td>Default (1)</td><td>—</td><td>Blocked by STP, Default only</td></tr>
+  </table>
+</section>
+
+<!-- IP INTERFACES -->
+<section id="ipconfig">
+  <div class="phase-label">Switch Config</div>
+  <h2>IP Interfaces — <code>show ipconfig</code></h2>
+
+  <pre class="switch">Interface    IP Address          Flags                   nSIA
+Corporate    10.20.0.1       /24 EUf--R--g---           0
+Default      192.168.0.24    /24 EU---R--gB--           0
+Guest        10.30.0.1       /24 EUf--R--g---           0 </pre>
+
+  <h3>Flag Decode</h3>
+  <table>
+    <tr><th>Interface</th><th>E</th><th>U</th><th>f (Forwarding)</th><th>B (BOOTP)</th><th>Meaning</th></tr>
+    <tr>
+      <td>Corporate</td>
+      <td><span class="badge badge-ok">Enabled</span></td>
+      <td><span class="badge badge-ok">Up</span></td>
+      <td><span class="badge badge-ok">ON</span></td>
+      <td>—</td>
+      <td>Interface active, routing enabled. Will forward packets between VLANs and to Default. ✓</td>
+    </tr>
+    <tr>
+      <td>Default</td>
+      <td><span class="badge badge-ok">Enabled</span></td>
+      <td><span class="badge badge-ok">Up</span></td>
+      <td><span class="badge badge-warn">OFF</span></td>
+      <td><span class="badge badge-info">ON</span></td>
+      <td>Management interface. BOOTP=ON means switch is a DHCP client here. Forwarding OFF means this interface does not route — correct for management VLAN.</td>
+    </tr>
+    <tr>
+      <td>Guest</td>
+      <td><span class="badge badge-ok">Enabled</span></td>
+      <td><span class="badge badge-ok">Up</span></td>
+      <td><span class="badge badge-ok">ON</span></td>
+      <td>—</td>
+      <td>Interface active, routing enabled. DHCP confirmed working (client in ARP). ✓</td>
+    </tr>
+    <tr>
+      <td><strong class="err-text">IoT</strong></td>
+      <td colspan="4"><strong class="err-text">NOT SHOWN — no IP address configured on this VLAN</strong></td>
+      <td><strong class="err-text">IoT VLAN has no L3 interface.</strong></td>
+    </tr>
+  </table>
+</section>
+
+<!-- ROUTING TABLE -->
+<section id="routing">
+  <div class="phase-label">Switch Config</div>
+  <h2>Routing Table — <code>show iproute</code></h2>
+
+  <pre class="switch">Ori  Destination        Gateway         Mtr  Flags         VLAN       Duration
+#bo  Default Route      192.168.0.1     1    UG-D---um--f- Default    1d:15h:3m:55s
+#d   10.20.0.0/24       10.20.0.1       1    U------um--f- Corporate  0d:16h:7m:50s
+#d   10.30.0.0/24       10.30.0.1       1    U------um--f- Guest      0d:16h:19m:0s
+#d   192.168.0.0/24     192.168.0.24    1    U------um--f- Default    1d:15h:3m:56s
+
+Total routes: 4  (3 Direct, 1 BOOTP)</pre>
+
+  <h3>Route Analysis</h3>
+  <table>
+    <tr><th>Route</th><th>Origin</th><th>Meaning</th><th>Status</th></tr>
+    <tr>
+      <td><code>0.0.0.0/0 → 192.168.0.1</code></td>
+      <td><span class="badge badge-info">BOOTP</span></td>
+      <td>Default route — all unknown destinations go to home router. Obtained via DHCP from the home router alongside 192.168.0.24. Uptime: 1 day 15 hours = config survived overnight reboot test ✓</td>
+      <td><span class="badge badge-ok">OK</span></td>
+    </tr>
+    <tr>
+      <td><code>10.20.0.0/24 → 10.20.0.1</code></td>
+      <td><span class="badge badge-info">Direct</span></td>
+      <td>Corporate VLAN subnet directly connected. Created when Corporate IP was configured.</td>
+      <td><span class="badge badge-ok">OK</span></td>
+    </tr>
+    <tr>
+      <td><code>10.30.0.0/24 → 10.30.0.1</code></td>
+      <td><span class="badge badge-info">Direct</span></td>
+      <td>Guest VLAN subnet directly connected. Created when Guest IP was configured.</td>
+      <td><span class="badge badge-ok">OK</span></td>
+    </tr>
+    <tr>
+      <td><code>192.168.0.0/24 → 192.168.0.24</code></td>
+      <td><span class="badge badge-info">Direct</span></td>
+      <td>Default VLAN management subnet directly connected.</td>
+      <td><span class="badge badge-ok">OK</span></td>
+    </tr>
+    <tr>
+      <td><code>10.40.0.0/24</code></td>
+      <td>—</td>
+      <td><strong class="err-text">MISSING — IoT VLAN has no IP, so no route exists for this subnet.</strong></td>
+      <td><span class="badge badge-err">MISSING</span></td>
+    </tr>
+  </table>
+
+  <div class="card box-purple">
+    <div class="box-title purple">The Routing Table Is Correct — The Problem Is Upstream</div>
+    <p>The switch knows exactly what to do: send unknown traffic (including 8.8.8.8) to 192.168.0.1 via the default route. The switch's job is done correctly. The failure is that when traffic from 10.30.0.x arrives at the home router, the home router has no return path — it only knows how to send replies back to 192.168.0.0/24 devices.</p>
+  </div>
+</section>
+
+<!-- DHCP SERVER STATE -->
+<section id="dhcp">
+  <div class="phase-label">Switch Config</div>
+  <h2>DHCP Server State</h2>
+
+  <div class="card box-amber">
+    <div class="box-title amber"><code>show dhcp-server lease</code> — Command Not Valid on EXOS</div>
+    <p>The command <code>show dhcp-server lease</code> does not exist on EXOS SwitchEngine. The DHCP server state is visible through two methods: (1) the running configuration (<code>show configuration</code>), and (2) the ARP table (<code>show iparp</code>) which shows active leases as IP-to-MAC mappings once a client has been assigned an address and communicated with the switch.</p>
+  </div>
+
+  <h3>DHCP Configuration Verified from Running Config</h3>
+  <table>
+    <tr><th>VLAN</th><th>Address Pool</th><th>Gateway Option</th><th>DNS</th><th>Lease</th><th>Enabled Ports</th><th>Status</th></tr>
+    <tr>
+      <td>Corporate (20)</td>
+      <td>10.20.0.100 – 10.20.0.200</td>
+      <td>10.20.0.1</td>
+      <td>8.8.8.8</td>
+      <td>3600s (1hr)</td>
+      <td>3, 5</td>
+      <td><span class="badge badge-ok">Configured</span></td>
+    </tr>
+    <tr>
+      <td>Guest (30)</td>
+      <td>10.30.0.100 – 10.30.0.200</td>
+      <td>10.30.0.1</td>
+      <td>8.8.8.8</td>
+      <td>3600s (1hr)</td>
+      <td>3, 5</td>
+      <td><span class="badge badge-ok">Active — client confirmed</span></td>
+    </tr>
+    <tr>
+      <td><strong class="err-text">IoT (40)</strong></td>
+      <td colspan="5"><strong class="err-text">Not configured</strong></td>
+      <td><span class="badge badge-err">Missing</span></td>
+    </tr>
+  </table>
+
+  <h3>Active DHCP Lease — Confirmed via ARP</h3>
+  <pre class="switch">VR-Default    10.30.0.102      74:a6:cd:8b:19:60   11  NO  Guest  30  port 5
+
+&larr; A WiFi client (MAC 74:a6:cd:8b:19:60) received 10.30.0.102 from the switch DHCP server
+   It is connected on port 5 (AP2) on VLAN 30 (Guest)
+   This is the phone that tested internet access — DHCP is working correctly</pre>
+
+  <h3>Switch as DHCP Client (Default VLAN)</h3>
+  <pre class="switch">enable dhcp vlan Default   &larr; in running config
+
+&larr; The switch itself obtains 192.168.0.24 via DHCP from the home router
+   This also gives the switch its default gateway (192.168.0.1) and DNS servers
+   The switch DNS client adds 1.0.0.1 (Cloudflare) and 208.67.220.220 (OpenDNS) separately</pre>
+</section>
+
+<!-- PoE AND FDB -->
+<section id="poe">
+  <div class="phase-label">Switch Config</div>
+  <h2>PoE Status &amp; FDB</h2>
+
+  <h3>PoE — <code>show inline-power info ports 3,5</code></h3>
+  <pre class="switch">Port    State           Class      Volts    Curr    Power     Fault
+                                            (mA)   (Watts)
+3       delivering      class4     54.0      91      4.900    None
+5       delivering      class4     54.0      92      4.900    None</pre>
+
+  <table>
+    <tr><th>Port</th><th>AP</th><th>State</th><th>Voltage</th><th>Current</th><th>Power</th><th>Notes</th></tr>
+    <tr>
+      <td>3</td>
+      <td>AP1 AH-556680</td>
+      <td><span class="badge badge-ok">Delivering</span></td>
+      <td>54.0V</td>
+      <td>91mA</td>
+      <td>4.9W</td>
+      <td>Class 4 (IEEE 802.3at PoE+). Normal idle power. Full load at 12–15W when clients active.</td>
+    </tr>
+    <tr>
+      <td>5</td>
+      <td>AP2 AH-565780</td>
+      <td><span class="badge badge-ok">Delivering</span></td>
+      <td>54.0V</td>
+      <td>92mA</td>
+      <td>4.9W</td>
+      <td>Class 4. WiFi client 10.30.0.102 confirmed connected through this AP. ✓</td>
+    </tr>
+  </table>
+
+  <h3>FDB — MAC Addresses Learned on AP Ports</h3>
+  <pre class="switch">show fdb ports 3:
+00:e6:0e:55:66:80   Default(0001)   d m   port 3   &larr; AP1 MAC (untagged, Default VLAN)
+
+show fdb ports 5:
+00:e6:0e:56:57:80   Default(0001)   d m   port 5   &larr; AP2 MAC (untagged, Default VLAN)
+74:a6:cd:8b:19:60   Guest(0030)     d mi  port 5   &larr; WiFi CLIENT MAC (tagged, VLAN 30)</pre>
+
+  <div class="card box-purple">
+    <div class="box-title purple">What the FDB Tells Us</div>
+    <p>Port 5 shows <strong class="hi">two entries</strong>: the AP itself (00:e6:0e:56:57:80) on Default VLAN untagged, and a WiFi client (74:a6:cd:8b:19:60) on Guest VLAN 30 tagged. This confirms the AP is correctly tagging the client's traffic with VLAN 30 and sending it to the switch. The <code>mi</code> flags mean the entry was learned dynamically (d) and has an associated IP (i) — confirmed by the ARP table entry at 10.30.0.102.</p>
+  </div>
+</section>
+
+<!-- ARP TABLE -->
+<section id="arp">
+  <div class="phase-label">Switch Config</div>
+  <h2>ARP Table — <code>show iparp</code></h2>
+
+  <pre class="switch">VR            Destination      Mac                Age  Static  VLAN     VID  Port
+VR-Default    192.168.0.1      58:13:d3:9c:c1:ee   20     NO  Default    1    1   &larr; home router
+VR-Default    192.168.0.3      00:58:28:f3:b0:10   20     NO  Default    1    1
+VR-Default    192.168.0.6      00:58:28:57:69:21   20     NO  Default    1    1
+VR-Default    192.168.0.7      50:a0:30:07:50:96    7     NO  Default    1    1
+VR-Default    192.168.0.22     6e:9d:2f:f0:a0:a3   12     NO  Default    1    1
+VR-Default    192.168.0.28     d8:e0:16:37:6c:00    4     NO  Default    1    1   &larr; 2nd switch
+VR-Default    10.30.0.102      74:a6:cd:8b:19:60   11     NO  Guest     30    5   &larr; WiFi CLIENT!</pre>
+
+  <p>The ARP table confirms a WiFi client at <code>10.30.0.102</code> on Guest VLAN 30 via port 5 (AP2). The client's MAC is <code>74:a6:cd:8b:19:60</code> — this is the phone used to test internet access. <strong class="hi">DHCP is working correctly. The client has a valid IP. The only failure is the return-path NAT problem upstream.</strong></p>
+</section>
+
+<!-- HOW 5320 REACHES XIQ -->
+<section id="xiq-how">
+  <div class="phase-label">Root Cause Analysis</div>
+  <h2>How the 5320 Reaches XIQ Servers</h2>
+
+  <p>This is entirely handled through the <strong class="hi">Default VLAN management interface</strong> — the same interface used for SSH access. The XIQ agent (<code>iqagent</code>) is bound to <code>VR-Default</code> which uses 192.168.0.24.</p>
+
+  <div style="max-width:520px;margin:24px auto">
+    <div class="flow-box" style="border-color:#a78bfa"><strong style="color:#a78bfa">5320 Switch</strong><br>iqagent configured on VR-Default<br>Source IP: <code>192.168.0.24</code> (Default VLAN)</div>
+    <div class="flow-arrow">↓ HTTPS/WebSocket outbound on port 443</div>
+    <div class="flow-box" style="border-color:#67e8f9"><strong style="color:#67e8f9">Port 1 (uplink)</strong><br>Default VLAN untagged egress</div>
+    <div class="flow-arrow">↓</div>
+    <div class="flow-box" style="border-color:#67e8f9"><strong style="color:#67e8f9">Home Router — 192.168.0.1</strong><br>Sees packet from 192.168.0.24<br>This is its own subnet — NATs it to public IP ✓</div>
+    <div class="flow-arrow">↓ Public internet</div>
+    <div class="flow-box" style="border-color:#34d399"><strong style="color:#34d399">hac.extremecloudiq.com</strong><br>XIQ cloud receives connection<br>Switch shows as MANAGED in XIQ ✓</div>
+  </div>
+
+  <h3>Supporting Evidence</h3>
+  <table>
+    <tr><th>Command</th><th>Result</th><th>What It Proves</th></tr>
+    <tr>
+      <td><code>ping 8.8.8.8</code> (no source)</td>
+      <td><span class="ok">0% loss, 5–6ms</span></td>
+      <td>Switch management IP (192.168.0.24) reaches internet — home router NATs it ✓</td>
+    </tr>
+    <tr>
+      <td><code>ping 8.8.8.8 from 10.30.0.1</code></td>
+      <td><span class="err-text">100% loss</span></td>
+      <td>Packets sourced from 10.30.0.1 reach the home router but replies are dropped — no return path ✗</td>
+    </tr>
+    <tr>
+      <td><code>configure iqagent server vr VR-Default</code></td>
+      <td>In running config</td>
+      <td>XIQ agent explicitly bound to Default VLAN routing domain ✓</td>
+    </tr>
+    <tr>
+      <td>DNS clients configured</td>
+      <td>1.0.0.1 and 208.67.220.220</td>
+      <td>Switch can resolve XIQ hostnames via internet DNS, sourced from 192.168.0.24 ✓</td>
+    </tr>
+    <tr>
+      <td>NTP servers configured</td>
+      <td>aerohive.pool.ntp.org x4</td>
+      <td>Time sync works via internet, sourced from 192.168.0.24 ✓</td>
+    </tr>
+  </table>
+</section>
+
+<!-- WHY APs GOT IPs -->
+<section id="ap-dhcp">
+  <div class="phase-label">Root Cause Analysis</div>
+  <h2>Why the APs Got IP Addresses</h2>
+
+  <p>The APs use the <strong class="hi">Default VLAN (untagged)</strong> for their management traffic — not any of the data VLANs (20/30/40). This is the critical distinction.</p>
+
+  <div style="max-width:600px;margin:24px auto">
+    <div class="flow-box" style="border-color:#10b981"><strong style="color:#34d399">AP3000 powers on (PoE class4 on port 3 or 5)</strong><br>AP has no configuration yet — sends all traffic untagged</div>
+    <div class="flow-arrow">↓ Untagged Ethernet frame (DHCP Discover broadcast)</div>
+    <div class="flow-box" style="border-color:#a78bfa"><strong style="color:#a78bfa">5320 receives on port 3 or 5</strong><br>No VLAN tag = Default VLAN (1)<br>Switch has <code>enable dhcp vlan Default</code> configured<br>Switch is a DHCP CLIENT here — it forwards the broadcast out port 1</div>
+    <div class="flow-arrow">↓ DHCP Discover exits port 1 untagged</div>
+    <div class="flow-box" style="border-color:#67e8f9"><strong style="color:#67e8f9">Home router (192.168.0.1) — DHCP server</strong><br>Responds with DHCP Offer: 192.168.0.x address<br>Gateway: 192.168.0.1 &nbsp; DNS: from home router</div>
+    <div class="flow-arrow">↓ DHCP Offer back to AP</div>
+    <div class="flow-box" style="border-color:#10b981"><strong style="color:#34d399">AP gets 192.168.0.25 or 192.168.0.26</strong><br>Source IP is 192.168.0.x — the home router's OWN subnet<br>AP reaches XIQ at hac.extremecloudiq.com ✓<br>Home router NATs 192.168.0.x → internet correctly ✓</div>
+  </div>
+
+  <h3>The Key Fact</h3>
+  <div class="card box-purple">
+    <div class="box-title purple">APs Are on Default VLAN — Clients Are on VLANs 20/30/40</div>
+    <p>The AP itself (its management interface) always lives on the Default VLAN (untagged). It gets a <code>192.168.0.x</code> address. The APs then tag WiFi client traffic with VLAN 20, 30, or 40 <em>per SSID</em> and forward it tagged to the switch. So the AP is simultaneously on Default VLAN (management) and carrying client traffic for VLANs 20/30/40 (data). Two completely separate flows on the same physical port.</p>
+  </div>
+</section>
+
+<!-- WHY CLIENTS FAIL -->
+<section id="client-fail">
+  <div class="phase-label">Root Cause Analysis</div>
+  <h2>Why WiFi Clients Cannot Reach the Internet</h2>
+
+  <p>Everything on the switch side is working correctly. The failure is entirely at the <strong class="hi">Quantum Fiber home router</strong> — it cannot NAT return traffic to the 10.x.x.x subnets.</p>
+
+  <h3>Step-by-Step Data Path Analysis</h3>
+  <table>
+    <tr><th>Step</th><th>What Happens</th><th>Works?</th></tr>
+    <tr>
+      <td>1. Phone connects to Guest SSID</td>
+      <td>Phone associates with AP2 (port 5). AP tags all frames from this client with VLAN 30.</td>
+      <td><span class="badge badge-ok">✓</span></td>
+    </tr>
+    <tr>
+      <td>2. Phone sends DHCP Discover</td>
+      <td>Tagged VLAN 30 frame arrives at switch port 5. Switch DHCP server on VLAN 30 responds with Offer.</td>
+      <td><span class="badge badge-ok">✓</span></td>
+    </tr>
+    <tr>
+      <td>3. Phone gets IP</td>
+      <td>Phone receives 10.30.0.102, gateway 10.30.0.1, DNS 8.8.8.8. ARP table confirms this. <strong>DHCP is working.</strong></td>
+      <td><span class="badge badge-ok">✓</span></td>
+    </tr>
+    <tr>
+      <td>4. Phone sends DNS query to 8.8.8.8</td>
+      <td>Phone: src=10.30.0.102, dst=8.8.8.8. Sent to gateway 10.30.0.1 (the switch).</td>
+      <td><span class="badge badge-ok">✓</span></td>
+    </tr>
+    <tr>
+      <td>5. Switch routes the packet</td>
+      <td>Switch looks up 8.8.8.8 in routing table → default route → gateway 192.168.0.1. Packet forwarded out port 1.</td>
+      <td><span class="badge badge-ok">✓</span></td>
+    </tr>
+    <tr>
+      <td>6. Packet arrives at home router</td>
+      <td>Home router receives packet: <strong>src=10.30.0.102, dst=8.8.8.8</strong>. Home router's LAN subnet is 192.168.0.0/24. It does not know about 10.30.0.0/24.</td>
+      <td><span class="badge badge-warn">Uncertain</span></td>
+    </tr>
+    <tr>
+      <td>7. Google replies to 10.30.0.102</td>
+      <td>If home router forwarded the packet (some do, some don't), Google sends reply to 10.30.0.102. Home router has no route to 10.30.0.0/24 — it cannot forward the reply back to the phone. <strong>Reply is dropped.</strong></td>
+      <td><span class="badge badge-err">✗ FAIL</span></td>
+    </tr>
+  </table>
+
+  <h3>Proof from the Switch</h3>
+  <pre class="switch">5320# ping 8.8.8.8
+<span class="ok">4 packets transmitted, 4 received, 0% loss</span>       &larr; 192.168.0.24 source → NAT works ✓
+
+5320# ping 8.8.8.8 from 10.30.0.1
+<span class="err-text">4 packets transmitted, 0 received, 100% loss</span>   &larr; 10.30.0.1 source → return dropped ✗
+
+5320# ping 8.8.8.8 from 10.20.0.1
+<span class="err-text">4 packets transmitted, 0 received, 100% loss</span>   &larr; 10.20.0.1 source → return dropped ✗</pre>
+
+  <div class="card box-red">
+    <div class="box-title red">Root Cause — One Sentence</div>
+    <p>The Quantum Fiber home router only NATstrafic sourced from <code>192.168.0.0/24</code> (its own LAN subnet). Traffic from <code>10.20.0.0/24</code> or <code>10.30.0.0/24</code> arrives at the home router as a "foreign" subnet — the home router either drops the outbound packet, or forwards it to the internet but cannot route the reply back because it has no path to <code>10.x.x.x</code>. The switch cannot fix this because it does not support NAT (<code>configure ipmasquerade</code> does not exist on EXOS).</p>
+  </div>
+</section>
+
+<!-- ISSUES -->
+<section id="issues">
+  <div class="phase-label">Issues &amp; Next Steps</div>
+  <h2>Issues Found — Prioritised</h2>
+
+  <table>
+    <tr><th>#</th><th>Issue</th><th>Impact</th><th>Priority</th><th>Fix</th></tr>
+    <tr>
+      <td>1</td>
+      <td><strong>No internet for WiFi clients</strong> — home router cannot NAT 10.x.x.x return traffic</td>
+      <td>All WiFi clients on Corporate and Guest get DHCP but no internet</td>
+      <td><span class="badge badge-err">HIGH</span></td>
+      <td>See Options section below</td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td><strong>IoT VLAN (40) incomplete</strong> — no IP address, no ipforwarding, no DHCP</td>
+      <td>No IoT devices can connect or get IPs on the IoT SSID</td>
+      <td><span class="badge badge-err">HIGH</span></td>
+      <td>Run the 3 IoT config commands below</td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td><strong>Management IP via DHCP</strong> — switch gets 192.168.0.24 from home router</td>
+      <td>If home router reboots and assigns a different IP, SSH and XIQ connectivity could break</td>
+      <td><span class="badge badge-warn">MEDIUM</span></td>
+      <td>Set a static DHCP reservation in home router, or convert to static IP on the switch</td>
+    </tr>
+    <tr>
+      <td>4</td>
+      <td><strong>Port 5 outside STP scope</strong> for tagged VLANs</td>
+      <td>No loop protection on port 5 for VLANs 20/30/40. Currently no issue (single switch). Risk if topology expands.</td>
+      <td><span class="badge badge-warn">LOW</span></td>
+      <td><code>configure stpd s0 add vlan Corporate ports 5 dot1d</code> (repeat for Guest, IoT)</td>
+    </tr>
+    <tr>
+      <td>5</td>
+      <td><strong>XIQ Switch Policy not updated</strong> with DHCP/IP CLI changes</td>
+      <td>If XIQ pushes a Switch Policy update, it will overwrite DHCP and IP config</td>
+      <td><span class="badge badge-warn">MEDIUM</span></td>
+      <td>Re-enter VLAN IP/DHCP settings into XIQ 5320-Home-Policy → Switch Policy</td>
+    </tr>
+  </table>
+
+  <h3>IoT VLAN Fix — Run Now</h3>
+  <pre class="cmd">configure vlan IoT ipaddress 10.40.0.1/24
+enable ipforwarding vlan IoT
+configure vlan IoT dhcp-address-range 10.40.0.100 - 10.40.0.200
+configure vlan IoT dhcp-options default-gateway 10.40.0.1
+configure vlan IoT dhcp-options dns-server primary 8.8.8.8
+configure vlan IoT dhcp-lease-timer 3600
+enable dhcp ports 3 vlan IoT
+enable dhcp ports 5 vlan IoT
+save configuration</pre>
+</section>
+
+<!-- OPTIONS -->
+<section id="options">
+  <div class="phase-label">Issues &amp; Next Steps</div>
+  <h2>Internet Connectivity — Fix Options</h2>
+
+  <div class="card box-amber">
+    <div class="box-title amber">Option A — Add a Router Between Quantum Fiber and 5320 (Recommended Long-Term)</div>
+    <p><strong class="hi">What:</strong> Place a second router (e.g. TP-Link Archer ~$30) between the Quantum Fiber box and the 5320. This router becomes the NAT boundary for all your private subnets.</p>
+    <p><strong class="hi">How it works:</strong> Quantum Fiber router → new router WAN port (gets 192.168.0.x) → new router LAN port → 5320 port 1. New router does NAT for all 10.x.x.x traffic. Quantum Fiber only ever talks to the new router's WAN IP — it never sees 10.x.x.x addresses.</p>
+    <p><strong class="hi">Trade-offs:</strong> Preserves your 10.x.x.x VLAN subnet design. Clean architecture. Adds a hardware device. ~20 min setup.</p>
+  </div>
+
+  <div class="card box-purple">
+    <div class="box-title purple">Option B — DHCP Relay (Fastest, No Hardware)</div>
+    <p><strong class="hi">What:</strong> Remove 10.x.x.x config from the switch VLANs. Configure DHCP relay so that DHCP requests from VLANs 20/30/40 are forwarded to the home router (192.168.0.1). Clients get 192.168.0.x addresses — the home router already NATs those.</p>
+    <p><strong class="hi">Commands:</strong></p>
+    <pre class="cmd" style="margin:8px 0">configure vlan Guest    dhcp-address-range none
+configure vlan Corporate dhcp-address-range none
+disable dhcp ports 3,5 vlan Guest
+disable dhcp ports 3,5 vlan Corporate
+configure vlan Guest     iphelper add 192.168.0.1
+configure vlan Corporate iphelper add 192.168.0.1
+save configuration</pre>
+    <p><strong class="hi">Trade-off:</strong> Clients get 192.168.0.x IPs — you lose VLAN separation at the IP level. VLAN-based traffic isolation (tagged frames) still works, but clients are in the same IP subnet. Fine for a home/lab setup.</p>
+  </div>
+
+  <div class="card box-blue">
+    <div class="box-title blue">Option C — ISP Static Routes (Clean, No Hardware, But Requires ISP)</div>
+    <p><strong class="hi">What:</strong> Call Quantum Fiber and ask them to add static routes on your CPE for 10.20.0.0/24, 10.30.0.0/24, and 10.40.0.0/24, all pointing to 192.168.0.24 (the switch). Quantum Fiber router then knows where to send reply traffic.</p>
+    <p><strong class="hi">Trade-off:</strong> Preserves your subnet design. No extra hardware. ISPs often decline or are unaware of how to do this for residential accounts. Unknown wait time.</p>
+  </div>
+</section>
+
+<!-- GLOSSARY -->
+<section id="glossary">
+  <div class="phase-label">Reference</div>
+  <h2>Command Reference — All Commands Used This Session</h2>
+
+  <h3>Configuration Commands</h3>
+  <table>
+    <tr><th>Command</th><th>What It Does</th><th>Notes</th></tr>
+    <tr><td><code>configure vlan Guest ipaddress 10.30.0.1/24</code></td><td>Sets VLAN interface IP — becomes the L3 gateway for clients</td><td>Run <code>unconfigure vlan Guest ipaddress</code> first if IP already set (no argument needed)</td></tr>
+    <tr><td><code>unconfigure vlan Guest ipaddress</code></td><td>Removes the IP address from the VLAN interface</td><td>No IP argument — just the command by itself</td></tr>
+    <tr><td><code>enable ipforwarding vlan Guest</code></td><td>Enables L3 packet routing on this VLAN interface</td><td>Required for client traffic to be routed to the internet</td></tr>
+    <tr><td><code>configure vlan Guest dhcp-address-range 10.30.0.100 - 10.30.0.200</code></td><td>Sets DHCP pool. Dash separator is required — not "to" or "high"</td><td>101 addresses. Dash with spaces on both sides.</td></tr>
+    <tr><td><code>configure vlan Guest dhcp-options default-gateway 10.30.0.1</code></td><td>DHCP option 3 — sent to every client as their gateway</td><td>Must match the VLAN IP address</td></tr>
+    <tr><td><code>configure vlan Guest dhcp-options dns-server primary 8.8.8.8</code></td><td>DHCP option 6 — DNS server sent to every client</td><td>8.8.8.8 = Google. Requires working internet to function.</td></tr>
+    <tr><td><code>configure vlan Guest dhcp-lease-timer 3600</code></td><td>DHCP lease duration in seconds</td><td>3600 = 1 hour. Client renews at 30 min.</td></tr>
+    <tr><td><code>enable dhcp ports 3,5 vlan Guest</code></td><td>Activates DHCP server on ports 3 and 5 for Guest VLAN</td><td>Must be per-port. Comma-separated list works here.</td></tr>
+    <tr><td><code>configure vlan Guest iphelper add 192.168.0.1</code></td><td>DHCP relay — forward DHCP broadcasts to upstream server</td><td>Use for Option B internet fix</td></tr>
+    <tr><td><code>enable inline-power ports 3,5</code></td><td>Enable PoE on AP ports</td><td>Required for AP power delivery</td></tr>
+    <tr><td><code>save configuration</code></td><td>Persist running config to primary.cfg on flash</td><td>Critical — all changes lost on reboot without this</td></tr>
+  </table>
+
+  <h3>Show / Verification Commands</h3>
+  <table>
+    <tr><th>Command</th><th>What It Shows</th><th>Key Things to Look For</th></tr>
+    <tr><td><code>show configuration</code></td><td>Full running config as a script</td><td>All VLAN, IP, DHCP, STP, PoE config in one place</td></tr>
+    <tr><td><code>show vlan detail</code></td><td>Per-VLAN: IP, forwarding state, exact port membership with flags</td><td><code>*</code> = active, <code>b</code> = STP blocked, forwarding state</td></tr>
+    <tr><td><code>show ipconfig</code></td><td>IP interfaces: address, flags (forwarding, BOOTP, etc.)</td><td><code>f</code> flag = forwarding enabled; <code>B</code> = BOOTP/DHCP client</td></tr>
+    <tr><td><code>show iproute</code></td><td>Routing table: all known networks and gateways</td><td>Default route via 192.168.0.1; 10.x.x.x subnets directly connected</td></tr>
+    <tr><td><code>show iparp</code></td><td>ARP table: IP-to-MAC for all devices switch has communicated with</td><td>Shows active DHCP clients as mi entries; confirms layer 3 reachability</td></tr>
+    <tr><td><code>show fdb ports 3</code></td><td>MAC table for port 3: all devices at layer 2</td><td>Confirms AP is connected; shows WiFi clients on tagged VLANs</td></tr>
+    <tr><td><code>show inline-power info ports 3,5</code></td><td>PoE per-port: state, class, voltage, current, watts</td><td>State should be "delivering" with class4 for AP3000</td></tr>
+    <tr><td><code>show management</code></td><td>SSH, Telnet, SNMP, CLI settings</td><td>Confirms SSH enabled, idle timeout, access profiles</td></tr>
+    <tr><td><code>ping 8.8.8.8</code></td><td>Ping from switch management IP (192.168.0.24)</td><td>Should succeed. Proves Default VLAN internet path works.</td></tr>
+    <tr><td><code>ping 8.8.8.8 from 10.30.0.1</code></td><td>Ping using Guest VLAN as source IP</td><td>Fails with 100% loss — proves home router NAT problem</td></tr>
+  </table>
+
+  <h3>Common Errors Encountered This Session</h3>
+  <table>
+    <tr><th>Command Attempted</th><th>Error</th><th>Correct Command</th></tr>
+    <tr><td><code>enable ipforwarding vlan Guest low 10.30.0.100 high 10.30.0.200</code></td><td>Invalid input — extra parameters not valid</td><td><code>enable ipforwarding vlan Guest</code></td></tr>
+    <tr><td><code>configure dhcp-server vlan Guest low ... high ...</code></td><td>Invalid input — command doesn't exist</td><td><code>configure vlan Guest dhcp-address-range 10.30.0.100 - 10.30.0.200</code></td></tr>
+    <tr><td><code>configure vlan Guest dhcp-address-range 10.30.0.100 to 10.30.0.200</code></td><td>Invalid input at "to"</td><td>Use <code>-</code> (dash) as separator, not "to"</td></tr>
+    <tr><td><code>enable dhcp-server vlan Guest</code></td><td>Invalid input</td><td><code>enable dhcp ports 3,5 vlan Guest</code></td></tr>
+    <tr><td><code>configure vlan Guest ipaddress 10.30.0.1/24</code> (second time)</td><td>"Can't change primary IP — unconfig first"</td><td><code>unconfigure vlan Guest ipaddress</code> then set new IP</td></tr>
+    <tr><td><code>configure ipmasquerade ?</code></td><td>Invalid input — command doesn't exist</td><td>5320 does not support NAT. Use external router.</td></tr>
+    <tr><td><code>show dhcp-server lease</code></td><td>Invalid input</td><td>Use <code>show iparp</code> to see active DHCP clients</td></tr>
+    <tr><td><code>ping 8.8.8.8 vr VR-Default</code></td><td>Invalid input at "vr"</td><td><code>ping 8.8.8.8</code> or <code>ping 8.8.8.8 from &lt;source-ip&gt;</code></td></tr>
+    <tr><td><code>ssh admin@192.168.0.24</code></td><td>No matching host key type found</td><td><code>ssh -o HostKeyAlgorithms=+ssh-rsa -o PubkeyAcceptedAlgorithms=+ssh-rsa admin@192.168.0.24</code></td></tr>
+  </table>
+</section>
+
+<footer>
+  <p>Config Verification Report &nbsp;&middot;&nbsp; March 27, 2026 &nbsp;&middot;&nbsp; Khursheed Khan &nbsp;&middot;&nbsp; Extreme Networks &nbsp;&middot;&nbsp; Built with Claude Code</p>
+  <div style="margin-top:10px">
+    <a href="index.html">&larr; Back to Docs Home</a>
+    <a href="ap_onboarding_20260326.html">AP Onboarding Guide</a>
+    <a href="session_20260325.html">Switch Config Report Mar 25</a>
+  </div>
+</footer>
+
+</main>
+
+<script>
+const sections = document.querySelectorAll('section[id]');
+const navLinks = document.querySelectorAll('nav a');
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      navLinks.forEach(l => l.classList.remove('active'));
+      const active = document.querySelector(`nav a[href="#${entry.target.id}"]`);
+      if (active) active.classList.add('active');
+    }
+  });
+}, { rootMargin: '-20% 0px -70% 0px' });
+sections.forEach(s => observer.observe(s));
+</script>
+
+</body>
+</html>
