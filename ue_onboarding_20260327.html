@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UE / Device Onboarding &amp; Data Flow — March 27, 2026</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Segoe UI', Arial, sans-serif; background: #0f172a; color: #e2e8f0; display: flex; min-height: 100vh; }
+nav { position: fixed; left: 0; top: 0; width: 230px; height: 100vh; background: #0d1117; border-right: 1px solid #1e293b; overflow-y: auto; padding: 20px 0; z-index: 100; }
+nav .nav-title { color: #7c3aed; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; padding: 0 18px 14px; border-bottom: 1px solid #1e293b; margin-bottom: 10px; }
+nav a { display: block; padding: 6px 18px; color: #64748b; font-size: 0.80rem; text-decoration: none; border-left: 3px solid transparent; transition: all 0.15s; line-height: 1.4; }
+nav a:hover, nav a.active { color: #a78bfa; border-left-color: #7c3aed; background: #1e293b; }
+nav .nav-section { padding: 10px 18px 4px; color: #334155; font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; }
+main { margin-left: 230px; max-width: 1040px; padding: 48px 40px; flex: 1; }
+.page-header { margin-bottom: 48px; }
+.page-header h1 { font-size: 1.9rem; color: #a78bfa; margin-bottom: 8px; }
+.page-header .meta { color: #64748b; font-size: 0.88rem; margin-bottom: 4px; }
+.page-header .subtitle { color: #94a3b8; font-size: 0.95rem; line-height: 1.6; }
+section { margin-bottom: 64px; scroll-margin-top: 24px; }
+h2 { font-size: 1.4rem; color: #a78bfa; margin-bottom: 6px; padding-bottom: 10px; border-bottom: 1px solid #1e293b; }
+h3 { font-size: 1.05rem; color: #c4b5fd; margin: 24px 0 12px; }
+p { color: #94a3b8; font-size: 0.92rem; line-height: 1.7; margin-bottom: 12px; }
+.phase-label { display: inline-block; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #7c3aed; margin-bottom: 8px; }
+.card { background: #1e293b; border: 1px solid #334155; border-radius: 8px; padding: 20px 24px; margin: 16px 0; }
+.box-purple { border-color: #7c3aed; background: #1a1035; }
+.box-amber { border-color: #f59e0b; background: #1a1200; }
+.box-green { border-color: #10b981; background: #052019; }
+.box-red { border-color: #ef4444; background: #1a0505; }
+.box-blue { border-color: #3b82f6; background: #0c1a2e; }
+.box-title { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 10px; }
+.box-title.purple { color: #a78bfa; }
+.box-title.amber { color: #fcd34d; }
+.box-title.green { color: #34d399; }
+.box-title.red { color: #f87171; }
+.box-title.blue { color: #60a5fa; }
+pre { border-radius: 6px; padding: 16px; font-size: 0.80rem; line-height: 1.6; overflow-x: auto; margin: 12px 0; font-family: 'SF Mono', 'Fira Code', monospace; }
+pre.switch { background: #0d1117; border-left: 3px solid #67e8f9; color: #67e8f9; }
+pre.cmd { background: #0d1117; border-left: 3px solid #a78bfa; color: #a78bfa; }
+.ok { color: #34d399; }
+.warn { color: #fcd34d; }
+.err-text { color: #f87171; }
+.dim { color: #475569; }
+.hi { color: #e2e8f0; font-weight: 600; }
+code { background: #1e293b; color: #67e8f9; padding: 2px 6px; border-radius: 3px; font-size: 0.82rem; font-family: 'SF Mono', monospace; }
+table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.84rem; }
+th { background: #1e293b; color: #a78bfa; font-weight: 600; padding: 10px 12px; text-align: left; border-bottom: 2px solid #334155; }
+td { padding: 9px 12px; border-bottom: 1px solid #1e293b; color: #94a3b8; vertical-align: top; }
+tr:hover td { background: #1e293b44; }
+td code { background: #0d1117; color: #67e8f9; padding: 2px 5px; border-radius: 3px; font-size: 0.78rem; }
+.badge { display: inline-block; font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 10px; }
+.badge-ok { background: #052019; color: #34d399; border: 1px solid #10b981; }
+.badge-warn { background: #1a1200; color: #fcd34d; border: 1px solid #f59e0b; }
+.badge-err { background: #1a0505; color: #f87171; border: 1px solid #ef4444; }
+.flowchart { background: #1e293b; border: 1px solid #334155; border-radius: 8px; padding: 24px; overflow-x: auto; margin: 16px 0; }
+footer { margin-top: 80px; padding-top: 24px; border-top: 1px solid #1e293b; text-align: center; }
+footer p { color: #475569; font-size: 0.78rem; }
+footer a { color: #60a5fa; font-size: 0.82rem; margin: 0 10px; text-decoration: none; }
+footer a:hover { text-decoration: underline; }
+@media print {
+  nav { display: none; }
+  main { margin-left: 0; padding: 24px; }
+  body { background: #fff; color: #111; }
+  h2 { color: #4c1d95; }
+  pre { border: 1px solid #ccc; background: #f8f8f8 !important; color: #111 !important; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-title">UE Onboarding<br>Mar 27, 2026</div>
+  <div class="nav-section">Overview</div>
+  <a href="#summary">Session Summary</a>
+  <a href="#series">3-Phase Onboarding</a>
+  <div class="nav-section">Data Flow</div>
+  <a href="#flow-overview">End-to-End Flow</a>
+  <a href="#outbound">Outbound Path</a>
+  <a href="#return">Return Path</a>
+  <div class="nav-section">Root Causes</div>
+  <a href="#issue1">Issue 1 — Static Route</a>
+  <a href="#issue2">Issue 2 — ipforwarding</a>
+  <div class="nav-section">Resolution</div>
+  <a href="#fixes">Fix Commands</a>
+  <a href="#verified">Verified State</a>
+  <a href="#glossary">Concept Glossary</a>
+</nav>
+
+<main>
+
+<!-- Series banner -->
+<div style="background:#0d2b1f;border:1px solid #065f46;border-radius:8px;padding:14px 20px;margin-bottom:32px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+  <div>
+    <span style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#34d399">5320 Full Stack Onboarding Series</span>
+    <span style="color:#475569;font-size:0.8rem;margin-left:12px">Phase 3 of 3 &mdash; UE / Device Onboarding</span>
+  </div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap">
+    <a href="onboarding.html" style="background:#0d1117;border:1px solid #334155;border-radius:6px;padding:6px 12px;color:#64748b;font-size:0.78rem;font-weight:600;text-decoration:none">&larr; Phase 1 &middot; Switch</a>
+    <a href="ap_onboarding_20260326.html" style="background:#0d1117;border:1px solid #334155;border-radius:6px;padding:6px 12px;color:#64748b;font-size:0.78rem;font-weight:600;text-decoration:none">&larr; Phase 2 &middot; AP</a>
+  </div>
+</div>
+
+<div class="page-header">
+  <div class="meta">Khursheed Khan &nbsp;&middot;&nbsp; March 27, 2026 &nbsp;&middot;&nbsp; Extreme Networks</div>
+  <h1>UE &amp; Device Onboarding — End-to-End Data Flow</h1>
+  <p class="subtitle">Phase 3 of the full-stack 5320 onboarding series. Documents how a WiFi client (iPhone) connects through an AP3000 to the internet via the 5320 switch and Quantum Fiber modem — including the two routing issues discovered and resolved live, with complete data flow diagrams showing exactly where each failure occurred.</p>
+</div>
+
+<!-- SESSION SUMMARY -->
+<section id="summary">
+  <div class="phase-label">Overview</div>
+  <h2>Session Summary — March 27, 2026</h2>
+
+  <p>With both AP3000s adopted in XIQ and SSIDs broadcasting (completed March 26), this session focused on getting WiFi clients to reach the internet. DHCP was already configured on the switch for Corporate (VLAN 20) and Guest (VLAN 30). The iPhone connected, received a valid IP, but had no internet. Two separate routing issues were diagnosed and resolved.</p>
+
+  <table>
+    <tr><th>Time</th><th>Action</th><th>Result</th></tr>
+    <tr><td>Start of session</td><td>iPhone connects to Guest SSID, gets 10.30.0.102 from switch DHCP</td><td><span class="badge badge-warn">No internet</span></td></tr>
+    <tr><td>Step 1</td><td>Confirmed switch can ping 8.8.8.8 from 10.30.0.1</td><td><span class="badge badge-ok">0% loss ✓</span></td></tr>
+    <tr><td>Step 2</td><td>Confirmed iPhone in switch ARP table at 10.30.0.102</td><td><span class="badge badge-ok">Layer 3 reachable ✓</span></td></tr>
+    <tr><td>Step 3</td><td>Tested http://1.1.1.1 from iPhone — unreachable</td><td><span class="badge badge-err">Routing failure ✗</span></td></tr>
+    <tr><td>Fix 1</td><td>Added static routes on Quantum Fiber modem: 10.20.0.0/24 and 10.30.0.0/24 → gateway 192.168.0.24</td><td><span class="badge badge-warn">Still no internet</span></td></tr>
+    <tr><td>Fix 2</td><td><code>enable ipforwarding vlan Default</code> on the 5320</td><td><span class="badge badge-ok">ONLINE ✓</span></td></tr>
+    <tr><td>Verification</td><td>iPhone on Guest SSID — full internet access confirmed</td><td><span class="badge badge-ok">End-to-end working ✓</span></td></tr>
+  </table>
+
+  <div class="card box-green">
+    <div class="box-title green">Final State — All Three Phases Complete</div>
+    <p>Switch onboarded (EXOS 33.5.2) → APs adopted in XIQ (2× AP3000, IQ Engine 10.6) → WiFi clients on Corporate and Guest VLANs have full internet access. The 5320 is the L3 gateway and DHCP server for both subnets. The Quantum Fiber modem routes return traffic via static routes back to the switch.</p>
+  </div>
+</section>
+
+<!-- 3-PHASE SERIES -->
+<section id="series">
+  <div class="phase-label">Overview</div>
+  <h2>3-Phase Onboarding Series</h2>
+
+  <div style="display:flex;gap:0;margin:24px 0;flex-wrap:wrap">
+    <!-- Phase 1 -->
+    <a href="onboarding.html" style="flex:1;min-width:200px;background:#1e1035;border:2px solid #7c3aed;border-right:none;border-radius:8px 0 0 8px;padding:20px;text-decoration:none;display:flex;flex-direction:column;gap:6px">
+      <span style="font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#7c3aed">Phase 1</span>
+      <span style="color:#a78bfa;font-size:1rem;font-weight:700">Switch</span>
+      <span style="color:#64748b;font-size:0.78rem;line-height:1.5">Factory reset &rarr; ZTP+ &rarr; EXOS migration &rarr; VLAN creation &rarr; management IP</span>
+      <span style="color:#7c3aed;font-size:0.78rem;font-weight:600;margin-top:4px">View guide &rarr;</span>
+    </a>
+    <!-- Phase 2 -->
+    <a href="ap_onboarding_20260326.html" style="flex:1;min-width:200px;background:#052019;border:2px solid #10b981;border-radius:0;padding:20px;text-decoration:none;display:flex;flex-direction:column;gap:6px">
+      <span style="font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#10b981">Phase 2</span>
+      <span style="color:#34d399;font-size:1rem;font-weight:700">Access Points</span>
+      <span style="color:#64748b;font-size:0.78rem;line-height:1.5">Port config &rarr; PoE &rarr; AP discovery &rarr; XIQ adoption &rarr; SSID policy &rarr; DHCP config</span>
+      <span style="color:#10b981;font-size:0.78rem;font-weight:600;margin-top:4px">View guide &rarr;</span>
+    </a>
+    <!-- Phase 3 -->
+    <div style="flex:1;min-width:200px;background:#0c1a2e;border:2px solid #3b82f6;border-left:none;border-radius:0 8px 8px 0;padding:20px;display:flex;flex-direction:column;gap:6px">
+      <span style="font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#3b82f6">Phase 3 — You Are Here</span>
+      <span style="color:#60a5fa;font-size:1rem;font-weight:700">UE / Devices</span>
+      <span style="color:#64748b;font-size:0.78rem;line-height:1.5">Client connects &rarr; DHCP &rarr; routing &rarr; static routes on modem &rarr; ipforwarding &rarr; internet</span>
+      <span style="color:#3b82f6;font-size:0.78rem;font-weight:600;margin-top:4px">This document</span>
+    </div>
+  </div>
+</section>
+
+<!-- FLOW OVERVIEW -->
+<section id="flow-overview">
+  <div class="phase-label">Data Flow</div>
+  <h2>Complete End-to-End Data Flow — iPhone to google.com</h2>
+
+  <p>The diagram below shows the full path a packet takes from the iPhone to Google and back, with both failure points annotated exactly where they occurred and how each was resolved.</p>
+
+  <div class="flowchart">
+    <svg viewBox="0 0 920 1080" width="100%" style="min-width:700px">
+      <defs>
+        <marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#475569"/></marker>
+        <marker id="arr-g" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#34d399"/></marker>
+        <marker id="arr-a" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#f59e0b"/></marker>
+        <marker id="arr-r" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#ef4444"/></marker>
+        <marker id="arr-b" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#3b82f6"/></marker>
+      </defs>
+
+      <!-- ============ DEVICES (left column) ============ -->
+      <!-- iPhone -->
+      <rect x="20" y="40" width="160" height="70" rx="8" fill="#1e1035" stroke="#7c3aed" stroke-width="2"/>
+      <text x="100" y="62" text-anchor="middle" fill="#a78bfa" font-size="12" font-weight="700">📱 iPhone</text>
+      <text x="100" y="80" text-anchor="middle" fill="#7c3aed" font-size="10">IP: 10.30.0.102</text>
+      <text x="100" y="95" text-anchor="middle" fill="#7c3aed" font-size="10">GW: 10.30.0.1 · DNS: 8.8.8.8</text>
+
+      <!-- AP3000 -->
+      <rect x="20" y="180" width="160" height="70" rx="8" fill="#052019" stroke="#10b981" stroke-width="2"/>
+      <text x="100" y="202" text-anchor="middle" fill="#34d399" font-size="12" font-weight="700">📡 AP3000</text>
+      <text x="100" y="220" text-anchor="middle" fill="#10b981" font-size="10">Port 5 · IP: 192.168.0.25</text>
+      <text x="100" y="235" text-anchor="middle" fill="#10b981" font-size="10">Tags client frames → VLAN 30</text>
+
+      <!-- Arrow iPhone → AP -->
+      <line x1="100" y1="110" x2="100" y2="180" stroke="#a78bfa" stroke-width="1.5" marker-end="url(#arr)"/>
+      <text x="110" y="150" fill="#7c3aed" font-size="9">802.11 WiFi</text>
+      <text x="110" y="162" fill="#475569" font-size="9">Guest SSID</text>
+
+      <!-- ============ 5320 SWITCH (center column) ============ -->
+      <rect x="310" y="20" width="300" height="720" rx="10" fill="#0d1117" stroke="#a78bfa" stroke-width="2"/>
+      <text x="460" y="46" text-anchor="middle" fill="#a78bfa" font-size="13" font-weight="700">5320 Switch</text>
+      <text x="460" y="62" text-anchor="middle" fill="#475569" font-size="10">EXOS SwitchEngine 33.5.2 · 192.168.0.24</text>
+
+      <!-- Port 5 box -->
+      <rect x="325" y="80" width="270" height="50" rx="6" fill="#1e293b" stroke="#334155"/>
+      <text x="460" y="100" text-anchor="middle" fill="#94a3b8" font-size="11" font-weight="600">Port 5 (AP2 uplink)</text>
+      <text x="460" y="117" text-anchor="middle" fill="#475569" font-size="9">Receives tagged VLAN 30 frame from AP · Untagged = Default VLAN</text>
+
+      <!-- Guest VLAN box -->
+      <rect x="325" y="160" width="270" height="70" rx="6" fill="#1a1200" stroke="#f59e0b" stroke-width="1.5"/>
+      <text x="460" y="182" text-anchor="middle" fill="#fcd34d" font-size="11" font-weight="700">Guest VLAN 30 Interface</text>
+      <text x="460" y="198" text-anchor="middle" fill="#f59e0b" font-size="10">IP: 10.30.0.1/24 · DHCP server</text>
+      <text x="460" y="213" text-anchor="middle" fill="#10b981" font-size="9">✓ ipforwarding ON — routes packets out to Default VLAN</text>
+
+      <!-- Routing engine box -->
+      <rect x="325" y="260" width="270" height="50" rx="6" fill="#1e293b" stroke="#334155"/>
+      <text x="460" y="281" text-anchor="middle" fill="#94a3b8" font-size="11" font-weight="600">Routing Engine</text>
+      <text x="460" y="297" text-anchor="middle" fill="#475569" font-size="9">Lookup 8.8.8.8 → default route → gateway 192.168.0.1</text>
+
+      <!-- Port 1 box -->
+      <rect x="325" y="340" width="270" height="50" rx="6" fill="#1e293b" stroke="#334155"/>
+      <text x="460" y="360" text-anchor="middle" fill="#94a3b8" font-size="11" font-weight="600">Port 1 (Uplink to Quantum Fiber)</text>
+      <text x="460" y="377" text-anchor="middle" fill="#475569" font-size="9">Packet exits untagged on Default VLAN · src=10.30.0.102 dst=8.8.8.8</text>
+
+      <!-- ISSUE 2 callout inside switch (return path) -->
+      <rect x="325" y="460" width="270" height="80" rx="6" fill="#1a0505" stroke="#ef4444" stroke-width="2" stroke-dasharray="6,3"/>
+      <text x="460" y="483" text-anchor="middle" fill="#f87171" font-size="11" font-weight="700">⚠ ISSUE 2 — Default VLAN</text>
+      <text x="460" y="499" text-anchor="middle" fill="#94a3b8" font-size="10">Return packet arrives here destined for</text>
+      <text x="460" y="513" text-anchor="middle" fill="#fcd34d" font-size="10">10.30.0.102 — needs routing to Guest VLAN</text>
+      <text x="460" y="529" text-anchor="middle" fill="#f87171" font-size="10">ipforwarding OFF → switch DROPS packet ✗</text>
+
+      <!-- FIX 2 box -->
+      <rect x="325" y="565" width="270" height="60" rx="6" fill="#052019" stroke="#10b981" stroke-width="1.5"/>
+      <text x="460" y="585" text-anchor="middle" fill="#34d399" font-size="11" font-weight="700">✓ FIX 2 Applied</text>
+      <text x="460" y="601" text-anchor="middle" fill="#10b981" font-size="9">enable ipforwarding vlan Default</text>
+      <text x="460" y="615" text-anchor="middle" fill="#10b981" font-size="9">Switch now routes return traffic to Guest VLAN 30 → iPhone</text>
+
+      <!-- Default VLAN interface label -->
+      <rect x="325" y="650" width="270" height="50" rx="6" fill="#1e293b" stroke="#67e8f9" stroke-width="1.5"/>
+      <text x="460" y="671" text-anchor="middle" fill="#67e8f9" font-size="11" font-weight="600">Default VLAN Interface</text>
+      <text x="460" y="687" text-anchor="middle" fill="#475569" font-size="9">192.168.0.24/24 · DHCP client · management</text>
+
+      <!-- Arrows inside switch (outbound) -->
+      <line x1="460" y1="130" x2="460" y2="160" stroke="#f59e0b" stroke-width="1.5" marker-end="url(#arr-a)"/>
+      <line x1="460" y1="230" x2="460" y2="260" stroke="#f59e0b" stroke-width="1.5" marker-end="url(#arr-a)"/>
+      <line x1="460" y1="310" x2="460" y2="340" stroke="#f59e0b" stroke-width="1.5" marker-end="url(#arr-a)"/>
+
+      <!-- Arrow AP → Port 5 -->
+      <line x1="180" y1="215" x2="310" y2="105" stroke="#10b981" stroke-width="1.5" marker-end="url(#arr-g)"/>
+      <text x="235" y="148" text-anchor="middle" fill="#10b981" font-size="9">802.1Q tagged</text>
+      <text x="235" y="160" text-anchor="middle" fill="#10b981" font-size="9">VLAN 30</text>
+
+      <!-- ============ QUANTUM FIBER (right column, top) ============ -->
+      <rect x="680" y="280" width="220" height="110" rx="8" fill="#1e293b" stroke="#67e8f9" stroke-width="2"/>
+      <text x="790" y="304" text-anchor="middle" fill="#67e8f9" font-size="12" font-weight="700">Quantum Fiber Modem</text>
+      <text x="790" y="322" text-anchor="middle" fill="#94a3b8" font-size="10">LAN: 192.168.0.1</text>
+      <text x="790" y="338" text-anchor="middle" fill="#94a3b8" font-size="10">WAN: 71.212.x.x (public)</text>
+      <text x="790" y="354" text-anchor="middle" fill="#34d399" font-size="9">NAT: 10.30.0.x → public IP ✓</text>
+      <text x="790" y="370" text-anchor="middle" fill="#34d399" font-size="9">Static route: 10.30.0.0/24 → 192.168.0.24 ✓</text>
+
+      <!-- Switch Port 1 → Quantum Fiber (outbound) -->
+      <line x1="595" y1="365" x2="680" y2="335" stroke="#f59e0b" stroke-width="2" marker-end="url(#arr-a)"/>
+      <text x="638" y="342" text-anchor="middle" fill="#f59e0b" font-size="9">src: 10.30.0.102</text>
+      <text x="638" y="354" text-anchor="middle" fill="#f59e0b" font-size="9">dst: 8.8.8.8</text>
+
+      <!-- ISSUE 1 callout (Quantum Fiber) -->
+      <rect x="680" y="430" width="220" height="90" rx="8" fill="#1a0505" stroke="#ef4444" stroke-width="2" stroke-dasharray="6,3"/>
+      <text x="790" y="453" text-anchor="middle" fill="#f87171" font-size="11" font-weight="700">⚠ ISSUE 1</text>
+      <text x="790" y="469" text-anchor="middle" fill="#94a3b8" font-size="10">Reply from Google arrives</text>
+      <text x="790" y="484" text-anchor="middle" fill="#94a3b8" font-size="10">dst = 10.30.0.102</text>
+      <text x="790" y="499" text-anchor="middle" fill="#f87171" font-size="10">No static route → WHERE IS</text>
+      <text x="790" y="511" text-anchor="middle" fill="#f87171" font-size="10">10.30.0.0/24? Dropped. ✗</text>
+
+      <!-- FIX 1 callout -->
+      <rect x="680" y="545" width="220" height="70" rx="8" fill="#052019" stroke="#10b981" stroke-width="1.5"/>
+      <text x="790" y="566" text-anchor="middle" fill="#34d399" font-size="11" font-weight="700">✓ FIX 1 Applied</text>
+      <text x="790" y="582" text-anchor="middle" fill="#10b981" font-size="9">Static route added on modem:</text>
+      <text x="790" y="597" text-anchor="middle" fill="#10b981" font-size="9">10.30.0.0/24 → 192.168.0.24</text>
+      <text x="790" y="609" text-anchor="middle" fill="#10b981" font-size="9">Reply now forwarded to switch ✓</text>
+
+      <!-- ============ INTERNET (top right) ============ -->
+      <rect x="680" y="40" width="220" height="80" rx="8" fill="#1e293b" stroke="#34d399" stroke-width="2"/>
+      <text x="790" y="68" text-anchor="middle" fill="#34d399" font-size="13" font-weight="700">🌐 Internet</text>
+      <text x="790" y="86" text-anchor="middle" fill="#94a3b8" font-size="10">google.com · 8.8.8.8</text>
+      <text x="790" y="102" text-anchor="middle" fill="#64748b" font-size="9">src reply: 8.8.8.8 → dst: 10.30.0.102</text>
+
+      <!-- Quantum Fiber → Internet (outbound NAT) -->
+      <line x1="790" y1="280" x2="790" y2="120" stroke="#34d399" stroke-width="2" marker-end="url(#arr-g)"/>
+      <text x="805" y="205" fill="#34d399" font-size="9">NAT</text>
+      <text x="805" y="218" fill="#64748b" font-size="9">public IP</text>
+
+      <!-- Internet → Quantum Fiber (return) -->
+      <line x1="760" y1="120" x2="760" y2="280" stroke="#3b82f6" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arr-b)"/>
+      <text x="730" y="205" fill="#3b82f6" font-size="9" text-anchor="middle">reply</text>
+      <text x="730" y="218" fill="#3b82f6" font-size="9" text-anchor="middle">dst=10.30.0.102</text>
+
+      <!-- Quantum Fiber → Switch (return, after fix 1) -->
+      <line x1="680" y1="580" x2="610" y2="490" stroke="#3b82f6" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arr-b)"/>
+      <text x="650" y="527" text-anchor="middle" fill="#3b82f6" font-size="9">after fix 1</text>
+      <text x="650" y="539" text-anchor="middle" fill="#3b82f6" font-size="9">→ 192.168.0.24</text>
+
+      <!-- Switch fix2 → Guest VLAN (return path after fix 2) -->
+      <line x1="325" y1="590" x2="325" y2="195" stroke="#34d399" stroke-width="2" stroke-dasharray="4,2" marker-end="url(#arr-g)"/>
+      <text x="310" y="400" text-anchor="middle" fill="#34d399" font-size="9" transform="rotate(-90,310,400)">routed to Guest VLAN after fix 2</text>
+
+      <!-- Guest VLAN → AP → iPhone (return) -->
+      <line x1="310" y1="185" x2="180" y2="215" stroke="#34d399" stroke-width="2" marker-end="url(#arr-g)"/>
+      <line x1="100" y1="180" x2="100" y2="110" stroke="#34d399" stroke-width="2" marker-end="url(#arr-g)"/>
+
+      <!-- ============ LEGEND ============ -->
+      <rect x="20" y="880" width="880" height="180" rx="6" fill="#0d1117" stroke="#1e293b"/>
+      <text x="36" y="902" fill="#475569" font-size="10" font-weight="700">LEGEND</text>
+
+      <line x1="36" y1="920" x2="70" y2="920" stroke="#f59e0b" stroke-width="2"/>
+      <text x="76" y="924" fill="#94a3b8" font-size="10">Outbound path (iPhone → internet)</text>
+
+      <line x1="36" y1="940" x2="70" y2="940" stroke="#3b82f6" stroke-width="2" stroke-dasharray="5,3"/>
+      <text x="76" y="944" fill="#94a3b8" font-size="10">Return path (internet → iPhone)</text>
+
+      <line x1="36" y1="960" x2="70" y2="960" stroke="#34d399" stroke-width="2"/>
+      <text x="76" y="964" fill="#94a3b8" font-size="10">Return path after both fixes applied ✓</text>
+
+      <rect x="260" y="912" width="14" height="14" rx="2" fill="#1a0505" stroke="#ef4444" stroke-width="1.5" stroke-dasharray="4,2"/>
+      <text x="280" y="924" fill="#94a3b8" font-size="10">Failure point (before fix)</text>
+
+      <rect x="260" y="932" width="14" height="14" rx="2" fill="#052019" stroke="#10b981" stroke-width="1.5"/>
+      <text x="280" y="944" fill="#94a3b8" font-size="10">Fix applied (resolved)</text>
+
+      <text x="36" y="990" fill="#64748b" font-size="9">OUTBOUND (works without fixes): iPhone → WiFi → AP tags VLAN 30 → 5320 port 5 → Guest VLAN routing engine → default route → port 1 → Quantum Fiber NATs to public IP → Internet</text>
+      <text x="36" y="1006" fill="#64748b" font-size="9">RETURN (requires both fixes): Internet replies to public IP → Quantum Fiber de-NATs to 10.30.0.102 → [FIX 1: static route] → forwards to 192.168.0.24 → [FIX 2: ipforwarding Default VLAN] → routes to Guest VLAN → iPhone ✓</text>
+      <text x="36" y="1022" fill="#ef4444" font-size="9">WHY OUTBOUND WORKED BUT RETURN FAILED: Outbound routing is simple (default route). Return path requires Quantum Fiber to KNOW where 10.30.0.x lives (static route) AND the switch to ROUTE</text>
+      <text x="36" y="1036" fill="#ef4444" font-size="9">the arriving packet from Default VLAN interface to Guest VLAN (ipforwarding). Both were missing independently.</text>
+      <text x="36" y="1056" fill="#34d399" font-size="9">SWITCH PING WORKED (ping 8.8.8.8 from 10.30.0.1) BECAUSE: reply was addressed to 10.30.0.1 = the switch's own interface. No routing needed. iPhone traffic addressed to 10.30.0.102 = requires routing. Different code path.</text>
+    </svg>
+  </div>
+</section>
+
+<!-- OUTBOUND PATH -->
+<section id="outbound">
+  <div class="phase-label">Data Flow</div>
+  <h2>Outbound Path — iPhone to Google</h2>
+  <p>The outbound direction works without any special configuration because the switch has a default route to the home router. Every hop knows what to do.</p>
+
+  <table>
+    <tr><th>Hop</th><th>Device</th><th>What Happens</th><th>Packet State</th></tr>
+    <tr>
+      <td>1</td>
+      <td>iPhone</td>
+      <td>User opens Safari → google.com. iPhone looks up DNS (8.8.8.8). Traffic destined for 8.8.8.8. Sends to default gateway 10.30.0.1.</td>
+      <td>src=10.30.0.102 · dst=8.8.8.8</td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>AP3000 (port 5)</td>
+      <td>AP receives the WiFi frame from the iPhone on the Guest SSID. Tags it with 802.1Q VLAN 30. Sends the tagged Ethernet frame up the trunk to the switch port 5.</td>
+      <td>802.1Q tag 0x8100 VLAN 30 added</td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td>5320 — Guest VLAN 30</td>
+      <td>Switch receives tagged frame on port 5. Strips the VLAN tag. Passes to Guest VLAN interface (10.30.0.1). ipforwarding ON — switch routes the packet.</td>
+      <td>src=10.30.0.102 · dst=8.8.8.8</td>
+    </tr>
+    <tr>
+      <td>4</td>
+      <td>5320 — Routing engine</td>
+      <td>Looks up 8.8.8.8 in routing table. No specific route. Matches default route: 0.0.0.0/0 via 192.168.0.1 on Default VLAN. Forwards out port 1.</td>
+      <td>Next-hop: 192.168.0.1 · exit: port 1</td>
+    </tr>
+    <tr>
+      <td>5</td>
+      <td>Quantum Fiber modem</td>
+      <td>Receives packet from LAN. Source IP is 10.30.0.102. Applies NAT: rewrites source to public WAN IP (71.212.x.x). Records NAT mapping: WAN-port-X ↔ 10.30.0.102. Forwards to internet.</td>
+      <td>src=71.212.x.x · dst=8.8.8.8</td>
+    </tr>
+    <tr>
+      <td>6</td>
+      <td>Internet / Google</td>
+      <td>Packet arrives at 8.8.8.8. Google processes the request. Sends reply to the WAN IP (71.212.x.x).</td>
+      <td>src=8.8.8.8 · dst=71.212.x.x</td>
+    </tr>
+  </table>
+</section>
+
+<!-- RETURN PATH -->
+<section id="return">
+  <div class="phase-label">Data Flow</div>
+  <h2>Return Path — Google to iPhone (Two Failure Points)</h2>
+  <p>The return path is where both issues lived. The outbound direction only requires a default route — but the return path requires specific knowledge at two devices.</p>
+
+  <table>
+    <tr><th>Hop</th><th>Device</th><th>What Needs to Happen</th><th>Before Fix</th><th>After Fix</th></tr>
+    <tr>
+      <td>1</td>
+      <td>Quantum Fiber</td>
+      <td>De-NAT the reply: swap dst from 71.212.x.x back to 10.30.0.102. Now needs to DELIVER the packet to 10.30.0.102.</td>
+      <td><span class="badge badge-ok">Works (NAT table intact)</span></td>
+      <td><span class="badge badge-ok">Works</span></td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>Quantum Fiber — routing</td>
+      <td>Look up 10.30.0.102 in routing table. Where is 10.30.0.0/24? If no route exists, the modem drops the packet — it has no idea where that subnet lives.</td>
+      <td><span class="badge badge-err">DROPPED — no route to 10.30.0.0/24 ✗</span></td>
+      <td><span class="badge badge-ok">Static route: 10.30.0.0/24 → 192.168.0.24 ✓</span></td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td>5320 — Default VLAN</td>
+      <td>Packet arrives at 192.168.0.24 (Default VLAN interface). Destination is 10.30.0.102. Switch must ROUTE it from Default VLAN to Guest VLAN 30. Requires ipforwarding ON.</td>
+      <td><span class="badge badge-err">DROPPED — ipforwarding OFF on Default VLAN ✗</span></td>
+      <td><span class="badge badge-ok">enable ipforwarding vlan Default ✓</span></td>
+    </tr>
+    <tr>
+      <td>4</td>
+      <td>5320 — Guest VLAN</td>
+      <td>Switch looks up 10.30.0.102 in ARP table. Finds it on port 5 (AP2). Sends packet out port 5 tagged VLAN 30.</td>
+      <td>Never reached</td>
+      <td><span class="badge badge-ok">Delivered to AP ✓</span></td>
+    </tr>
+    <tr>
+      <td>5</td>
+      <td>AP3000 → iPhone</td>
+      <td>AP strips VLAN 30 tag. Delivers frame to iPhone over WiFi on Guest SSID.</td>
+      <td>Never reached</td>
+      <td><span class="badge badge-ok">iPhone receives reply ✓</span></td>
+    </tr>
+  </table>
+
+  <div class="card box-purple">
+    <div class="box-title purple">Why the Switch Ping Worked But iPhone Didn't</div>
+    <p>When the switch runs <code>ping 8.8.8.8 from 10.30.0.1</code>, the reply from Google is addressed to <strong class="hi">10.30.0.1 — the switch's own interface</strong>. The switch receives it on the Default VLAN interface (192.168.0.24) and recognises the destination as itself. No routing needed — the packet is accepted locally.</p>
+    <p style="margin-top:8px">When the iPhone sends traffic, the reply is addressed to <strong class="hi">10.30.0.102 — a client behind the switch</strong>. The switch receives it on Default VLAN but now needs to <em>route</em> it onwards to the Guest VLAN. That requires ipforwarding. Two completely different code paths in the OS — one works, one doesn't.</p>
+  </div>
+</section>
+
+<!-- ISSUE 1 -->
+<section id="issue1">
+  <div class="phase-label">Root Cause 1</div>
+  <h2>Issue 1 — Missing Static Route on Quantum Fiber</h2>
+
+  <div class="card box-red">
+    <div class="box-title red">The Problem</div>
+    <p>The Quantum Fiber modem's routing table only knew about its own subnets (<code>192.168.0.0/24</code> and its WAN ranges). It had no entry for <code>10.20.0.0/24</code> or <code>10.30.0.0/24</code>. After de-NATting a reply from Google, it had no way to forward the packet to the correct device — so it dropped it silently.</p>
+  </div>
+
+  <h3>Diagnosis</h3>
+  <table>
+    <tr><th>Test</th><th>Result</th><th>What It Proved</th></tr>
+    <tr><td><code>ping 8.8.8.8 from 10.30.0.1</code> on switch</td><td><span class="ok">0% loss</span></td><td>Outbound works AND switch's own address gets replies (no routing needed on return)</td></tr>
+    <tr><td>iPhone tries 1.1.1.1 in Safari</td><td><span class="err-text">Unreachable</span></td><td>Return traffic for a CLIENT address (not switch interface) fails — routing problem upstream</td></tr>
+    <tr><td><code>ping 10.30.0.102</code> from switch</td><td><span class="ok">Success</span></td><td>Local network is fine — problem is at the upstream boundary</td></tr>
+  </table>
+
+  <h3>Fix Applied</h3>
+  <p>Two static routes added on the Quantum Fiber modem admin UI (Advanced → Static Routing):</p>
+  <table>
+    <tr><th>Destination</th><th>Mask</th><th>Gateway</th><th>Purpose</th></tr>
+    <tr><td><code>10.20.0.0</code></td><td><code>255.255.255.0</code> (/24)</td><td><code>192.168.0.24</code></td><td>Corporate WiFi clients → route replies to switch</td></tr>
+    <tr><td><code>10.30.0.0</code></td><td><code>255.255.255.0</code> (/24)</td><td><code>192.168.0.24</code></td><td>Guest WiFi clients → route replies to switch</td></tr>
+  </table>
+
+  <div class="card box-amber">
+    <div class="box-title amber">Note — First Attempt Failed</div>
+    <p>The first attempt at adding the routes used the wrong gateway IP. The Quantum Fiber UI accepted the entry but the route was either rejected silently or saved with incorrect data. Re-entering with gateway <code>192.168.0.24</code> (the switch management IP on Default VLAN) resolved the issue. Always verify routes appear in the static routes table after saving.</p>
+  </div>
+</section>
+
+<!-- ISSUE 2 -->
+<section id="issue2">
+  <div class="phase-label">Root Cause 2</div>
+  <h2>Issue 2 — ipforwarding Disabled on Default VLAN</h2>
+
+  <div class="card box-red">
+    <div class="box-title red">The Problem</div>
+    <p>After the static route was added, return traffic successfully reached the switch at <code>192.168.0.24</code> (the Default VLAN interface). But the Default VLAN had <code>ipforwarding</code> disabled — meaning the switch could accept traffic <em>for itself</em> on that interface but could not <em>route</em> traffic that arrived there to another VLAN. The packet was silently dropped.</p>
+  </div>
+
+  <h3>Evidence from <code>show ipconfig</code></h3>
+  <pre class="switch">Interface    IP Address          Flags
+Corporate    10.20.0.1       /24 EUf--R--g---    &larr; f = ipforwarding ON ✓
+Default      192.168.0.24    /24 EU---R--gB--    &larr; NO f = ipforwarding OFF ✗
+Guest        10.30.0.1       /24 EUf--R--g---    &larr; f = ipforwarding ON ✓</pre>
+
+  <h3>Why This Matters</h3>
+  <table>
+    <tr><th>Scenario</th><th>ipforwarding needed?</th><th>Works without it?</th></tr>
+    <tr><td>Switch pings 8.8.8.8 from 10.30.0.1 (its own interface)</td><td>No — reply is TO the switch itself</td><td><span class="ok">Yes ✓</span></td></tr>
+    <tr><td>iPhone at 10.30.0.102 sends traffic to internet</td><td>Yes — reply arrives on Default VLAN, must be routed to Guest VLAN</td><td><span class="err-text">No ✗</span></td></tr>
+    <tr><td>SSH to switch from Mac (192.168.0.x)</td><td>No — management traffic stays on Default VLAN</td><td><span class="ok">Yes ✓</span></td></tr>
+    <tr><td>XIQ agent connectivity</td><td>No — XIQ agent uses Default VLAN management IP</td><td><span class="ok">Yes ✓</span></td></tr>
+  </table>
+
+  <h3>Fix Applied</h3>
+  <pre class="cmd">enable ipforwarding vlan Default
+save configuration</pre>
+
+  <p>With forwarding enabled, the Default VLAN interface can now act as an inter-VLAN routing gateway. Return traffic arriving at <code>192.168.0.24</code> destined for <code>10.30.0.102</code> is routed to the Guest VLAN interface and delivered to the iPhone via port 5.</p>
+</section>
+
+<!-- FIXES -->
+<section id="fixes">
+  <div class="phase-label">Resolution</div>
+  <h2>Complete Fix Commands</h2>
+
+  <h3>Fix 1 — Quantum Fiber Static Routes (UI, not CLI)</h3>
+  <p>Quantum Fiber admin UI → Advanced → Static Routing → Add route (repeat for each):</p>
+  <table>
+    <tr><th>Field</th><th>Route 1 (Corporate)</th><th>Route 2 (Guest)</th></tr>
+    <tr><td>IP Type</td><td>IPv4</td><td>IPv4</td></tr>
+    <tr><td>Network Address</td><td><code>10.20.0.0</code></td><td><code>10.30.0.0</code></td></tr>
+    <tr><td>Prefix</td><td><code>/24</code></td><td><code>/24</code></td></tr>
+    <tr><td>Gateway IP</td><td><code>192.168.0.24</code></td><td><code>192.168.0.24</code></td></tr>
+  </table>
+
+  <h3>Fix 2 — Enable ipforwarding on Default VLAN (5320 CLI)</h3>
+  <pre class="cmd">enable ipforwarding vlan Default
+save configuration</pre>
+
+  <h3>Complete VLAN IP &amp; Routing State After All Fixes</h3>
+  <pre class="switch">show ipconfig:
+Interface    IP Address          Flags
+Corporate    10.20.0.1       /24 EUf--R--g---    &larr; forwarding ON ✓
+Default      192.168.0.24    /24 EUf--R--gB--    &larr; forwarding ON ✓ (after fix)
+Guest        10.30.0.1       /24 EUf--R--g---    &larr; forwarding ON ✓
+
+show iproute:
+#bo  Default Route      192.168.0.1     1    UG   Default    ← internet exit ✓
+#d   10.20.0.0/24       10.20.0.1       1    U    Corporate  ← directly connected ✓
+#d   10.30.0.0/24       10.30.0.1       1    U    Guest      ← directly connected ✓
+#d   192.168.0.0/24     192.168.0.24    1    U    Default    ← management ✓</pre>
+</section>
+
+<!-- VERIFIED STATE -->
+<section id="verified">
+  <div class="phase-label">Resolution</div>
+  <h2>Verified State — Full Stack Working</h2>
+
+  <table>
+    <tr><th>Test</th><th>Result</th></tr>
+    <tr><td><code>ping 8.8.8.8 from 10.30.0.1</code></td><td><span class="ok">0% loss ✓</span></td></tr>
+    <tr><td><code>ping 8.8.8.8 from 10.20.0.1</code></td><td><span class="ok">0% loss ✓</span></td></tr>
+    <tr><td><code>ping 10.30.0.102</code> (iPhone) from switch</td><td><span class="ok">0% loss ✓</span></td></tr>
+    <tr><td>iPhone on Guest SSID — internet access</td><td><span class="ok">ONLINE ✓</span></td></tr>
+    <tr><td>Both AP3000s — XIQ status</td><td><span class="ok">MANAGED ✓</span></td></tr>
+    <tr><td>Switch management — SSH + XIQ</td><td><span class="ok">Reachable ✓</span></td></tr>
+    <tr><td>Configuration saved</td><td><span class="ok">primary.cfg saved ✓</span></td></tr>
+  </table>
+
+  <div class="card box-green">
+    <div class="box-title green">3-Phase Onboarding Complete</div>
+    <p><strong class="hi">Phase 1 — Switch:</strong> Fabric Engine 9.2 → EXOS SwitchEngine 33.5.2 via ZTP+. VLANs 1/10/20/30/40 created. Management IP 192.168.0.24.</p>
+    <p style="margin-top:6px"><strong class="hi">Phase 2 — APs:</strong> 2× AP3000 powered via PoE on ports 3 and 5. Adopted in XIQ. 5320-Home-Policy with Corporate/Guest/IoT SSIDs mapped to VLANs 20/30/40. DHCP servers configured on switch for Corporate and Guest.</p>
+    <p style="margin-top:6px"><strong class="hi">Phase 3 — Devices:</strong> iPhone connected to Guest SSID, received 10.30.0.102 from switch DHCP. Two routing issues diagnosed and resolved. Full internet access confirmed end to end.</p>
+  </div>
+</section>
+
+<!-- GLOSSARY -->
+<section id="glossary">
+  <div class="phase-label">Reference</div>
+  <h2>Concept Glossary</h2>
+
+  <table>
+    <tr><th>Term</th><th>Plain Language Definition</th></tr>
+    <tr><td><strong>ipforwarding</strong></td><td>A switch setting that allows a VLAN interface to act as a router — forwarding packets that arrive on that interface to a different subnet. Without it, the switch only accepts traffic <em>addressed to itself</em> on that interface.</td></tr>
+    <tr><td><strong>Static route</strong></td><td>A manual entry in a router's routing table that says "to reach subnet X, send traffic to gateway Y." Required when a router doesn't automatically know where a subnet lives.</td></tr>
+    <tr><td><strong>NAT (Network Address Translation)</strong></td><td>A router function that rewrites the source IP of outbound packets from a private address (10.x.x.x) to the router's public WAN IP. Return traffic is rewritten back. Allows many private devices to share one public IP.</td></tr>
+    <tr><td><strong>Default route</strong></td><td>A catch-all routing entry (0.0.0.0/0) — "if you don't know where to send a packet, send it here." The switch uses this to forward all internet-bound traffic to the Quantum Fiber modem.</td></tr>
+    <tr><td><strong>802.1Q VLAN tagging</strong></td><td>A standard for adding a 4-byte tag to an Ethernet frame to identify which VLAN it belongs to. The AP tags client traffic when it leaves the AP toward the switch. The switch uses the tag to route traffic to the correct VLAN interface.</td></tr>
+    <tr><td><strong>Return path</strong></td><td>The route a reply packet takes from the internet back to the original sender. More complex than outbound because every device along the path must know how to reach the original private IP address.</td></tr>
+    <tr><td><strong>DHCP</strong></td><td>Protocol that automatically assigns an IP address, gateway, and DNS server to a device when it joins the network. The 5320 is the DHCP server for Guest (10.30.0.x) and Corporate (10.20.0.x). The Quantum Fiber modem is the DHCP server for the Default VLAN (192.168.0.x).</td></tr>
+    <tr><td><strong>Inter-VLAN routing</strong></td><td>The process of forwarding traffic between two different VLANs through a Layer 3 switch. Requires ipforwarding to be enabled on the VLAN interfaces involved.</td></tr>
+  </table>
+</section>
+
+<!-- Prev/Next navigation -->
+<div style="display:flex;justify-content:space-between;align-items:stretch;gap:16px;margin-top:64px;padding-top:32px;border-top:1px solid #1e293b;flex-wrap:wrap">
+  <a href="ap_onboarding_20260326.html" style="flex:1;min-width:220px;background:#052019;border:1px solid #10b981;border-radius:8px;padding:16px 20px;text-decoration:none;display:flex;flex-direction:column;gap:4px">
+    <span style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.08em;color:#34d399;font-weight:700">&larr; Phase 2</span>
+    <span style="color:#34d399;font-size:0.88rem;font-weight:600">AP3000 Onboarding</span>
+    <span style="color:#64748b;font-size:0.78rem">March 26, 2026 &mdash; SSH &rarr; VLANs &rarr; PoE &rarr; XIQ &rarr; DHCP</span>
+  </a>
+  <a href="index.html" style="flex:1;min-width:220px;background:#1e293b;border:1px solid #334155;border-radius:8px;padding:16px 20px;text-decoration:none;display:flex;flex-direction:column;gap:4px;text-align:right">
+    <span style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.08em;color:#475569;font-weight:700">Home &rarr;</span>
+    <span style="color:#a78bfa;font-size:0.88rem;font-weight:600">Docs Home</span>
+    <span style="color:#64748b;font-size:0.78rem">All guides and session reports</span>
+  </a>
+</div>
+
+<footer>
+  <p>UE Onboarding &amp; Data Flow &nbsp;&middot;&nbsp; March 27, 2026 &nbsp;&middot;&nbsp; Khursheed Khan &nbsp;&middot;&nbsp; Extreme Networks &nbsp;&middot;&nbsp; Built with Claude Code</p>
+  <div style="margin-top:10px">
+    <a href="index.html">&larr; Back to Docs Home</a>
+    <a href="ap_onboarding_20260326.html">Phase 2 — AP Onboarding</a>
+    <a href="troubleshooting_20260327.html">Config Verification Report</a>
+  </div>
+</footer>
+
+</main>
+
+<script>
+const sections = document.querySelectorAll('section[id]');
+const navLinks = document.querySelectorAll('nav a');
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      navLinks.forEach(l => l.classList.remove('active'));
+      const active = document.querySelector(`nav a[href="#${entry.target.id}"]`);
+      if (active) active.classList.add('active');
+    }
+  });
+}, { rootMargin: '-20% 0px -70% 0px' });
+sections.forEach(s => observer.observe(s));
+</script>
+
+</body>
+</html>

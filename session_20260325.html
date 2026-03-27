@@ -1,0 +1,1685 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>5320-16P-2MXT-2X-SwitchEngine — Config Report</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; background: #0f172a; color: #e2e8f0; display: flex; flex-direction: column; min-height: 100vh; }
+  header { background: #1e293b; padding: 20px 32px; border-bottom: 2px solid #7c3aed; flex-shrink: 0; }
+  header h1 { color: #a78bfa; font-size: 1.4rem; margin-bottom: 12px; }
+  .meta { display: flex; flex-wrap: wrap; gap: 20px; }
+  .meta-item { display: flex; flex-direction: column; }
+  .meta-item span:first-child { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.07em; color: #64748b; margin-bottom: 2px; }
+  .meta-item span:last-child { font-size: 0.88rem; color: #94a3b8; }
+  .badge { padding: 3px 12px; border-radius: 4px; font-size: 0.82rem; font-weight: 600; }
+  .badge.connected { background: #166534; color: #86efac; }
+  .badge.not-connected { background: #7f1d1d; color: #fca5a5; }
+  .tabs { background: #1e293b; border-bottom: 1px solid #334155; padding: 0 32px; display: flex; gap: 4px; flex-wrap: wrap; flex-shrink: 0; }
+  .tab-btn { background: transparent; border: none; border-bottom: 3px solid transparent; color: #64748b; padding: 12px 18px; font-size: 0.88rem; cursor: pointer; transition: color 0.15s, border-color 0.15s; white-space: nowrap; }
+  .tab-btn:hover { color: #e2e8f0; }
+  .tab-btn.active { color: #a78bfa; border-bottom-color: #7c3aed; font-weight: 600; }
+  .content { flex: 1; padding: 24px 32px; overflow: auto; }
+  .tab-panel { height: 100%; display: flex; flex-direction: column; }
+  p.desc { color: #64748b; font-size: 0.88rem; margin-bottom: 14px; }
+  pre { background: #0a0f1e; border: 1px solid #334155; border-radius: 6px; padding: 16px 20px;
+         font-family: 'Fira Mono', 'Courier New', monospace; font-size: 0.82rem;
+         line-height: 1.6; color: #7dd3fc; white-space: pre-wrap; word-break: break-word;
+         flex: 1; overflow: auto; }
+
+  /* LOGIN GATE */
+  #login-gate { position:fixed;inset:0;background:#0f172a;display:flex;align-items:center;justify-content:center;z-index:9999; }
+  #login-box { background:#1e293b;border:1px solid #7c3aed;border-radius:12px;padding:40px 48px;box-shadow:0 8px 40px rgba(0,0,0,0.6);width:100%;max-width:400px;text-align:center; }
+  #login-box h2 { color:#a78bfa;margin-bottom:6px;font-size:1.4rem; }
+  #login-box p { color:#64748b;font-size:0.9rem;margin-bottom:24px; }
+  #login-box input { width:100%;padding:10px 14px;margin-bottom:14px;border:1px solid #334155;border-radius:6px;font-size:1rem;outline:none;background:#0f172a;color:#e2e8f0; }
+  #login-box input:focus { border-color:#7c3aed; }
+  #login-box button { width:100%;padding:12px;background:#7c3aed;color:white;border:none;border-radius:6px;font-size:1rem;cursor:pointer;font-weight:bold; }
+  #login-box button:hover { background:#6d28d9; }
+  #login-error { color:#f87171;font-size:0.85rem;margin-top:10px;display:none; }
+  #main-content { display:none; }
+</style>
+</head>
+<body>
+
+<!-- LOGIN GATE -->
+<div id="login-gate">
+  <div id="login-box">
+    <h2>Extreme Networks</h2>
+    <p>5320 Session Report &mdash; March 25, 2026</p>
+    <input type="text" id="username" placeholder="Username" autocomplete="username" />
+    <input type="password" id="password" placeholder="Password" autocomplete="current-password" />
+    <button onclick="checkLogin()">Sign In</button>
+    <div id="login-error">Invalid username or password.</div>
+  </div>
+</div>
+<div id="main-content">
+<div style="background:#7c3aed;color:#fff;padding:10px 32px;font-size:0.85rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px"><span><strong>Khursheed Khan</strong> &mdash; Onboarding Session</span><span>March 25, 2026 &nbsp;|&nbsp; 3:00 PM Pacific &nbsp;|&nbsp; EXOS SwitchEngine 33.5.2</span></div>
+<header>
+  <h1>Extreme Networks 5320-16P-2MXT-2X-SwitchEngine — Configuration Report</h1>
+  <div class="meta">
+    <div class="meta-item"><span>Switch Name</span><span>5320-16P-2MXT-2X-SwitchEngine</span></div>
+    <div class="meta-item"><span>Model</span><span>5320-16P-2MXT-2X-SwitchEngine</span></div>
+    <div class="meta-item"><span>Firmware</span><span>primary.cfg       Created by Extreme Networks Switch Engine version 33.5.2.118</span></div>
+    <div class="meta-item"><span>MAC</span><span>Factory MAC</span></div>
+    <div class="meta-item"><span>Generated</span><span>2026-03-25 14:58:37</span></div>
+    <div class="meta-item"><span>XIQ Status</span><span><span class="badge not-connected">&#10007; NOT CONFIRMED ON XIQ</span></span></div>
+  </div>
+</header>
+<div class="tabs">
+<button class="tab-btn active" onclick="switchTab('tab0')" id="btn-tab0">Switch</button>
+<button class="tab-btn " onclick="switchTab('tab1')" id="btn-tab1">Ipconfig</button>
+<button class="tab-btn " onclick="switchTab('tab2')" id="btn-tab2">Vlan Detail</button>
+<button class="tab-btn " onclick="switchTab('tab3')" id="btn-tab3">Port Configuration</button>
+<button class="tab-btn " onclick="switchTab('tab4')" id="btn-tab4">Management</button>
+<button class="tab-btn " onclick="switchTab('tab5')" id="btn-tab5">Configuration</button>
+</div>
+<div class="content">
+
+    <div class="tab-panel" id="tab0" style="display:block">
+      <p class="desc">Switch identity, firmware, management IP and gateway</p>
+      <pre>
+
+* 5320-16P-2MXT-2X-SwitchEngine.4 # show switch
+
+SysName:          5320-16P-2MXT-2X-SwitchEngine
+SysLocation:      
+SysContact:       https://www.extremenetworks.com/support/
+System MAC:       D8:E0:16:3B:54:00
+System MAC Used:  Factory MAC
+System Type:      5320-16P-2MXT-2X-SwitchEngine
+
+SysHealth check:  Enabled (Normal)
+Recovery Mode:    All
+System Watchdog:  Enabled
+
+Current Time:     Wed Mar 25 13:55:24 2026
+Timezone:         [Auto DST Disabled] GMT Offset: -480 minutes, name is PST.
+Boot Time:        Wed Mar 25 12:58:30 2026
+Boot Count:       7
+Next Reboot:      None scheduled
+System UpTime:    56 minutes 53 seconds
+
+Current State:    OPERATIONAL             
+Image Selected:   primary                 
+Image Booted:     primary                 
+Primary ver:      33.5.2.118              
+Secondary ver:    33.5.2.118  
+
+Config Selected:  primary.cfg                                          
+Config Booted:    primary.cfg                                          
+Config Automatic: NONE (Disabled)
+
+primary.cfg       Created by Extreme Networks Switch Engine version 33.5.2.118
+                  332181 bytes saved on Tue Mar 24 17:37:53 2026
+
+
+LAA MAC:          Locally Administered MAC Address Disabled
+* 5320-16P-2MXT-2X-SwitchEngine.5 # </pre>
+    </div>
+
+    <div class="tab-panel" id="tab1" style="display:none">
+      <p class="desc">IP configuration — DHCP or static, mask, gateway, DNS</p>
+      <pre>
+
+* 5320-16P-2MXT-2X-SwitchEngine.5 # show ipconfig
+       Use Redirects : Disabled
+  Ignore ICMP Bcasts : Enabled
+       IpOption LSRR : Enabled
+       IpOption SSRR : Enabled
+       Route Sharing : Disabled
+   Route Compression : Enabled
+  Originated Packets : Don&#x27;t require ipforwarding
+  IP Fwding into LSP : Disabled
+ Max Shared Gateways : Current: 4  Configured: 4
+  Route Sharing Hash : CRC Lower, Default Method
+     Ping Protection : Enabled for static routes   Interval: 2   Misses: 3
+      IP Anycast MAC : None 
+
+      IRDP:
+         Advertisement Address: 255.255.255.255      Maximum Interval: 600 
+         Minimum Interval: 450     Lifetime: 1800  Preference: 0 
+
+Interface    IP Address          Flags                   nSIA
+
+Flags: (b) Broadcast Forwarding Enabled, (B) BOOTP Enabled,
+       (E) Interface Enabled, (f) Forwarding Enabled,
+       (g) Ignore IP Broadcast Enabled, (h) Directed Broadcast Forwarding by Hardware Enabled,
+       (I) IRDP Advertisement Enabled, (m) Multicast forwarding Enabled,
+       (n) Multinetted VLAN, (nSIA) Number of Secondary IP Addresses,
+       (R) Send Redirects Enabled, (u) Send Unreachables Enabled,
+       (U) Interface Up, (v) VRRP Enabled.
+* 5320-16P-2MXT-2X-SwitchEngine.6 # </pre>
+    </div>
+
+    <div class="tab-panel" id="tab2" style="display:none">
+      <p class="desc">All VLANs configured by XIQ</p>
+      <pre>
+
+* 5320-16P-2MXT-2X-SwitchEngine.6 # show vlan detail
+VLAN Interface with name Default created by user
+    Admin State:	 Enabled     Tagging:	802.1Q Tag 1 
+    Description:	 None
+    Virtual router:	 VR-Default
+    IP Anycast:		 Disabled
+    IPv4 Forwarding:	 Disabled
+    IPv4 MC Forwarding:  Disabled
+    Primary IP:		 192.168.0.24/24
+    IPv6 Forwarding:	 Disabled
+    IPv6 MC Forwarding:  Disabled
+    IPv6:                None
+    STPD:      		 s0(Enabled,Auto-bind) 
+    Layer 2 Forwarding:  Enabled
+    Protocol:            Match all unfiltered protocols
+    Loopback:            Disabled
+    NetLogin:            Disabled
+    QosProfile:     	 None configured
+    Flood Rate Limit QosProfile:       None configured
+    Suppress ARP:        Disabled
+    Suppress ND:         Disabled
+    Proxy ARP:           Entry required
+    Ports:   20. 	  (Number of active ports=1)
+       Untag:      *1,     2b,     3b,     4b,     5b,     6b,     7b,
+                   8b,     9b,    10b,    11b,    12b,    13b,    14b,
+                  15b,    16b,    17b,    18b,    19b,    20b
+	Flags:    (*) Active, (!) Disabled, (g) Load Sharing port
+                  (b) Port blocked on the vlan, (m) Mac-Based port
+                  (M) Mac-Based port with ingress filtering on
+                  (i) Port inactivated on the vlan due to VXLAN configuration
+                  (a) Egress traffic allowed for NetLogin
+                  (u) Egress traffic unallowed for NetLogin
+                  (t) Translate VLAN tag for Private-VLAN
+                  (s) Private-VLAN System Port, (L) Loopback port
+                  (x) VMAN Tag Translated port
+                  (A) Dynamically added by Auto-peering
+                  (F) Dynamically added by Fabric Attach
+                  (G) Multi-switch LAG Group port
+                  (H) Dynamically added by MVRP
+                  (I) Dynamically added by IDM
+                  (N) Dynamically added by Netlogin
+                  (S) Added by static MAC-based VLAN
+                  (U) Dynamically added uplink port
+                  (V) Dynamically added by VM Tracking
+
+#
+#
+VLAN Interface with name VLAN_0010 created by user
+    Admin State:	 Enabled     Tagging:	802.1Q Tag 10 
+    Description:	 None
+    Virtual router:	 VR-Default
+    IP Anycast:		 Disabled
+    IPv4 Forwarding:	 Disabled
+    IPv4 MC Forwarding:  Disabled
+    IPv6 Forwarding:	 Disabled
+    IPv6 MC Forwarding:  Disabled
+    IPv6:                None
+    STPD:      		 s0(Enabled,Auto-bind) 
+    Layer 2 Forwarding:  Enabled
+    Protocol:            Match all unfiltered protocols
+    Loopback:            Disabled
+    NetLogin:            Disabled
+    QosProfile:     	 None configured
+    Flood Rate Limit QosProfile:       None configured
+    Suppress ARP:        Disabled
+    Suppress ND:         Disabled
+    Proxy ARP:           Entry required
+    Ports:   1. 	  (Number of active ports=1)
+       Tag:        *1
+	Flags:    (*) Active, (!) Disabled, (g) Load Sharing port
+                  (b) Port blocked on the vlan, (m) Mac-Based port
+                  (M) Mac-Based port with ingress filtering on
+                  (i) Port inactivated on the vlan due to VXLAN configuration
+                  (a) Egress traffic allowed for NetLogin
+                  (u) Egress traffic unallowed for NetLogin
+                  (t) Translate VLAN tag for Private-VLAN
+                  (s) Private-VLAN System Port, (L) Loopback port
+                  (x) VMAN Tag Translated port
+                  (A) Dynamically added by Auto-peering
+                  (F) Dynamically added by Fabric Attach
+                  (G) Multi-switch LAG Group port
+                  (H) Dynamically added by MVRP
+                  (I) Dynamically added by IDM
+                  (N) Dynamically added by Netlogin
+                  (S) Added by static MAC-based VLAN
+                  (U) Dynamically added uplink port
+                  (V) Dynamically added by VM Tracking
+
+#
+#
+VLAN Interface with name VLAN_0020 created by user
+    Admin State:	 Enabled     Tagging:	802.1Q Tag 20 
+    Description:	 None
+    Virtual router:	 VR-Default
+    IP Anycast:		 Disabled
+    IPv4 Forwarding:	 Disabled
+    IPv4 MC Forwarding:  Disabled
+    IPv6 Forwarding:	 Disabled
+    IPv6 MC Forwarding:  Disabled
+    IPv6:                None
+    STPD:      		 s0(Enabled,Auto-bind) 
+    Layer 2 Forwarding:  Enabled
+    Protocol:            Match all unfiltered protocols
+    Loopback:            Disabled
+    NetLogin:            Disabled
+    QosProfile:     	 None configured
+    Flood Rate Limit QosProfile:       None configured
+    Suppress ARP:        Disabled
+    Suppress ND:         Disabled
+    Proxy ARP:           Entry required
+    Ports:   3. 	  (Number of active ports=1)
+       Tag:        *1,     2b,     3b
+	Flags:    (*) Active, (!) Disabled, (g) Load Sharing port
+                  (b) Port blocked on the vlan, (m) Mac-Based port
+                  (M) Mac-Based port with ingress filtering on
+                  (i) Port inactivated on the vlan due to VXLAN configuration
+                  (a) Egress traffic allowed for NetLogin
+                  (u) Egress traffic unallowed for NetLogin
+                  (t) Translate VLAN tag for Private-VLAN
+                  (s) Private-VLAN System Port, (L) Loopback port
+                  (x) VMAN Tag Translated port
+                  (A) Dynamically added by Auto-peering
+                  (F) Dynamically added by Fabric Attach
+                  (G) Multi-switch LAG Group port
+                  (H) Dynamically added by MVRP
+                  (I) Dynamically added by IDM
+                  (N) Dynamically added by Netlogin
+                  (S) Added by static MAC-based VLAN
+                  (U) Dynamically added uplink port
+                  (V) Dynamically added by VM Tracking
+
+#
+#
+VLAN Interface with name VLAN_0030 created by user
+    Admin State:	 Enabled     Tagging:	802.1Q Tag 30 
+    Description:	 None
+    Virtual router:	 VR-Default
+    IP Anycast:		 Disabled
+    IPv4 Forwarding:	 Disabled
+    IPv4 MC Forwarding:  Disabled
+    IPv6 Forwarding:	 Disabled
+    IPv6 MC Forwarding:  Disabled
+    IPv6:                None
+    STPD:      		 s0(Enabled,Auto-bind) 
+    Layer 2 Forwarding:  Enabled
+    Protocol:            Match all unfiltered protocols
+    Loopback:            Disabled
+    NetLogin:            Disabled
+    QosProfile:     	 None configured
+    Flood Rate Limit QosProfile:       None configured
+    Suppress ARP:        Disabled
+    Suppress ND:         Disabled
+    Proxy ARP:           Entry required
+    Ports:   3. 	  (Number of active ports=1)
+       Tag:        *1,     2b,     3b
+	Flags:    (*) Active, (!) Disabled, (g) Load Sharing port
+                  (b) Port blocked on the vlan, (m) Mac-Based port
+                  (M) Mac-Based port with ingress filtering on
+                  (i) Port inactivated on the vlan due to VXLAN configuration
+                  (a) Egress traffic allowed for NetLogin
+                  (u) Egress traffic unallowed for NetLogin
+                  (t) Translate VLAN tag for Private-VLAN
+                  (s) Private-VLAN System Port, (L) Loopback port
+                  (x) VMAN Tag Translated port
+                  (A) Dynamically added by Auto-peering
+                  (F) Dynamically added by Fabric Attach
+                  (G) Multi-switch LAG Group port
+                  (H) Dynamically added by MVRP
+                  (I) Dynamically added by IDM
+                  (N) Dynamically added by Netlogin
+                  (S) Added by static MAC-based VLAN
+                  (U) Dynamically added uplink port
+                  (V) Dynamically added by VM Tracking
+
+#
+#
+VLAN Interface with name VLAN_0040 created by user
+    Admin State:	 Enabled     Tagging:	802.1Q Tag 40 
+    Description:	 None
+    Virtual router:	 VR-Default
+    IP Anycast:		 Disabled
+    IPv4 Forwarding:	 Disabled
+    IPv4 MC Forwarding:  Disabled
+    IPv6 Forwarding:	 Disabled
+    IPv6 MC Forwarding:  Disabled
+    IPv6:                None
+    STPD:      		 s0(Enabled,Auto-bind) 
+    Layer 2 Forwarding:  Enabled
+    Protocol:            Match all unfiltered protocols
+    Loopback:            Disabled
+    NetLogin:            Disabled
+    QosProfile:     	 None configured
+    Flood Rate Limit QosProfile:       None configured
+    Suppress ARP:        Disabled
+    Suppress ND:         Disabled
+    Proxy ARP:           Entry required
+    Ports:   3. 	  (Number of active ports=1)
+       Tag:        *1,     2b,     3b
+	Flags:    (*) Active, (!) Disabled, (g) Load Sharing port
+                  (b) Port blocked on the vlan, (m) Mac-Based port
+                  (M) Mac-Based port with ingress filtering on
+                  (i) Port inactivated on the vlan due to VXLAN configuration
+                  (a) Egress traffic allowed for NetLogin
+                  (u) Egress traffic unallowed for NetLogin
+                  (t) Translate VLAN tag for Private-VLAN
+                  (s) Private-VLAN System Port, (L) Loopback port
+                  (x) VMAN Tag Translated port
+                  (A) Dynamically added by Auto-peering
+                  (F) Dynamically added by Fabric Attach
+                  (G) Multi-switch LAG Group port
+                  (H) Dynamically added by MVRP
+                  (I) Dynamically added by IDM
+                  (N) Dynamically added by Netlogin
+                  (S) Added by static MAC-based VLAN
+                  (U) Dynamically added uplink port
+                  (V) Dynamically added by VM Tracking
+
+* 5320-16P-2MXT-2X-SwitchEngine.7 # </pre>
+    </div>
+
+    <div class="tab-panel" id="tab3" style="display:none">
+      <p class="desc">Port modes and speeds set by XIQ</p>
+      <pre>
+
+* 5320-16P-2MXT-2X-SwitchEngine.7 # show port configuration
+Port Configuration Monitor                              Wed Mar 25 13:55:54 2026
+Port     Virtual    Port  Link   AutoNeg     Speed      Duplex   Flow  Load   Media
+         router     State State Cfg Actual Cfg Actual Cfg Actual Cntrl Master Pri Red
+1        VR-Default E       A   ON  ON    AUTO 1000   AUTO FULL SY/ASY        UTP          
+2        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+3        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+4        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+5        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+6        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+7        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+8        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+9        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+10       VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+11       VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+12       VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+&gt; indicates Port Display Name truncated past 8 characters
+Link State: A-Active, R-Ready, NP-Port Not Present, L-Loopback
+Port State: D-Disabled, E-Enabled, L-License Disabled
+Media: !-Unsupported, $-Unlicensed, #-LRM/MACsec Adapter, ?-Mismatches Partition
+Media Red: * - use &quot;show port info detail&quot; for redundant media type
+Flow Cntrl: Shows link partner&#x27;s abilities. NONE if Auto Neg is OFF
+0-&gt;Clear Counters  U-&gt;page up  D-&gt;page down ESC-&gt;exit[23APort Configuration Monitor                              Wed Mar 25 13:55:56 2026
+Port     Virtual    Port  Link   AutoNeg     Speed      Duplex   Flow  Load   Media
+         router     State State Cfg Actual Cfg Actual Cfg Actual Cntrl Master Pri Red
+1        VR-Default E       A   ON  ON    AUTO 1000   AUTO FULL SY/ASY        UTP          
+2        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+3        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+4        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+5        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+6        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+7        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+8        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+9        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+10       VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+11       VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+12       VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+&gt; indicates Port Display Name truncated past 8 characters
+Link State: A-Active, R-Ready, NP-Port Not Present, L-Loopback
+Port State: D-Disabled, E-Enabled, L-License Disabled
+Media: !-Unsupported, $-Unlicensed, #-LRM/MACsec Adapter, ?-Mismatches Partition
+Media Red: * - use &quot;show port info detail&quot; for redundant media type
+Flow Cntrl: Shows link partner&#x27;s abilities. NONE if Auto Neg is OFF
+0-&gt;Clear Counters  U-&gt;page up  D-&gt;page down ESC-&gt;exit[23APort Configuration Monitor                              Wed Mar 25 13:55:57 2026
+Port     Virtual    Port  Link   AutoNeg     Speed      Duplex   Flow  Load   Media
+         router     State State Cfg Actual Cfg Actual Cfg Actual Cntrl Master Pri Red
+1        VR-Default E       A   ON  ON    AUTO 1000   AUTO FULL SY/ASY        UTP          
+2        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+3        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+4        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+5        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+6        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+7        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+8        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+9        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+10       VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+11       VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+12       VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+&gt; indicates Port Display Name truncated past 8 characters
+Link State: A-Active, R-Ready, NP-Port Not Present, L-Loopback
+Port State: D-Disabled, E-Enabled, L-License Disabled
+Media: !-Unsupported, $-Unlicensed, #-LRM/MACsec Adapter, ?-Mismatches Partition
+Media Red: * - use &quot;show port info detail&quot; for redundant media type
+Flow Cntrl: Shows link partner&#x27;s abilities. NONE if Auto Neg is OFF
+0-&gt;Clear Counters  U-&gt;page up  D-&gt;page down ESC-&gt;exit[23APort Configuration Monitor                              Wed Mar 25 13:55:58 2026
+Port     Virtual    Port  Link   AutoNeg     Speed      Duplex   Flow  Load   Media
+         router     State State Cfg Actual Cfg Actual Cfg Actual Cntrl Master Pri Red
+1        VR-Default E       A   ON  ON    AUTO 1000   AUTO FULL SY/ASY        UTP          
+2        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+3        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+4        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+5        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+6        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+7        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+8        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+9        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+10       VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+11       VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+12       VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+&gt; indicates Port Display Name truncated past 8 characters
+Link State: A-Active, R-Ready, NP-Port Not Present, L-Loopback
+Port State: D-Disabled, E-Enabled, L-License Disabled
+Media: !-Unsupported, $-Unlicensed, #-LRM/MACsec Adapter, ?-Mismatches Partition
+Media Red: * - use &quot;show port info detail&quot; for redundant media type
+Flow Cntrl: Shows link partner&#x27;s abilities. NONE if Auto Neg is OFF
+0-&gt;Clear Counters  U-&gt;page up  D-&gt;page down ESC-&gt;exit[23APort Configuration Monitor                              Wed Mar 25 13:55:59 2026
+Port     Virtual    Port  Link   AutoNeg     Speed      Duplex   Flow  Load   Media
+         router     State State Cfg Actual Cfg Actual Cfg Actual Cntrl Master Pri Red
+1        VR-Default E       A   ON  ON    AUTO 1000   AUTO FULL SY/ASY        UTP          
+2        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+3        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+4        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+5        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+6        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+7        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+8        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+9        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+10       VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+11       VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+12       VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+&gt; indicates Port Display Name truncated past 8 characters
+Link State: A-Active, R-Ready, NP-Port Not Present, L-Loopback
+Port State: D-Disabled, E-Enabled, L-License Disabled
+Media: !-Unsupported, $-Unlicensed, #-LRM/MACsec Adapter, ?-Mismatches Partition
+Media Red: * - use &quot;show port info detail&quot; for redundant media type
+Flow Cntrl: Shows link partner&#x27;s abilities. NONE if Auto Neg is OFF
+0-&gt;Clear Counters  U-&gt;page up  D-&gt;page down ESC-&gt;exit[23APort Configuration Monitor                              Wed Mar 25 13:56:00 2026
+Port     Virtual    Port  Link   AutoNeg     Speed      Duplex   Flow  Load   Media
+         router     State State Cfg Actual Cfg Actual Cfg Actual Cntrl Master Pri Red
+1        VR-Default E       A   ON  ON    AUTO 1000   AUTO FULL SY/ASY        UTP          
+2        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+3        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+4        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+5        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+6        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+7        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+8        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+9        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+10       VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+11       VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+12       VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+&gt; indicates Port Display Name truncated past 8 characters
+Link State: A-Active, R-Ready, NP-Port Not Present, L-Loopback
+Port State: D-Disabled, E-Enabled, L-License Disabled
+Media: !-Unsupported, $-Unlicensed, #-LRM/MACsec Adapter, ?-Mismatches Partition
+Media Red: * - use &quot;show port info detail&quot; for redundant media type
+Flow Cntrl: Shows link partner&#x27;s abilities. NONE if Auto Neg is OFF
+0-&gt;Clear Counters  U-&gt;page up  D-&gt;page down ESC-&gt;exit[23APort Configuration Monitor                              Wed Mar 25 13:56:02 2026
+Port     Virtual    Port  Link   AutoNeg     Speed      Duplex   Flow  Load   Media
+         router     State State Cfg Actual Cfg Actual Cfg Actual Cntrl Master Pri Red
+1        VR-Default E       A   ON  ON    AUTO 1000   AUTO FULL SY/ASY        UTP          
+2        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+3        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+4        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+5        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+6        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+7        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+8        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+9        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+10       VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+11       VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+12       VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+&gt; indicates Port Display Name truncated past 8 characters
+Link State: A-Active, R-Ready, NP-Port Not Present, L-Loopback
+Port State: D-Disabled, E-Enabled, L-License Disabled
+Media: !-Unsupported, $-Unlicensed, #-LRM/MACsec Adapter, ?-Mismatches Partition
+Media Red: * - use &quot;show port info detail&quot; for redundant media type
+Flow Cntrl: Shows link partner&#x27;s abilities. NONE if Auto Neg is OFF
+0-&gt;Clear Counters  U-&gt;page up  D-&gt;page down ESC-&gt;exit[23APort Configuration Monitor                              Wed Mar 25 13:56:03 2026
+Port     Virtual    Port  Link   AutoNeg     Speed      Duplex   Flow  Load   Media
+         router     State State Cfg Actual Cfg Actual Cfg Actual Cntrl Master Pri Red
+1        VR-Default E       A   ON  ON    AUTO 1000   AUTO FULL SY/ASY        UTP          
+2        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+3        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+4        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+5        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+6        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+7        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+8        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+9        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+10       VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+11       VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+12       VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+&gt; indicates Port Display Name truncated past 8 characters
+Link State: A-Active, R-Ready, NP-Port Not Present, L-Loopback
+Port State: D-Disabled, E-Enabled, L-License Disabled
+Media: !-Unsupported, $-Unlicensed, #-LRM/MACsec Adapter, ?-Mismatches Partition
+Media Red: * - use &quot;show port info detail&quot; for redundant media type
+Flow Cntrl: Shows link partner&#x27;s abilities. NONE if Auto Neg is OFF
+0-&gt;Clear Counters  U-&gt;page up  D-&gt;page down ESC-&gt;exit[23APort Configuration Monitor                              Wed Mar 25 13:56:04 2026
+Port     Virtual    Port  Link   AutoNeg     Speed      Duplex   Flow  Load   Media
+         router     State State Cfg Actual Cfg Actual Cfg Actual Cntrl Master Pri Red
+1        VR-Default E       A   ON  ON    AUTO 1000   AUTO FULL SY/ASY        UTP          
+2        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+3        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+4        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+5        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+6        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+7        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+8        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+9        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+10       VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+11       VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+12       VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+&gt; indicates Port Display Name truncated past 8 characters
+Link State: A-Active, R-Ready, NP-Port Not Present, L-Loopback
+Port State: D-Disabled, E-Enabled, L-License Disabled
+Media: !-Unsupported, $-Unlicensed, #-LRM/MACsec Adapter, ?-Mismatches Partition
+Media Red: * - use &quot;show port info detail&quot; for redundant media type
+Flow Cntrl: Shows link partner&#x27;s abilities. NONE if Auto Neg is OFF
+0-&gt;Clear Counters  U-&gt;page up  D-&gt;page down ESC-&gt;exit[23APort Configuration Monitor                              Wed Mar 25 13:56:05 2026
+Port     Virtual    Port  Link   AutoNeg     Speed      Duplex   Flow  Load   Media
+         router     State State Cfg Actual Cfg Actual Cfg Actual Cntrl Master Pri Red
+1        VR-Default E       A   ON  ON    AUTO 1000   AUTO FULL SY/ASY        UTP          
+2        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+3        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+4        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+5        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+6        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+7        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+8        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+9        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+10       VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+11       VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+12       VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+&gt; indicates Port Display Name truncated past 8 characters
+Link State: A-Active, R-Ready, NP-Port Not Present, L-Loopback
+Port State: D-Disabled, E-Enabled, L-License Disabled
+Media: !-Unsupported, $-Unlicensed, #-LRM/MACsec Adapter, ?-Mismatches Partition
+Media Red: * - use &quot;show port info detail&quot; for redundant media type
+Flow Cntrl: Shows link partner&#x27;s abilities. NONE if Auto Neg is OFF
+0-&gt;Clear Counters  U-&gt;page up  D-&gt;page down ESC-&gt;exit[23APort Configuration Monitor                              Wed Mar 25 13:56:06 2026
+Port     Virtual    Port  Link   AutoNeg     Speed      Duplex   Flow  Load   Media
+         router     State State Cfg Actual Cfg Actual Cfg Actual Cntrl Master Pri Red
+1        VR-Default E       A   ON  ON    AUTO 1000   AUTO FULL SY/ASY        UTP          
+2        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+3        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+4        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+5        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+6        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+7        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+8        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+9        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+10       VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+11       VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+12       VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+&gt; indicates Port Display Name truncated past 8 characters
+Link State: A-Active, R-Ready, NP-Port Not Present, L-Loopback
+Port State: D-Disabled, E-Enabled, L-License Disabled
+Media: !-Unsupported, $-Unlicensed, #-LRM/MACsec Adapter, ?-Mismatches Partition
+Media Red: * - use &quot;show port info detail&quot; for redundant media type
+Flow Cntrl: Shows link partner&#x27;s abilities. NONE if Auto Neg is OFF
+0-&gt;Clear Counters  U-&gt;page up  D-&gt;page down ESC-&gt;exit[23APort Configuration Monitor                              Wed Mar 25 13:56:08 2026
+Port     Virtual    Port  Link   AutoNeg     Speed      Duplex   Flow  Load   Media
+         router     State State Cfg Actual Cfg Actual Cfg Actual Cntrl Master Pri Red
+1        VR-Default E       A   ON  ON    AUTO 1000   AUTO FULL SY/ASY        UTP          
+2        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+3        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+4        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+5        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+6        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+7        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+8        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+9        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+10       VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+11       VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+12       VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+&gt; indicates Port Display Name truncated past 8 characters
+Link State: A-Active, R-Ready, NP-Port Not Present, L-Loopback
+Port State: D-Disabled, E-Enabled, L-License Disabled
+Media: !-Unsupported, $-Unlicensed, #-LRM/MACsec Adapter, ?-Mismatches Partition
+Media Red: * - use &quot;show port info detail&quot; for redundant media type
+Flow Cntrl: Shows link partner&#x27;s abilities. NONE if Auto Neg is OFF
+0-&gt;Clear Counters  U-&gt;page up  D-&gt;page down ESC-&gt;exit[23APort Configuration Monitor                              Wed Mar 25 13:56:09 2026
+Port     Virtual    Port  Link   AutoNeg     Speed      Duplex   Flow  Load   Media
+         router     State State Cfg Actual Cfg Actual Cfg Actual Cntrl Master Pri Red
+1        VR-Default E       A   ON  ON    AUTO 1000   AUTO FULL SY/ASY        UTP          
+2        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+3        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+4        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+5        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+6        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+7        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+8        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+9        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+10       VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+11       VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+12       VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+&gt; indicates Port Display Name truncated past 8 characters
+Link State: A-Active, R-Ready, NP-Port Not Present, L-Loopback
+Port State: D-Disabled, E-Enabled, L-License Disabled
+Media: !-Unsupported, $-Unlicensed, #-LRM/MACsec Adapter, ?-Mismatches Partition
+Media Red: * - use &quot;show port info detail&quot; for redundant media type
+Flow Cntrl: Shows link partner&#x27;s abilities. NONE if Auto Neg is OFF
+0-&gt;Clear Counters  U-&gt;page up  D-&gt;page down ESC-&gt;exit[23APort Configuration Monitor                              Wed Mar 25 13:56:10 2026
+Port     Virtual    Port  Link   AutoNeg     Speed      Duplex   Flow  Load   Media
+         router     State State Cfg Actual Cfg Actual Cfg Actual Cntrl Master Pri Red
+1        VR-Default E       A   ON  ON    AUTO 1000   AUTO FULL SY/ASY        UTP          
+2        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+3        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+4        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+5        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+6        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+7        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+8        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+9        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+10       VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+11       VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+12       VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+&gt; indicates Port Display Name truncated past 8 characters
+Link State: A-Active, R-Ready, NP-Port Not Present, L-Loopback
+Port State: D-Disabled, E-Enabled, L-License Disabled
+Media: !-Unsupported, $-Unlicensed, #-LRM/MACsec Adapter, ?-Mismatches Partition
+Media Red: * - use &quot;show port info detail&quot; for redundant media type
+Flow Cntrl: Shows link partner&#x27;s abilities. NONE if Auto Neg is OFF
+0-&gt;Clear Counters  U-&gt;page up  D-&gt;page down ESC-&gt;exit[23APort Configuration Monitor                              Wed Mar 25 13:56:11 2026
+Port     Virtual    Port  Link   AutoNeg     Speed      Duplex   Flow  Load   Media
+         router     State State Cfg Actual Cfg Actual Cfg Actual Cntrl Master Pri Red
+1        VR-Default E       A   ON  ON    AUTO 1000   AUTO FULL SY/ASY        UTP          
+2        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+3        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+4        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+5        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+6        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+7        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+8        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+9        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+10       VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+11       VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+12       VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+&gt; indicates Port Display Name truncated past 8 characters
+Link State: A-Active, R-Ready, NP-Port Not Present, L-Loopback
+Port State: D-Disabled, E-Enabled, L-License Disabled
+Media: !-Unsupported, $-Unlicensed, #-LRM/MACsec Adapter, ?-Mismatches Partition
+Media Red: * - use &quot;show port info detail&quot; for redundant media type
+Flow Cntrl: Shows link partner&#x27;s abilities. NONE if Auto Neg is OFF
+0-&gt;Clear Counters  U-&gt;page up  D-&gt;page down ESC-&gt;exit[23APort Configuration Monitor                              Wed Mar 25 13:56:12 2026
+Port     Virtual    Port  Link   AutoNeg     Speed      Duplex   Flow  Load   Media
+         router     State State Cfg Actual Cfg Actual Cfg Actual Cntrl Master Pri Red
+1        VR-Default E       A   ON  ON    AUTO 1000   AUTO FULL SY/ASY        UTP          
+2        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+3        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+4        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+5        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+6        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+7        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+8        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+9        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+10       VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+11       VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+12       VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+&gt; indicates Port Display Name truncated past 8 characters
+Link State: A-Active, R-Ready, NP-Port Not Present, L-Loopback
+Port State: D-Disabled, E-Enabled, L-License Disabled
+Media: !-Unsupported, $-Unlicensed, #-LRM/MACsec Adapter, ?-Mismatches Partition
+Media Red: * - use &quot;show port info detail&quot; for redundant media type
+Flow Cntrl: Shows link partner&#x27;s abilities. NONE if Auto Neg is OFF
+0-&gt;Clear Counters  U-&gt;page up  D-&gt;page down ESC-&gt;exit[23APort Configuration Monitor                              Wed Mar 25 13:56:14 2026
+Port     Virtual    Port  Link   AutoNeg     Speed      Duplex   Flow  Load   Media
+         router     State State Cfg Actual Cfg Actual Cfg Actual Cntrl Master Pri Red
+1        VR-Default E       A   ON  ON    AUTO 1000   AUTO FULL SY/ASY        UTP          
+2        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+3        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+4        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+5        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+6        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+7        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+8        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+9        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+10       VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+11       VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+12       VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+&gt; indicates Port Display Name truncated past 8 characters
+Link State: A-Active, R-Ready, NP-Port Not Present, L-Loopback
+Port State: D-Disabled, E-Enabled, L-License Disabled
+Media: !-Unsupported, $-Unlicensed, #-LRM/MACsec Adapter, ?-Mismatches Partition
+Media Red: * - use &quot;show port info detail&quot; for redundant media type
+Flow Cntrl: Shows link partner&#x27;s abilities. NONE if Auto Neg is OFF
+0-&gt;Clear Counters  U-&gt;page up  D-&gt;page down ESC-&gt;exit[23APort Configuration Monitor                              Wed Mar 25 13:56:15 2026
+Port     Virtual    Port  Link   AutoNeg     Speed      Duplex   Flow  Load   Media
+         router     State State Cfg Actual Cfg Actual Cfg Actual Cntrl Master Pri Red
+1        VR-Default E       A   ON  ON    AUTO 1000   AUTO FULL SY/ASY        UTP          
+2        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+3        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+4        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+5        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+6        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+7        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+8        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+9        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+10       VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+11       VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+12       VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+&gt; indicates Port Display Name truncated past 8 characters
+Link State: A-Active, R-Ready, NP-Port Not Present, L-Loopback
+Port State: D-Disabled, E-Enabled, L-License Disabled
+Media: !-Unsupported, $-Unlicensed, #-LRM/MACsec Adapter, ?-Mismatches Partition
+Media Red: * - use &quot;show port info detail&quot; for redundant media type
+Flow Cntrl: Shows link partner&#x27;s abilities. NONE if Auto Neg is OFF
+0-&gt;Clear Counters  U-&gt;page up  D-&gt;page down ESC-&gt;exit[23APort Configuration Monitor                              Wed Mar 25 13:56:16 2026
+Port     Virtual    Port  Link   AutoNeg     Speed      Duplex   Flow  Load   Media
+         router     State State Cfg Actual Cfg Actual Cfg Actual Cntrl Master Pri Red
+1        VR-Default E       A   ON  ON    AUTO 1000   AUTO FULL SY/ASY        UTP          
+2        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+3        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+4        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+5        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+6        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+7        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+8        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+9        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+10       VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+11       VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+12       VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+&gt; indicates Port Display Name truncated past 8 characters
+Link State: A-Active, R-Ready, NP-Port Not Present, L-Loopback
+Port State: D-Disabled, E-Enabled, L-License Disabled
+Media: !-Unsupported, $-Unlicensed, #-LRM/MACsec Adapter, ?-Mismatches Partition
+Media Red: * - use &quot;show port info detail&quot; for redundant media type
+Flow Cntrl: Shows link partner&#x27;s abilities. NONE if Auto Neg is OFF
+0-&gt;Clear Counters  U-&gt;page up  D-&gt;page down ESC-&gt;exit[23APort Configuration Monitor                              Wed Mar 25 13:56:17 2026
+Port     Virtual    Port  Link   AutoNeg     Speed      Duplex   Flow  Load   Media
+         router     State State Cfg Actual Cfg Actual Cfg Actual Cntrl Master Pri Red
+1        VR-Default E       A   ON  ON    AUTO 1000   AUTO FULL SY/ASY        UTP          
+2        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+3        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+4        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+5        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+6        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+7        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+8        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+9        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+10       VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+11       VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+12       VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+&gt; indicates Port Display Name truncated past 8 characters
+Link State: A-Active, R-Ready, NP-Port Not Present, L-Loopback
+Port State: D-Disabled, E-Enabled, L-License Disabled
+Media: !-Unsupported, $-Unlicensed, #-LRM/MACsec Adapter, ?-Mismatches Partition
+Media Red: * - use &quot;show port info detail&quot; for redundant media type
+Flow Cntrl: Shows link partner&#x27;s abilities. NONE if Auto Neg is OFF
+0-&gt;Clear Counters  U-&gt;page up  D-&gt;page down ESC-&gt;exit[23APort Configuration Monitor                              Wed Mar 25 13:56:18 2026
+Port     Virtual    Port  Link   AutoNeg     Speed      Duplex   Flow  Load   Media
+         router     State State Cfg Actual Cfg Actual Cfg Actual Cntrl Master Pri Red
+1        VR-Default E       A   ON  ON    AUTO 1000   AUTO FULL SY/ASY        UTP          
+2        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+3        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+4        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+5        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+6        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+7        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+8        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+9        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+10       VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+11       VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+12       VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+&gt; indicates Port Display Name truncated past 8 characters
+Link State: A-Active, R-Ready, NP-Port Not Present, L-Loopback
+Port State: D-Disabled, E-Enabled, L-License Disabled
+Media: !-Unsupported, $-Unlicensed, #-LRM/MACsec Adapter, ?-Mismatches Partition
+Media Red: * - use &quot;show port info detail&quot; for redundant media type
+Flow Cntrl: Shows link partner&#x27;s abilities. NONE if Auto Neg is OFF
+0-&gt;Clear Counters  U-&gt;page up  D-&gt;page down ESC-&gt;exit[23APort Configuration Monitor                              Wed Mar 25 13:56:20 2026
+Port     Virtual    Port  Link   AutoNeg     Speed      Duplex   Flow  Load   Media
+         router     State State Cfg Actual Cfg Actual Cfg Actual Cntrl Master Pri Red
+1        VR-Default E       A   ON  ON    AUTO 1000   AUTO FULL SY/ASY        UTP          
+2        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+3        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+4        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+5        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+6        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+7        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+8        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+9        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+10       VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+11       VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+12       VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+&gt; indicates Port Display Name truncated past 8 characters
+Link State: A-Active, R-Ready, NP-Port Not Present, L-Loopback
+Port State: D-Disabled, E-Enabled, L-License Disabled
+Media: !-Unsupported, $-Unlicensed, #-LRM/MACsec Adapter, ?-Mismatches Partition
+Media Red: * - use &quot;show port info detail&quot; for redundant media type
+Flow Cntrl: Shows link partner&#x27;s abilities. NONE if Auto Neg is OFF
+0-&gt;Clear Counters  U-&gt;page up  D-&gt;page down ESC-&gt;exit[23APort Configuration Monitor                              Wed Mar 25 13:56:21 2026
+Port     Virtual    Port  Link   AutoNeg     Speed      Duplex   Flow  Load   Media
+         router     State State Cfg Actual Cfg Actual Cfg Actual Cntrl Master Pri Red
+1        VR-Default E       A   ON  ON    AUTO 1000   AUTO FULL SY/ASY        UTP          
+2        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+3        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+4        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+5        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+6        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+7        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+8        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+9        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+10       VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+11       VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+12       VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+&gt; indicates Port Display Name truncated past 8 characters
+Link State: A-Active, R-Ready, NP-Port Not Present, L-Loopback
+Port State: D-Disabled, E-Enabled, L-License Disabled
+Media: !-Unsupported, $-Unlicensed, #-LRM/MACsec Adapter, ?-Mismatches Partition
+Media Red: * - use &quot;show port info detail&quot; for redundant media type
+Flow Cntrl: Shows link partner&#x27;s abilities. NONE if Auto Neg is OFF
+0-&gt;Clear Counters  U-&gt;page up  D-&gt;page down ESC-&gt;exit[23APort Configuration Monitor                              Wed Mar 25 13:56:22 2026
+Port     Virtual    Port  Link   AutoNeg     Speed      Duplex   Flow  Load   Media
+         router     State State Cfg Actual Cfg Actual Cfg Actual Cntrl Master Pri Red
+1        VR-Default E       A   ON  ON    AUTO 1000   AUTO FULL SY/ASY        UTP          
+2        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+3        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+4        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+5        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+6        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+7        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+8        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+9        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+10       VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+11       VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+12       VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+&gt; indicates Port Display Name truncated past 8 characters
+Link State: A-Active, R-Ready, NP-Port Not Present, L-Loopback
+Port State: D-Disabled, E-Enabled, L-License Disabled
+Media: !-Unsupported, $-Unlicensed, #-LRM/MACsec Adapter, ?-Mismatches Partition
+Media Red: * - use &quot;show port info detail&quot; for redundant media type
+Flow Cntrl: Shows link partner&#x27;s abilities. NONE if Auto Neg is OFF
+0-&gt;Clear Counters  U-&gt;page up  D-&gt;page down ESC-&gt;exit[23APort Configuration Monitor                              Wed Mar 25 13:56:23 2026
+Port     Virtual    Port  Link   AutoNeg     Speed      Duplex   Flow  Load   Media
+         router     State State Cfg Actual Cfg Actual Cfg Actual Cntrl Master Pri Red
+1        VR-Default E       A   ON  ON    AUTO 1000   AUTO FULL SY/ASY        UTP          
+2        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+3        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+4        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+5        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+6        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+7        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+8        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+9        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+10       VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+11       VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+12       VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+&gt; indicates Port Display Name truncated past 8 characters
+Link State: A-Active, R-Ready, NP-Port Not Present, L-Loopback
+Port State: D-Disabled, E-Enabled, L-License Disabled
+Media: !-Unsupported, $-Unlicensed, #-LRM/MACsec Adapter, ?-Mismatches Partition
+Media Red: * - use &quot;show port info detail&quot; for redundant media type
+Flow Cntrl: Shows link partner&#x27;s abilities. NONE if Auto Neg is OFF
+0-&gt;Clear Counters  U-&gt;page up  D-&gt;page down ESC-&gt;exit[23APort Configuration Monitor                              Wed Mar 25 13:56:24 2026
+Port     Virtual    Port  Link   AutoNeg     Speed      Duplex   Flow  Load   Media
+         router     State State Cfg Actual Cfg Actual Cfg Actual Cntrl Master Pri Red
+1        VR-Default E       A   ON  ON    AUTO 1000   AUTO FULL SY/ASY        UTP          
+2        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+3        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+4        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+5        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+6        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+7        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+8        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+9        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+10       VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+11       VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+12       VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+&gt; indicates Port Display Name truncated past 8 characters
+Link State: A-Active, R-Ready, NP-Port Not Present, L-Loopback
+Port State: D-Disabled, E-Enabled, L-License Disabled
+Media: !-Unsupported, $-Unlicensed, #-LRM/MACsec Adapter, ?-Mismatches Partition
+Media Red: * - use &quot;show port info detail&quot; for redundant media type
+Flow Cntrl: Shows link partner&#x27;s abilities. NONE if Auto Neg is OFF
+0-&gt;Clear Counters  U-&gt;page up  D-&gt;page down ESC-&gt;exit[23APort Configuration Monitor                              Wed Mar 25 13:56:26 2026
+Port     Virtual    Port  Link   AutoNeg     Speed      Duplex   Flow  Load   Media
+         router     State State Cfg Actual Cfg Actual Cfg Actual Cntrl Master Pri Red
+1        VR-Default E       A   ON  ON    AUTO 1000   AUTO FULL SY/ASY        UTP          
+2        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+3        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+4        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+5        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+6        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+7        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+8        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+9        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+10       VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+11       VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+12       VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+&gt; indicates Port Display Name truncated past 8 characters
+Link State: A-Active, R-Ready, NP-Port Not Present, L-Loopback
+Port State: D-Disabled, E-Enabled, L-License Disabled
+Media: !-Unsupported, $-Unlicensed, #-LRM/MACsec Adapter, ?-Mismatches Partition
+Media Red: * - use &quot;show port info detail&quot; for redundant media type
+Flow Cntrl: Shows link partner&#x27;s abilities. NONE if Auto Neg is OFF
+0-&gt;Clear Counters  U-&gt;page up  D-&gt;page down ESC-&gt;exit[23APort Configuration Monitor                              Wed Mar 25 13:56:27 2026
+Port     Virtual    Port  Link   AutoNeg     Speed      Duplex   Flow  Load   Media
+         router     State State Cfg Actual Cfg Actual Cfg Actual Cntrl Master Pri Red
+1        VR-Default E       A   ON  ON    AUTO 1000   AUTO FULL SY/ASY        UTP          
+2        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+3        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+4        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+5        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+6        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+7        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+8        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+9        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+10       VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+11       VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+12       VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+&gt; indicates Port Display Name truncated past 8 characters
+Link State: A-Active, R-Ready, NP-Port Not Present, L-Loopback
+Port State: D-Disabled, E-Enabled, L-License Disabled
+Media: !-Unsupported, $-Unlicensed, #-LRM/MACsec Adapter, ?-Mismatches Partition
+Media Red: * - use &quot;show port info detail&quot; for redundant media type
+Flow Cntrl: Shows link partner&#x27;s abilities. NONE if Auto Neg is OFF
+0-&gt;Clear Counters  U-&gt;page up  D-&gt;page down ESC-&gt;exit[23APort Configuration Monitor                              Wed Mar 25 13:56:28 2026
+Port     Virtual    Port  Link   AutoNeg     Speed      Duplex   Flow  Load   Media
+         router     State State Cfg Actual Cfg Actual Cfg Actual Cntrl Master Pri Red
+1        VR-Default E       A   ON  ON    AUTO 1000   AUTO FULL SY/ASY        UTP          
+2        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+3        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+4        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+5        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+6        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+7        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+8        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+9        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+10       VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+11       VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+12       VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+&gt; indicates Port Display Name truncated past 8 characters
+Link State: A-Active, R-Ready, NP-Port Not Present, L-Loopback
+Port State: D-Disabled, E-Enabled, L-License Disabled
+Media: !-Unsupported, $-Unlicensed, #-LRM/MACsec Adapter, ?-Mismatches Partition
+Media Red: * - use &quot;show port info detail&quot; for redundant media type
+Flow Cntrl: Shows link partner&#x27;s abilities. NONE if Auto Neg is OFF
+0-&gt;Clear Counters  U-&gt;page up  D-&gt;page down ESC-&gt;exit[23APort Configuration Monitor                              Wed Mar 25 13:56:29 2026
+Port     Virtual    Port  Link   AutoNeg     Speed      Duplex   Flow  Load   Media
+         router     State State Cfg Actual Cfg Actual Cfg Actual Cntrl Master Pri Red
+1        VR-Default E       A   ON  ON    AUTO 1000   AUTO FULL SY/ASY        UTP          
+2        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+3        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+4        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+5        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+6        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+7        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+8        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+9        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+10       VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+11       VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+12       VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+&gt; indicates Port Display Name truncated past 8 characters
+Link State: A-Active, R-Ready, NP-Port Not Present, L-Loopback
+Port State: D-Disabled, E-Enabled, L-License Disabled
+Media: !-Unsupported, $-Unlicensed, #-LRM/MACsec Adapter, ?-Mismatches Partition
+Media Red: * - use &quot;show port info detail&quot; for redundant media type
+Flow Cntrl: Shows link partner&#x27;s abilities. NONE if Auto Neg is OFF
+0-&gt;Clear Counters  U-&gt;page up  D-&gt;page down ESC-&gt;exit[23APort Configuration Monitor                              Wed Mar 25 13:56:30 2026
+Port     Virtual    Port  Link   AutoNeg     Speed      Duplex   Flow  Load   Media
+         router     State State Cfg Actual Cfg Actual Cfg Actual Cntrl Master Pri Red
+1        VR-Default E       A   ON  ON    AUTO 1000   AUTO FULL SY/ASY        UTP          
+2        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+3        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+4        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+5        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+6        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+7        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+8        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+9        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+10       VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+11       VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+12       VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+&gt; indicates Port Display Name truncated past 8 characters
+Link State: A-Active, R-Ready, NP-Port Not Present, L-Loopback
+Port State: D-Disabled, E-Enabled, L-License Disabled
+Media: !-Unsupported, $-Unlicensed, #-LRM/MACsec Adapter, ?-Mismatches Partition
+Media Red: * - use &quot;show port info detail&quot; for redundant media type
+Flow Cntrl: Shows link partner&#x27;s abilities. NONE if Auto Neg is OFF
+0-&gt;Clear Counters  U-&gt;page up  D-&gt;page down ESC-&gt;exit[23APort Configuration Monitor                              Wed Mar 25 13:56:32 2026
+Port     Virtual    Port  Link   AutoNeg     Speed      Duplex   Flow  Load   Media
+         router     State State Cfg Actual Cfg Actual Cfg Actual Cntrl Master Pri Red
+1        VR-Default E       A   ON  ON    AUTO 1000   AUTO FULL SY/ASY        UTP          
+2        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+3        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+4        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+5        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+6        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+7        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+8        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+9        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+10       VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+11       VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+12       VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+&gt; indicates Port Display Name truncated past 8 characters
+Link State: A-Active, R-Ready, NP-Port Not Present, L-Loopback
+Port State: D-Disabled, E-Enabled, L-License Disabled
+Media: !-Unsupported, $-Unlicensed, #-LRM/MACsec Adapter, ?-Mismatches Partition
+Media Red: * - use &quot;show port info detail&quot; for redundant media type
+Flow Cntrl: Shows link partner&#x27;s abilities. NONE if Auto Neg is OFF
+0-&gt;Clear Counters  U-&gt;page up  D-&gt;page down ESC-&gt;exit[23APort Configuration Monitor                              Wed Mar 25 13:56:33 2026
+Port     Virtual    Port  Link   AutoNeg     Speed      Duplex   Flow  Load   Media
+         router     State State Cfg Actual Cfg Actual Cfg Actual Cntrl Master Pri Red
+1        VR-Default E       A   ON  ON    AUTO 1000   AUTO FULL SY/ASY        UTP          
+2        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+3        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+4        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+5        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+6        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+7        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+8        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+9        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+10       VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+11       VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+12       VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+&gt; indicates Port Display Name truncated past 8 characters
+Link State: A-Active, R-Ready, NP-Port Not Present, L-Loopback
+Port State: D-Disabled, E-Enabled, L-License Disabled
+Media: !-Unsupported, $-Unlicensed, #-LRM/MACsec Adapter, ?-Mismatches Partition
+Media Red: * - use &quot;show port info detail&quot; for redundant media type
+Flow Cntrl: Shows link partner&#x27;s abilities. NONE if Auto Neg is OFF
+0-&gt;Clear Counters  U-&gt;page up  D-&gt;page down ESC-&gt;exit[23APort Configuration Monitor                              Wed Mar 25 13:56:34 2026
+Port     Virtual    Port  Link   AutoNeg     Speed      Duplex   Flow  Load   Media
+         router     State State Cfg Actual Cfg Actual Cfg Actual Cntrl Master Pri Red
+1        VR-Default E       A   ON  ON    AUTO 1000   AUTO FULL SY/ASY        UTP          
+2        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+3        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+4        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+5        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+6        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+7        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+8        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+9        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+10       VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+11       VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+12       VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+&gt; indicates Port Display Name truncated past 8 characters
+Link State: A-Active, R-Ready, NP-Port Not Present, L-Loopback
+Port State: D-Disabled, E-Enabled, L-License Disabled
+Media: !-Unsupported, $-Unlicensed, #-LRM/MACsec Adapter, ?-Mismatches Partition
+Media Red: * - use &quot;show port info detail&quot; for redundant media type
+Flow Cntrl: Shows link partner&#x27;s abilities. NONE if Auto Neg is OFF
+0-&gt;Clear Counters  U-&gt;page up  D-&gt;page down ESC-&gt;exit[23APort Configuration Monitor                              Wed Mar 25 13:56:35 2026
+Port     Virtual    Port  Link   AutoNeg     Speed      Duplex   Flow  Load   Media
+         router     State State Cfg Actual Cfg Actual Cfg Actual Cntrl Master Pri Red
+1        VR-Default E       A   ON  ON    AUTO 1000   AUTO FULL SY/ASY        UTP          
+2        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+3        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+4        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+5        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+6        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+7        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+8        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+9        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+10       VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+11       VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+12       VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+&gt; indicates Port Display Name truncated past 8 characters
+Link State: A-Active, R-Ready, NP-Port Not Present, L-Loopback
+Port State: D-Disabled, E-Enabled, L-License Disabled
+Media: !-Unsupported, $-Unlicensed, #-LRM/MACsec Adapter, ?-Mismatches Partition
+Media Red: * - use &quot;show port info detail&quot; for redundant media type
+Flow Cntrl: Shows link partner&#x27;s abilities. NONE if Auto Neg is OFF
+0-&gt;Clear Counters  U-&gt;page up  D-&gt;page down ESC-&gt;exit[23APort Configuration Monitor                              Wed Mar 25 13:56:36 2026
+Port     Virtual    Port  Link   AutoNeg     Speed      Duplex   Flow  Load   Media
+         router     State State Cfg Actual Cfg Actual Cfg Actual Cntrl Master Pri Red
+1        VR-Default E       A   ON  ON    AUTO 1000   AUTO FULL SY/ASY        UTP          
+2        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+3        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+4        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+5        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+6        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+7        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+8        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+9        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+10       VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+11       VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+12       VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+&gt; indicates Port Display Name truncated past 8 characters
+Link State: A-Active, R-Ready, NP-Port Not Present, L-Loopback
+Port State: D-Disabled, E-Enabled, L-License Disabled
+Media: !-Unsupported, $-Unlicensed, #-LRM/MACsec Adapter, ?-Mismatches Partition
+Media Red: * - use &quot;show port info detail&quot; for redundant media type
+Flow Cntrl: Shows link partner&#x27;s abilities. NONE if Auto Neg is OFF
+0-&gt;Clear Counters  U-&gt;page up  D-&gt;page down ESC-&gt;exit[23APort Configuration Monitor                              Wed Mar 25 13:56:38 2026
+Port     Virtual    Port  Link   AutoNeg     Speed      Duplex   Flow  Load   Media
+         router     State State Cfg Actual Cfg Actual Cfg Actual Cntrl Master Pri Red
+1        VR-Default E       A   ON  ON    AUTO 1000   AUTO FULL SY/ASY        UTP          
+2        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+3        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+4        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+5        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+6        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+7        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+8        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+9        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+10       VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+11       VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+12       VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+&gt; indicates Port Display Name truncated past 8 characters
+Link State: A-Active, R-Ready, NP-Port Not Present, L-Loopback
+Port State: D-Disabled, E-Enabled, L-License Disabled
+Media: !-Unsupported, $-Unlicensed, #-LRM/MACsec Adapter, ?-Mismatches Partition
+Media Red: * - use &quot;show port info detail&quot; for redundant media type
+Flow Cntrl: Shows link partner&#x27;s abilities. NONE if Auto Neg is OFF
+0-&gt;Clear Counters  U-&gt;page up  D-&gt;page down ESC-&gt;exit[23APort Configuration Monitor                              Wed Mar 25 13:56:39 2026
+Port     Virtual    Port  Link   AutoNeg     Speed      Duplex   Flow  Load   Media
+         router     State State Cfg Actual Cfg Actual Cfg Actual Cntrl Master Pri Red
+1        VR-Default E       A   ON  ON    AUTO 1000   AUTO FULL SY/ASY        UTP          
+2        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+3        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+4        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+5        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+6        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+7        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+8        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+9        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+10       VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+11       VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+12       VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+&gt; indicates Port Display Name truncated past 8 characters
+Link State: A-Active, R-Ready, NP-Port Not Present, L-Loopback
+Port State: D-Disabled, E-Enabled, L-License Disabled
+Media: !-Unsupported, $-Unlicensed, #-LRM/MACsec Adapter, ?-Mismatches Partition
+Media Red: * - use &quot;show port info detail&quot; for redundant media type
+Flow Cntrl: Shows link partner&#x27;s abilities. NONE if Auto Neg is OFF
+0-&gt;Clear Counters  U-&gt;page up  D-&gt;page down ESC-&gt;exit[23APort Configuration Monitor                              Wed Mar 25 13:56:39 2026
+Port     Virtual    Port  Link   AutoNeg     Speed      Duplex   Flow  Load   Media
+         router     State State Cfg Actual Cfg Actual Cfg Actual Cntrl Master Pri Red
+1        VR-Default E       A   ON  ON    AUTO 1000   AUTO FULL SY/ASY        UTP          
+2        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+3        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+4        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+5        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+6        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+7        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+8        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+9        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+10       VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+11       VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+12       VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+&gt; indicates Port Display Name truncated past 8 characters
+Link State: A-Active, R-Ready, NP-Port Not Present, L-Loopback
+Port State: D-Disabled, E-Enabled, L-License Disabled
+Media: !-Unsupported, $-Unlicensed, #-LRM/MACsec Adapter, ?-Mismatches Partition
+Media Red: * - use &quot;show port info detail&quot; for redundant media type
+Flow Cntrl: Shows link partner&#x27;s abilities. NONE if Auto Neg is OFF
+0-&gt;Clear Counters  U-&gt;page up  D-&gt;page down ESC-&gt;exit
+[23APort Configuration Monitor                              Wed Mar 25 13:56:40 2026
+Port     Virtual    Port  Link   AutoNeg     Speed      Duplex   Flow  Load   Media
+         router     State State Cfg Actual Cfg Actual Cfg Actual Cntrl Master Pri Red
+1        VR-Default E       A   ON  ON    AUTO 1000   AUTO FULL SY/ASY        UTP          
+2        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+3        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+4        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+5        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+6        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+7        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+8        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+9        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+10       VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+11       VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+12       VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+&gt; indicates Port Display Name truncated past 8 characters
+Link State: A-Active, R-Ready, NP-Port Not Present, L-Loopback
+Port State: D-Disabled, E-Enabled, L-License Disabled
+Media: !-Unsupported, $-Unlicensed, #-LRM/MACsec Adapter, ?-Mismatches Partition
+Media Red: * - use &quot;show port info detail&quot; for redundant media type
+Flow Cntrl: Shows link partner&#x27;s abilities. NONE if Auto Neg is OFF
+0-&gt;Clear Counters  U-&gt;page up  D-&gt;page down ESC-&gt;exit[23APort Configuration Monitor                              Wed Mar 25 13:56:41 2026
+Port     Virtual    Port  Link   AutoNeg     Speed      Duplex   Flow  Load   Media
+         router     State State Cfg Actual Cfg Actual Cfg Actual Cntrl Master Pri Red
+1        VR-Default E       A   ON  ON    AUTO 1000   AUTO FULL SY/ASY        UTP          
+2        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+3        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+4        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+5        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+6        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+7        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+8        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+9        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+10       VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+11       VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+12       VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+&gt; indicates Port Display Name truncated past 8 characters
+Link State: A-Active, R-Ready, NP-Port Not Present, L-Loopback
+Port State: D-Disabled, E-Enabled, L-License Disabled
+Media: !-Unsupported, $-Unlicensed, #-LRM/MACsec Adapter, ?-Mismatches Partition
+Media Red: * - use &quot;show port info detail&quot; for redundant media type
+Flow Cntrl: Shows link partner&#x27;s abilities. NONE if Auto Neg is OFF
+0-&gt;Clear Counters  U-&gt;page up  D-&gt;page down ESC-&gt;exit[23APort Configuration Monitor                              Wed Mar 25 13:56:42 2026
+Port     Virtual    Port  Link   AutoNeg     Speed      Duplex   Flow  Load   Media
+         router     State State Cfg Actual Cfg Actual Cfg Actual Cntrl Master Pri Red
+1        VR-Default E       A   ON  ON    AUTO 1000   AUTO FULL SY/ASY        UTP          
+2        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+3        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+4        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+5        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+6        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+7        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+8        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+9        VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+10       VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+11       VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+12       VR-Default E       R   ON  ON    AUTO        AUTO                    UTP          
+&gt; indicates Port Display Name truncated past 8 characters
+Link State: A-Active, R-Ready, NP-Port Not Present, L-Loopback
+Port State: D-Disabled, E-Enabled, L-License Disabled
+Media: !-Unsupported, $-Unlicensed, #-LRM/MACsec Adapter, ?-Mismatches Partition
+Media Red: * - use &quot;show port info detail&quot; for redundant media type
+Flow Cntrl: Shows link partner&#x27;s abilities. NONE if Auto Neg is OFF
+0-&gt;Clear Counters  U-&gt;page up  D-&gt;page down ESC-&gt;exit[23A[J* 5320-16P-2MXT-2X-SwitchEngine.8 # </pre>
+    </div>
+
+    <div class="tab-panel" id="tab4" style="display:none">
+      <p class="desc">Management access — SSH, SNMP, Telnet, HTTP</p>
+      <pre>
+
+* 5320-16P-2MXT-2X-SwitchEngine.8 # show management
+Info: Command executed. Please use new command: show switch management
+CLI idle timeout                 : Enabled (20 minutes)
+CLI max number of login attempts : 3
+CLI max number of sessions       : 8
+CLI paging                       : Disabled (this session only)
+CLI space-completion             : Disabled (this session only)
+CLI configuration logging        : Disabled (without expansion)
+CLI journal size                 : 100
+CLI password prompting only      : Disabled
+CLI display moved-keywords       : Hidden
+CLI moved-keywords hidden release: 33.5
+CLI RADIUS cmd authorize tokens  : 2
+CLI scripting                    : Disabled (this session only)
+CLI scripting error mode         : Ignore-Error (this session only)
+CLI script search path           : &quot;.:/usr/local/cfg&quot; (this session only)
+CLI persistent mode              : Persistent (this session only)
+CLI prompting                    : Enabled (this session only)
+CLI screen size                  : 30 Lines 120 Columns (this session only)
+CLI refresh                      : Enabled
+CLI history expansion            : Disabled
+Image integrity checking         : Off 
+Current system port notation     : port
+Configured system port notation  : port
+Telnet access                    : Enabled (tcp port 23 vr all)
+                                 : Access Profile : not set
+SSH access                       : Enabled (Key valid, tcp port 22 vr all)
+                                 : Secure-Mode    : Off
+                                 : Access Profile : not set
+SSH2 idle time                   : 60 minutes
+SSH2 rekey interval              : 4096 MB and no time limit
+Web access                       : Enabled (tcp port 80)
+                                 : Access Profile : not set
+Total Read Only Communities	 : 1
+Total Read Write Communities	 : 0
+RMON                             : Disabled
+SNMP access                      : Enabled
+                                 : Access Profile : not set
+SNMP Notifications               : Enabled
+SNMP Notification Receivers  : None
+SNMP stats:	InPkts 20      OutPkts   19      Errors 0       AuthErrors 1
+		Gets   0       GetNexts  19      Sets   0       Drops      0       
+SNMP traps:	Sent   0       AuthTraps Enabled
+SNMP inform:	Sent   0       Retries   0       Failed 0
+* 5320-16P-2MXT-2X-SwitchEngine.9 # </pre>
+    </div>
+
+    <div class="tab-panel" id="tab5" style="display:none">
+      <p class="desc">Full static running configuration</p>
+      <pre>
+
+* 5320-16P-2MXT-2X-SwitchEngine.9 # show configuration
+#
+# Module devmgr configuration.
+#
+configure timezone name PST -480 autodst
+configure sys-recovery-level switch reset
+
+#
+# Module vlan configuration.
+#
+configure vlan default delete ports all
+configure vr VR-Default delete ports 1-20
+configure vr VR-Default add ports 1-20
+create vlan &quot;VLAN_0010&quot;
+configure vlan VLAN_0010 tag 10
+create vlan &quot;VLAN_0020&quot;
+configure vlan VLAN_0020 tag 20
+create vlan &quot;VLAN_0030&quot;
+configure vlan VLAN_0030 tag 30
+create vlan &quot;VLAN_0040&quot;
+configure vlan VLAN_0040 tag 40
+configure ports 4 description-string &quot;Default settings for the access port&quot;
+configure ports 5 description-string &quot;Default settings for the access port&quot;
+configure ports 6 description-string &quot;Default settings for the access port&quot;
+configure ports 7 description-string &quot;Default settings for the access port&quot;
+configure ports 8 description-string &quot;Default settings for the access port&quot;
+configure ports 9 description-string &quot;Default settings for the access port&quot;
+configure ports 10 description-string &quot;Default settings for the access port&quot;
+configure ports 11 description-string &quot;Default settings for the access port&quot;
+configure ports 12 description-string &quot;Default settings for the access port&quot;
+configure ports 13 description-string &quot;Default settings for the access port&quot;
+configure ports 14 description-string &quot;Default settings for the access port&quot;
+configure ports 15 description-string &quot;Default settings for the access port&quot;
+configure ports 16 description-string &quot;Default settings for the access port&quot;
+configure ports 17 description-string &quot;Default settings for the access port&quot;
+configure ports 18 description-string &quot;Default settings for the access port&quot;
+configure ports 19 description-string &quot;Default settings for the access port&quot;
+configure ports 20 description-string &quot;Default settings for the access port&quot;
+configure vlan Default add ports 1-20 untagged  
+configure vlan VLAN_0010 add ports 1 tagged  
+configure vlan VLAN_0020 add ports 1-3 tagged  
+configure vlan VLAN_0030 add ports 1-3 tagged  
+configure vlan VLAN_0040 add ports 1-3 tagged  
+configure vr VR-Default delete protocol mpls
+
+#
+# Module mcmgr configuration.
+#
+
+#
+# Module otm configuration.
+#
+
+#
+# Module fdb configuration.
+#
+
+#
+# Module rtmgr configuration.
+#
+
+#
+# Module policy configuration.
+#
+
+#
+# Module aaa configuration.
+#
+configure account admin encrypted &quot;$5$HzTskn$bxfAJgwr0wi2zxZWrAwDTVT1fazSA2RdXdQwLaDCR77&quot; 
+
+#
+# Module acl configuration.
+#
+
+
+
+configure access-list zone SYSTEM application Mrp application-priority 2
+configure access-list zone SYSTEM application IpSecurity application-priority 3
+configure access-list zone SYSTEM application FIPSnooping application-priority 4
+configure access-list zone SYSTEM application Dot1Ag application-priority 5
+configure access-list zone SYSTEM application Dot1AgDefault application-priority 6
+configure access-list zone SYSTEM application NetLogin application-priority 7
+configure access-list zone SYSTEM application FDB application-priority 8
+configure access-list zone SYSTEM application HealthCheckLAG application-priority 9
+configure access-list zone SYSTEM application IdentityManager application-priority 10
+configure access-list zone SYSTEM application VMTracking application-priority 11
+configure access-list zone SYSTEM application PolicyManager application-priority 12
+configure access-list zone SYSTEM application Policy application-priority 13
+configure access-list zone SYSTEM application L2PT_PF application-priority 14
+configure access-list zone SYSTEM application Snmp application-priority 17
+configure access-list zone SYSTEM application Telnet application-priority 18
+configure access-list zone SYSTEM application Http application-priority 19
+configure access-list zone SYSTEM application Ssh2 application-priority 20
+configure access-list zone SYSTEM application VlanManager application-priority 21
+configure access-list zone SYSTEM application SlppGuard application-priority 22
+configure access-list zone SYSTEM application ElrpHwAssist application-priority 23
+configure access-list zone SYSTEM application Flowmon application-priority 24
+
+#
+# Module bfd configuration.
+#
+
+#
+# Module bgp configuration.
+#
+
+#
+# Module cfgmgr configuration.
+#
+
+#
+# Module dnsAnalytics configuration.
+#
+
+#
+# Module dosprotect configuration.
+#
+
+#
+# Module dot1ag configuration.
+#
+
+#
+# Module eaps configuration.
+#
+
+#
+# Module edp configuration.
+#
+
+#
+# Module elrp configuration.
+#
+
+#
+# Module ems configuration.
+#
+
+#
+# Module epm configuration.
+#
+
+#
+# Module erps configuration.
+#
+
+#
+# Module esrp configuration.
+#
+
+#
+# Module ethoam configuration.
+#
+
+#
+# Module etmon configuration.
+#
+
+#
+# Module exsshd configuration.
+#
+enable ssh2
+
+#
+# Module hal configuration.
+#
+
+#
+# Module idMgr configuration.
+#
+
+#
+# Module ipSecurity configuration.
+#
+
+configure trusted-ports 1-3 trust-for dhcp-server
+
+#
+# Module ipfix configuration.
+#
+
+#
+# Module iqagent configuration.
+#
+configure iqagent server vr VR-Default
+
+#
+# Module isis configuration.
+#
+
+#
+# Module lldp configuration.
+#
+
+#
+# Module mrp configuration.
+#
+
+#
+# Module msdp configuration.
+#
+
+#
+# Module netDb configuration.
+#
+
+#
+# Module netLogin configuration.
+#
+
+#
+# Module netTools configuration.
+#
+configure dns-client add name-server 1.0.0.1 vr VR-Default
+configure dns-client add name-server 208.67.220.220 vr VR-Default
+configure sntp-client broadcast vr VR-Default
+configure sntp-client update-interval 16 
+enable dhcp vlan Default
+
+#
+# Module nodealias configuration.
+#
+
+#
+# Module ntp configuration.
+#
+enable ntp vr VR-Default
+configure ntp server add 0.aerohive.pool.ntp.org vr VR-Default
+configure ntp server add 1.aerohive.pool.ntp.org vr VR-Default
+configure ntp server add 2.aerohive.pool.ntp.org vr VR-Default
+configure ntp server add 3.aerohive.pool.ntp.org vr VR-Default
+
+#
+# Module ospf configuration.
+#
+configure ospf vlan Default priority 0
+
+#
+# Module ospfv3 configuration.
+#
+
+#
+# Module pim configuration.
+#
+
+#
+# Module poe configuration.
+#
+disable inline-power ports 1
+
+#
+# Module rip configuration.
+#
+
+#
+# Module ripng configuration.
+#
+
+#
+# Module snmpMaster configuration.
+#
+configure snmpv3 engine-id 03:d8:e0:16:3b:54:00
+configure snmpv3 add user &quot;rwa&quot; engine-id 80:00:07:7c:03:d8:e0:16:3b:54:00 authentication md5 auth-encrypted hex 23:24:59:76:6a:76:6f:73:51:77:77:39:67:62:67:35:7a:53:5a:2b:4b:6f:6e:57:39:48:52:68:4f:4f:6f:51:3d:3d privacy aes 128 privacy-encrypted hex 23:24:41:69:44:74:35:50:59:74:35:44:72:57:53:6c:75:67:49:6f:49:43:41:4a:43:35:55:41:49:45:50:51:3d:3d 
+configure snmpv3 add group &quot;admin&quot; user &quot;rwa&quot; sec-model usm 
+configure snmpv3 add community &quot;basic_ro&quot; encrypted name &quot;#$CUMXAwD5EEA01rpLL6mCtjsccoW7Vw==&quot; user &quot;v1v2c_ro&quot; 
+enable snmp access
+enable snmp access snmp-v1v2c
+enable snmp access snmpv3
+
+#
+# Module stp configuration.
+#
+disable stpd s0
+configure stpd s0 mode dot1d
+configure stpd s0 priority 4096 extended-system-id 0
+enable stpd s0 auto-bind vlan VLAN_0010
+enable stpd s0 auto-bind vlan VLAN_0020
+enable stpd s0 auto-bind vlan VLAN_0030
+enable stpd s0 auto-bind vlan VLAN_0040
+configure stpd s0 add vlan Default ports 1-20 dot1d
+configure stpd s0 add vlan VLAN_0010 ports 1 dot1d
+configure stpd s0 add vlan VLAN_0020 ports 1-3 dot1d
+configure stpd s0 add vlan VLAN_0030 ports 1-3 dot1d
+configure stpd s0 add vlan VLAN_0040 ports 1-3 dot1d
+enable stpd s0
+
+#
+# Module techSupport configuration.
+#
+
+#
+# Module telnetd configuration.
+#
+
+#
+# Module tftpd configuration.
+#
+
+#
+# Module thttpd configuration.
+#
+enable web https
+
+#
+# Module twamp configuration.
+#
+
+#
+# Module upm configuration.
+#
+
+#
+# Module vmt configuration.
+#
+
+#
+# Module vrrp configuration.
+#
+
+#
+# Module vsm configuration.
+#
+
+#
+# Module vpex configuration.
+#
+* 5320-16P-2MXT-2X-SwitchEngine.10 # </pre>
+    </div>
+</div>
+<script>
+  function switchTab(id) {
+    document.querySelectorAll('.tab-panel').forEach(p => p.style.display = 'none');
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById(id).style.display = 'flex';
+    document.getElementById('btn-' + id).classList.add('active');
+  }
+</script>
+</div>
+<script>
+  function checkLogin() {
+    var u = document.getElementById('username').value;
+    var p = document.getElementById('password').value;
+    if (u === 'admin' && p === 'Extreme01!!') {
+      document.getElementById('login-gate').style.display = 'none';
+      document.getElementById('main-content').style.display = 'flex';
+      document.getElementById('main-content').style.flexDirection = 'column';
+      sessionStorage.setItem('auth25','1');
+    } else {
+      document.getElementById('login-error').style.display = 'block';
+    }
+  }
+  document.addEventListener('keydown', function(e){ if(e.key==='Enter') checkLogin(); });
+  if (sessionStorage.getItem('auth25')==='1') {
+    document.getElementById('login-gate').style.display = 'none';
+    document.getElementById('main-content').style.display = 'flex';
+    document.getElementById('main-content').style.flexDirection = 'column';
+  }
+</script>
+</body>
+</html>
