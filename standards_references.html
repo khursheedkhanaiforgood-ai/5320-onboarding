@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Standards & References — Extreme Networks 5320 Onboarding</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; background: #0f172a; color: #e2e8f0; min-height: 100vh; padding: 48px 24px; }
+  .container { max-width: 860px; margin: 0 auto; }
+
+  /* Header */
+  .page-header { margin-bottom: 40px; }
+  .page-header h1 { font-size: 1.7rem; color: #a78bfa; margin-bottom: 6px; }
+  .page-header .meta { font-size: 0.78rem; color: #a78bfa; letter-spacing: 0.05em; margin-bottom: 10px; }
+  .page-header .subtitle { color: #64748b; font-size: 0.9rem; line-height: 1.7; max-width: 640px; }
+
+  /* Series nav */
+  .series-nav { display: flex; align-items: center; gap: 10px; margin-bottom: 36px; flex-wrap: wrap; }
+  .series-nav a { font-size: 0.75rem; color: #60a5fa; text-decoration: none; padding: 4px 10px; border: 1px solid #1e3a5f; border-radius: 4px; }
+  .series-nav a:hover { border-color: #3b82f6; color: #93c5fd; }
+  .series-nav .sep { color: #334155; font-size: 0.75rem; }
+
+  /* Section titles */
+  .section-title { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: #475569; margin-bottom: 18px; padding-bottom: 8px; border-bottom: 1px solid #1e293b; }
+
+  /* Layer group */
+  .layer-group { margin-bottom: 36px; }
+  .layer-group h2 { font-size: 0.95rem; font-weight: 700; margin-bottom: 14px; display: flex; align-items: center; gap: 10px; }
+  .layer-badge { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; padding: 3px 8px; border-radius: 3px; }
+
+  /* Standards table */
+  .std-table { width: 100%; border-collapse: collapse; font-size: 0.83rem; }
+  .std-table thead tr { background: #1e293b; }
+  .std-table thead th { padding: 9px 12px; text-align: left; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: #64748b; }
+  .std-table tbody tr { border-bottom: 1px solid #1e293b; }
+  .std-table tbody tr:hover { background: #1e293b44; }
+  .std-table td { padding: 10px 12px; vertical-align: top; line-height: 1.5; }
+  .std-table td:first-child { font-weight: 600; color: #e2e8f0; white-space: nowrap; }
+  .std-table td:nth-child(2) { color: #94a3b8; font-size: 0.8rem; }
+  .std-table td:nth-child(3) { color: #cbd5e1; font-family: monospace; font-size: 0.78rem; }
+  .std-table td:last-child { font-size: 0.78rem; }
+  .std-table a { color: #60a5fa; text-decoration: none; }
+  .std-table a:hover { text-decoration: underline; }
+
+  /* Lab highlight pill */
+  .lab { display: inline-block; background: #0d2b1f; color: #34d399; font-size: 0.68rem; padding: 2px 7px; border-radius: 3px; border: 1px solid #065f46; margin-top: 3px; }
+
+  /* Layer badge colors */
+  .l1 { background: #1c1917; color: #a8a29e; border: 1px solid #44403c; }
+  .l2 { background: #1e1a2e; color: #c4b5fd; border: 1px solid #4c1d95; }
+  .l3 { background: #0c1a2e; color: #93c5fd; border: 1px solid #1e3a5f; }
+  .l4 { background: #0d2320; color: #6ee7b7; border: 1px solid #065f46; }
+  .lw { background: #1a1a2e; color: #f0abfc; border: 1px solid #6b21a8; }
+  .lc { background: #1a1a0d; color: #fcd34d; border: 1px solid #713f12; }
+
+  /* Appendix */
+  .appendix-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 32px; }
+  @media (max-width: 600px) { .appendix-grid { grid-template-columns: 1fr; } }
+  .appendix-card { background: #1e293b; border: 1px solid #334155; border-radius: 8px; padding: 20px 20px 16px; }
+  .appendix-card h3 { font-size: 0.82rem; font-weight: 700; color: #a78bfa; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.07em; }
+  .appendix-card ul { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+  .appendix-card li { font-size: 0.8rem; line-height: 1.5; }
+  .appendix-card a { color: #60a5fa; text-decoration: none; }
+  .appendix-card a:hover { text-decoration: underline; }
+  .appendix-card .note { color: #475569; font-size: 0.72rem; display: block; margin-top: 2px; }
+
+  /* Footer nav */
+  .footer-nav { display: flex; justify-content: space-between; align-items: center; margin-top: 48px; padding-top: 20px; border-top: 1px solid #1e293b; font-size: 0.8rem; flex-wrap: wrap; gap: 10px; }
+  .footer-nav a { color: #60a5fa; text-decoration: none; padding: 6px 14px; border: 1px solid #1e3a5f; border-radius: 5px; }
+  .footer-nav a:hover { border-color: #3b82f6; }
+  .footer-nav .center { color: #334155; font-size: 0.72rem; }
+
+  hr.divider { border: none; border-top: 1px solid #1e293b; margin: 36px 0; }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- Header -->
+  <div class="page-header">
+    <p class="meta">Khursheed Khan &nbsp;&mdash;&nbsp; Extreme Networks &nbsp;&mdash;&nbsp; March 2026</p>
+    <h1>Standards &amp; References</h1>
+    <p class="subtitle">
+      Every concept encountered during the 5320 switch bring-up, AP onboarding, and WiFi client
+      connectivity debug — mapped to its governing IEEE standard or IETF RFC, top-down from the
+      physical layer to the cloud. Appendix links to primary sources for deeper study.
+    </p>
+  </div>
+
+  <!-- Series nav -->
+  <div class="series-nav">
+    <a href="index.html">&larr; Home</a>
+    <span class="sep">|</span>
+    <a href="onboarding.html">Switch Onboarding</a>
+    <span class="sep">&rarr;</span>
+    <a href="ap_onboarding_20260326.html">AP Onboarding</a>
+    <span class="sep">&rarr;</span>
+    <a href="troubleshooting_20260327.html">Troubleshooting</a>
+    <span class="sep">&rarr;</span>
+    <a href="ue_onboarding_20260327.html">UE/Devices</a>
+  </div>
+
+  <p class="section-title">The OSI Stack &mdash; Concepts, Lab Application, and Governing Standards</p>
+
+  <!-- Layer 1: Physical -->
+  <div class="layer-group">
+    <h2><span class="layer-badge l1">Layer 1</span> Physical &mdash; Ethernet &amp; Power over Ethernet</h2>
+    <table class="std-table">
+      <thead><tr><th>Concept</th><th>What We Did</th><th>Standard</th><th>Reference</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>Gigabit Ethernet</td>
+          <td>RJ45 copper links: switch ↔ APs, switch ↔ home router<br><span class="lab">Ports 1–5 active</span></td>
+          <td>IEEE 802.3ab<br>(1000BASE-T)</td>
+          <td><a href="https://ieeexplore.ieee.org/document/9844436" target="_blank">IEEE 802.3-2022 &#8599;</a></td>
+        </tr>
+        <tr>
+          <td>Power over Ethernet</td>
+          <td>Switch powered both AP3000s via ports 3 &amp; 5; measured ~4.9 W each (Class 2)<br><span class="lab">enable inline-power ports 3,5</span></td>
+          <td>IEEE 802.3af (PoE 15.4 W)<br>IEEE 802.3at (PoE+ 30 W)<br>IEEE 802.3bt (PoE++ 90 W)</td>
+          <td><a href="https://ieeexplore.ieee.org/document/9844436" target="_blank">IEEE 802.3-2022 §33 &#8599;</a></td>
+        </tr>
+        <tr>
+          <td>Multi-rate / SFP+</td>
+          <td>5320-16P-2MXT-2X uplink slots (2×Multi-XG + 2×SFP+) — unused in this lab<br><span class="lab">Reference only</span></td>
+          <td>IEEE 802.3bz<br>(2.5G/5GBASE-T)</td>
+          <td><a href="https://ieeexplore.ieee.org/document/9844436" target="_blank">IEEE 802.3-2022 §126 &#8599;</a></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Layer 2: Data Link -->
+  <div class="layer-group">
+    <h2><span class="layer-badge l2">Layer 2</span> Data Link &mdash; VLANs, STP, ARP</h2>
+    <table class="std-table">
+      <thead><tr><th>Concept</th><th>What We Did</th><th>Standard</th><th>Reference</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>VLAN Tagging (802.1Q)</td>
+          <td>Created VLANs 1 (Default), 20 (Corporate), 30 (Guest), 40 (IoT); tagged ports 1/2/3/5 for trunk<br><span class="lab">create vlan Corporate tag 20</span></td>
+          <td>IEEE 802.1Q-2018</td>
+          <td><a href="https://ieeexplore.ieee.org/document/8403927" target="_blank">IEEE 802.1Q-2018 &#8599;</a></td>
+        </tr>
+        <tr>
+          <td>Spanning Tree Protocol</td>
+          <td>STP running on tagged VLANs for ports 1–3; port 5 had STP coverage gap (added via CLI post-XIQ)<br><span class="lab">Port 5 STP gap identified</span></td>
+          <td>IEEE 802.1D-2004 (STP)<br>IEEE 802.1w (RSTP)<br>IEEE 802.1s (MSTP)</td>
+          <td><a href="https://ieeexplore.ieee.org/document/1309630" target="_blank">IEEE 802.1D-2004 &#8599;</a></td>
+        </tr>
+        <tr>
+          <td>MAC Address Learning &amp; ARP</td>
+          <td>FDB confirmed iPhone (74:a6:cd:8b:19:60) on VLAN 30 port 5; ARP table showed 10.30.0.102<br><span class="lab">show fdb / show arp</span></td>
+          <td>RFC 826 (ARP)</td>
+          <td><a href="https://www.rfc-editor.org/rfc/rfc826" target="_blank">RFC 826 &#8599;</a></td>
+        </tr>
+        <tr>
+          <td>Link Layer Discovery</td>
+          <td>LLDP used for AP discovery alongside nmap; APs visible before XIQ adoption<br><span class="lab">show lldp neighbors</span></td>
+          <td>IEEE 802.1AB-2016 (LLDP)</td>
+          <td><a href="https://ieeexplore.ieee.org/document/7433915" target="_blank">IEEE 802.1AB-2016 &#8599;</a></td>
+        </tr>
+        <tr>
+          <td>DHCP Snooping</td>
+          <td>Ports 1–3 trusted for DHCP server; port 5 untrusted — security control so rogue DHCP servers cannot inject leases from WiFi clients<br><span class="lab">configure trusted-ports 1-3 trust-for dhcp-server</span></td>
+          <td>IEEE 802.1Q §8 (port security)<br>RFC 2131 §4.3 context</td>
+          <td><a href="https://www.rfc-editor.org/rfc/rfc2131" target="_blank">RFC 2131 &#8599;</a></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Layer 3: Network -->
+  <div class="layer-group">
+    <h2><span class="layer-badge l3">Layer 3</span> Network &mdash; IP, Routing, NAT, DHCP</h2>
+    <table class="std-table">
+      <thead><tr><th>Concept</th><th>What We Did</th><th>Standard</th><th>Reference</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>IPv4 Addressing</td>
+          <td>Default VLAN: 192.168.0.24/24; Corporate: 10.20.0.1/24; Guest: 10.30.0.1/24<br><span class="lab">configure vlan Guest ipaddress 10.30.0.1/24</span></td>
+          <td>RFC 791 (IPv4)</td>
+          <td><a href="https://www.rfc-editor.org/rfc/rfc791" target="_blank">RFC 791 &#8599;</a></td>
+        </tr>
+        <tr>
+          <td>Private Address Space</td>
+          <td>10.x.x.x and 192.168.x.x ranges used throughout — these are non-routable on the public internet, which is why NAT was required<br><span class="lab">Root cause of connectivity failure</span></td>
+          <td>RFC 1918</td>
+          <td><a href="https://www.rfc-editor.org/rfc/rfc1918" target="_blank">RFC 1918 &#8599;</a></td>
+        </tr>
+        <tr>
+          <td>IP Forwarding / Inter-VLAN Routing</td>
+          <td>Root cause #2: Default VLAN had ipforwarding OFF — return packets from internet (addressed to 10.30.0.102) arrived on Default VLAN but could not be forwarded to Guest VLAN<br><span class="lab">enable ipforwarding vlan Default</span></td>
+          <td>RFC 1812 (IPv4 Router Requirements)</td>
+          <td><a href="https://www.rfc-editor.org/rfc/rfc1812" target="_blank">RFC 1812 &#8599;</a></td>
+        </tr>
+        <tr>
+          <td>Static Routing</td>
+          <td>Root cause #1: Quantum Fiber modem had no route for 10.x.x.x — added static routes 10.20.0.0/24 and 10.30.0.0/24 → 192.168.0.24<br><span class="lab">Quantum Fiber UI → Static Routing</span></td>
+          <td>RFC 1812 §5.2 (Static Routes)</td>
+          <td><a href="https://www.rfc-editor.org/rfc/rfc1812" target="_blank">RFC 1812 &#8599;</a></td>
+        </tr>
+        <tr>
+          <td>NAT (Network Address Translation)</td>
+          <td>Quantum Fiber only NATs 192.168.0.x → public IP. WiFi clients on 10.30.x.x were outside NAT scope; their packets were dropped on the return path<br><span class="lab">APs: 192.168.0.x ✓ NAT'd | Clients: 10.30.x.x ✗ not NAT'd</span></td>
+          <td>RFC 3022 (Traditional NAT)<br>RFC 2663 (NAT terminology)</td>
+          <td><a href="https://www.rfc-editor.org/rfc/rfc3022" target="_blank">RFC 3022 &#8599;</a> &nbsp; <a href="https://www.rfc-editor.org/rfc/rfc2663" target="_blank">RFC 2663 &#8599;</a></td>
+        </tr>
+        <tr>
+          <td>DHCP Server</td>
+          <td>5320 ran its own DHCP server for Guest (10.30.0.100–200) and Corporate (10.20.0.100–200) VLANs; enabled per-port not per-VLAN<br><span class="lab">configure vlan Guest dhcp-address-range 10.30.0.100 - 10.30.0.200</span></td>
+          <td>RFC 2131 (DHCP)<br>RFC 2132 (DHCP Options)</td>
+          <td><a href="https://www.rfc-editor.org/rfc/rfc2131" target="_blank">RFC 2131 &#8599;</a></td>
+        </tr>
+        <tr>
+          <td>ICMP / Ping</td>
+          <td>Switch ping from 10.30.0.1 succeeded (reply to switch's own interface, no routing needed); iPhone ping to 1.1.1.1 failed until both fixes applied<br><span class="lab">ping 8.8.8.8 from 10.30.0.1 vr VR-Default</span></td>
+          <td>RFC 792 (ICMP)</td>
+          <td><a href="https://www.rfc-editor.org/rfc/rfc792" target="_blank">RFC 792 &#8599;</a></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Layer 4: Transport -->
+  <div class="layer-group">
+    <h2><span class="layer-badge l4">Layer 4</span> Transport &mdash; TCP, UDP, SSH</h2>
+    <table class="std-table">
+      <thead><tr><th>Concept</th><th>What We Did</th><th>Standard</th><th>Reference</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>TCP</td>
+          <td>All SSH sessions (CLI management), XIQ cloud sync, and browser HTTPS traffic run over TCP<br><span class="lab">Implicit in every management session</span></td>
+          <td>RFC 793 (TCP)<br>RFC 9293 (updated 2022)</td>
+          <td><a href="https://www.rfc-editor.org/rfc/rfc9293" target="_blank">RFC 9293 &#8599;</a></td>
+        </tr>
+        <tr>
+          <td>UDP / DNS</td>
+          <td>DHCP discovery/offer uses UDP 67/68; DNS resolution uses UDP 53<br><span class="lab">DHCP snooping &amp; DNS via Quantum Fiber</span></td>
+          <td>RFC 768 (UDP)<br>RFC 1034, RFC 1035 (DNS)</td>
+          <td><a href="https://www.rfc-editor.org/rfc/rfc1035" target="_blank">RFC 1035 &#8599;</a></td>
+        </tr>
+        <tr>
+          <td>SSH (Secure Shell)</td>
+          <td>All CLI management sessions to 5320 via SSH; required legacy key algorithm flags due to EXOS version<br><span class="lab">ssh -o HostKeyAlgorithms=+ssh-rsa admin@192.168.0.24</span></td>
+          <td>RFC 4251 (SSH Architecture)<br>RFC 4252 (Auth)<br>RFC 4253 (Transport)</td>
+          <td><a href="https://www.rfc-editor.org/rfc/rfc4251" target="_blank">RFC 4251 &#8599;</a></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Wireless -->
+  <div class="layer-group">
+    <h2><span class="layer-badge lw">Wireless</span> IEEE 802.11 &mdash; WiFi &amp; AP Management</h2>
+    <table class="std-table">
+      <thead><tr><th>Concept</th><th>What We Did</th><th>Standard</th><th>Reference</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>WiFi (802.11)</td>
+          <td>AP3000 access points broadcasting Corporate and Guest SSIDs; iPhone associated to Guest SSID on VLAN 30<br><span class="lab">iPhone MAC confirmed in FDB on VLAN 30</span></td>
+          <td>IEEE 802.11-2020<br>802.11ax (Wi-Fi 6)</td>
+          <td><a href="https://ieeexplore.ieee.org/document/9363693" target="_blank">IEEE 802.11-2020 &#8599;</a></td>
+        </tr>
+        <tr>
+          <td>WPA2 / WPA3 Security</td>
+          <td>SSIDs configured in XIQ with WPA2/WPA3 passphrase authentication<br><span class="lab">XIQ → SSID policy</span></td>
+          <td>IEEE 802.11i (WPA2)<br>IEEE 802.11 SAE (WPA3)</td>
+          <td><a href="https://ieeexplore.ieee.org/document/9363693" target="_blank">IEEE 802.11-2020 §12 &#8599;</a></td>
+        </tr>
+        <tr>
+          <td>CAPWAP (AP ↔ Controller)</td>
+          <td>AP3000s communicate with Extreme XIQ cloud controller via CAPWAP tunnels; this is how XIQ pushes SSID/VLAN config to APs<br><span class="lab">XIQ adoption via Default VLAN 192.168.0.x</span></td>
+          <td>RFC 5415 (CAPWAP base)<br>RFC 5416 (802.11 binding)</td>
+          <td><a href="https://www.rfc-editor.org/rfc/rfc5415" target="_blank">RFC 5415 &#8599;</a> &nbsp; <a href="https://www.rfc-editor.org/rfc/rfc5416" target="_blank">RFC 5416 &#8599;</a></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Cloud Management -->
+  <div class="layer-group">
+    <h2><span class="layer-badge lc">Cloud</span> Cloud Management &mdash; XIQ &amp; ZTP+</h2>
+    <table class="std-table">
+      <thead><tr><th>Concept</th><th>What We Did</th><th>Standard / Protocol</th><th>Reference</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>Zero Touch Provisioning (ZTP+)</td>
+          <td>5320 factory reset from Fabric Engine; connected to internet via any RJ45 port; EXOS image downloaded and installed automatically via ZTP+<br><span class="lab">delete /intflash/config.cfg → boot</span></td>
+          <td>RFC 8572 (SZTP)<br>Extreme ZTP+ (proprietary extension)</td>
+          <td><a href="https://www.rfc-editor.org/rfc/rfc8572" target="_blank">RFC 8572 &#8599;</a> &nbsp; <a href="https://documentation.extremenetworks.com/" target="_blank">Extreme Docs &#8599;</a></td>
+        </tr>
+        <tr>
+          <td>XIQ IQ Agent</td>
+          <td>Switch reaches XIQ cloud via Default VLAN (192.168.0.24); <code>configure iqagent server vr VR-Default</code> sets the VR context<br><span class="lab">show iqagent | show version</span></td>
+          <td>HTTPS/TLS (RFC 8446)<br>Proprietary XIQ agent protocol</td>
+          <td><a href="https://www.rfc-editor.org/rfc/rfc8446" target="_blank">RFC 8446 (TLS 1.3) &#8599;</a></td>
+        </tr>
+        <tr>
+          <td>CLI Config vs Cloud Sync</td>
+          <td>Key operational insight: XIQ cannot detect CLI changes. If a Switch Policy is pushed from XIQ, it overwrites CLI config. Re-enter VLAN IP/DHCP into XIQ Switch Policy to make XIQ the source of truth<br><span class="lab">Pending: XIQ policy sync</span></td>
+          <td>RFC 6241 (NETCONF)<br>RFC 8040 (RESTCONF)</td>
+          <td><a href="https://www.rfc-editor.org/rfc/rfc6241" target="_blank">RFC 6241 &#8599;</a></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <hr class="divider">
+
+  <!-- Appendix -->
+  <p class="section-title">Appendix &mdash; Primary Sources &amp; Further Reading</p>
+
+  <div class="appendix-grid">
+
+    <div class="appendix-card">
+      <h3>&#128218; Foundational Books</h3>
+      <ul>
+        <li>
+          <a href="https://www.pearson.com/en-us/subject-catalog/p/computer-networking-a-top-down-approach/P200000003568" target="_blank">Computer Networking: A Top-Down Approach</a>
+          <span class="note">Kurose &amp; Ross — the standard university textbook; Chapters 4–5 cover IP routing and link-layer exactly as we debugged it</span>
+        </li>
+        <li>
+          <a href="https://www.oreilly.com/library/view/tcpip-illustrated-volume/9780132808200/" target="_blank">TCP/IP Illustrated, Vol. 1</a>
+          <span class="note">W. Richard Stevens — the definitive deep-dive on ARP, ICMP, IP routing, DHCP behaviour</span>
+        </li>
+        <li>
+          <a href="https://www.pearson.com/en-us/subject-catalog/p/computer-networks/P200000003467" target="_blank">Computer Networks</a>
+          <span class="note">Andrew Tanenbaum &amp; David Wetherall — rigorous OSI-model treatment, 802.11 and VLANs well covered</span>
+        </li>
+        <li>
+          <a href="https://www.ciscopress.com/store/routing-tcpip-volume-1-9781587052026" target="_blank">Routing TCP/IP, Vol. 1</a>
+          <span class="note">Jeff Doyle (Cisco Press) — inter-VLAN routing, static routes, and OSPF from a practitioner's view</span>
+        </li>
+        <li>
+          <a href="https://www.sybex.com/go/cwna" target="_blank">CWNA: Certified Wireless Network Administrator</a>
+          <span class="note">Coleman &amp; Westcott — 802.11 mechanics, CAPWAP, WPA3, enterprise WLAN design</span>
+        </li>
+      </ul>
+    </div>
+
+    <div class="appendix-card">
+      <h3>&#127979; University Courses &amp; Lecture Notes</h3>
+      <ul>
+        <li>
+          <a href="https://ocw.mit.edu/courses/6-829-computer-networks-fall-2002/" target="_blank">MIT 6.829 — Computer Networks (OCW)</a>
+          <span class="note">MIT OpenCourseWare — routing algorithms, TCP congestion control, network architecture; free lecture notes and problem sets</span>
+        </li>
+        <li>
+          <a href="https://cs144.github.io/" target="_blank">Stanford CS144 — Introduction to Computer Networking</a>
+          <span class="note">Stanford — hands-on TCP/IP implementation; lab assignments build a TCP stack from scratch</span>
+        </li>
+        <li>
+          <a href="https://gaia.cs.umass.edu/kurose_ross/lectures.php" target="_blank">UMass COMPSCI 453 Lecture Slides</a>
+          <span class="note">Kurose's own slides for the textbook — excellent visual treatment of DHCP, NAT, and routing tables</span>
+        </li>
+        <li>
+          <a href="https://web.stanford.edu/class/ee384y/" target="_blank">Stanford EE384Y — Packet Switch Architectures</a>
+          <span class="note">Stanford EE — switching fabrics, VLAN forwarding, QoS; aligned with 5320 hardware internals</span>
+        </li>
+      </ul>
+    </div>
+
+    <div class="appendix-card">
+      <h3>&#128196; Standards Bodies</h3>
+      <ul>
+        <li>
+          <a href="https://www.rfc-editor.org/" target="_blank">IETF RFC Editor</a>
+          <span class="note">Canonical source for all IETF RFCs — IP, TCP, DHCP, DNS, NAT, SSH, CAPWAP, ZTP</span>
+        </li>
+        <li>
+          <a href="https://ieeexplore.ieee.org/browse/standards/get-program/page/series?id=68" target="_blank">IEEE 802 LAN/MAN Standards</a>
+          <span class="note">IEEE Xplore — 802.3 (Ethernet/PoE), 802.1Q (VLAN), 802.1D (STP), 802.11 (WiFi) — free to browse titles</span>
+        </li>
+        <li>
+          <a href="https://www.broadband-forum.org/technical-specifications" target="_blank">Broadband Forum Technical Specs</a>
+          <span class="note">TR-069 (CPE management), TR-181 (device data model) — relevant to Quantum Fiber CPE behavior</span>
+        </li>
+        <li>
+          <a href="https://www.wi-fi.org/discover-wi-fi/wi-fi-certified-6" target="_blank">Wi-Fi Alliance — Wi-Fi 6 (802.11ax)</a>
+          <span class="note">Certification program and technical overview for the standard underpinning AP3000 wireless</span>
+        </li>
+      </ul>
+    </div>
+
+    <div class="appendix-card">
+      <h3>&#127760; Vendor &amp; Practitioner Docs</h3>
+      <ul>
+        <li>
+          <a href="https://documentation.extremenetworks.com/exos_33.5/" target="_blank">Extreme EXOS 33.5 User Guide</a>
+          <span class="note">Authoritative source for every EXOS CLI command used — VLAN, DHCP, ipforwarding, iqagent</span>
+        </li>
+        <li>
+          <a href="https://documentation.extremenetworks.com/XIQ/" target="_blank">Extreme XIQ Cloud Documentation</a>
+          <span class="note">XIQ Switch Policy, AP adoption, SSID-to-VLAN mapping, and IQ Agent configuration</span>
+        </li>
+        <li>
+          <a href="https://www.cloudflare.com/learning/network-layer/what-is-routing/" target="_blank">Cloudflare Learning Center — Routing &amp; NAT</a>
+          <span class="note">Cloudflare's free reference — excellent plain-English treatment of NAT, DNS, BGP, and IP routing</span>
+        </li>
+        <li>
+          <a href="https://www.cisco.com/c/en/us/tech/lan-switching/index.html" target="_blank">Cisco LAN Switching Technology</a>
+          <span class="note">Cisco's switching reference (VLAN, STP, inter-VLAN routing) — vendor-agnostic concepts apply directly to EXOS</span>
+        </li>
+        <li>
+          <a href="https://packetlife.net/library/cheat-sheets/" target="_blank">PacketLife Cheat Sheets</a>
+          <span class="note">Handy one-page references for subnetting, 802.1Q, STP timers, and TCP/IP headers</span>
+        </li>
+      </ul>
+    </div>
+
+  </div>
+
+  <!-- Footer nav -->
+  <div class="footer-nav">
+    <a href="index.html">&larr; Back to Home</a>
+    <span class="center">Built with Claude Code &mdash; March 2026</span>
+    <a href="ue_onboarding_20260327.html">UE/Devices Guide &rarr;</a>
+  </div>
+
+</div>
+</body>
+</html>
