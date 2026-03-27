@@ -95,6 +95,8 @@ footer a:hover { text-decoration: underline; }
   <a href="#poe">5 &middot; PoE Enablement</a>
   <a href="#discovery">6 &middot; AP Discovery</a>
   <a href="#xiq">7 &middot; XIQ Adoption</a>
+  <a href="#dhcp">8 &middot; DHCP &amp; IP Config</a>
+  <a href="#internet">9 &middot; Internet Connectivity</a>
   <a href="#glossary">Command Glossary</a>
 </nav>
 
@@ -103,7 +105,7 @@ footer a:hover { text-decoration: underline; }
 <div class="page-header">
   <div class="meta">Khursheed Khan &nbsp;&middot;&nbsp; March 26, 2026 &nbsp;&middot;&nbsp; Extreme Networks</div>
   <h1>AP3000 Onboarding Guide</h1>
-  <p class="subtitle">Complete session record: 5320-16P-2MXT-2X switch configuration via CLI &rarr; VLAN design &rarr; PoE &rarr; IP discovery &rarr; ExtremeCloud IQ adoption. Two AP3000s deployed on ports 3 and 5.</p>
+  <p class="subtitle">Complete session record: 5320-16P-2MXT-2X switch configuration via CLI &rarr; VLAN design &rarr; PoE &rarr; IP discovery &rarr; ExtremeCloud IQ adoption &rarr; DHCP &amp; IP gateway configuration &rarr; internet connectivity diagnosis. Two AP3000s deployed on ports 3 and 5. Updated March 27, 2026.</p>
 </div>
 
 <!-- OVERVIEW -->
@@ -882,6 +884,170 @@ khukhan@EXT-L63PXM76R6 ~ % ping -c 3 192.168.0.25
   </table>
 </section>
 
+<!-- DHCP & IP CONFIG -->
+<section id="dhcp">
+  <div class="phase-label">Phase 8</div>
+  <h2>DHCP &amp; IP Gateway Configuration</h2>
+
+  <p>After both APs were adopted in XIQ and SSIDs were broadcasting, the next step was to give WiFi clients actual IP addresses. The 5320 runs a built-in DHCP server — each VLAN needs an IP address (its gateway), a DHCP address pool, a default gateway option, DNS, and DHCP enabled per port.</p>
+
+  <div class="card box-amber">
+    <div class="box-title amber">Important: XIQ Does Not Know About These CLI Changes</div>
+    <p>XIQ manages the switch by <strong style="color:#e2e8f0">pushing</strong> configuration down. It has no mechanism to detect what you type manually at the CLI. If you push a Network Policy update from XIQ that covers VLANs, it will <strong style="color:#f87171">overwrite</strong> the DHCP/IP configuration below. Run <code>save configuration</code> after every CLI change. Long-term, re-enter this config into XIQ's Switch Policy so XIQ is the single source of truth.</p>
+  </div>
+
+  <h3>Key EXOS DHCP Syntax Lessons</h3>
+  <div class="card box-red">
+    <div class="box-title red">Wrong commands attempted</div>
+    <pre class="switch"><span class="err"># These do NOT work on EXOS SwitchEngine:</span>
+configure dhcp-server vlan Guest low 10.30.0.100 high 10.30.0.200   &larr; does not exist
+enable dhcp-server vlan Guest                                        &larr; does not exist
+configure vlan Guest ipaddress 10.30.0.1/24                         &larr; error if IP already set
+unconfigure vlan Guest ipaddress                                     &larr; must clear first</pre>
+  </div>
+  <div class="card box-green">
+    <div class="box-title green">Correct EXOS DHCP syntax</div>
+    <pre class="switch"><span class="ok"># Correct pattern on EXOS SwitchEngine 33.5.2:</span>
+configure vlan &lt;name&gt; dhcp-address-range 10.X.0.100 - 10.X.0.200   &larr; dash separator (not "to" or "high")
+configure vlan &lt;name&gt; dhcp-options default-gateway 10.X.0.1
+configure vlan &lt;name&gt; dhcp-options dns-server primary 8.8.8.8
+configure vlan &lt;name&gt; dhcp-lease-timer 3600
+enable dhcp ports 3 vlan &lt;name&gt;                                     &larr; enable per-port, not per-VLAN</pre>
+  </div>
+
+  <h3>Guest VLAN (30) — Full Command Sequence</h3>
+  <pre class="cmd">configure vlan Guest ipaddress 10.30.0.1/24
+enable ipforwarding vlan Guest
+configure vlan Guest dhcp-address-range 10.30.0.100 - 10.30.0.200
+configure vlan Guest dhcp-options default-gateway 10.30.0.1
+configure vlan Guest dhcp-options dns-server primary 8.8.8.8
+configure vlan Guest dhcp-lease-timer 3600
+enable dhcp ports 3 vlan Guest
+enable dhcp ports 5 vlan Guest</pre>
+
+  <h3>Corporate VLAN (20) — Full Command Sequence</h3>
+  <pre class="cmd">configure vlan Corporate ipaddress 10.20.0.1/24
+enable ipforwarding vlan Corporate
+configure vlan Corporate dhcp-address-range 10.20.0.100 - 10.20.0.200
+configure vlan Corporate dhcp-options default-gateway 10.20.0.1
+configure vlan Corporate dhcp-options dns-server primary 8.8.8.8
+configure vlan Corporate dhcp-lease-timer 3600
+enable dhcp ports 3 vlan Corporate
+enable dhcp ports 5 vlan Corporate</pre>
+
+  <h3>IoT VLAN (40) — Full Command Sequence</h3>
+  <pre class="cmd">configure vlan IoT ipaddress 10.40.0.1/24
+enable ipforwarding vlan IoT
+configure vlan IoT dhcp-address-range 10.40.0.100 - 10.40.0.200
+configure vlan IoT dhcp-options default-gateway 10.40.0.1
+configure vlan IoT dhcp-options dns-server primary 8.8.8.8
+configure vlan IoT dhcp-lease-timer 3600
+enable dhcp ports 3 vlan IoT
+enable dhcp ports 5 vlan IoT</pre>
+
+  <h3>What Each Command Does</h3>
+  <table>
+    <tr><th>Command</th><th>What It Does</th></tr>
+    <tr><td><code>configure vlan Guest ipaddress 10.30.0.1/24</code></td><td>Sets the switch's IP on the Guest VLAN interface — this becomes the <strong>default gateway</strong> that clients will use</td></tr>
+    <tr><td><code>enable ipforwarding vlan Guest</code></td><td>Allows the switch to <strong>route</strong> packets that arrive on the Guest VLAN interface — without this, the switch drops any packet not addressed to itself</td></tr>
+    <tr><td><code>configure vlan Guest dhcp-address-range</code></td><td>Defines the pool of IPs the DHCP server can hand out to clients (10.30.0.100 through 10.30.0.200 = 101 addresses)</td></tr>
+    <tr><td><code>configure vlan Guest dhcp-options default-gateway</code></td><td>Tells clients "your gateway is 10.30.0.1" — the DHCP option 3 sent in every DHCP Offer and Ack</td></tr>
+    <tr><td><code>configure vlan Guest dhcp-options dns-server primary 8.8.8.8</code></td><td>Tells clients which DNS server to use (Google Public DNS — works for any network that can reach the internet)</td></tr>
+    <tr><td><code>configure vlan Guest dhcp-lease-timer 3600</code></td><td>IP lease duration in seconds (3600 = 1 hour). Client must renew at 30 min mark or get a different IP after 1 hour of absence</td></tr>
+    <tr><td><code>enable dhcp ports 3 vlan Guest</code></td><td>Activates the DHCP server on port 3 for the Guest VLAN — the switch will answer DHCP Discover broadcasts arriving on that port/VLAN</td></tr>
+  </table>
+
+  <h3>Routing Table Verification</h3>
+  <pre class="switch">* # show iproute
+
+Destination         Gateway          Mtr Flags VLAN            Duration
+0.0.0.0/0           192.168.0.1      1   UG    Default         0d:0h:3m:22s    &larr; default route to home router
+10.20.0.0/24        Direct           1   U     Corporate       0d:0h:2m:11s    &larr; Corporate directly connected
+10.30.0.0/24        Direct           1   U     Guest           0d:0h:1m:44s    &larr; Guest directly connected
+192.168.0.0/24      Direct           1   U     Default         1d:2h:15m:08s</pre>
+
+  <div class="card box-green">
+    <div class="box-title green">Routing Table Confirmed Correct</div>
+    <p>Default route via 192.168.0.1 (home router). All 10.x.x.x subnets directly connected on the switch. Traffic from a WiFi client will route: client &rarr; switch VLAN gateway &rarr; Default VLAN &rarr; 192.168.0.1. The switch's job is done correctly.</p>
+  </div>
+
+  <h3>Save Configuration</h3>
+  <pre class="cmd">save configuration</pre>
+  <p>Run this after any CLI change. Without it, a power cycle wipes all DHCP/IP/routing configuration. Configuration is now persisted.</p>
+</section>
+
+<!-- INTERNET CONNECTIVITY -->
+<section id="internet">
+  <div class="phase-label">Phase 9</div>
+  <h2>Internet Connectivity — Diagnosis &amp; Options</h2>
+
+  <p>After DHCP was configured, a phone connected to the Guest SSID and successfully received an IP: <code>10.30.0.100</code>, gateway <code>10.30.0.1</code>, DNS <code>8.8.8.8</code>. However, the phone had <strong style="color:#f87171">no internet access</strong>.</p>
+
+  <h3>Root Cause — NAT Boundary</h3>
+
+  <div class="card box-red">
+    <div class="box-title red">What Is Failing and Why</div>
+    <p>The phone's traffic leaves the 5320 sourced from <code>10.30.0.100</code>. It reaches the Quantum Fiber router at <code>192.168.0.1</code>. The Quantum Fiber router only knows how to NAT traffic from its own <code>192.168.0.0/24</code> subnet. It has no route back to <code>10.30.0.0/24</code> — so when Google sends a reply, the Quantum Fiber router drops it. The phone never receives the response.</p>
+  </div>
+
+  <h3>What NAT Does (Plain Language)</h3>
+  <table>
+    <tr><th>Without NAT (current state)</th><th>With NAT (needed)</th></tr>
+    <tr>
+      <td>Phone sends packet: <strong>from</strong> 10.30.0.100 <strong>to</strong> 8.8.8.8<br>Quantum Fiber router sees source 10.30.0.100<br>Google replies to 10.30.0.100<br><span class="err">Quantum Fiber has no route to 10.30.0.x — reply dropped ✗</span></td>
+      <td>Phone sends packet: from 10.30.0.100<br>NAT router <strong>rewrites</strong> source to 192.168.0.50 (its WAN IP)<br>Google replies to 192.168.0.50<br>NAT router <strong>rewrites</strong> back to 10.30.0.100 and forwards<br><span class="ok">Phone receives response ✓</span></td>
+    </tr>
+  </table>
+
+  <div class="card">
+    <div class="box-title purple">Why the 5320 Cannot Do This</div>
+    <p>The 5320 is a layer-2/3 access switch. It can route between VLANs but it does not support <code>configure ipmasquerade</code> (NAT/PAT). This command does not exist on EXOS SwitchEngine. A separate router or firewall is needed at the boundary between the private 10.x.x.x subnets and the home router.</p>
+  </div>
+
+  <h3>Three Options to Fix Internet Access</h3>
+  <table>
+    <tr><th>Option</th><th>What</th><th>Effort</th><th>Preserves 10.x subnets?</th></tr>
+    <tr>
+      <td><strong style="color:#f59e0b">A — Add a router</strong></td>
+      <td>Place a second router (e.g. TP-Link ~$30) between the Quantum Fiber box and the 5320. It handles NAT for all your VLANs. WAN port gets 192.168.0.x; LAN side connects to 5320 uplink.</td>
+      <td>~20 min + hardware</td>
+      <td><span class="ok">Yes ✓</span></td>
+    </tr>
+    <tr>
+      <td><strong style="color:#a78bfa">B — DHCP relay</strong></td>
+      <td>Remove 10.x.x.x config from the VLANs. Configure <code>iphelper</code> on each VLAN to forward DHCP requests to the Quantum Fiber router (192.168.0.1). Clients get 192.168.0.x IPs — the home router already NATs those. Fastest fix, no hardware needed.</td>
+      <td>~15 min CLI</td>
+      <td><span class="err">No — clients on 192.168.0.x</span></td>
+    </tr>
+    <tr>
+      <td><strong style="color:#67e8f9">C — ISP static routes</strong></td>
+      <td>Call Quantum Fiber and ask them to add static routes for 10.20.0.0/24, 10.30.0.0/24, and 10.40.0.0/24 pointing to 192.168.0.24. Clean enterprise solution — no extra hardware.</td>
+      <td>Call ISP — unknown wait</td>
+      <td><span class="ok">Yes ✓</span></td>
+    </tr>
+  </table>
+
+  <h3>DHCP Relay Commands (Option B)</h3>
+  <p>If you choose Option B, run the following to remove the switch DHCP server and relay requests to the home router instead:</p>
+  <pre class="cmd"><span class="dim"># Remove switch DHCP server for each VLAN</span>
+configure vlan Guest dhcp-address-range none
+configure vlan Guest dhcp-options default-gateway none
+disable dhcp ports 3 vlan Guest
+disable dhcp ports 5 vlan Guest
+
+<span class="dim"># Forward DHCP requests to home router</span>
+configure vlan Guest iphelper add 192.168.0.1
+configure vlan Corporate iphelper add 192.168.0.1
+configure vlan IoT iphelper add 192.168.0.1
+
+save configuration</pre>
+
+  <div class="card box-amber">
+    <div class="box-title amber">Status as of March 27, 2026 — Pending Resolution</div>
+    <p>The Quantum Fiber router is inaccessible (forgotten password). An Ipanema router was identified as a potential NAT device — model verification in progress. Option A (add router) is the recommended long-term path. Option B (DHCP relay) can be implemented immediately if the subnet design flexibility is acceptable.</p>
+  </div>
+</section>
+
 <!-- GLOSSARY -->
 <section id="glossary">
   <div class="phase-label">Reference</div>
@@ -906,6 +1072,16 @@ khukhan@EXT-L63PXM76R6 ~ % ping -c 3 192.168.0.25
     <tr><td><code>show dhcp-server lease vlan Default</code></td><td>Would show DHCP leases if switch is DHCP server</td><td>Error &mdash; home router is DHCP server here</td></tr>
     <tr><td><code>delete vlan Mgmt</code></td><td>Attempt to delete Mgmt VLAN</td><td>Error &mdash; system-protected OOB VLAN</td></tr>
     <tr><td><code>show inline-power ?</code></td><td>Show available subcommands</td><td>Use <code>info</code> for per-port data</td></tr>
+    <tr><td><code>configure vlan Guest ipaddress 10.30.0.1/24</code></td><td>Set switch IP on VLAN interface — becomes the gateway for clients</td><td>Run <code>unconfigure vlan Guest ipaddress</code> first if IP already set</td></tr>
+    <tr><td><code>enable ipforwarding vlan Guest</code></td><td>Allow switch to route packets arriving on this VLAN interface</td><td>Required for L3 routing between VLANs and to internet</td></tr>
+    <tr><td><code>configure vlan Guest dhcp-address-range 10.30.0.100 - 10.30.0.200</code></td><td>Define DHCP pool — dash separator required, not "to" or "high"</td><td>101 addresses available in this range</td></tr>
+    <tr><td><code>configure vlan Guest dhcp-options default-gateway 10.30.0.1</code></td><td>DHCP option 3 — gateway address sent to every client</td><td>Must match the VLAN IP address configured above</td></tr>
+    <tr><td><code>configure vlan Guest dhcp-options dns-server primary 8.8.8.8</code></td><td>DHCP option 6 — DNS server address sent to every client</td><td>8.8.8.8 = Google Public DNS; works when internet is reachable</td></tr>
+    <tr><td><code>configure vlan Guest dhcp-lease-timer 3600</code></td><td>IP lease duration in seconds (3600 = 1 hour)</td><td>Client renews at 30 min; loses IP after 1 hour if disconnected</td></tr>
+    <tr><td><code>enable dhcp ports 3 vlan Guest</code></td><td>Activate switch DHCP server on port 3 for Guest VLAN</td><td>Must be done per port — not a single global enable</td></tr>
+    <tr><td><code>show iproute</code></td><td>Show routing table — all directly connected networks and default route</td><td>Verify default route via 192.168.0.1 and 10.x subnets present</td></tr>
+    <tr><td><code>configure vlan Guest iphelper add 192.168.0.1</code></td><td>DHCP relay — forward broadcasts to an upstream DHCP server (Option B fix)</td><td>Use if removing switch DHCP server; clients get IPs from home router</td></tr>
+    <tr><td><code>save configuration</code></td><td>Persist all current configuration to flash</td><td>Critical — all CLI changes are lost on reboot without this</td></tr>
   </table>
 
   <h3>Mac Terminal Commands</h3>
@@ -922,7 +1098,7 @@ khukhan@EXT-L63PXM76R6 ~ % ping -c 3 192.168.0.25
 </section>
 
 <footer>
-  <p>Generated March 26, 2026 &nbsp;&middot;&nbsp; Khursheed Khan &nbsp;&middot;&nbsp; Extreme Networks &nbsp;&middot;&nbsp; Built with Claude Code</p>
+  <p>Started March 26, 2026 &nbsp;&middot;&nbsp; Updated March 27, 2026 &nbsp;&middot;&nbsp; Khursheed Khan &nbsp;&middot;&nbsp; Extreme Networks &nbsp;&middot;&nbsp; Built with Claude Code</p>
   <div style="margin-top:10px">
     <a href="index.html">&larr; Back to Docs Home</a>
     <a href="session_summary_20260325.html">Session Summary Mar 25</a>
