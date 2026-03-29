@@ -478,16 +478,65 @@
           <div class="mod-sub">Port-by-port config table, VLAN membership matrix, DHCP ranges, PoE, STP</div>
         </div>
       </div>
-      <div class="placeholder">
-        <div class="ph-title">Locked — pending Module B</div>
-        LLD will cover: per-port config table for all 32 ports (16 per switch), VLAN tagging matrix, DHCP address ranges, PoE per AP port, STP scope, trusted DHCP ports, and ipforwarding checklist.
+      <!-- Phase 1 LLD — SW1 complete. SW2 added after Phase 2. -->
+      <div style="background:#0c1a2e;border:1px solid #1e3a5f;border-radius:6px;padding:10px 16px;margin-bottom:20px;font-size:0.78rem;color:#60a5fa">
+        Phase 1 (SW1) complete. SW2 LLD added after Phase 2 execution. Phase 3 (VLAN 10) added after Phase 3.
+      </div>
+
+      <!-- Port table SW1 -->
+      <p style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#34d399;margin-bottom:10px">SW1 — Port Configuration Table</p>
+      <table class="data-table" style="margin-bottom:22px">
+        <thead><tr><th>Port</th><th>Role</th><th>VLAN (untagged)</th><th>VLAN (tagged)</th><th>PoE</th><th>Notes</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>Uplink → Quantum Fiber</td><td>Default (1)</td><td>—</td><td>No</td><td>ZTP+, XIQ agent, internet gateway</td></tr>
+          <tr><td>3</td><td>AP3000-A</td><td>Default (1)</td><td>Corp1 (20), Guest1 (30)</td><td>Yes</td><td>Default untagged = AP provisioning; Corp1/Guest1 tagged = client data</td></tr>
+          <tr><td>10</td><td>Reserved — VLAN 10 trunk</td><td>—</td><td>Mgmt (10) — Phase 3</td><td>No</td><td>Inter-switch link, deferred</td></tr>
+          <tr><td>2,4–9,11–16</td><td>Unused</td><td>Default (1)</td><td>—</td><td>No</td><td>Available for future use</td></tr>
+        </tbody>
+      </table>
+
+      <!-- VLAN matrix SW1 -->
+      <p style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#34d399;margin-bottom:10px">SW1 — VLAN Parameter Matrix</p>
+      <table class="data-table" style="margin-bottom:22px">
+        <thead><tr><th>VLAN</th><th>Name</th><th>Tag</th><th>IP Interface</th><th>DHCP Range</th><th>Gateway</th><th>DNS</th><th>ipforwarding</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>Default</td><td>—</td><td>192.168.0.x (DHCP)</td><td>— (modem)</td><td>192.168.0.1</td><td>—</td><td>enable ✓</td></tr>
+          <tr><td>20</td><td>Corp1</td><td>20</td><td>10.20.0.1/24</td><td>10.20.0.100–200</td><td>10.20.0.1</td><td>8.8.8.8</td><td>enable ✓</td></tr>
+          <tr><td>30</td><td>Guest1</td><td>30</td><td>10.30.0.1/24</td><td>10.30.0.100–200</td><td>10.30.0.1</td><td>8.8.8.8</td><td>enable ✓</td></tr>
+        </tbody>
+      </table>
+
+      <!-- Quantum Fiber routes -->
+      <p style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#34d399;margin-bottom:10px">Quantum Fiber — Static Routes (Phase 1)</p>
+      <table class="data-table" style="margin-bottom:22px">
+        <thead><tr><th>Destination</th><th>Mask</th><th>Next-Hop</th><th>Via</th></tr></thead>
+        <tbody>
+          <tr><td>10.20.0.0</td><td>255.255.255.0</td><td>192.168.0.? (SW1 — from show ipconfig)</td><td>SW1 Port 1</td></tr>
+          <tr><td>10.30.0.0</td><td>255.255.255.0</td><td>192.168.0.? (SW1 — same)</td><td>SW1 Port 1</td></tr>
+          <tr><td class="tbd">10.50.0.0</td><td class="tbd">255.255.255.0</td><td class="tbd">192.168.0.? (SW2 — Phase 2)</td><td class="tbd">SW2 Port 1</td></tr>
+          <tr><td class="tbd">10.60.0.0</td><td class="tbd">255.255.255.0</td><td class="tbd">192.168.0.? (SW2 — Phase 2)</td><td class="tbd">SW2 Port 1</td></tr>
+        </tbody>
+      </table>
+
+      <!-- Verify checklist -->
+      <p style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#34d399;margin-bottom:10px">Pre-Execution Checklist — Confirm Before Touching Hardware</p>
+      <div style="background:#0d2b1f;border:1px solid #065f46;border-radius:6px;padding:14px 18px;margin-bottom:6px;font-size:0.82rem;color:#6ee7b7;line-height:2">
+        &#9633; Console cable connected to SW1<br>
+        &#9633; Port 1 cable connected to Quantum Fiber LAN port<br>
+        &#9633; Port 3 cable connected to AP3000-A<br>
+        &#9633; AP3000-A decommissioned from XIQ<br>
+        &#9633; Quantum Fiber modem accessible (for static routes after ZTP+)
+      </div>
+      <div style="background:#0d1422;border:1px dashed #334155;border-radius:6px;padding:12px 16px;margin-bottom:4px;font-size:0.78rem;color:#475569">
+        SW2 LLD — added in Phase 2 (VLAN 50/Corp2, VLAN 60/Guest2, Port 13 AP port, Port 1 uplink).<br>
+        VLAN 10 LLD — added in Phase 3 (Port 10 trunk, 10.10.0.1/10.10.0.2, inter-switch static routes).
       </div>
     </div>
 
-    <!-- ═══════════════════════════════════════ MODULE C + EXECUTION ═══════════════════════ -->
+    <!-- ═══════════════════════════════════════ EXECUTION ═══════════════════════ -->
     <div class="module" id="exec">
       <div class="module-header">
-        <span class="mod-badge mod-e">Module C + Execution — Phase 1</span>
+        <span class="mod-badge mod-e">Execution — Phase 1</span>
         <div>
           <div style="font-size:1.05rem;color:#e2e8f0;font-weight:700">SW1 + AP3000-A — Corp1/Guest1 — iPhone Test</div>
           <div class="mod-sub">Factory reset → ZTP+ → SW1 CLI config → AP reset → XIQ SSID mapping → verify</div>
