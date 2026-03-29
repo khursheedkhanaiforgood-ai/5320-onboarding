@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Standards & References — Extreme Networks 5320 Onboarding</title>
+<title>Standards & References — E2E Network Deployment</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: 'Segoe UI', Arial, sans-serif; background: #0f172a; color: #e2e8f0; min-height: 100vh; padding: 48px 24px; }
@@ -82,9 +82,7 @@
     <p class="meta">Khursheed Khan &nbsp;&mdash;&nbsp; Extreme Networks &nbsp;&mdash;&nbsp; March 2026</p>
     <h1>Standards &amp; References</h1>
     <p class="subtitle">
-      Every concept encountered during the 5320 switch bring-up, AP onboarding, and WiFi client
-      connectivity debug — mapped to its governing IEEE standard or IETF RFC, top-down from the
-      physical layer to the cloud. Appendix links to primary sources for deeper study.
+      Every concept encountered in this E2E deployment — from EN-5320 switch bring-up through AP3000 onboarding, VLAN design, inter-switch trunking, static routing, and UE/iPhone internet verification — mapped to its governing IEEE standard or IETF RFC. Appendix includes foundational textbooks, university courses, AI-agentic workflow references, and primary standards bodies.
     </p>
   </div>
 
@@ -337,6 +335,10 @@
           <a href="https://www.sybex.com/go/cwna" target="_blank">CWNA: Certified Wireless Network Administrator</a>
           <span class="note">Coleman &amp; Westcott — 802.11 mechanics, CAPWAP, WPA3, enterprise WLAN design</span>
         </li>
+        <li>
+          <a href="https://web.mit.edu/gallager/www/papers/datanet.pdf" target="_blank">Data Networks (2nd ed.)</a>
+          <span class="note">Bertsekas &amp; Gallager — the graduate-level classic: queuing theory, routing algorithms (Bellman-Ford, Dijkstra), flow control, and multiple-access protocols. Free PDF on Gallager's MIT page. Directly underpins every routing and DHCP concept in this lab.</span>
+        </li>
       </ul>
     </div>
 
@@ -408,6 +410,126 @@
           <span class="note">Handy one-page references for subnetting, 802.1Q, STP timers, and TCP/IP headers</span>
         </li>
       </ul>
+    </div>
+
+    <div class="appendix-card" style="border-color:#4c1d95">
+      <h3 style="color:#c084fc">&#129302; AI-Agentic Workflows</h3>
+      <ul>
+        <li>
+          <a href="agent_tutorial.html">5320 Onboarding Agent — Build Tutorial</a>
+          <span class="note">This project: 20-state regex machine + Claude API on state transitions. Read-only serial monitor, rolling 4000-char buffer, Rich terminal UI. Python + pyserial + anthropic SDK.</span>
+        </li>
+        <li>
+          <a href="railway_tutorial.html">Railway Hybrid Deployment — Build Tutorial</a>
+          <span class="note">FastAPI WebSocket server + vanilla JS web UI + bridge.py field client. Cloud-hosted agent with local serial port access via authenticated WebSocket tunnel.</span>
+        </li>
+        <li>
+          <a href="https://docs.anthropic.com/en/docs/build-with-claude/tool-use" target="_blank">Anthropic Tool Use (Function Calling)</a>
+          <span class="note">Anthropic's official guide to structured tool use — the pattern behind the agent's state-transition API calls</span>
+        </li>
+        <li>
+          <a href="https://docs.anthropic.com/en/docs/agents-and-tools/agents-overview" target="_blank">Anthropic Agents Overview</a>
+          <span class="note">Agentic loop design: perception → reasoning → action. Directly maps to this agent's serial-read → state-detect → instruct cycle.</span>
+        </li>
+        <li>
+          <a href="https://github.com/anthropics/anthropic-cookbook" target="_blank">Anthropic Cookbook</a>
+          <span class="note">Practical patterns for building agents with Claude — tool use, multi-step tasks, streaming, and prompt engineering recipes</span>
+        </li>
+        <li>
+          <a href="https://www.anthropic.com/claude-code" target="_blank">Claude Code CLI</a>
+          <span class="note">The AI coding assistant used to build and iterate every file in this project — from agent Python code to these HTML docs</span>
+        </li>
+      </ul>
+    </div>
+
+  </div>
+
+  <hr class="divider">
+
+  <!-- E2E Key Learnings -->
+  <p class="section-title">E2E Key Learnings — Concepts Every Networking Student Should Know</p>
+  <p style="font-size:0.8rem;color:#475569;margin-bottom:24px;line-height:1.7">Each lesson from this lab mapped to the underlying networking concept and where to go deeper. These are the moments where something broke, was debugged, and truly understood.</p>
+
+  <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:36px">
+
+    <div style="background:#1e293b;border:1px solid #334155;border-radius:6px;padding:16px 20px">
+      <div style="display:flex;align-items:flex-start;gap:14px">
+        <span style="font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#34d399;background:#0d2b1f;border:1px solid #065f46;padding:2px 7px;border-radius:3px;white-space:nowrap;margin-top:2px">L3 Routing</span>
+        <div>
+          <div style="font-size:0.88rem;font-weight:600;color:#e2e8f0;margin-bottom:4px">ipforwarding must be enabled on every routed VLAN — including Default</div>
+          <div style="font-size:0.78rem;color:#64748b;line-height:1.6">Omitting it on Default VLAN broke internet for all WiFi clients even though Corp/Guest VLANs were enabled. The switch is an L3 device — each VLAN interface must explicitly opt in to forwarding. Concept: <em>directly connected routes and per-interface forwarding decisions.</em> See: RFC 1812 §5.2, Bertsekas &amp; Gallager Ch. 5.</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="background:#1e293b;border:1px solid #334155;border-radius:6px;padding:16px 20px">
+      <div style="display:flex;align-items:flex-start;gap:14px">
+        <span style="font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#93c5fd;background:#0c1a2e;border:1px solid #1e3a5f;padding:2px 7px;border-radius:3px;white-space:nowrap;margin-top:2px">NAT / Return Path</span>
+        <div>
+          <div style="font-size:0.88rem;font-weight:600;color:#e2e8f0;margin-bottom:4px">Quantum Fiber needs static routes to reach your private subnets</div>
+          <div style="font-size:0.78rem;color:#64748b;line-height:1.6">Quantum Fiber NATs outbound traffic — your 10.20.x.x client reaches 8.8.8.8, but the reply comes back to Quantum Fiber which has no route for 10.20.0.0/24. Without static routes pointing to the switch, replies are silently dropped. Concept: <em>NAT, return-path routing, RFC 1918 private addressing.</em> See: RFC 3022 (NAT), RFC 1918.</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="background:#1e293b;border:1px solid #334155;border-radius:6px;padding:16px 20px">
+      <div style="display:flex;align-items:flex-start;gap:14px">
+        <span style="font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#c084fc;background:#1a0d2e;border:1px solid #4c1d95;padding:2px 7px;border-radius:3px;white-space:nowrap;margin-top:2px">802.1Q VLANs</span>
+        <div>
+          <div style="font-size:0.88rem;font-weight:600;color:#e2e8f0;margin-bottom:4px">A port can be untagged on only one VLAN — but tagged on many</div>
+          <div style="font-size:0.78rem;color:#64748b;line-height:1.6">The AP3000 carries Corp1 (VLAN 20) and Guest1 (VLAN 30) over a single cable using 802.1Q tags. The switch port is untagged on Default (for AP→XIQ provisioning) and tagged on Corp1+Guest1 (for SSID traffic). Concept: <em>trunk ports, access ports, VLAN tagging, 4-byte 802.1Q header.</em> See: IEEE 802.1Q-2018.</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="background:#1e293b;border:1px solid #334155;border-radius:6px;padding:16px 20px">
+      <div style="display:flex;align-items:flex-start;gap:14px">
+        <span style="font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#fcd34d;background:#1a1a0d;border:1px solid #713f12;padding:2px 7px;border-radius:3px;white-space:nowrap;margin-top:2px">DHCP</span>
+        <div>
+          <div style="font-size:0.88rem;font-weight:600;color:#e2e8f0;margin-bottom:4px">The switch itself is the DHCP server — not the AP, not the cloud</div>
+          <div style="font-size:0.78rem;color:#64748b;line-height:1.6">On EXOS, <code style="background:#0f172a;padding:1px 4px;border-radius:2px;color:#a78bfa">enable dhcp ports 3 vlan Corp1</code> starts the switch's built-in DHCP server on that VLAN. The gateway, DNS, and address range are configured directly on the switch. Concept: <em>DORA sequence, DHCP relay, gateway and DNS options.</em> See: RFC 2131.</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="background:#1e293b;border:1px solid #334155;border-radius:6px;padding:16px 20px">
+      <div style="display:flex;align-items:flex-start;gap:14px">
+        <span style="font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#fda4af;background:#1a1219;border:1px solid #881337;padding:2px 7px;border-radius:3px;white-space:nowrap;margin-top:2px">ARP vs Routing</span>
+        <div>
+          <div style="font-size:0.88rem;font-weight:600;color:#e2e8f0;margin-bottom:4px">show iparp shows neighbors — show iproute shows the switch's own addresses</div>
+          <div style="font-size:0.78rem;color:#64748b;line-height:1.6">A device never ARPs for itself. The ARP table contains only remote devices the switch has discovered. The route table contains the switch's own directly-connected networks and learned routes. Confusing these two is a classic beginner error. Concept: <em>ARP, MAC-to-IP resolution, routing table vs ARP cache.</em> See: RFC 826 (ARP), RFC 1812.</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="background:#1e293b;border:1px solid #334155;border-radius:6px;padding:16px 20px">
+      <div style="display:flex;align-items:flex-start;gap:14px">
+        <span style="font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#5eead4;background:#0d1a1a;border:1px solid #134e4a;padding:2px 7px;border-radius:3px;white-space:nowrap;margin-top:2px">PoE / 802.3af</span>
+        <div>
+          <div style="font-size:0.88rem;font-weight:600;color:#e2e8f0;margin-bottom:4px">Power and data on the same cable — the switch negotiates class with the AP</div>
+          <div style="font-size:0.78rem;color:#64748b;line-height:1.6">The EN-5320 detects the AP3000 as a Class 4 device (up to 30W) and delivers 5.2W at idle. No separate power supply needed. <code style="background:#0f172a;padding:1px 4px;border-radius:2px;color:#a78bfa">show inline-power info ports 3</code> shows voltage, current, and watts in real time. Concept: <em>IEEE 802.3af/at/bt power classes, detection handshake.</em></div>
+        </div>
+      </div>
+    </div>
+
+    <div style="background:#1e293b;border:1px solid #334155;border-radius:6px;padding:16px 20px">
+      <div style="display:flex;align-items:flex-start;gap:14px">
+        <span style="font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#fb923c;background:#1c0a00;border:1px solid #431407;padding:2px 7px;border-radius:3px;white-space:nowrap;margin-top:2px">CAPWAP / XIQ</span>
+        <div>
+          <div style="font-size:0.88rem;font-weight:600;color:#e2e8f0;margin-bottom:4px">AP3000 SSID config is cloud-only — there is no AP CLI for SSID configuration</div>
+          <div style="font-size:0.78rem;color:#64748b;line-height:1.6">The AP3000 uses CAPWAP to tunnel management traffic to XIQ. All SSID, radio, and VLAN mapping config is pushed from the cloud. The AP CLI is limited to diagnostics. "Reset and Delete" in XIQ clears the org binding on the AP — "Delete" alone does not. Concept: <em>CAPWAP split-MAC architecture, cloud controller model.</em> See: RFC 5415, RFC 5416.</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="background:#1e293b;border:1px solid #334155;border-radius:6px;padding:16px 20px">
+      <div style="display:flex;align-items:flex-start;gap:14px">
+        <span style="font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#a78bfa;background:#1e1a2e;border:1px solid #4c1d95;padding:2px 7px;border-radius:3px;white-space:nowrap;margin-top:2px">AI Agents</span>
+        <div>
+          <div style="font-size:0.88rem;font-weight:600;color:#e2e8f0;margin-bottom:4px">A state machine + LLM = a domain-specific autonomous agent</div>
+          <div style="font-size:0.78rem;color:#64748b;line-height:1.6">The 5320 onboarding agent combines a 20-state regex machine (cheap, local, fast) with Claude API calls only on state transitions (expensive, cloud, powerful). The serial port is read-only — the human always types the commands. This separation of concerns (observe vs act) is a core agentic design principle. See: <a href="agent_tutorial.html" style="color:#60a5fa">Agent Build Tutorial</a>, Anthropic Agents docs.</div>
+        </div>
+      </div>
     </div>
 
   </div>
