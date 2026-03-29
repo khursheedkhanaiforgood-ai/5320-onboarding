@@ -132,6 +132,51 @@
     </div>
   </div>
 
+  <!-- Key Learnings -->
+  <div style="margin-top:32px">
+    <p style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#a78bfa;margin-bottom:14px;padding-left:2px">&#9135;&#9135; E2E Key Learnings</p>
+    <div style="background:#1e293b;border:1px solid #334155;border-radius:10px;padding:24px 28px;max-width:960px">
+      <p style="font-size:0.78rem;color:#64748b;margin-bottom:16px;line-height:1.6">Each lesson from this lab mapped to the underlying networking concept. Click to jump to the relevant guide section or standard.</p>
+      <ol style="list-style:none;padding:0;display:flex;flex-direction:column;gap:10px;counter-reset:learn">
+        <li style="display:flex;gap:12px;align-items:flex-start">
+          <span style="font-size:0.65rem;font-weight:700;background:#0d2b1f;color:#34d399;border:1px solid #065f46;padding:2px 7px;border-radius:3px;white-space:nowrap;margin-top:1px">L3 Routing</span>
+          <span style="font-size:0.82rem;color:#94a3b8;line-height:1.5"><a href="lab_20260329.html#exec" style="color:#e2e8f0;text-decoration:none;font-weight:600">ipforwarding must be enabled on every routed VLAN — including Default</a> &mdash; missing on Default VLAN breaks internet for all clients. <a href="standards_references.html#learnings" style="color:#60a5fa;font-size:0.78rem">RFC 1812 &#8599;</a></span>
+        </li>
+        <li style="display:flex;gap:12px;align-items:flex-start">
+          <span style="font-size:0.65rem;font-weight:700;background:#0c1a2e;color:#93c5fd;border:1px solid #1e3a5f;padding:2px 7px;border-radius:3px;white-space:nowrap;margin-top:1px">NAT</span>
+          <span style="font-size:0.82rem;color:#94a3b8;line-height:1.5"><a href="lab_20260329.html#exec" style="color:#e2e8f0;text-decoration:none;font-weight:600">Quantum Fiber needs static routes back to your private subnets</a> &mdash; without them, internet replies are silently dropped. <a href="standards_references.html#learnings" style="color:#60a5fa;font-size:0.78rem">RFC 3022 &#8599;</a></span>
+        </li>
+        <li style="display:flex;gap:12px;align-items:flex-start">
+          <span style="font-size:0.65rem;font-weight:700;background:#1e1a2e;color:#c4b5fd;border:1px solid #4c1d95;padding:2px 7px;border-radius:3px;white-space:nowrap;margin-top:1px">802.1Q</span>
+          <span style="font-size:0.82rem;color:#94a3b8;line-height:1.5"><a href="lab_20260329.html#exec" style="color:#e2e8f0;text-decoration:none;font-weight:600">A port is untagged on one VLAN but tagged on many</a> &mdash; AP trunk carries Corp + Guest SSIDs on one cable. <a href="standards_references.html" style="color:#60a5fa;font-size:0.78rem">IEEE 802.1Q &#8599;</a></span>
+        </li>
+        <li style="display:flex;gap:12px;align-items:flex-start">
+          <span style="font-size:0.65rem;font-weight:700;background:#1a1a0d;color:#fcd34d;border:1px solid #713f12;padding:2px 7px;border-radius:3px;white-space:nowrap;margin-top:1px">DHCP</span>
+          <span style="font-size:0.82rem;color:#94a3b8;line-height:1.5"><a href="lab_20260329.html#exec" style="color:#e2e8f0;text-decoration:none;font-weight:600">The switch is the DHCP server — gateway, DNS, and range configured on the switch itself</a>. <a href="standards_references.html" style="color:#60a5fa;font-size:0.78rem">RFC 2131 &#8599;</a></span>
+        </li>
+        <li style="display:flex;gap:12px;align-items:flex-start">
+          <span style="font-size:0.65rem;font-weight:700;background:#1a1219;color:#fda4af;border:1px solid #881337;padding:2px 7px;border-radius:3px;white-space:nowrap;margin-top:1px">ARP</span>
+          <span style="font-size:0.82rem;color:#94a3b8;line-height:1.5"><a href="session_log_20260329.html#vlans" style="color:#e2e8f0;text-decoration:none;font-weight:600">show iparp shows neighbors — show iproute shows the switch's own addresses</a>. A device never ARPs for itself. <a href="standards_references.html" style="color:#60a5fa;font-size:0.78rem">RFC 826 &#8599;</a></span>
+        </li>
+        <li style="display:flex;gap:12px;align-items:flex-start">
+          <span style="font-size:0.65rem;font-weight:700;background:#1c1917;color:#a8a29e;border:1px solid #44403c;padding:2px 7px;border-radius:3px;white-space:nowrap;margin-top:1px">PoE</span>
+          <span style="font-size:0.82rem;color:#94a3b8;line-height:1.5"><a href="lab_20260329.html#exec" style="color:#e2e8f0;text-decoration:none;font-weight:600">Power and data on the same cable — switch negotiates class with the AP</a>. AP3000 = Class 4, 5.2W at idle. <a href="standards_references.html" style="color:#60a5fa;font-size:0.78rem">IEEE 802.3af &#8599;</a></span>
+        </li>
+        <li style="display:flex;gap:12px;align-items:flex-start">
+          <span style="font-size:0.65rem;font-weight:700;background:#1a1209;color:#fbbf24;border:1px solid #713f12;padding:2px 7px;border-radius:3px;white-space:nowrap;margin-top:1px">CAPWAP</span>
+          <span style="font-size:0.82rem;color:#94a3b8;line-height:1.5"><a href="ap_onboarding_20260326.html" style="color:#e2e8f0;text-decoration:none;font-weight:600">AP3000 SSID config is cloud-only — no AP CLI for SSIDs</a>. XIQ "Reset &amp; Delete" clears the AP's org binding; plain "Delete" does not. <a href="standards_references.html" style="color:#60a5fa;font-size:0.78rem">RFC 5415 &#8599;</a></span>
+        </li>
+        <li style="display:flex;gap:12px;align-items:flex-start">
+          <span style="font-size:0.65rem;font-weight:700;background:#1a0d2e;color:#c084fc;border:1px solid #4c1d95;padding:2px 7px;border-radius:3px;white-space:nowrap;margin-top:1px">AI Agent</span>
+          <span style="font-size:0.82rem;color:#94a3b8;line-height:1.5"><a href="agent_tutorial.html" style="color:#e2e8f0;text-decoration:none;font-weight:600">State machine + LLM = domain-specific autonomous agent</a>. Regex detects state cheaply; Claude API called only on transitions. Read-only on the wire. <a href="standards_references.html" style="color:#60a5fa;font-size:0.78rem">Agent Tutorial &#8599;</a></span>
+        </li>
+      </ol>
+      <div style="margin-top:16px;padding-top:12px;border-top:1px solid #334155;font-size:0.75rem;color:#475569">
+        Full concept map with IEEE standards, RFCs, and Bertsekas &amp; Gallager citations &rarr; <a href="standards_references.html" style="color:#a78bfa">Standards &amp; References</a>
+      </div>
+    </div>
+  </div>
+
   <!-- Standards & References -->
   <div style="margin-top:32px">
     <p style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#a78bfa;margin-bottom:14px;padding-left:2px">&#9135;&#9135; Reference</p>

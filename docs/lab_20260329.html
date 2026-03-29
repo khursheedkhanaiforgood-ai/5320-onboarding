@@ -122,7 +122,7 @@
     <a href="#lld">Low-Level Design</a>
     <div class="mod-label">Execution</div>
     <a href="#exec">Phase 1 — SW1 ✓</a>
-    <a href="#exec2">Phase 2 — SW2</a>
+    <a href="#exec2">Phase 2 — SW2 ✓</a>
     <a href="#exec3">Phase 3 — Trunk</a>
     <div class="mod-label">Log</div>
     <a href="#log">Session Log</a>
@@ -515,8 +515,8 @@
         <tbody>
           <tr><td>10.20.0.0</td><td>255.255.255.0</td><td>192.168.0.? (SW1 — from show ipconfig)</td><td>SW1 Port 1</td></tr>
           <tr><td>10.30.0.0</td><td>255.255.255.0</td><td>192.168.0.? (SW1 — same)</td><td>SW1 Port 1</td></tr>
-          <tr><td class="tbd">10.50.0.0</td><td class="tbd">255.255.255.0</td><td class="tbd">192.168.0.? (SW2 — Phase 2)</td><td class="tbd">SW2 Port 1</td></tr>
-          <tr><td class="tbd">10.60.0.0</td><td class="tbd">255.255.255.0</td><td class="tbd">192.168.0.? (SW2 — Phase 2)</td><td class="tbd">SW2 Port 1</td></tr>
+          <tr><td>10.50.0.0</td><td>255.255.255.0</td><td>192.168.0.28 (SW2)</td><td>SW2 Port 1</td></tr>
+          <tr><td>10.60.0.0</td><td>255.255.255.0</td><td>192.168.0.28 (SW2)</td><td>SW2 Port 1</td></tr>
         </tbody>
       </table>
 
@@ -706,8 +706,8 @@ show iproute</pre>
       <div class="module-header">
         <span class="mod-badge mod-e" style="background:#0c1a2e;color:#93c5fd;border-color:#1e3a5f">Execution — Phase 2</span>
         <div>
-          <div style="font-size:1.05rem;color:#e2e8f0;font-weight:700">SW2 + AP3000-B — Corp2/Guest2 — iPhone Test</div>
-          <div class="mod-sub">Factory reset → SW2 CLI config → AP reset → XIQ SSID mapping → verify</div>
+          <div style="font-size:1.05rem;color:#e2e8f0;font-weight:700">SW2 + AP3000-B — Corp2/Guest2 — iPhone Test <span style="color:#34d399;font-size:0.85rem">&#10003; Complete</span></div>
+          <div class="mod-sub">Factory reset → SW2 CLI config → AP reset → XIQ SSID mapping → iPhone internet verified Mar 29</div>
         </div>
       </div>
 
@@ -943,9 +943,29 @@ show vlan detail</pre>
         <div class="log-time">Morning</div>
         <div class="log-text"><strong>Module C + Execution complete — Phase 1.</strong> 11-step command sheet: XIQ AP decommission → SW1 factory reset → ZTP+ → VLAN/port/DHCP/routing CLI → AP reset → XIQ SSID mapping → Quantum Fiber routes → verify. AP SSID config confirmed as XIQ-only (AP3000 CLI limitation). Phased plan locked: SW1 → SW2 → VLAN10.</div>
       </div>
+      <div class="log-entry done">
+        <div class="log-time">Morning</div>
+        <div class="log-text"><strong>Phase 1 complete.</strong> SW1 factory reset, VLAN 20/30 configured, PoE Port 3, DHCP, ipforwarding, Quantum Fiber routes added. AP3000-A claimed in XIQ, SW1-AP-Policy pushed. iPhone internet verified on Corp1 and Guest1.</div>
+      </div>
+      <div class="log-entry done">
+        <div class="log-time">Afternoon</div>
+        <div class="log-text"><strong>Phase 2 — SW2 factory reset.</strong> Console connected (/dev/cu.usbserial-A9XH7AI0). unconfigure switch all. Wizard: enhanced security, babla/bigsur accounts, disable ports. Enabled ports 1 and 3. SW2 at 192.168.0.28.</div>
+      </div>
+      <div class="log-entry done">
+        <div class="log-time">Afternoon</div>
+        <div class="log-text"><strong>SW2 VLAN config complete.</strong> Corp2 (VLAN 50, 10.50.0.1/24) and Guest2 (VLAN 60, 10.60.0.1/24) created. Tagged Port 3. ipforwarding on Default/Corp2/Guest2. DHCP on both VLANs. PoE Port 3. Saved.</div>
+      </div>
+      <div class="log-entry done">
+        <div class="log-time">Afternoon</div>
+        <div class="log-text"><strong>Troubleshooting — ping from Corp2/Guest2 gateways.</strong> Symptom: couldn't ping 8.8.8.8 from 10.50.0.1. Diagnosis: show iproute confirmed default route exists. Root cause was EXOS ping syntax — correct form is <code>ping vr VR-Default 8.8.8.8 from 10.50.0.1</code> (VR before host, from at end). Both Corp2 and Guest2 pings returned 0% loss. Quantum Fiber static routes for 10.50/10.60 → 192.168.0.28 confirmed.</div>
+      </div>
+      <div class="log-entry done">
+        <div class="log-time">Afternoon</div>
+        <div class="log-text"><strong>Phase 2 complete.</strong> AP3000-B physical pinhole reset, firmware updated, claimed in XIQ. SW2-AP-Policy created: Corp2 → VLAN 50, Guest2 → VLAN 60. Profile pushed. iPhone connected to Corp2 and Guest2 — internet verified on both SSIDs.</div>
+      </div>
       <div class="log-entry active">
-        <div class="log-time">Ready</div>
-        <div class="log-text"><strong>Ready for execution.</strong> Hardware: connect console cable to SW1, begin Step 1.</div>
+        <div class="log-time">Next</div>
+        <div class="log-text"><strong>Phase 3 — VLAN 10 inter-switch trunk.</strong> Connect Ethernet cable Port 10 SW1 ↔ Port 10 SW2. Configure VLAN 10 Mgmt (10.10.0.1/10.10.0.2) on both switches. Add static routes for cross-switch VLAN reachability.</div>
       </div>
     </div>
 

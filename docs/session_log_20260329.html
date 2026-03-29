@@ -111,9 +111,12 @@
   <a href="#vlans">VLAN Build</a>
   <a href="#internet">Internet Verify</a>
   <a href="#ap">AP3000 Onboarding</a>
+  <div class="sec-label">Phase 2 — SW2</div>
+  <a href="#phase2">SW2 Execution</a>
+  <a href="#phase2-trouble">Troubleshooting</a>
   <div class="sec-label">Reference</div>
   <a href="#lessons">Key Lessons</a>
-  <a href="#status">Phase 1 Status</a>
+  <a href="#status">Session Status</a>
 </nav>
 
 <main class="main">
@@ -756,6 +759,128 @@
 
   <hr class="section-divider">
 
+  <!-- PHASE 2 -->
+  <section id="phase2">
+    <div class="section-label">Phase 2 — SW2 Execution</div>
+    <div class="timeline">
+
+      <div class="step">
+        <div class="step-dot dot-ok"></div>
+        <div class="step-header">
+          <span class="step-num">28</span>
+          <span class="step-title">SW2 Factory Reset &amp; Wizard</span>
+          <span class="tag tag-ok">Completed</span>
+        </div>
+        <div class="step-body">
+          <p>Same process as SW1. Console at <code>/dev/cu.usbserial-A9XH7AI0</code>. <code>unconfigure switch all</code> → Yes. Wizard: enhanced security, <code>babla</code> admin account, <code>bigsur</code> failsafe, disable ports Yes, SNMP re-enabled.</p>
+          <div class="cmd-block">
+            <span class="fix">enable ports 1</span><br>
+            <span class="fix">enable ports 3</span><br>
+            <span class="fix">show ipconfig</span><br>
+            <span class="output">Default  1  192.168.0.28/24  VR-Default</span>
+          </div>
+          <p>SW2 management IP: <strong>192.168.0.28</strong></p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-dot dot-ok"></div>
+        <div class="step-header">
+          <span class="step-num">29</span>
+          <span class="step-title">SW2 VLAN, DHCP, Routing, PoE</span>
+          <span class="tag tag-ok">Completed</span>
+        </div>
+        <div class="step-body">
+          <div class="cmd-block">
+            <span class="fix">create vlan Corp2 tag 50</span><br>
+            <span class="fix">create vlan Guest2 tag 60</span><br>
+            <span class="fix">configure vlan Corp2 add ports 3 tagged</span><br>
+            <span class="fix">configure vlan Guest2 add ports 3 tagged</span><br>
+            <span class="fix">configure vlan Corp2 ipaddress 10.50.0.1/24</span><br>
+            <span class="fix">configure vlan Guest2 ipaddress 10.60.0.1/24</span><br>
+            <span class="fix">enable ipforwarding vlan Default</span><br>
+            <span class="fix">enable ipforwarding vlan Corp2</span><br>
+            <span class="fix">enable ipforwarding vlan Guest2</span><br>
+            <span class="fix">configure vlan Corp2 dhcp-address-range 10.50.0.100 - 10.50.0.200</span><br>
+            <span class="fix">configure vlan Corp2 dhcp-options default-gateway 10.50.0.1</span><br>
+            <span class="fix">configure vlan Corp2 dhcp-options dns-server primary 8.8.8.8</span><br>
+            <span class="fix">enable dhcp ports 3 vlan Corp2</span><br>
+            <span class="fix">configure vlan Guest2 dhcp-address-range 10.60.0.100 - 10.60.0.200</span><br>
+            <span class="fix">configure vlan Guest2 dhcp-options default-gateway 10.60.0.1</span><br>
+            <span class="fix">configure vlan Guest2 dhcp-options dns-server primary 8.8.8.8</span><br>
+            <span class="fix">enable dhcp ports 3 vlan Guest2</span><br>
+            <span class="fix">enable inline-power ports 3</span><br>
+            <span class="fix">save configuration</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <section id="phase2-trouble">
+    <div class="section-label">Phase 2 — Troubleshooting</div>
+    <div class="timeline">
+
+      <div class="step">
+        <div class="step-dot dot-learn"></div>
+        <div class="step-header">
+          <span class="step-num">30</span>
+          <span class="step-title">Two "Default" in show iproute — What Does it Mean?</span>
+          <span class="tag tag-qa">Q&amp;A</span>
+        </div>
+        <div class="step-body">
+          <div class="qa-box">
+            <div class="q">Q: Why do I have two "Default" in show iproute?</div>
+            <div class="a"><strong>Default Route</strong> in the Destination column = the routing concept 0.0.0.0/0 — "send everything unknown to 192.168.0.1 (Quantum Fiber)". This is a routing term, not a VLAN name.<br><br><strong>Default</strong> in the VLAN column = the VLAN named "Default" (VID 1) — SW2's management IP 192.168.0.28. Same VLAN, two completely different contexts in the same table.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-dot dot-hiccup"></div>
+        <div class="step-header">
+          <span class="step-num">31</span>
+          <span class="step-title">Cannot Ping 8.8.8.8 from Corp2/Guest2 Gateways</span>
+          <span class="tag tag-hiccup">Troubleshooting</span>
+        </div>
+        <div class="step-body">
+          <div class="hiccup-box">
+            <div class="hiccup-label">Symptom</div>
+            <p>Could not ping 8.8.8.8 sourced from 10.50.0.1 or 10.60.0.1. show vlan confirmed ipforwarding enabled (f flag) on all three VLANs. show iproute confirmed default route → 192.168.0.1 exists. Quantum Fiber static routes for 10.50/10.60 → 192.168.0.28 confirmed in place.</p>
+          </div>
+          <div class="learn-box">
+            <div class="learn-label">Root Cause — EXOS Ping Syntax</div>
+            <p>Connectivity was fine all along. The issue was EXOS ping argument order. <code>ping 8.8.8.8 from 10.50.0.1</code> and <code>ping vr VR-Default 8.8.8.8 from 10.50.0.1</code> with wrong order both fail. The <code>from</code> keyword must follow the destination.</p>
+            <p>Correct: <code>ping vr VR-Default 8.8.8.8 from 10.50.0.1</code></p>
+          </div>
+          <div class="cmd-block">
+            <span class="fix">ping vr VR-Default 8.8.8.8 from 10.50.0.1</span><br>
+            <span class="output">4 packets, 0% loss, avg 5ms  ✓</span><br>
+            <span class="fix">ping vr VR-Default 8.8.8.8 from 10.60.0.1</span><br>
+            <span class="output">4 packets, 0% loss, avg 5ms  ✓</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-dot dot-ok"></div>
+        <div class="step-header">
+          <span class="step-num">32</span>
+          <span class="step-title">AP3000-B Onboarded — iPhone Internet on Corp2 &amp; Guest2</span>
+          <span class="tag tag-ok">Completed</span>
+        </div>
+        <div class="step-body">
+          <p>AP3000-B physical pinhole reset (10 sec). Firmware updated automatically (~8 min). Claimed in XIQ. SW2-AP-Policy created: Corp2 → VLAN 50, Guest2 → VLAN 60. Policy pushed. iPhone connected to Corp2 (10.50.0.x) and Guest2 (10.60.0.x) — internet verified on both SSIDs.</p>
+          <p><strong>Phase 2 complete.</strong> Both switches independently operational with full E2E internet path from iPhone through AP → switch → Quantum Fiber.</p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <hr class="section-divider">
+
   <!-- KEY LESSONS -->
   <section id="lessons">
     <div class="section-label">Key Lessons — Mar 29 Session</div>
@@ -778,23 +903,26 @@
 
   <!-- STATUS -->
   <section id="status" style="margin-top:48px">
-    <div class="section-label">Phase 1 Status</div>
+    <div class="section-label">Session Status — Mar 29</div>
     <table>
       <tr><th>Item</th><th>Status</th><th>Notes</th></tr>
+      <tr><td colspan="3" style="color:#34d399;font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;padding-top:14px">Phase 1 — SW1 + AP3000-A</td></tr>
       <tr><td>SW1 factory reset</td><td class="check">✓</td><td>unconfigure switch all</td></tr>
       <tr><td>Setup wizard</td><td class="check">✓</td><td>babla (admin) / bigsur (failsafe)</td></tr>
-      <tr><td>Port 1 &amp; 3 enabled</td><td class="check">✓</td><td>SW1 at 192.168.0.24</td></tr>
-      <tr><td>Corp1 VLAN 20</td><td class="check">✓</td><td>10.20.0.1/24, DHCP, tagged Port 3</td></tr>
-      <tr><td>Guest1 VLAN 30</td><td class="check">✓</td><td>10.30.0.1/24, DHCP, tagged Port 3</td></tr>
-      <tr><td>ipforwarding all VLANs</td><td class="check">✓</td><td>Default + Corp1 + Guest1</td></tr>
-      <tr><td>PoE Port 3</td><td class="check">✓</td><td>5.2W delivering</td></tr>
-      <tr><td>Quantum Fiber static routes</td><td class="check">✓</td><td>10.20 + 10.30 → 192.168.0.24</td></tr>
-      <tr><td>SW1 internet ping</td><td class="check">✓</td><td>0% loss to 8.8.8.8</td></tr>
-      <tr><td>AP3000-A claimed in XIQ</td><td class="check">✓</td><td>Firmware updated, claimed</td></tr>
-      <tr><td>XIQ SSID policy push</td><td class="pending">⏳</td><td>In progress</td></tr>
-      <tr><td>iPhone internet test</td><td class="pending">⏳</td><td>After SSID push</td></tr>
-      <tr><td>SW2 Phase 2</td><td class="pending">⏳</td><td>VLAN 50/60, AP3000-B</td></tr>
-      <tr><td>VLAN 10 inter-switch trunk</td><td class="deferred">↷ Phase 3</td><td>Port 10, 10.10.0.1/10.10.0.2</td></tr>
+      <tr><td>Corp1 VLAN 20 + Guest1 VLAN 30</td><td class="check">✓</td><td>DHCP, ipforwarding, tagged Port 3</td></tr>
+      <tr><td>PoE Port 3 + Quantum Fiber routes</td><td class="check">✓</td><td>10.20 + 10.30 → 192.168.0.24</td></tr>
+      <tr><td>AP3000-A XIQ + SSID push</td><td class="check">✓</td><td>SW1-AP-Policy: Corp1 VLAN20, Guest1 VLAN30</td></tr>
+      <tr><td>iPhone internet — Corp1 + Guest1</td><td class="check">✓</td><td>Verified Mar 29</td></tr>
+      <tr><td colspan="3" style="color:#93c5fd;font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;padding-top:14px">Phase 2 — SW2 + AP3000-B</td></tr>
+      <tr><td>SW2 factory reset</td><td class="check">✓</td><td>192.168.0.28</td></tr>
+      <tr><td>Corp2 VLAN 50 + Guest2 VLAN 60</td><td class="check">✓</td><td>DHCP, ipforwarding, tagged Port 3</td></tr>
+      <tr><td>PoE Port 3 + Quantum Fiber routes</td><td class="check">✓</td><td>10.50 + 10.60 → 192.168.0.28</td></tr>
+      <tr><td>Ping from Corp2/Guest2 gateways</td><td class="check">✓</td><td>ping vr VR-Default 8.8.8.8 from 10.50.0.1</td></tr>
+      <tr><td>AP3000-B XIQ + SSID push</td><td class="check">✓</td><td>SW2-AP-Policy: Corp2 VLAN50, Guest2 VLAN60</td></tr>
+      <tr><td>iPhone internet — Corp2 + Guest2</td><td class="check">✓</td><td>Verified Mar 29</td></tr>
+      <tr><td colspan="3" style="color:#fbbf24;font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;padding-top:14px">Phase 3 — Inter-Switch Trunk</td></tr>
+      <tr><td>VLAN 10 trunk SW1↔SW2</td><td class="deferred">↷ Pending</td><td>Port 10, 10.10.0.1/10.10.0.2</td></tr>
+      <tr><td>Static routes cross-switch</td><td class="deferred">↷ Pending</td><td>SW1: 10.50/60 → 10.10.0.2 | SW2: 10.20/30 → 10.10.0.1</td></tr>
     </table>
   </section>
 
