@@ -140,8 +140,9 @@
       </p>
       <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap">
         <span class="status status-live">&#9679; Active Session</span>
-        <span class="status status-pending">Module A — In Review</span>
-        <span class="status status-locked">B / C / E — Locked until A confirmed</span>
+        <span class="status status-live">Module A &#10003; Phase 1 Complete</span>
+        <span class="status status-pending">Module B — In Progress</span>
+        <span class="status status-locked">C / E — Pending</span>
       </div>
     </div>
 
@@ -355,13 +356,116 @@
       <div class="module-header">
         <span class="mod-badge mod-b">Module B</span>
         <div>
-          <div style="font-size:1.05rem;color:#e2e8f0;font-weight:700">High-Level Design</div>
-          <div class="mod-sub">Traffic flow, VLAN propagation, inter-switch routing strategy</div>
+          <div style="font-size:1.05rem;color:#e2e8f0;font-weight:700">High-Level Design — Phase 1</div>
+          <div class="mod-sub">Port assignments, VLAN topology, traffic flow, Quantum Fiber routing — VLAN 10 deferred to Phase 2</div>
         </div>
       </div>
-      <div class="placeholder">
-        <div class="ph-title">Locked — complete Module A open questions first</div>
-        HLD will cover: traffic flow diagrams per VLAN, inter-switch trunk design, routing table on each switch, Quantum Fiber static route table, and XIQ cloud management path.
+
+      <!-- Phase note -->
+      <div style="background:#0c1a2e;border:1px solid #1e3a5f;border-radius:6px;padding:12px 16px;margin-bottom:22px;font-size:0.8rem;color:#60a5fa;line-height:1.6">
+        <strong>Phase 1 scope:</strong> Two independent switches, each with its own uplink to the Quantum Fiber modem, independent data VLANs, and their own DHCP servers. VLAN 10 management trunk deferred — Port 10 reserved on both switches for Phase 2.
+      </div>
+
+      <!-- Port assignment -->
+      <p style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#475569;margin-bottom:12px">Port Assignments</p>
+      <div class="two-col" style="margin-bottom:24px">
+        <div class="card" style="border-color:#10b981">
+          <h3 style="color:#34d399">Switch_1 — EN 5320</h3>
+          <table class="data-table" style="margin:0">
+            <thead><tr><th>Port</th><th>Role</th><th>VLAN</th></tr></thead>
+            <tbody>
+              <tr><td>1</td><td>Uplink → Quantum Fiber</td><td>Default (1) untagged</td></tr>
+              <tr><td>3</td><td>AP3000-A</td><td>Corp1(20) + Guest1(30) tagged</td></tr>
+              <tr><td>10</td><td>Reserved — VLAN 10 trunk</td><td>Phase 2</td></tr>
+              <tr><td>2,4–9,11–16</td><td>Unused / available</td><td>—</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="card" style="border-color:#3b82f6">
+          <h3 style="color:#93c5fd">Switch_2 — EN 5320</h3>
+          <table class="data-table" style="margin:0">
+            <thead><tr><th>Port</th><th>Role</th><th>VLAN</th></tr></thead>
+            <tbody>
+              <tr><td>1</td><td>Uplink → Quantum Fiber</td><td>Default (1) untagged</td></tr>
+              <tr><td>13</td><td>AP3000-B</td><td>Corp2(50) + Guest2(60) tagged</td></tr>
+              <tr><td>10</td><td>Reserved — VLAN 10 trunk</td><td>Phase 2</td></tr>
+              <tr><td>2–9,11–12,14–16</td><td>Unused / available</td><td>—</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- VLAN topology -->
+      <p style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#475569;margin-bottom:12px">VLAN Topology — Phase 1</p>
+      <table class="data-table" style="margin-bottom:24px">
+        <thead><tr><th>VLAN</th><th>Name</th><th>Switch</th><th>IP Interface</th><th>DHCP Range</th><th>AP Port</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>Default</td><td>Both</td><td>192.168.0.x (DHCP from modem)</td><td>— (modem serves this)</td><td>—</td></tr>
+          <tr><td>20</td><td>Corp1</td><td>SW1</td><td>10.20.0.1/24</td><td>10.20.0.100–200</td><td>Port 3 tagged</td></tr>
+          <tr><td>30</td><td>Guest1</td><td>SW1</td><td>10.30.0.1/24</td><td>10.30.0.100–200</td><td>Port 3 tagged</td></tr>
+          <tr><td>50</td><td>Corp2</td><td>SW2</td><td>10.50.0.1/24</td><td>10.50.0.100–200</td><td>Port 13 tagged</td></tr>
+          <tr><td>60</td><td>Guest2</td><td>SW2</td><td>10.60.0.1/24</td><td>10.60.0.100–200</td><td>Port 13 tagged</td></tr>
+        </tbody>
+      </table>
+
+      <!-- Traffic flow -->
+      <p style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#475569;margin-bottom:12px">Traffic Flow — iPhone on Corp1 SSID to Internet</p>
+      <table class="data-table" style="margin-bottom:24px">
+        <thead><tr><th>#</th><th>Hop</th><th>Detail</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>iPhone → AP3000-A (WiFi)</td><td>Associate to "Corp1" SSID — AP maps Corp1 SSID → VLAN 20 tag</td></tr>
+          <tr><td>2</td><td>AP3000-A → SW1 Port 3</td><td>Ethernet frame with 802.1Q tag VLAN 20 on copper cable</td></tr>
+          <tr><td>3</td><td>SW1 VLAN 20 interface</td><td>Receives tagged frame, DHCP assigns 10.20.0.x to iPhone, gateway = 10.20.0.1</td></tr>
+          <tr><td>4</td><td>SW1 L3 routing</td><td>ipforwarding on Corp1 VLAN — routes packet toward 0.0.0.0/0 (default route via Default VLAN)</td></tr>
+          <tr><td>5</td><td>SW1 Default VLAN → Port 1</td><td>Packet exits SW1 as untagged frame via 192.168.0.x</td></tr>
+          <tr><td>6</td><td>Quantum Fiber modem</td><td>NATs 192.168.0.x → public IP, forwards to internet</td></tr>
+          <tr><td>7</td><td>Return path</td><td>Reply arrives at modem → static route 10.20.0.0/24 → SW1's 192.168.0.x → SW1 routes to iPhone via Corp1 VLAN</td></tr>
+        </tbody>
+      </table>
+
+      <!-- Quantum Fiber routes -->
+      <p style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#475569;margin-bottom:12px">Quantum Fiber — Static Routes Required</p>
+      <div class="lesson" style="margin-bottom:20px">
+        <strong>Note:</strong> SW1 and SW2 get their Default VLAN IPs from the modem's DHCP. These are not known until after ZTP+ boots. Discover them first with <code>show ipconfig</code> or check the modem's DHCP lease table, then add these 4 routes.
+      </div>
+      <table class="data-table" style="margin-bottom:24px">
+        <thead><tr><th>Destination</th><th>Next-Hop</th><th>Via</th></tr></thead>
+        <tbody>
+          <tr><td>10.20.0.0/24</td><td>192.168.0.? (SW1 Default VLAN IP)</td><td>SW1 Port 1 uplink</td></tr>
+          <tr><td>10.30.0.0/24</td><td>192.168.0.? (SW1 Default VLAN IP)</td><td>SW1 Port 1 uplink</td></tr>
+          <tr><td>10.50.0.0/24</td><td>192.168.0.? (SW2 Default VLAN IP)</td><td>SW2 Port 1 uplink</td></tr>
+          <tr><td>10.60.0.0/24</td><td>192.168.0.? (SW2 Default VLAN IP)</td><td>SW2 Port 1 uplink</td></tr>
+        </tbody>
+      </table>
+
+      <!-- ipforwarding checklist -->
+      <p style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#475569;margin-bottom:12px">ipforwarding Checklist — Must-Do (Mar 27 Lesson)</p>
+      <div class="two-col">
+        <div class="card" style="border-color:#10b981">
+          <h3 style="color:#34d399">Switch_1</h3>
+          <ul>
+            <li><code>enable ipforwarding vlan Default</code> — return path from internet</li>
+            <li><code>enable ipforwarding vlan Corp1</code> — outbound from clients</li>
+            <li><code>enable ipforwarding vlan Guest1</code> — outbound from clients</li>
+          </ul>
+        </div>
+        <div class="card" style="border-color:#3b82f6">
+          <h3 style="color:#93c5fd">Switch_2</h3>
+          <ul>
+            <li><code>enable ipforwarding vlan Default</code> — return path from internet</li>
+            <li><code>enable ipforwarding vlan Corp2</code> — outbound from clients</li>
+            <li><code>enable ipforwarding vlan Guest2</code> — outbound from clients</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Phase 2 note -->
+      <div style="background:#0d1422;border:1px dashed #334155;border-radius:6px;padding:14px 16px;margin-top:20px;font-size:0.8rem;color:#475569;line-height:1.7">
+        <strong style="color:#64748b">Phase 2 additions (deferred):</strong> Port 10 on both switches → VLAN 10 trunk (tagged).
+        SW1 VLAN 10 IP: 10.10.0.1/24 · SW2 VLAN 10 IP: 10.10.0.2/24.
+        Static routes on each switch for the other's subnets via VLAN 10 next-hop.
+        Static route on Quantum Fiber modem: 10.10.0.0/24 → SW1's 192.168.0.x.
+        ipforwarding on VLAN 10 both switches.
       </div>
     </div>
 
@@ -417,9 +521,13 @@
         <div class="log-time">Morning</div>
         <div class="log-text"><strong>Architecture clarified.</strong> 1 AP per switch (not 2). Each switch has own uplink to Quantum Fiber. VLAN 10 = management + inter-switch trunk. Port 1 = uplink on both. AP/Switch reset via console. XIQ: separate switch policy + AP policy.</div>
       </div>
+      <div class="log-entry done">
+        <div class="log-time">Morning</div>
+        <div class="log-text"><strong>Module A complete — Phase 1.</strong> VLAN 10 deferred. Port 10 reserved on both switches for Phase 2 trunk. AP port = tagged. SW1/SW2 are already L3 — no separate L3 switch needed. 5320 routes natively.</div>
+      </div>
       <div class="log-entry active">
         <div class="log-time">In Progress</div>
-        <div class="log-text"><strong>Module A — 3 questions remaining.</strong> Inter-switch trunk port, tagged vs untagged AP port design, VLAN 10 static IPs for both switches.</div>
+        <div class="log-text"><strong>Module B — HLD published.</strong> Port assignments, VLAN table, traffic flow, Quantum Fiber static routes, ipforwarding checklist. Ready for Module C review.</div>
       </div>
     </div>
 
