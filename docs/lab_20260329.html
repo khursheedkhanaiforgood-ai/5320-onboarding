@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dual-Switch Lab — March 29, 2026</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; background: #0f172a; color: #e2e8f0; min-height: 100vh; }
+
+  /* Layout */
+  .layout { display: flex; min-height: 100vh; }
+  .sidebar { width: 220px; flex-shrink: 0; background: #0d1a2e; border-right: 1px solid #1e293b; padding: 28px 0; position: sticky; top: 0; height: 100vh; overflow-y: auto; }
+  .main { flex: 1; padding: 40px 48px; max-width: 1000px; }
+  @media (max-width: 700px) { .sidebar { display: none; } .main { padding: 24px 16px; } }
+
+  /* Sidebar */
+  .sidebar-title { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: #334155; padding: 0 20px 14px; border-bottom: 1px solid #1e293b; margin-bottom: 14px; }
+  .sidebar a { display: block; padding: 7px 20px; font-size: 0.78rem; color: #64748b; text-decoration: none; border-left: 2px solid transparent; }
+  .sidebar a:hover, .sidebar a.active { color: #a78bfa; border-left-color: #7c3aed; background: #1e293b22; }
+  .sidebar .mod-label { font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #1e3a5f; padding: 12px 20px 4px; }
+
+  /* Header */
+  .page-header { margin-bottom: 40px; }
+  .page-header .date-tag { font-size: 0.72rem; color: #a78bfa; letter-spacing: 0.05em; margin-bottom: 6px; font-weight: 700; text-transform: uppercase; }
+  .page-header h1 { font-size: 1.7rem; color: #f1f5f9; margin-bottom: 10px; }
+  .page-header .subtitle { color: #64748b; font-size: 0.88rem; line-height: 1.7; max-width: 680px; }
+
+  /* Module header */
+  .module { margin-bottom: 56px; }
+  .module-header { display: flex; align-items: center; gap: 14px; margin-bottom: 24px; padding-bottom: 12px; border-bottom: 1px solid #1e293b; }
+  .mod-badge { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; padding: 4px 10px; border-radius: 4px; flex-shrink: 0; }
+  .mod-a { background: #1a1a0d; color: #fcd34d; border: 1px solid #713f12; }
+  .mod-b { background: #0c1a2e; color: #93c5fd; border: 1px solid #1e3a5f; }
+  .mod-c { background: #0d2b1f; color: #6ee7b7; border: 1px solid #065f46; }
+  .mod-e { background: #1a0d1a; color: #f0abfc; border: 1px solid #6b21a8; }
+  .mod-log { background: #1a1219; color: #fda4af; border: 1px solid #881337; }
+  .module-header h2 { font-size: 1.1rem; color: #e2e8f0; }
+  .module-header .mod-sub { font-size: 0.78rem; color: #475569; margin-top: 2px; }
+
+  /* Status badge */
+  .status { display: inline-block; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; padding: 2px 8px; border-radius: 3px; }
+  .status-live { background: #0d2b1f; color: #34d399; border: 1px solid #065f46; }
+  .status-pending { background: #1a1a0d; color: #fbbf24; border: 1px solid #713f12; }
+  .status-locked { background: #1e293b; color: #475569; border: 1px solid #334155; }
+
+  /* SVG diagram container */
+  .diagram-wrap { background: #0d1422; border: 1px solid #1e3a5f; border-radius: 10px; padding: 24px; margin-bottom: 28px; overflow-x: auto; }
+  .diagram-wrap svg { display: block; margin: 0 auto; }
+
+  /* Defined / gap table */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 28px; }
+  @media (max-width: 700px) { .two-col { grid-template-columns: 1fr; } }
+  .card { background: #1e293b; border: 1px solid #334155; border-radius: 8px; padding: 20px; }
+  .card h3 { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 14px; }
+  .card ul { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 7px; }
+  .card li { font-size: 0.82rem; color: #94a3b8; line-height: 1.5; padding-left: 16px; position: relative; }
+  .card li::before { content: ""; position: absolute; left: 4px; top: 8px; width: 5px; height: 5px; border-radius: 50%; }
+  .card.defined { border-color: #065f46; }
+  .card.defined h3 { color: #34d399; }
+  .card.defined li::before { background: #34d399; }
+  .card.gaps { border-color: #92400e; }
+  .card.gaps h3 { color: #fbbf24; }
+  .card.gaps li::before { background: #fbbf24; }
+
+  /* Question cards */
+  .q-card { background: #1a1209; border: 1px solid #713f12; border-radius: 8px; padding: 18px 20px; margin-bottom: 12px; }
+  .q-card .q-num { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #92400e; margin-bottom: 6px; }
+  .q-card .q-text { font-size: 0.88rem; color: #fcd34d; line-height: 1.6; }
+  .q-card .q-hint { font-size: 0.75rem; color: #78350f; margin-top: 6px; font-style: italic; }
+
+  /* Lesson callout */
+  .lesson { background: #0c1f1a; border-left: 3px solid #10b981; border-radius: 0 6px 6px 0; padding: 14px 16px; margin-bottom: 16px; font-size: 0.82rem; color: #6ee7b7; line-height: 1.6; }
+  .lesson strong { color: #34d399; }
+
+  /* Placeholder module */
+  .placeholder { background: #0d1117; border: 1px dashed #1e293b; border-radius: 8px; padding: 32px; text-align: center; color: #334155; font-size: 0.85rem; }
+  .placeholder .ph-title { font-size: 1rem; color: #1e3a5f; margin-bottom: 8px; }
+
+  /* Session log */
+  .log-entry { border-left: 2px solid #334155; padding: 10px 0 10px 18px; margin-bottom: 6px; position: relative; }
+  .log-entry::before { content: ""; position: absolute; left: -5px; top: 14px; width: 8px; height: 8px; border-radius: 50%; background: #334155; }
+  .log-entry.done::before { background: #34d399; }
+  .log-entry.active::before { background: #fbbf24; animation: pulse 1.5s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+  .log-time { font-size: 0.68rem; color: #475569; font-family: monospace; margin-bottom: 3px; }
+  .log-text { font-size: 0.82rem; color: #94a3b8; line-height: 1.5; }
+  .log-text strong { color: #e2e8f0; }
+
+  /* Subnet table */
+  .data-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; margin-bottom: 20px; }
+  .data-table thead tr { background: #1e293b; }
+  .data-table thead th { padding: 8px 12px; text-align: left; font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: #64748b; }
+  .data-table tbody tr { border-bottom: 1px solid #1e293b; }
+  .data-table tbody tr:hover { background: #1e293b44; }
+  .data-table td { padding: 9px 12px; color: #94a3b8; }
+  .data-table td:first-child { font-family: monospace; color: #e2e8f0; }
+  .tbd { color: #475569 !important; font-style: italic; }
+
+  /* Nav */
+  .footer-nav { display: flex; justify-content: space-between; align-items: center; margin-top: 48px; padding-top: 20px; border-top: 1px solid #1e293b; font-size: 0.8rem; flex-wrap: wrap; gap: 10px; }
+  .footer-nav a { color: #60a5fa; text-decoration: none; padding: 6px 14px; border: 1px solid #1e3a5f; border-radius: 5px; }
+  .footer-nav a:hover { border-color: #3b82f6; }
+
+  code { background: #0f172a; color: #34d399; padding: 2px 6px; border-radius: 3px; font-size: 0.8em; font-family: monospace; }
+</style>
+</head>
+<body>
+<div class="layout">
+
+  <!-- Sidebar -->
+  <nav class="sidebar">
+    <div class="sidebar-title">March 29, 2026</div>
+    <a href="#overview">Overview</a>
+    <div class="mod-label">Module A</div>
+    <a href="#arch">Architecture</a>
+    <a href="#defined">What&rsquo;s Defined</a>
+    <a href="#gaps">Open Questions</a>
+    <div class="mod-label">Module B</div>
+    <a href="#hld">High-Level Design</a>
+    <div class="mod-label">Module C</div>
+    <a href="#lld">Low-Level Design</a>
+    <div class="mod-label">Execution</div>
+    <a href="#exec">Commands</a>
+    <div class="mod-label">Log</div>
+    <a href="#log">Session Log</a>
+  </nav>
+
+  <!-- Main -->
+  <div class="main">
+
+    <!-- Header -->
+    <div class="page-header" id="overview">
+      <div class="date-tag">March 29, 2026 &nbsp;&mdash;&nbsp; Khursheed Khan &nbsp;&mdash;&nbsp; Extreme Networks</div>
+      <h1>Dual-Switch Lab Rebuild</h1>
+      <p class="subtitle">
+        Full factory reset and CLI-only reconfiguration of two EN-5320 switches and two AP-3000 access points.
+        Management VLAN 10 inter-connecting both switches. Four data VLANs across two switches serving
+        Corp/Guest SSIDs. All-CLI driven — no XIQ push until execution phase.
+      </p>
+      <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap">
+        <span class="status status-live">&#9679; Active Session</span>
+        <span class="status status-pending">Module A — In Review</span>
+        <span class="status status-locked">B / C / E — Locked until A confirmed</span>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════ MODULE A ═══════════════════════ -->
+    <div class="module" id="arch">
+      <div class="module-header">
+        <span class="mod-badge mod-a">Module A</span>
+        <div>
+          <div class="module-header h2" style="font-size:1.05rem;color:#e2e8f0;font-weight:700">Problem Definition &amp; Architecture</div>
+          <div class="mod-sub">Schematic of the intended topology — confirm before any cable is touched</div>
+        </div>
+      </div>
+
+      <!-- SVG Diagram -->
+      <div class="diagram-wrap">
+        <svg width="820" height="560" viewBox="0 0 820 560" xmlns="http://www.w3.org/2000/svg" font-family="'Segoe UI',Arial,sans-serif">
+
+          <!-- Background lanes -->
+          <rect x="10" y="10" width="800" height="540" rx="8" fill="#0a111e" stroke="#1e293b" stroke-width="1"/>
+
+          <!-- Layer labels -->
+          <text x="24" y="46" font-size="9" fill="#1e3a5f" font-weight="700" text-transform="uppercase" letter-spacing="1">INTERNET / ISP</text>
+          <text x="24" y="156" font-size="9" fill="#1e3a5f" font-weight="700">CPE / HOME ROUTER</text>
+          <text x="24" y="266" font-size="9" fill="#1e3a5f" font-weight="700">LAYER 2/3 — SWITCHES</text>
+          <text x="24" y="386" font-size="9" fill="#1e3a5f" font-weight="700">ACCESS POINTS</text>
+          <text x="24" y="506" font-size="9" fill="#1e3a5f" font-weight="700">UE / CLIENTS</text>
+
+          <!-- Horizontal dividers -->
+          <line x1="20" y1="52" x2="800" y2="52" stroke="#1e293b" stroke-width="1"/>
+          <line x1="20" y1="162" x2="800" y2="162" stroke="#1e293b" stroke-width="1"/>
+          <line x1="20" y1="272" x2="800" y2="272" stroke="#1e293b" stroke-width="1"/>
+          <line x1="20" y1="392" x2="800" y2="392" stroke="#1e293b" stroke-width="1"/>
+          <line x1="20" y1="512" x2="800" y2="512" stroke="#1e293b" stroke-width="1"/>
+
+          <!-- Internet cloud -->
+          <ellipse cx="410" cy="84" rx="90" ry="28" fill="#0c1a2e" stroke="#1e3a5f" stroke-width="1.5"/>
+          <text x="410" y="88" text-anchor="middle" font-size="12" fill="#60a5fa" font-weight="700">Internet</text>
+
+          <!-- Quantum Fiber modem -->
+          <rect x="310" y="170" width="200" height="48" rx="6" fill="#1a1a0d" stroke="#713f12" stroke-width="1.5"/>
+          <text x="410" y="190" text-anchor="middle" font-size="11" fill="#fcd34d" font-weight="700">Quantum Fiber Modem</text>
+          <text x="410" y="207" text-anchor="middle" font-size="9.5" fill="#92400e">192.168.0.1 (gateway) — NATs 192.168.0.0/24 only</text>
+
+          <!-- Internet to modem -->
+          <line x1="410" y1="112" x2="410" y2="170" stroke="#1e3a5f" stroke-width="1.5" stroke-dasharray="4,3"/>
+
+          <!-- SWITCH 1 -->
+          <rect x="100" y="282" width="240" height="60" rx="6" fill="#0d2b1f" stroke="#10b981" stroke-width="1.5"/>
+          <text x="220" y="304" text-anchor="middle" font-size="11" fill="#34d399" font-weight="700">Switch_1 — EN 5320</text>
+          <text x="220" y="320" text-anchor="middle" font-size="9" fill="#064e3b">VLAN 10 (Mgmt) · VLAN 20 (Corp1) · VLAN 30 (Guest1)</text>
+          <text x="220" y="334" text-anchor="middle" font-size="9" fill="#065f46">10.10.0.1 · 10.20.0.1 · 10.30.0.1</text>
+
+          <!-- SWITCH 2 -->
+          <rect x="480" y="282" width="240" height="60" rx="6" fill="#0c1a2e" stroke="#3b82f6" stroke-width="1.5"/>
+          <text x="600" y="304" text-anchor="middle" font-size="11" fill="#93c5fd" font-weight="700">Switch_2 — EN 5320</text>
+          <text x="600" y="320" text-anchor="middle" font-size="9" fill="#1e3a5f">VLAN 10 (Mgmt) · VLAN 50 (Corp2) · VLAN 60 (Guest2)</text>
+          <text x="600" y="334" text-anchor="middle" font-size="9" fill="#1e3a5f">10.10.0.2 · 10.50.0.1 · 10.60.0.1</text>
+
+          <!-- Modem to Switch_1 uplink -->
+          <line x1="350" y1="218" x2="250" y2="282" stroke="#713f12" stroke-width="1.5" stroke-dasharray="4,3"/>
+          <text x="270" y="258" font-size="8.5" fill="#92400e">Default VLAN (untagged)</text>
+          <text x="272" y="269" font-size="8.5" fill="#92400e">Port ? on SW1</text>
+
+          <!-- Modem to Switch_2 uplink — marked TBD -->
+          <line x1="470" y1="218" x2="550" y2="282" stroke="#713f12" stroke-width="1.5" stroke-dasharray="4,3"/>
+          <text x="490" y="258" font-size="8.5" fill="#92400e">Default VLAN (untagged)</text>
+          <text x="492" y="269" font-size="8.5" fill="#92400e">Port ? on SW2</text>
+
+          <!-- Inter-switch link — TBD/question -->
+          <line x1="340" y1="312" x2="480" y2="312" stroke="#f59e0b" stroke-width="2" stroke-dasharray="6,3"/>
+          <rect x="370" y="300" width="80" height="22" rx="4" fill="#1a1209" stroke="#713f12"/>
+          <text x="410" y="314" text-anchor="middle" font-size="9.5" fill="#fbbf24" font-weight="700">? Trunk Link ?</text>
+
+          <!-- AP1 Switch_1 Port 3 -->
+          <rect x="120" y="402" width="90" height="42" rx="5" fill="#1a0d2e" stroke="#7c3aed" stroke-width="1.5"/>
+          <text x="165" y="419" text-anchor="middle" font-size="10" fill="#c4b5fd" font-weight="700">AP3000-1</text>
+          <text x="165" y="433" text-anchor="middle" font-size="8" fill="#6b21a8">Port 3 · VL20+30</text>
+
+          <!-- AP2 Switch_1 Port 5 -->
+          <rect x="230" y="402" width="90" height="42" rx="5" fill="#1a0d2e" stroke="#7c3aed" stroke-width="1.5"/>
+          <text x="275" y="419" text-anchor="middle" font-size="10" fill="#c4b5fd" font-weight="700">AP3000-2</text>
+          <text x="275" y="433" text-anchor="middle" font-size="8" fill="#6b21a8">Port 5 · VL20+30</text>
+
+          <!-- AP3 Switch_2 Port 13 -->
+          <rect x="500" y="402" width="90" height="42" rx="5" fill="#0c1a2e" stroke="#3b82f6" stroke-width="1.5"/>
+          <text x="545" y="419" text-anchor="middle" font-size="10" fill="#93c5fd" font-weight="700">AP3000-3</text>
+          <text x="545" y="433" text-anchor="middle" font-size="8" fill="#1e3a5f">Port 13 · VL50+60</text>
+
+          <!-- AP4 Switch_2 Port 15 -->
+          <rect x="610" y="402" width="90" height="42" rx="5" fill="#0c1a2e" stroke="#3b82f6" stroke-width="1.5"/>
+          <text x="655" y="419" text-anchor="middle" font-size="10" fill="#93c5fd" font-weight="700">AP3000-4</text>
+          <text x="655" y="433" text-anchor="middle" font-size="8" fill="#1e3a5f">Port 15 · VL50+60</text>
+
+          <!-- Switch_1 to AP lines -->
+          <line x1="175" y1="342" x2="165" y2="402" stroke="#7c3aed" stroke-width="1.5"/>
+          <line x1="220" y1="342" x2="275" y2="402" stroke="#7c3aed" stroke-width="1.5"/>
+
+          <!-- Switch_2 to AP lines -->
+          <line x1="565" y1="342" x2="545" y2="402" stroke="#3b82f6" stroke-width="1.5"/>
+          <line x1="615" y1="342" x2="655" y2="402" stroke="#3b82f6" stroke-width="1.5"/>
+
+          <!-- UE/Client boxes -->
+          <!-- Corp1 client -->
+          <rect x="90" y="522" width="70" height="28" rx="4" fill="#0d2b1f" stroke="#065f46"/>
+          <text x="125" y="540" text-anchor="middle" font-size="8.5" fill="#34d399">Corp1 UE</text>
+          <!-- Guest1 client -->
+          <rect x="175" y="522" width="70" height="28" rx="4" fill="#0d2b1f" stroke="#065f46"/>
+          <text x="210" y="540" text-anchor="middle" font-size="8.5" fill="#34d399">Guest1 UE</text>
+          <!-- Corp2 client -->
+          <rect x="480" y="522" width="70" height="28" rx="4" fill="#0c1a2e" stroke="#1e3a5f"/>
+          <text x="515" y="540" text-anchor="middle" font-size="8.5" fill="#60a5fa">Corp2 UE</text>
+          <!-- Guest2 client -->
+          <rect x="565" y="522" width="70" height="28" rx="4" fill="#0c1a2e" stroke="#1e3a5f"/>
+          <text x="600" y="540" text-anchor="middle" font-size="8.5" fill="#60a5fa">Guest2 UE</text>
+
+          <!-- AP to UE lines -->
+          <line x1="150" y1="444" x2="125" y2="522" stroke="#065f46" stroke-width="1" stroke-dasharray="3,2"/>
+          <line x1="180" y1="444" x2="210" y2="522" stroke="#065f46" stroke-width="1" stroke-dasharray="3,2"/>
+          <line x1="530" y1="444" x2="515" y2="522" stroke="#1e3a5f" stroke-width="1" stroke-dasharray="3,2"/>
+          <line x1="670" y1="444" x2="600" y2="522" stroke="#1e3a5f" stroke-width="1" stroke-dasharray="3,2"/>
+
+          <!-- LEGEND -->
+          <rect x="620" y="60" width="170" height="92" rx="5" fill="#0d1422" stroke="#1e293b"/>
+          <text x="630" y="77" font-size="8.5" fill="#475569" font-weight="700">LEGEND</text>
+          <line x1="630" y1="86" x2="655" y2="86" stroke="#10b981" stroke-width="1.5"/>
+          <text x="660" y="89" font-size="8" fill="#34d399">Switch_1 (VLAN 20/30)</text>
+          <line x1="630" y1="100" x2="655" y2="100" stroke="#3b82f6" stroke-width="1.5"/>
+          <text x="660" y="103" font-size="8" fill="#60a5fa">Switch_2 (VLAN 50/60)</text>
+          <line x1="630" y1="114" x2="655" y2="114" stroke="#f59e0b" stroke-width="2" stroke-dasharray="5,2"/>
+          <text x="660" y="117" font-size="8" fill="#fbbf24">Inter-switch (TBD)</text>
+          <line x1="630" y1="128" x2="655" y2="128" stroke="#713f12" stroke-width="1.5" stroke-dasharray="4,3"/>
+          <text x="660" y="131" font-size="8" fill="#92400e">Uplink to CPE (TBD)</text>
+          <line x1="630" y1="142" x2="655" y2="142" stroke="#065f46" stroke-width="1" stroke-dasharray="3,2"/>
+          <text x="660" y="145" font-size="8" fill="#475569">WiFi (air)</text>
+
+        </svg>
+      </div>
+
+      <!-- Subnet table -->
+      <p style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#475569;margin-bottom:12px" id="defined">Subnet Plan — As Described</p>
+      <table class="data-table" style="margin-bottom:28px">
+        <thead><tr><th>VLAN</th><th>Name</th><th>Switch</th><th>Subnet</th><th>Gateway</th><th>Purpose</th></tr></thead>
+        <tbody>
+          <tr><td>10</td><td>Management</td><td>Both</td><td class="tbd">10.10.0.0/24 ?</td><td class="tbd">10.10.0.1 / .2 ?</td><td>Switch management &amp; inter-switch connectivity</td></tr>
+          <tr><td>20</td><td>Corp1</td><td>Switch_1</td><td>10.20.0.0/24</td><td>10.20.0.1</td><td>Corporate WiFi clients — AP3000-1 &amp; -2</td></tr>
+          <tr><td>30</td><td>Guest1</td><td>Switch_1</td><td>10.30.0.0/24</td><td>10.30.0.1</td><td>Guest WiFi clients — AP3000-1 &amp; -2</td></tr>
+          <tr><td>50</td><td>Corp2</td><td>Switch_2</td><td>10.50.0.0/24</td><td>10.50.0.1</td><td>Corporate WiFi clients — AP3000-3 &amp; -4</td></tr>
+          <tr><td>60</td><td>Guest2</td><td>Switch_2</td><td>10.60.0.0/24</td><td>10.60.0.1</td><td>Guest WiFi clients — AP3000-3 &amp; -4</td></tr>
+          <tr><td>1</td><td>Default</td><td>Both</td><td>192.168.0.0/24</td><td>192.168.0.1</td><td>Home router DHCP — ZTP+, XIQ agent, AP adoption</td></tr>
+        </tbody>
+      </table>
+
+      <!-- Defined vs Gaps -->
+      <div class="two-col">
+        <div class="card defined">
+          <h3>&#10003; Defined &amp; Agreed</h3>
+          <ul>
+            <li>Two EN 5320 switches — full factory reset</li>
+            <li>Two AP3000 per switch — full factory reset</li>
+            <li>ALL configuration via CLI only</li>
+            <li>VLAN 10 = Management (both switches)</li>
+            <li>VLAN 20/30 on Switch_1 (Corp1/Guest1)</li>
+            <li>VLAN 50/60 on Switch_2 (Corp2/Guest2)</li>
+            <li>Ports 3 &amp; 5 on Switch_1 → APs (tagged VL20+30)</li>
+            <li>Ports 13 &amp; 15 on Switch_2 → APs (tagged VL50+60)</li>
+            <li>Subnets: 10.20/30/50/60.0.0/24</li>
+            <li>Static routes on Quantum Fiber for all 4 subnets</li>
+            <li>ipforwarding enabled on all routed VLANs (lesson learned Mar 27)</li>
+          </ul>
+        </div>
+        <div class="card gaps" id="gaps">
+          <h3>&#9888; Not Yet Defined</h3>
+          <ul>
+            <li>VLAN 10 subnet and IP for each switch</li>
+            <li>Which port connects each switch to the home router</li>
+            <li>Physical inter-switch link — which ports? which VLANs trunked?</li>
+            <li>Does Switch_2 uplink directly to Quantum Fiber or through Switch_1?</li>
+            <li>How many static routes on Quantum Fiber — and to which next-hops?</li>
+            <li>AP reset procedure (console vs XIQ vs button)</li>
+            <li>Post-reset discovery: how to find switch IPs after ZTP+</li>
+            <li>XIQ policy strategy — one policy or two?</li>
+            <li>DHCP snooping trusted-port config for new port layout</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Lesson learned callout -->
+      <div class="lesson">
+        <strong>Lesson from Mar 27:</strong> After setting static routes on Quantum Fiber, internet still failed because
+        <code>ipforwarding</code> was OFF on the Default VLAN — return traffic arrived at 192.168.0.x but could not be
+        routed to 10.30.x.x. Must run <code>enable ipforwarding vlan &lt;name&gt;</code> on <em>every</em> routed VLAN interface,
+        not just the data VLANs. This will be a checklist item in Module C.
+      </div>
+
+      <!-- Open Questions -->
+      <p style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#92400e;margin:24px 0 14px">Open Questions — Answer These Before Module B</p>
+
+      <div class="q-card">
+        <div class="q-num">Question 1 — Physical Topology</div>
+        <div class="q-text">How are Switch_1 and Switch_2 physically connected to each other and to the Quantum Fiber modem? Draw it out: does each switch have its own cable to the modem, or does Switch_2 daisy-chain through Switch_1?</div>
+        <div class="q-hint">Hint: your answer changes how many uplink ports you need, how many static routes the modem needs, and whether VLAN 10 needs a routed trunk or just a tagged port.</div>
+      </div>
+
+      <div class="q-card">
+        <div class="q-num">Question 2 — Management VLAN 10</div>
+        <div class="q-text">You said VLAN 10 should "somehow connect both switches." What do you want to be able to do from a management workstation — reach both switches on a single subnet, or just ensure the switches can talk to each other?</div>
+        <div class="q-hint">Hint: if you want one SSH session to reach both 10.10.0.1 and 10.10.0.2, the trunk link between the switches must carry VLAN 10 tagged.</div>
+      </div>
+
+      <div class="q-card">
+        <div class="q-num">Question 3 — Static Routes</div>
+        <div class="q-text">How many static routes will the Quantum Fiber modem need, and what is the next-hop IP for each? Think about which device is the gateway for each subnet and whether the modem can reach it directly.</div>
+        <div class="q-hint">Hint: you have four data subnets across two switches. The modem only knows 192.168.0.0/24 directly.</div>
+      </div>
+
+      <div class="q-card">
+        <div class="q-num">Question 4 — Port Assignment</div>
+        <div class="q-text">Which port on each switch is the uplink to the home router? The 5320-16P-2MXT-2X has ports 1–16 plus multi-XG uplinks. Port 1 was used last time — is that your plan again for both switches?</div>
+        <div class="q-hint">Hint: the uplink port carries untagged Default VLAN traffic for ZTP+ and XIQ. It should be a different port from your AP ports (3, 5, 13, 15).</div>
+      </div>
+
+      <div class="q-card">
+        <div class="q-num">Question 5 — AP Reset</div>
+        <div class="q-text">How are you planning to factory reset the AP3000s? XIQ has a reset option, the AP has a physical reset button, and EXOS has CLI commands to decommission. Which method will you use?</div>
+        <div class="q-hint">Hint: if XIQ still shows the APs as adopted, a physical button reset alone may not remove them from the XIQ inventory. Check the XIQ decommission flow first.</div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════ MODULE B ═══════════════════════ -->
+    <div class="module" id="hld">
+      <div class="module-header">
+        <span class="mod-badge mod-b">Module B</span>
+        <div>
+          <div style="font-size:1.05rem;color:#e2e8f0;font-weight:700">High-Level Design</div>
+          <div class="mod-sub">Traffic flow, VLAN propagation, inter-switch routing strategy</div>
+        </div>
+      </div>
+      <div class="placeholder">
+        <div class="ph-title">Locked — complete Module A open questions first</div>
+        HLD will cover: traffic flow diagrams per VLAN, inter-switch trunk design, routing table on each switch, Quantum Fiber static route table, and XIQ cloud management path.
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════ MODULE C ═══════════════════════ -->
+    <div class="module" id="lld">
+      <div class="module-header">
+        <span class="mod-badge mod-c">Module C</span>
+        <div>
+          <div style="font-size:1.05rem;color:#e2e8f0;font-weight:700">Low-Level Design</div>
+          <div class="mod-sub">Port-by-port config table, VLAN membership matrix, DHCP ranges, PoE, STP</div>
+        </div>
+      </div>
+      <div class="placeholder">
+        <div class="ph-title">Locked — pending Module B</div>
+        LLD will cover: per-port config table for all 32 ports (16 per switch), VLAN tagging matrix, DHCP address ranges, PoE per AP port, STP scope, trusted DHCP ports, and ipforwarding checklist.
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════ EXECUTION ═══════════════════════ -->
+    <div class="module" id="exec">
+      <div class="module-header">
+        <span class="mod-badge mod-e">Execution</span>
+        <div>
+          <div style="font-size:1.05rem;color:#e2e8f0;font-weight:700">CLI Commands — In Sequence</div>
+          <div class="mod-sub">Switch factory reset → ZTP+ → VLAN build → DHCP → routing → AP adoption → XIQ → verify</div>
+        </div>
+      </div>
+      <div class="placeholder">
+        <div class="ph-title">Locked — pending Modules A, B, C</div>
+        Execution will be broken into phases: (E1) Factory reset both switches and APs, (E2) ZTP+ and post-boot SSH access, (E3) VLAN and port config on Switch_1, (E4) VLAN and port config on Switch_2, (E5) Inter-switch trunk, (E6) DHCP + routing on both, (E7) Verify, (E8) AP adoption via XIQ, (E9) End-to-end client test.
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════ SESSION LOG ═══════════════════════ -->
+    <div class="module" id="log">
+      <div class="module-header">
+        <span class="mod-badge mod-log">Session Log</span>
+        <div>
+          <div style="font-size:1.05rem;color:#e2e8f0;font-weight:700">Live Activity — March 29, 2026</div>
+          <div class="mod-sub">Running record of the day — updated as work progresses</div>
+        </div>
+      </div>
+
+      <div class="log-entry done">
+        <div class="log-time">Morning</div>
+        <div class="log-text"><strong>Session started.</strong> Objective defined: dual-switch CLI-only rebuild with VLAN 10 management, VLAN 20/30 on Switch_1, VLAN 50/60 on Switch_2, two AP3000 per switch.</div>
+      </div>
+      <div class="log-entry done">
+        <div class="log-time">Morning</div>
+        <div class="log-text"><strong>Module A architecture schematic created.</strong> Topology diagram published. Five open questions identified for review before design proceeds.</div>
+      </div>
+      <div class="log-entry active">
+        <div class="log-time">In Progress</div>
+        <div class="log-text"><strong>Reviewing Module A.</strong> Answering open questions: physical topology, VLAN 10 design, static route count, port assignment, AP reset method.</div>
+      </div>
+    </div>
+
+    <div class="footer-nav">
+      <a href="index.html">&larr; Home</a>
+      <span style="color:#334155;font-size:0.72rem">March 29, 2026 &nbsp;&mdash;&nbsp; Dual-Switch Lab</span>
+      <a href="standards_references.html">Standards Ref &rarr;</a>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  // Active sidebar link tracking
+  const links = document.querySelectorAll('.sidebar a');
+  const sections = Array.from(links).map(l => document.querySelector(l.getAttribute('href'))).filter(Boolean);
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        links.forEach(l => l.classList.remove('active'));
+        const active = document.querySelector(`.sidebar a[href="#${e.target.id}"]`);
+        if (active) active.classList.add('active');
+      }
+    });
+  }, { threshold: 0.3 });
+  sections.forEach(s => obs.observe(s));
+</script>
+</body>
+</html>
