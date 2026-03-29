@@ -484,18 +484,179 @@
       </div>
     </div>
 
-    <!-- ═══════════════════════════════════════ EXECUTION ═══════════════════════ -->
+    <!-- ═══════════════════════════════════════ MODULE C + EXECUTION ═══════════════════════ -->
     <div class="module" id="exec">
       <div class="module-header">
-        <span class="mod-badge mod-e">Execution</span>
+        <span class="mod-badge mod-e">Module C + Execution — Phase 1</span>
         <div>
-          <div style="font-size:1.05rem;color:#e2e8f0;font-weight:700">CLI Commands — In Sequence</div>
-          <div class="mod-sub">Switch factory reset → ZTP+ → VLAN build → DHCP → routing → AP adoption → XIQ → verify</div>
+          <div style="font-size:1.05rem;color:#e2e8f0;font-weight:700">SW1 + AP3000-A — Corp1/Guest1 — iPhone Test</div>
+          <div class="mod-sub">Factory reset → ZTP+ → SW1 CLI config → AP reset → XIQ SSID mapping → verify</div>
         </div>
       </div>
-      <div class="placeholder">
-        <div class="ph-title">Locked — pending Modules A, B, C</div>
-        Execution will be broken into phases: (E1) Factory reset both switches and APs, (E2) ZTP+ and post-boot SSH access, (E3) VLAN and port config on Switch_1, (E4) VLAN and port config on Switch_2, (E5) Inter-switch trunk, (E6) DHCP + routing on both, (E7) Verify, (E8) AP adoption via XIQ, (E9) End-to-end client test.
+
+      <div style="background:#0c1a2e;border:1px solid #1e3a5f;border-radius:6px;padding:12px 16px;margin-bottom:24px;font-size:0.8rem;color:#60a5fa;line-height:1.6">
+        <strong>AP note:</strong> Switch configuration is 100% CLI. AP SSID-to-VLAN mapping (Corp1→VLAN20, Guest1→VLAN30) must be done in XIQ — the AP3000 CLI does not support SSID configuration. XIQ steps are clearly marked below.
+      </div>
+
+      <!-- ── STEP 1: Pre-reset ── -->
+      <p style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#92400e;margin-bottom:10px">Step 1 — Pre-Reset: Decommission AP from XIQ</p>
+      <div style="background:#1a1209;border:1px solid #713f12;border-radius:6px;padding:14px 18px;margin-bottom:22px;font-size:0.82rem;color:#fcd34d;line-height:1.8">
+        XIQ → Devices → select AP3000-A → Actions → <strong>Reset to Factory Default</strong> (or Decommission)<br>
+        <span style="color:#92400e;font-size:0.75rem">Why: if you skip this, XIQ re-pushes the old config the moment the AP comes back online.</span>
+      </div>
+
+      <!-- ── STEP 2: Factory reset SW1 ── -->
+      <p style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#92400e;margin-bottom:10px">Step 2 — Factory Reset SW1 (Console Cable)</p>
+      <div style="background:#0d1117;border:1px solid #1e293b;border-radius:6px;padding:16px 18px;margin-bottom:22px">
+        <pre style="font-family:monospace;font-size:0.8rem;color:#94a3b8;line-height:1.9;margin:0"># Connect console cable
+ls /dev/cu.*
+screen /dev/cu.usbserial-XXXXXX 115200
+
+# Login (EXOS from previous session)
+admin
+[blank password]
+
+# Wipe configuration
+delete configuration primary
+# prompt: y
+
+# Reboot
+reboot
+# prompt: y</pre>
+        <div style="margin-top:12px;font-size:0.75rem;color:#475569">Wait ~5 minutes. Switch boots into ZTP+ mode, gets DHCP IP from home router, checks in with XIQ.</div>
+      </div>
+
+      <!-- ── STEP 3: Post-ZTP reconnect ── -->
+      <p style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#92400e;margin-bottom:10px">Step 3 — Post-ZTP+: Find IP and SSH In</p>
+      <div style="background:#0d1117;border:1px solid #1e293b;border-radius:6px;padding:16px 18px;margin-bottom:22px">
+        <pre style="font-family:monospace;font-size:0.8rem;color:#94a3b8;line-height:1.9;margin:0"># Still on console after reboot — login
+admin
+[blank password]
+
+# Complete setup wizard
+# Key answers: N N N N Y Y N Y  (same as original onboarding)
+
+# Find the DHCP IP assigned by home router
+show ipconfig
+
+# Note 192.168.0.x — this is your SSH target AND your Quantum Fiber static route next-hop
+
+# Open new terminal — SSH in
+ssh -o HostKeyAlgorithms=+ssh-rsa -o PubkeyAcceptedAlgorithms=+ssh-rsa admin@192.168.0.x</pre>
+      </div>
+
+      <!-- ── STEP 4: SW1 VLAN + Port config ── -->
+      <p style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#34d399;margin-bottom:10px">Step 4 — SW1: Create VLANs and Configure Ports</p>
+      <div style="background:#0d1117;border:1px solid #065f46;border-radius:6px;padding:16px 18px;margin-bottom:22px">
+        <pre style="font-family:monospace;font-size:0.8rem;color:#94a3b8;line-height:1.9;margin:0"># Create VLANs
+create vlan Corp1 tag 20
+create vlan Guest1 tag 30
+
+# Add AP port — BOTH tagged so Port 3 carries both VLANs simultaneously
+configure vlan Corp1 add ports 3 tagged
+configure vlan Guest1 add ports 3 tagged
+
+# Assign IP interfaces
+configure vlan Corp1 ipaddress 10.20.0.1/24
+configure vlan Guest1 ipaddress 10.30.0.1/24
+
+# Enable PoE for AP
+enable inline-power ports 3</pre>
+      </div>
+
+      <!-- ── STEP 5: ipforwarding ── -->
+      <p style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#34d399;margin-bottom:10px">Step 5 — SW1: Enable IP Forwarding (All Routed VLANs)</p>
+      <div style="background:#0d1117;border:1px solid #065f46;border-radius:6px;padding:16px 18px;margin-bottom:22px">
+        <pre style="font-family:monospace;font-size:0.8rem;color:#94a3b8;line-height:1.9;margin:0"># Required on ALL three — lesson from March 27
+enable ipforwarding vlan Default
+enable ipforwarding vlan Corp1
+enable ipforwarding vlan Guest1</pre>
+        <div style="margin-top:10px;font-size:0.75rem;color:#475569">Default VLAN must be enabled — return traffic from internet arrives here before being routed to Corp1/Guest1.</div>
+      </div>
+
+      <!-- ── STEP 6: DHCP ── -->
+      <p style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#34d399;margin-bottom:10px">Step 6 — SW1: Configure DHCP for Both VLANs</p>
+      <div style="background:#0d1117;border:1px solid #065f46;border-radius:6px;padding:16px 18px;margin-bottom:22px">
+        <pre style="font-family:monospace;font-size:0.8rem;color:#94a3b8;line-height:1.9;margin:0"># Corp1 DHCP
+configure vlan Corp1 dhcp-address-range 10.20.0.100 - 10.20.0.200
+configure vlan Corp1 dhcp-options default-gateway 10.20.0.1
+configure vlan Corp1 dhcp-options dns-server primary 8.8.8.8
+enable dhcp ports 3 vlan Corp1
+
+# Guest1 DHCP
+configure vlan Guest1 dhcp-address-range 10.30.0.100 - 10.30.0.200
+configure vlan Guest1 dhcp-options default-gateway 10.30.0.1
+configure vlan Guest1 dhcp-options dns-server primary 8.8.8.8
+enable dhcp ports 3 vlan Guest1</pre>
+      </div>
+
+      <!-- ── STEP 7: Save ── -->
+      <p style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#34d399;margin-bottom:10px">Step 7 — SW1: Save Configuration</p>
+      <div style="background:#0d1117;border:1px solid #065f46;border-radius:6px;padding:16px 18px;margin-bottom:22px">
+        <pre style="font-family:monospace;font-size:0.8rem;color:#94a3b8;line-height:1.9;margin:0">save configuration
+# prompt: y</pre>
+      </div>
+
+      <!-- ── STEP 8: AP reset ── -->
+      <p style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#92400e;margin-bottom:10px">Step 8 — Factory Reset AP3000-A (Physical Button)</p>
+      <div style="background:#1a1209;border:1px solid #713f12;border-radius:6px;padding:14px 18px;margin-bottom:22px;font-size:0.82rem;color:#fcd34d;line-height:1.8">
+        1. Plug AP3000-A into SW1 Port 3 (PoE now active)<br>
+        2. Hold reset button 10–15 seconds until LED flashes rapidly<br>
+        3. AP reboots → gets 192.168.0.x from home router via Default VLAN (untagged on Port 3)<br>
+        4. AP reaches XIQ and appears as <strong>"New Device"</strong> for adoption<br>
+        <span style="color:#92400e;font-size:0.75rem">Wait 2–3 minutes for AP to fully boot and check in to XIQ.</span>
+      </div>
+
+      <!-- ── STEP 9: XIQ SSID config ── -->
+      <p style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#fbbf24;margin-bottom:10px">Step 9 — XIQ: SSID Mapping (Cannot Be Done via CLI)</p>
+      <div style="background:#1a1a0d;border:1px solid #713f12;border-radius:6px;padding:14px 18px;margin-bottom:22px;font-size:0.82rem;color:#fcd34d;line-height:2">
+        1. XIQ → <strong>Configure → Network Policies → New Policy</strong> → name: <code>SW1-AP-Policy</code><br>
+        2. Add SSID: <strong>Corp1</strong> → VLAN 20 → WPA2/WPA3 passphrase<br>
+        3. Add SSID: <strong>Guest1</strong> → VLAN 30 → WPA2/WPA3 passphrase<br>
+        4. Assign AP3000-A to <code>SW1-AP-Policy</code><br>
+        5. Push / Deploy → wait for AP to apply config (~1 min)<br>
+        <span style="color:#92400e;font-size:0.75rem">AP will now broadcast both SSIDs. VLAN tags are sent from AP to SW1 Port 3.</span>
+      </div>
+
+      <!-- ── STEP 10: Quantum Fiber routes ── -->
+      <p style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#92400e;margin-bottom:10px">Step 10 — Quantum Fiber: Add Static Routes for SW1</p>
+      <div style="background:#1a1209;border:1px solid #713f12;border-radius:6px;padding:14px 18px;margin-bottom:22px;font-size:0.82rem;color:#fcd34d;line-height:1.8">
+        Quantum Fiber UI → Advanced → Static Routing → Add:<br>
+        <code style="display:block;margin:6px 0;background:#0f172a;padding:4px 10px;border-radius:3px;font-size:0.8rem;color:#34d399">10.20.0.0 / 255.255.255.0 → 192.168.0.x  (SW1's IP from show ipconfig)</code>
+        <code style="display:block;margin:6px 0;background:#0f172a;padding:4px 10px;border-radius:3px;font-size:0.8rem;color:#34d399">10.30.0.0 / 255.255.255.0 → 192.168.0.x  (same SW1 IP)</code>
+      </div>
+
+      <!-- ── STEP 11: Verify ── -->
+      <p style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#34d399;margin-bottom:10px">Step 11 — Verify: Switch Commands + iPhone Test</p>
+      <div style="background:#0d1117;border:1px solid #065f46;border-radius:6px;padding:16px 18px;margin-bottom:22px">
+        <pre style="font-family:monospace;font-size:0.8rem;color:#94a3b8;line-height:1.9;margin:0"># On SW1 — confirm VLANs have IPs
+show ipconfig
+
+# Confirm Port 3 VLAN membership
+show vlan detail
+
+# Confirm AP got an IP on Default VLAN
+show arp
+
+# Confirm PoE delivering power
+show inline-power info ports 3
+
+# Confirm DHCP is serving
+show dhcp-server stats
+
+# Confirm routing table has default route
+show iproute</pre>
+        <div style="margin-top:14px;background:#0d2b1f;border-left:3px solid #10b981;padding:10px 14px;border-radius:0 4px 4px 0;font-size:0.8rem;color:#6ee7b7;line-height:1.7">
+          <strong>iPhone test:</strong> Connect to Corp1 SSID → confirm 10.20.0.x address → ping 8.8.8.8 → open browser → confirm internet.<br>
+          Repeat on Guest1 SSID → confirm 10.30.0.x address → internet works.
+        </div>
+      </div>
+
+      <!-- Phase 2 / 3 coming -->
+      <div style="background:#0d1422;border:1px dashed #334155;border-radius:6px;padding:16px;font-size:0.8rem;color:#475569;line-height:1.8">
+        <strong style="color:#64748b">Next phases (pending Phase 1 success):</strong><br>
+        Phase 2 — SW2 + AP3000-B: repeat Steps 1–11 with VLAN 50 (Corp2/10.50.0.0/24) and VLAN 60 (Guest2/10.60.0.0/24) on Port 13.<br>
+        Phase 3 — VLAN 10 trunk: Port 10 on both switches, static IPs 10.10.0.1/10.10.0.2, inter-switch static routes.
       </div>
     </div>
 
@@ -525,9 +686,17 @@
         <div class="log-time">Morning</div>
         <div class="log-text"><strong>Module A complete — Phase 1.</strong> VLAN 10 deferred. Port 10 reserved on both switches for Phase 2 trunk. AP port = tagged. SW1/SW2 are already L3 — no separate L3 switch needed. 5320 routes natively.</div>
       </div>
+      <div class="log-entry done">
+        <div class="log-time">Morning</div>
+        <div class="log-text"><strong>Module B complete.</strong> Port assignments, VLAN table, traffic flow, Quantum Fiber static routes, ipforwarding checklist published.</div>
+      </div>
+      <div class="log-entry done">
+        <div class="log-time">Morning</div>
+        <div class="log-text"><strong>Module C + Execution complete — Phase 1.</strong> 11-step command sheet: XIQ AP decommission → SW1 factory reset → ZTP+ → VLAN/port/DHCP/routing CLI → AP reset → XIQ SSID mapping → Quantum Fiber routes → verify. AP SSID config confirmed as XIQ-only (AP3000 CLI limitation). Phased plan locked: SW1 → SW2 → VLAN10.</div>
+      </div>
       <div class="log-entry active">
-        <div class="log-time">In Progress</div>
-        <div class="log-text"><strong>Module B — HLD published.</strong> Port assignments, VLAN table, traffic flow, Quantum Fiber static routes, ipforwarding checklist. Ready for Module C review.</div>
+        <div class="log-time">Ready</div>
+        <div class="log-text"><strong>Ready for execution.</strong> Hardware: connect console cable to SW1, begin Step 1.</div>
       </div>
     </div>
 
