@@ -121,7 +121,9 @@
     <div class="mod-label">Module C</div>
     <a href="#lld">Low-Level Design</a>
     <div class="mod-label">Execution</div>
-    <a href="#exec">Commands</a>
+    <a href="#exec">Phase 1 — SW1 ✓</a>
+    <a href="#exec2">Phase 2 — SW2</a>
+    <a href="#exec3">Phase 3 — Trunk</a>
     <div class="mod-label">Log</div>
     <a href="#log">Session Log</a>
   </nav>
@@ -538,8 +540,8 @@
       <div class="module-header">
         <span class="mod-badge mod-e">Execution — Phase 1</span>
         <div>
-          <div style="font-size:1.05rem;color:#e2e8f0;font-weight:700">SW1 + AP3000-A — Corp1/Guest1 — iPhone Test</div>
-          <div class="mod-sub">Factory reset → ZTP+ → SW1 CLI config → AP reset → XIQ SSID mapping → verify</div>
+          <div style="font-size:1.05rem;color:#e2e8f0;font-weight:700">SW1 + AP3000-A — Corp1/Guest1 — iPhone Test <span style="color:#34d399;font-size:0.85rem">&#10003; Complete</span></div>
+          <div class="mod-sub">Factory reset → SW1 CLI config → AP reset → XIQ SSID mapping → iPhone internet verified Mar 29</div>
         </div>
       </div>
 
@@ -565,13 +567,9 @@ screen /dev/cu.usbserial-XXXXXX 115200
 admin
 [blank password]
 
-# Wipe configuration
-delete configuration primary
-# prompt: y
-
-# Reboot
-reboot
-# prompt: y</pre>
+# Wipe configuration (EXOS command — NOT "delete configuration primary")
+unconfigure switch all
+# prompt: Yes (capital Y)</pre>
         <div style="margin-top:12px;font-size:0.75rem;color:#475569">Wait ~5 minutes. Switch boots into ZTP+ mode, gets DHCP IP from home router, checks in with XIQ.</div>
       </div>
 
@@ -701,11 +699,213 @@ show iproute</pre>
         </div>
       </div>
 
-      <!-- Phase 2 / 3 coming -->
-      <div style="background:#0d1422;border:1px dashed #334155;border-radius:6px;padding:16px;font-size:0.8rem;color:#475569;line-height:1.8">
-        <strong style="color:#64748b">Next phases (pending Phase 1 success):</strong><br>
-        Phase 2 — SW2 + AP3000-B: repeat Steps 1–11 with VLAN 50 (Corp2/10.50.0.0/24) and VLAN 60 (Guest2/10.60.0.0/24) on Port 13.<br>
-        Phase 3 — VLAN 10 trunk: Port 10 on both switches, static IPs 10.10.0.1/10.10.0.2, inter-switch static routes.
+    </div>
+
+    <!-- ═══════════════════════════════════════ PHASE 2 ═══════════════════════════ -->
+    <div class="module" id="exec2">
+      <div class="module-header">
+        <span class="mod-badge mod-e" style="background:#0c1a2e;color:#93c5fd;border-color:#1e3a5f">Execution — Phase 2</span>
+        <div>
+          <div style="font-size:1.05rem;color:#e2e8f0;font-weight:700">SW2 + AP3000-B — Corp2/Guest2 — iPhone Test</div>
+          <div class="mod-sub">Factory reset → SW2 CLI config → AP reset → XIQ SSID mapping → verify</div>
+        </div>
+      </div>
+
+      <div style="background:#0c1a2e;border:1px solid #1e3a5f;border-radius:6px;padding:12px 16px;margin-bottom:24px;font-size:0.8rem;color:#60a5fa;line-height:1.6">
+        Same process as Phase 1 — different VLANs (50/60), different IPs (10.50/10.60). SW2 connects its own AP3000-B on Port 3. Quantum Fiber gets two more static routes after you find SW2's DHCP IP.
+      </div>
+
+      <!-- Step 1 -->
+      <p style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#92400e;margin-bottom:10px">Step 1 — Factory Reset SW2 (Console Cable)</p>
+      <div style="background:#0d1117;border:1px solid #1e293b;border-radius:6px;padding:16px 18px;margin-bottom:22px">
+        <pre style="font-family:monospace;font-size:0.8rem;color:#94a3b8;line-height:1.9;margin:0"># Connect console cable to SW2
+ls /dev/cu.*
+screen /dev/cu.usbserial-XXXXXX 115200
+
+# Login with existing credentials
+admin  /  Extreme01!!  (or current password)
+
+# Factory reset
+unconfigure switch all
+# prompt: Yes
+
+# Wizard runs on reboot:
+# - Enhanced security: Yes
+# - New account: babla  (admin already exists)
+# - Failsafe: bigsur
+# - Disable unconfigured ports: Yes
+# - Re-enable SNMP: Yes</pre>
+        <div style="margin-top:10px;background:#2d1515;border-left:3px solid #f87171;padding:8px 12px;border-radius:0 4px 4px 0;font-size:0.75rem;color:#fca5a5">
+          Answering "Yes" to disable ports runs <code>disable ports all</code>. Enable ports 1 and 3 immediately after wizard.
+        </div>
+      </div>
+
+      <!-- Step 2 -->
+      <p style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#34d399;margin-bottom:10px">Step 2 — Enable Ports &amp; Find SW2 IP</p>
+      <div style="background:#0d1117;border:1px solid #065f46;border-radius:6px;padding:16px 18px;margin-bottom:22px">
+        <pre style="font-family:monospace;font-size:0.8rem;color:#94a3b8;line-height:1.9;margin:0">enable ports 1
+enable ports 3
+show ipconfig
+# Note 192.168.0.x — needed for Quantum Fiber static routes</pre>
+      </div>
+
+      <!-- Step 3 -->
+      <p style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#34d399;margin-bottom:10px">Step 3 — SW2: Create VLANs and Configure Ports</p>
+      <div style="background:#0d1117;border:1px solid #065f46;border-radius:6px;padding:16px 18px;margin-bottom:22px">
+        <pre style="font-family:monospace;font-size:0.8rem;color:#94a3b8;line-height:1.9;margin:0">create vlan Corp2 tag 50
+create vlan Guest2 tag 60
+
+configure vlan Corp2 add ports 3 tagged
+configure vlan Guest2 add ports 3 tagged
+
+configure vlan Corp2 ipaddress 10.50.0.1/24
+configure vlan Guest2 ipaddress 10.60.0.1/24
+
+enable inline-power ports 3</pre>
+      </div>
+
+      <!-- Step 4 -->
+      <p style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#34d399;margin-bottom:10px">Step 4 — SW2: Enable IP Forwarding (All Routed VLANs)</p>
+      <div style="background:#0d1117;border:1px solid #065f46;border-radius:6px;padding:16px 18px;margin-bottom:22px">
+        <pre style="font-family:monospace;font-size:0.8rem;color:#94a3b8;line-height:1.9;margin:0">enable ipforwarding vlan Default
+enable ipforwarding vlan Corp2
+enable ipforwarding vlan Guest2</pre>
+        <div style="margin-top:10px;font-size:0.75rem;color:#475569">All three required — Default VLAN must be enabled for return traffic from internet.</div>
+      </div>
+
+      <!-- Step 5 -->
+      <p style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#34d399;margin-bottom:10px">Step 5 — SW2: Configure DHCP for Both VLANs</p>
+      <div style="background:#0d1117;border:1px solid #065f46;border-radius:6px;padding:16px 18px;margin-bottom:22px">
+        <pre style="font-family:monospace;font-size:0.8rem;color:#94a3b8;line-height:1.9;margin:0"># Corp2 DHCP
+configure vlan Corp2 dhcp-address-range 10.50.0.100 - 10.50.0.200
+configure vlan Corp2 dhcp-options default-gateway 10.50.0.1
+configure vlan Corp2 dhcp-options dns-server primary 8.8.8.8
+enable dhcp ports 3 vlan Corp2
+
+# Guest2 DHCP
+configure vlan Guest2 dhcp-address-range 10.60.0.100 - 10.60.0.200
+configure vlan Guest2 dhcp-options default-gateway 10.60.0.1
+configure vlan Guest2 dhcp-options dns-server primary 8.8.8.8
+enable dhcp ports 3 vlan Guest2</pre>
+      </div>
+
+      <!-- Step 6 -->
+      <p style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#34d399;margin-bottom:10px">Step 6 — SW2: Save Configuration</p>
+      <div style="background:#0d1117;border:1px solid #065f46;border-radius:6px;padding:16px 18px;margin-bottom:22px">
+        <pre style="font-family:monospace;font-size:0.8rem;color:#94a3b8;line-height:1.9;margin:0">save configuration</pre>
+      </div>
+
+      <!-- Step 7 -->
+      <p style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#92400e;margin-bottom:10px">Step 7 — Quantum Fiber: Add Static Routes for SW2</p>
+      <div style="background:#1a1209;border:1px solid #713f12;border-radius:6px;padding:14px 18px;margin-bottom:22px;font-size:0.82rem;color:#fcd34d;line-height:1.8">
+        Quantum Fiber UI → Advanced → Static Routing → Add:<br>
+        <code style="display:block;margin:6px 0;background:#0f172a;padding:4px 10px;border-radius:3px;font-size:0.8rem;color:#34d399">10.50.0.0 / 255.255.255.0 → 192.168.0.x  (SW2 IP from show ipconfig)</code>
+        <code style="display:block;margin:6px 0;background:#0f172a;padding:4px 10px;border-radius:3px;font-size:0.8rem;color:#34d399">10.60.0.0 / 255.255.255.0 → 192.168.0.x  (same SW2 IP)</code>
+      </div>
+
+      <!-- Step 8 -->
+      <p style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#92400e;margin-bottom:10px">Step 8 — Factory Reset AP3000-B (Physical Pinhole)</p>
+      <div style="background:#1a1209;border:1px solid #713f12;border-radius:6px;padding:14px 18px;margin-bottom:22px;font-size:0.82rem;color:#fcd34d;line-height:1.8">
+        1. Plug AP3000-B into SW2 Port 3 (PoE active)<br>
+        2. Hold reset pinhole <strong>10 seconds</strong> until LED cycles<br>
+        3. AP reboots → gets 192.168.0.x from home router → reaches XIQ<br>
+        4. Firmware update runs automatically (~5–8 min)<br>
+        <span style="color:#92400e;font-size:0.75rem">Use physical reset — do NOT use XIQ "Delete" alone (leaves old org binding on AP).</span>
+      </div>
+
+      <!-- Step 9 -->
+      <p style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#fbbf24;margin-bottom:10px">Step 9 — XIQ: Claim AP3000-B + SSID Mapping</p>
+      <div style="background:#1a1a0d;border:1px solid #713f12;border-radius:6px;padding:14px 18px;margin-bottom:22px;font-size:0.82rem;color:#fcd34d;line-height:2">
+        1. XIQ → Devices → claim AP3000-B<br>
+        2. <strong>Configure → Network Policies → New Policy</strong> → name: <code>SW2-AP-Policy</code><br>
+        3. Add SSID: <strong>Corp2</strong> → VLAN 50 → WPA2/WPA3 passphrase<br>
+        4. Add SSID: <strong>Guest2</strong> → VLAN 60 → WPA2/WPA3 passphrase<br>
+        5. Assign AP3000-B to <code>SW2-AP-Policy</code> → Push / Deploy<br>
+        <span style="color:#92400e;font-size:0.75rem">AP will broadcast Corp2 and Guest2 SSIDs. VLAN tags sent from AP to SW2 Port 3.</span>
+      </div>
+
+      <!-- Step 10 -->
+      <p style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#34d399;margin-bottom:10px">Step 10 — Verify SW2</p>
+      <div style="background:#0d1117;border:1px solid #065f46;border-radius:6px;padding:16px 18px;margin-bottom:22px">
+        <pre style="font-family:monospace;font-size:0.8rem;color:#94a3b8;line-height:1.9;margin:0">show ipconfig          # Corp2/Guest2 IPs on SW2
+show vlan detail       # Port 3 tagged on Corp2 + Guest2
+show iparp             # AP3000-B at 192.168.0.x
+show inline-power info ports 3   # delivering power
+ping vr VR-Default 8.8.8.8       # SW2 internet ok</pre>
+        <div style="margin-top:14px;background:#0d2b1f;border-left:3px solid #10b981;padding:10px 14px;border-radius:0 4px 4px 0;font-size:0.8rem;color:#6ee7b7;line-height:1.7">
+          <strong>iPhone test:</strong> Connect to Corp2 → confirm 10.50.0.x → ping 8.8.8.8 → internet.<br>
+          Repeat on Guest2 → confirm 10.60.0.x → internet works.
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════ PHASE 3 ═══════════════════════════ -->
+    <div class="module" id="exec3">
+      <div class="module-header">
+        <span class="mod-badge mod-e" style="background:#1a0d0d;color:#fda4af;border-color:#881337">Execution — Phase 3</span>
+        <div>
+          <div style="font-size:1.05rem;color:#e2e8f0;font-weight:700">VLAN 10 Inter-Switch Trunk — SW1 Port 10 ↔ SW2 Port 10</div>
+          <div class="mod-sub">Connect trunk cable → configure VLAN 10 on both switches → static routes → verify cross-switch routing</div>
+        </div>
+      </div>
+
+      <div style="background:#0c1a2e;border:1px solid #1e3a5f;border-radius:6px;padding:12px 16px;margin-bottom:24px;font-size:0.8rem;color:#60a5fa;line-height:1.6">
+        <strong>Prerequisite:</strong> Phase 2 fully verified (SW2 + AP3000-B + iPhone internet). Then connect an Ethernet cable between SW1 Port 10 and SW2 Port 10 before running these commands.
+      </div>
+
+      <!-- Step 1 — SW1 -->
+      <p style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#34d399;margin-bottom:10px">Step 1 — SW1: Configure VLAN 10 Trunk</p>
+      <div style="background:#0d1117;border:1px solid #065f46;border-radius:6px;padding:16px 18px;margin-bottom:22px">
+        <pre style="font-family:monospace;font-size:0.8rem;color:#94a3b8;line-height:1.9;margin:0"># SSH to SW1 at 192.168.0.24
+create vlan Mgmt tag 10
+configure vlan Mgmt add ports 10 tagged
+configure vlan Mgmt ipaddress 10.10.0.1/24
+enable ipforwarding vlan Mgmt
+
+# Static routes to reach SW2's VLANs via the trunk
+configure iproute add 10.50.0.0/24 10.10.0.2
+configure iproute add 10.60.0.0/24 10.10.0.2
+
+save configuration</pre>
+      </div>
+
+      <!-- Step 2 — SW2 -->
+      <p style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#93c5fd;margin-bottom:10px">Step 2 — SW2: Configure VLAN 10 Trunk</p>
+      <div style="background:#0d1117;border:1px solid #1e3a5f;border-radius:6px;padding:16px 18px;margin-bottom:22px">
+        <pre style="font-family:monospace;font-size:0.8rem;color:#94a3b8;line-height:1.9;margin:0"># SSH to SW2 at 192.168.0.x
+enable ports 10
+create vlan Mgmt tag 10
+configure vlan Mgmt add ports 10 tagged
+configure vlan Mgmt ipaddress 10.10.0.2/24
+enable ipforwarding vlan Mgmt
+
+# Static routes to reach SW1's VLANs via the trunk
+configure iproute add 10.20.0.0/24 10.10.0.1
+configure iproute add 10.30.0.0/24 10.10.0.1
+
+save configuration</pre>
+      </div>
+
+      <!-- Step 3 — Verify -->
+      <p style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#34d399;margin-bottom:10px">Step 3 — Verify Trunk &amp; Cross-Switch Routing</p>
+      <div style="background:#0d1117;border:1px solid #065f46;border-radius:6px;padding:16px 18px;margin-bottom:22px">
+        <pre style="font-family:monospace;font-size:0.8rem;color:#94a3b8;line-height:1.9;margin:0"># On SW1 — ping SW2's trunk IP
+ping vr VR-Default 10.10.0.2
+
+# On SW2 — ping SW1's trunk IP
+ping vr VR-Default 10.10.0.1
+
+# On SW1 — ping SW2's Corp2 gateway (cross-switch routing)
+ping vr VR-Default 10.50.0.1
+
+# On SW2 — ping SW1's Corp1 gateway
+ping vr VR-Default 10.20.0.1
+
+# Verify trunk in VLAN table
+show vlan detail</pre>
+        <div style="margin-top:14px;background:#0d2b1f;border-left:3px solid #10b981;padding:10px 14px;border-radius:0 4px 4px 0;font-size:0.8rem;color:#6ee7b7;line-height:1.7">
+          All four pings should reply. This confirms the trunk is up and inter-switch routing is working end to end.
+        </div>
       </div>
     </div>
 
