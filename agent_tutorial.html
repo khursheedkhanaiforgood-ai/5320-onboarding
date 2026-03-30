@@ -1342,67 +1342,14 @@ tests/
           </div>
         </div>
       </div>
-    </div>
-  </section>
+    
 
-  <!-- ═══════════ DECISIONS ═══════════ -->
-  <section id="decisions">
-    <h2>Key Technical Decisions</h2>
-    <table>
-      <tr><th>Decision</th><th>Alternative Considered</th><th>Why This Approach</th></tr>
-      <tr><td>LogfileMonitor (tail logfile)</td><td>Direct pyserial read</td><td>Only one process can hold the serial port exclusively. <code>screen</code> already owns it. Tailing the logfile is zero-conflict and lets the operator type freely.</td></tr>
-      <tr><td>Regex state machine &rarr; Claude on transition</td><td>Call Claude on every line</td><td>Regex runs in microseconds. Claude latency is 1&ndash;3 seconds. State machine filters 99% of lines &mdash; Claude only sees meaningful transitions. Token cost is negligible.</td></tr>
-      <tr><td>osascript to open Terminal</td><td>Manual instruction to operator</td><td>Zero operator setup steps. Session ID tracked automatically. Stale sessions killed before opening.</td></tr>
-      <tr><td>_wait_for_settle (activity then quiet)</td><td><code>time.sleep(N)</code> fixed delay</td><td>Fixed sleep is either too short (misses slow output) or too long (slows every command). Settle-based wait adapts to actual output speed.</td></tr>
-      <tr><td>Blank CR + 400ms before each command</td><td>Send command directly</td><td>screen drops the first character of a command sent immediately after the previous one. Without the delay: <code>show ipconfig</code> &rarr; <code>how ipconfig</code>.</td></tr>
-      <tr><td>Space to dismiss --More--</td><td>Escape key</td><td>Escape aborts all remaining output &mdash; ports after the first page are lost before the filter can run. Space advances to the next page, capturing everything.</td></tr>
-      <tr><td>verification_done flag</td><td>Re-check likely_already_onboarded</td><td>The property stays True permanently. Without the flag, every subsequent state transition re-enters the verification flow.</td></tr>
-      <tr><td>10s wait after username before sending password</td><td>Send username + password in sequence</td><td>EXOS can accept admin with blank password instantly. If the password is sent after login completes, EXOS treats it as a command &mdash; &ldquo;Invalid input&rdquo;.</td></tr>
-    </table>
-  </section>
+  <!-- Copyright -->
+  <div style="text-align:center;padding:28px 0 8px;border-top:1px solid #334155;margin-top:40px">
+    <p style="font-family:'Segoe UI',Arial,sans-serif;font-size:0.78rem;font-weight:600;color:#cbd5e1;letter-spacing:0.06em">&copy; 2026 Khursheed Khan &nbsp;&middot;&nbsp; All rights reserved &nbsp;&middot;&nbsp; March 2026</p>
+  </div>
 
-  <!-- ═══════════ TESTS ═══════════ -->
-  <section id="tests">
-    <h2>Test Coverage</h2>
-    <p>21 unit tests in <code>tests/test_state_machine.py</code> &mdash; all passing throughout every iteration:</p>
-    <ul>
-      <li>Initial state (<code>UNKNOWN</code>)</li>
-      <li>Individual detection for all major states: U-Boot, FE login, FE login blocked, FE logged in, ZTD, DHCP, XIQ connecting, firmware download, firmware install, EXOS boot, EXOS login, onboarded</li>
-      <li>Boot-complete flag lifecycle</li>
-      <li><code>likely_already_onboarded</code> &mdash; three scenarios: detected correctly, not triggered after full ZTP+ flow, not triggered before EXOS states</li>
-      <li>Full 14-step onboarding sequence in order from U-Boot to ONBOARDED</li>
-    </ul>
-    <p>The state machine was the one module that <strong>never broke</strong> across any change in the entire build. The test suite caught the duplicate pattern bug immediately in Phase 1.</p>
-    <pre>python3 -m pytest tests/ -v
-# 21 passed in 0.03s</pre>
-  </section>
-
-  <!-- ═══════════ RUNNING ═══════════ -->
-  <section id="running">
-    <h2>Running the Agent Today</h2>
-    <ol>
-      <li>Connect the USB-C serial console cable to the Mac and the switch console port (RJ45 labeled CON/CONSOLE)</li>
-      <li><code>cd /path/to/5320-onboarding-agent</code></li>
-      <li><code>source .venv/bin/activate</code></li>
-      <li><code>python3 -m agent.main</code></li>
-    </ol>
-    <p>The agent auto-detects the port, kills any stale session, opens a Terminal window with screen logging to <code>/tmp/screenlog.0</code>, and starts monitoring.</p>
-
-    <h3>The 6 Capture Commands (already-onboarded path)</h3>
-    <table>
-      <tr><th>Command</th><th>HTML Tab</th><th>What It Captures</th></tr>
-      <tr><td><code>show switch</code></td><td>Switch</td><td>Identity, firmware version, management IP, uptime, MAC</td></tr>
-      <tr><td><code>show ipconfig</code></td><td>Ipconfig</td><td>IP configuration &mdash; DHCP or static, mask, gateway, DNS</td></tr>
-      <tr><td><code>show vlan detail</code></td><td>Vlan Detail</td><td>All VLANs configured by XIQ &mdash; ports, tagging, IP</td></tr>
-      <tr><td><code>show port configuration</code></td><td>Port Configuration</td><td>Port modes and speeds (inactive ports filtered out automatically)</td></tr>
-      <tr><td><code>show management</code></td><td>Management</td><td>SSH, SNMP, Telnet, HTTP access settings</td></tr>
-      <tr><td><code>show configuration</code></td><td>Configuration</td><td>Full static running configuration</td></tr>
-    </table>
-  </section>
-
-</main>
-
-<script>
+</div><script>
   const secs = document.querySelectorAll('section[id]');
   const links = document.querySelectorAll('nav a[href^="#"]');
   window.addEventListener('scroll', () => {
@@ -1412,9 +1359,5 @@ tests/
   }, { passive: true });
 </script>
 
-  <!-- Copyright -->
-  <div style="text-align:center;padding:32px 24px 24px;border-top:1px solid #334155;margin-top:48px">
-    <p style="font-family:'Segoe UI',Arial,sans-serif;font-size:0.78rem;font-weight:600;color:#cbd5e1;letter-spacing:0.06em">&copy; 2026 Khursheed Khan &nbsp;&middot;&nbsp; All rights reserved &nbsp;&middot;&nbsp; March 2026</p>
-  </div>
 </body>
 </html>
