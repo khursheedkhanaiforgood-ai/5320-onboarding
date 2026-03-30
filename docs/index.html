@@ -4,245 +4,377 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Khursheed Khan — E2E Network Deployment | Extreme Networks 5320</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Libre+Franklin:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'Segoe UI', Arial, sans-serif; background: #0f172a; color: #e2e8f0; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 48px 24px; }
-  .container { max-width: 680px; width: 100%; }
-  h1 { font-size: 1.8rem; color: #a78bfa; margin-bottom: 8px; }
-  .subtitle { color: #64748b; font-size: 0.95rem; margin-bottom: 48px; line-height: 1.6; }
-  .cards { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 40px; }
-  @media (max-width: 500px) { .cards { grid-template-columns: 1fr; } }
-  .card { background: #1e293b; border: 1px solid #334155; border-radius: 10px; padding: 28px 24px; text-decoration: none; transition: border-color 0.2s, transform 0.15s; display: flex; flex-direction: column; }
-  .card:hover { border-color: #7c3aed; transform: translateY(-2px); }
-  .card .icon { font-size: 2rem; margin-bottom: 14px; }
-  .card h2 { font-size: 1.05rem; color: #a78bfa; margin-bottom: 8px; }
-  .card p { color: #94a3b8; font-size: 0.85rem; line-height: 1.6; flex: 1; }
-  .card .cta { margin-top: 18px; font-size: 0.82rem; color: #7c3aed; font-weight: 600; }
-  .refs { text-align: center; }
-  .refs p { color: #475569; font-size: 0.78rem; margin-bottom: 8px; }
-  .refs a { color: #60a5fa; font-size: 0.82rem; text-decoration: none; margin: 0 10px; }
+
+  body {
+    font-family: 'Libre Baskerville', Georgia, serif;
+    background: #FFFFFF;
+    color: #111111;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 48px 24px 72px;
+  }
+
+  .container { max-width: 740px; width: 100%; }
+
+  /* ── Masthead ── */
+  .nyt-rule-top { border: none; border-top: 3px solid #111; margin-bottom: 6px; }
+  .nyt-rule-thin { border: none; border-top: 1px solid #111; margin-bottom: 18px; }
+  .nyt-logo {
+    font-family: 'Libre Franklin', Arial, sans-serif;
+    font-size: 0.62rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.22em;
+    color: #666;
+    text-align: center;
+    margin-bottom: 6px;
+  }
+
+  .byline {
+    font-family: 'Libre Franklin', Arial, sans-serif;
+    font-size: 0.72rem;
+    color: #666;
+    margin-bottom: 14px;
+    letter-spacing: 0.02em;
+  }
+  .byline strong { color: #111; font-weight: 700; }
+
+  h1 {
+    font-family: 'Libre Baskerville', Georgia, serif;
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #111;
+    line-height: 1.15;
+    margin-bottom: 14px;
+  }
+
+  .subtitle {
+    font-family: 'Libre Baskerville', Georgia, serif;
+    font-size: 1.05rem;
+    font-style: italic;
+    color: #444;
+    line-height: 1.8;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #E2E2E2;
+    padding-bottom: 28px;
+  }
+
+  /* ── Section labels ── */
+  .section-label {
+    font-family: 'Libre Franklin', Arial, sans-serif;
+    font-size: 0.62rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: #326891;
+    margin-bottom: 16px;
+    padding-bottom: 6px;
+    border-bottom: 2px solid #326891;
+    display: block;
+  }
+
+  /* ── Cards — article preview style ── */
+  .cards { display: grid; grid-template-columns: 1fr 1fr; gap: 0; }
+  @media (max-width: 520px) { .cards { grid-template-columns: 1fr; } }
+
+  .card {
+    background: #FFFFFF;
+    border: 1px solid #E2E2E2;
+    margin: -1px 0 0 -1px;
+    padding: 20px;
+    text-decoration: none;
+    display: flex;
+    flex-direction: column;
+    transition: background 0.12s;
+  }
+  .card:hover { background: #F7F7F5; }
+
+  .card .card-label {
+    font-family: 'Libre Franklin', Arial, sans-serif;
+    font-size: 0.58rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: #326891;
+    margin-bottom: 7px;
+  }
+
+  .card h2 {
+    font-family: 'Libre Baskerville', Georgia, serif;
+    font-size: 1.0rem;
+    font-weight: 700;
+    color: #111;
+    margin-bottom: 8px;
+    line-height: 1.35;
+  }
+
+  .card p {
+    font-family: 'Libre Franklin', Arial, sans-serif;
+    color: #555;
+    font-size: 0.82rem;
+    line-height: 1.65;
+    flex: 1;
+  }
+
+  .card .cta {
+    margin-top: 12px;
+    font-family: 'Libre Franklin', Arial, sans-serif;
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #326891;
+  }
+
+  /* ── Divider ── */
+  .divider { border: none; border-top: 1px solid #E2E2E2; margin: 36px 0; }
+
+  /* ── Footer refs ── */
+  .refs {
+    text-align: center;
+    font-family: 'Libre Franklin', Arial, sans-serif;
+  }
+  .refs p { color: #999; font-size: 0.72rem; margin-bottom: 8px; }
+  .refs a { color: #326891; font-size: 0.75rem; text-decoration: none; margin: 0 10px; }
   .refs a:hover { text-decoration: underline; }
-  .divider { border: none; border-top: 1px solid #1e293b; margin: 32px 0; }
+
+  /* ── Concept tags ── */
+  .tag {
+    font-family: 'Libre Franklin', Arial, sans-serif;
+    font-size: 0.55rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 2px 6px;
+    white-space: nowrap;
+    flex-shrink: 0;
+    margin-top: 3px;
+    border: 1px solid;
+  }
+  .tag-green  { color: #1a5c2a; border-color: #A7D7B0; background: #F3FBF5; }
+  .tag-blue   { color: #1a3a6b; border-color: #93C5FD; background: #EFF6FF; }
+  .tag-purple { color: #5b21b6; border-color: #C4B5FD; background: #F5F3FF; }
+  .tag-amber  { color: #78350f; border-color: #FCD34D; background: #FFFBEB; }
+  .tag-rose   { color: #881337; border-color: #FDA4AF; background: #FFF1F2; }
+  .tag-teal   { color: #134e4a; border-color: #5EEAD4; background: #F0FDFA; }
+  .tag-orange { color: #7c2d12; border-color: #FB923C; background: #FFF7ED; }
+  .tag-violet { color: #3b0764; border-color: #A78BFA; background: #FAF5FF; }
 </style>
 </head>
 <body>
 <div class="container">
-  <h1>End-to-End Network Deployment</h1>
-  <p style="color:#a78bfa;font-size:0.82rem;margin-bottom:6px;letter-spacing:0.04em">Khursheed Khan &nbsp;&mdash;&nbsp; March 2026 &nbsp;&mdash;&nbsp; Extreme Networks 5320</p>
-  <p class="subtitle">E2E onboarding, configuration, and integration — from UE/iPhone and laptop through AP3000 and EN-5320 switch to Quantum Fiber internet.<br>AI-assisted deployment using Claude Code: switch CLI, XIQ cloud management, static routing, and VLAN architecture.</p>
 
-  <div class="cards" style="grid-template-columns: 1fr 1fr; max-width: 720px;">
+  <!-- Masthead -->
+  <div class="nyt-rule-top"></div>
+  <p class="nyt-logo">Network Engineering &amp; AI Deployment</p>
+  <div class="nyt-rule-thin"></div>
+
+  <h1>End-to-End Network Deployment</h1>
+  <p class="byline"><strong>By Khursheed Khan</strong> &nbsp;&middot;&nbsp; March 2026 &nbsp;&middot;&nbsp; Extreme Networks 5320 &nbsp;&middot;&nbsp; AI-assisted with Claude Code</p>
+  <p class="subtitle">End-to-end onboarding, configuration, and integration &mdash; from UE/iPhone and laptop through AP3000 and EN-5320 switch to Quantum Fiber internet. AI-assisted deployment using Claude Code: switch CLI, XIQ cloud management, static routing, and VLAN architecture.</p>
+
+  <!-- Agent & Deployment -->
+  <span class="section-label">Agent &amp; Deployment</span>
+  <div class="cards" style="max-width:740px;margin-bottom:36px">
     <a class="card" href="onboarding.html">
-      <div class="icon">&#128225;</div>
+      <div class="card-label">Live session record</div>
       <h2>Onboarding Guide</h2>
-      <p>Step-by-step record of a live onboarding session — Fabric Engine factory reset through ZTP+ to EXOS SwitchEngine. Switch console output, commands, and observations captured in real time.</p>
+      <p>Step-by-step record of a live onboarding session &mdash; Fabric Engine factory reset through ZTP+ to EXOS SwitchEngine. Switch console output, commands, and observations captured in real time.</p>
       <div class="cta">Open guide &rarr;</div>
     </a>
-
     <a class="card" href="agent_tutorial.html">
-      <div class="icon">&#129302;</div>
+      <div class="card-label">Build tutorial &mdash; 43 prompts</div>
       <h2>Agent Build Tutorial</h2>
-      <p>How the AI onboarding agent was designed and built — architecture, the 20-state machine, every prompt in the build conversation, every bug fix, and every key technical decision explained.</p>
+      <p>How the AI onboarding agent was designed and built &mdash; architecture, the 20-state machine, every prompt in the build conversation, every bug fix, and every key technical decision explained.</p>
       <div class="cta">Open tutorial &rarr;</div>
     </a>
-
-    <a class="card" href="railway_tutorial.html" style="border-color:#f59e0b">
-      <div class="icon">&#9729;</div>
-      <h2 style="color:#fcd34d">Railway Deployment Tutorial</h2>
-      <p>How the agent was extended for cloud deployment — hybrid bridge architecture, FastAPI WebSocket server, vanilla JS web UI, and every Railway build fix documented step by step.</p>
-      <div class="cta" style="color:#f59e0b">Open tutorial &rarr;</div>
+    <a class="card" href="railway_tutorial.html">
+      <div class="card-label">Cloud deployment</div>
+      <h2>Railway Deployment Tutorial</h2>
+      <p>How the agent was extended for cloud deployment &mdash; hybrid bridge architecture, FastAPI WebSocket server, vanilla JS web UI, and every Railway build fix documented step by step.</p>
+      <div class="cta">Open tutorial &rarr;</div>
     </a>
-
     <a class="card" href="deploy.html">
-      <div class="icon">&#128187;</div>
+      <div class="card-label">Setup reference</div>
       <h2>Deployment Guide</h2>
-      <p>Get the agent running on a fresh MacBook in under 10 minutes — clone, virtual environment, API key, cable connection, and first run. Includes a troubleshooting reference.</p>
+      <p>Get the agent running on a fresh MacBook in under 10 minutes &mdash; clone, virtual environment, API key, cable connection, and first run. Includes a troubleshooting reference.</p>
       <div class="cta">Open guide &rarr;</div>
     </a>
+  </div>
 
-    <a class="card" href="session_20260325.html" style="border-color:#7c3aed">
-      <div class="icon">&#128202;</div>
-      <h2>Config Report — Mar 25 2026</h2>
-      <p>Khursheed Khan &mdash; 3:00 PM Pacific. EXOS SwitchEngine 33.5.2 configuration capture: switch identity, IP, VLANs, port configuration, management, and full running config.</p>
+  <!-- March 25 Sessions -->
+  <span class="section-label">Config Report &amp; Session Log &mdash; Mar 25, 2026</span>
+  <div class="cards" style="max-width:740px;margin-bottom:36px">
+    <a class="card" href="session_20260325.html">
+      <div class="card-label">Config capture &mdash; 3:00 PM Pacific</div>
+      <h2>Config Report &mdash; Mar 25 2026</h2>
+      <p>EXOS SwitchEngine 33.5.2 configuration capture: switch identity, IP, VLANs, port configuration, management, and full running config.</p>
       <div class="cta">View report &rarr;</div>
     </a>
-
-    <a class="card" href="session_log_20260325.html" style="border-color:#065f46">
-      <div class="icon">&#128433;</div>
-      <h2>Session Log — Mar 25 2026</h2>
-      <p>Agent prompt window and switch console side by side — the full live exchange from connection to config capture, exactly as it ran.</p>
+    <a class="card" href="session_log_20260325.html">
+      <div class="card-label">Side-by-side agent &amp; console</div>
+      <h2>Session Log &mdash; Mar 25 2026</h2>
+      <p>Agent prompt window and switch console side by side &mdash; the full live exchange from connection to config capture, exactly as it ran.</p>
       <div class="cta">View log &rarr;</div>
     </a>
-
   </div>
 
-  <!-- March 29 Lab -->
-  <div style="margin-top:32px">
-    <p style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#f97316;margin-bottom:14px;padding-left:2px">&#9135;&#9135; Dual-Switch Lab Rebuild &nbsp;&mdash;&nbsp; Mar 29, 2026</p>
-    <div style="max-width:960px;display:grid;grid-template-columns:1fr 1fr;gap:20px">
-      <a class="card" href="lab_20260329.html" style="border-color:#f97316;display:flex;flex-direction:row;align-items:flex-start;gap:20px">
-        <div style="font-size:2rem;flex-shrink:0">&#127981;</div>
+  <!-- March 26–27 Integration Series -->
+  <span class="section-label">5320 + AP3000 + UE/Devices Integration Series &mdash; Mar 26&ndash;27, 2026</span>
+  <div class="cards" style="grid-template-columns:1fr 1fr 1fr;max-width:960px;margin-bottom:36px">
+    <a class="card" href="ap_onboarding_20260326.html">
+      <div class="card-label">Phase 1 of 3 &mdash; Switch &rarr; AP</div>
+      <h2>AP3000 Onboarding &mdash; Mar 26</h2>
+      <p>SSH to switch &rarr; VLAN naming &rarr; port config &rarr; PoE &rarr; AP discovery via nmap &rarr; XIQ adoption &rarr; DHCP &amp; IP gateway config &rarr; internet diagnosis.</p>
+      <div class="cta">View guide &rarr;</div>
+    </a>
+    <a class="card" href="troubleshooting_20260327.html">
+      <div class="card-label">Phase 2 of 3 &mdash; Config &amp; Diagnosis</div>
+      <h2>Config Verification &amp; Troubleshooting &mdash; Mar 27</h2>
+      <p>Full running config analysis, VLAN/IP/DHCP/routing verification, root-cause diagnosis of WiFi client internet failure, and prioritised issue list with fix options.</p>
+      <div class="cta">View report &rarr;</div>
+    </a>
+    <a class="card" href="ue_onboarding_20260327.html">
+      <div class="card-label">Phase 3 of 3 &mdash; AP &rarr; UE/Devices</div>
+      <h2>UE/Device Onboarding &mdash; Mar 27</h2>
+      <p>End-to-end data flow from iPhone to internet &mdash; static route fix on Quantum Fiber, ipforwarding on Default VLAN, root cause of inter-VLAN routing failure, and verified fix.</p>
+      <div class="cta">View guide &rarr;</div>
+    </a>
+  </div>
+
+  <!-- March 29 Dual-Switch Lab -->
+  <span class="section-label">Dual-Switch Lab Rebuild &mdash; Mar 29, 2026</span>
+  <div class="cards" style="max-width:740px;margin-bottom:36px">
+    <a class="card" href="lab_20260329.html">
+      <div class="card-label">&#9679; Live session &mdash; SW1 + SW2</div>
+      <h2>Dual-Switch + 4&times;AP Lab &mdash; Mar 29</h2>
+      <p>Full CLI rebuild of two EN-5320 switches and four AP3000s. VLAN 10 management, Corp/Guest VLANs on each switch, inter-switch trunk design, and end-to-end client verification.</p>
+      <div class="cta">Open live session &rarr;</div>
+    </a>
+    <a class="card" href="session_log_20260329.html">
+      <div class="card-label">Session log &mdash; steps &amp; hiccups</div>
+      <h2>Steps, Hiccups &amp; Lessons &mdash; Mar 29</h2>
+      <p>Chronological record of every command, error, and fix from the Mar 29 session &mdash; factory reset through AP onboarding. Key lessons including EXOS reset syntax, port disable gotcha, and XIQ Delete vs Reset&amp;Delete.</p>
+      <div class="cta">View session log &rarr;</div>
+    </a>
+  </div>
+
+  <!-- E2E Key Learnings -->
+  <span class="section-label">E2E Key Learnings</span>
+  <div style="margin-bottom:36px;max-width:960px">
+    <p style="font-family:'Libre Baskerville',Georgia,serif;font-size:0.95rem;font-style:italic;color:#666;margin-bottom:20px;line-height:1.8;padding-bottom:16px;border-bottom:1px solid #E2E2E2">Each lesson from this lab mapped to the underlying networking concept. Click any entry to jump to the section where it was applied, or follow the standard citation for deeper study.</p>
+
+    <div style="display:flex;flex-direction:column">
+
+      <!-- L3 Routing -->
+      <div style="display:flex;gap:14px;align-items:flex-start;padding:15px 0;border-bottom:1px solid #E8E8E8">
+        <span class="tag tag-green">L3 Routing</span>
         <div style="flex:1">
-          <div style="font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#fb923c;margin-bottom:6px">&#9679; Live Session</div>
-          <h2 style="color:#fb923c">Dual-Switch + 4&times;AP Lab — Mar 29</h2>
-          <p>Full CLI rebuild of two EN-5320 switches and four AP3000s. VLAN 10 management, Corp/Guest VLANs on each switch, inter-switch trunk design, and end-to-end client verification. Structured A&rarr;B&rarr;C&rarr;E methodology.</p>
-          <div class="cta" style="color:#f97316">Open live session &rarr;</div>
+          <div style="font-family:'Libre Baskerville',Georgia,serif;font-size:0.95rem;font-weight:700;color:#111;line-height:1.45;margin-bottom:5px"><a href="lab_20260329.html#exec" style="color:#111;text-decoration:none;border-bottom:1px solid #326891">ipforwarding must be enabled on every routed VLAN &mdash; including Default</a></div>
+          <div style="font-family:'Libre Franklin',Arial,sans-serif;font-size:0.71rem;color:#777;line-height:1.8">Applied in: <a href="lab_20260329.html#exec" style="color:#326891;text-decoration:none">Lab Phase 1 (SW1)</a> &middot; <a href="lab_20260329.html#exec2" style="color:#326891;text-decoration:none">Lab Phase 2 (SW2)</a> &middot; <a href="session_log_20260329.html#vlans" style="color:#326891;text-decoration:none">Session Log &sect;VLAN config</a> &middot; <a href="onboarding.html#exos-setup" style="color:#326891;text-decoration:none">Onboarding &sect;EXOS setup</a> &nbsp;&mdash;&nbsp; <a href="standards_references.html#learn-l3" style="color:#555;text-decoration:underline">RFC 1812 &nearr;</a></div>
         </div>
-      </a>
-      <a class="card" href="session_log_20260329.html" style="border-color:#78350f;display:flex;flex-direction:row;align-items:flex-start;gap:20px">
-        <div style="font-size:2rem;flex-shrink:0">&#128221;</div>
-        <div style="flex:1">
-          <div style="font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#fb923c;margin-bottom:6px">Session Log</div>
-          <h2 style="color:#fb923c">Steps, Hiccups &amp; Lessons — Mar 29</h2>
-          <p>Chronological record of every command, error, and fix from the Mar 29 session — factory reset through AP onboarding. 9 key lessons documented including EXOS reset syntax, port disable gotcha, and XIQ Delete vs Reset&amp;Delete.</p>
-          <div class="cta" style="color:#f97316">View session log &rarr;</div>
-        </div>
-      </a>
-    </div>
-  </div>
-
-  <!-- 5320 + AP + UE Integration Series -->
-  <div style="margin-top:32px">
-    <p style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#34d399;margin-bottom:6px;padding-left:2px">&#9135;&#9135; 5320 + AP3000 + UE/Devices Integration Series &nbsp;&mdash;&nbsp; Mar 26&ndash;27, 2026</p>
-    <p style="font-size:0.75rem;color:#475569;margin-bottom:16px;padding-left:2px">Switch &rarr; AP &rarr; UE/Devices &nbsp;&mdash;&nbsp; end-to-end onboarding and internet connectivity</p>
-    <div class="cards" style="grid-template-columns: 1fr 1fr 1fr; max-width: 960px;">
-      <a class="card" href="ap_onboarding_20260326.html" style="border-color:#10b981">
-        <div style="font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#34d399;margin-bottom:10px">Phase 1 of 3 &mdash; Switch &rarr; AP</div>
-        <div class="icon">&#128225;</div>
-        <h2 style="color:#34d399">AP3000 Onboarding — Mar 26</h2>
-        <p>SSH to switch &rarr; VLAN naming &rarr; port config &rarr; PoE &rarr; AP discovery via nmap &rarr; XIQ adoption &rarr; DHCP &amp; IP gateway config &rarr; internet diagnosis.</p>
-        <div class="cta" style="color:#10b981">View guide &rarr;</div>
-      </a>
-
-      <a class="card" href="troubleshooting_20260327.html" style="border-color:#3b82f6">
-        <div style="font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#60a5fa;margin-bottom:10px">Phase 2 of 3 &mdash; Config &amp; Diagnosis</div>
-        <div class="icon">&#128269;</div>
-        <h2 style="color:#60a5fa">Config Verification &amp; Troubleshooting — Mar 27</h2>
-        <p>Full running config analysis, VLAN/IP/DHCP/routing verification, root-cause diagnosis of WiFi client internet failure, and prioritised issue list with fix options.</p>
-        <div class="cta" style="color:#3b82f6">View report &rarr;</div>
-      </a>
-
-      <a class="card" href="ue_onboarding_20260327.html" style="border-color:#f97316">
-        <div style="font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#fb923c;margin-bottom:10px">Phase 3 of 3 &mdash; AP &rarr; UE/Devices</div>
-        <div class="icon">&#128241;</div>
-        <h2 style="color:#fb923c">UE/Device Onboarding — Mar 27</h2>
-        <p>End-to-end data flow from iPhone to internet &mdash; static route fix on Quantum Fiber, ipforwarding on Default VLAN, root cause of inter-VLAN routing failure, and verified fix.</p>
-        <div class="cta" style="color:#f97316">View guide &rarr;</div>
-      </a>
-    </div>
-  </div>
-
-  <!-- Key Learnings -->
-  <div style="margin-top:32px">
-    <p style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#a78bfa;margin-bottom:14px;padding-left:2px">&#9135;&#9135; E2E Key Learnings</p>
-    <div style="background:#1e293b;border:1px solid #334155;border-radius:10px;padding:24px 28px;max-width:960px">
-      <p style="font-size:0.78rem;color:#64748b;margin-bottom:16px;line-height:1.6">Each lesson from this lab mapped to the underlying networking concept. Click to jump to the relevant guide section or standard.</p>
-      <ol style="list-style:none;padding:0;display:flex;flex-direction:column;gap:14px;counter-reset:learn">
-
-        <!-- L3 Routing -->
-        <li style="display:flex;gap:12px;align-items:flex-start">
-          <span style="font-size:0.65rem;font-weight:700;background:#0d2b1f;color:#34d399;border:1px solid #065f46;padding:2px 7px;border-radius:3px;white-space:nowrap;margin-top:2px">L3 Routing</span>
-          <div style="flex:1">
-            <div style="font-size:0.82rem;color:#e2e8f0;font-weight:600;line-height:1.5"><a href="lab_20260329.html#exec" style="color:#e2e8f0;text-decoration:none">ipforwarding must be enabled on every routed VLAN — including Default</a> &mdash; missing on Default breaks internet for all clients.</div>
-            <div style="font-size:0.73rem;color:#94a3b8;margin-top:4px;line-height:1.7">Applied in: <a href="lab_20260329.html#exec" style="color:#7dd3fc">Lab Phase 1 (SW1)</a> &middot; <a href="lab_20260329.html#exec2" style="color:#7dd3fc">Lab Phase 2 (SW2)</a> &middot; <a href="session_log_20260329.html#vlans" style="color:#7dd3fc">Session Log §VLAN config</a> &middot; <a href="onboarding.html#exos-setup" style="color:#7dd3fc">Onboarding Guide §EXOS setup</a> &nbsp;|&nbsp; <a href="standards_references.html#learn-l3" style="color:#a78bfa">RFC 1812 deep-dive &#8599;</a></div>
-          </div>
-        </li>
-
-        <!-- NAT -->
-        <li style="display:flex;gap:12px;align-items:flex-start">
-          <span style="font-size:0.65rem;font-weight:700;background:#0c1a2e;color:#93c5fd;border:1px solid #1e3a5f;padding:2px 7px;border-radius:3px;white-space:nowrap;margin-top:2px">NAT</span>
-          <div style="flex:1">
-            <div style="font-size:0.82rem;color:#e2e8f0;font-weight:600;line-height:1.5"><a href="lab_20260329.html#exec" style="color:#e2e8f0;text-decoration:none">Quantum Fiber needs static routes back to your private subnets</a> &mdash; without them, internet replies are silently dropped.</div>
-            <div style="font-size:0.73rem;color:#94a3b8;margin-top:4px;line-height:1.7">Applied in: <a href="lab_20260329.html#exec" style="color:#7dd3fc">Lab Phase 1 (SW1 routes)</a> &middot; <a href="lab_20260329.html#exec2" style="color:#7dd3fc">Lab Phase 2 (SW2 routes)</a> &middot; <a href="session_log_20260329.html#internet" style="color:#7dd3fc">Session Log §Internet verify</a> &middot; <a href="session_log_20260329.html#phase2-trouble" style="color:#7dd3fc">Session Log §Phase 2 troubleshoot</a> &nbsp;|&nbsp; <a href="standards_references.html#learn-nat" style="color:#a78bfa">RFC 3022 deep-dive &#8599;</a></div>
-          </div>
-        </li>
-
-        <!-- 802.1Q -->
-        <li style="display:flex;gap:12px;align-items:flex-start">
-          <span style="font-size:0.65rem;font-weight:700;background:#1e1a2e;color:#c4b5fd;border:1px solid #4c1d95;padding:2px 7px;border-radius:3px;white-space:nowrap;margin-top:2px">802.1Q</span>
-          <div style="flex:1">
-            <div style="font-size:0.82rem;color:#e2e8f0;font-weight:600;line-height:1.5"><a href="lab_20260329.html#lld" style="color:#e2e8f0;text-decoration:none">A port is untagged on one VLAN but tagged on many</a> &mdash; AP trunk carries Corp + Guest SSIDs on one cable.</div>
-            <div style="font-size:0.73rem;color:#94a3b8;margin-top:4px;line-height:1.7">Applied in: <a href="lab_20260329.html#lld" style="color:#7dd3fc">Lab LLD (VLAN/subnet plan)</a> &middot; <a href="session_log_20260329.html#vlans" style="color:#7dd3fc">Session Log §VLAN build</a> &middot; <a href="lab_20260329.html#exec" style="color:#7dd3fc">Lab Phase 1 exec</a> &middot; <a href="onboarding.html#exos-setup" style="color:#7dd3fc">Onboarding Guide §EXOS setup</a> &nbsp;|&nbsp; <a href="standards_references.html#learn-8021q" style="color:#a78bfa">IEEE 802.1Q deep-dive &#8599;</a></div>
-          </div>
-        </li>
-
-        <!-- DHCP -->
-        <li style="display:flex;gap:12px;align-items:flex-start">
-          <span style="font-size:0.65rem;font-weight:700;background:#1a1a0d;color:#fcd34d;border:1px solid #713f12;padding:2px 7px;border-radius:3px;white-space:nowrap;margin-top:2px">DHCP</span>
-          <div style="flex:1">
-            <div style="font-size:0.82rem;color:#e2e8f0;font-weight:600;line-height:1.5"><a href="lab_20260329.html#exec" style="color:#e2e8f0;text-decoration:none">The switch is the DHCP server — gateway, DNS, and range configured on the switch itself</a>.</div>
-            <div style="font-size:0.73rem;color:#94a3b8;margin-top:4px;line-height:1.7">Applied in: <a href="lab_20260329.html#exec" style="color:#7dd3fc">Lab Phase 1 (SW1 DHCP)</a> &middot; <a href="lab_20260329.html#exec2" style="color:#7dd3fc">Lab Phase 2 (SW2 DHCP)</a> &middot; <a href="session_log_20260329.html#vlans" style="color:#7dd3fc">Session Log §VLAN config</a> &middot; <a href="onboarding.html#commands" style="color:#7dd3fc">Onboarding §Command ref</a> &nbsp;|&nbsp; <a href="standards_references.html#learn-dhcp" style="color:#a78bfa">RFC 2131 deep-dive &#8599;</a></div>
-          </div>
-        </li>
-
-        <!-- ARP -->
-        <li style="display:flex;gap:12px;align-items:flex-start">
-          <span style="font-size:0.65rem;font-weight:700;background:#1a1219;color:#fda4af;border:1px solid #881337;padding:2px 7px;border-radius:3px;white-space:nowrap;margin-top:2px">ARP</span>
-          <div style="flex:1">
-            <div style="font-size:0.82rem;color:#e2e8f0;font-weight:600;line-height:1.5"><a href="session_log_20260329.html#phase2" style="color:#e2e8f0;text-decoration:none">show iparp shows neighbors — show iproute shows the switch's own addresses</a>. A device never ARPs for itself.</div>
-            <div style="font-size:0.73rem;color:#94a3b8;margin-top:4px;line-height:1.7">Applied in: <a href="session_log_20260329.html#phase2" style="color:#7dd3fc">Session Log §Phase 2 ("two Default")</a> &middot; <a href="session_log_20260329.html#phase2-trouble" style="color:#7dd3fc">Session Log §Phase 2 troubleshoot</a> &middot; <a href="lab_20260329.html#exec2" style="color:#7dd3fc">Lab Phase 2 verify steps</a> &nbsp;|&nbsp; <a href="standards_references.html#learn-arp" style="color:#a78bfa">RFC 826 deep-dive &#8599;</a></div>
-          </div>
-        </li>
-
-        <!-- PoE -->
-        <li style="display:flex;gap:12px;align-items:flex-start">
-          <span style="font-size:0.65rem;font-weight:700;background:#0d1a1a;color:#5eead4;border:1px solid #134e4a;padding:2px 7px;border-radius:3px;white-space:nowrap;margin-top:2px">PoE</span>
-          <div style="flex:1">
-            <div style="font-size:0.82rem;color:#e2e8f0;font-weight:600;line-height:1.5"><a href="lab_20260329.html#exec" style="color:#e2e8f0;text-decoration:none">Power and data on the same cable — switch negotiates class with the AP</a>. AP3000 = Class 4, 5.2W at idle.</div>
-            <div style="font-size:0.73rem;color:#94a3b8;margin-top:4px;line-height:1.7">Applied in: <a href="lab_20260329.html#exec" style="color:#7dd3fc">Lab Phase 1 (enable inline-power)</a> &middot; <a href="lab_20260329.html#exec2" style="color:#7dd3fc">Lab Phase 2</a> &middot; <a href="session_log_20260329.html#ap" style="color:#7dd3fc">Session Log §AP onboarding</a> &nbsp;|&nbsp; <a href="standards_references.html#learn-poe" style="color:#a78bfa">IEEE 802.3af deep-dive &#8599;</a></div>
-          </div>
-        </li>
-
-        <!-- CAPWAP -->
-        <li style="display:flex;gap:12px;align-items:flex-start">
-          <span style="font-size:0.65rem;font-weight:700;background:#1c0a00;color:#fb923c;border:1px solid #431407;padding:2px 7px;border-radius:3px;white-space:nowrap;margin-top:2px">CAPWAP</span>
-          <div style="flex:1">
-            <div style="font-size:0.82rem;color:#e2e8f0;font-weight:600;line-height:1.5"><a href="session_log_20260329.html#ap" style="color:#e2e8f0;text-decoration:none">AP3000 SSID config is cloud-only — no AP CLI for SSIDs</a>. XIQ "Reset &amp; Delete" clears org binding; plain "Delete" does not.</div>
-            <div style="font-size:0.73rem;color:#94a3b8;margin-top:4px;line-height:1.7">Applied in: <a href="session_log_20260329.html#ap" style="color:#7dd3fc">Session Log §AP3000-A onboarding</a> &middot; <a href="session_log_20260329.html#phase2" style="color:#7dd3fc">Session Log §AP3000-B (Phase 2)</a> &middot; <a href="lab_20260329.html#exec" style="color:#7dd3fc">Lab Phase 1 AP step</a> &middot; <a href="onboarding.html#xiq" style="color:#7dd3fc">Onboarding §XIQ confirmation</a> &nbsp;|&nbsp; <a href="standards_references.html#learn-capwap" style="color:#a78bfa">RFC 5415 deep-dive &#8599;</a></div>
-          </div>
-        </li>
-
-        <!-- AI Agent -->
-        <li style="display:flex;gap:12px;align-items:flex-start">
-          <span style="font-size:0.65rem;font-weight:700;background:#1a0d2e;color:#c084fc;border:1px solid #4c1d95;padding:2px 7px;border-radius:3px;white-space:nowrap;margin-top:2px">AI Agent</span>
-          <div style="flex:1">
-            <div style="font-size:0.82rem;color:#e2e8f0;font-weight:600;line-height:1.5"><a href="agent_tutorial.html#modules" style="color:#e2e8f0;text-decoration:none">State machine + LLM = domain-specific autonomous agent</a>. Regex detects state cheaply; Claude API called only on transitions. Read-only on the wire.</div>
-            <div style="font-size:0.73rem;color:#94a3b8;margin-top:4px;line-height:1.7">Applied in: <a href="agent_tutorial.html#modules" style="color:#7dd3fc">Agent Tutorial §Module map</a> &middot; <a href="agent_tutorial.html#states" style="color:#7dd3fc">Agent Tutorial §20-state machine</a> &middot; <a href="deploy.html" style="color:#7dd3fc">Deploy Guide (Local + Railway)</a> &middot; <a href="railway_tutorial.html" style="color:#7dd3fc">Railway Tutorial</a> &nbsp;|&nbsp; <a href="standards_references.html#learn-ai" style="color:#a78bfa">AI Agents deep-dive &#8599;</a></div>
-          </div>
-        </li>
-
-      </ol>
-      <div style="margin-top:16px;padding-top:12px;border-top:1px solid #334155;font-size:0.75rem;color:#475569">
-        Full concept map with IEEE standards, RFCs, and Bertsekas &amp; Gallager citations &rarr; <a href="standards_references.html" style="color:#a78bfa">Standards &amp; References</a>
       </div>
+
+      <!-- NAT -->
+      <div style="display:flex;gap:14px;align-items:flex-start;padding:15px 0;border-bottom:1px solid #E8E8E8">
+        <span class="tag tag-blue">NAT</span>
+        <div style="flex:1">
+          <div style="font-family:'Libre Baskerville',Georgia,serif;font-size:0.95rem;font-weight:700;color:#111;line-height:1.45;margin-bottom:5px"><a href="lab_20260329.html#exec" style="color:#111;text-decoration:none;border-bottom:1px solid #326891">Quantum Fiber needs static routes back to your private subnets</a></div>
+          <div style="font-family:'Libre Franklin',Arial,sans-serif;font-size:0.71rem;color:#777;line-height:1.8">Applied in: <a href="lab_20260329.html#exec" style="color:#326891;text-decoration:none">Lab Phase 1 (SW1 routes)</a> &middot; <a href="lab_20260329.html#exec2" style="color:#326891;text-decoration:none">Lab Phase 2 (SW2 routes)</a> &middot; <a href="session_log_20260329.html#internet" style="color:#326891;text-decoration:none">Session Log &sect;Internet verify</a> &middot; <a href="session_log_20260329.html#phase2-trouble" style="color:#326891;text-decoration:none">Session Log &sect;Phase 2 troubleshoot</a> &nbsp;&mdash;&nbsp; <a href="standards_references.html#learn-nat" style="color:#555;text-decoration:underline">RFC 3022 &nearr;</a></div>
+        </div>
+      </div>
+
+      <!-- 802.1Q -->
+      <div style="display:flex;gap:14px;align-items:flex-start;padding:15px 0;border-bottom:1px solid #E8E8E8">
+        <span class="tag tag-purple">802.1Q</span>
+        <div style="flex:1">
+          <div style="font-family:'Libre Baskerville',Georgia,serif;font-size:0.95rem;font-weight:700;color:#111;line-height:1.45;margin-bottom:5px"><a href="lab_20260329.html#lld" style="color:#111;text-decoration:none;border-bottom:1px solid #326891">A port is untagged on one VLAN but tagged on many</a></div>
+          <div style="font-family:'Libre Franklin',Arial,sans-serif;font-size:0.71rem;color:#777;line-height:1.8">Applied in: <a href="lab_20260329.html#lld" style="color:#326891;text-decoration:none">Lab LLD (VLAN/subnet plan)</a> &middot; <a href="session_log_20260329.html#vlans" style="color:#326891;text-decoration:none">Session Log &sect;VLAN build</a> &middot; <a href="lab_20260329.html#exec" style="color:#326891;text-decoration:none">Lab Phase 1 exec</a> &middot; <a href="onboarding.html#exos-setup" style="color:#326891;text-decoration:none">Onboarding &sect;EXOS setup</a> &nbsp;&mdash;&nbsp; <a href="standards_references.html#learn-8021q" style="color:#555;text-decoration:underline">IEEE 802.1Q &nearr;</a></div>
+        </div>
+      </div>
+
+      <!-- DHCP -->
+      <div style="display:flex;gap:14px;align-items:flex-start;padding:15px 0;border-bottom:1px solid #E8E8E8">
+        <span class="tag tag-amber">DHCP</span>
+        <div style="flex:1">
+          <div style="font-family:'Libre Baskerville',Georgia,serif;font-size:0.95rem;font-weight:700;color:#111;line-height:1.45;margin-bottom:5px"><a href="lab_20260329.html#exec" style="color:#111;text-decoration:none;border-bottom:1px solid #326891">The switch is the DHCP server &mdash; gateway, DNS, and range configured on the switch itself</a></div>
+          <div style="font-family:'Libre Franklin',Arial,sans-serif;font-size:0.71rem;color:#777;line-height:1.8">Applied in: <a href="lab_20260329.html#exec" style="color:#326891;text-decoration:none">Lab Phase 1 (SW1 DHCP)</a> &middot; <a href="lab_20260329.html#exec2" style="color:#326891;text-decoration:none">Lab Phase 2 (SW2 DHCP)</a> &middot; <a href="session_log_20260329.html#vlans" style="color:#326891;text-decoration:none">Session Log &sect;VLAN config</a> &middot; <a href="onboarding.html#commands" style="color:#326891;text-decoration:none">Onboarding &sect;Command ref</a> &nbsp;&mdash;&nbsp; <a href="standards_references.html#learn-dhcp" style="color:#555;text-decoration:underline">RFC 2131 &nearr;</a></div>
+        </div>
+      </div>
+
+      <!-- ARP -->
+      <div style="display:flex;gap:14px;align-items:flex-start;padding:15px 0;border-bottom:1px solid #E8E8E8">
+        <span class="tag tag-rose">ARP</span>
+        <div style="flex:1">
+          <div style="font-family:'Libre Baskerville',Georgia,serif;font-size:0.95rem;font-weight:700;color:#111;line-height:1.45;margin-bottom:5px"><a href="session_log_20260329.html#phase2" style="color:#111;text-decoration:none;border-bottom:1px solid #326891">show iparp shows neighbors &mdash; show iproute shows the switch&rsquo;s own addresses</a></div>
+          <div style="font-family:'Libre Franklin',Arial,sans-serif;font-size:0.71rem;color:#777;line-height:1.8">Applied in: <a href="session_log_20260329.html#phase2" style="color:#326891;text-decoration:none">Session Log &sect;Phase 2 (&ldquo;two Default&rdquo;)</a> &middot; <a href="session_log_20260329.html#phase2-trouble" style="color:#326891;text-decoration:none">Session Log &sect;Phase 2 troubleshoot</a> &middot; <a href="lab_20260329.html#exec2" style="color:#326891;text-decoration:none">Lab Phase 2 verify steps</a> &nbsp;&mdash;&nbsp; <a href="standards_references.html#learn-arp" style="color:#555;text-decoration:underline">RFC 826 &nearr;</a></div>
+        </div>
+      </div>
+
+      <!-- PoE -->
+      <div style="display:flex;gap:14px;align-items:flex-start;padding:15px 0;border-bottom:1px solid #E8E8E8">
+        <span class="tag tag-teal">PoE</span>
+        <div style="flex:1">
+          <div style="font-family:'Libre Baskerville',Georgia,serif;font-size:0.95rem;font-weight:700;color:#111;line-height:1.45;margin-bottom:5px"><a href="lab_20260329.html#exec" style="color:#111;text-decoration:none;border-bottom:1px solid #326891">Power and data on the same cable &mdash; switch negotiates class with the AP</a></div>
+          <div style="font-family:'Libre Franklin',Arial,sans-serif;font-size:0.71rem;color:#777;line-height:1.8">Applied in: <a href="lab_20260329.html#exec" style="color:#326891;text-decoration:none">Lab Phase 1 (enable inline-power)</a> &middot; <a href="lab_20260329.html#exec2" style="color:#326891;text-decoration:none">Lab Phase 2</a> &middot; <a href="session_log_20260329.html#ap" style="color:#326891;text-decoration:none">Session Log &sect;AP onboarding</a> &nbsp;&mdash;&nbsp; <a href="standards_references.html#learn-poe" style="color:#555;text-decoration:underline">IEEE 802.3af &nearr;</a></div>
+        </div>
+      </div>
+
+      <!-- CAPWAP -->
+      <div style="display:flex;gap:14px;align-items:flex-start;padding:15px 0;border-bottom:1px solid #E8E8E8">
+        <span class="tag tag-orange">CAPWAP</span>
+        <div style="flex:1">
+          <div style="font-family:'Libre Baskerville',Georgia,serif;font-size:0.95rem;font-weight:700;color:#111;line-height:1.45;margin-bottom:5px"><a href="session_log_20260329.html#ap" style="color:#111;text-decoration:none;border-bottom:1px solid #326891">AP3000 SSID config is cloud-only &mdash; no AP CLI for SSIDs</a></div>
+          <div style="font-family:'Libre Franklin',Arial,sans-serif;font-size:0.71rem;color:#777;line-height:1.8">Applied in: <a href="session_log_20260329.html#ap" style="color:#326891;text-decoration:none">Session Log &sect;AP3000-A onboarding</a> &middot; <a href="session_log_20260329.html#phase2" style="color:#326891;text-decoration:none">Session Log &sect;AP3000-B (Phase 2)</a> &middot; <a href="lab_20260329.html#exec" style="color:#326891;text-decoration:none">Lab Phase 1 AP step</a> &middot; <a href="onboarding.html#xiq" style="color:#326891;text-decoration:none">Onboarding &sect;XIQ confirmation</a> &nbsp;&mdash;&nbsp; <a href="standards_references.html#learn-capwap" style="color:#555;text-decoration:underline">RFC 5415 &nearr;</a></div>
+        </div>
+      </div>
+
+      <!-- AI Agent -->
+      <div style="display:flex;gap:14px;align-items:flex-start;padding:15px 0;border-bottom:1px solid #E8E8E8">
+        <span class="tag tag-violet">AI Agent</span>
+        <div style="flex:1">
+          <div style="font-family:'Libre Baskerville',Georgia,serif;font-size:0.95rem;font-weight:700;color:#111;line-height:1.45;margin-bottom:5px"><a href="agent_tutorial.html#modules" style="color:#111;text-decoration:none;border-bottom:1px solid #326891">State machine + LLM = domain-specific autonomous agent</a></div>
+          <div style="font-family:'Libre Franklin',Arial,sans-serif;font-size:0.71rem;color:#777;line-height:1.8">Applied in: <a href="agent_tutorial.html#modules" style="color:#326891;text-decoration:none">Agent Tutorial &sect;Module map</a> &middot; <a href="agent_tutorial.html#states" style="color:#326891;text-decoration:none">Agent Tutorial &sect;20-state machine</a> &middot; <a href="deploy.html" style="color:#326891;text-decoration:none">Deploy Guide (Local + Railway)</a> &middot; <a href="railway_tutorial.html" style="color:#326891;text-decoration:none">Railway Tutorial</a> &nbsp;&mdash;&nbsp; <a href="standards_references.html#learn-ai" style="color:#555;text-decoration:underline">AI Agents &nearr;</a></div>
+        </div>
+      </div>
+
+    </div>
+
+    <div style="margin-top:16px;font-family:'Libre Franklin',Arial,sans-serif;font-size:0.72rem;color:#888">
+      Full concept map with IEEE standards, RFCs, and Bertsekas &amp; Gallager citations &rarr; <a href="standards_references.html" style="color:#326891;text-decoration:none;font-weight:700">Standards &amp; References</a>
     </div>
   </div>
 
   <!-- Standards & References -->
-  <div style="margin-top:32px">
-    <p style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#a78bfa;margin-bottom:14px;padding-left:2px">&#9135;&#9135; Reference</p>
-    <div style="max-width:960px">
-      <a class="card" href="standards_references.html" style="border-color:#a78bfa;flex-direction:row;align-items:flex-start;gap:20px;display:flex">
-        <div style="font-size:2rem;flex-shrink:0">&#128214;</div>
-        <div style="flex:1">
-          <h2>Standards &amp; References</h2>
-          <p>Every concept from switch bring-up to WiFi client internet fix — mapped to its IEEE standard or IETF RFC, top-down from Layer 1 to cloud. Appendix links to MIT/Stanford courses, foundational textbooks, and primary standards bodies.</p>
-          <div class="cta">View standards map &rarr;</div>
-        </div>
-      </a>
-    </div>
+  <span class="section-label">Reference</span>
+  <div style="max-width:740px;margin-bottom:36px">
+    <a href="standards_references.html" style="display:flex;flex-direction:row;align-items:flex-start;gap:18px;border:1px solid #E2E2E2;text-decoration:none;background:#fff;padding:20px;transition:background 0.12s" onmouseover="this.style.background='#F7F7F5'" onmouseout="this.style.background='#fff'">
+      <div style="font-family:'Libre Baskerville',Georgia,serif;font-size:2rem;flex-shrink:0;color:#326891;line-height:1">&sect;</div>
+      <div style="flex:1">
+        <h2 style="font-family:'Libre Baskerville',Georgia,serif;font-size:1.0rem;font-weight:700;color:#111;margin-bottom:8px">Standards &amp; References</h2>
+        <p style="font-family:'Libre Franklin',Arial,sans-serif;color:#555;font-size:0.82rem;line-height:1.65">Every concept from switch bring-up to WiFi client internet fix &mdash; mapped to its IEEE standard or IETF RFC, top-down from Layer 1 to cloud. Appendix links to MIT/Stanford courses, foundational textbooks, and primary standards bodies.</p>
+        <div style="margin-top:12px;font-family:'Libre Franklin',Arial,sans-serif;font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#326891">View standards map &rarr;</div>
+      </div>
+    </a>
   </div>
 
   <hr class="divider">
 
   <!-- Owner quick-start: only shown when URL ends with #me -->
-  <div id="quickstart-card" style="display:none;margin-bottom:28px;background:#0d2b1f;border:1px solid #065f46;border-radius:10px;padding:22px 24px">
-    <p style="font-size:0.72rem;text-transform:uppercase;letter-spacing:0.1em;color:#34d399;font-weight:700;margin-bottom:12px">&#9733; Already on This Mac</p>
-    <ol style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:10px">
-      <li style="color:#6ee7b7;font-size:0.85rem"><span style="color:#34d399;font-weight:700">One command from anywhere:</span><br><code style="display:inline-block;margin-top:4px;background:#0f172a;color:#34d399;padding:4px 10px;border-radius:4px;font-size:0.82rem">~/5320-onboarding-agent/run.sh</code></li>
-      <li style="color:#6ee7b7;font-size:0.85rem;margin-top:10px;padding-top:10px;border-top:1px solid #065f46"><span style="color:#fcd34d;font-weight:700">&#9729; Railway web UI:</span><br>
-        <a href="https://5320-onboarding-production.up.railway.app" target="_blank" style="display:inline-block;margin-top:4px;background:#0f172a;color:#fcd34d;padding:4px 10px;border-radius:4px;font-size:0.82rem;text-decoration:none;border:1px solid #44330a">https://5320-onboarding-production.up.railway.app</a>
-        <br><span style="font-size:0.75rem;color:#92400e;margin-top:4px;display:inline-block">Bridge token: <code style="background:#0f172a;color:#fcd34d;padding:2px 6px;border-radius:3px;font-size:0.78rem">5320bridge</code></span>
+  <div id="quickstart-card" style="display:none;margin-bottom:28px;background:#F0FAF4;border:1px solid #86EFAC;padding:22px 24px">
+    <p style="font-family:'Libre Franklin',Arial,sans-serif;font-size:0.62rem;text-transform:uppercase;letter-spacing:0.16em;color:#166534;font-weight:700;margin-bottom:14px;border-bottom:1px solid #86EFAC;padding-bottom:8px">&#9733; Already on This Mac</p>
+    <ol style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:12px">
+      <li style="font-family:'Libre Franklin',Arial,sans-serif;color:#333;font-size:0.82rem"><span style="font-weight:700;color:#166534;text-transform:uppercase;font-size:0.62rem;letter-spacing:0.12em">One command from anywhere:</span><br><code style="display:inline-block;margin-top:6px;background:#111;color:#86EFAC;padding:5px 12px;font-size:0.82rem">~/5320-onboarding-agent/run.sh</code></li>
+      <li style="font-family:'Libre Franklin',Arial,sans-serif;color:#333;font-size:0.82rem;margin-top:4px;padding-top:12px;border-top:1px solid #86EFAC"><span style="font-weight:700;color:#92400E;text-transform:uppercase;font-size:0.62rem;letter-spacing:0.12em">Railway web UI:</span><br>
+        <a href="https://5320-onboarding-production.up.railway.app" target="_blank" style="display:inline-block;margin-top:6px;background:#111;color:#FCD34D;padding:5px 12px;font-size:0.82rem;text-decoration:none">https://5320-onboarding-production.up.railway.app</a>
+        <br><span style="font-size:0.72rem;color:#92400E;margin-top:5px;display:inline-block">Bridge token: <code style="background:#111;color:#FCD34D;padding:2px 7px;font-size:0.78rem">5320bridge</code></span>
       </li>
     </ol>
   </div>
@@ -251,9 +383,10 @@
 
   <div class="refs">
     <p>Built with Claude Code &mdash; March 2026</p>
-    <a href="https://github.com/shanraisshan/claude-code-best-practice" target="_blank">Claude Code Best Practices &#8599;</a>
-    <a href="https://github.com/affaan-m/everything-claude-code" target="_blank">Everything Claude Code &#8599;</a>
+    <a href="https://github.com/shanraisshan/claude-code-best-practice" target="_blank">Claude Code Best Practices &nearr;</a>
+    <a href="https://github.com/affaan-m/everything-claude-code" target="_blank">Everything Claude Code &nearr;</a>
   </div>
+
 </div>
 
 <script>
