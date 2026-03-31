@@ -138,6 +138,9 @@ td code { color: #89dceb; font-family: 'Courier New', monospace; font-size: 0.8r
   <button class="tab-btn" onclick="switchTab('ts',this)">
     Troubleshooting <span class="tab-pill">VPCS + STP</span>
   </button>
+  <button class="tab-btn" onclick="switchTab('loop',this)">
+    Loop Behaviour <span class="tab-pill">Why Some Pings Worked</span>
+  </button>
 </div>
 
 
@@ -805,6 +808,344 @@ td code { color: #89dceb; font-family: 'Courier New', monospace; font-size: 0.8r
 </div><!-- /tab-layout -->
 </div><!-- /tab-ts -->
 
+<!-- ════════════════════════════════════════
+     TAB 3 — LOOP BEHAVIOUR
+════════════════════════════════════════ -->
+<div id="tab-loop" class="tab-pane">
+<div class="tab-layout">
+
+  <!-- Sidebar -->
+  <nav class="sidebar" id="loop-sidebar">
+    <div class="grp">The Puzzle</div>
+    <a href="#loop-puzzle">The Question</a>
+    <a href="#loop-adjacent">Adjacent Pings — Why OK</a>
+    <a href="#loop-vpcs">VPCS Pings — Why Failed</a>
+    <div class="grp">Deep Dive</div>
+    <a href="#loop-arp-flow">ARP Flow Diagram</a>
+    <a href="#loop-fdb">FDB Flapping Explained</a>
+    <a href="#loop-rule">The Rule</a>
+    <div class="grp">Reference</div>
+    <a href="#loop-concepts">Concepts</a>
+    <a href="#loop-refs">RFCs &amp; Standards</a>
+  </nav>
+
+  <div class="content">
+
+    <div class="page-header">
+      <div class="kicker">Deep Dive &nbsp;&mdash;&nbsp; Layer 2 Loop Behaviour</div>
+      <h1>Why Some Pings Worked Without STP</h1>
+      <p style="color:#64748b;font-size:0.85rem;">Switch-to-switch management pings succeeded. VPCS client pings across the ring failed. Both ran on the same loop-ridden network — here is exactly why they behaved differently.</p>
+      <div class="meta-row">
+        <div class="meta-item"><strong>Topology</strong> 6-switch ring, no STP active</div>
+        <div class="meta-item"><strong>Observed</strong> March 30, 2026 during VPCS validation</div>
+      </div>
+    </div>
+
+    <!-- The Puzzle -->
+    <section id="loop-puzzle">
+      <h2>The Question</h2>
+      <p>After completing the lab configuration but <em>before</em> binding VLANs to STP, the following behaviour was observed:</p>
+      <table>
+        <tr><th>Test</th><th>Result</th><th>Surprising?</th></tr>
+        <tr><td>Core-1 ping Core-2 (adjacent, 1 hop)</td><td class="port-f">SUCCESS</td><td>No</td></tr>
+        <tr><td>Edge-1 ping Edge-2 (non-adjacent, 3 hops)</td><td class="warn" style="color:#fcd34d;font-weight:600;">UNRELIABLE</td><td>Yes</td></tr>
+        <tr><td>VLAN10-Client1 ping VLAN10-Client2</td><td class="port-b">FAILED</td><td>Yes — same VLAN, same config</td></tr>
+        <tr><td>VLAN20-Client1 ping VLAN20-Client2</td><td class="port-b">FAILED</td><td>Yes</td></tr>
+      </table>
+      <p>The instinct is: "if the network is looping, <em>nothing</em> should work." But that is not quite right. A loop does not break all traffic equally — it breaks traffic that depends on a stable, multi-hop unicast return path.</p>
+    </section>
+
+    <!-- Adjacent switch pings -->
+    <section id="loop-adjacent">
+      <h2>Why Adjacent Switch Pings Worked</h2>
+      <p>Every adjacent switch pair in the ring is <strong>directly connected by a single cable</strong>. Core-1 and Core-2 share a direct link on port 2. When Core-1 pings Core-2, the entire exchange happens on that one link — the loop is irrelevant.</p>
+
+      <h3>Step-by-step ARP + Ping flow (Core-1 → Core-2)</h3>
+      <div class="cmd-block">
+<span class="comment">Step 1 — Core-1 sends ARP broadcast: "Who has 10.10.30.2?"</span>
+<span class="out">  Frame exits Core-1 port 2 (direct link to Core-2)</span>
+<span class="out">  Frame also exits Core-1 port 1 (into the ring toward Edge-1)</span>
+
+<span class="comment">Step 2 — Core-2 receives ARP on port 2 (direct link)</span>
+<span class="out">  Core-2 records: Core-1 MAC is on port 2  → FDB entry stable ✓</span>
+<span class="out">  Core-2 sends unicast ARP reply → out port 2 → direct to Core-1</span>
+
+<span class="comment">Step 3 — Core-1 receives ARP reply on port 2 (direct link)</span>
+<span class="ok">  ARP resolves. Ping proceeds. Works every time. ✓</span>
+
+<span class="comment">Meanwhile — the broadcast is looping around the ring</span>
+<span class="out">  Core-1 port 1 → Edge-1 → Core-5 → Core-4 → Edge-2 → Core-2 port 1</span>
+<span class="warn">  Core-2 receives Core-1 MAC again — this time on port 1 (ring side)</span>
+<span class="warn">  FDB briefly flips: Core-1 MAC now on port 1 instead of port 2 ← noise</span>
+<span class="out">  But the ping reply was already sent and received. No impact.</span>
+      </div>
+
+      <div class="alert alert-green">
+        <strong>Key insight:</strong> The unicast ARP reply from Core-2 travels on the <em>direct link</em> back to Core-1 — one hop, no ambiguity, arrives before the loop noise can corrupt the FDB entry. The ping completes before the loop has time to cause damage.
+      </div>
+
+      <p>Think of it like asking someone next to you a question — they answer you directly before the echo of your voice comes back from the other end of the room. The echo exists, but it arrives too late to matter.</p>
+    </section>
+
+    <!-- VPCS failure -->
+    <section id="loop-vpcs">
+      <h2>Why VPCS Client Pings Failed</h2>
+      <p>Edge-1 and Edge-2 are <strong>not directly connected</strong>. Traffic between VLAN10-Client1 (Edge-1) and VLAN10-Client2 (Edge-2) must traverse 3 switches. With no STP, the ARP broadcast floods in <em>both</em> directions around the ring simultaneously.</p>
+
+      <h3>What happens without STP</h3>
+      <div class="cmd-block">
+<span class="comment">Client1 sends ARP broadcast: "Who has 10.10.10.12?"</span>
+<span class="out">  Edge-1 floods out port 1 AND port 2 simultaneously</span>
+
+<span class="comment">Path A (clockwise):  Edge-1 → Core-1 → Core-2 → Edge-2</span>
+<span class="out">  Arrives at Edge-2 port 1  → Edge-2 records: Client1 MAC on port 1</span>
+
+<span class="comment">Path B (counter-clockwise):  Edge-1 → Core-5 → Core-4 → Edge-2</span>
+<span class="out">  Arrives at Edge-2 port 2  → Edge-2 records: Client1 MAC on port 2  ← OVERWRITES</span>
+
+<span class="comment">Both copies continue looping — arriving repeatedly from alternating directions</span>
+<span class="warn">  Edge-2 FDB: Client1 MAC flaps between port 1 and port 2 every few milliseconds</span>
+
+<span class="comment">Client2 receives broadcast, sends unicast ARP reply to Client1 MAC</span>
+<span class="out">  Edge-2 checks FDB for Client1 MAC → points to port 2 (Core-4 side) at this instant</span>
+<span class="out">  Reply goes: Edge-2 → Core-4 → Core-5 → Edge-1</span>
+<span class="out">  Edge-1 receives reply on port 2... but its FDB has Client1 (its own VPC!) on port 2</span>
+<span class="err">  Edge-1 may forward the reply back OUT port 2 into the ring → reply loops</span>
+<span class="err">  Client1 never receives the ARP reply → ping fails → "host not reachable"</span>
+      </div>
+
+      <div class="alert alert-red">
+        <strong>Root mechanism:</strong> The loop causes <em>MAC address flapping</em> — the same source MAC arriving on alternating ports. Each arrival overwrites the FDB entry. When the unicast reply is sent, the FDB entry points in the wrong direction. The reply either loops endlessly or is forwarded away from the destination.
+      </div>
+    </section>
+
+    <!-- ARP Flow Diagram -->
+    <section id="loop-arp-flow">
+      <h2>ARP Flow — With vs Without STP</h2>
+      <div class="topo-wrap">
+        <svg viewBox="0 0 700 340" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:700px;display:block;margin:0 auto;">
+          <rect width="700" height="340" fill="#111827"/>
+
+          <!-- Labels -->
+          <text x="350" y="22" text-anchor="middle" font-size="11" fill="#64748b" font-family="sans-serif" font-weight="700">WITHOUT STP — ARP Broadcast Floods Both Directions</text>
+
+          <!-- Ring nodes (compact) -->
+          <rect x="290" y="38" width="70" height="32" rx="5" fill="#1e293b" stroke="#38bdf8" stroke-width="1.5"/>
+          <text x="325" y="57" text-anchor="middle" font-size="10" fill="#38bdf8" font-weight="bold" font-family="sans-serif">Core-1</text>
+
+          <rect x="290" y="180" width="70" height="32" rx="5" fill="#1e293b" stroke="#334155" stroke-width="1.5"/>
+          <text x="325" y="199" text-anchor="middle" font-size="10" fill="#e2e8f0" font-weight="bold" font-family="sans-serif">Core-2</text>
+
+          <rect x="80" y="108" width="70" height="32" rx="5" fill="#1e293b" stroke="#a78bfa" stroke-width="1.8"/>
+          <text x="115" y="127" text-anchor="middle" font-size="10" fill="#a78bfa" font-weight="bold" font-family="sans-serif">Edge-1</text>
+
+          <rect x="500" y="108" width="70" height="32" rx="5" fill="#1e293b" stroke="#a78bfa" stroke-width="1.8"/>
+          <text x="535" y="127" text-anchor="middle" font-size="10" fill="#a78bfa" font-weight="bold" font-family="sans-serif">Edge-2</text>
+
+          <rect x="140" y="220" width="70" height="32" rx="5" fill="#1e293b" stroke="#334155" stroke-width="1.5"/>
+          <text x="175" y="239" text-anchor="middle" font-size="10" fill="#e2e8f0" font-weight="bold" font-family="sans-serif">Core-5</text>
+
+          <rect x="440" y="220" width="70" height="32" rx="5" fill="#1e293b" stroke="#334155" stroke-width="1.5"/>
+          <text x="475" y="239" text-anchor="middle" font-size="10" fill="#e2e8f0" font-weight="bold" font-family="sans-serif">Core-4</text>
+
+          <!-- Path A arrows (clockwise) — blue -->
+          <defs>
+            <marker id="arrowB" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+              <path d="M0,0 L0,6 L8,3 z" fill="#3b82f6"/>
+            </marker>
+            <marker id="arrowR" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+              <path d="M0,0 L0,6 L8,3 z" fill="#ef4444"/>
+            </marker>
+            <marker id="arrowG" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+              <path d="M0,0 L0,6 L8,3 z" fill="#10b981"/>
+            </marker>
+          </defs>
+
+          <!-- Path A: Edge-1 → Core-1 → Core-2 → Edge-2 -->
+          <path d="M150,112 Q230,60 290,58" stroke="#3b82f6" stroke-width="2" fill="none" marker-end="url(#arrowB)"/>
+          <path d="M360,62 Q400,80 500,118" stroke="#3b82f6" stroke-width="2" fill="none" marker-end="url(#arrowB)"/>
+          <text x="255" y="55" font-size="9" fill="#3b82f6" font-family="sans-serif" font-weight="600">Path A</text>
+
+          <!-- Path B: Edge-1 → Core-5 → Core-4 → Edge-2 -->
+          <path d="M150,132 Q155,180 140,220" stroke="#ef4444" stroke-width="2" fill="none" marker-end="url(#arrowR)"/>
+          <path d="M210,236 L440,236" stroke="#ef4444" stroke-width="2" fill="none" marker-end="url(#arrowR)"/>
+          <path d="M510,220 Q530,180 535,140" stroke="#ef4444" stroke-width="2" fill="none" marker-end="url(#arrowR)"/>
+          <text x="305" y="252" font-size="9" fill="#ef4444" font-family="sans-serif" font-weight="600">Path B</text>
+
+          <!-- Client boxes -->
+          <rect x="30" y="108" width="52" height="32" rx="4" fill="#0f172a" stroke="#334155"/>
+          <text x="56" y="122" text-anchor="middle" font-size="8" fill="#89dceb" font-family="monospace">Client1</text>
+          <text x="56" y="133" text-anchor="middle" font-size="7.5" fill="#475569" font-family="monospace">.11</text>
+          <line x1="82" y1="124" x2="80" y2="124" stroke="#475569" stroke-width="1.5" stroke-dasharray="3,2"/>
+
+          <rect x="616" y="108" width="52" height="32" rx="4" fill="#0f172a" stroke="#334155"/>
+          <text x="642" y="122" text-anchor="middle" font-size="8" fill="#89dceb" font-family="monospace">Client2</text>
+          <text x="642" y="133" text-anchor="middle" font-size="7.5" fill="#475569" font-family="monospace">.12</text>
+          <line x1="570" y1="124" x2="616" y2="124" stroke="#475569" stroke-width="1.5" stroke-dasharray="3,2"/>
+
+          <!-- FDB flap annotation -->
+          <rect x="480" y="155" width="180" height="54" rx="4" fill="#1c0f0f" stroke="#dc2626"/>
+          <text x="570" y="172" text-anchor="middle" font-size="9" fill="#fca5a5" font-family="sans-serif" font-weight="700">Edge-2 FDB — FLAPPING</text>
+          <text x="570" y="186" text-anchor="middle" font-size="8.5" fill="#94a3b8" font-family="monospace">Client1 MAC → port 1 (A)</text>
+          <text x="570" y="199" text-anchor="middle" font-size="8.5" fill="#94a3b8" font-family="monospace">Client1 MAC → port 2 (B)</text>
+
+          <!-- Arrow from Edge-2 to annotation -->
+          <line x1="542" y1="140" x2="530" y2="158" stroke="#dc2626" stroke-width="1" stroke-dasharray="3,2"/>
+
+          <!-- Unicast reply goes wrong way -->
+          <path d="M500,130 Q440,190 475,220" stroke="#f59e0b" stroke-width="1.8" fill="none" stroke-dasharray="5,3" marker-end="url(#arrowG)"/>
+          <text x="450" y="185" font-size="8.5" fill="#f59e0b" font-family="sans-serif">Reply →</text>
+          <text x="440" y="196" font-size="8.5" fill="#f59e0b" font-family="sans-serif">wrong path</text>
+
+          <!-- Legend -->
+          <rect x="16" y="280" width="350" height="48" rx="4" fill="#0d1a2e" stroke="#1e293b"/>
+          <line x1="28" y1="296" x2="62" y2="296" stroke="#3b82f6" stroke-width="2"/>
+          <text x="68" y="300" font-size="8.5" fill="#93c5fd" font-family="sans-serif">ARP broadcast Path A (clockwise)</text>
+          <line x1="28" y1="312" x2="62" y2="312" stroke="#ef4444" stroke-width="2"/>
+          <text x="68" y="316" font-size="8.5" fill="#fca5a5" font-family="sans-serif">ARP broadcast Path B (counter-clockwise)</text>
+          <line x1="200" y1="296" x2="234" y2="296" stroke="#f59e0b" stroke-width="1.8" stroke-dasharray="5,3"/>
+          <text x="240" y="300" font-size="8.5" fill="#fcd34d" font-family="sans-serif">Unicast reply (wrong direction)</text>
+        </svg>
+      </div>
+    </section>
+
+    <!-- FDB Flapping -->
+    <section id="loop-fdb">
+      <h2>FDB Flapping — The Core Mechanism</h2>
+      <p>The MAC address table (FDB) is updated every time a frame arrives. In a loop, the same source MAC arrives from multiple ports in rapid succession. The switch keeps overwriting its own table:</p>
+      <table>
+        <tr><th>Time</th><th>Event</th><th>FDB Entry for Client1 MAC</th></tr>
+        <tr><td>t=0ms</td><td>Client1 ARP broadcast exits Edge-1 on ports 1 and 2</td><td>Edge-2: not yet learned</td></tr>
+        <tr><td>t=1ms</td><td>Path A arrives at Edge-2 port 1 first</td><td>Edge-2: Client1 → port 1</td></tr>
+        <tr><td>t=2ms</td><td>Path B arrives at Edge-2 port 2 (slightly longer path)</td><td>Edge-2: Client1 → <span class="port-b">port 2</span> (overwritten)</td></tr>
+        <tr><td>t=3ms</td><td>Looped copy of Path A arrives again at Edge-2 port 1</td><td>Edge-2: Client1 → <span class="port-b">port 1</span> (overwritten again)</td></tr>
+        <tr><td>t=4ms</td><td>Client2 sends unicast reply — FDB says port 2 at this instant</td><td>Reply exits Edge-2 port 2 → goes the wrong way</td></tr>
+        <tr><td>t=5ms</td><td>Looped copy arrives again — FDB flips back</td><td>Continuous instability</td></tr>
+      </table>
+      <p>This is called <strong>MAC address flapping</strong>. Enterprise switches detect it and generate log alerts. In a ring with no STP, every broadcast causes a flapping storm that lasts until the frame is consumed (it never is — Ethernet has no TTL).</p>
+      <div class="alert alert-yellow">
+        <strong>No TTL in Ethernet:</strong> Unlike IP packets (which have a TTL field that decrements at each hop and expires), Ethernet frames have no hop counter. A looping Ethernet broadcast circulates at wire speed forever — or until the switch is rebooted, the cable is unplugged, or STP blocks the loop.
+      </div>
+    </section>
+
+    <!-- The Rule -->
+    <section id="loop-rule">
+      <h2>The Rule — When a Loop Breaks Traffic</h2>
+      <table>
+        <tr><th>Scenario</th><th>Works without STP?</th><th>Reason</th></tr>
+        <tr>
+          <td>Adjacent switch ↔ switch (1 hop, direct cable)</td>
+          <td class="port-f">Usually yes</td>
+          <td>Unicast reply takes the direct link. Arrives before loop noise corrupts the FDB entry. Exchange completes in microseconds.</td>
+        </tr>
+        <tr>
+          <td>Non-adjacent switch ↔ switch (2+ hops)</td>
+          <td class="warn" style="color:#fcd34d;font-weight:600;">Unreliable</td>
+          <td>Reply must choose a path. FDB entry for sender may have been overwritten by loop traffic before reply arrives. Intermittent success possible.</td>
+        </tr>
+        <tr>
+          <td>VPCS client ↔ VPCS client (cross-ring, 4 hops)</td>
+          <td class="port-b">No</td>
+          <td>ARP broadcast floods both ring directions simultaneously. Edge switch FDB flaps before reply can be correctly routed back. Client never gets reply.</td>
+        </tr>
+        <tr>
+          <td>Broadcast storm threshold</td>
+          <td class="port-b">Eventually breaks everything</td>
+          <td>Unmitigated loops compound. Each loop adds another copy of every broadcast. CPU overloads. All traffic eventually fails. In EVE-NG the VM limits slow this effect.</td>
+        </tr>
+      </table>
+
+      <h3>Why EVE-NG masked the worst effects</h3>
+      <p>In a real physical network, an unmitigated ring loop causes a <strong>broadcast storm within seconds</strong> — link utilisation hits 100%, switch CPUs max out, and the entire network goes dark. In EVE-NG, virtual links have much lower throughput and the hypervisor throttles traffic, so the loop causes FDB flapping and selective failures rather than an immediate full outage. This is why some pings appeared to work — the storm was slow enough to allow short exchanges on direct links to complete.</p>
+    </section>
+
+    <!-- Concepts -->
+    <section id="loop-concepts">
+      <h2>Key Concepts</h2>
+      <div class="concept-grid">
+        <div class="concept-card">
+          <span class="ctag tag-con">MAC Flapping</span>
+          <h4>FDB Instability Under a Loop</h4>
+          <p>When the same MAC address is seen on two different ports in quick succession, the switch overwrites its FDB entry each time. The result is that unicast frames destined for that MAC are forwarded alternately to the wrong port. Enterprise switches log MAC flapping as a warning event.</p>
+        </div>
+        <div class="concept-card">
+          <span class="ctag tag-rfc">No TTL in Ethernet</span>
+          <h4>Why Loops Are Permanent</h4>
+          <p>IP packets carry a TTL field that decrements at each router hop and causes the packet to be discarded at zero. Ethernet frames have no equivalent. A looping frame circulates at full wire speed indefinitely — only STP, cable removal, or reboot can stop it.</p>
+          <a href="#loop-refs">&#8594; IEEE 802.1D — Bridge Loops</a>
+        </div>
+        <div class="concept-card">
+          <span class="ctag tag-ieee">IEEE 802.1D</span>
+          <h4>Why STP Was Invented</h4>
+          <p>STP (1985, Radia Perlman) was designed specifically to solve the loop problem in Ethernet bridged networks. It provides a distributed algorithm for switches to collectively agree on a loop-free tree topology — without manual configuration of which link to block.</p>
+          <a href="#loop-refs">&#8594; IEEE 802.1D-2004</a>
+        </div>
+        <div class="concept-card">
+          <span class="ctag tag-rfc">RFC 826</span>
+          <h4>ARP — The Loop's Victim</h4>
+          <p>ARP relies on broadcasting a request and receiving a single unicast reply. This protocol has zero tolerance for the MAC instability caused by a loop — if the FDB entry for the requester flaps between the request and the reply, the reply is misrouted and the entire name resolution fails.</p>
+          <a href="https://www.rfc-editor.org/rfc/rfc826" target="_blank">&#8594; RFC 826</a>
+        </div>
+        <div class="concept-card">
+          <span class="ctag tag-con">Broadcast Storm</span>
+          <h4>The Compounding Effect</h4>
+          <p>Each switch floods a broadcast out all ports in a VLAN. In a loop, every copy of the broadcast is flooded again, creating exponentially more copies. A single broadcast becomes thousands within milliseconds. This is a broadcast storm — it saturates links and overwhelms switch CPUs.</p>
+        </div>
+        <div class="concept-card">
+          <span class="ctag tag-exos">EVE-NG Effect</span>
+          <h4>Why the Lab Didn't Storm Immediately</h4>
+          <p>EVE-NG virtualises links at low speeds with CPU-based forwarding. The hypervisor throttles frame rates, so a loop that would storm a physical network in &lt;1 second instead causes slow FDB flapping and selective failures. This is useful for learning but can mask the true severity of a loop.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- References -->
+    <section id="loop-refs">
+      <h2>RFCs &amp; Standards</h2>
+      <table>
+        <tr><th>Reference</th><th>Title</th><th>What to Read</th></tr>
+        <tr>
+          <td><strong>IEEE 802.1D-2004</strong></td>
+          <td>Media Access Control Bridges — Spanning Tree</td>
+          <td>Section 17: Loop detection and STP algorithm. The original motivation for STP was exactly the broadcast storm scenario described in this tab. Radia Perlman's spanning tree algorithm is described in full.</td>
+        </tr>
+        <tr>
+          <td><strong>IEEE 802.1Q-2022</strong></td>
+          <td>Virtual Bridged LANs</td>
+          <td>Section on MSTP (Multiple Spanning Tree). Explains how modern switches handle per-VLAN loop protection and why explicit VLAN binding to STP instances is necessary in MSTP mode.</td>
+        </tr>
+        <tr>
+          <td><strong>RFC 826</strong></td>
+          <td>An Ethernet Address Resolution Protocol</td>
+          <td>The ARP specification. Read Section 3 (Packet Format) to understand why ARP replies are unicast and why MAC instability directly causes ARP failure.</td>
+        </tr>
+        <tr>
+          <td><strong>Perlman, R. (1985)</strong></td>
+          <td>An Algorithm for Distributed Computation of a Spanning Tree in an Extended LAN</td>
+          <td>The original academic paper that introduced spanning tree to networking. Radia Perlman ("Mother of the Internet") describes the loop problem and its solution from first principles. Accessible and historically significant.</td>
+        </tr>
+        <tr>
+          <td><strong>Cisco Press</strong></td>
+          <td>CCIE Routing and Switching — Chapter: Spanning Tree</td>
+          <td>Vendor-neutral deep dive into STP, RSTP, and MSTP mechanics including MAC flapping, TCN (Topology Change Notification), and how different vendors implement BPDU handling.</td>
+        </tr>
+      </table>
+
+      <h3>Further Reading</h3>
+      <ul style="padding-left:20px;font-size:0.85rem;color:#94a3b8;line-height:2.4;">
+        <li><a href="https://www.rfc-editor.org/rfc/rfc826" target="_blank" style="color:#38bdf8;">RFC 826 — ARP (IETF)</a></li>
+        <li><a href="https://standards.ieee.org/ieee/802.1D/3399/" target="_blank" style="color:#38bdf8;">IEEE 802.1D-2004 — Spanning Tree Protocol</a></li>
+        <li><a href="https://standards.ieee.org/ieee/802.1Q/10323/" target="_blank" style="color:#38bdf8;">IEEE 802.1Q-2022 — VLANs and MSTP</a></li>
+        <li><a href="https://dl.acm.org/doi/10.1145/319056.319051" target="_blank" style="color:#38bdf8;">Radia Perlman (1985) — Spanning Tree Original Paper (ACM)</a></li>
+      </ul>
+    </section>
+
+    <div class="foot">&copy; 2026 Khursheed Khan &nbsp;&middot;&nbsp; KK Collaboration &nbsp;&middot;&nbsp; All rights reserved</div>
+  </div>
+</div>
+</div><!-- /tab-loop -->
+
+
 
 <script>
 function switchTab(name, btn) {
@@ -834,6 +1175,7 @@ function setupSidebar(sidebarId, tabId) {
 }
 setupSidebar('lab-sidebar', 'tab-lab');
 setupSidebar('ts-sidebar', 'tab-ts');
+setupSidebar('loop-sidebar', 'tab-loop');
 </script>
 </body>
 </html>
