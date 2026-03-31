@@ -125,25 +125,49 @@ td code { color: #89dceb; font-family: 'Courier New', monospace; font-size: 0.8r
 /* ── Footer ── */
 .foot { margin-top:60px; padding-top:18px; border-top:1px solid #1e293b; font-size:0.72rem; color:#475569; text-align:center; }
 
-/* ── Hidden session banner ── */
-#session-banner { display:none; position:fixed; top:54px; left:0; right:0; z-index:200; background:#1a1040; border-bottom:3px solid #7c3aed; padding:14px 32px; }
-.session-banner-inner { max-width:960px; margin:0 auto; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; }
-.session-banner-inner .s-title { font-size:0.92rem; font-weight:700; color:#c4b5fd; }
-.session-banner-inner .s-sub { font-size:0.78rem; color:#7c3aed; }
-.session-banner-inner .s-close { font-size:0.72rem; color:#475569; cursor:pointer; text-decoration:underline; }
-#session-notes { display:none; }
-.session-notes-wrap { max-width:900px; margin:80px auto 40px; padding:0 32px; }
-.session-notes-wrap h2 { font-size:0.76rem; font-weight:700; color:#a78bfa; margin-bottom:16px; padding-bottom:8px; border-bottom:1px solid #1e293b; text-transform:uppercase; letter-spacing:0.08em; }
-.session-notes-wrap h3 { font-size:0.9rem; color:#e2e8f0; margin:20px 0 8px; }
-.session-notes-wrap p { font-size:0.86rem; color:#cbd5e1; margin-bottom:8px; }
-.sn-table { width:100%; border-collapse:collapse; font-size:0.82rem; margin-bottom:16px; }
-.sn-table th { text-align:left; padding:7px 12px; background:#1e293b; color:#94a3b8; font-size:0.66rem; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; }
-.sn-table td { padding:7px 12px; border-bottom:1px solid #1e293b; color:#cbd5e1; vertical-align:top; }
-.sn-cmd { background:#1e293b; border-radius:4px; padding:12px 16px; font-family:"Courier New",monospace; font-size:0.79rem; line-height:1.9; overflow-x:auto; margin-bottom:12px; }
-.sn-cmd .c { color:#89dceb; } .sn-cmd .ok { color:#6ee7b7; } .sn-cmd .err { color:#fca5a5; }
 .sn-timeline { list-style:none; border-left:2px solid #1e293b; padding-left:20px; }
 .sn-timeline li { position:relative; padding:6px 0 14px; font-size:0.84rem; color:#cbd5e1; }
 .sn-timeline li::before { content:""; position:absolute; left:-25px; top:10px; width:8px; height:8px; border-radius:50%; background:#7c3aed; }
+
+/* ── Session banner (#me) ── */
+#session-banner{display:none;position:fixed;top:54px;left:0;right:0;z-index:300;
+  background:#2e1065;border-bottom:3px solid #7c3aed;padding:10px 28px;}
+.sb-inner{max-width:960px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+.sb-text .sb-title{font-size:0.88rem;font-weight:700;color:#c4b5fd;}
+.sb-text .sb-sub{font-size:0.74rem;color:#7c3aed;margin-top:2px;}
+.sb-actions{display:flex;gap:12px;align-items:center;}
+.sb-btn{font-size:0.72rem;font-weight:700;padding:5px 14px;border-radius:4px;border:none;cursor:pointer;background:#7c3aed;color:#fff;}
+.sb-btn:hover{background:#6d28d9;}
+.sb-close{font-size:0.72rem;color:#7c3aed;cursor:pointer;text-decoration:underline;}
+
+/* ── Session modal ── */
+#session-modal{display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:400;
+  background:rgba(0,0,0,0.75);overflow-y:auto;}
+.sm-box{background:#0f172a;max-width:820px;margin:60px auto;border-radius:10px;
+  border:1px solid #4c1d95;overflow:hidden;}
+.sm-head{background:#2e1065;padding:20px 28px;display:flex;align-items:flex-start;justify-content:space-between;}
+.sm-head h2{font-size:1.0rem;font-weight:700;color:#c4b5fd;margin:0;}
+.sm-head p{font-size:0.76rem;color:#7c3aed;margin:4px 0 0;}
+.sm-head .sm-x{font-size:1.2rem;color:#7c3aed;cursor:pointer;line-height:1;padding:0 4px;}
+.sm-head .sm-x:hover{color:#c4b5fd;}
+.sm-body{padding:24px 28px;}
+.sm-body h3{font-size:0.8rem;font-weight:700;color:#a78bfa;text-transform:uppercase;letter-spacing:0.08em;
+  margin:20px 0 10px;padding-bottom:6px;border-bottom:1px solid #1e293b;}
+.sm-body h3:first-child{margin-top:0;}
+.sm-body p{font-size:0.84rem;color:#cbd5e1;margin-bottom:8px;}
+.sm-table{width:100%;border-collapse:collapse;font-size:0.81rem;margin-bottom:16px;}
+.sm-table th{text-align:left;padding:7px 12px;background:#1e293b;color:#94a3b8;font-size:0.65rem;
+  font-weight:700;text-transform:uppercase;letter-spacing:0.1em;}
+.sm-table td{padding:7px 12px;border-bottom:1px solid #1e293b;color:#cbd5e1;vertical-align:top;}
+.sm-table td:first-child{color:#94a3b8;white-space:nowrap;width:140px;}
+.sm-cmd{background:#1e293b;border-radius:5px;padding:12px 16px;font-family:"Courier New",monospace;
+  font-size:0.79rem;line-height:1.9;overflow-x:auto;margin-bottom:12px;}
+.sm-cmd .c{color:#89dceb;display:block;} .sm-cmd .ok{color:#6ee7b7;display:block;}
+.sm-timeline{list-style:none;padding:0;border-left:2px solid #4c1d95;padding-left:20px;}
+.sm-timeline li{position:relative;padding:4px 0 12px;font-size:0.83rem;color:#cbd5e1;}
+.sm-timeline li::before{content:"";position:absolute;left:-25px;top:10px;
+  width:8px;height:8px;border-radius:50%;background:#7c3aed;}
+.sm-footer{padding:14px 28px;border-top:1px solid #1e293b;font-size:0.71rem;color:#475569;text-align:center;}
 </style>
 </head>
 <body>
@@ -1268,10 +1292,7 @@ setupSidebar('loop-sidebar', 'tab-loop');
 function checkHash() {
   if (window.location.hash === '#me') {
     var b = document.getElementById('session-banner');
-    var n = document.getElementById('session-notes');
-    if (b) b.style.display = 'block';
-    if (n) n.style.display = 'block';
-    if (b) window.scrollTo(0, 0);
+    if (b) { b.style.display = 'block'; window.scrollTo(0, 0); }
   }
 }
 window.addEventListener('hashchange', checkHash);
@@ -1280,70 +1301,71 @@ document.addEventListener('DOMContentLoaded', checkHash);
 setTimeout(checkHash, 300);
 </script>
 
-<!-- ════ HIDDEN SESSION BANNER (visible at #me) ════ -->
+<!-- ════ #me HIDDEN SESSION (banner + modal) ════ -->
 <div id="session-banner">
-  <div class="session-banner-inner">
-    <div>
-      <div class="s-title">Troubleshooting with Khursheed &nbsp;&mdash;&nbsp; March 30, 2026 &nbsp;·&nbsp; 5:30 pm Pacific</div>
-      <div class="s-sub">Topic: STP misconfiguration in a 6-switch EXOS ring &nbsp;·&nbsp; Platform: EVE-NG &nbsp;·&nbsp; Resolved live</div>
+  <div class="sb-inner">
+    <div class="sb-text">
+      <div class="sb-title">Troubleshooting with Khursheed &nbsp;&mdash;&nbsp; March 30, 2026 &nbsp;·&nbsp; 5:30 pm Pacific</div>
+      <div class="sb-sub">Topic: STP misconfiguration in a 6-switch EXOS ring &nbsp;·&nbsp; EVE-NG &nbsp;·&nbsp; Resolved live</div>
     </div>
-    <span class="s-close" onclick="document.getElementById('session-banner').style.display='none'; document.getElementById('session-notes').style.display='none';">✕ close</span>
+    <div class="sb-actions">
+      <button class="sb-btn" onclick="document.getElementById('session-modal').style.display='block'">View session log</button>
+      <span class="sb-close" onclick="document.getElementById('session-banner').style.display='none'">&#10005; dismiss</span>
+    </div>
   </div>
 </div>
 
-<div id="session-notes">
-  <div class="session-notes-wrap">
+<div id="session-modal" onclick="if(event.target===this)this.style.display='none'">
+  <div class="sm-box">
+    <div class="sm-head">
+      <div>
+        <h2>Session Log &nbsp;&mdash;&nbsp; March 30, 2026 &nbsp;·&nbsp; 5:30 pm Pacific</h2>
+        <p>EXOS Layer 2 Ring &nbsp;·&nbsp; EVE-NG &nbsp;·&nbsp; 6 Switches &nbsp;·&nbsp; STP Troubleshooting</p>
+      </div>
+      <span class="sm-x" onclick="document.getElementById('session-modal').style.display='none'">&#10005;</span>
+    </div>
+    <div class="sm-body">
 
-    <h2>Private Session Log &nbsp;&mdash;&nbsp; March 30, 2026 &nbsp;·&nbsp; 5:30 pm Pacific</h2>
+      <h3>Session Summary</h3>
+      <table class="sm-table">
+        <tr><td>Date / Time</td><td>March 30, 2026 &nbsp;&mdash;&nbsp; 5:30 pm Pacific</td></tr>
+        <tr><td>Platform</td><td>EVE-NG — 6 &times; ExtremeOs EXOS SwitchEngine VMs</td></tr>
+        <tr><td>Topology</td><td>6-switch ring: Core-1/2/4/5 (backbone) + Edge-1 / Edge-2 (clients)</td></tr>
+        <tr><td>VLANs</td><td>Data (10) &nbsp;/ Voice (20) &nbsp;/ Kh_Mgmt (30)</td></tr>
+        <tr><td>Clients</td><td>6 &times; VPCS — 2 per VLAN, one on each edge switch</td></tr>
+        <tr><td>Symptom</td><td>"host not reachable" — VPCS cross-ring pings failing</td></tr>
+        <tr><td>Root Cause</td><td>STP bound to no VLANs — <code style="color:#89dceb">Ports: (none)</code>, <code style="color:#89dceb">Participating VLANs: (none)</code></td></tr>
+        <tr><td>Fix</td><td><code style="color:#89dceb">configure stpd s0 add vlan &lt;name&gt; ports 1,2</code> on all 6 switches</td></tr>
+        <tr><td>Outcome</td><td>Core-4 port 2 blocked by STP &nbsp;&mdash;&nbsp; pings restored on all VLANs &nbsp;&#10003;</td></tr>
+      </table>
 
-    <h3>What Was Worked On</h3>
-    <p>Live troubleshooting session with Khursheed Khan on a 6-switch Extreme EXOS ring topology running in EVE-NG. After completing the full lab build (Steps 1–8), VPCS client pings across the ring were failing. The session investigated root cause, fixed the issue, and explained the underlying Layer 2 loop mechanics in detail.</p>
+      <h3>Investigation Timeline</h3>
+      <ul class="sm-timeline">
+        <li><strong>Confirmed VPCS IPs set correctly</strong> — <code style="color:#89dceb">show ip</code> on each VPC passed</li>
+        <li><strong>Ping attempted, failed</strong> — "host (10.10.10.12) not reachable"</li>
+        <li><strong>Port config verified OK</strong> — Edge-1 port 3 untagged in Data VLAN, port active</li>
+        <li><strong>ARP asymmetry found</strong> — Client2 had Client1 in ARP table, Client1 ARP was empty. Classic loop signature.</li>
+        <li><strong>FDB on Edge-2</strong> — Client1 MAC learned on port 2 (trunk, wrong direction)</li>
+        <li><strong>Root cause</strong> — <code style="color:#89dceb">show stpd detail</code> on Edge-2: Ports: (none), Participating VLANs: (none). EXOS requires explicit VLAN binding — unlike Cisco PVST+.</li>
+        <li><strong>Fix applied on all 6 switches</strong> — <code style="color:#89dceb">configure stpd s0 add vlan Data/Voice/Kh_Mgmt ports 1,2</code></li>
+        <li><strong>STP converged (~30s)</strong> — Core-4 port 2 in BLK state, all others Forwarding</li>
+        <li><strong>Ping restored</strong> — <code style="color:#89dceb">clear fdb</code> then ping succeeded &#10003;</li>
+      </ul>
 
-    <table class="sn-table">
-      <tr><th>Item</th><th>Detail</th></tr>
-      <tr><td>Date / Time</td><td>March 30, 2026 — 5:30 pm Pacific</td></tr>
-      <tr><td>Platform</td><td>EVE-NG — 6 × ExtremeOs EXOS SwitchEngine VMs</td></tr>
-      <tr><td>Topology</td><td>6-switch ring: Core-1/2/4/5 (backbone) + Edge-1/Edge-2 (clients)</td></tr>
-      <tr><td>VLANs</td><td>Data (10) / Voice (20) / Kh_Mgmt (30) — all trunked on ports 1,2</td></tr>
-      <tr><td>Clients</td><td>6 × VPCS — 2 per VLAN, one on each edge switch</td></tr>
-      <tr><td>Symptom</td><td>VPCS cross-ring ping failing: "host not reachable"</td></tr>
-      <tr><td>Root Cause</td><td>STP bound to no VLANs — Ports: (none), Participating VLANs: (none)</td></tr>
-      <tr><td>Fix</td><td><code>configure stpd s0 add vlan &lt;name&gt; ports 1,2</code> on all 6 switches</td></tr>
-      <tr><td>Outcome</td><td>Core-4 port 2 blocked by STP, pings restored on all VLANs</td></tr>
-    </table>
-
-    <h3>Investigation Timeline</h3>
-    <ul class="sn-timeline">
-      <li><strong>Step 1 — Confirmed VPCS IPs set correctly</strong> (<code>show ip</code> on each VPC)</li>
-      <li><strong>Step 2 — Ping attempted, failed:</strong> "host (10.10.10.12) not reachable"</li>
-      <li><strong>Step 3 — Port config verified OK:</strong> Edge-1 port 3 untagged in Data VLAN, port active</li>
-      <li><strong>Step 4 — ARP asymmetry found:</strong> Client2 had Client1 in ARP table, but Client1 ARP was empty — one-way traffic, classic loop signature</li>
-      <li><strong>Step 5 — FDB check on Edge-2:</strong> Client1 MAC (00:50:79:66:68:07) learned on port 2 (trunk) — wrong direction</li>
-      <li><strong>Step 6 — Root cause:</strong> <code>show stpd detail</code> on Edge-2 revealed Ports: (none), Participating VLANs: (none) — EXOS requires explicit VLAN binding</li>
-      <li><strong>Step 7 — Fix applied on all 6 switches:</strong> <code>configure stpd s0 add vlan Data/Voice/Kh_Mgmt ports 1,2</code></li>
-      <li><strong>Step 8 — STP converged:</strong> Core-4 port 2 in BLK state, all others Forwarding</li>
-      <li><strong>Step 9 — Ping restored:</strong> <code>clear fdb</code> then <code>ping 10.10.10.12</code> — success ✓</li>
-    </ul>
-
-    <h3>Fix Applied (all 6 switches)</h3>
-    <div class="sn-cmd">
+      <h3>Fix Commands</h3>
+      <div class="sm-cmd">
 <span class="c">configure stpd s0 add vlan Data ports 1,2</span>
 <span class="c">configure stpd s0 add vlan Voice ports 1,2</span>
 <span class="c">configure stpd s0 add vlan Kh_Mgmt ports 1,2</span>
 <span class="c">save configuration</span>
-<span class="ok"># After ~30s: Core-4 port 2 → BLK  ← ring loop broken ✓</span>
-<span class="c">clear fdb</span>
-<span class="c">ping 10.10.10.12</span>
-<span class="ok">84 bytes from 10.10.10.12 icmp_seq=1 ttl=64 time=x.xxx ms   ✓</span>
+<span class="ok"># ~30s later: Core-4 port 2 → BLK  ✓  then: clear fdb</span>
+      </div>
+
+      <h3>Key Lesson</h3>
+      <p>Unlike Cisco IOS (PVST+ runs automatically per VLAN), EXOS requires explicit VLAN binding to a Spanning Tree Domain. STP showing "ENABLED" does not mean it is protecting your VLANs. Always verify <code style="color:#89dceb">show stpd detail</code> shows participating VLANs and ports after config.</p>
+
     </div>
-
-    <h3>Key Lesson</h3>
-    <p>Unlike Cisco IOS (PVST+ runs automatically per VLAN), EXOS uses Spanning Tree Domains (STPDs) that require explicit VLAN and port binding. STP showing "ENABLED" in the output is misleading — if no VLANs are bound, it protects nothing. Always verify <code>show stpd detail</code> shows <code>Participating Vlans</code> after config.</p>
-
-    <h3>Also Discussed</h3>
-    <p>Why adjacent switch-to-switch pings worked without STP: the unicast ARP reply travels on the direct link between adjacent switches (1 hop) and completes before loop noise corrupts the FDB. Cross-ring VPCS pings (4 hops) fail because the broadcast floods both ring directions, causing FDB flapping that misroutes the unicast reply.</p>
-
-    <div style="margin-top:24px;padding-top:16px;border-top:1px solid #1e293b;font-size:0.72rem;color:#475569;">&copy; 2026 Khursheed Khan &nbsp;&middot;&nbsp; Private session log &nbsp;&middot;&nbsp; All rights reserved</div>
+    <div class="sm-footer">&copy; 2026 Khursheed Khan &nbsp;&middot;&nbsp; Private session log &nbsp;&middot;&nbsp; All rights reserved</div>
   </div>
 </div>
 </body>
