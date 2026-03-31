@@ -1267,19 +1267,17 @@ setupSidebar('loop-sidebar', 'tab-loop');
 // Hidden session reveal — navigate to #me to show
 function checkHash() {
   if (window.location.hash === '#me') {
-    document.getElementById('session-banner').style.display = 'block';
-    document.getElementById('session-notes').style.display = 'block';
-    window.scrollTo(0, 0);
+    var b = document.getElementById('session-banner');
+    var n = document.getElementById('session-notes');
+    if (b) b.style.display = 'block';
+    if (n) n.style.display = 'block';
+    if (b) window.scrollTo(0, 0);
   }
 }
 window.addEventListener('hashchange', checkHash);
-// Robust init: run immediately, on DOMContentLoaded, and after a short delay
-// to handle both local file:// and served environments
-checkHash();
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', checkHash);
-}
-setTimeout(checkHash, 200);
+// Element is injected after this script tag — must wait for full DOM parse
+document.addEventListener('DOMContentLoaded', checkHash);
+setTimeout(checkHash, 300);
 </script>
 
 <!-- ════ HIDDEN SESSION BANNER (visible at #me) ════ -->
