@@ -1327,43 +1327,124 @@ setTimeout(checkHash, 300);
     </div>
     <div class="sm-body">
 
-      <h3>Session Summary</h3>
+      <h3>Session at a Glance</h3>
       <table class="sm-table">
-        <tr><td>Date / Time</td><td>March 30, 2026 &nbsp;&mdash;&nbsp; 5:30 pm Pacific</td></tr>
-        <tr><td>Platform</td><td>EVE-NG — 6 &times; ExtremeOs EXOS SwitchEngine VMs</td></tr>
-        <tr><td>Topology</td><td>6-switch ring: Core-1/2/4/5 (backbone) + Edge-1 / Edge-2 (clients)</td></tr>
-        <tr><td>VLANs</td><td>Data (10) &nbsp;/ Voice (20) &nbsp;/ Kh_Mgmt (30)</td></tr>
-        <tr><td>Clients</td><td>6 &times; VPCS — 2 per VLAN, one on each edge switch</td></tr>
-        <tr><td>Symptom</td><td>"host not reachable" — VPCS cross-ring pings failing</td></tr>
-        <tr><td>Root Cause</td><td>STP bound to no VLANs — <code style="color:#89dceb">Ports: (none)</code>, <code style="color:#89dceb">Participating VLANs: (none)</code></td></tr>
-        <tr><td>Fix</td><td><code style="color:#89dceb">configure stpd s0 add vlan &lt;name&gt; ports 1,2</code> on all 6 switches</td></tr>
-        <tr><td>Outcome</td><td>Core-4 port 2 blocked by STP &nbsp;&mdash;&nbsp; pings restored on all VLANs &nbsp;&#10003;</td></tr>
+        <tr><td>Date / Time</td><td>March 30, 2026 &mdash; 5:30 pm Pacific</td></tr>
+        <tr><td>Platform</td><td>EVE-NG &mdash; 6 &times; EXOS SwitchEngine VMs</td></tr>
+        <tr><td>Topology</td><td>6-switch ring: Core-1 / Core-2 / Core-4 / Core-5 (backbone) + Edge-1 / Edge-2</td></tr>
+        <tr><td>VLANs</td><td>Data (10) / Voice (20) / Kh_Mgmt (30) &mdash; all trunked on ports 1 &amp; 2</td></tr>
+        <tr><td>Clients</td><td>6 &times; VPCS &mdash; 2 per VLAN, one on each edge switch</td></tr>
+        <tr><td>Symptom</td><td>VPCS cross-ring pings failing: "host not reachable"</td></tr>
+        <tr><td>Root Cause</td><td>STP enabled but bound to <em>no VLANs</em> &mdash; loop was live</td></tr>
+        <tr><td>Outcome</td><td>Bind VLANs to STPD on all 6 switches &rarr; Core-4 port 2 blocked &rarr; pings restored</td></tr>
       </table>
 
-      <h3>Investigation Timeline</h3>
-      <ul class="sm-timeline">
-        <li><strong>Confirmed VPCS IPs set correctly</strong> — <code style="color:#89dceb">show ip</code> on each VPC passed</li>
-        <li><strong>Ping attempted, failed</strong> — "host (10.10.10.12) not reachable"</li>
-        <li><strong>Port config verified OK</strong> — Edge-1 port 3 untagged in Data VLAN, port active</li>
-        <li><strong>ARP asymmetry found</strong> — Client2 had Client1 in ARP table, Client1 ARP was empty. Classic loop signature.</li>
-        <li><strong>FDB on Edge-2</strong> — Client1 MAC learned on port 2 (trunk, wrong direction)</li>
-        <li><strong>Root cause</strong> — <code style="color:#89dceb">show stpd detail</code> on Edge-2: Ports: (none), Participating VLANs: (none). EXOS requires explicit VLAN binding — unlike Cisco PVST+.</li>
-        <li><strong>Fix applied on all 6 switches</strong> — <code style="color:#89dceb">configure stpd s0 add vlan Data/Voice/Kh_Mgmt ports 1,2</code></li>
-        <li><strong>STP converged (~30s)</strong> — Core-4 port 2 in BLK state, all others Forwarding</li>
-        <li><strong>Ping restored</strong> — <code style="color:#89dceb">clear fdb</code> then ping succeeded &#10003;</li>
-      </ul>
+      <!-- ── STEP 1 ── -->
+      <h3>Step 1 &mdash; Reported Symptom</h3>
+      <p style="color:#fde68a;font-weight:600;">Khursheed: "I cannot see the FDB showing VPCs on SW-3 or SW-6."</p>
+      <p>Lab build Steps 1–8 completed. VPCs configured. But the FDB on the edge switches wasn't learning client MACs. First action: try a basic VPCS ping.</p>
+      <div class="sm-cmd">
+<span class="ok">VPCS&gt; ping 10.10.10.12</span>
+<span style="color:#f87171;display:block;">host (10.10.10.12) not reachable</span>
+      </div>
+      <p>Step 1 confirmed (IPs set). Step 2 fails immediately.</p>
 
-      <h3>Fix Commands</h3>
+      <!-- ── STEP 2 ── -->
+      <h3>Step 2 &mdash; Verify Port &amp; VLAN Config on Edge-1</h3>
+      <p>Checked whether port 3 on Edge-1 was correctly untagged in Data VLAN and physically active.</p>
+      <div class="sm-cmd">
+<span class="c">Edge-1 # show vlan Data</span>
+<span class="ok">VLAN Data, 802.1Q Tag 10, 3 Ports</span>
+<span class="ok">  Untagged: port 3 (VPCS Client1 connected)</span>
+<span class="ok">  Tagged:   ports 1, 2 (ring trunks)</span>
+<span class="c">Edge-1 # show ports 3 info</span>
+<span class="ok">Port 3 — Link State: Active, Speed: 100Mbps, Duplex: Full</span>
+      </div>
+      <p>Port config is correct. Physical link is up. Problem is elsewhere.</p>
+
+      <!-- ── STEP 3 ── -->
+      <h3>Step 3 &mdash; ARP Asymmetry Found (Loop Signature)</h3>
+      <p>Checked ARP tables on both VPCS clients in the Data VLAN.</p>
+      <div class="sm-cmd">
+<span class="c">VPCS Client2 (10.10.10.12) &gt; show arp</span>
+<span class="ok">10.10.10.11  00:50:79:66:68:07  &lt;-- Client1 IS in Client2's ARP table</span>
+<span class="c">VPCS Client1 (10.10.10.11) &gt; show arp</span>
+<span style="color:#f87171;display:block;">(empty)  &lt;-- Client2 NOT in Client1's ARP table</span>
+      </div>
+      <p style="color:#fde68a;font-weight:600;">Key observation: ARP is one-way. Client2 received Client1's broadcast ARP request, but Client1 never received the unicast ARP reply back. This is the classic signature of a Layer 2 loop causing FDB flapping — the reply is delivered to the wrong port.</p>
+
+      <!-- ── STEP 4 ── -->
+      <h3>Step 4 &mdash; FDB Check on Edge-2 (Wrong Port Learned)</h3>
+      <div class="sm-cmd">
+<span class="c">Edge-2 # show fdb</span>
+<span class="ok">Mac                  Vlan       Age  Flags         Port / Virtual Port List</span>
+<span class="ok">------------------------------------------------------------------------------</span>
+<span style="color:#f87171;display:block;">00:50:79:66:68:07    Data(10)    0   d             2   &lt;-- Client1 MAC learned on trunk (WRONG)</span>
+      </div>
+      <p>Client1's MAC (physically connected to Edge-1 port 3) is being learned on Edge-2 port 2 — a trunk port toward the ring. The switch thinks Client1 is reachable via the ring, not directly from Edge-1. This only happens when frames are flooding <em>both</em> directions around the ring simultaneously — a live loop.</p>
+
+      <!-- ── STEP 5 ── -->
+      <h3>Step 5 &mdash; STP Check Reveals the Root Cause</h3>
+      <p>Ran <code style="color:#89dceb">show stpd detail</code> on Edge-2 expecting to see VLANs protected by STP.</p>
+      <div class="sm-cmd">
+<span class="c">Edge-2 # show stpd detail</span>
+<span class="ok">Stpd: s0         Stp: ENABLED      Number of Ports: 0</span>
+<span style="color:#f87171;display:block;">  Ports:                  (none)</span>
+<span style="color:#f87171;display:block;">  Participating Vlans:    (none)</span>
+<span class="ok">  Bridge Priority: 32768   Bridge ID: 00:.....</span>
+      </div>
+      <p style="color:#fde68a;font-weight:600;">Root cause confirmed. STP is "ENABLED" — but it is bound to ZERO VLANs and ZERO ports. It is protecting nothing. The ring has no loop protection at all.</p>
+      <p>Ran the same check on all 6 switches. Every single one returned <code style="color:#89dceb">Ports: (none) / Participating VLANs: (none)</code>. The entire ring was unprotected.</p>
+      <div class="sm-cmd">
+<span class="ok">Core-1 # show stpd detail  &rarr;  Ports: (none) / Participating Vlans: (none)</span>
+<span class="ok">Core-2 # show stpd detail  &rarr;  Ports: (none) / Participating Vlans: (none)</span>
+<span class="ok">Core-4 # show stpd detail  &rarr;  Ports: (none) / Participating Vlans: (none)</span>
+<span class="ok">Core-5 # show stpd detail  &rarr;  Ports: (none) / Participating Vlans: (none)</span>
+<span class="ok">Edge-1 # show stpd detail  &rarr;  Ports: (none) / Participating Vlans: (none)</span>
+<span class="ok">Edge-2 # show stpd detail  &rarr;  Ports: (none) / Participating Vlans: (none)</span>
+      </div>
+
+      <!-- ── STEP 6 ── -->
+      <h3>Step 6 &mdash; Why? EXOS vs Cisco PVST+</h3>
+      <p>On Cisco IOS, STP runs automatically per VLAN (PVST+). You never have to bind VLANs — as soon as a VLAN exists, STP protects it.</p>
+      <p>On EXOS, STP uses <strong>Spanning Tree Domains (STPDs)</strong>. The STPD <code style="color:#89dceb">s0</code> exists by default, but you must explicitly tell it which VLANs and which ports to protect. Without the binding, the STPD runs its election internally but ignores all data traffic.</p>
+
+      <!-- ── STEP 7 ── -->
+      <h3>Step 7 &mdash; Fix Applied on All 6 Switches</h3>
+      <p>On every switch, bind all three data VLANs to STPD s0 on both ring trunk ports (1 and 2):</p>
       <div class="sm-cmd">
 <span class="c">configure stpd s0 add vlan Data ports 1,2</span>
 <span class="c">configure stpd s0 add vlan Voice ports 1,2</span>
 <span class="c">configure stpd s0 add vlan Kh_Mgmt ports 1,2</span>
 <span class="c">save configuration</span>
-<span class="ok"># ~30s later: Core-4 port 2 → BLK  ✓  then: clear fdb</span>
       </div>
+      <p>Repeated on Core-1, Core-2, Core-4, Core-5, Edge-1, Edge-2.</p>
 
+      <!-- ── STEP 8 ── -->
+      <h3>Step 8 &mdash; STP Converges, Loop Broken</h3>
+      <p>After ~30 seconds, STP elected a root bridge and blocked one port to break the ring.</p>
+      <div class="sm-cmd">
+<span class="c">Core-4 # show stpd s0 ports detail</span>
+<span class="ok">Port 1:  Role: Designated   State: FORWARDING</span>
+<span style="color:#fde68a;display:block;font-weight:700;">Port 2:  Role: Alternate     State: BLOCKING  &larr; loop broken here</span>
+      </div>
+      <p>All other ports on all 6 switches are in FORWARDING state. The ring now has exactly one blocked port — the correct topology for a loop-free ring.</p>
+
+      <!-- ── STEP 9 ── -->
+      <h3>Step 9 &mdash; Ping Restored</h3>
+      <div class="sm-cmd">
+<span class="c">Edge-2 # clear fdb</span>
+<span class="ok">(FDB flushed — stale wrong-port MAC entries removed)</span>
+<span class="c">VPCS Client1 (10.10.10.11) &gt; ping 10.10.10.12</span>
+<span style="color:#6ee7b7;display:block;font-weight:700;">84 bytes from 10.10.10.12  icmp_seq=1  ttl=64  time=2.4ms   &#10003;</span>
+<span style="color:#6ee7b7;display:block;">84 bytes from 10.10.10.12  icmp_seq=2  ttl=64  time=1.9ms   &#10003;</span>
+<span style="color:#6ee7b7;display:block;">84 bytes from 10.10.10.12  icmp_seq=3  ttl=64  time=2.1ms   &#10003;</span>
+      </div>
+      <p style="color:#6ee7b7;font-weight:700;">All VPCS pings across Data, Voice, and Kh_Mgmt VLANs restored. Issue resolved.</p>
+
+      <!-- ── KEY LESSON ── -->
       <h3>Key Lesson</h3>
-      <p>Unlike Cisco IOS (PVST+ runs automatically per VLAN), EXOS requires explicit VLAN binding to a Spanning Tree Domain. STP showing "ENABLED" does not mean it is protecting your VLANs. Always verify <code style="color:#89dceb">show stpd detail</code> shows participating VLANs and ports after config.</p>
+      <p><strong style="color:#facc15;">EXOS STP "ENABLED" &ne; STP is protecting your VLANs.</strong> The STPD s0 runs its own internal election but is invisible to data traffic until you explicitly bind VLANs and ports. Always verify with <code style="color:#89dceb">show stpd detail</code> — if <code style="color:#89dceb">Participating VLANs: (none)</code>, your ring has no loop protection regardless of what the status line says.</p>
 
     </div>
     <div class="sm-footer">&copy; 2026 Khursheed Khan &nbsp;&middot;&nbsp; Private session log &nbsp;&middot;&nbsp; All rights reserved</div>
