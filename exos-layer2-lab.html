@@ -1273,7 +1273,13 @@ function checkHash() {
   }
 }
 window.addEventListener('hashchange', checkHash);
+// Robust init: run immediately, on DOMContentLoaded, and after a short delay
+// to handle both local file:// and served environments
 checkHash();
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', checkHash);
+}
+setTimeout(checkHash, 200);
 </script>
 
 <!-- ════ HIDDEN SESSION BANNER (visible at #me) ════ -->
