@@ -235,6 +235,30 @@ VLAN 60 (Guest2)    10.60.0.0/24  DHCP   SW2 AP — Guest2 SSID clients</code></
 
   <hr class="divider">
 
+  <!-- Critical Lesson Banner -->
+  <div style="background:#FFD600;border:3px solid #F9A825;border-radius:6px;padding:20px 24px;margin:24px 0;">
+    <div style="font-family:'Libre Franklin',Arial,sans-serif;font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:0.18em;color:#333;margin-bottom:8px;">⚠ Critical Lesson — Internet Not Working After DHCP + Default Route</div>
+    <div style="font-size:1.05rem;font-weight:700;color:#111;margin-bottom:10px;">Always run <code style="background:#fff3;padding:2px 6px;border-radius:3px;">enable ipforwarding vlan Default</code> on every switch</div>
+    <p style="margin:0 0 10px;color:#111;font-size:0.92rem;">Return traffic from the internet arrives on <strong>VLAN 1 (Default)</strong> — the uplink to the Quantum Fiber router. Without IP forwarding enabled on Default VLAN, the switch cannot route that return traffic back to clients on VLANs 20/30/50/60. Result: clients get DHCP, get a gateway, but Safari times out.</p>
+    <p style="margin:0 0 10px;color:#111;font-size:0.92rem;">This was confirmed working in the March 29 lab session and re-discovered April 7. It must be run <strong>after every factory reset</strong> before testing internet from client devices.</p>
+    <pre style="background:#fff8;border-radius:4px;padding:12px;font-size:0.88rem;margin:0;color:#111;">enable ipforwarding vlan Default    ← SW1
+save configuration
+
+enable ipforwarding vlan Default    ← SW2
+save configuration</pre>
+  </div>
+
+  <div style="background:#FFD600;border:3px solid #F9A825;border-radius:6px;padding:20px 24px;margin:24px 0;">
+    <div style="font-family:'Libre Franklin',Arial,sans-serif;font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:0.18em;color:#333;margin-bottom:8px;">⚠ Critical Lesson — Default Route is Automatic via DHCP, ipforwarding is NOT</div>
+    <div style="font-size:1.05rem;font-weight:700;color:#111;margin-bottom:10px;">Do NOT manually add <code style="background:#fff3;padding:2px 6px;border-radius:3px;">configure iproute add default 192.168.0.1</code> — EXOS installs it automatically from DHCP lease</div>
+    <p style="margin:0 0 10px;color:#111;font-size:0.92rem;">When the switch gets its management IP via DHCP (e.g. 192.168.0.11 from Quantum Fiber), EXOS automatically installs a <strong>BOOTP/DHCP default route</strong> (origin <code>bo</code> in <code>show iproute</code>). You can verify: look for <code>bo  Default Route  192.168.0.1</code>.</p>
+    <p style="margin:0 0 10px;color:#111;font-size:0.92rem;"><strong>What IS required and is NOT automatic:</strong></p>
+    <pre style="background:#fff8;border-radius:4px;padding:12px;font-size:0.88rem;margin:0;color:#111;">enable ipforwarding vlan Default    ← manual, required on every switch after factory reset
+save configuration</pre>
+  </div>
+
+  <hr class="divider">
+
   <!-- Section 7 -->
   <span class="section-label">Pending</span>
   <h2 id="pending">Pending Items</h2>
