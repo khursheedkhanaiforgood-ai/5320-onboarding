@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>April 7, 2026 — XIQ Deploy + EXOS Syntax Lessons</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; background: #0f172a; color: #e2e8f0; min-height: 100vh; }
+  .layout { display: flex; min-height: 100vh; }
+  .sidebar { width: 220px; flex-shrink: 0; background: #0d1a2e; border-right: 1px solid #1e293b; padding: 28px 0; position: sticky; top: 0; height: 100vh; overflow-y: auto; }
+  .main { flex: 1; padding: 40px 48px; max-width: 1000px; }
+  @media (max-width: 700px) { .sidebar { display: none; } .main { padding: 24px 16px; } }
+  .sidebar-title { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: #f59e0b; padding: 0 20px 14px; border-bottom: 1px solid #1e293b; margin-bottom: 14px; }
+  .sidebar a { display: block; padding: 7px 20px; font-size: 0.78rem; color: #64748b; text-decoration: none; border-left: 2px solid transparent; }
+  .sidebar a:hover { color: #f59e0b; border-left-color: #f59e0b; background: #1e293b22; }
+  .sidebar .mod-label { font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #334155; padding: 12px 20px 4px; }
+  code { background: #0f172a; color: #34d399; padding: 2px 6px; border-radius: 3px; font-size: 0.8em; font-family: monospace; border: 1px solid #1e293b; }
+  pre { background: #0d1422; border: 1px solid #1e3a5f; border-radius: 6px; padding: 16px; font-size: 0.83rem; color: #34d399; overflow-x: auto; margin: 12px 0; font-family: monospace; line-height: 1.6; }
+  h2 { font-size: 1.2rem; color: #f1f5f9; margin-bottom: 8px; }
+  h3 { font-size: 0.9rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.08em; margin: 24px 0 12px; }
+  p { color: #94a3b8; font-size: 0.88rem; line-height: 1.7; margin-bottom: 12px; }
+  .module { margin-bottom: 48px; padding-bottom: 32px; border-bottom: 1px solid #1e293b; }
+  .mod-badge { display: inline-block; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; padding: 4px 10px; border-radius: 4px; margin-bottom: 14px; }
+  .mod-xiq  { background: #0c1a2e; color: #93c5fd; border: 1px solid #1e3a5f; }
+  .mod-warn { background: #1a1209; color: #fcd34d; border: 1px solid #713f12; }
+  .mod-done { background: #0d2b1f; color: #6ee7b7; border: 1px solid #065f46; }
+  .log-entry { border-left: 2px solid #334155; padding: 10px 0 10px 18px; margin-bottom: 8px; position: relative; }
+  .log-entry::before { content: ""; position: absolute; left: -5px; top: 14px; width: 8px; height: 8px; border-radius: 50%; background: #334155; }
+  .log-entry.done::before { background: #34d399; }
+  .log-entry.warn::before { background: #fbbf24; }
+  .log-time { font-size: 0.68rem; color: #475569; font-family: monospace; margin-bottom: 3px; }
+  .log-text { font-size: 0.83rem; color: #94a3b8; line-height: 1.5; }
+  .log-text strong { color: #e2e8f0; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.83rem; margin-bottom: 20px; }
+  thead tr { background: #1e293b; }
+  th { padding: 8px 12px; text-align: left; font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: #64748b; }
+  tbody tr { border-bottom: 1px solid #1e293b; }
+  td { padding: 9px 12px; color: #94a3b8; }
+  td:first-child { font-family: monospace; color: #e2e8f0; }
+  .status { display: inline-block; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; padding: 2px 8px; border-radius: 3px; }
+  .done-s  { background: #0d2b1f; color: #34d399; border: 1px solid #065f46; }
+  .prog-s  { background: #1a1a0d; color: #fbbf24; border: 1px solid #713f12; }
+  .plan-s  { background: #1e293b; color: #475569; border: 1px solid #334155; }
+  /* Yellow banners */
+  .yellow-banner { background: #FFD600; border: 3px solid #F9A825; border-radius: 6px; padding: 18px 20px; margin-bottom: 16px; }
+  .yellow-banner .yb-label { font-size: 0.63rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.15em; color: #333; margin-bottom: 6px; }
+  .yellow-banner p { color: #111; font-size: 0.88rem; margin-bottom: 8px; }
+  .yellow-banner pre { background: rgba(255,255,255,0.4); color: #111; border: none; }
+  .yellow-banner code { background: rgba(255,255,255,0.4); color: #111; border: none; }
+</style>
+</head>
+<body>
+<div class="layout">
+
+  <nav class="sidebar">
+    <div class="sidebar-title">April 7, 2026</div>
+    <div class="mod-label">Session</div>
+    <a href="#overview">Overview</a>
+    <a href="#xiq-flow">XIQ Deploy Flow</a>
+    <div class="mod-label">Lessons</div>
+    <a href="#lesson-ipfwd">ipforwarding ⚠</a>
+    <a href="#lesson-dhcp">DHCP Syntax ⚠</a>
+    <a href="#lesson-defroute">Default Route ⚠</a>
+    <div class="mod-label">State</div>
+    <a href="#state">Lab State</a>
+    <a href="#commands">Full Command Ref</a>
+  </nav>
+
+  <div class="main">
+
+    <!-- AMBER TOP BANNER -->
+    <div style="background:#f59e0b;color:#111;border-radius:8px;padding:18px 24px;margin-bottom:32px;border:3px solid #d97706">
+      <div style="font-size:0.62rem;font-weight:700;text-transform:uppercase;letter-spacing:0.18em;margin-bottom:4px">Owner View — April 7, 2026</div>
+      <div style="font-size:1.2rem;font-weight:700;margin-bottom:6px">XIQ-Only Deployment + EXOS Syntax Lessons</div>
+      <div style="font-size:0.85rem">SW1 internet verified &#10003; &nbsp;|&nbsp; SW2 in progress &nbsp;|&nbsp; 3 critical syntax lessons saved to memory</div>
+    </div>
+
+    <!-- OVERVIEW -->
+    <div class="module" id="overview">
+      <span class="mod-badge mod-xiq">Overview</span>
+      <h2>April 7 — XIQ-Only Deploy: Two 5320 Switches + Two AP3000s</h2>
+      <p>Goal: deploy both switches and both APs entirely via XIQ — no CLI. XIQ handled L2 (VLANs, SVIs via Network Allocation, port types, AP policies). CLI was required for DHCP server, <code>enable ipforwarding vlan Default</code>, and DNS. iPhone internet working on SW1 VLANs 20/30. SW2 VLANs 50/60 in progress.</p>
+      <table>
+        <thead><tr><th>Device</th><th>IP</th><th>Serial</th><th>VLANs</th></tr></thead>
+        <tbody>
+          <tr><td>SW1</td><td>192.168.0.28</td><td>FJ012544G-00483</td><td>20 (Corp) + 30 (Guest)</td></tr>
+          <tr><td>SW2</td><td>192.168.0.11</td><td>FJ012544G-00233</td><td>50 (Corp2) + 60 (Guest2)</td></tr>
+          <tr><td>AP1 (SW1 port 3)</td><td>192.168.0.12</td><td>—</td><td>20 + 30</td></tr>
+          <tr><td>AP2 (SW2 port 3)</td><td>192.168.0.25</td><td>—</td><td>50 + 60</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- XIQ FLOW -->
+    <div class="module" id="xiq-flow">
+      <span class="mod-badge mod-xiq">XIQ Flow</span>
+      <h2>10-Step XIQ Deploy — Linked List</h2>
+
+      <div class="log-entry done"><div class="log-time">Step 1</div><div class="log-text"><strong>Factory reset both switches.</strong> ZTP+ auto-onboarded to XIQ via DHCP on any RJ45 port. New IPs assigned by Quantum Fiber.</div></div>
+      <div class="log-entry done"><div class="log-time">Step 2</div><div class="log-text"><strong>XIQ policies created.</strong> One switch policy (Test_SW1) for both switches. Separate AP policies: AP1 = VLANs 20/30, AP2 = VLANs 50/60.</div></div>
+      <div class="log-entry done"><div class="log-time">Step 3</div><div class="log-text"><strong>VLAN Attributes.</strong> Added VLANs 20/30/50/60. <strong>Hiccup:</strong> table appeared empty — root cause: switches not yet assigned to Test_SW1 policy.</div></div>
+      <div class="log-entry done"><div class="log-time">Step 4</div><div class="log-text"><strong>Network Allocation.</strong> Four subnets defined. SVIs auto-set (.1 of each). <strong>Hiccup:</strong> adding VLAN 1 to Routing section broke XIQ↔switch comms. <strong>Rule: never add VLAN 1 to Routing section.</strong></div></div>
+      <div class="log-entry done"><div class="log-time">Step 5</div><div class="log-text"><strong>Routing — SVIs pushed by XIQ.</strong> IPv4 Forwarding enabled. Confirmed via <code>show vlan</code> — <code>f</code> flag + 10.20.0.1/10.30.0.1 present. DHCP + default route NOT pushed.</div></div>
+      <div class="log-entry warn"><div class="log-time">Step 6</div><div class="log-text"><strong>Static Routes — BLOCKED.</strong> XIQ error: "next hop IP doesn't match any subnetworks." Root cause confirmed by Extreme expert: XIQ cannot push L3 static routes via L2 interface. VLAN 1 not visible as managed subnet. Deferred to CLI.</div></div>
+      <div class="log-entry warn"><div class="log-time">Step 7</div><div class="log-text"><strong>Switch access failures.</strong> SSH failed (XIQ ZTP+ set unknown password). Console login failed (same). XIQ CLI script push — no output (SSH issue XIQ side). Eventually got in via console.</div></div>
+      <div class="log-entry done"><div class="log-time">Step 8</div><div class="log-text"><strong>Port Types — discovered missing config.</strong> VLANs 20/30 showed 0/0 ports. Created <code>AP_Port</code>: Trunk, Native VLAN 1, Tagged 20/30/50/60, Edge Port ON, PoE ON. Assigned port 3 both switches. Pushed — 1/1 ports confirmed.</div></div>
+      <div class="log-entry done"><div class="log-time">Step 9</div><div class="log-text"><strong>DHCP via CLI.</strong> Correct syntax required (see lessons below). iPhone got 10.20.0.x but no internet — missing <code>enable ipforwarding vlan Default</code>.</div></div>
+      <div class="log-entry done"><div class="log-time">Step 10</div><div class="log-text"><strong>SW1 internet verified.</strong> Safari loaded on iPhone on Corp SSID (VLAN 20). SW2 commands in progress.</div></div>
+    </div>
+
+    <!-- LESSON 1 — IPFORWARDING -->
+    <div class="module" id="lesson-ipfwd">
+      <span class="mod-badge mod-warn">⚠ Critical</span>
+      <h2>Lesson 1 — enable ipforwarding vlan Default</h2>
+      <div class="yellow-banner">
+        <div class="yb-label">⚠ Mandatory after every factory reset — not set by XIQ</div>
+        <p>Return traffic from the internet arrives on <strong>VLAN 1 (Default)</strong> — the uplink to the Quantum Fiber router. Without IP forwarding enabled on Default VLAN, clients get DHCP and a gateway but Safari times out. Must be done via CLI after every factory reset.</p>
+        <pre>enable ipforwarding vlan Default
+save configuration</pre>
+      </div>
+    </div>
+
+    <!-- LESSON 2 — DHCP SYNTAX -->
+    <div class="module" id="lesson-dhcp">
+      <span class="mod-badge mod-warn">⚠ Syntax</span>
+      <h2>Lesson 2 — Correct EXOS DHCP Syntax (SwitchEngine 33.x)</h2>
+      <div class="yellow-banner">
+        <div class="yb-label">⚠ Use these exactly — verified via ? on switch console April 7 2026</div>
+        <p>Three syntax errors were discovered during this session. The correct commands:</p>
+        <pre>configure vlan &lt;name&gt; dhcp-address-range 10.20.0.100 - 10.20.0.200
+configure vlan &lt;name&gt; dhcp-options default-gateway 10.20.0.1
+configure vlan &lt;name&gt; dhcp-options dns-server primary 8.8.8.8
+configure vlan &lt;name&gt; dhcp-options dns-server secondary 8.8.4.4
+enable dhcp ports 3 vlan &lt;name&gt;</pre>
+      </div>
+      <table>
+        <thead><tr><th>Wrong</th><th>Correct</th></tr></thead>
+        <tbody>
+          <tr><td>dhcp-range</td><td>dhcp-address-range</td></tr>
+          <tr><td>10.20.0.100 10.20.0.200 (no dash)</td><td>10.20.0.100 - 10.20.0.200 (spaces + dash)</td></tr>
+          <tr><td>dhcp-options gateway</td><td>dhcp-options default-gateway</td></tr>
+          <tr><td>enable dhcp ports vlan X (no port#)</td><td>enable dhcp ports 3 vlan X</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- LESSON 3 — DEFAULT ROUTE -->
+    <div class="module" id="lesson-defroute">
+      <span class="mod-badge mod-warn">⚠ Do Not</span>
+      <h2>Lesson 3 — Default Route is Automatic via DHCP</h2>
+      <div class="yellow-banner">
+        <div class="yb-label">⚠ Do NOT manually add the default route</div>
+        <p>EXOS installs a BOOTP default route automatically when the switch gets its management IP via DHCP. Verify with <code>show iproute</code> — look for origin <code>bo</code> (BOOTP). Only <code>enable ipforwarding vlan Default</code> is manual.</p>
+      </div>
+    </div>
+
+    <!-- CURRENT STATE -->
+    <div class="module" id="state">
+      <span class="mod-badge mod-done">State</span>
+      <h2>Lab State — April 7, 2026</h2>
+      <table>
+        <thead><tr><th>Item</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr><td>SW1 — VLANs 20+30, DHCP, ipforwarding</td><td><span class="status done-s">&#10003; Done</span></td></tr>
+          <tr><td>iPhone internet — Corp/Guest on SW1</td><td><span class="status done-s">&#10003; Verified</span></td></tr>
+          <tr><td>SW2 — VLANs 50+60, DHCP, ipforwarding</td><td><span class="status prog-s">In Progress</span></td></tr>
+          <tr><td>iPhone internet — Corp2/Guest2 on SW2</td><td><span class="status prog-s">Pending SW2</span></td></tr>
+          <tr><td>Sprint 1: NYT theme sitewide (13 pages)</td><td><span class="status plan-s">Planned</span></td></tr>
+          <tr><td>Sprint 2: VLAN 10 management isolation</td><td><span class="status plan-s">Planned</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- FULL COMMAND REFERENCE -->
+    <div class="module" id="commands">
+      <span class="mod-badge mod-done">Reference</span>
+      <h2>Full Verified Command Block — Both Switches</h2>
+      <h3>SW1 (VLANs 20 + 30)</h3>
+      <pre>configure vlan SW_VLAN_20 dhcp-address-range 10.20.0.100 - 10.20.0.200
+configure vlan SW_VLAN_20 dhcp-options default-gateway 10.20.0.1
+configure vlan SW_VLAN_20 dhcp-options dns-server primary 8.8.8.8
+configure vlan SW_VLAN_20 dhcp-options dns-server secondary 8.8.4.4
+enable dhcp ports 3 vlan SW_VLAN_20
+
+configure vlan SW_VLAN_30 dhcp-address-range 10.30.0.100 - 10.30.0.200
+configure vlan SW_VLAN_30 dhcp-options default-gateway 10.30.0.1
+configure vlan SW_VLAN_30 dhcp-options dns-server primary 8.8.8.8
+configure vlan SW_VLAN_30 dhcp-options dns-server secondary 8.8.4.4
+enable dhcp ports 3 vlan SW_VLAN_30
+
+enable ipforwarding vlan Default
+save configuration</pre>
+
+      <h3>SW2 (VLANs 50 + 60)</h3>
+      <pre>configure vlan SW_VLAN_50 dhcp-address-range 10.50.0.100 - 10.50.0.200
+configure vlan SW_VLAN_50 dhcp-options default-gateway 10.50.0.1
+configure vlan SW_VLAN_50 dhcp-options dns-server primary 8.8.8.8
+configure vlan SW_VLAN_50 dhcp-options dns-server secondary 8.8.4.4
+enable dhcp ports 3 vlan SW_VLAN_50
+
+configure vlan SW_VLAN_60 dhcp-address-range 10.60.0.100 - 10.60.0.200
+configure vlan SW_VLAN_60 dhcp-options default-gateway 10.60.0.1
+configure vlan SW_VLAN_60 dhcp-options dns-server primary 8.8.8.8
+configure vlan SW_VLAN_60 dhcp-options dns-server secondary 8.8.4.4
+enable dhcp ports 3 vlan SW_VLAN_60
+
+enable ipforwarding vlan Default
+save configuration</pre>
+
+      <h3>Verify DHCP</h3>
+      <pre>show dhcp-server
+show iproute
+show vlan</pre>
+    </div>
+
+    <div style="margin-top:32px;padding-top:20px;border-top:1px solid #1e293b;font-size:0.75rem;color:#334155;display:flex;justify-content:space-between">
+      <a href="lab_20260329.html" style="color:#60a5fa;text-decoration:none">&larr; March 29 Lab Guide</a>
+      <span>April 7, 2026 &mdash; Khursheed Khan &mdash; Extreme Networks</span>
+    </div>
+
+  </div>
+</div>
+</body>
+</html>
