@@ -4,40 +4,41 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>5320-16P-2MXT-2X-SwitchEngine — Config Report</title>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Libre+Franklin:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'Segoe UI', Arial, sans-serif; background: #0f172a; color: #e2e8f0; display: flex; flex-direction: column; min-height: 100vh; }
-  header { background: #1e293b; padding: 20px 32px; border-bottom: 2px solid #7c3aed; flex-shrink: 0; }
-  header h1 { color: #a78bfa; font-size: 1.4rem; margin-bottom: 12px; }
+  body { font-family: 'Libre Franklin', Arial, sans-serif; background: #FFFFFF; color: #111111; display: flex; flex-direction: column; min-height: 100vh; }
+  header { background: #F7F7F5; padding: 20px 32px; border-bottom: 2px solid #326891; flex-shrink: 0; }
+  header h1 { font-family: 'Libre Baskerville', Georgia, serif; color: #326891; font-size: 1.4rem; margin-bottom: 12px; }
   .meta { display: flex; flex-wrap: wrap; gap: 20px; }
   .meta-item { display: flex; flex-direction: column; }
-  .meta-item span:first-child { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.07em; color: #64748b; margin-bottom: 2px; }
-  .meta-item span:last-child { font-size: 0.88rem; color: #94a3b8; }
+  .meta-item span:first-child { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.07em; color: #666666; margin-bottom: 2px; }
+  .meta-item span:last-child { font-size: 0.88rem; color: #555555; }
   .badge { padding: 3px 12px; border-radius: 4px; font-size: 0.82rem; font-weight: 600; }
-  .badge.connected { background: #166534; color: #86efac; }
-  .badge.not-connected { background: #7f1d1d; color: #fca5a5; }
-  .tabs { background: #1e293b; border-bottom: 1px solid #334155; padding: 0 32px; display: flex; gap: 4px; flex-wrap: wrap; flex-shrink: 0; }
-  .tab-btn { background: transparent; border: none; border-bottom: 3px solid transparent; color: #64748b; padding: 12px 18px; font-size: 0.88rem; cursor: pointer; transition: color 0.15s, border-color 0.15s; white-space: nowrap; }
-  .tab-btn:hover { color: #e2e8f0; }
-  .tab-btn.active { color: #a78bfa; border-bottom-color: #7c3aed; font-weight: 600; }
+  .badge.connected { background: #e6f4ea; color: #2e7d32; }
+  .badge.not-connected { background: #fdecea; color: #c62828; }
+  .tabs { background: #F7F7F5; border-bottom: 1px solid #E2E2E2; padding: 0 32px; display: flex; gap: 4px; flex-wrap: wrap; flex-shrink: 0; }
+  .tab-btn { background: transparent; border: none; border-bottom: 3px solid transparent; color: #666666; padding: 12px 18px; font-size: 0.88rem; cursor: pointer; transition: color 0.15s, border-color 0.15s; white-space: nowrap; }
+  .tab-btn:hover { color: #111111; }
+  .tab-btn.active { color: #326891; border-bottom-color: #326891; font-weight: 600; }
   .content { flex: 1; padding: 24px 32px; overflow: auto; }
   .tab-panel { height: 100%; display: flex; flex-direction: column; }
-  p.desc { color: #64748b; font-size: 0.88rem; margin-bottom: 14px; }
-  pre { background: #0a0f1e; border: 1px solid #334155; border-radius: 6px; padding: 16px 20px;
+  p.desc { color: #666666; font-size: 0.88rem; margin-bottom: 14px; }
+  pre { background: #F7F7F5; border: 1px solid #E2E2E2; border-radius: 6px; padding: 16px 20px;
          font-family: 'Fira Mono', 'Courier New', monospace; font-size: 0.82rem;
-         line-height: 1.6; color: #7dd3fc; white-space: pre-wrap; word-break: break-word;
+         line-height: 1.6; color: #111; white-space: pre-wrap; word-break: break-word;
          flex: 1; overflow: auto; }
 
   /* LOGIN GATE */
-  #login-gate { position:fixed;inset:0;background:#0f172a;display:flex;align-items:center;justify-content:center;z-index:9999; }
-  #login-box { background:#1e293b;border:1px solid #7c3aed;border-radius:12px;padding:40px 48px;box-shadow:0 8px 40px rgba(0,0,0,0.6);width:100%;max-width:400px;text-align:center; }
-  #login-box h2 { color:#a78bfa;margin-bottom:6px;font-size:1.4rem; }
-  #login-box p { color:#64748b;font-size:0.9rem;margin-bottom:24px; }
-  #login-box input { width:100%;padding:10px 14px;margin-bottom:14px;border:1px solid #334155;border-radius:6px;font-size:1rem;outline:none;background:#0f172a;color:#e2e8f0; }
-  #login-box input:focus { border-color:#7c3aed; }
-  #login-box button { width:100%;padding:12px;background:#7c3aed;color:white;border:none;border-radius:6px;font-size:1rem;cursor:pointer;font-weight:bold; }
-  #login-box button:hover { background:#6d28d9; }
-  #login-error { color:#f87171;font-size:0.85rem;margin-top:10px;display:none; }
+  #login-gate { position:fixed;inset:0;background:#FFFFFF;display:flex;align-items:center;justify-content:center;z-index:9999; }
+  #login-box { background:#F7F7F5;border:1px solid #326891;border-radius:12px;padding:40px 48px;box-shadow:0 8px 40px rgba(0,0,0,0.1);width:100%;max-width:400px;text-align:center; }
+  #login-box h2 { font-family: 'Libre Baskerville', Georgia, serif; color:#326891;margin-bottom:6px;font-size:1.4rem; }
+  #login-box p { color:#666666;font-size:0.9rem;margin-bottom:24px; }
+  #login-box input { width:100%;padding:10px 14px;margin-bottom:14px;border:1px solid #E2E2E2;border-radius:6px;font-size:1rem;outline:none;background:#FFFFFF;color:#111111; }
+  #login-box input:focus { border-color:#326891; }
+  #login-box button { width:100%;padding:12px;background:#326891;color:white;border:none;border-radius:6px;font-size:1rem;cursor:pointer;font-weight:bold; }
+  #login-box button:hover { background:#245070; }
+  #login-error { color:#c62828;font-size:0.85rem;margin-top:10px;display:none; }
   #main-content { display:none; }
 </style>
 </head>
