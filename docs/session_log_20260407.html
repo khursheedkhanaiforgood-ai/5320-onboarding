@@ -73,14 +73,14 @@
     <div style="background:#f59e0b;color:#111;border-radius:8px;padding:18px 24px;margin-bottom:32px;border:3px solid #d97706">
       <div style="font-size:0.62rem;font-weight:700;text-transform:uppercase;letter-spacing:0.18em;margin-bottom:4px">Owner View — April 7, 2026</div>
       <div style="font-size:1.2rem;font-weight:700;margin-bottom:6px">XIQ-Only Deployment + EXOS Syntax Lessons</div>
-      <div style="font-size:0.85rem">SW1 internet verified &#10003; &nbsp;|&nbsp; SW2 in progress &nbsp;|&nbsp; 3 critical syntax lessons saved to memory</div>
+      <div style="font-size:0.85rem">SW1 &#10003; &nbsp;|&nbsp; SW2 &#10003; via XIQ CLI &nbsp;|&nbsp; All 4 VLANs, 2 APs, 2 Switches — iPhone internet verified &#10003;</div>
     </div>
 
     <!-- OVERVIEW -->
     <div class="module" id="overview">
       <span class="mod-badge mod-xiq">Overview</span>
       <h2>April 7 — XIQ-Only Deploy: Two 5320 Switches + Two AP3000s</h2>
-      <p>Goal: deploy both switches and both APs entirely via XIQ — no CLI. XIQ handled L2 (VLANs, SVIs via Network Allocation, port types, AP policies). CLI was required for DHCP server, <code>enable ipforwarding vlan Default</code>, and DNS. iPhone internet working on SW1 VLANs 20/30. SW2 VLANs 50/60 in progress.</p>
+      <p>Goal: deploy both switches and both APs entirely via XIQ — no CLI. XIQ handled L2 (VLANs, SVIs via Network Allocation, port types, AP policies). CLI was required for DHCP server, <code>enable ipforwarding vlan Default</code>, and DNS. iPhone internet verified on all 4 SSIDs across both switches. SW2 configured via XIQ CLI scripting.</p>
       <table>
         <thead><tr><th>Device</th><th>IP</th><th>Serial</th><th>VLANs</th></tr></thead>
         <tbody>
@@ -106,7 +106,8 @@
       <div class="log-entry warn"><div class="log-time">Step 7</div><div class="log-text"><strong>Switch access failures.</strong> SSH failed (XIQ ZTP+ set unknown password). Console login failed (same). XIQ CLI script push — no output (SSH issue XIQ side). Eventually got in via console.</div></div>
       <div class="log-entry done"><div class="log-time">Step 8</div><div class="log-text"><strong>Port Types — discovered missing config.</strong> VLANs 20/30 showed 0/0 ports. Created <code>AP_Port</code>: Trunk, Native VLAN 1, Tagged 20/30/50/60, Edge Port ON, PoE ON. Assigned port 3 both switches. Pushed — 1/1 ports confirmed.</div></div>
       <div class="log-entry done"><div class="log-time">Step 9</div><div class="log-text"><strong>DHCP via CLI.</strong> Correct syntax required (see lessons below). iPhone got 10.20.0.x but no internet — missing <code>enable ipforwarding vlan Default</code>.</div></div>
-      <div class="log-entry done"><div class="log-time">Step 10</div><div class="log-text"><strong>SW1 internet verified.</strong> Safari loaded on iPhone on Corp SSID (VLAN 20). SW2 commands in progress.</div></div>
+      <div class="log-entry done"><div class="log-time">Step 10</div><div class="log-text"><strong>SW1 internet verified.</strong> Safari loaded on iPhone on Corp SSID (VLAN 20).</div></div>
+      <div class="log-entry done"><div class="log-time">Step 11</div><div class="log-text"><strong>SW2 complete via XIQ CLI scripting.</strong> DHCP + ipforwarding pushed to SW2 (VLANs 50+60) via XIQ CLI. iPhone internet verified on Corp2 + Guest2. All 4 VLANs on 2 APs on 2 switches — fully operational. &#10003;</div></div>
     </div>
 
     <!-- LESSON 1 — IPFORWARDING -->
@@ -164,12 +165,44 @@ enable dhcp ports 3 vlan &lt;name&gt;</pre>
         <tbody>
           <tr><td>SW1 — VLANs 20+30, DHCP, ipforwarding</td><td><span class="status done-s">&#10003; Done</span></td></tr>
           <tr><td>iPhone internet — Corp/Guest on SW1</td><td><span class="status done-s">&#10003; Verified</span></td></tr>
-          <tr><td>SW2 — VLANs 50+60, DHCP, ipforwarding</td><td><span class="status prog-s">In Progress</span></td></tr>
-          <tr><td>iPhone internet — Corp2/Guest2 on SW2</td><td><span class="status prog-s">Pending SW2</span></td></tr>
+          <tr><td>SW2 — VLANs 50+60, DHCP, ipforwarding (via XIQ CLI)</td><td><span class="status done-s">&#10003; Done</span></td></tr>
+          <tr><td>iPhone internet — Corp2/Guest2 on SW2</td><td><span class="status done-s">&#10003; Verified</span></td></tr>
           <tr><td>Sprint 1: NYT theme sitewide (13 pages)</td><td><span class="status plan-s">Planned</span></td></tr>
-          <tr><td>Sprint 2: VLAN 10 management isolation</td><td><span class="status plan-s">Planned</span></td></tr>
+          <tr><td>Sprint 2: VLAN 10 management — design confirmed, XIQ approach</td><td><span class="status plan-s">Ready</span></td></tr>
         </tbody>
       </table>
+    </div>
+
+    <!-- SPRINT 2 DESIGN -->
+    <div class="module" id="sprint2">
+      <span class="mod-badge mod-xiq">Sprint 2</span>
+      <h2>VLAN 10 Management — Design (XIQ approach, confirmed April 7)</h2>
+      <p>User confirmed: do VLAN 10 on both switches (.28 and .11) via XIQ. One Test_SW1 policy change covers both switches automatically.</p>
+
+      <h3>IP Design</h3>
+      <table>
+        <thead><tr><th>VLAN</th><th>Name</th><th>Subnet</th><th>SW1 IP</th><th>SW2 IP</th><th>Purpose</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>Default</td><td>192.168.0.x</td><td>192.168.0.28</td><td>192.168.0.11</td><td>ZTP+ + XIQ only — do not touch</td></tr>
+          <tr><td>10</td><td>SwMgmt</td><td>10.10.0.0/24</td><td>10.10.0.1</td><td>10.10.0.2</td><td>SSH + SNMP + XIQ management</td></tr>
+          <tr><td>20</td><td>Corp</td><td>10.20.0.0/24</td><td>10.20.0.1</td><td>—</td><td>SW1 Corp clients ✓</td></tr>
+          <tr><td>30</td><td>Guest</td><td>10.30.0.0/24</td><td>10.30.0.1</td><td>—</td><td>SW1 Guest clients ✓</td></tr>
+          <tr><td>50</td><td>Corp2</td><td>10.50.0.0/24</td><td>—</td><td>10.50.0.1</td><td>SW2 Corp clients ✓</td></tr>
+          <tr><td>60</td><td>Guest2</td><td>10.60.0.0/24</td><td>—</td><td>10.60.0.1</td><td>SW2 Guest clients ✓</td></tr>
+        </tbody>
+      </table>
+
+      <h3>XIQ Steps</h3>
+      <div class="log-entry"><div class="log-time">Step 1</div><div class="log-text">XIQ → Network Policies → Test_SW1 → VLAN Attributes → Add VLAN 10, name <strong>SwMgmt</strong></div></div>
+      <div class="log-entry"><div class="log-time">Step 2</div><div class="log-text">Network Allocation → add 10.10.0.0/24 → SVI: SW1=10.10.0.1, SW2=10.10.0.2 (assign per device)</div></div>
+      <div class="log-entry"><div class="log-time">Step 3</div><div class="log-text">Port Types → add VLAN 10 tagged to uplink port type (port 1) — NOT on AP_Port</div></div>
+      <div class="log-entry"><div class="log-time">Step 4</div><div class="log-text">Push config via XIQ → both switches update simultaneously</div></div>
+      <div class="log-entry"><div class="log-time">Step 5</div><div class="log-text">Quantum Fiber router → add static route: 10.10.0.0/24 → 192.168.0.28</div></div>
+      <div class="log-entry"><div class="log-time">Step 6</div><div class="log-text">Test: SSH to 10.10.0.1 (SW1) and 10.10.0.2 (SW2) — confirm management reachable on VLAN 10</div></div>
+
+      <div style="background:#0c1f1a;border-left:3px solid #10b981;border-radius:0 6px 6px 0;padding:14px 16px;margin-top:16px;font-size:0.82rem;color:#6ee7b7;line-height:1.6">
+        <strong>Critical constraints:</strong> VLAN name must be <code>SwMgmt</code> — "Mgmt" and "Management" are reserved keywords in EXOS and will fail silently or error. Do NOT remove VLAN 1 from uplink ports — XIQ loses connectivity. Test SSH to 10.10.0.1 BEFORE making any changes to VLAN 1.
+      </div>
     </div>
 
     <!-- FULL COMMAND REFERENCE -->
