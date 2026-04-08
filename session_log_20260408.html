@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>April 8, 2026 — E2E XIQ Deployment Walkthrough</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; background: #0f172a; color: #e2e8f0; min-height: 100vh; }
+  .layout { display: flex; min-height: 100vh; }
+  .sidebar { width: 220px; flex-shrink: 0; background: #0d1a2e; border-right: 1px solid #1e293b; padding: 28px 0; position: sticky; top: 0; height: 100vh; overflow-y: auto; }
+  .main { flex: 1; padding: 40px 48px; max-width: 1100px; }
+  @media (max-width: 700px) { .sidebar { display: none; } .main { padding: 24px 16px; } }
+  .sidebar-title { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: #60a5fa; padding: 0 20px 14px; border-bottom: 1px solid #1e293b; margin-bottom: 14px; }
+  .sidebar a { display: block; padding: 7px 20px; font-size: 0.78rem; color: #64748b; text-decoration: none; border-left: 2px solid transparent; }
+  .sidebar a:hover { color: #60a5fa; border-left-color: #60a5fa; }
+  .sidebar .mod-label { font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #334155; padding: 12px 20px 4px; }
+  code { background: #0f172a; color: #34d399; padding: 2px 6px; border-radius: 3px; font-size: 0.8em; font-family: monospace; border: 1px solid #1e293b; }
+  pre { background: #0d1422; border: 1px solid #1e3a5f; border-radius: 6px; padding: 16px; font-size: 0.83rem; color: #34d399; overflow-x: auto; margin: 12px 0; font-family: monospace; line-height: 1.6; }
+  h2 { font-size: 1.2rem; color: #f1f5f9; margin-bottom: 8px; }
+  h3 { font-size: 0.85rem; color: #60a5fa; text-transform: uppercase; letter-spacing: 0.08em; margin: 24px 0 12px; }
+  p { color: #94a3b8; font-size: 0.88rem; line-height: 1.7; margin-bottom: 12px; }
+  .module { margin-bottom: 48px; padding-bottom: 32px; border-bottom: 1px solid #1e293b; }
+  .mod-badge { display: inline-block; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; padding: 4px 10px; border-radius: 4px; margin-bottom: 14px; }
+  .mod-xiq { background: #0c1a2e; color: #93c5fd; border: 1px solid #1e3a5f; }
+  .mod-cli { background: #0d2b1f; color: #6ee7b7; border: 1px solid #065f46; }
+  .mod-arch { background: #1a1a0d; color: #fcd34d; border: 1px solid #713f12; }
+  .mod-ref { background: #1a0d1a; color: #f0abfc; border: 1px solid #6b21a8; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.83rem; margin-bottom: 20px; }
+  thead tr { background: #1e293b; }
+  th { padding: 8px 12px; text-align: left; font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: #64748b; }
+  tbody tr { border-bottom: 1px solid #1e293b; }
+  td { padding: 9px 12px; color: #94a3b8; }
+  td:first-child { color: #e2e8f0; }
+  .status { display: inline-block; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; padding: 2px 8px; border-radius: 3px; }
+  .done-s { background: #0d2b1f; color: #34d399; border: 1px solid #065f46; }
+  .cli-s  { background: #1a1209; color: #fcd34d; border: 1px solid #713f12; }
+  .xiq-s  { background: #0c1a2e; color: #93c5fd; border: 1px solid #1e3a5f; }
+  .diagram-wrap { background: #0d1422; border: 1px solid #1e3a5f; border-radius: 10px; padding: 24px; margin-bottom: 28px; overflow-x: auto; }
+  .yellow-banner { background: #FFD600; border: 3px solid #F9A825; border-radius: 6px; padding: 18px 20px; margin: 16px 0; }
+  .yellow-banner .yb-label { font-size: 0.63rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.15em; color: #333; margin-bottom: 6px; }
+  .yellow-banner p { color: #111; font-size: 0.88rem; margin-bottom: 6px; }
+  .yellow-banner code { background: rgba(255,255,255,0.4); color: #111; border: none; }
+  .step-row { display: flex; gap: 16px; align-items: flex-start; padding: 12px 0; border-bottom: 1px solid #1e293b22; }
+  .step-num { font-size: 0.65rem; font-weight: 700; color: #475569; font-family: monospace; min-width: 60px; padding-top: 2px; }
+  .step-body { flex: 1; font-size: 0.85rem; color: #94a3b8; line-height: 1.6; }
+  .step-body strong { color: #e2e8f0; }
+  .step-tool { font-size: 0.62rem; font-weight: 700; text-transform: uppercase; padding: 2px 7px; border-radius: 3px; margin-left: 8px; vertical-align: middle; }
+</style>
+</head>
+<body>
+<div class="layout">
+
+  <nav class="sidebar">
+    <div class="sidebar-title">April 8, 2026</div>
+    <div class="mod-label">Architecture</div>
+    <a href="#overview">Overview</a>
+    <a href="#diagram">E2E Diagram</a>
+    <div class="mod-label">Deployment</div>
+    <a href="#sequence">11-Step Sequence</a>
+    <a href="#xiq-steps">XIQ Steps</a>
+    <a href="#cli-steps">CLI Steps</a>
+    <div class="mod-label">Reference</div>
+    <a href="#commands">CLI Commands</a>
+    <a href="#boundary">XIQ vs CLI</a>
+    <a href="#lessons">Key Lessons</a>
+  </nav>
+
+  <div class="main">
+
+    <!-- Header -->
+    <div style="margin-bottom:36px">
+      <div style="font-size:0.62rem;font-weight:700;text-transform:uppercase;letter-spacing:0.18em;color:#60a5fa;margin-bottom:6px">April 8, 2026 — Khursheed Khan — Extreme Networks</div>
+      <h1 style="font-size:1.6rem;color:#f1f5f9;margin-bottom:8px">E2E XIQ Deployment — 2× 5320 + 2× AP3000</h1>
+      <p style="max-width:680px">Full end-to-end deployment walkthrough covering both March 29 (CLI-only) and April 7 (XIQ + CLI hybrid) sessions. Includes architecture diagram, 11-step sequence, XIQ boundary lessons, and verified CLI command blocks.</p>
+    </div>
+
+    <!-- ARCHITECTURE DIAGRAM -->
+    <div class="module" id="diagram">
+      <span class="mod-badge mod-arch">Architecture</span>
+      <h2 id="overview">E2E Network Architecture — XIQ Hybrid Deployment</h2>
+
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 800 520" width="100%" xmlns="http://www.w3.org/2000/svg" font-family="'Segoe UI', Arial, sans-serif">
+
+          <!-- Background layers -->
+          <!-- Internet cloud -->
+          <ellipse cx="400" cy="42" rx="80" ry="28" fill="#0d1f3c" stroke="#1e3a5f" stroke-width="1.5"/>
+          <text x="400" y="38" text-anchor="middle" font-size="10" fill="#60a5fa" font-weight="700">INTERNET</text>
+          <text x="400" y="52" text-anchor="middle" font-size="8" fill="#334155">ISP / WAN</text>
+
+          <!-- XIQ Cloud -->
+          <rect x="580" y="10" width="200" height="60" rx="8" fill="#0c1a2e" stroke="#1e3a5f" stroke-width="1.5" stroke-dasharray="4,3"/>
+          <text x="680" y="32" text-anchor="middle" font-size="10" fill="#93c5fd" font-weight="700">ExtremeCloud IQ (XIQ)</text>
+          <text x="680" y="46" text-anchor="middle" font-size="8" fill="#334155">extremecloudiq.com</text>
+          <text x="680" y="58" text-anchor="middle" font-size="7.5" fill="#475569">ZTP+ · Policy Push · Monitoring</text>
+
+          <!-- Arrow: Internet to XIQ -->
+          <line x1="480" y1="42" x2="580" y2="40" stroke="#1e3a5f" stroke-width="1" stroke-dasharray="3,3"/>
+
+          <!-- Quantum Fiber Router -->
+          <rect x="300" y="100" width="200" height="52" rx="6" fill="#0d1a2e" stroke="#1e3a5f" stroke-width="1.5"/>
+          <text x="400" y="120" text-anchor="middle" font-size="10" fill="#e2e8f0" font-weight="700">Quantum Fiber Router</text>
+          <text x="400" y="134" text-anchor="middle" font-size="8" fill="#475569">192.168.0.1 — Gateway + DHCP for VLAN 1</text>
+          <text x="400" y="146" text-anchor="middle" font-size="7.5" fill="#334155">NATs 192.168.0.x → WAN IP</text>
+
+          <!-- Arrow: Internet to Router -->
+          <line x1="400" y1="70" x2="400" y2="100" stroke="#475569" stroke-width="1.5" marker-end="url(#arr)"/>
+
+          <!-- Arrow: Router to XIQ (management path) -->
+          <line x1="500" y1="126" x2="580" y2="55" stroke="#1e3a5f" stroke-width="1" stroke-dasharray="3,3"/>
+          <text x="545" y="88" text-anchor="middle" font-size="7" fill="#334155">mgmt</text>
+
+          <!-- SW1 -->
+          <rect x="80" y="210" width="240" height="80" rx="6" fill="#0d1a2e" stroke="#1e3a5f" stroke-width="2"/>
+          <text x="200" y="232" text-anchor="middle" font-size="10" fill="#e2e8f0" font-weight="700">SW1 — 5320-16P</text>
+          <text x="200" y="246" text-anchor="middle" font-size="8" fill="#60a5fa">192.168.0.28 (VLAN 1)</text>
+          <text x="200" y="260" text-anchor="middle" font-size="7.5" fill="#475569">VLAN 10: 10.10.0.1 · VLAN 20: 10.20.0.1 · VLAN 30: 10.30.0.1</text>
+          <text x="200" y="273" text-anchor="middle" font-size="7.5" fill="#334155">Port 1: Uplink · Port 3: AP (PoE) · Port 10: Reserved trunk</text>
+          <text x="200" y="284" text-anchor="middle" font-size="7" fill="#065f46">FJ012544G-00483</text>
+
+          <!-- SW2 -->
+          <rect x="480" y="210" width="240" height="80" rx="6" fill="#0d1a2e" stroke="#1e3a5f" stroke-width="2"/>
+          <text x="600" y="232" text-anchor="middle" font-size="10" fill="#e2e8f0" font-weight="700">SW2 — 5320-16P</text>
+          <text x="600" y="246" text-anchor="middle" font-size="8" fill="#60a5fa">192.168.0.11 (VLAN 1)</text>
+          <text x="600" y="260" text-anchor="middle" font-size="7.5" fill="#475569">VLAN 10: 10.10.0.2 · VLAN 50: 10.50.0.1 · VLAN 60: 10.60.0.1</text>
+          <text x="600" y="273" text-anchor="middle" font-size="7.5" fill="#334155">Port 1: Uplink · Port 3: AP (PoE) · Port 10: Reserved trunk</text>
+          <text x="600" y="284" text-anchor="middle" font-size="7" fill="#065f46">FJ012544G-00233</text>
+
+          <!-- Arrows: Router to Switches -->
+          <line x1="360" y1="152" x2="240" y2="210" stroke="#475569" stroke-width="1.5" marker-end="url(#arr)"/>
+          <line x1="440" y1="152" x2="560" y2="210" stroke="#475569" stroke-width="1.5" marker-end="url(#arr)"/>
+
+          <!-- XIQ to Switches (policy push) -->
+          <line x1="640" y1="70" x2="290" y2="215" stroke="#1e3a5f" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#arrd)"/>
+          <line x1="660" y1="70" x2="510" y2="215" stroke="#1e3a5f" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#arrd)"/>
+
+          <!-- AP1 -->
+          <rect x="100" y="345" width="160" height="52" rx="6" fill="#0d2b1f" stroke="#065f46" stroke-width="1.5"/>
+          <text x="180" y="364" text-anchor="middle" font-size="9.5" fill="#6ee7b7" font-weight="700">AP3000 — AP1</text>
+          <text x="180" y="378" text-anchor="middle" font-size="7.5" fill="#475569">192.168.0.12 (VLAN 1 mgmt)</text>
+          <text x="180" y="390" text-anchor="middle" font-size="7" fill="#334155">SSIDs: Corp1 (V20) · Guest1 (V30)</text>
+
+          <!-- AP2 -->
+          <rect x="540" y="345" width="160" height="52" rx="6" fill="#0d2b1f" stroke="#065f46" stroke-width="1.5"/>
+          <text x="620" y="364" text-anchor="middle" font-size="9.5" fill="#6ee7b7" font-weight="700">AP3000 — AP2</text>
+          <text x="620" y="378" text-anchor="middle" font-size="7.5" fill="#475569">192.168.0.25 (VLAN 1 mgmt)</text>
+          <text x="620" y="390" text-anchor="middle" font-size="7" fill="#334155">SSIDs: Corp2 (V50) · Guest2 (V60)</text>
+
+          <!-- Arrows: SW to AP -->
+          <line x1="180" y1="290" x2="180" y2="345" stroke="#065f46" stroke-width="1.5" marker-end="url(#arrg)"/>
+          <text x="165" y="320" font-size="7" fill="#065f46">Port 3 / PoE</text>
+          <line x1="620" y1="290" x2="620" y2="345" stroke="#065f46" stroke-width="1.5" marker-end="url(#arrg)"/>
+          <text x="625" y="320" font-size="7" fill="#065f46">Port 3 / PoE</text>
+
+          <!-- iPhones -->
+          <!-- iPhone on Corp1 -->
+          <rect x="50" y="450" width="100" height="44" rx="5" fill="#1a1a0d" stroke="#713f12" stroke-width="1.5"/>
+          <text x="100" y="468" text-anchor="middle" font-size="8.5" fill="#fcd34d" font-weight="700">iPhone</text>
+          <text x="100" y="480" text-anchor="middle" font-size="7" fill="#78350f">Corp1 SSID</text>
+          <text x="100" y="490" text-anchor="middle" font-size="7" fill="#475569">10.20.0.x</text>
+
+          <!-- iPhone on Guest1 -->
+          <rect x="165" y="450" width="100" height="44" rx="5" fill="#1a1a0d" stroke="#713f12" stroke-width="1.5"/>
+          <text x="215" y="468" text-anchor="middle" font-size="8.5" fill="#fcd34d" font-weight="700">iPhone</text>
+          <text x="215" y="480" text-anchor="middle" font-size="7" fill="#78350f">Guest1 SSID</text>
+          <text x="215" y="490" text-anchor="middle" font-size="7" fill="#475569">10.30.0.x</text>
+
+          <!-- iPhone on Corp2 -->
+          <rect x="490" y="450" width="100" height="44" rx="5" fill="#1a1a0d" stroke="#713f12" stroke-width="1.5"/>
+          <text x="540" y="468" text-anchor="middle" font-size="8.5" fill="#fcd34d" font-weight="700">iPhone</text>
+          <text x="540" y="480" text-anchor="middle" font-size="7" fill="#78350f">Corp2 SSID</text>
+          <text x="540" y="490" text-anchor="middle" font-size="7" fill="#475569">10.50.0.x</text>
+
+          <!-- iPhone on Guest2 -->
+          <rect x="605" y="450" width="100" height="44" rx="5" fill="#1a1a0d" stroke="#713f12" stroke-width="1.5"/>
+          <text x="655" y="468" text-anchor="middle" font-size="8.5" fill="#fcd34d" font-weight="700">iPhone</text>
+          <text x="655" y="480" text-anchor="middle" font-size="7" fill="#78350f">Guest2 SSID</text>
+          <text x="655" y="490" text-anchor="middle" font-size="7" fill="#475569">10.60.0.x</text>
+
+          <!-- iPhone to AP arrows -->
+          <line x1="100" y1="450" x2="155" y2="397" stroke="#713f12" stroke-width="1" stroke-dasharray="3,2" marker-end="url(#arro)"/>
+          <line x1="215" y1="450" x2="195" y2="397" stroke="#713f12" stroke-width="1" stroke-dasharray="3,2" marker-end="url(#arro)"/>
+          <line x1="540" y1="450" x2="600" y2="397" stroke="#713f12" stroke-width="1" stroke-dasharray="3,2" marker-end="url(#arro)"/>
+          <line x1="655" y1="450" x2="645" y2="397" stroke="#713f12" stroke-width="1" stroke-dasharray="3,2" marker-end="url(#arro)"/>
+
+          <!-- VLAN labels -->
+          <rect x="290" y="215" width="120" height="68" rx="4" fill="#0a1628" stroke="#1e293b" stroke-width="1"/>
+          <text x="350" y="232" text-anchor="middle" font-size="7.5" fill="#475569" font-weight="700">VLAN TABLE</text>
+          <text x="350" y="245" text-anchor="middle" font-size="7" fill="#334155">V1: ZTP+/XIQ mgmt</text>
+          <text x="350" y="256" text-anchor="middle" font-size="7" fill="#334155">V10: SwMgmt 10.10.0.x</text>
+          <text x="350" y="267" text-anchor="middle" font-size="7" fill="#334155">V20/30: SW1 clients</text>
+          <text x="350" y="278" text-anchor="middle" font-size="7" fill="#334155">V50/60: SW2 clients</text>
+
+          <!-- Arrowhead markers -->
+          <defs>
+            <marker id="arr" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
+              <path d="M0,0 L6,3 L0,6 Z" fill="#475569"/>
+            </marker>
+            <marker id="arrd" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
+              <path d="M0,0 L6,3 L0,6 Z" fill="#1e3a5f"/>
+            </marker>
+            <marker id="arrg" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
+              <path d="M0,0 L6,3 L0,6 Z" fill="#065f46"/>
+            </marker>
+            <marker id="arro" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
+              <path d="M0,0 L6,3 L0,6 Z" fill="#713f12"/>
+            </marker>
+          </defs>
+        </svg>
+      </div>
+    </div>
+
+    <!-- 11-STEP SEQUENCE -->
+    <div class="module" id="sequence">
+      <span class="mod-badge mod-xiq">Sequence</span>
+      <h2>11-Step E2E Deployment</h2>
+
+      <table>
+        <thead><tr><th>#</th><th>Tool</th><th>Action</th><th>Result</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td><span class="status xiq-s">Physical</span></td><td>Power on switches → connect port 1 to Quantum Fiber router</td><td>Switches get DHCP on VLAN 1, reach internet</td></tr>
+          <tr><td>2</td><td><span class="status xiq-s">XIQ</span></td><td>ZTP+ auto-onboards switches. Pre-register AP serial numbers.</td><td>All 4 devices visible in XIQ device list</td></tr>
+          <tr><td>3</td><td><span class="status xiq-s">XIQ</span></td><td>Create switch policy → select 5320 template</td><td>Policy ready for VLAN + port config</td></tr>
+          <tr><td>4</td><td><span class="status xiq-s">XIQ</span></td><td>VLAN Attributes → add VLANs 10, 20, 30, 50, 60</td><td>VLANs defined in policy</td></tr>
+          <tr><td>5</td><td><span class="status xiq-s">XIQ</span></td><td>Network Allocation → define subnets per VLAN</td><td>10.10/20/30/50/60.0.0/24 assigned</td></tr>
+          <tr><td>6</td><td><span class="status xiq-s">XIQ</span></td><td>Routing → assign SVI per device, enable IPv4 Forwarding</td><td>SW1: .1 IPs · SW2: .2/.1 IPs · f flag set</td></tr>
+          <tr><td>7</td><td><span class="status xiq-s">XIQ</span></td><td>Port Types → AP_Port: trunk, native V1, tagged 20/30/50/60</td><td>Port 3 both switches carries all data VLANs</td></tr>
+          <tr><td>8</td><td><span class="status xiq-s">XIQ</span></td><td>Assign AP policies (AP1=V20/30, AP2=V50/60) → push all</td><td>SSIDs live on both APs</td></tr>
+          <tr><td>9</td><td><span class="status cli-s">CLI</span></td><td>DHCP server config on both switches (range, gateway, DNS, enable ports)</td><td>Clients get IPs from switch DHCP</td></tr>
+          <tr><td>10</td><td><span class="status cli-s">CLI</span></td><td><code>enable ipforwarding vlan Default</code> + <code>save configuration</code></td><td>Return traffic from internet routed to clients</td></tr>
+          <tr><td>11</td><td><span class="status done-s">Test</span></td><td>iPhone → connect SSID → check IP + gateway + Safari</td><td>Internet verified on all 4 SSIDs ✅</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- XIQ vs CLI BOUNDARY -->
+    <div class="module" id="boundary">
+      <span class="mod-badge mod-ref">Boundary</span>
+      <h2>XIQ vs CLI — What Each Handles</h2>
+      <table>
+        <thead><tr><th>Function</th><th>XIQ</th><th>CLI</th></tr></thead>
+        <tbody>
+          <tr><td>VLAN creation + naming</td><td>✅</td><td></td></tr>
+          <tr><td>SVI IP addresses per switch</td><td>✅</td><td></td></tr>
+          <tr><td>IPv4 Forwarding per VLAN</td><td>✅</td><td></td></tr>
+          <tr><td>Port type / trunk config</td><td>✅</td><td></td></tr>
+          <tr><td>AP SSID → VLAN mapping</td><td>✅</td><td></td></tr>
+          <tr><td>ZTP+ onboarding</td><td>✅</td><td></td></tr>
+          <tr><td>DHCP server (range, gateway, DNS)</td><td>❌ limitation</td><td>✅</td></tr>
+          <tr><td>Static routes via L2 interface</td><td>❌ bug/limitation</td><td>✅</td></tr>
+          <tr><td>enable ipforwarding vlan Default</td><td>❌</td><td>✅</td></tr>
+          <tr><td>VLAN 10 port assignment (SVI up)</td><td>Port type needed</td><td>✅ add ports 1 tagged</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- CLI COMMANDS -->
+    <div class="module" id="commands">
+      <span class="mod-badge mod-cli">CLI Reference</span>
+      <h2>Verified CLI Commands — Both Switches</h2>
+
+      <h3>SW1 — VLANs 20 + 30</h3>
+      <pre>configure vlan SW_VLAN_20 dhcp-address-range 10.20.0.100 - 10.20.0.200
+configure vlan SW_VLAN_20 dhcp-options default-gateway 10.20.0.1
+configure vlan SW_VLAN_20 dhcp-options dns-server primary 8.8.8.8
+configure vlan SW_VLAN_20 dhcp-options dns-server secondary 8.8.4.4
+enable dhcp ports 3 vlan SW_VLAN_20
+
+configure vlan SW_VLAN_30 dhcp-address-range 10.30.0.100 - 10.30.0.200
+configure vlan SW_VLAN_30 dhcp-options default-gateway 10.30.0.1
+configure vlan SW_VLAN_30 dhcp-options dns-server primary 8.8.8.8
+configure vlan SW_VLAN_30 dhcp-options dns-server secondary 8.8.4.4
+enable dhcp ports 3 vlan SW_VLAN_30
+
+enable ipforwarding vlan Default
+save configuration</pre>
+
+      <h3>SW2 — VLANs 50 + 60</h3>
+      <pre>configure vlan SW_VLAN_50 dhcp-address-range 10.50.0.100 - 10.50.0.200
+configure vlan SW_VLAN_50 dhcp-options default-gateway 10.50.0.1
+configure vlan SW_VLAN_50 dhcp-options dns-server primary 8.8.8.8
+configure vlan SW_VLAN_50 dhcp-options dns-server secondary 8.8.4.4
+enable dhcp ports 3 vlan SW_VLAN_50
+
+configure vlan SW_VLAN_60 dhcp-address-range 10.60.0.100 - 10.60.0.200
+configure vlan SW_VLAN_60 dhcp-options default-gateway 10.60.0.1
+configure vlan SW_VLAN_60 dhcp-options dns-server primary 8.8.8.8
+configure vlan SW_VLAN_60 dhcp-options dns-server secondary 8.8.4.4
+enable dhcp ports 3 vlan SW_VLAN_60
+
+enable ipforwarding vlan Default
+save configuration</pre>
+
+      <h3>Verify</h3>
+      <pre>show dhcp-server              # confirm ranges + ports enabled
+ping vr VR-Default 8.8.8.8   # confirm switch has internet
+show iproute                  # confirm U + f flags on all VLAN routes</pre>
+    </div>
+
+    <!-- KEY LESSONS -->
+    <div class="module" id="lessons">
+      <span class="mod-badge mod-ref">Lessons</span>
+      <h2>Key Lessons — April 7 + 8 2026</h2>
+
+      <div class="yellow-banner">
+        <div class="yb-label">⚠ enable ipforwarding vlan Default — mandatory after every factory reset</div>
+        <p>Without this, clients get DHCP and a gateway but Safari times out. Return traffic from internet arrives on VLAN 1 and the switch won't forward it. Not pushed by XIQ.</p>
+      </div>
+
+      <div class="yellow-banner">
+        <div class="yb-label">⚠ DHCP syntax — use these exactly (verified on SwitchEngine 33.x)</div>
+        <p><code>dhcp-address-range 10.20.0.100 - 10.20.0.200</code> (dash with spaces)<br>
+        <code>dhcp-options default-gateway</code> (not "gateway")<br>
+        <code>enable dhcp ports 3 vlan X</code> (port number required)</p>
+      </div>
+
+      <div class="yellow-banner">
+        <div class="yb-label">⚠ VLAN SVI stays DOWN with 0 ports — add port 1 tagged to bring up</div>
+        <p>EXOS requires at least one port in link-up state for SVI to be active. Fix: <code>configure vlan SW_VLAN_10_Mgmt add ports 1 tagged</code></p>
+      </div>
+
+      <div class="yellow-banner">
+        <div class="yb-label">⚠ Never add VLAN 1 to XIQ Routing section</div>
+        <p>Breaks XIQ ↔ switch communication immediately. VLAN 1 is the XIQ management lifeline — leave it unmanaged.</p>
+      </div>
+    </div>
+
+    <div style="margin-top:32px;padding-top:20px;border-top:1px solid #1e293b;font-size:0.75rem;color:#334155;display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px">
+      <a href="lab_20260329.html" style="color:#60a5fa;text-decoration:none">&larr; March 29 Lab Guide</a>
+      <a href="session_log_20260407.html" style="color:#60a5fa;text-decoration:none">&larr; April 7 Session Log</a>
+      <span>April 8, 2026 &mdash; Khursheed Khan &mdash; Extreme Networks &mdash; © 2026</span>
+    </div>
+
+  </div>
+</div>
+</body>
+</html>
