@@ -168,9 +168,33 @@ enable dhcp ports 3 vlan &lt;name&gt;</pre>
           <tr><td>SW2 — VLANs 50+60, DHCP, ipforwarding (via XIQ CLI)</td><td><span class="status done-s">&#10003; Done</span></td></tr>
           <tr><td>iPhone internet — Corp2/Guest2 on SW2</td><td><span class="status done-s">&#10003; Verified</span></td></tr>
           <tr><td>Sprint 1: NYT theme sitewide (13 pages)</td><td><span class="status plan-s">Planned</span></td></tr>
-          <tr><td>Sprint 2: VLAN 10 management — design confirmed, XIQ approach</td><td><span class="status plan-s">Ready</span></td></tr>
+          <tr><td>VLAN 10 XIQ config — SVIs pushed, SVI UP on both switches</td><td><span class="status done-s">&#10003; Done</span></td></tr>
+          <tr><td>VLAN 10 SSH from Mac via 10.10.0.1</td><td><span class="status prog-s">Pending — direct cable needed</span></td></tr>
         </tbody>
       </table>
+    </div>
+
+    <!-- VLAN 10 EXECUTION LOG -->
+    <div class="module" id="vlan10-exec">
+      <span class="mod-badge mod-xiq">VLAN 10 Execution</span>
+      <h2>VLAN 10 Management — What Happened April 7</h2>
+
+      <div class="log-entry done"><div class="log-time">XIQ</div><div class="log-text"><strong>VLAN 10 created in XIQ.</strong> VLAN Attribute: 10 / SW_VLAN_10_Mgmt. Network Allocation: SW_Mgmt → 10.10.0.0/24.</div></div>
+      <div class="log-entry done"><div class="log-time">XIQ</div><div class="log-text"><strong>Routing per device configured.</strong> SW1 (FJ012544G-00483): 10.10.0.1/24. SW2 (FJ012544G-00233): 10.10.0.2/24. IPv4 Forwarding ON. Config pushed.</div></div>
+      <div class="log-entry done"><div class="log-time">XIQ</div><div class="log-text"><strong>Port type SW_Mgmt_VLAN10 created.</strong> Access port, VLAN 10, Edge Port ON. For laptop direct connection to management network.</div></div>
+      <div class="log-entry warn"><div class="log-time">Issue</div><div class="log-text"><strong>VLAN 10 SVI was DOWN — 0 ports.</strong> show iproute showed no U or f flag on 10.10.0.0/24. EXOS requires at least one port in link-up state for SVI to be active.</div></div>
+      <div class="log-entry done"><div class="log-time">CLI Fix</div><div class="log-text"><strong>Added port 1 tagged to VLAN 10.</strong> <code>configure vlan SW_VLAN_10_Mgmt add ports 1 tagged</code> on both switches. SVI came UP immediately — U + f flags confirmed in show iproute.</div></div>
+      <div class="log-entry done"><div class="log-time">Quantum Fiber</div><div class="log-text"><strong>Static route added:</strong> 10.10.0.0/255.255.255.0 → 192.168.0.28.</div></div>
+      <div class="log-entry warn"><div class="log-time">Blocker</div><div class="log-text"><strong>Mac cannot ping 10.10.0.1.</strong> Quantum Fiber router does NOT route LAN→LAN traffic via static routes. Static routes only apply to WAN-bound traffic. Switch can ping Mac but Mac cannot reach VLAN 10.</div></div>
+
+      <div style="background:#FFD600;border:3px solid #F9A825;border-radius:6px;padding:18px 20px;margin-top:16px">
+        <div style="font-size:0.63rem;font-weight:700;text-transform:uppercase;letter-spacing:0.15em;color:#333;margin-bottom:6px">⚠ Next Step — Direct Cable Required for VLAN 10 SSH</div>
+        <p style="margin:0 0 8px;color:#111;font-size:0.88rem">To SSH to 10.10.0.1 / 10.10.0.2, plug laptop directly into a switch port assigned SW_Mgmt_VLAN10 port type. Set laptop static IP to 10.10.0.10/24, gateway 10.10.0.1. Then SSH directly — no router involved.</p>
+        <pre style="background:#fff8;border-radius:4px;padding:10px;font-size:0.83rem;margin:0;color:#111;">Laptop static IP: 10.10.0.10 / 255.255.255.0
+Gateway: 10.10.0.1
+ssh admin@10.10.0.1   (SW1)
+ssh admin@10.10.0.2   (SW2)</pre>
+      </div>
     </div>
 
     <!-- SPRINT 2 DESIGN -->
