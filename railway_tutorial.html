@@ -4,93 +4,90 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>5320 Agent — Railway Deployment Tutorial</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Libre+Franklin:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   *{box-sizing:border-box;margin:0;padding:0}
-  body{font-family:'Libre Franklin',Arial,sans-serif;background:#FFFFFF;color:#111111;display:flex;min-height:100vh}
+  body{font-family:'Segoe UI',Arial,sans-serif;background:#0f172a;color:#e2e8f0;display:flex;min-height:100vh}
 
   /* Sidebar */
-  nav{width:260px;min-width:260px;background:#F7F7F5;border-right:1px solid #E2E2E2;padding:0;position:sticky;top:0;height:100vh;overflow-y:auto;display:flex;flex-direction:column;flex-shrink:0}
-  .nav-logo{padding:20px 20px 16px;border-bottom:1px solid #E2E2E2}
-  .nav-logo h1{font-size:0.88rem;color:#326891;line-height:1.45;font-weight:700;font-family:'Libre Baskerville',serif}
-  .nav-logo p{font-size:0.7rem;color:#555555;margin-top:3px}
-  .nav-label{padding:14px 20px 3px;font-size:0.65rem;text-transform:uppercase;letter-spacing:0.1em;color:#888888;font-weight:700}
-  nav a{display:block;padding:7px 20px;font-size:0.8rem;color:#555555;text-decoration:none;border-left:3px solid transparent;transition:all .15s;line-height:1.4}
-  nav a:hover{color:#326891;background:#EBF4FA}
-  nav a.active{color:#326891;border-left-color:#326891;background:#EBF4FA}
+  nav{width:260px;min-width:260px;background:#1e293b;border-right:1px solid #334155;padding:0;position:sticky;top:0;height:100vh;overflow-y:auto;display:flex;flex-direction:column;flex-shrink:0}
+  .nav-logo{padding:20px 20px 16px;border-bottom:1px solid #334155}
+  .nav-logo h1{font-size:0.88rem;color:#fcd34d;line-height:1.45;font-weight:700}
+  .nav-logo p{font-size:0.7rem;color:#64748b;margin-top:3px}
+  .nav-label{padding:14px 20px 3px;font-size:0.65rem;text-transform:uppercase;letter-spacing:0.1em;color:#475569;font-weight:700}
+  nav a{display:block;padding:7px 20px;font-size:0.8rem;color:#94a3b8;text-decoration:none;border-left:3px solid transparent;transition:all .15s;line-height:1.4}
+  nav a:hover{color:#e2e8f0;background:#0f172a}
+  nav a.active{color:#fcd34d;border-left-color:#f59e0b;background:#0f172a}
   nav a.sub{padding-left:30px;font-size:0.76rem}
-  .nav-refs{margin-top:auto;padding:14px 20px;border-top:1px solid #E2E2E2}
-  .nav-refs p{font-size:0.7rem;color:#555555;margin-bottom:5px}
-  .nav-refs a{display:inline;padding:0;border:none;font-size:0.73rem;color:#326891;text-decoration:none}
+  .nav-refs{margin-top:auto;padding:14px 20px;border-top:1px solid #334155}
+  .nav-refs p{font-size:0.7rem;color:#64748b;margin-bottom:5px}
+  .nav-refs a{display:inline;padding:0;border:none;font-size:0.73rem;color:#60a5fa;text-decoration:none}
   .nav-refs a:hover{text-decoration:underline}
 
   /* Main */
   main{flex:1;padding:44px 60px 80px;overflow-x:hidden;max-width:1000px}
 
-  .page-header{margin-bottom:44px;padding-bottom:22px;border-bottom:2px solid #326891}
-  .page-header h1{font-size:1.7rem;color:#111111;font-family:'Libre Baskerville',serif;margin-bottom:8px}
-  .page-header .meta{font-size:0.82rem;color:#555555;display:flex;gap:20px;flex-wrap:wrap}
+  .page-header{margin-bottom:44px;padding-bottom:22px;border-bottom:2px solid #f59e0b}
+  .page-header h1{font-size:1.7rem;color:#fcd34d;margin-bottom:8px}
+  .page-header .meta{font-size:0.82rem;color:#64748b;display:flex;gap:20px;flex-wrap:wrap}
   .page-header .meta span{display:flex;align-items:center;gap:5px}
 
   section{margin-bottom:60px}
-  h2{font-size:1.15rem;color:#326891;font-family:'Libre Baskerville',serif;margin-bottom:20px;padding-bottom:10px;border-bottom:2px solid #326891;display:flex;align-items:center;gap:10px}
-  h2 .sec-num{background:#326891;color:#FFFFFF;border-radius:6px;padding:2px 9px;font-size:0.78rem;font-weight:800}
-  h3{font-size:0.95rem;color:#111111;margin:20px 0 10px;font-weight:700}
-  p{color:#555555;font-size:0.88rem;line-height:1.75;margin-bottom:12px}
-  ul,ol{color:#555555;font-size:0.88rem;line-height:1.75;padding-left:20px;margin-bottom:12px}
+  h2{font-size:1.15rem;color:#fcd34d;margin-bottom:20px;padding-bottom:10px;border-bottom:1px solid #44330a;display:flex;align-items:center;gap:10px}
+  h2 .sec-num{background:#f59e0b;color:#0f172a;border-radius:6px;padding:2px 9px;font-size:0.78rem;font-weight:800}
+  h3{font-size:0.95rem;color:#e2e8f0;margin:20px 0 10px}
+  p{color:#94a3b8;font-size:0.88rem;line-height:1.75;margin-bottom:12px}
+  ul,ol{color:#94a3b8;font-size:0.88rem;line-height:1.75;padding-left:20px;margin-bottom:12px}
   li{margin-bottom:5px}
-  strong{color:#111111}
-  a{color:#326891;text-decoration:none}
+  strong{color:#e2e8f0}
+  a{color:#60a5fa;text-decoration:none}
   a:hover{text-decoration:underline}
 
-  pre{background:#F7F7F5;border:1px solid #E2E2E2;border-radius:8px;padding:14px 18px;margin:12px 0;font-family:'SF Mono','Fira Code',monospace;font-size:0.8rem;color:#326891;line-height:1.6;overflow-x:auto;white-space:pre-wrap}
-  code{font-family:'SF Mono','Fira Code',monospace;font-size:0.8rem;background:#F7F7F5;color:#326891;padding:2px 6px;border-radius:4px;border:1px solid #E2E2E2}
+  pre{background:#0d1117;border:1px solid #334155;border-radius:8px;padding:14px 18px;margin:12px 0;font-family:'SF Mono','Fira Code',monospace;font-size:0.8rem;color:#a5f3fc;line-height:1.6;overflow-x:auto;white-space:pre-wrap}
+  code{font-family:'SF Mono','Fira Code',monospace;font-size:0.8rem;background:#1e293b;color:#fcd34d;padding:2px 6px;border-radius:4px}
 
   /* Chat bubbles */
   .chat{display:flex;flex-direction:column;gap:18px;margin:24px 0}
   .bubble{border-radius:12px;padding:16px 20px;max-width:100%;position:relative}
-  .bubble-you{background:#FFF8E1;border:1px solid #F9A825;border-radius:12px 12px 12px 2px}
+  .bubble-you{background:#1c1506;border:1px solid #92400e;border-radius:12px 12px 12px 2px}
   .bubble-you .avatar{display:flex;align-items:center;gap:8px;margin-bottom:8px}
-  .bubble-you .avatar .av{background:#F9A825;color:#111111;border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:800;flex-shrink:0}
-  .bubble-you .label{font-size:0.7rem;font-weight:700;color:#7a5a00;text-transform:uppercase;letter-spacing:0.07em}
-  .bubble-you .num{font-size:0.68rem;color:#7a5a00;margin-left:auto}
-  .bubble-you p{color:#5a3e00;font-size:0.88rem;line-height:1.7;margin:0}
-  .bubble-cc{background:#F7F7F5;border:1px solid #E2E2E2;border-radius:12px 12px 2px 12px}
+  .bubble-you .avatar .av{background:#f59e0b;color:#0f172a;border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:800;flex-shrink:0}
+  .bubble-you .label{font-size:0.7rem;font-weight:700;color:#d97706;text-transform:uppercase;letter-spacing:0.07em}
+  .bubble-you .num{font-size:0.68rem;color:#92400e;margin-left:auto}
+  .bubble-you p{color:#fde68a;font-size:0.88rem;line-height:1.7;margin:0}
+  .bubble-cc{background:#1e293b;border:1px solid #334155;border-radius:12px 12px 2px 12px}
   .bubble-cc .avatar{display:flex;align-items:center;gap:8px;margin-bottom:10px}
-  .bubble-cc .avatar .av{background:#326891;color:#FFFFFF;border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:800;flex-shrink:0}
-  .bubble-cc .label{font-size:0.7rem;font-weight:700;color:#326891;text-transform:uppercase;letter-spacing:0.07em}
-  .bubble-cc p{color:#555555;font-size:0.88rem;line-height:1.75;margin-bottom:8px}
+  .bubble-cc .avatar .av{background:#f59e0b;color:#0f172a;border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:800;flex-shrink:0}
+  .bubble-cc .label{font-size:0.7rem;font-weight:700;color:#f59e0b;text-transform:uppercase;letter-spacing:0.07em}
+  .bubble-cc p{color:#94a3b8;font-size:0.88rem;line-height:1.75;margin-bottom:8px}
   .bubble-cc p:last-child{margin-bottom:0}
-  .bubble-cc ul{color:#555555;font-size:0.88rem;line-height:1.75;padding-left:18px;margin-bottom:8px}
-  .bubble-cc code{background:#F7F7F5;color:#326891;border:1px solid #E2E2E2}
+  .bubble-cc ul{color:#94a3b8;font-size:0.88rem;line-height:1.75;padding-left:18px;margin-bottom:8px}
+  .bubble-cc code{background:#0d1117;color:#fcd34d}
   .bubble-cc pre{margin:8px 0}
 
   /* Phase divider */
-  .phase-divider{background:#326891;color:#FFFFFF;font-size:0.78rem;font-weight:800;text-transform:uppercase;letter-spacing:0.12em;padding:8px 20px;border-radius:6px;margin:36px 0 8px;display:inline-block}
+  .phase-divider{background:linear-gradient(90deg,#f59e0b,#d97706);color:#0f172a;font-size:0.78rem;font-weight:800;text-transform:uppercase;letter-spacing:0.12em;padding:8px 20px;border-radius:6px;margin:36px 0 8px;display:inline-block}
 
   /* Arch table */
   .arch-table{width:100%;border-collapse:collapse;margin:14px 0;font-size:0.85rem}
-  .arch-table th{background:#F7F7F5;color:#326891;text-align:left;padding:10px 14px;border-bottom:2px solid #326891}
-  .arch-table td{padding:9px 14px;border-bottom:1px solid #E2E2E2;color:#555555;vertical-align:top}
-  .arch-table td:first-child{color:#326891;font-family:'SF Mono',monospace;font-size:0.8rem;white-space:nowrap}
+  .arch-table th{background:#1c1506;color:#fcd34d;text-align:left;padding:10px 14px;border-bottom:2px solid #44330a}
+  .arch-table td{padding:9px 14px;border-bottom:1px solid #1e293b;color:#94a3b8;vertical-align:top}
+  .arch-table td:first-child{color:#fcd34d;font-family:'SF Mono',monospace;font-size:0.8rem;white-space:nowrap}
 
   /* Why table */
-  .why-table td:first-child{color:#555555;font-family:inherit;font-size:0.85rem}
-  .yes{color:#1a5c2a!important;font-weight:700}
-  .no{color:#c0392b!important}
+  .why-table td:first-child{color:#94a3b8;font-family:inherit;font-size:0.85rem}
+  .yes{color:#34d399!important;font-weight:700}
+  .no{color:#f87171!important}
 
   @media print{
     nav{display:none!important}
     body{background:#fff;color:#111;display:block}
     main{padding:20px;max-width:100%}
-    h2{color:#326891!important;border-color:#326891!important}
-    .bubble-you{background:#FFF8E1;border-color:#F9A825}
+    h2{color:#b45309!important;border-color:#b45309!important}
+    .bubble-you{background:#fef3c7;border-color:#d97706}
     .bubble-you p{color:#111}
-    .bubble-cc{background:#F7F7F5;border-color:#E2E2E2}
+    .bubble-cc{background:#f8fafc;border-color:#cbd5e1}
     .bubble-cc p,.bubble-cc li{color:#111}
-    pre{background:#F7F7F5!important;color:#326891!important}
+    pre{background:#f1f5f9!important;color:#111!important}
   }
 </style>
 </head>
@@ -315,16 +312,17 @@ python3 ~/5320-onboarding/bridge/bridge.py \
       <p style="color:#fcd34d;font-size:0.85rem;margin:0"><strong>Note:</strong> Change the <code>BRIDGE_TOKEN</code> set to <code>5320bridge</code> — update this if you ever rotate the token in Railway → Variables.</p>
     </div>
 
-    <div style="margin-top:48px;padding-top:20px;border-top:1px solid #E2E2E2;text-align:center">
-      <p style="color:#555555;font-size:0.78rem">Built with Claude Code — March 25, 2026 &nbsp;|&nbsp;
-        <a href="deploy.html#tab-railway" style="color:#326891">Deployment Guide &#8599;</a>
-        &nbsp;|&nbsp; <a href="agent_tutorial.html" style="color:#326891">Agent Build Tutorial &#8599;</a>
-        &nbsp;|&nbsp; <a href="index.html" style="color:#326891">Docs Home</a></p>
+    <div style="margin-top:48px;padding-top:20px;border-top:1px solid #44330a;text-align:center">
+      <p style="color:#475569;font-size:0.78rem">Built with Claude Code — March 25, 2026 &nbsp;|&nbsp;
+        <a href="deploy.html#tab-railway" style="color:#f59e0b">Deployment Guide &#8599;</a>
+        &nbsp;|&nbsp; <a href="agent_tutorial.html" style="color:#a78bfa">Agent Build Tutorial &#8599;</a>
+        &nbsp;|&nbsp; <a href="index.html" style="color:#60a5fa">Docs Home</a></p>
+    </div>
+  </section>
 
+</main>
 
-
-<div style="text-align:center;padding:28px 24px 16px;border-top:1px solid #E2E2E2;margin-top:48px"><p style="font-family:'Libre Franklin',Arial,sans-serif;font-size:0.8rem;font-weight:600;color:#555555;letter-spacing:0.06em">&copy; 2026 Khursheed Khan &nbsp;&middot;&nbsp; All rights reserved &nbsp;&middot;&nbsp; March 2026</p></div>
-</div><script>
+<script>
   const sections = document.querySelectorAll('section[id]');
   const navLinks = document.querySelectorAll('nav a[href^="#"]');
   window.addEventListener('scroll', () => {
@@ -335,6 +333,5 @@ python3 ~/5320-onboarding/bridge/bridge.py \
     });
   }, { passive: true });
 </script>
-
 </body>
 </html>

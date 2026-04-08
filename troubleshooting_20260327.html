@@ -4,75 +4,72 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>5320 Config Verification &amp; Troubleshooting — March 27, 2026</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Libre+Franklin:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: 'Libre Franklin', Arial, sans-serif; background: #FFFFFF; color: #111111; display: flex; min-height: 100vh; }
-nav { position: fixed; left: 0; top: 0; width: 230px; height: 100vh; background: #F7F7F5; border-right: 1px solid #E2E2E2; overflow-y: auto; padding: 20px 0; z-index: 100; }
-nav .nav-title { color: #326891; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; padding: 0 18px 14px; border-bottom: 1px solid #E2E2E2; margin-bottom: 10px; }
-nav a { display: block; padding: 6px 18px; color: #555555; font-size: 0.80rem; text-decoration: none; border-left: 3px solid transparent; transition: all 0.15s; line-height: 1.4; }
-nav a:hover, nav a.active { color: #326891; border-left-color: #326891; background: #EBF4FA; }
-nav .nav-section { padding: 10px 18px 4px; color: #888888; font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; }
+body { font-family: 'Segoe UI', Arial, sans-serif; background: #0f172a; color: #e2e8f0; display: flex; min-height: 100vh; }
+nav { position: fixed; left: 0; top: 0; width: 230px; height: 100vh; background: #0d1117; border-right: 1px solid #1e293b; overflow-y: auto; padding: 20px 0; z-index: 100; }
+nav .nav-title { color: #7c3aed; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; padding: 0 18px 14px; border-bottom: 1px solid #1e293b; margin-bottom: 10px; }
+nav a { display: block; padding: 6px 18px; color: #64748b; font-size: 0.80rem; text-decoration: none; border-left: 3px solid transparent; transition: all 0.15s; line-height: 1.4; }
+nav a:hover, nav a.active { color: #a78bfa; border-left-color: #7c3aed; background: #1e293b; }
+nav .nav-section { padding: 10px 18px 4px; color: #334155; font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; }
 main { margin-left: 230px; max-width: 1020px; padding: 48px 40px; flex: 1; }
 .page-header { margin-bottom: 48px; }
-.page-header h1 { font-size: 1.9rem; color: #111111; font-family: 'Libre Baskerville', serif; margin-bottom: 8px; }
-.page-header .meta { color: #555555; font-size: 0.88rem; margin-bottom: 4px; }
-.page-header .subtitle { color: #555555; font-size: 0.95rem; line-height: 1.6; }
+.page-header h1 { font-size: 1.9rem; color: #a78bfa; margin-bottom: 8px; }
+.page-header .meta { color: #64748b; font-size: 0.88rem; margin-bottom: 4px; }
+.page-header .subtitle { color: #94a3b8; font-size: 0.95rem; line-height: 1.6; }
 section { margin-bottom: 64px; scroll-margin-top: 24px; }
-h2 { font-size: 1.4rem; color: #326891; font-family: 'Libre Baskerville', serif; margin-bottom: 6px; padding-bottom: 10px; border-bottom: 2px solid #326891; }
-h3 { font-size: 1.05rem; color: #111111; margin: 24px 0 12px; font-weight: 700; }
-h4 { font-size: 0.9rem; color: #555555; margin: 18px 0 8px; font-weight: 600; }
-p { color: #555555; font-size: 0.92rem; line-height: 1.7; margin-bottom: 12px; }
-.phase-label { display: inline-block; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #326891; margin-bottom: 8px; }
-.card { background: #FFFFFF; border: 1px solid #E2E2E2; border-radius: 8px; padding: 20px 24px; margin: 16px 0; }
-.box-purple { border-color: #326891; background: #EBF4FA; }
-.box-amber { border-color: #F9A825; background: #FFF8E1; }
-.box-green { border-color: #1a5c2a; background: #F0FBF4; }
-.box-red { border-color: #c0392b; background: #FEF2F2; }
-.box-blue { border-color: #326891; background: #EBF4FA; }
+h2 { font-size: 1.4rem; color: #a78bfa; margin-bottom: 6px; padding-bottom: 10px; border-bottom: 1px solid #1e293b; }
+h3 { font-size: 1.05rem; color: #c4b5fd; margin: 24px 0 12px; }
+h4 { font-size: 0.9rem; color: #94a3b8; margin: 18px 0 8px; font-weight: 600; }
+p { color: #94a3b8; font-size: 0.92rem; line-height: 1.7; margin-bottom: 12px; }
+.phase-label { display: inline-block; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #7c3aed; margin-bottom: 8px; }
+.card { background: #1e293b; border: 1px solid #334155; border-radius: 8px; padding: 20px 24px; margin: 16px 0; }
+.box-purple { border-color: #7c3aed; background: #1a1035; }
+.box-amber { border-color: #f59e0b; background: #1a1200; }
+.box-green { border-color: #10b981; background: #052019; }
+.box-red { border-color: #ef4444; background: #1a0505; }
+.box-blue { border-color: #3b82f6; background: #0c1a2e; }
 .box-title { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 10px; }
-.box-title.purple { color: #326891; }
-.box-title.amber { color: #5a3e00; }
-.box-title.green { color: #1a5c2a; }
-.box-title.red { color: #c0392b; }
-.box-title.blue { color: #326891; }
+.box-title.purple { color: #a78bfa; }
+.box-title.amber { color: #fcd34d; }
+.box-title.green { color: #34d399; }
+.box-title.red { color: #f87171; }
+.box-title.blue { color: #60a5fa; }
 pre { border-radius: 6px; padding: 16px; font-size: 0.80rem; line-height: 1.6; overflow-x: auto; margin: 12px 0; font-family: 'SF Mono', 'Fira Code', monospace; }
-pre.switch { background: #F7F7F5; border: 1px solid #E2E2E2; border-left: 3px solid #326891; color: #326891; }
-pre.cmd { background: #F7F7F5; border: 1px solid #E2E2E2; border-left: 3px solid #245a7a; color: #245a7a; }
-pre.config { background: #F7F7F5; border: 1px solid #E2E2E2; border-left: 3px solid #1a5c2a; color: #1a5c2a; }
-pre.err { background: #FEF2F2; border: 1px solid #f5c6cb; border-left: 3px solid #c0392b; color: #555555; }
-.ok { color: #1a5c2a; }
-.warn { color: #7a5a00; }
-.err-text { color: #c0392b; }
-.dim { color: #888888; }
-.hi { color: #111111; font-weight: 600; }
-code { background: #F7F7F5; color: #326891; padding: 2px 6px; border-radius: 3px; font-size: 0.82rem; font-family: 'SF Mono', monospace; border: 1px solid #E2E2E2; }
+pre.switch { background: #0d1117; border-left: 3px solid #67e8f9; color: #67e8f9; }
+pre.cmd { background: #0d1117; border-left: 3px solid #a78bfa; color: #a78bfa; }
+pre.config { background: #0d1117; border-left: 3px solid #34d399; color: #34d399; }
+pre.err { background: #0d1117; border-left: 3px solid #ef4444; color: #94a3b8; }
+.ok { color: #34d399; }
+.warn { color: #fcd34d; }
+.err-text { color: #f87171; }
+.dim { color: #475569; }
+.hi { color: #e2e8f0; font-weight: 600; }
+code { background: #1e293b; color: #67e8f9; padding: 2px 6px; border-radius: 3px; font-size: 0.82rem; font-family: 'SF Mono', monospace; }
 table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.84rem; }
-th { background: #F7F7F5; color: #326891; font-weight: 600; padding: 10px 12px; text-align: left; border-bottom: 2px solid #326891; }
-td { padding: 9px 12px; border-bottom: 1px solid #E2E2E2; color: #555555; vertical-align: top; }
-tr:hover td { background: #F7F7F5; }
-td code { background: #F7F7F5; color: #326891; padding: 2px 5px; border-radius: 3px; font-size: 0.78rem; border: 1px solid #E2E2E2; }
+th { background: #1e293b; color: #a78bfa; font-weight: 600; padding: 10px 12px; text-align: left; border-bottom: 2px solid #334155; }
+td { padding: 9px 12px; border-bottom: 1px solid #1e293b; color: #94a3b8; vertical-align: top; }
+tr:hover td { background: #1e293b44; }
+td code { background: #0d1117; color: #67e8f9; padding: 2px 5px; border-radius: 3px; font-size: 0.78rem; }
 .badge { display: inline-block; font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 10px; }
-.badge-ok { background: #F0FBF4; color: #1a5c2a; border: 1px solid #b8e0c6; }
-.badge-warn { background: #FFF8E1; color: #7a5a00; border: 1px solid #F9A825; }
-.badge-err { background: #FEF2F2; color: #c0392b; border: 1px solid #f5c6cb; }
-.badge-info { background: #EBF4FA; color: #326891; border: 1px solid #B8D4E8; }
+.badge-ok { background: #052019; color: #34d399; border: 1px solid #10b981; }
+.badge-warn { background: #1a1200; color: #fcd34d; border: 1px solid #f59e0b; }
+.badge-err { background: #1a0505; color: #f87171; border: 1px solid #ef4444; }
+.badge-info { background: #0c1a2e; color: #60a5fa; border: 1px solid #3b82f6; }
 .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0; }
 @media (max-width: 700px) { .two-col { grid-template-columns: 1fr; } }
-.flow-box { background: #F7F7F5; border: 1px solid #E2E2E2; border-radius: 6px; padding: 14px 16px; font-size: 0.82rem; color: #555555; }
-.flow-arrow { text-align: center; color: #888888; font-size: 1.2rem; margin: 4px 0; }
-footer { margin-top: 80px; padding-top: 24px; border-top: 1px solid #E2E2E2; text-align: center; }
-footer p { color: #555555; font-size: 0.78rem; }
-footer a { color: #326891; font-size: 0.82rem; margin: 0 10px; text-decoration: none; }
+.flow-box { background: #1e293b; border: 1px solid #334155; border-radius: 6px; padding: 14px 16px; font-size: 0.82rem; color: #94a3b8; }
+.flow-arrow { text-align: center; color: #475569; font-size: 1.2rem; margin: 4px 0; }
+footer { margin-top: 80px; padding-top: 24px; border-top: 1px solid #1e293b; text-align: center; }
+footer p { color: #475569; font-size: 0.78rem; }
+footer a { color: #60a5fa; font-size: 0.82rem; margin: 0 10px; text-decoration: none; }
 footer a:hover { text-decoration: underline; }
 @media print {
   nav { display: none; }
   main { margin-left: 0; padding: 24px; }
   body { background: #fff; color: #111; }
-  h2 { color: #326891; border-bottom: 2px solid #326891; }
-  pre { border: 1px solid #E2E2E2; background: #F7F7F5 !important; color: #326891 !important; }
+  h2 { color: #4c1d95; }
+  pre { border: 1px solid #ccc; background: #f8f8f8 !important; color: #111 !important; }
 }
 </style>
 </head>
@@ -104,12 +101,12 @@ footer a:hover { text-decoration: underline; }
 <main>
 
 <!-- Series banner -->
-<div style="background:#F0FBF4;border:1px solid #b8e0c6;border-radius:8px;padding:14px 20px;margin-bottom:32px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+<div style="background:#0d2b1f;border:1px solid #065f46;border-radius:8px;padding:14px 20px;margin-bottom:32px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
   <div>
-    <span style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#1a5c2a">5320 + AP3000 Integration Series</span>
-    <span style="color:#555555;font-size:0.8rem;margin-left:12px">Part 2 of 2</span>
+    <span style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#34d399">5320 + AP3000 Integration Series</span>
+    <span style="color:#475569;font-size:0.8rem;margin-left:12px">Part 2 of 2</span>
   </div>
-  <a href="ap_onboarding_20260326.html" style="display:inline-flex;align-items:center;gap:6px;background:#F0FBF4;border:1px solid #b8e0c6;border-radius:6px;padding:7px 14px;color:#1a5c2a;font-size:0.82rem;font-weight:600;text-decoration:none">
+  <a href="ap_onboarding_20260326.html" style="display:inline-flex;align-items:center;gap:6px;background:#052019;border:1px solid #10b981;border-radius:6px;padding:7px 14px;color:#34d399;font-size:0.82rem;font-weight:600;text-decoration:none">
     &larr; Part 1 &middot; AP3000 Onboarding Guide
   </a>
 </div>
@@ -130,7 +127,7 @@ footer a:hover { text-decoration: underline; }
   <div class="two-col">
     <div class="card box-green">
       <div class="box-title green">What Is Working</div>
-      <ul style="color:#1a5c2a;font-size:0.85rem;line-height:2;padding-left:16px">
+      <ul style="color:#6ee7b7;font-size:0.85rem;line-height:2;padding-left:16px">
         <li>Switch management to internet (192.168.0.24) ✓</li>
         <li>XIQ agent connectivity from switch ✓</li>
         <li>Both AP3000s adopted in XIQ (MANAGED) ✓</li>
@@ -144,7 +141,7 @@ footer a:hover { text-decoration: underline; }
     </div>
     <div class="card box-red">
       <div class="box-title red">What Is Not Working / Missing</div>
-      <ul style="color:#c0392b;font-size:0.85rem;line-height:2;padding-left:16px">
+      <ul style="color:#fca5a5;font-size:0.85rem;line-height:2;padding-left:16px">
         <li>WiFi clients cannot reach internet ✗</li>
         <li>IoT VLAN (40): no IP address configured ✗</li>
         <li>IoT VLAN (40): no DHCP server configured ✗</li>
@@ -356,7 +353,7 @@ enable stpd s0</pre>
       <td>Management VLAN. ipforwarding disabled by design — switch does not route inter-VLAN via Default.</td>
     </tr>
     <tr>
-      <td><strong style="color:#326891">Corporate</strong></td>
+      <td><strong style="color:#a78bfa">Corporate</strong></td>
       <td>20</td>
       <td>10.20.0.1/24<br><span class="badge badge-ok">Forwarding ON</span></td>
       <td>Tag: <span class="ok">*1, *3, *5</span> active<br>Blocked: 2b</td>
@@ -364,7 +361,7 @@ enable stpd s0</pre>
       <td>L3 routing enabled. DHCP server configured. ✓</td>
     </tr>
     <tr>
-      <td><strong style="color:#7a5a00">Guest</strong></td>
+      <td><strong style="color:#fcd34d">Guest</strong></td>
       <td>30</td>
       <td>10.30.0.1/24<br><span class="badge badge-ok">Forwarding ON</span></td>
       <td>Tag: <span class="ok">*1, *3, *5</span> active<br>Blocked: 2b</td>
@@ -372,7 +369,7 @@ enable stpd s0</pre>
       <td>L3 routing enabled. DHCP confirmed working (client 10.30.0.102 in ARP). ✓</td>
     </tr>
     <tr>
-      <td><strong style="color:#1a5c2a">IoT</strong></td>
+      <td><strong style="color:#34d399">IoT</strong></td>
       <td>40</td>
       <td><span class="err-text">NO IP ADDRESS</span><br><span class="badge badge-err">Forwarding OFF</span></td>
       <td>Tag: <span class="ok">*1, *3, *5</span> active<br>Blocked: 2b</td>
@@ -625,13 +622,13 @@ VR-Default    10.30.0.102      74:a6:cd:8b:19:60   11     NO  Guest     30    5 
   <p>This is entirely handled through the <strong class="hi">Default VLAN management interface</strong> — the same interface used for SSH access. The XIQ agent (<code>iqagent</code>) is bound to <code>VR-Default</code> which uses 192.168.0.24.</p>
 
   <div style="max-width:520px;margin:24px auto">
-    <div class="flow-box" style="border-color:#326891"><strong style="color:#326891">5320 Switch</strong><br>iqagent configured on VR-Default<br>Source IP: <code>192.168.0.24</code> (Default VLAN)</div>
+    <div class="flow-box" style="border-color:#a78bfa"><strong style="color:#a78bfa">5320 Switch</strong><br>iqagent configured on VR-Default<br>Source IP: <code>192.168.0.24</code> (Default VLAN)</div>
     <div class="flow-arrow">↓ HTTPS/WebSocket outbound on port 443</div>
-    <div class="flow-box" style="border-color:#326891"><strong style="color:#326891">Port 1 (uplink)</strong><br>Default VLAN untagged egress</div>
+    <div class="flow-box" style="border-color:#67e8f9"><strong style="color:#67e8f9">Port 1 (uplink)</strong><br>Default VLAN untagged egress</div>
     <div class="flow-arrow">↓</div>
-    <div class="flow-box" style="border-color:#326891"><strong style="color:#326891">Home Router — 192.168.0.1</strong><br>Sees packet from 192.168.0.24<br>This is its own subnet — NATs it to public IP ✓</div>
+    <div class="flow-box" style="border-color:#67e8f9"><strong style="color:#67e8f9">Home Router — 192.168.0.1</strong><br>Sees packet from 192.168.0.24<br>This is its own subnet — NATs it to public IP ✓</div>
     <div class="flow-arrow">↓ Public internet</div>
-    <div class="flow-box" style="border-color:#1a5c2a"><strong style="color:#1a5c2a">hac.extremecloudiq.com</strong><br>XIQ cloud receives connection<br>Switch shows as MANAGED in XIQ ✓</div>
+    <div class="flow-box" style="border-color:#34d399"><strong style="color:#34d399">hac.extremecloudiq.com</strong><br>XIQ cloud receives connection<br>Switch shows as MANAGED in XIQ ✓</div>
   </div>
 
   <h3>Supporting Evidence</h3>
@@ -673,13 +670,13 @@ VR-Default    10.30.0.102      74:a6:cd:8b:19:60   11     NO  Guest     30    5 
   <p>The APs use the <strong class="hi">Default VLAN (untagged)</strong> for their management traffic — not any of the data VLANs (20/30/40). This is the critical distinction.</p>
 
   <div style="max-width:600px;margin:24px auto">
-    <div class="flow-box" style="border-color:#1a5c2a"><strong style="color:#1a5c2a">AP3000 powers on (PoE class4 on port 3 or 5)</strong><br>AP has no configuration yet — sends all traffic untagged</div>
+    <div class="flow-box" style="border-color:#10b981"><strong style="color:#34d399">AP3000 powers on (PoE class4 on port 3 or 5)</strong><br>AP has no configuration yet — sends all traffic untagged</div>
     <div class="flow-arrow">↓ Untagged Ethernet frame (DHCP Discover broadcast)</div>
-    <div class="flow-box" style="border-color:#326891"><strong style="color:#326891">5320 receives on port 3 or 5</strong><br>No VLAN tag = Default VLAN (1)<br>Switch has <code>enable dhcp vlan Default</code> configured<br>Switch is a DHCP CLIENT here — it forwards the broadcast out port 1</div>
+    <div class="flow-box" style="border-color:#a78bfa"><strong style="color:#a78bfa">5320 receives on port 3 or 5</strong><br>No VLAN tag = Default VLAN (1)<br>Switch has <code>enable dhcp vlan Default</code> configured<br>Switch is a DHCP CLIENT here — it forwards the broadcast out port 1</div>
     <div class="flow-arrow">↓ DHCP Discover exits port 1 untagged</div>
-    <div class="flow-box" style="border-color:#326891"><strong style="color:#326891">Home router (192.168.0.1) — DHCP server</strong><br>Responds with DHCP Offer: 192.168.0.x address<br>Gateway: 192.168.0.1 &nbsp; DNS: from home router</div>
+    <div class="flow-box" style="border-color:#67e8f9"><strong style="color:#67e8f9">Home router (192.168.0.1) — DHCP server</strong><br>Responds with DHCP Offer: 192.168.0.x address<br>Gateway: 192.168.0.1 &nbsp; DNS: from home router</div>
     <div class="flow-arrow">↓ DHCP Offer back to AP</div>
-    <div class="flow-box" style="border-color:#1a5c2a"><strong style="color:#1a5c2a">AP gets 192.168.0.25 or 192.168.0.26</strong><br>Source IP is 192.168.0.x — the home router's OWN subnet<br>AP reaches XIQ at hac.extremecloudiq.com ✓<br>Home router NATs 192.168.0.x → internet correctly ✓</div>
+    <div class="flow-box" style="border-color:#10b981"><strong style="color:#34d399">AP gets 192.168.0.25 or 192.168.0.26</strong><br>Source IP is 192.168.0.x — the home router's OWN subnet<br>AP reaches XIQ at hac.extremecloudiq.com ✓<br>Home router NATs 192.168.0.x → internet correctly ✓</div>
   </div>
 
   <h3>The Key Fact</h3>
@@ -893,16 +890,16 @@ save configuration</pre>
 </section>
 
 <!-- Prev/Next navigation -->
-<div style="display:flex;justify-content:space-between;align-items:stretch;gap:16px;margin-top:64px;padding-top:32px;border-top:1px solid #E2E2E2;flex-wrap:wrap">
-  <a href="ap_onboarding_20260326.html" style="flex:1;min-width:220px;background:#F0FBF4;border:1px solid #b8e0c6;border-radius:8px;padding:16px 20px;text-decoration:none;display:flex;flex-direction:column;gap:4px">
-    <span style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.08em;color:#1a5c2a;font-weight:700">&larr; Previous</span>
-    <span style="color:#1a5c2a;font-size:0.88rem;font-weight:600">AP3000 Onboarding Guide</span>
-    <span style="color:#555555;font-size:0.78rem">March 26, 2026 &mdash; SSH &rarr; VLANs &rarr; PoE &rarr; XIQ adoption</span>
+<div style="display:flex;justify-content:space-between;align-items:stretch;gap:16px;margin-top:64px;padding-top:32px;border-top:1px solid #1e293b;flex-wrap:wrap">
+  <a href="ap_onboarding_20260326.html" style="flex:1;min-width:220px;background:#052019;border:1px solid #10b981;border-radius:8px;padding:16px 20px;text-decoration:none;display:flex;flex-direction:column;gap:4px">
+    <span style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.08em;color:#34d399;font-weight:700">&larr; Previous</span>
+    <span style="color:#34d399;font-size:0.88rem;font-weight:600">AP3000 Onboarding Guide</span>
+    <span style="color:#64748b;font-size:0.78rem">March 26, 2026 &mdash; SSH &rarr; VLANs &rarr; PoE &rarr; XIQ adoption</span>
   </a>
-  <a href="index.html" style="flex:1;min-width:220px;background:#F7F7F5;border:1px solid #E2E2E2;border-radius:8px;padding:16px 20px;text-decoration:none;display:flex;flex-direction:column;gap:4px;text-align:right">
-    <span style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.08em;color:#555555;font-weight:700">Home &rarr;</span>
-    <span style="color:#326891;font-size:0.88rem;font-weight:600">Docs Home</span>
-    <span style="color:#555555;font-size:0.78rem">All guides and session reports</span>
+  <a href="index.html" style="flex:1;min-width:220px;background:#1e293b;border:1px solid #334155;border-radius:8px;padding:16px 20px;text-decoration:none;display:flex;flex-direction:column;gap:4px;text-align:right">
+    <span style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.08em;color:#475569;font-weight:700">Home &rarr;</span>
+    <span style="color:#a78bfa;font-size:0.88rem;font-weight:600">Docs Home</span>
+    <span style="color:#64748b;font-size:0.78rem">All guides and session reports</span>
   </a>
 </div>
 
@@ -912,11 +909,12 @@ save configuration</pre>
     <a href="index.html">&larr; Back to Docs Home</a>
     <a href="ap_onboarding_20260326.html">AP Onboarding Guide</a>
     <a href="session_20260325.html">Switch Config Report Mar 25</a>
+  </div>
+</footer>
 
+</main>
 
-
-<div style="text-align:center;padding:28px 24px 16px;border-top:1px solid #E2E2E2;margin-top:48px"><p style="font-family:'Libre Franklin',Arial,sans-serif;font-size:0.8rem;font-weight:600;color:#555555;letter-spacing:0.06em">&copy; 2026 Khursheed Khan &nbsp;&middot;&nbsp; All rights reserved &nbsp;&middot;&nbsp; March 2026</p></div>
-</div><script>
+<script>
 const sections = document.querySelectorAll('section[id]');
 const navLinks = document.querySelectorAll('nav a');
 const observer = new IntersectionObserver(entries => {

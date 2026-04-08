@@ -4,76 +4,72 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Extreme Networks 5320 Onboarding Guide</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Libre+Franklin:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Libre Franklin', Arial, sans-serif; background: #FFFFFF; color: #111111; line-height: 1.7; }
+    body { font-family: 'Segoe UI', Arial, sans-serif; background: #f4f6f9; color: #222; line-height: 1.7; }
 
     /* LOGIN GATE */
     #login-gate {
-      position: fixed; inset: 0; background: #FFFFFF;
+      position: fixed; inset: 0; background: #1a0a2e;
       display: flex; align-items: center; justify-content: center; z-index: 9999;
     }
     #login-box {
-      background: #FFFFFF; border: 1px solid #326891; border-radius: 12px; padding: 40px 48px;
-      box-shadow: 0 8px 40px rgba(0,0,0,0.1); width: 100%; max-width: 400px; text-align: center;
+      background: white; border-radius: 12px; padding: 40px 48px;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.5); width: 100%; max-width: 400px; text-align: center;
     }
-    #login-box h2 { color: #326891; margin-bottom: 6px; font-size: 1.4rem; font-family: 'Libre Baskerville', serif; }
-    #login-box p { color: #555555; font-size: 0.9rem; margin-bottom: 24px; }
+    #login-box h2 { color: #7b2d8b; margin-bottom: 6px; font-size: 1.4rem; }
+    #login-box p { color: #666; font-size: 0.9rem; margin-bottom: 24px; }
     #login-box input {
       width: 100%; padding: 10px 14px; margin-bottom: 14px;
-      border: 1px solid #E2E2E2; border-radius: 6px; font-size: 1rem; outline: none;
-      background: #FFFFFF; color: #111111;
+      border: 1px solid #ddd; border-radius: 6px; font-size: 1rem; outline: none;
     }
-    #login-box input:focus { border-color: #326891; }
+    #login-box input:focus { border-color: #7b2d8b; }
     #login-box button {
-      width: 100%; padding: 12px; background: #326891; color: white;
+      width: 100%; padding: 12px; background: #7b2d8b; color: white;
       border: none; border-radius: 6px; font-size: 1rem; cursor: pointer; font-weight: bold;
     }
-    #login-box button:hover { background: #245a7a; }
-    #login-error { color: #c0392b; font-size: 0.85rem; margin-top: 10px; display: none; }
+    #login-box button:hover { background: #5a1f6b; }
+    #login-error { color: #dc3545; font-size: 0.85rem; margin-top: 10px; display: none; }
     #main-content { display: none; }
 
     /* MAIN STYLES */
-    header { background: #326891; color: white; padding: 32px 40px; }
-    header h1 { font-size: 2rem; font-family: 'Libre Baskerville', serif; }
-    header p { font-size: 1rem; opacity: 0.9; margin-top: 6px; }
-    nav { background: #245a7a; padding: 12px 40px; position: sticky; top: 0; z-index: 100; }
-    nav a { color: #c8dcea; text-decoration: none; margin-right: 20px; font-size: 0.9rem; }
+    header { background: #7b2d8b; color: white; padding: 32px 40px; }
+    header h1 { font-size: 2rem; }
+    header p { font-size: 1rem; opacity: 0.85; margin-top: 6px; }
+    nav { background: #5a1f6b; padding: 12px 40px; position: sticky; top: 0; z-index: 100; }
+    nav a { color: #f0c0ff; text-decoration: none; margin-right: 20px; font-size: 0.9rem; }
     nav a:hover { color: white; text-decoration: underline; }
     .container { max-width: 1100px; margin: 0 auto; padding: 30px 20px; }
-    .info-box { background: #FFFFFF; border-left: 5px solid #326891; border-radius: 6px; padding: 20px 24px; margin-bottom: 24px; border: 1px solid #E2E2E2; }
-    .info-box h3 { color: #326891; margin-bottom: 10px; font-family: 'Libre Baskerville', serif; }
+    .info-box { background: #fff; border-left: 5px solid #7b2d8b; border-radius: 6px; padding: 20px 24px; margin-bottom: 24px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+    .info-box h3 { color: #7b2d8b; margin-bottom: 10px; }
     .info-box table { width: 100%; border-collapse: collapse; }
-    .info-box table td { padding: 5px 10px; border-bottom: 1px solid #E2E2E2; }
-    .info-box table td:first-child { font-weight: bold; width: 220px; color: #555555; }
-    section { background: #FFFFFF; border-radius: 8px; padding: 28px 32px; margin-bottom: 28px; border: 1px solid #E2E2E2; }
-    section h2 { color: #326891; font-size: 1.3rem; font-family: 'Libre Baskerville', serif; border-bottom: 2px solid #326891; padding-bottom: 10px; margin-bottom: 18px; }
-    section h3 { color: #111111; font-size: 1rem; margin: 16px 0 8px; }
+    .info-box table td { padding: 5px 10px; border-bottom: 1px solid #eee; }
+    .info-box table td:first-child { font-weight: bold; width: 220px; color: #555; }
+    section { background: white; border-radius: 8px; padding: 28px 32px; margin-bottom: 28px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+    section h2 { color: #7b2d8b; font-size: 1.3rem; border-bottom: 2px solid #f0e0f5; padding-bottom: 10px; margin-bottom: 18px; }
+    section h3 { color: #444; font-size: 1rem; margin: 16px 0 8px; }
     p { margin-bottom: 12px; }
-    .cmd-block { background: #F7F7F5; color: #326891; border-radius: 6px; padding: 14px 18px; font-family: 'SF Mono', 'Fira Code', monospace; font-size: 0.88rem; margin: 10px 0 16px; overflow-x: auto; border: 1px solid #E2E2E2; }
-    .cmd-block .cmd { color: #326891; font-weight: 600; }
-    .cmd-block .output { color: #555555; }
-    .cmd-block .comment { color: #888888; font-style: italic; }
-    .cmd-block .success { color: #1a5c2a; }
-    .cmd-block .error { color: #c0392b; }
+    .cmd-block { background: #1e1e2e; color: #cdd6f4; border-radius: 6px; padding: 14px 18px; font-family: 'Courier New', monospace; font-size: 0.88rem; margin: 10px 0 16px; overflow-x: auto; }
+    .cmd-block .cmd { color: #89dceb; }
+    .cmd-block .output { color: #cdd6f4; opacity: 0.8; }
+    .cmd-block .comment { color: #6c7086; font-style: italic; }
+    .cmd-block .success { color: #a6e3a1; }
+    .cmd-block .error { color: #f38ba8; }
     .step { display: flex; gap: 16px; align-items: flex-start; margin-bottom: 16px; }
-    .step-num { background: #326891; color: white; border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.85rem; flex-shrink: 0; margin-top: 2px; }
+    .step-num { background: #7b2d8b; color: white; border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.85rem; flex-shrink: 0; margin-top: 2px; }
     .step-content { flex: 1; }
     .badge { display: inline-block; padding: 2px 10px; border-radius: 20px; font-size: 0.78rem; font-weight: bold; margin-left: 8px; vertical-align: middle; }
-    .badge-success { background: #F0FBF4; color: #1a5c2a; }
-    .badge-fail { background: #FEF2F2; color: #c0392b; }
-    .badge-info { background: #EBF4FA; color: #1a4a6b; }
-    .toc { background: #F7F7F5; border-radius: 8px; padding: 20px 28px; margin-bottom: 28px; border: 1px solid #E2E2E2; }
-    .toc h2 { color: #326891; margin-bottom: 12px; font-size: 1.1rem; font-family: 'Libre Baskerville', serif; }
+    .badge-success { background: #d4edda; color: #155724; }
+    .badge-fail { background: #f8d7da; color: #721c24; }
+    .badge-info { background: #d1ecf1; color: #0c5460; }
+    .toc { background: #f8f0fc; border-radius: 8px; padding: 20px 28px; margin-bottom: 28px; }
+    .toc h2 { color: #7b2d8b; margin-bottom: 12px; font-size: 1.1rem; }
     .toc ol { padding-left: 20px; }
     .toc li { margin: 6px 0; }
-    .toc a { color: #326891; text-decoration: none; }
-    .key-finding { background: #FFF8E1; border-left: 4px solid #F9A825; border-radius: 4px; padding: 12px 16px; margin: 10px 0; }
-    .key-finding strong { color: #5a3e00; }
-    footer { background: #326891; color: white; text-align: center; padding: 20px; font-size: 0.85rem; margin-top: 40px; }
+    .toc a { color: #7b2d8b; text-decoration: none; }
+    .key-finding { background: #fff8e1; border-left: 4px solid #ffc107; border-radius: 4px; padding: 12px 16px; margin: 10px 0; }
+    .key-finding strong { color: #856404; }
+    footer { background: #7b2d8b; color: white; text-align: center; padding: 20px; font-size: 0.85rem; margin-top: 40px; }
   </style>
 </head>
 <body>
@@ -206,11 +202,9 @@
   </section>
 </div>
 <footer>Extreme Networks 5320 Onboarding Guide &nbsp;|&nbsp; March 23, 2026 &nbsp;|&nbsp; khursheedkhanaiforgood-ai<br><small>Future: automated agent-driven onboarding for additional 5320 switches</small></footer>
+</div>
 
-
-
-<div style="text-align:center;padding:28px 24px 16px;border-top:1px solid #E2E2E2;margin-top:48px"><p style="font-family:'Libre Franklin',Arial,sans-serif;font-size:0.8rem;font-weight:600;color:#555555;letter-spacing:0.06em">&copy; 2026 Khursheed Khan &nbsp;&middot;&nbsp; All rights reserved &nbsp;&middot;&nbsp; March 2026</p></div>
-</div><script>
+<script>
   function checkLogin() {
     var u = document.getElementById('username').value;
     var p = document.getElementById('password').value;
@@ -230,6 +224,5 @@
     document.getElementById('main-content').style.display = 'block';
   }
 </script>
-
 </body>
 </html>

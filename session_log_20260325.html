@@ -4,37 +4,34 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>5320 Session — Agent &amp; Console | Mar 25 2026</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Libre+Franklin:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   *{box-sizing:border-box;margin:0;padding:0}
-  body{font-family:'Libre Franklin',Arial,sans-serif;background:#FFFFFF;color:#111111;min-height:100vh;display:flex;flex-direction:column}
-  .caption{background:#326891;color:#fff;padding:10px 32px;font-size:0.85rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+  body{font-family:'Segoe UI',Arial,sans-serif;background:#0f172a;color:#e2e8f0;min-height:100vh;display:flex;flex-direction:column}
+  .caption{background:#7c3aed;color:#fff;padding:10px 32px;font-size:0.85rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
   .caption strong{font-weight:700}
-  .toolbar{background:#F7F7F5;border-bottom:1px solid #E2E2E2;padding:12px 24px;display:flex;gap:16px;align-items:center;flex-wrap:wrap}
-  .toolbar h1{color:#111111;font-family:'Libre Baskerville',serif;font-size:1.1rem;flex:1}
-  .toolbar a{color:#326891;font-size:0.82rem;text-decoration:none}
+  .toolbar{background:#1e293b;border-bottom:1px solid #334155;padding:12px 24px;display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+  .toolbar h1{color:#a78bfa;font-size:1.1rem;flex:1}
+  .toolbar a{color:#60a5fa;font-size:0.82rem;text-decoration:none}
   .toolbar a:hover{text-decoration:underline}
   .cols{display:grid;grid-template-columns:1fr 1fr;flex:1;overflow:hidden}
-  .pane{display:flex;flex-direction:column;overflow:hidden;border-right:1px solid #E2E2E2}
+  .pane{display:flex;flex-direction:column;overflow:hidden;border-right:1px solid #334155}
   .pane:last-child{border-right:none}
-  .pane-header{background:#F7F7F5;padding:10px 20px;font-size:0.75rem;text-transform:uppercase;letter-spacing:0.08em;font-weight:700;flex-shrink:0;border-bottom:1px solid #E2E2E2}
-  .pane-header.agent{color:#326891}
-  .pane-header.console{color:#1a5c2a}
-  .pane pre{flex:1;overflow:auto;padding:16px 20px;font-family:'SF Mono','Fira Code',monospace;font-size:0.78rem;line-height:1.6;background:#F7F7F5;color:#111111;border:1px solid #E2E2E2;white-space:pre-wrap;word-break:break-word;height:calc(100vh - 120px)}
-  .pane.agent pre{color:#326891}
-  .pane.console pre{color:#1a5c2a}
+  .pane-header{background:#1e293b;padding:10px 20px;font-size:0.75rem;text-transform:uppercase;letter-spacing:0.08em;font-weight:700;flex-shrink:0;border-bottom:1px solid #334155}
+  .pane-header.agent{color:#a78bfa}
+  .pane-header.console{color:#34d399}
+  .pane pre{flex:1;overflow:auto;padding:16px 20px;font-family:'SF Mono','Fira Code',monospace;font-size:0.78rem;line-height:1.6;background:#0d1117;color:#e2e8f0;white-space:pre-wrap;word-break:break-word;height:calc(100vh - 120px)}
+  .pane.agent pre{color:#c4b5fd}
+  .pane.console pre{color:#a5f3fc}
   /* LOGIN GATE */
-  #login-gate{position:fixed;inset:0;background:#FFFFFF;display:flex;align-items:center;justify-content:center;z-index:9999}
-  #login-box{background:#FFFFFF;border:1px solid #326891;border-radius:12px;padding:40px 48px;box-shadow:0 8px 40px rgba(0,0,0,0.1);width:100%;max-width:400px;text-align:center}
-  #login-box h2{color:#326891;margin-bottom:6px;font-size:1.4rem;font-family:'Libre Baskerville',serif}
-  #login-box p{color:#555555;font-size:0.9rem;margin-bottom:24px}
-  #login-box input{width:100%;padding:10px 14px;margin-bottom:14px;border:1px solid #E2E2E2;border-radius:6px;font-size:1rem;outline:none;background:#FFFFFF;color:#111111}
-  #login-box input:focus{border-color:#326891}
-  #login-box button{width:100%;padding:12px;background:#326891;color:white;border:none;border-radius:6px;font-size:1rem;cursor:pointer;font-weight:bold}
-  #login-box button:hover{background:#245a7a}
-  #login-error{color:#c0392b;font-size:0.85rem;margin-top:10px;display:none}
+  #login-gate{position:fixed;inset:0;background:#0f172a;display:flex;align-items:center;justify-content:center;z-index:9999}
+  #login-box{background:#1e293b;border:1px solid #7c3aed;border-radius:12px;padding:40px 48px;box-shadow:0 8px 40px rgba(0,0,0,0.6);width:100%;max-width:400px;text-align:center}
+  #login-box h2{color:#a78bfa;margin-bottom:6px;font-size:1.4rem}
+  #login-box p{color:#64748b;font-size:0.9rem;margin-bottom:24px}
+  #login-box input{width:100%;padding:10px 14px;margin-bottom:14px;border:1px solid #334155;border-radius:6px;font-size:1rem;outline:none;background:#0f172a;color:#e2e8f0}
+  #login-box input:focus{border-color:#7c3aed}
+  #login-box button{width:100%;padding:12px;background:#7c3aed;color:white;border:none;border-radius:6px;font-size:1rem;cursor:pointer;font-weight:bold}
+  #login-box button:hover{background:#6d28d9}
+  #login-error{color:#f87171;font-size:0.85rem;margin-top:10px;display:none}
   #main-content{display:none;flex-direction:column;flex:1}
 </style>
 </head>
@@ -875,11 +872,9 @@ enable web https
 * 5320-16P-2MXT-2X-SwitchEngine.11 #</pre>
     </div>
   </div>
+</div>
 
-
-
-<div style="text-align:center;padding:28px 24px 16px;border-top:1px solid #E2E2E2;margin-top:48px"><p style="font-family:'Libre Franklin',Arial,sans-serif;font-size:0.8rem;font-weight:600;color:#555555;letter-spacing:0.06em">&copy; 2026 Khursheed Khan &nbsp;&middot;&nbsp; All rights reserved &nbsp;&middot;&nbsp; March 2026</p></div>
-</div><script>
+<script>
   function checkLogin(){
     var u=document.getElementById('username').value;
     var p=document.getElementById('password').value;
@@ -897,6 +892,5 @@ enable web https
     document.getElementById('main-content').style.display='flex';
   }
 </script>
-
 </body>
 </html>
