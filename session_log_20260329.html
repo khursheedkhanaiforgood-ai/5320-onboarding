@@ -4,93 +4,96 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Session Log — Dual-Switch Lab Mar 29, 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Libre+Franklin:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'Segoe UI', Arial, sans-serif; background: #0f172a; color: #e2e8f0; min-height: 100vh; }
+  body { font-family: 'Libre Franklin', Arial, sans-serif; background: #FFFFFF; color: #111111; min-height: 100vh; }
 
   .layout { display: flex; min-height: 100vh; }
-  .sidebar { width: 230px; flex-shrink: 0; background: #0d1a2e; border-right: 1px solid #1e293b; padding: 28px 0; position: sticky; top: 0; height: 100vh; overflow-y: auto; }
+  .sidebar { width: 230px; flex-shrink: 0; background: #F7F7F5; border-right: 1px solid #E2E2E2; padding: 28px 0; position: sticky; top: 0; height: 100vh; overflow-y: auto; }
   .main { flex: 1; padding: 40px 48px; max-width: 960px; }
   @media (max-width: 700px) { .sidebar { display: none; } .main { padding: 24px 16px; } }
 
-  .sidebar-title { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: #334155; padding: 0 20px 14px; border-bottom: 1px solid #1e293b; margin-bottom: 14px; }
-  .sidebar a { display: block; padding: 7px 20px; font-size: 0.78rem; color: #64748b; text-decoration: none; border-left: 2px solid transparent; }
-  .sidebar a:hover, .sidebar a.active { color: #f97316; border-left-color: #f97316; background: #1e293b22; }
-  .sidebar .sec-label { font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #1e3a5f; padding: 12px 20px 4px; }
+  .sidebar-title { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.18em; color: #326891; padding: 0 20px 14px; border-bottom: 2px solid #326891; margin-bottom: 14px; }
+  .sidebar a { display: block; padding: 7px 20px; font-size: 0.78rem; color: #555555; text-decoration: none; border-left: 2px solid transparent; }
+  .sidebar a:hover, .sidebar a.active { color: #326891; border-left-color: #326891; background: #F7F7F5; }
+  .sidebar .sec-label { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #666666; padding: 12px 20px 4px; }
 
   .page-header { margin-bottom: 40px; }
-  .page-header .date-tag { font-size: 0.72rem; color: #f97316; letter-spacing: 0.05em; margin-bottom: 6px; font-weight: 700; text-transform: uppercase; }
-  .page-header h1 { font-size: 1.7rem; color: #f1f5f9; margin-bottom: 10px; }
-  .page-header .subtitle { color: #64748b; font-size: 0.88rem; line-height: 1.7; max-width: 680px; }
+  .page-header .date-tag { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.62rem; color: #326891; letter-spacing: 0.18em; margin-bottom: 6px; font-weight: 700; text-transform: uppercase; }
+  .page-header h1 { font-family: 'Libre Baskerville', Georgia, serif; font-size: 1.7rem; color: #111111; margin-bottom: 10px; }
+  .page-header .subtitle { color: #555555; font-size: 0.88rem; line-height: 1.7; max-width: 680px; }
 
-  .back-link { display: inline-flex; align-items: center; gap: 6px; font-size: 0.8rem; color: #f97316; text-decoration: none; margin-bottom: 28px; border: 1px solid #431407; background: #1c0a00; padding: 6px 14px; border-radius: 5px; }
-  .back-link:hover { border-color: #f97316; }
+  .back-link { display: inline-flex; align-items: center; gap: 6px; font-size: 0.8rem; color: #326891; text-decoration: none; margin-bottom: 28px; border: 1px solid #B8D4E8; background: #EBF4FA; padding: 6px 14px; border-radius: 5px; }
+  .back-link:hover { border-color: #326891; }
 
   .timeline { position: relative; padding-left: 28px; }
-  .timeline::before { content: ''; position: absolute; left: 9px; top: 0; bottom: 0; width: 2px; background: #1e293b; }
+  .timeline::before { content: ''; position: absolute; left: 9px; top: 0; bottom: 0; width: 2px; background: #E2E2E2; }
 
   .step { position: relative; margin-bottom: 36px; }
   .step-dot { position: absolute; left: -28px; top: 4px; width: 14px; height: 14px; border-radius: 50%; border: 2px solid; }
-  .dot-ok    { background: #0d2b1f; border-color: #34d399; }
-  .dot-hiccup{ background: #2d1515; border-color: #f87171; }
-  .dot-learn { background: #1a1a0d; border-color: #fbbf24; }
-  .dot-wait  { background: #0c1a2e; border-color: #60a5fa; }
-  .dot-qa    { background: #1a0d2e; border-color: #c084fc; }
-  .dot-plan  { background: #0d1a1a; border-color: #2dd4bf; }
-  .dot-info  { background: #1e293b; border-color: #475569; }
+  .dot-ok    { background: #F0FBF4; border-color: #2E7D32; }
+  .dot-hiccup{ background: #FEF2F2; border-color: #c0392b; }
+  .dot-learn { background: #FFF8E1; border-color: #F9A825; }
+  .dot-wait  { background: #EBF4FA; border-color: #326891; }
+  .dot-qa    { background: #F5F3FF; border-color: #5b21b6; }
+  .dot-plan  { background: #F0FDFA; border-color: #134e4a; }
+  .dot-info  { background: #F7F7F5; border-color: #666666; }
 
   .step-header { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; flex-wrap: wrap; }
-  .step-num { font-size: 0.65rem; font-weight: 700; color: #475569; min-width: 28px; }
-  .step-title { font-size: 0.95rem; font-weight: 600; color: #e2e8f0; }
+  .step-num { font-size: 0.65rem; font-weight: 700; color: #666666; min-width: 28px; }
+  .step-title { font-family: 'Libre Baskerville', Georgia, serif; font-size: 0.95rem; font-weight: 700; color: #111111; }
   .tag { font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; padding: 2px 7px; border-radius: 3px; flex-shrink: 0; }
-  .tag-ok     { background: #0d2b1f; color: #34d399; border: 1px solid #065f46; }
-  .tag-hiccup { background: #2d1515; color: #fca5a5; border: 1px solid #7f1d1d; }
-  .tag-learn  { background: #1a1a0d; color: #fcd34d; border: 1px solid #713f12; }
-  .tag-wait   { background: #0c1a2e; color: #93c5fd; border: 1px solid #1e3a5f; }
-  .tag-qa     { background: #1a0d2e; color: #d8b4fe; border: 1px solid #4c1d95; }
-  .tag-plan   { background: #0d1a1a; color: #5eead4; border: 1px solid #134e4a; }
-  .tag-info   { background: #1e293b; color: #94a3b8; border: 1px solid #334155; }
+  .tag-ok     { background: #F0FBF4; color: #1a5c2a; border: 1px solid #A7D7B0; }
+  .tag-hiccup { background: #FEF2F2; color: #c0392b; border: 1px solid #f5c6c6; }
+  .tag-learn  { background: #FFF8E1; color: #7a5a00; border: 1px solid #F9A825; }
+  .tag-wait   { background: #EBF4FA; color: #326891; border: 1px solid #B8D4E8; }
+  .tag-qa     { background: #F5F3FF; color: #5b21b6; border: 1px solid #C4B5FD; }
+  .tag-plan   { background: #F0FDFA; color: #134e4a; border: 1px solid #5EEAD4; }
+  .tag-info   { background: #F7F7F5; color: #555555; border: 1px solid #E2E2E2; }
 
-  .step-body { font-size: 0.84rem; color: #94a3b8; line-height: 1.7; }
+  .step-body { font-size: 0.84rem; color: #555555; line-height: 1.7; }
   .step-body p { margin-bottom: 8px; }
   .step-body p:last-child { margin-bottom: 0; }
 
-  code { background: #0f172a; color: #a78bfa; padding: 2px 6px; border-radius: 3px; font-size: 0.82rem; font-family: 'Menlo', 'Consolas', monospace; border: 1px solid #1e293b; }
+  code { background: #F7F7F5; color: #326891; padding: 2px 6px; border-radius: 3px; font-size: 0.82rem; font-family: 'Menlo', 'Consolas', monospace; border: 1px solid #E2E2E2; }
 
-  .cmd-block { background: #0d1422; border: 1px solid #1e3a5f; border-radius: 6px; padding: 14px 18px; margin: 10px 0; font-family: 'Menlo', 'Consolas', monospace; font-size: 0.8rem; color: #6ee7b7; line-height: 1.8; }
-  .cmd-block .output  { color: #64748b; }
-  .cmd-block .error   { color: #f87171; }
-  .cmd-block .fix     { color: #34d399; }
-  .cmd-block .comment { color: #334155; }
+  .cmd-block { background: #F7F7F5; border: 1px solid #E2E2E2; border-radius: 6px; padding: 14px 18px; margin: 10px 0; font-family: 'Menlo', 'Consolas', monospace; font-size: 0.8rem; color: #111111; line-height: 1.8; }
+  .cmd-block .output  { color: #666666; }
+  .cmd-block .error   { color: #c0392b; }
+  .cmd-block .fix     { color: #1a5c2a; }
+  .cmd-block .comment { color: #999999; }
 
-  .hiccup-box { background: #1a0a0a; border: 1px solid #7f1d1d; border-radius: 6px; padding: 14px 18px; margin: 10px 0; }
-  .hiccup-box .hiccup-label { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #f87171; margin-bottom: 6px; }
-  .hiccup-box p { font-size: 0.82rem; color: #fca5a5; line-height: 1.6; }
+  .hiccup-box { background: #FEF2F2; border: 1px solid #f5c6c6; border-radius: 6px; padding: 14px 18px; margin: 10px 0; }
+  .hiccup-box .hiccup-label { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #c0392b; margin-bottom: 6px; }
+  .hiccup-box p { font-size: 0.82rem; color: #7b1f1f; line-height: 1.6; }
 
-  .learn-box { background: #1a1505; border: 1px solid #713f12; border-radius: 6px; padding: 14px 18px; margin: 10px 0; }
-  .learn-box .learn-label { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #fbbf24; margin-bottom: 6px; }
-  .learn-box p { font-size: 0.82rem; color: #fde68a; line-height: 1.6; margin-bottom: 6px; }
+  .learn-box { background: #FFF8E1; border: 1px solid #F9A825; border-radius: 6px; padding: 14px 18px; margin: 10px 0; }
+  .learn-box .learn-label { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #7a5a00; margin-bottom: 6px; }
+  .learn-box p { font-size: 0.82rem; color: #5a3e00; line-height: 1.6; margin-bottom: 6px; }
   .learn-box p:last-child { margin-bottom: 0; }
 
-  .qa-box { background: #120d1f; border: 1px solid #4c1d95; border-radius: 6px; padding: 14px 18px; margin: 10px 0; }
-  .qa-box .q { font-size: 0.78rem; color: #c084fc; font-weight: 600; margin-bottom: 6px; }
-  .qa-box .a { font-size: 0.82rem; color: #ddd6fe; line-height: 1.6; }
+  .qa-box { background: #F5F3FF; border: 1px solid #C4B5FD; border-radius: 6px; padding: 14px 18px; margin: 10px 0; }
+  .qa-box .q { font-size: 0.78rem; color: #5b21b6; font-weight: 600; margin-bottom: 6px; }
+  .qa-box .a { font-size: 0.82rem; color: #3b0764; line-height: 1.6; }
 
-  .section-divider { margin: 48px 0 32px; border: none; border-top: 1px solid #1e293b; }
-  .section-label { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: #f97316; margin-bottom: 24px; }
+  .section-divider { margin: 48px 0 32px; border: none; border-top: 1px solid #E2E2E2; }
+  .section-label { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.18em; color: #326891; padding-bottom: 6px; border-bottom: 2px solid #326891; margin-bottom: 24px; display: block; }
 
-  table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.82rem; }
-  th { text-align: left; padding: 8px 12px; font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #475569; border-bottom: 1px solid #1e293b; }
-  td { padding: 9px 12px; color: #94a3b8; border-bottom: 1px solid #1e2535; vertical-align: top; }
+  table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.82rem; border: 1px solid #E2E2E2; }
+  th { text-align: left; padding: 8px 12px; font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #111111; border-bottom: 2px solid #E2E2E2; background: #F7F7F5; border: 1px solid #E2E2E2; }
+  td { padding: 9px 12px; color: #555555; border-bottom: 1px solid #E2E2E2; vertical-align: top; border: 1px solid #E2E2E2; }
   tr:last-child td { border-bottom: none; }
-  td:first-child { color: #e2e8f0; font-weight: 600; }
-  .check    { color: #34d399; font-weight: 700; }
-  .pending  { color: #fbbf24; font-weight: 700; }
-  .deferred { color: #60a5fa; font-weight: 700; }
+  td:first-child { color: #111111; font-weight: 600; }
+  .check    { color: #1a5c2a; font-weight: 700; }
+  .pending  { color: #7a5a00; font-weight: 700; }
+  .deferred { color: #326891; font-weight: 700; }
 
   ul.plain { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 5px; }
-  ul.plain li { font-size: 0.82rem; color: #94a3b8; padding-left: 14px; position: relative; }
-  ul.plain li::before { content: "›"; position: absolute; left: 0; color: #475569; }
+  ul.plain li { font-size: 0.82rem; color: #555555; padding-left: 14px; position: relative; }
+  ul.plain li::before { content: "›"; position: absolute; left: 0; color: #326891; }
 </style>
 </head>
 <body>
@@ -126,7 +129,7 @@
   <div class="page-header">
     <div class="date-tag">&#9679; Live Session Log &nbsp;&mdash;&nbsp; March 29, 2026</div>
     <h1>Dual-Switch Lab — Full Session Log</h1>
-    <p class="subtitle">Complete record of every design decision, question, command, hiccup, and lesson from the Mar 29 lab session — from first planning prompt through AP onboarding. Companion to the <a href="lab_20260329.html" style="color:#f97316">Lab Guide</a>.</p>
+    <p class="subtitle">Complete record of every design decision, question, command, hiccup, and lesson from the Mar 29 lab session — from first planning prompt through AP onboarding. Companion to the <a href="lab_20260329.html" style="color:#326891">Lab Guide</a>.</p>
   </div>
 
   <!-- CONTEXT -->
@@ -259,7 +262,7 @@
           <span class="tag tag-plan">Design</span>
         </div>
         <div class="step-body">
-          <p>Diagram embedded in <a href="lab_20260329.html" style="color:#f97316">Module A of the Lab Guide</a>. Key design decisions:</p>
+          <p>Diagram embedded in <a href="lab_20260329.html" style="color:#326891">Module A of the Lab Guide</a>. Key design decisions:</p>
           <ul class="plain" style="margin:6px 0">
             <li>Quantum Fiber → SW1 Port 1 (solid green uplink)</li>
             <li>SW1 Port 3 → AP3000-A (PoE, tagged Corp1+Guest1)</li>
@@ -906,38 +909,38 @@
     <div class="section-label">Session Status — Mar 29</div>
     <table>
       <tr><th>Item</th><th>Status</th><th>Notes</th></tr>
-      <tr><td colspan="3" style="color:#34d399;font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;padding-top:14px">Phase 1 — SW1 + AP3000-A</td></tr>
+      <tr><td colspan="3" style="color:#1a5c2a;font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;padding-top:14px">Phase 1 — SW1 + AP3000-A</td></tr>
       <tr><td>SW1 factory reset</td><td class="check">✓</td><td>unconfigure switch all</td></tr>
       <tr><td>Setup wizard</td><td class="check">✓</td><td>babla (admin) / bigsur (failsafe)</td></tr>
       <tr><td>Corp1 VLAN 20 + Guest1 VLAN 30</td><td class="check">✓</td><td>DHCP, ipforwarding, tagged Port 3</td></tr>
       <tr><td>PoE Port 3 + Quantum Fiber routes</td><td class="check">✓</td><td>10.20 + 10.30 → 192.168.0.24</td></tr>
       <tr><td>AP3000-A XIQ + SSID push</td><td class="check">✓</td><td>SW1-AP-Policy: Corp1 VLAN20, Guest1 VLAN30</td></tr>
       <tr><td>iPhone internet — Corp1 + Guest1</td><td class="check">✓</td><td>Verified Mar 29</td></tr>
-      <tr><td colspan="3" style="color:#93c5fd;font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;padding-top:14px">Phase 2 — SW2 + AP3000-B</td></tr>
+      <tr><td colspan="3" style="color:#326891;font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;padding-top:14px">Phase 2 — SW2 + AP3000-B</td></tr>
       <tr><td>SW2 factory reset</td><td class="check">✓</td><td>192.168.0.28</td></tr>
       <tr><td>Corp2 VLAN 50 + Guest2 VLAN 60</td><td class="check">✓</td><td>DHCP, ipforwarding, tagged Port 3</td></tr>
       <tr><td>PoE Port 3 + Quantum Fiber routes</td><td class="check">✓</td><td>10.50 + 10.60 → 192.168.0.28</td></tr>
       <tr><td>Ping from Corp2/Guest2 gateways</td><td class="check">✓</td><td>ping vr VR-Default 8.8.8.8 from 10.50.0.1</td></tr>
       <tr><td>AP3000-B XIQ + SSID push</td><td class="check">✓</td><td>SW2-AP-Policy: Corp2 VLAN50, Guest2 VLAN60</td></tr>
       <tr><td>iPhone internet — Corp2 + Guest2</td><td class="check">✓</td><td>Verified Mar 29</td></tr>
-      <tr><td colspan="3" style="color:#fbbf24;font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;padding-top:14px">Phase 3 — Inter-Switch Trunk</td></tr>
+      <tr><td colspan="3" style="color:#7a5a00;font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;padding-top:14px">Phase 3 — Inter-Switch Trunk</td></tr>
       <tr><td>VLAN 10 trunk SW1↔SW2</td><td class="deferred">↷ Pending</td><td>Port 10, 10.10.0.1/10.10.0.2</td></tr>
       <tr><td>Static routes cross-switch</td><td class="deferred">↷ Pending</td><td>SW1: 10.50/60 → 10.10.0.2 | SW2: 10.20/30 → 10.10.0.1</td></tr>
     </table>
   </section>
 
-  <div style="margin-top:48px;padding-top:24px;border-top:1px solid #1e293b;text-align:center">
-    <p style="font-size:0.75rem;color:#334155">Khursheed Khan &nbsp;&mdash;&nbsp; March 29, 2026 &nbsp;&mdash;&nbsp; Built with Claude Code</p>
-    <a href="lab_20260329.html" style="color:#f97316;font-size:0.8rem;text-decoration:none">&#8592; Lab Guide</a>
+  <div style="margin-top:48px;padding-top:24px;border-top:1px solid #E2E2E2;text-align:center">
+    <p style="font-size:0.75rem;color:#666666">Khursheed Khan &nbsp;&mdash;&nbsp; March 29, 2026 &nbsp;&mdash;&nbsp; Built with Claude Code</p>
+    <a href="lab_20260329.html" style="color:#326891;font-size:0.8rem;text-decoration:none">&#8592; Lab Guide</a>
     &nbsp;&nbsp;
-    <a href="index.html" style="color:#64748b;font-size:0.8rem;text-decoration:none">&#8592; Landing Page</a>
+    <a href="index.html" style="color:#555555;font-size:0.8rem;text-decoration:none">&#8592; Landing Page</a>
   </div>
 
 </main>
 
 
 
-<div style="text-align:center;padding:28px 24px 16px;border-top:1px solid #334155;margin-top:48px"><p style="font-family:'Segoe UI',Arial,sans-serif;font-size:0.8rem;font-weight:600;color:#cbd5e1;letter-spacing:0.06em">&copy; 2026 Khursheed Khan &nbsp;&middot;&nbsp; All rights reserved &nbsp;&middot;&nbsp; March 2026</p></div>
+<div style="text-align:center;padding:28px 24px 16px;border-top:1px solid #E2E2E2;margin-top:48px"><p style="font-family:'Libre Franklin',Arial,sans-serif;font-size:0.8rem;font-weight:600;color:#666666;letter-spacing:0.06em">&copy; 2026 Khursheed Khan &nbsp;&middot;&nbsp; All rights reserved &nbsp;&middot;&nbsp; March 2026</p></div>
 </div><script>
   const anchors = document.querySelectorAll('section[id]');
   const links = document.querySelectorAll('.sidebar a[href^="#"]');

@@ -4,105 +4,108 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Dual-Switch Lab — March 29, 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Libre+Franklin:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'Segoe UI', Arial, sans-serif; background: #0f172a; color: #e2e8f0; min-height: 100vh; }
+  body { font-family: 'Libre Franklin', Arial, sans-serif; background: #FFFFFF; color: #111111; min-height: 100vh; }
 
   /* Layout */
   .layout { display: flex; min-height: 100vh; }
-  .sidebar { width: 220px; flex-shrink: 0; background: #0d1a2e; border-right: 1px solid #1e293b; padding: 28px 0; position: sticky; top: 0; height: 100vh; overflow-y: auto; }
+  .sidebar { width: 220px; flex-shrink: 0; background: #F7F7F5; border-right: 1px solid #E2E2E2; padding: 28px 0; position: sticky; top: 0; height: 100vh; overflow-y: auto; }
   .main { flex: 1; padding: 40px 48px; max-width: 1000px; }
   @media (max-width: 700px) { .sidebar { display: none; } .main { padding: 24px 16px; } }
 
   /* Sidebar */
-  .sidebar-title { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: #334155; padding: 0 20px 14px; border-bottom: 1px solid #1e293b; margin-bottom: 14px; }
-  .sidebar a { display: block; padding: 7px 20px; font-size: 0.78rem; color: #64748b; text-decoration: none; border-left: 2px solid transparent; }
-  .sidebar a:hover, .sidebar a.active { color: #a78bfa; border-left-color: #7c3aed; background: #1e293b22; }
-  .sidebar .mod-label { font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #1e3a5f; padding: 12px 20px 4px; }
+  .sidebar-title { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.18em; color: #326891; padding: 0 20px 14px; border-bottom: 2px solid #326891; margin-bottom: 14px; }
+  .sidebar a { display: block; padding: 7px 20px; font-size: 0.78rem; color: #555555; text-decoration: none; border-left: 2px solid transparent; }
+  .sidebar a:hover, .sidebar a.active { color: #326891; border-left-color: #326891; background: #F7F7F5; }
+  .sidebar .mod-label { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #666666; padding: 12px 20px 4px; }
 
   /* Header */
   .page-header { margin-bottom: 40px; }
-  .page-header .date-tag { font-size: 0.72rem; color: #a78bfa; letter-spacing: 0.05em; margin-bottom: 6px; font-weight: 700; text-transform: uppercase; }
-  .page-header h1 { font-size: 1.7rem; color: #f1f5f9; margin-bottom: 10px; }
-  .page-header .subtitle { color: #64748b; font-size: 0.88rem; line-height: 1.7; max-width: 680px; }
+  .page-header .date-tag { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.62rem; color: #326891; letter-spacing: 0.18em; margin-bottom: 6px; font-weight: 700; text-transform: uppercase; }
+  .page-header h1 { font-family: 'Libre Baskerville', Georgia, serif; font-size: 1.7rem; color: #111111; margin-bottom: 10px; }
+  .page-header .subtitle { color: #555555; font-size: 0.88rem; line-height: 1.7; max-width: 680px; }
 
   /* Module header */
   .module { margin-bottom: 56px; }
-  .module-header { display: flex; align-items: center; gap: 14px; margin-bottom: 24px; padding-bottom: 12px; border-bottom: 1px solid #1e293b; }
-  .mod-badge { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; padding: 4px 10px; border-radius: 4px; flex-shrink: 0; }
-  .mod-a { background: #1a1a0d; color: #fcd34d; border: 1px solid #713f12; }
-  .mod-b { background: #0c1a2e; color: #93c5fd; border: 1px solid #1e3a5f; }
-  .mod-c { background: #0d2b1f; color: #6ee7b7; border: 1px solid #065f46; }
-  .mod-e { background: #1a0d1a; color: #f0abfc; border: 1px solid #6b21a8; }
-  .mod-log { background: #1a1219; color: #fda4af; border: 1px solid #881337; }
-  .module-header h2 { font-size: 1.1rem; color: #e2e8f0; }
-  .module-header .mod-sub { font-size: 0.78rem; color: #475569; margin-top: 2px; }
+  .module-header { display: flex; align-items: center; gap: 14px; margin-bottom: 24px; padding-bottom: 12px; border-bottom: 1px solid #E2E2E2; }
+  .mod-badge { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; padding: 4px 10px; border-radius: 4px; flex-shrink: 0; }
+  .mod-a { background: #FFF8E1; color: #7a5a00; border: 1px solid #F9A825; }
+  .mod-b { background: #EBF4FA; color: #326891; border: 1px solid #B8D4E8; }
+  .mod-c { background: #F0FBF4; color: #1a5c2a; border: 1px solid #A7D7B0; }
+  .mod-e { background: #F5F3FF; color: #5b21b6; border: 1px solid #C4B5FD; }
+  .mod-log { background: #FFF1F2; color: #881337; border: 1px solid #FDA4AF; }
+  .module-header h2 { font-family: 'Libre Baskerville', Georgia, serif; font-size: 1.1rem; color: #111111; }
+  .module-header .mod-sub { font-size: 0.78rem; color: #666666; margin-top: 2px; }
 
   /* Status badge */
-  .status { display: inline-block; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; padding: 2px 8px; border-radius: 3px; }
-  .status-live { background: #0d2b1f; color: #34d399; border: 1px solid #065f46; }
-  .status-pending { background: #1a1a0d; color: #fbbf24; border: 1px solid #713f12; }
-  .status-locked { background: #1e293b; color: #475569; border: 1px solid #334155; }
+  .status { display: inline-block; font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; padding: 2px 8px; border-radius: 3px; }
+  .status-live { background: #F0FBF4; color: #1a5c2a; border: 1px solid #A7D7B0; }
+  .status-pending { background: #FFF8E1; color: #7a5a00; border: 1px solid #F9A825; }
+  .status-locked { background: #F7F7F5; color: #666666; border: 1px solid #E2E2E2; }
 
   /* SVG diagram container */
-  .diagram-wrap { background: #0d1422; border: 1px solid #1e3a5f; border-radius: 10px; padding: 24px; margin-bottom: 28px; overflow-x: auto; }
+  .diagram-wrap { background: #F7F7F5; border: 1px solid #E2E2E2; border-radius: 10px; padding: 24px; margin-bottom: 28px; overflow-x: auto; }
   .diagram-wrap svg { display: block; margin: 0 auto; }
 
   /* Defined / gap table */
   .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 28px; }
   @media (max-width: 700px) { .two-col { grid-template-columns: 1fr; } }
-  .card { background: #1e293b; border: 1px solid #334155; border-radius: 8px; padding: 20px; }
-  .card h3 { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 14px; }
+  .card { background: #FFFFFF; border: 1px solid #E2E2E2; border-radius: 8px; padding: 20px; }
+  .card h3 { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 14px; }
   .card ul { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 7px; }
-  .card li { font-size: 0.82rem; color: #94a3b8; line-height: 1.5; padding-left: 16px; position: relative; }
+  .card li { font-size: 0.82rem; color: #555555; line-height: 1.5; padding-left: 16px; position: relative; }
   .card li::before { content: ""; position: absolute; left: 4px; top: 8px; width: 5px; height: 5px; border-radius: 50%; }
-  .card.defined { border-color: #065f46; }
-  .card.defined h3 { color: #34d399; }
-  .card.defined li::before { background: #34d399; }
-  .card.gaps { border-color: #92400e; }
-  .card.gaps h3 { color: #fbbf24; }
-  .card.gaps li::before { background: #fbbf24; }
+  .card.defined { border-color: #A7D7B0; }
+  .card.defined h3 { color: #1a5c2a; }
+  .card.defined li::before { background: #1a5c2a; }
+  .card.gaps { border-color: #F9A825; }
+  .card.gaps h3 { color: #7a5a00; }
+  .card.gaps li::before { background: #F9A825; }
 
   /* Question cards */
-  .q-card { background: #1a1209; border: 1px solid #713f12; border-radius: 8px; padding: 18px 20px; margin-bottom: 12px; }
-  .q-card .q-num { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #92400e; margin-bottom: 6px; }
-  .q-card .q-text { font-size: 0.88rem; color: #fcd34d; line-height: 1.6; }
-  .q-card .q-hint { font-size: 0.75rem; color: #78350f; margin-top: 6px; font-style: italic; }
+  .q-card { background: #FFF8E1; border: 1px solid #F9A825; border-radius: 8px; padding: 18px 20px; margin-bottom: 12px; }
+  .q-card .q-num { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #7a5a00; margin-bottom: 6px; }
+  .q-card .q-text { font-size: 0.88rem; color: #5a3e00; line-height: 1.6; }
+  .q-card .q-hint { font-size: 0.75rem; color: #a06020; margin-top: 6px; font-style: italic; }
 
   /* Lesson callout */
-  .lesson { background: #0c1f1a; border-left: 3px solid #10b981; border-radius: 0 6px 6px 0; padding: 14px 16px; margin-bottom: 16px; font-size: 0.82rem; color: #6ee7b7; line-height: 1.6; }
-  .lesson strong { color: #34d399; }
+  .lesson { background: #F0FBF4; border-left: 3px solid #2E7D32; border-radius: 0 6px 6px 0; padding: 14px 16px; margin-bottom: 16px; font-size: 0.82rem; color: #1a5c2a; line-height: 1.6; }
+  .lesson strong { color: #1a5c2a; }
 
   /* Placeholder module */
-  .placeholder { background: #0d1117; border: 1px dashed #1e293b; border-radius: 8px; padding: 32px; text-align: center; color: #334155; font-size: 0.85rem; }
-  .placeholder .ph-title { font-size: 1rem; color: #1e3a5f; margin-bottom: 8px; }
+  .placeholder { background: #F7F7F5; border: 1px dashed #E2E2E2; border-radius: 8px; padding: 32px; text-align: center; color: #999999; font-size: 0.85rem; }
+  .placeholder .ph-title { font-size: 1rem; color: #326891; margin-bottom: 8px; }
 
   /* Session log */
-  .log-entry { border-left: 2px solid #334155; padding: 10px 0 10px 18px; margin-bottom: 6px; position: relative; }
-  .log-entry::before { content: ""; position: absolute; left: -5px; top: 14px; width: 8px; height: 8px; border-radius: 50%; background: #334155; }
-  .log-entry.done::before { background: #34d399; }
-  .log-entry.active::before { background: #fbbf24; animation: pulse 1.5s infinite; }
+  .log-entry { border-left: 2px solid #E2E2E2; padding: 10px 0 10px 18px; margin-bottom: 6px; position: relative; }
+  .log-entry::before { content: ""; position: absolute; left: -5px; top: 14px; width: 8px; height: 8px; border-radius: 50%; background: #E2E2E2; }
+  .log-entry.done::before { background: #2E7D32; }
+  .log-entry.active::before { background: #F9A825; animation: pulse 1.5s infinite; }
   @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
-  .log-time { font-size: 0.68rem; color: #475569; font-family: monospace; margin-bottom: 3px; }
-  .log-text { font-size: 0.82rem; color: #94a3b8; line-height: 1.5; }
-  .log-text strong { color: #e2e8f0; }
+  .log-time { font-size: 0.68rem; color: #666666; font-family: monospace; margin-bottom: 3px; }
+  .log-text { font-size: 0.82rem; color: #555555; line-height: 1.5; }
+  .log-text strong { color: #111111; }
 
   /* Subnet table */
-  .data-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; margin-bottom: 20px; }
-  .data-table thead tr { background: #1e293b; }
-  .data-table thead th { padding: 8px 12px; text-align: left; font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: #64748b; }
-  .data-table tbody tr { border-bottom: 1px solid #1e293b; }
-  .data-table tbody tr:hover { background: #1e293b44; }
-  .data-table td { padding: 9px 12px; color: #94a3b8; }
-  .data-table td:first-child { font-family: monospace; color: #e2e8f0; }
-  .tbd { color: #475569 !important; font-style: italic; }
+  .data-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; margin-bottom: 20px; border: 1px solid #E2E2E2; }
+  .data-table thead tr { background: #F7F7F5; }
+  .data-table thead th { padding: 8px 12px; text-align: left; font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: #111111; border: 1px solid #E2E2E2; }
+  .data-table tbody tr { border-bottom: 1px solid #E2E2E2; }
+  .data-table tbody tr:hover { background: #F7F7F5; }
+  .data-table td { padding: 9px 12px; color: #555555; border: 1px solid #E2E2E2; }
+  .data-table td:first-child { font-family: monospace; color: #111111; }
+  .tbd { color: #999999 !important; font-style: italic; }
 
   /* Nav */
-  .footer-nav { display: flex; justify-content: space-between; align-items: center; margin-top: 48px; padding-top: 20px; border-top: 1px solid #1e293b; font-size: 0.8rem; flex-wrap: wrap; gap: 10px; }
-  .footer-nav a { color: #60a5fa; text-decoration: none; padding: 6px 14px; border: 1px solid #1e3a5f; border-radius: 5px; }
-  .footer-nav a:hover { border-color: #3b82f6; }
+  .footer-nav { display: flex; justify-content: space-between; align-items: center; margin-top: 48px; padding-top: 20px; border-top: 1px solid #E2E2E2; font-size: 0.8rem; flex-wrap: wrap; gap: 10px; }
+  .footer-nav a { color: #326891; text-decoration: none; padding: 6px 14px; border: 1px solid #B8D4E8; border-radius: 5px; }
+  .footer-nav a:hover { border-color: #326891; }
 
-  code { background: #0f172a; color: #34d399; padding: 2px 6px; border-radius: 3px; font-size: 0.8em; font-family: monospace; }
+  code { background: #F7F7F5; color: #326891; padding: 2px 6px; border-radius: 3px; font-size: 0.8em; font-family: monospace; border: 1px solid #E2E2E2; }
 </style>
 </head>
 <body>
@@ -127,13 +130,13 @@
     <div class="mod-label">Log</div>
     <a href="#log">Session Log</a>
     <div id="sidebar-apr7">
-      <div class="mod-label" style="color:#f59e0b">April 7, 2026</div>
+      <div class="mod-label" style="color:#7a5a00">April 7, 2026</div>
       <a href="#apr7-xiq">XIQ-Only Deploy</a>
       <a href="#apr7-lessons">Critical Lessons</a>
       <a href="#apr7-state">Current State</a>
     </div>
     <div id="sidebar-apr8">
-      <div class="mod-label" style="color:#e879f9">April 8, 2026</div>
+      <div class="mod-label" style="color:#5b21b6">April 8, 2026</div>
       <a href="#apr8-link">E2E Session &#8594;</a>
     </div>
   </nav>
@@ -142,14 +145,14 @@
   <div class="main">
 
     <!-- April 7 top banner — always visible -->
-    <div id="apr7-banner" style="background:#f59e0b;color:#111;border-radius:8px;padding:18px 24px;margin-bottom:32px;border:3px solid #d97706">
-      <div style="font-size:0.62rem;font-weight:700;text-transform:uppercase;letter-spacing:0.18em;margin-bottom:4px">&#9733; Updated April 7, 2026 &mdash; builds on March 29</div>
-      <div style="font-size:1.1rem;font-weight:700;margin-bottom:8px">XIQ-Only Deployment + EXOS Syntax Lessons &mdash; SW1 Internet Verified &#10003;</div>
-      <div style="font-size:0.85rem;margin-bottom:12px">10-step XIQ flow, critical DHCP syntax fixes, ipforwarding lesson, SW2 in progress. Jump to April 7 section:</div>
+    <div id="apr7-banner" style="background:#FFF8E1;color:#111;border-radius:8px;padding:18px 24px;margin-bottom:32px;border:2px solid #F9A825">
+      <div style="font-size:0.62rem;font-weight:700;text-transform:uppercase;letter-spacing:0.18em;margin-bottom:4px;color:#7a5a00">Updated April 7, 2026 &mdash; builds on March 29</div>
+      <div style="font-size:1.1rem;font-weight:700;margin-bottom:8px;color:#111111">XIQ-Only Deployment + EXOS Syntax Lessons &mdash; SW1 Internet Verified &#10003;</div>
+      <div style="font-size:0.85rem;margin-bottom:12px;color:#5a3e00">10-step XIQ flow, critical DHCP syntax fixes, ipforwarding lesson, SW2 in progress. Jump to April 7 section:</div>
       <div style="display:flex;gap:10px;flex-wrap:wrap">
-        <a href="#apr7-xiq" style="background:#111;color:#fbbf24;padding:6px 14px;border-radius:4px;text-decoration:none;font-size:0.82rem;font-weight:700">XIQ Deploy Flow &darr;</a>
-        <a href="#apr7-lessons" style="background:#111;color:#fbbf24;padding:6px 14px;border-radius:4px;text-decoration:none;font-size:0.82rem;font-weight:700">Critical Lessons &darr;</a>
-        <a href="#apr7-state" style="background:#111;color:#fbbf24;padding:6px 14px;border-radius:4px;text-decoration:none;font-size:0.82rem;font-weight:700">Current State &darr;</a>
+        <a href="#apr7-xiq" style="background:#326891;color:#FFFFFF;padding:6px 14px;border-radius:4px;text-decoration:none;font-size:0.82rem;font-weight:700">XIQ Deploy Flow &darr;</a>
+        <a href="#apr7-lessons" style="background:#326891;color:#FFFFFF;padding:6px 14px;border-radius:4px;text-decoration:none;font-size:0.82rem;font-weight:700">Critical Lessons &darr;</a>
+        <a href="#apr7-state" style="background:#326891;color:#FFFFFF;padding:6px 14px;border-radius:4px;text-decoration:none;font-size:0.82rem;font-weight:700">Current State &darr;</a>
       </div>
     </div>
 
@@ -176,7 +179,7 @@
       <div class="module-header">
         <span class="mod-badge mod-a">Module A</span>
         <div>
-          <div class="module-header h2" style="font-size:1.05rem;color:#e2e8f0;font-weight:700">Problem Definition &amp; Architecture</div>
+          <div class="module-header h2" style="font-size:1.05rem;color:#111111;font-weight:700">Problem Definition &amp; Architecture</div>
           <div class="mod-sub">Schematic of the intended topology — confirm before any cable is touched</div>
         </div>
       </div>
@@ -291,7 +294,7 @@
       </div>
 
       <!-- Subnet table -->
-      <p style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#475569;margin-bottom:12px" id="defined">Subnet Plan — As Described</p>
+      <p style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#666666;margin-bottom:12px" id="defined">Subnet Plan — As Described</p>
       <table class="data-table" style="margin-bottom:28px">
         <thead><tr><th>VLAN</th><th>Name</th><th>Switch</th><th>Subnet</th><th>Gateway</th><th>Purpose</th></tr></thead>
         <tbody>
@@ -345,8 +348,8 @@
       </div>
 
       <!-- Answered -->
-      <p style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#065f46;margin:24px 0 10px">&#10003; Answered</p>
-      <div style="background:#0d2b1f;border:1px solid #065f46;border-radius:8px;padding:14px 18px;margin-bottom:20px;font-size:0.82rem;color:#6ee7b7;line-height:1.9">
+      <p style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#1a5c2a;margin:24px 0 10px">&#10003; Answered</p>
+      <div style="background:#F0FBF4;border:1px solid #A7D7B0;border-radius:8px;padding:14px 18px;margin-bottom:20px;font-size:0.82rem;color:#1a5c2a;line-height:1.9">
         Q1 — Physical topology: each switch has own cable to modem ✓<br>
         Q2 — VLAN 10: management + inter-switch trunk for emergency access ✓<br>
         Q3 — Static routes: 4 total — 2 per switch, next-hop = each switch's 192.168.0.x IP ✓<br>
@@ -355,7 +358,7 @@
       </div>
 
       <!-- Still open -->
-      <p style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#92400e;margin:0 0 14px">Remaining Questions — Answer These Before Module B</p>
+      <p style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#7a5a00;margin:0 0 14px">Remaining Questions — Answer These Before Module B</p>
 
       <div class="q-card">
         <div class="q-num">Question 6 — Inter-Switch Trunk Port</div>
@@ -381,21 +384,21 @@
       <div class="module-header">
         <span class="mod-badge mod-b">Module B</span>
         <div>
-          <div style="font-size:1.05rem;color:#e2e8f0;font-weight:700">High-Level Design — Phase 1</div>
+          <div style="font-size:1.05rem;color:#111111;font-weight:700">High-Level Design — Phase 1</div>
           <div class="mod-sub">Port assignments, VLAN topology, traffic flow, Quantum Fiber routing — VLAN 10 deferred to Phase 2</div>
         </div>
       </div>
 
       <!-- Phase note -->
-      <div style="background:#0c1a2e;border:1px solid #1e3a5f;border-radius:6px;padding:12px 16px;margin-bottom:22px;font-size:0.8rem;color:#60a5fa;line-height:1.6">
+      <div style="background:#EBF4FA;border:1px solid #B8D4E8;border-radius:6px;padding:12px 16px;margin-bottom:22px;font-size:0.8rem;color:#326891;line-height:1.6">
         <strong>Phase 1 scope:</strong> Two independent switches, each with its own uplink to the Quantum Fiber modem, independent data VLANs, and their own DHCP servers. VLAN 10 management trunk deferred — Port 10 reserved on both switches for Phase 2.
       </div>
 
       <!-- Port assignment -->
-      <p style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#475569;margin-bottom:12px">Port Assignments</p>
+      <p style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#666666;margin-bottom:12px">Port Assignments</p>
       <div class="two-col" style="margin-bottom:24px">
-        <div class="card" style="border-color:#10b981">
-          <h3 style="color:#34d399">Switch_1 — EN 5320</h3>
+        <div class="card" style="border-color:#A7D7B0">
+          <h3 style="color:#1a5c2a">Switch_1 — EN 5320</h3>
           <table class="data-table" style="margin:0">
             <thead><tr><th>Port</th><th>Role</th><th>VLAN</th></tr></thead>
             <tbody>
@@ -406,8 +409,8 @@
             </tbody>
           </table>
         </div>
-        <div class="card" style="border-color:#3b82f6">
-          <h3 style="color:#93c5fd">Switch_2 — EN 5320</h3>
+        <div class="card" style="border-color:#B8D4E8">
+          <h3 style="color:#326891">Switch_2 — EN 5320</h3>
           <table class="data-table" style="margin:0">
             <thead><tr><th>Port</th><th>Role</th><th>VLAN</th></tr></thead>
             <tbody>
@@ -421,7 +424,7 @@
       </div>
 
       <!-- VLAN topology -->
-      <p style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#475569;margin-bottom:12px">VLAN Topology — Phase 1</p>
+      <p style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#666666;margin-bottom:12px">VLAN Topology — Phase 1</p>
       <table class="data-table" style="margin-bottom:24px">
         <thead><tr><th>VLAN</th><th>Name</th><th>Switch</th><th>IP Interface</th><th>DHCP Range</th><th>AP Port</th></tr></thead>
         <tbody>
@@ -434,7 +437,7 @@
       </table>
 
       <!-- Traffic flow -->
-      <p style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#475569;margin-bottom:12px">Traffic Flow — iPhone on Corp1 SSID to Internet</p>
+      <p style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#666666;margin-bottom:12px">Traffic Flow — iPhone on Corp1 SSID to Internet</p>
       <table class="data-table" style="margin-bottom:24px">
         <thead><tr><th>#</th><th>Hop</th><th>Detail</th></tr></thead>
         <tbody>
@@ -449,7 +452,7 @@
       </table>
 
       <!-- Quantum Fiber routes -->
-      <p style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#475569;margin-bottom:12px">Quantum Fiber — Static Routes Required</p>
+      <p style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#666666;margin-bottom:12px">Quantum Fiber — Static Routes Required</p>
       <div class="lesson" style="margin-bottom:20px">
         <strong>Note:</strong> SW1 and SW2 get their Default VLAN IPs from the modem's DHCP. These are not known until after ZTP+ boots. Discover them first with <code>show ipconfig</code> or check the modem's DHCP lease table, then add these 4 routes.
       </div>
@@ -464,18 +467,18 @@
       </table>
 
       <!-- ipforwarding checklist -->
-      <p style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#475569;margin-bottom:12px">ipforwarding Checklist — Must-Do (Mar 27 Lesson)</p>
+      <p style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#666666;margin-bottom:12px">ipforwarding Checklist — Must-Do (Mar 27 Lesson)</p>
       <div class="two-col">
-        <div class="card" style="border-color:#10b981">
-          <h3 style="color:#34d399">Switch_1</h3>
+        <div class="card" style="border-color:#A7D7B0">
+          <h3 style="color:#1a5c2a">Switch_1</h3>
           <ul>
             <li><code>enable ipforwarding vlan Default</code> — return path from internet</li>
             <li><code>enable ipforwarding vlan Corp1</code> — outbound from clients</li>
             <li><code>enable ipforwarding vlan Guest1</code> — outbound from clients</li>
           </ul>
         </div>
-        <div class="card" style="border-color:#3b82f6">
-          <h3 style="color:#93c5fd">Switch_2</h3>
+        <div class="card" style="border-color:#B8D4E8">
+          <h3 style="color:#326891">Switch_2</h3>
           <ul>
             <li><code>enable ipforwarding vlan Default</code> — return path from internet</li>
             <li><code>enable ipforwarding vlan Corp2</code> — outbound from clients</li>
@@ -485,8 +488,8 @@
       </div>
 
       <!-- Phase 2 note -->
-      <div style="background:#0d1422;border:1px dashed #334155;border-radius:6px;padding:14px 16px;margin-top:20px;font-size:0.8rem;color:#475569;line-height:1.7">
-        <strong style="color:#64748b">Phase 2 additions (deferred):</strong> Port 10 on both switches → VLAN 10 trunk (tagged).
+      <div style="background:#F7F7F5;border:1px dashed #E2E2E2;border-radius:6px;padding:14px 16px;margin-top:20px;font-size:0.8rem;color:#666666;line-height:1.7">
+        <strong style="color:#555555">Phase 2 additions (deferred):</strong> Port 10 on both switches → VLAN 10 trunk (tagged).
         SW1 VLAN 10 IP: 10.10.0.1/24 · SW2 VLAN 10 IP: 10.10.0.2/24.
         Static routes on each switch for the other's subnets via VLAN 10 next-hop.
         Static route on Quantum Fiber modem: 10.10.0.0/24 → SW1's 192.168.0.x.
@@ -499,17 +502,17 @@
       <div class="module-header">
         <span class="mod-badge mod-c">Module C</span>
         <div>
-          <div style="font-size:1.05rem;color:#e2e8f0;font-weight:700">Low-Level Design</div>
+          <div style="font-size:1.05rem;color:#111111;font-weight:700">Low-Level Design</div>
           <div class="mod-sub">Port-by-port config table, VLAN membership matrix, DHCP ranges, PoE, STP</div>
         </div>
       </div>
       <!-- Phase 1 LLD — SW1 complete. SW2 added after Phase 2. -->
-      <div style="background:#0c1a2e;border:1px solid #1e3a5f;border-radius:6px;padding:10px 16px;margin-bottom:20px;font-size:0.78rem;color:#60a5fa">
+      <div style="background:#EBF4FA;border:1px solid #B8D4E8;border-radius:6px;padding:10px 16px;margin-bottom:20px;font-size:0.78rem;color:#326891">
         Phase 1 (SW1) complete. SW2 LLD added after Phase 2 execution. Phase 3 (VLAN 10) added after Phase 3.
       </div>
 
       <!-- Port table SW1 -->
-      <p style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#34d399;margin-bottom:10px">SW1 — Port Configuration Table</p>
+      <p style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#1a5c2a;margin-bottom:10px">SW1 — Port Configuration Table</p>
       <table class="data-table" style="margin-bottom:22px">
         <thead><tr><th>Port</th><th>Role</th><th>VLAN (untagged)</th><th>VLAN (tagged)</th><th>PoE</th><th>Notes</th></tr></thead>
         <tbody>
@@ -521,7 +524,7 @@
       </table>
 
       <!-- VLAN matrix SW1 -->
-      <p style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#34d399;margin-bottom:10px">SW1 — VLAN Parameter Matrix</p>
+      <p style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#1a5c2a;margin-bottom:10px">SW1 — VLAN Parameter Matrix</p>
       <table class="data-table" style="margin-bottom:22px">
         <thead><tr><th>VLAN</th><th>Name</th><th>Tag</th><th>IP Interface</th><th>DHCP Range</th><th>Gateway</th><th>DNS</th><th>ipforwarding</th></tr></thead>
         <tbody>
@@ -532,7 +535,7 @@
       </table>
 
       <!-- Quantum Fiber routes -->
-      <p style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#34d399;margin-bottom:10px">Quantum Fiber — Static Routes (Phase 1)</p>
+      <p style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#1a5c2a;margin-bottom:10px">Quantum Fiber — Static Routes (Phase 1)</p>
       <table class="data-table" style="margin-bottom:22px">
         <thead><tr><th>Destination</th><th>Mask</th><th>Next-Hop</th><th>Via</th></tr></thead>
         <tbody>
@@ -544,15 +547,15 @@
       </table>
 
       <!-- Verify checklist -->
-      <p style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#34d399;margin-bottom:10px">Pre-Execution Checklist — Confirm Before Touching Hardware</p>
-      <div style="background:#0d2b1f;border:1px solid #065f46;border-radius:6px;padding:14px 18px;margin-bottom:6px;font-size:0.82rem;color:#6ee7b7;line-height:2">
+      <p style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#1a5c2a;margin-bottom:10px">Pre-Execution Checklist — Confirm Before Touching Hardware</p>
+      <div style="background:#F0FBF4;border:1px solid #A7D7B0;border-radius:6px;padding:14px 18px;margin-bottom:6px;font-size:0.82rem;color:#1a5c2a;line-height:2">
         &#9633; Console cable connected to SW1<br>
         &#9633; Port 1 cable connected to Quantum Fiber LAN port<br>
         &#9633; Port 3 cable connected to AP3000-A<br>
         &#9633; AP3000-A decommissioned from XIQ<br>
         &#9633; Quantum Fiber modem accessible (for static routes after ZTP+)
       </div>
-      <div style="background:#0d1422;border:1px dashed #334155;border-radius:6px;padding:12px 16px;margin-bottom:4px;font-size:0.78rem;color:#475569">
+      <div style="background:#F7F7F5;border:1px dashed #E2E2E2;border-radius:6px;padding:12px 16px;margin-bottom:4px;font-size:0.78rem;color:#666666">
         SW2 LLD — added in Phase 2 (VLAN 50/Corp2, VLAN 60/Guest2, Port 13 AP port, Port 1 uplink).<br>
         VLAN 10 LLD — added in Phase 3 (Port 10 trunk, 10.10.0.1/10.10.0.2, inter-switch static routes).
       </div>
@@ -563,26 +566,26 @@
       <div class="module-header">
         <span class="mod-badge mod-e">Execution — Phase 1</span>
         <div>
-          <div style="font-size:1.05rem;color:#e2e8f0;font-weight:700">SW1 + AP3000-A — Corp1/Guest1 — iPhone Test <span style="color:#34d399;font-size:0.85rem">&#10003; Complete</span></div>
+          <div style="font-size:1.05rem;color:#111111;font-weight:700">SW1 + AP3000-A — Corp1/Guest1 — iPhone Test <span style="color:#1a5c2a;font-size:0.85rem">&#10003; Complete</span></div>
           <div class="mod-sub">Factory reset → SW1 CLI config → AP reset → XIQ SSID mapping → iPhone internet verified Mar 29</div>
         </div>
       </div>
 
-      <div style="background:#0c1a2e;border:1px solid #1e3a5f;border-radius:6px;padding:12px 16px;margin-bottom:24px;font-size:0.8rem;color:#60a5fa;line-height:1.6">
+      <div style="background:#EBF4FA;border:1px solid #B8D4E8;border-radius:6px;padding:12px 16px;margin-bottom:24px;font-size:0.8rem;color:#326891;line-height:1.6">
         <strong>AP note:</strong> Switch configuration is 100% CLI. AP SSID-to-VLAN mapping (Corp1→VLAN20, Guest1→VLAN30) must be done in XIQ — the AP3000 CLI does not support SSID configuration. XIQ steps are clearly marked below.
       </div>
 
       <!-- ── STEP 1: Pre-reset ── -->
-      <p style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#92400e;margin-bottom:10px">Step 1 — Pre-Reset: Decommission AP from XIQ</p>
-      <div style="background:#1a1209;border:1px solid #713f12;border-radius:6px;padding:14px 18px;margin-bottom:22px;font-size:0.82rem;color:#fcd34d;line-height:1.8">
+      <p style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#7a5a00;margin-bottom:10px">Step 1 — Pre-Reset: Decommission AP from XIQ</p>
+      <div style="background:#FFF8E1;border:1px solid #F9A825;border-radius:6px;padding:14px 18px;margin-bottom:22px;font-size:0.82rem;color:#5a3e00;line-height:1.8">
         XIQ → Devices → select AP3000-A → Actions → <strong>Reset to Factory Default</strong> (or Decommission)<br>
-        <span style="color:#92400e;font-size:0.75rem">Why: if you skip this, XIQ re-pushes the old config the moment the AP comes back online.</span>
+        <span style="color:#7a5a00;font-size:0.75rem">Why: if you skip this, XIQ re-pushes the old config the moment the AP comes back online.</span>
       </div>
 
       <!-- ── STEP 2: Factory reset SW1 ── -->
-      <p style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#92400e;margin-bottom:10px">Step 2 — Factory Reset SW1 (Console Cable)</p>
-      <div style="background:#0d1117;border:1px solid #1e293b;border-radius:6px;padding:16px 18px;margin-bottom:22px">
-        <pre style="font-family:monospace;font-size:0.8rem;color:#94a3b8;line-height:1.9;margin:0"># Connect console cable
+      <p style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#7a5a00;margin-bottom:10px">Step 2 — Factory Reset SW1 (Console Cable)</p>
+      <div style="background:#F7F7F5;border:1px solid #E2E2E2;border-radius:6px;padding:16px 18px;margin-bottom:22px">
+        <pre style="font-family:monospace;font-size:0.8rem;color:#111111;line-height:1.9;margin:0"># Connect console cable
 ls /dev/cu.*
 screen /dev/cu.usbserial-XXXXXX 115200
 
@@ -593,13 +596,13 @@ admin
 # Wipe configuration (EXOS command — NOT "delete configuration primary")
 unconfigure switch all
 # prompt: Yes (capital Y)</pre>
-        <div style="margin-top:12px;font-size:0.75rem;color:#475569">Wait ~5 minutes. Switch boots into ZTP+ mode, gets DHCP IP from home router, checks in with XIQ.</div>
+        <div style="margin-top:12px;font-size:0.75rem;color:#666666">Wait ~5 minutes. Switch boots into ZTP+ mode, gets DHCP IP from home router, checks in with XIQ.</div>
       </div>
 
       <!-- ── STEP 3: Post-ZTP reconnect ── -->
-      <p style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#92400e;margin-bottom:10px">Step 3 — Post-ZTP+: Find IP and SSH In</p>
-      <div style="background:#0d1117;border:1px solid #1e293b;border-radius:6px;padding:16px 18px;margin-bottom:22px">
-        <pre style="font-family:monospace;font-size:0.8rem;color:#94a3b8;line-height:1.9;margin:0"># Still on console after reboot — login
+      <p style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#7a5a00;margin-bottom:10px">Step 3 — Post-ZTP+: Find IP and SSH In</p>
+      <div style="background:#F7F7F5;border:1px solid #E2E2E2;border-radius:6px;padding:16px 18px;margin-bottom:22px">
+        <pre style="font-family:monospace;font-size:0.8rem;color:#111111;line-height:1.9;margin:0"># Still on console after reboot — login
 admin
 [blank password]
 
@@ -616,9 +619,9 @@ ssh -o HostKeyAlgorithms=+ssh-rsa -o PubkeyAcceptedAlgorithms=+ssh-rsa admin@192
       </div>
 
       <!-- ── STEP 4: SW1 VLAN + Port config ── -->
-      <p style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#34d399;margin-bottom:10px">Step 4 — SW1: Create VLANs and Configure Ports</p>
+      <p style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#1a5c2a;margin-bottom:10px">Step 4 — SW1: Create VLANs and Configure Ports</p>
       <div style="background:#0d1117;border:1px solid #065f46;border-radius:6px;padding:16px 18px;margin-bottom:22px">
-        <pre style="font-family:monospace;font-size:0.8rem;color:#94a3b8;line-height:1.9;margin:0"># Create VLANs
+        <pre style="font-family:monospace;font-size:0.8rem;color:#111111;line-height:1.9;margin:0"># Create VLANs
 create vlan Corp1 tag 20
 create vlan Guest1 tag 30
 
@@ -635,19 +638,19 @@ enable inline-power ports 3</pre>
       </div>
 
       <!-- ── STEP 5: ipforwarding ── -->
-      <p style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#34d399;margin-bottom:10px">Step 5 — SW1: Enable IP Forwarding (All Routed VLANs)</p>
+      <p style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#1a5c2a;margin-bottom:10px">Step 5 — SW1: Enable IP Forwarding (All Routed VLANs)</p>
       <div style="background:#0d1117;border:1px solid #065f46;border-radius:6px;padding:16px 18px;margin-bottom:22px">
-        <pre style="font-family:monospace;font-size:0.8rem;color:#94a3b8;line-height:1.9;margin:0"># Required on ALL three — lesson from March 27
+        <pre style="font-family:monospace;font-size:0.8rem;color:#111111;line-height:1.9;margin:0"># Required on ALL three — lesson from March 27
 enable ipforwarding vlan Default
 enable ipforwarding vlan Corp1
 enable ipforwarding vlan Guest1</pre>
-        <div style="margin-top:10px;font-size:0.75rem;color:#475569">Default VLAN must be enabled — return traffic from internet arrives here before being routed to Corp1/Guest1.</div>
+        <div style="margin-top:10px;font-size:0.75rem;color:#666666">Default VLAN must be enabled — return traffic from internet arrives here before being routed to Corp1/Guest1.</div>
       </div>
 
       <!-- ── STEP 6: DHCP ── -->
-      <p style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#34d399;margin-bottom:10px">Step 6 — SW1: Configure DHCP for Both VLANs</p>
+      <p style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#1a5c2a;margin-bottom:10px">Step 6 — SW1: Configure DHCP for Both VLANs</p>
       <div style="background:#0d1117;border:1px solid #065f46;border-radius:6px;padding:16px 18px;margin-bottom:22px">
-        <pre style="font-family:monospace;font-size:0.8rem;color:#94a3b8;line-height:1.9;margin:0"># Corp1 DHCP
+        <pre style="font-family:monospace;font-size:0.8rem;color:#111111;line-height:1.9;margin:0"># Corp1 DHCP
 configure vlan Corp1 dhcp-address-range 10.20.0.100 - 10.20.0.200
 configure vlan Corp1 dhcp-options default-gateway 10.20.0.1
 configure vlan Corp1 dhcp-options dns-server primary 8.8.8.8
@@ -661,45 +664,45 @@ enable dhcp ports 3 vlan Guest1</pre>
       </div>
 
       <!-- ── STEP 7: Save ── -->
-      <p style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#34d399;margin-bottom:10px">Step 7 — SW1: Save Configuration</p>
+      <p style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#1a5c2a;margin-bottom:10px">Step 7 — SW1: Save Configuration</p>
       <div style="background:#0d1117;border:1px solid #065f46;border-radius:6px;padding:16px 18px;margin-bottom:22px">
-        <pre style="font-family:monospace;font-size:0.8rem;color:#94a3b8;line-height:1.9;margin:0">save configuration
+        <pre style="font-family:monospace;font-size:0.8rem;color:#111111;line-height:1.9;margin:0">save configuration
 # prompt: y</pre>
       </div>
 
       <!-- ── STEP 8: AP reset ── -->
-      <p style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#92400e;margin-bottom:10px">Step 8 — Factory Reset AP3000-A (Physical Button)</p>
-      <div style="background:#1a1209;border:1px solid #713f12;border-radius:6px;padding:14px 18px;margin-bottom:22px;font-size:0.82rem;color:#fcd34d;line-height:1.8">
+      <p style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#7a5a00;margin-bottom:10px">Step 8 — Factory Reset AP3000-A (Physical Button)</p>
+      <div style="background:#FFF8E1;border:1px solid #F9A825;border-radius:6px;padding:14px 18px;margin-bottom:22px;font-size:0.82rem;color:#5a3e00;line-height:1.8">
         1. Plug AP3000-A into SW1 Port 3 (PoE now active)<br>
         2. Hold reset button 10–15 seconds until LED flashes rapidly<br>
         3. AP reboots → gets 192.168.0.x from home router via Default VLAN (untagged on Port 3)<br>
         4. AP reaches XIQ and appears as <strong>"New Device"</strong> for adoption<br>
-        <span style="color:#92400e;font-size:0.75rem">Wait 2–3 minutes for AP to fully boot and check in to XIQ.</span>
+        <span style="color:#7a5a00;font-size:0.75rem">Wait 2–3 minutes for AP to fully boot and check in to XIQ.</span>
       </div>
 
       <!-- ── STEP 9: XIQ SSID config ── -->
-      <p style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#fbbf24;margin-bottom:10px">Step 9 — XIQ: SSID Mapping (Cannot Be Done via CLI)</p>
-      <div style="background:#1a1a0d;border:1px solid #713f12;border-radius:6px;padding:14px 18px;margin-bottom:22px;font-size:0.82rem;color:#fcd34d;line-height:2">
+      <p style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#7a5a00;margin-bottom:10px">Step 9 — XIQ: SSID Mapping (Cannot Be Done via CLI)</p>
+      <div style="background:#FFF8E1;border:1px solid #F9A825;border-radius:6px;padding:14px 18px;margin-bottom:22px;font-size:0.82rem;color:#5a3e00;line-height:2">
         1. XIQ → <strong>Configure → Network Policies → New Policy</strong> → name: <code>SW1-AP-Policy</code><br>
         2. Add SSID: <strong>Corp1</strong> → VLAN 20 → WPA2/WPA3 passphrase<br>
         3. Add SSID: <strong>Guest1</strong> → VLAN 30 → WPA2/WPA3 passphrase<br>
         4. Assign AP3000-A to <code>SW1-AP-Policy</code><br>
         5. Push / Deploy → wait for AP to apply config (~1 min)<br>
-        <span style="color:#92400e;font-size:0.75rem">AP will now broadcast both SSIDs. VLAN tags are sent from AP to SW1 Port 3.</span>
+        <span style="color:#7a5a00;font-size:0.75rem">AP will now broadcast both SSIDs. VLAN tags are sent from AP to SW1 Port 3.</span>
       </div>
 
       <!-- ── STEP 10: Quantum Fiber routes ── -->
-      <p style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#92400e;margin-bottom:10px">Step 10 — Quantum Fiber: Add Static Routes for SW1</p>
-      <div style="background:#1a1209;border:1px solid #713f12;border-radius:6px;padding:14px 18px;margin-bottom:22px;font-size:0.82rem;color:#fcd34d;line-height:1.8">
+      <p style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#7a5a00;margin-bottom:10px">Step 10 — Quantum Fiber: Add Static Routes for SW1</p>
+      <div style="background:#FFF8E1;border:1px solid #F9A825;border-radius:6px;padding:14px 18px;margin-bottom:22px;font-size:0.82rem;color:#5a3e00;line-height:1.8">
         Quantum Fiber UI → Advanced → Static Routing → Add:<br>
-        <code style="display:block;margin:6px 0;background:#0f172a;padding:4px 10px;border-radius:3px;font-size:0.8rem;color:#34d399">10.20.0.0 / 255.255.255.0 → 192.168.0.x  (SW1's IP from show ipconfig)</code>
-        <code style="display:block;margin:6px 0;background:#0f172a;padding:4px 10px;border-radius:3px;font-size:0.8rem;color:#34d399">10.30.0.0 / 255.255.255.0 → 192.168.0.x  (same SW1 IP)</code>
+        <code style="display:block;margin:6px 0;background:#F7F7F5;padding:4px 10px;border-radius:3px;font-size:0.8rem;color:#326891;border:1px solid #E2E2E2">10.20.0.0 / 255.255.255.0 → 192.168.0.x  (SW1's IP from show ipconfig)</code>
+        <code style="display:block;margin:6px 0;background:#F7F7F5;padding:4px 10px;border-radius:3px;font-size:0.8rem;color:#326891;border:1px solid #E2E2E2">10.30.0.0 / 255.255.255.0 → 192.168.0.x  (same SW1 IP)</code>
       </div>
 
       <!-- ── STEP 11: Verify ── -->
-      <p style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#34d399;margin-bottom:10px">Step 11 — Verify: Switch Commands + iPhone Test</p>
+      <p style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#1a5c2a;margin-bottom:10px">Step 11 — Verify: Switch Commands + iPhone Test</p>
       <div style="background:#0d1117;border:1px solid #065f46;border-radius:6px;padding:16px 18px;margin-bottom:22px">
-        <pre style="font-family:monospace;font-size:0.8rem;color:#94a3b8;line-height:1.9;margin:0"># On SW1 — confirm VLANs have IPs
+        <pre style="font-family:monospace;font-size:0.8rem;color:#111111;line-height:1.9;margin:0"># On SW1 — confirm VLANs have IPs
 show ipconfig
 
 # Confirm Port 3 VLAN membership
@@ -716,7 +719,7 @@ show dhcp-server stats
 
 # Confirm routing table has default route
 show iproute</pre>
-        <div style="margin-top:14px;background:#0d2b1f;border-left:3px solid #10b981;padding:10px 14px;border-radius:0 4px 4px 0;font-size:0.8rem;color:#6ee7b7;line-height:1.7">
+        <div style="margin-top:14px;background:#F0FBF4;border-left:3px solid #2E7D32;padding:10px 14px;border-radius:0 4px 4px 0;font-size:0.8rem;color:#1a5c2a;line-height:1.7">
           <strong>iPhone test:</strong> Connect to Corp1 SSID → confirm 10.20.0.x address → ping 8.8.8.8 → open browser → confirm internet.<br>
           Repeat on Guest1 SSID → confirm 10.30.0.x address → internet works.
         </div>
@@ -727,21 +730,21 @@ show iproute</pre>
     <!-- ═══════════════════════════════════════ PHASE 2 ═══════════════════════════ -->
     <div class="module" id="exec2">
       <div class="module-header">
-        <span class="mod-badge mod-e" style="background:#0c1a2e;color:#93c5fd;border-color:#1e3a5f">Execution — Phase 2</span>
+        <span class="mod-badge mod-e">Execution — Phase 2</span>
         <div>
-          <div style="font-size:1.05rem;color:#e2e8f0;font-weight:700">SW2 + AP3000-B — Corp2/Guest2 — iPhone Test <span style="color:#34d399;font-size:0.85rem">&#10003; Complete</span></div>
+          <div style="font-size:1.05rem;color:#111111;font-weight:700">SW2 + AP3000-B — Corp2/Guest2 — iPhone Test <span style="color:#1a5c2a;font-size:0.85rem">&#10003; Complete</span></div>
           <div class="mod-sub">Factory reset → SW2 CLI config → AP reset → XIQ SSID mapping → iPhone internet verified Mar 29</div>
         </div>
       </div>
 
-      <div style="background:#0c1a2e;border:1px solid #1e3a5f;border-radius:6px;padding:12px 16px;margin-bottom:24px;font-size:0.8rem;color:#60a5fa;line-height:1.6">
+      <div style="background:#EBF4FA;border:1px solid #B8D4E8;border-radius:6px;padding:12px 16px;margin-bottom:24px;font-size:0.8rem;color:#326891;line-height:1.6">
         Same process as Phase 1 — different VLANs (50/60), different IPs (10.50/10.60). SW2 connects its own AP3000-B on Port 3. Quantum Fiber gets two more static routes after you find SW2's DHCP IP.
       </div>
 
       <!-- Step 1 -->
-      <p style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#92400e;margin-bottom:10px">Step 1 — Factory Reset SW2 (Console Cable)</p>
-      <div style="background:#0d1117;border:1px solid #1e293b;border-radius:6px;padding:16px 18px;margin-bottom:22px">
-        <pre style="font-family:monospace;font-size:0.8rem;color:#94a3b8;line-height:1.9;margin:0"># Connect console cable to SW2
+      <p style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#7a5a00;margin-bottom:10px">Step 1 — Factory Reset SW2 (Console Cable)</p>
+      <div style="background:#F7F7F5;border:1px solid #E2E2E2;border-radius:6px;padding:16px 18px;margin-bottom:22px">
+        <pre style="font-family:monospace;font-size:0.8rem;color:#111111;line-height:1.9;margin:0"># Connect console cable to SW2
 ls /dev/cu.*
 screen /dev/cu.usbserial-XXXXXX 115200
 
@@ -758,24 +761,24 @@ unconfigure switch all
 # - Failsafe: bigsur
 # - Disable unconfigured ports: Yes
 # - Re-enable SNMP: Yes</pre>
-        <div style="margin-top:10px;background:#2d1515;border-left:3px solid #f87171;padding:8px 12px;border-radius:0 4px 4px 0;font-size:0.75rem;color:#fca5a5">
+        <div style="margin-top:10px;background:#FEF2F2;border-left:3px solid #c0392b;padding:8px 12px;border-radius:0 4px 4px 0;font-size:0.75rem;color:#7b1f1f">
           Answering "Yes" to disable ports runs <code>disable ports all</code>. Enable ports 1 and 3 immediately after wizard.
         </div>
       </div>
 
       <!-- Step 2 -->
-      <p style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#34d399;margin-bottom:10px">Step 2 — Enable Ports &amp; Find SW2 IP</p>
+      <p style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#1a5c2a;margin-bottom:10px">Step 2 — Enable Ports &amp; Find SW2 IP</p>
       <div style="background:#0d1117;border:1px solid #065f46;border-radius:6px;padding:16px 18px;margin-bottom:22px">
-        <pre style="font-family:monospace;font-size:0.8rem;color:#94a3b8;line-height:1.9;margin:0">enable ports 1
+        <pre style="font-family:monospace;font-size:0.8rem;color:#111111;line-height:1.9;margin:0">enable ports 1
 enable ports 3
 show ipconfig
 # Note 192.168.0.x — needed for Quantum Fiber static routes</pre>
       </div>
 
       <!-- Step 3 -->
-      <p style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#34d399;margin-bottom:10px">Step 3 — SW2: Create VLANs and Configure Ports</p>
+      <p style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#1a5c2a;margin-bottom:10px">Step 3 — SW2: Create VLANs and Configure Ports</p>
       <div style="background:#0d1117;border:1px solid #065f46;border-radius:6px;padding:16px 18px;margin-bottom:22px">
-        <pre style="font-family:monospace;font-size:0.8rem;color:#94a3b8;line-height:1.9;margin:0">create vlan Corp2 tag 50
+        <pre style="font-family:monospace;font-size:0.8rem;color:#111111;line-height:1.9;margin:0">create vlan Corp2 tag 50
 create vlan Guest2 tag 60
 
 configure vlan Corp2 add ports 3 tagged
@@ -788,18 +791,18 @@ enable inline-power ports 3</pre>
       </div>
 
       <!-- Step 4 -->
-      <p style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#34d399;margin-bottom:10px">Step 4 — SW2: Enable IP Forwarding (All Routed VLANs)</p>
+      <p style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#1a5c2a;margin-bottom:10px">Step 4 — SW2: Enable IP Forwarding (All Routed VLANs)</p>
       <div style="background:#0d1117;border:1px solid #065f46;border-radius:6px;padding:16px 18px;margin-bottom:22px">
-        <pre style="font-family:monospace;font-size:0.8rem;color:#94a3b8;line-height:1.9;margin:0">enable ipforwarding vlan Default
+        <pre style="font-family:monospace;font-size:0.8rem;color:#111111;line-height:1.9;margin:0">enable ipforwarding vlan Default
 enable ipforwarding vlan Corp2
 enable ipforwarding vlan Guest2</pre>
-        <div style="margin-top:10px;font-size:0.75rem;color:#475569">All three required — Default VLAN must be enabled for return traffic from internet.</div>
+        <div style="margin-top:10px;font-size:0.75rem;color:#666666">All three required — Default VLAN must be enabled for return traffic from internet.</div>
       </div>
 
       <!-- Step 5 -->
-      <p style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#34d399;margin-bottom:10px">Step 5 — SW2: Configure DHCP for Both VLANs</p>
+      <p style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#1a5c2a;margin-bottom:10px">Step 5 — SW2: Configure DHCP for Both VLANs</p>
       <div style="background:#0d1117;border:1px solid #065f46;border-radius:6px;padding:16px 18px;margin-bottom:22px">
-        <pre style="font-family:monospace;font-size:0.8rem;color:#94a3b8;line-height:1.9;margin:0"># Corp2 DHCP
+        <pre style="font-family:monospace;font-size:0.8rem;color:#111111;line-height:1.9;margin:0"># Corp2 DHCP
 configure vlan Corp2 dhcp-address-range 10.50.0.100 - 10.50.0.200
 configure vlan Corp2 dhcp-options default-gateway 10.50.0.1
 configure vlan Corp2 dhcp-options dns-server primary 8.8.8.8
@@ -813,49 +816,49 @@ enable dhcp ports 3 vlan Guest2</pre>
       </div>
 
       <!-- Step 6 -->
-      <p style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#34d399;margin-bottom:10px">Step 6 — SW2: Save Configuration</p>
+      <p style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#1a5c2a;margin-bottom:10px">Step 6 — SW2: Save Configuration</p>
       <div style="background:#0d1117;border:1px solid #065f46;border-radius:6px;padding:16px 18px;margin-bottom:22px">
-        <pre style="font-family:monospace;font-size:0.8rem;color:#94a3b8;line-height:1.9;margin:0">save configuration</pre>
+        <pre style="font-family:monospace;font-size:0.8rem;color:#111111;line-height:1.9;margin:0">save configuration</pre>
       </div>
 
       <!-- Step 7 -->
-      <p style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#92400e;margin-bottom:10px">Step 7 — Quantum Fiber: Add Static Routes for SW2</p>
-      <div style="background:#1a1209;border:1px solid #713f12;border-radius:6px;padding:14px 18px;margin-bottom:22px;font-size:0.82rem;color:#fcd34d;line-height:1.8">
+      <p style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#7a5a00;margin-bottom:10px">Step 7 — Quantum Fiber: Add Static Routes for SW2</p>
+      <div style="background:#FFF8E1;border:1px solid #F9A825;border-radius:6px;padding:14px 18px;margin-bottom:22px;font-size:0.82rem;color:#5a3e00;line-height:1.8">
         Quantum Fiber UI → Advanced → Static Routing → Add:<br>
-        <code style="display:block;margin:6px 0;background:#0f172a;padding:4px 10px;border-radius:3px;font-size:0.8rem;color:#34d399">10.50.0.0 / 255.255.255.0 → 192.168.0.x  (SW2 IP from show ipconfig)</code>
-        <code style="display:block;margin:6px 0;background:#0f172a;padding:4px 10px;border-radius:3px;font-size:0.8rem;color:#34d399">10.60.0.0 / 255.255.255.0 → 192.168.0.x  (same SW2 IP)</code>
+        <code style="display:block;margin:6px 0;background:#F7F7F5;padding:4px 10px;border-radius:3px;font-size:0.8rem;color:#326891;border:1px solid #E2E2E2">10.50.0.0 / 255.255.255.0 → 192.168.0.x  (SW2 IP from show ipconfig)</code>
+        <code style="display:block;margin:6px 0;background:#F7F7F5;padding:4px 10px;border-radius:3px;font-size:0.8rem;color:#326891;border:1px solid #E2E2E2">10.60.0.0 / 255.255.255.0 → 192.168.0.x  (same SW2 IP)</code>
       </div>
 
       <!-- Step 8 -->
-      <p style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#92400e;margin-bottom:10px">Step 8 — Factory Reset AP3000-B (Physical Pinhole)</p>
-      <div style="background:#1a1209;border:1px solid #713f12;border-radius:6px;padding:14px 18px;margin-bottom:22px;font-size:0.82rem;color:#fcd34d;line-height:1.8">
+      <p style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#7a5a00;margin-bottom:10px">Step 8 — Factory Reset AP3000-B (Physical Pinhole)</p>
+      <div style="background:#FFF8E1;border:1px solid #F9A825;border-radius:6px;padding:14px 18px;margin-bottom:22px;font-size:0.82rem;color:#5a3e00;line-height:1.8">
         1. Plug AP3000-B into SW2 Port 3 (PoE active)<br>
         2. Hold reset pinhole <strong>10 seconds</strong> until LED cycles<br>
         3. AP reboots → gets 192.168.0.x from home router → reaches XIQ<br>
         4. Firmware update runs automatically (~5–8 min)<br>
-        <span style="color:#92400e;font-size:0.75rem">Use physical reset — do NOT use XIQ "Delete" alone (leaves old org binding on AP).</span>
+        <span style="color:#7a5a00;font-size:0.75rem">Use physical reset — do NOT use XIQ "Delete" alone (leaves old org binding on AP).</span>
       </div>
 
       <!-- Step 9 -->
-      <p style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#fbbf24;margin-bottom:10px">Step 9 — XIQ: Claim AP3000-B + SSID Mapping</p>
-      <div style="background:#1a1a0d;border:1px solid #713f12;border-radius:6px;padding:14px 18px;margin-bottom:22px;font-size:0.82rem;color:#fcd34d;line-height:2">
+      <p style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#7a5a00;margin-bottom:10px">Step 9 — XIQ: Claim AP3000-B + SSID Mapping</p>
+      <div style="background:#FFF8E1;border:1px solid #F9A825;border-radius:6px;padding:14px 18px;margin-bottom:22px;font-size:0.82rem;color:#5a3e00;line-height:2">
         1. XIQ → Devices → claim AP3000-B<br>
         2. <strong>Configure → Network Policies → New Policy</strong> → name: <code>SW2-AP-Policy</code><br>
         3. Add SSID: <strong>Corp2</strong> → VLAN 50 → WPA2/WPA3 passphrase<br>
         4. Add SSID: <strong>Guest2</strong> → VLAN 60 → WPA2/WPA3 passphrase<br>
         5. Assign AP3000-B to <code>SW2-AP-Policy</code> → Push / Deploy<br>
-        <span style="color:#92400e;font-size:0.75rem">AP will broadcast Corp2 and Guest2 SSIDs. VLAN tags sent from AP to SW2 Port 3.</span>
+        <span style="color:#7a5a00;font-size:0.75rem">AP will broadcast Corp2 and Guest2 SSIDs. VLAN tags sent from AP to SW2 Port 3.</span>
       </div>
 
       <!-- Step 10 -->
-      <p style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#34d399;margin-bottom:10px">Step 10 — Verify SW2</p>
+      <p style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#1a5c2a;margin-bottom:10px">Step 10 — Verify SW2</p>
       <div style="background:#0d1117;border:1px solid #065f46;border-radius:6px;padding:16px 18px;margin-bottom:22px">
-        <pre style="font-family:monospace;font-size:0.8rem;color:#94a3b8;line-height:1.9;margin:0">show ipconfig          # Corp2/Guest2 IPs on SW2
+        <pre style="font-family:monospace;font-size:0.8rem;color:#111111;line-height:1.9;margin:0">show ipconfig          # Corp2/Guest2 IPs on SW2
 show vlan detail       # Port 3 tagged on Corp2 + Guest2
 show iparp             # AP3000-B at 192.168.0.x
 show inline-power info ports 3   # delivering power
 ping vr VR-Default 8.8.8.8       # SW2 internet ok</pre>
-        <div style="margin-top:14px;background:#0d2b1f;border-left:3px solid #10b981;padding:10px 14px;border-radius:0 4px 4px 0;font-size:0.8rem;color:#6ee7b7;line-height:1.7">
+        <div style="margin-top:14px;background:#F0FBF4;border-left:3px solid #2E7D32;padding:10px 14px;border-radius:0 4px 4px 0;font-size:0.8rem;color:#1a5c2a;line-height:1.7">
           <strong>iPhone test:</strong> Connect to Corp2 → confirm 10.50.0.x → ping 8.8.8.8 → internet.<br>
           Repeat on Guest2 → confirm 10.60.0.x → internet works.
         </div>
@@ -865,21 +868,21 @@ ping vr VR-Default 8.8.8.8       # SW2 internet ok</pre>
     <!-- ═══════════════════════════════════════ PHASE 3 ═══════════════════════════ -->
     <div class="module" id="exec3">
       <div class="module-header">
-        <span class="mod-badge mod-e" style="background:#1a0d0d;color:#fda4af;border-color:#881337">Execution — Phase 3</span>
+        <span class="mod-badge mod-log">Execution — Phase 3</span>
         <div>
-          <div style="font-size:1.05rem;color:#e2e8f0;font-weight:700">VLAN 10 Inter-Switch Trunk — SW1 Port 10 ↔ SW2 Port 10</div>
+          <div style="font-size:1.05rem;color:#111111;font-weight:700">VLAN 10 Inter-Switch Trunk — SW1 Port 10 ↔ SW2 Port 10</div>
           <div class="mod-sub">Connect trunk cable → configure VLAN 10 on both switches → static routes → verify cross-switch routing</div>
         </div>
       </div>
 
-      <div style="background:#0c1a2e;border:1px solid #1e3a5f;border-radius:6px;padding:12px 16px;margin-bottom:24px;font-size:0.8rem;color:#60a5fa;line-height:1.6">
+      <div style="background:#EBF4FA;border:1px solid #B8D4E8;border-radius:6px;padding:12px 16px;margin-bottom:24px;font-size:0.8rem;color:#326891;line-height:1.6">
         <strong>Prerequisite:</strong> Phase 2 fully verified (SW2 + AP3000-B + iPhone internet). Then connect an Ethernet cable between SW1 Port 10 and SW2 Port 10 before running these commands.
       </div>
 
       <!-- Step 1 — SW1 -->
-      <p style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#34d399;margin-bottom:10px">Step 1 — SW1: Configure VLAN 10 Trunk</p>
+      <p style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#1a5c2a;margin-bottom:10px">Step 1 — SW1: Configure VLAN 10 Trunk</p>
       <div style="background:#0d1117;border:1px solid #065f46;border-radius:6px;padding:16px 18px;margin-bottom:22px">
-        <pre style="font-family:monospace;font-size:0.8rem;color:#94a3b8;line-height:1.9;margin:0"># SSH to SW1 at 192.168.0.24
+        <pre style="font-family:monospace;font-size:0.8rem;color:#111111;line-height:1.9;margin:0"># SSH to SW1 at 192.168.0.24
 create vlan Mgmt tag 10
 configure vlan Mgmt add ports 10 tagged
 configure vlan Mgmt ipaddress 10.10.0.1/24
@@ -893,9 +896,9 @@ save configuration</pre>
       </div>
 
       <!-- Step 2 — SW2 -->
-      <p style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#93c5fd;margin-bottom:10px">Step 2 — SW2: Configure VLAN 10 Trunk</p>
+      <p style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#326891;margin-bottom:10px">Step 2 — SW2: Configure VLAN 10 Trunk</p>
       <div style="background:#0d1117;border:1px solid #1e3a5f;border-radius:6px;padding:16px 18px;margin-bottom:22px">
-        <pre style="font-family:monospace;font-size:0.8rem;color:#94a3b8;line-height:1.9;margin:0"># SSH to SW2 at 192.168.0.x
+        <pre style="font-family:monospace;font-size:0.8rem;color:#111111;line-height:1.9;margin:0"># SSH to SW2 at 192.168.0.x
 enable ports 10
 create vlan Mgmt tag 10
 configure vlan Mgmt add ports 10 tagged
@@ -910,9 +913,9 @@ save configuration</pre>
       </div>
 
       <!-- Step 3 — Verify -->
-      <p style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#34d399;margin-bottom:10px">Step 3 — Verify Trunk &amp; Cross-Switch Routing</p>
+      <p style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#1a5c2a;margin-bottom:10px">Step 3 — Verify Trunk &amp; Cross-Switch Routing</p>
       <div style="background:#0d1117;border:1px solid #065f46;border-radius:6px;padding:16px 18px;margin-bottom:22px">
-        <pre style="font-family:monospace;font-size:0.8rem;color:#94a3b8;line-height:1.9;margin:0"># On SW1 — ping SW2's trunk IP
+        <pre style="font-family:monospace;font-size:0.8rem;color:#111111;line-height:1.9;margin:0"># On SW1 — ping SW2's trunk IP
 ping vr VR-Default 10.10.0.2
 
 # On SW2 — ping SW1's trunk IP
@@ -926,7 +929,7 @@ ping vr VR-Default 10.20.0.1
 
 # Verify trunk in VLAN table
 show vlan detail</pre>
-        <div style="margin-top:14px;background:#0d2b1f;border-left:3px solid #10b981;padding:10px 14px;border-radius:0 4px 4px 0;font-size:0.8rem;color:#6ee7b7;line-height:1.7">
+        <div style="margin-top:14px;background:#F0FBF4;border-left:3px solid #2E7D32;padding:10px 14px;border-radius:0 4px 4px 0;font-size:0.8rem;color:#1a5c2a;line-height:1.7">
           All four pings should reply. This confirms the trunk is up and inter-switch routing is working end to end.
         </div>
       </div>
@@ -937,7 +940,7 @@ show vlan detail</pre>
       <div class="module-header">
         <span class="mod-badge mod-log">Session Log</span>
         <div>
-          <div style="font-size:1.05rem;color:#e2e8f0;font-weight:700">Live Activity — March 29, 2026</div>
+          <div style="font-size:1.05rem;color:#111111;font-weight:700">Live Activity — March 29, 2026</div>
           <div class="mod-sub">Running record of the day — updated as work progresses</div>
         </div>
       </div>
@@ -994,17 +997,17 @@ show vlan detail</pre>
 
     <div class="footer-nav">
       <a href="index.html">&larr; Home</a>
-      <span style="color:#334155;font-size:0.72rem">March 29, 2026 &nbsp;&mdash;&nbsp; Dual-Switch Lab</span>
+      <span style="color:#666666;font-size:0.72rem">March 29, 2026 &nbsp;&mdash;&nbsp; Dual-Switch Lab</span>
       <a href="standards_references.html">Standards Ref &rarr;</a>
     </div>
 
     <!-- ═══════════════ APRIL 7 2026 ═══════════════ -->
     <div id="apr7-section">
 
-      <div style="margin-top:56px;padding-top:32px;border-top:2px solid #f59e0b">
-        <div style="font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:0.18em;color:#f59e0b;margin-bottom:6px">April 7, 2026 — Owner Notes</div>
-        <h2 style="font-size:1.3rem;color:#f1f5f9;margin-bottom:8px">XIQ-Only Deployment + EXOS Syntax Lessons</h2>
-        <p style="color:#64748b;font-size:0.85rem;line-height:1.7">Second attempt at deploying two 5320 switches + two AP3000s entirely via XIQ (no CLI). XIQ handled L2 (VLANs, SVIs, port types, AP policies). CLI required for DHCP server, ipforwarding, and default route. iPhone internet verified on SW1 VLANs 20+30. SW2 VLANs 50+60 in progress.</p>
+      <div style="margin-top:56px;padding-top:32px;border-top:2px solid #F9A825">
+        <div style="font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:0.18em;color:#7a5a00;margin-bottom:6px">April 7, 2026 — Owner Notes</div>
+        <h2 style="font-size:1.3rem;color:#111111;margin-bottom:8px">XIQ-Only Deployment + EXOS Syntax Lessons</h2>
+        <p style="color:#555555;font-size:0.85rem;line-height:1.7">Second attempt at deploying two 5320 switches + two AP3000s entirely via XIQ (no CLI). XIQ handled L2 (VLANs, SVIs, port types, AP policies). CLI required for DHCP server, ipforwarding, and default route. iPhone internet verified on SW1 VLANs 20+30. SW2 VLANs 50+60 in progress.</p>
       </div>
 
       <!-- XIQ Flow -->
@@ -1012,7 +1015,7 @@ show vlan detail</pre>
         <div class="module-header">
           <span class="mod-badge mod-b">XIQ Deploy</span>
           <div>
-            <div style="font-size:1.05rem;color:#e2e8f0;font-weight:700">XIQ-Only Deployment Flow</div>
+            <div style="font-size:1.05rem;color:#111111;font-weight:700">XIQ-Only Deployment Flow</div>
             <div class="mod-sub">10-step linked list — what worked, what didn't, in order</div>
           </div>
         </div>
@@ -1020,7 +1023,7 @@ show vlan detail</pre>
         <div class="log-entry done"><div class="log-time">Step 1</div><div class="log-text"><strong>Factory reset both switches.</strong> SW1: 192.168.0.28 (FJ012544G-00483). SW2: 192.168.0.11 (FJ012544G-00233). AP1 (SW1 port 3): 192.168.0.12. AP2 (SW2 port 3): 192.168.0.25. ZTP+ auto-onboarded both to XIQ.</div></div>
         <div class="log-entry done"><div class="log-time">Step 2</div><div class="log-text"><strong>XIQ policies created.</strong> One switch policy (Test_SW1) for both switches. Separate AP policies: AP1 = VLANs 20/30, AP2 = VLANs 50/60.</div></div>
         <div class="log-entry done"><div class="log-time">Step 3</div><div class="log-text"><strong>VLAN Attributes added.</strong> VLANs 20/30/50/60 added. Hiccup: table appeared empty after save — root cause was switches not yet assigned to Test_SW1 policy.</div></div>
-        <div class="log-entry done"><div class="log-time">Step 4</div><div class="log-text"><strong>Network Allocation configured.</strong> Corp_20 (10.20.0.0/24), Guest_30 (10.30.0.0/24), Corp_50 (10.50.0.0/24), Guest_60 (10.60.0.0/24). SVIs auto-set to .1 of each subnet. <strong style="color:#fbbf24">Lesson: never add VLAN 1 to Routing section — broke XIQ↔switch comms.</strong></div></div>
+        <div class="log-entry done"><div class="log-time">Step 4</div><div class="log-text"><strong>Network Allocation configured.</strong> Corp_20 (10.20.0.0/24), Guest_30 (10.30.0.0/24), Corp_50 (10.50.0.0/24), Guest_60 (10.60.0.0/24). SVIs auto-set to .1 of each subnet. <strong style="color:#7a5a00">Lesson: never add VLAN 1 to Routing section — broke XIQ↔switch comms.</strong></div></div>
         <div class="log-entry done"><div class="log-time">Step 5</div><div class="log-text"><strong>Routing — SVIs pushed successfully.</strong> IPv4 Forwarding enabled on all VLANs. XIQ pushed SVI IPs confirmed via <code>show vlan</code> (<code>f</code> flag). DHCP and default route NOT pushed by XIQ.</div></div>
         <div class="log-entry done"><div class="log-time">Step 6</div><div class="log-text"><strong>Static Routes — BLOCKED (XIQ bug/limitation).</strong> Error: "next hop IP doesn't match any subnetworks configured for this device." Root cause confirmed by Extreme expert: XIQ cannot push L3 static routes via L2 interface. VLAN 1 (192.168.0.0/24) is unmanaged by XIQ. Deferred to CLI.</div></div>
         <div class="log-entry done"><div class="log-time">Step 7</div><div class="log-text"><strong>Switch access — multiple failures.</strong> SSH failed (XIQ ZTP+ set unknown password). Console login failed (same). XIQ CLI script push attempted — no output (SSH issue on XIQ side). Eventually accessed via console after persistent attempts.</div></div>
@@ -1034,23 +1037,23 @@ show vlan detail</pre>
         <div class="module-header">
           <span class="mod-badge mod-log">Lessons</span>
           <div>
-            <div style="font-size:1.05rem;color:#e2e8f0;font-weight:700">Critical Lessons — EXOS CLI Syntax (verified April 7 2026)</div>
+            <div style="font-size:1.05rem;color:#111111;font-weight:700">Critical Lessons — EXOS CLI Syntax (verified April 7 2026)</div>
             <div class="mod-sub">Never guess these — confirmed by trial and <code>?</code> on switch console</div>
           </div>
         </div>
 
         <!-- Yellow banner 1 -->
-        <div style="background:#FFD600;border:3px solid #F9A825;border-radius:6px;padding:18px 20px;margin-bottom:16px">
-          <div style="font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:0.15em;color:#333;margin-bottom:6px">⚠ ipforwarding on Default VLAN — mandatory after every factory reset</div>
-          <p style="margin:0 0 8px;color:#111;font-size:0.88rem">Return traffic from internet arrives on VLAN 1 (Default). Without ipforwarding enabled here, clients get DHCP + gateway but Safari times out. Not set by XIQ. Must be done via CLI.</p>
-          <pre style="background:#fff8;border-radius:4px;padding:10px;font-size:0.83rem;margin:0;color:#111;">enable ipforwarding vlan Default
+        <div style="background:#FFF8E1;border:2px solid #F9A825;border-radius:6px;padding:18px 20px;margin-bottom:16px">
+          <div style="font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:0.15em;color:#7a5a00;margin-bottom:6px">ipforwarding on Default VLAN — mandatory after every factory reset</div>
+          <p style="margin:0 0 8px;color:#111111;font-size:0.88rem">Return traffic from internet arrives on VLAN 1 (Default). Without ipforwarding enabled here, clients get DHCP + gateway but Safari times out. Not set by XIQ. Must be done via CLI.</p>
+          <pre style="background:#F7F7F5;border-radius:4px;padding:10px;font-size:0.83rem;margin:0;color:#111111;border:1px solid #E2E2E2;">enable ipforwarding vlan Default
 save configuration</pre>
         </div>
 
         <!-- Yellow banner 2 -->
-        <div style="background:#FFD600;border:3px solid #F9A825;border-radius:6px;padding:18px 20px;margin-bottom:16px">
-          <div style="font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:0.15em;color:#333;margin-bottom:6px">⚠ Default route is automatic via DHCP — do NOT manually add it</div>
-          <p style="margin:0 0 8px;color:#111;font-size:0.88rem">EXOS installs a BOOTP default route automatically when the switch gets its management IP via DHCP. Check with <code style="background:#fff3;padding:1px 5px;border-radius:2px;">show iproute</code> — look for origin <code style="background:#fff3;padding:1px 5px;border-radius:2px;">bo</code>. Only <code style="background:#fff3;padding:1px 5px;border-radius:2px;">enable ipforwarding vlan Default</code> is manual.</p>
+        <div style="background:#FFF8E1;border:2px solid #F9A825;border-radius:6px;padding:18px 20px;margin-bottom:16px">
+          <div style="font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:0.15em;color:#7a5a00;margin-bottom:6px">Default route is automatic via DHCP — do NOT manually add it</div>
+          <p style="margin:0 0 8px;color:#111111;font-size:0.88rem">EXOS installs a BOOTP default route automatically when the switch gets its management IP via DHCP. Check with <code style="background:#F7F7F5;padding:1px 5px;border-radius:2px;color:#326891;border:1px solid #E2E2E2;">show iproute</code> — look for origin <code style="background:#F7F7F5;padding:1px 5px;border-radius:2px;color:#326891;border:1px solid #E2E2E2;">bo</code>. Only <code style="background:#F7F7F5;padding:1px 5px;border-radius:2px;color:#326891;border:1px solid #E2E2E2;">enable ipforwarding vlan Default</code> is manual.</p>
         </div>
 
         <!-- DHCP syntax table -->
@@ -1073,7 +1076,7 @@ save configuration</pre>
         <div class="module-header">
           <span class="mod-badge mod-c">State</span>
           <div>
-            <div style="font-size:1.05rem;color:#e2e8f0;font-weight:700">Current Lab State — April 7 2026 EOD</div>
+            <div style="font-size:1.05rem;color:#111111;font-weight:700">Current Lab State — April 7 2026 EOD</div>
           </div>
         </div>
         <table class="data-table">
@@ -1095,14 +1098,14 @@ save configuration</pre>
         <div class="module-header">
           <span class="mod-badge mod-c">Apr 8</span>
           <div>
-            <div style="font-size:1.05rem;color:#e2e8f0;font-weight:700">April 8, 2026 — E2E Architecture &amp; Timed Walkthrough</div>
+            <div style="font-size:1.05rem;color:#111111;font-weight:700">April 8, 2026 — E2E Architecture &amp; Timed Walkthrough</div>
           </div>
         </div>
-        <p style="color:#94a3b8;font-size:0.85rem;margin:10px 0">
+        <p style="color:#555555;font-size:0.85rem;margin:10px 0">
           SVG end-to-end diagram (Internet &rarr; XIQ &rarr; Quantum Fiber &rarr; SW1/SW2 &rarr; AP1/AP2 &rarr; 4 iPhones),
           11-step XIQ+CLI deployment sequence, and verified CLI command blocks for both switches.
         </p>
-        <a href="session_log_20260408.html" style="display:inline-block;background:#1e1433;color:#e879f9;border:1px solid #7c3aed;padding:9px 18px;border-radius:5px;font-size:0.82rem;font-weight:600;text-decoration:none">
+        <a href="session_log_20260408.html" style="display:inline-block;background:#EBF4FA;color:#326891;border:1px solid #B8D4E8;padding:9px 18px;border-radius:5px;font-size:0.82rem;font-weight:600;text-decoration:none">
           View April 8 E2E Session &rarr;
         </a>
       </div>

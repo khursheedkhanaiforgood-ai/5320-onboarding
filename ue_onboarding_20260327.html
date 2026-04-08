@@ -4,65 +4,68 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>UE / Device Onboarding &amp; Data Flow — March 27, 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Libre+Franklin:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: 'Segoe UI', Arial, sans-serif; background: #0f172a; color: #e2e8f0; display: flex; min-height: 100vh; }
-nav { position: fixed; left: 0; top: 0; width: 230px; height: 100vh; background: #0d1117; border-right: 1px solid #1e293b; overflow-y: auto; padding: 20px 0; z-index: 100; }
-nav .nav-title { color: #7c3aed; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; padding: 0 18px 14px; border-bottom: 1px solid #1e293b; margin-bottom: 10px; }
-nav a { display: block; padding: 6px 18px; color: #64748b; font-size: 0.80rem; text-decoration: none; border-left: 3px solid transparent; transition: all 0.15s; line-height: 1.4; }
-nav a:hover, nav a.active { color: #a78bfa; border-left-color: #7c3aed; background: #1e293b; }
-nav .nav-section { padding: 10px 18px 4px; color: #334155; font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; }
+body { font-family: 'Libre Franklin', Arial, sans-serif; background: #FFFFFF; color: #111111; display: flex; min-height: 100vh; }
+nav { position: fixed; left: 0; top: 0; width: 230px; height: 100vh; background: #F7F7F5; border-right: 1px solid #E2E2E2; overflow-y: auto; padding: 20px 0; z-index: 100; }
+nav .nav-title { color: #326891; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; padding: 0 18px 14px; border-bottom: 1px solid #E2E2E2; margin-bottom: 10px; }
+nav a { display: block; padding: 6px 18px; color: #555555; font-size: 0.80rem; text-decoration: none; border-left: 3px solid transparent; transition: all 0.15s; line-height: 1.4; }
+nav a:hover, nav a.active { color: #326891; border-left-color: #326891; background: #EBF4FA; }
+nav .nav-section { padding: 10px 18px 4px; color: #888888; font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; }
 main { margin-left: 230px; max-width: 1040px; padding: 48px 40px; flex: 1; }
 .page-header { margin-bottom: 48px; }
-.page-header h1 { font-size: 1.9rem; color: #a78bfa; margin-bottom: 8px; }
-.page-header .meta { color: #64748b; font-size: 0.88rem; margin-bottom: 4px; }
-.page-header .subtitle { color: #94a3b8; font-size: 0.95rem; line-height: 1.6; }
+.page-header h1 { font-size: 1.9rem; color: #111111; font-family: 'Libre Baskerville', serif; margin-bottom: 8px; }
+.page-header .meta { color: #555555; font-size: 0.88rem; margin-bottom: 4px; }
+.page-header .subtitle { color: #555555; font-size: 0.95rem; line-height: 1.6; }
 section { margin-bottom: 64px; scroll-margin-top: 24px; }
-h2 { font-size: 1.4rem; color: #a78bfa; margin-bottom: 6px; padding-bottom: 10px; border-bottom: 1px solid #1e293b; }
-h3 { font-size: 1.05rem; color: #c4b5fd; margin: 24px 0 12px; }
-p { color: #94a3b8; font-size: 0.92rem; line-height: 1.7; margin-bottom: 12px; }
-.phase-label { display: inline-block; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #7c3aed; margin-bottom: 8px; }
-.card { background: #1e293b; border: 1px solid #334155; border-radius: 8px; padding: 20px 24px; margin: 16px 0; }
-.box-purple { border-color: #7c3aed; background: #1a1035; }
-.box-amber { border-color: #f59e0b; background: #1a1200; }
-.box-green { border-color: #10b981; background: #052019; }
-.box-red { border-color: #ef4444; background: #1a0505; }
-.box-blue { border-color: #3b82f6; background: #0c1a2e; }
+h2 { font-size: 1.4rem; color: #326891; font-family: 'Libre Baskerville', serif; margin-bottom: 6px; padding-bottom: 10px; border-bottom: 2px solid #326891; }
+h3 { font-size: 1.05rem; color: #111111; margin: 24px 0 12px; font-weight: 700; }
+p { color: #555555; font-size: 0.92rem; line-height: 1.7; margin-bottom: 12px; }
+.phase-label { display: inline-block; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #326891; margin-bottom: 8px; }
+.card { background: #FFFFFF; border: 1px solid #E2E2E2; border-radius: 8px; padding: 20px 24px; margin: 16px 0; }
+.box-purple { border-color: #326891; background: #EBF4FA; }
+.box-amber { border-color: #F9A825; background: #FFF8E1; }
+.box-green { border-color: #1a5c2a; background: #F0FBF4; }
+.box-red { border-color: #c0392b; background: #FEF2F2; }
+.box-blue { border-color: #326891; background: #EBF4FA; }
 .box-title { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 10px; }
-.box-title.purple { color: #a78bfa; }
-.box-title.amber { color: #fcd34d; }
-.box-title.green { color: #34d399; }
-.box-title.red { color: #f87171; }
-.box-title.blue { color: #60a5fa; }
+.box-title.purple { color: #326891; }
+.box-title.amber { color: #5a3e00; }
+.box-title.green { color: #1a5c2a; }
+.box-title.red { color: #c0392b; }
+.box-title.blue { color: #326891; }
 pre { border-radius: 6px; padding: 16px; font-size: 0.80rem; line-height: 1.6; overflow-x: auto; margin: 12px 0; font-family: 'SF Mono', 'Fira Code', monospace; }
-pre.switch { background: #0d1117; border-left: 3px solid #67e8f9; color: #67e8f9; }
-pre.cmd { background: #0d1117; border-left: 3px solid #a78bfa; color: #a78bfa; }
-.ok { color: #34d399; }
-.warn { color: #fcd34d; }
-.err-text { color: #f87171; }
-.dim { color: #475569; }
-.hi { color: #e2e8f0; font-weight: 600; }
-code { background: #1e293b; color: #67e8f9; padding: 2px 6px; border-radius: 3px; font-size: 0.82rem; font-family: 'SF Mono', monospace; }
+pre.switch { background: #F7F7F5; border: 1px solid #E2E2E2; border-left: 3px solid #326891; color: #326891; }
+pre.cmd { background: #F7F7F5; border: 1px solid #E2E2E2; border-left: 3px solid #245a7a; color: #245a7a; }
+.ok { color: #1a5c2a; }
+.warn { color: #7a5a00; }
+.err-text { color: #c0392b; }
+.dim { color: #888888; }
+.hi { color: #111111; font-weight: 600; }
+code { background: #F7F7F5; color: #326891; padding: 2px 6px; border-radius: 3px; font-size: 0.82rem; font-family: 'SF Mono', monospace; border: 1px solid #E2E2E2; }
 table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.84rem; }
-th { background: #1e293b; color: #a78bfa; font-weight: 600; padding: 10px 12px; text-align: left; border-bottom: 2px solid #334155; }
-td { padding: 9px 12px; border-bottom: 1px solid #1e293b; color: #94a3b8; vertical-align: top; }
-tr:hover td { background: #1e293b44; }
-td code { background: #0d1117; color: #67e8f9; padding: 2px 5px; border-radius: 3px; font-size: 0.78rem; }
+th { background: #F7F7F5; color: #326891; font-weight: 600; padding: 10px 12px; text-align: left; border-bottom: 2px solid #326891; }
+td { padding: 9px 12px; border-bottom: 1px solid #E2E2E2; color: #555555; vertical-align: top; }
+tr:hover td { background: #F7F7F5; }
+td code { background: #F7F7F5; color: #326891; padding: 2px 5px; border-radius: 3px; font-size: 0.78rem; border: 1px solid #E2E2E2; }
 .badge { display: inline-block; font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 10px; }
-.badge-ok { background: #052019; color: #34d399; border: 1px solid #10b981; }
-.badge-warn { background: #1a1200; color: #fcd34d; border: 1px solid #f59e0b; }
-.badge-err { background: #1a0505; color: #f87171; border: 1px solid #ef4444; }
-.flowchart { background: #1e293b; border: 1px solid #334155; border-radius: 8px; padding: 24px; overflow-x: auto; margin: 16px 0; }
-footer { margin-top: 80px; padding-top: 24px; border-top: 1px solid #1e293b; text-align: center; }
-footer p { color: #475569; font-size: 0.78rem; }
-footer a { color: #60a5fa; font-size: 0.82rem; margin: 0 10px; text-decoration: none; }
+.badge-ok { background: #F0FBF4; color: #1a5c2a; border: 1px solid #b8e0c6; }
+.badge-warn { background: #FFF8E1; color: #7a5a00; border: 1px solid #F9A825; }
+.badge-err { background: #FEF2F2; color: #c0392b; border: 1px solid #f5c6cb; }
+.flowchart { background: #F7F7F5; border: 1px solid #E2E2E2; border-radius: 8px; padding: 24px; overflow-x: auto; margin: 16px 0; }
+footer { margin-top: 80px; padding-top: 24px; border-top: 1px solid #E2E2E2; text-align: center; }
+footer p { color: #555555; font-size: 0.78rem; }
+footer a { color: #326891; font-size: 0.82rem; margin: 0 10px; text-decoration: none; }
 footer a:hover { text-decoration: underline; }
 @media print {
   nav { display: none; }
   main { margin-left: 0; padding: 24px; }
   body { background: #fff; color: #111; }
-  h2 { color: #4c1d95; }
-  pre { border: 1px solid #ccc; background: #f8f8f8 !important; color: #111 !important; }
+  h2 { color: #326891; border-bottom: 2px solid #326891; }
+  pre { border: 1px solid #E2E2E2; background: #F7F7F5 !important; color: #326891 !important; }
 }
 </style>
 </head>
@@ -89,14 +92,14 @@ footer a:hover { text-decoration: underline; }
 <main>
 
 <!-- Series banner -->
-<div style="background:#0d2b1f;border:1px solid #065f46;border-radius:8px;padding:14px 20px;margin-bottom:32px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+<div style="background:#F0FBF4;border:1px solid #b8e0c6;border-radius:8px;padding:14px 20px;margin-bottom:32px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
   <div>
-    <span style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#34d399">5320 Full Stack Onboarding Series</span>
-    <span style="color:#475569;font-size:0.8rem;margin-left:12px">Phase 3 of 3 &mdash; UE / Device Onboarding</span>
+    <span style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#1a5c2a">5320 Full Stack Onboarding Series</span>
+    <span style="color:#555555;font-size:0.8rem;margin-left:12px">Phase 3 of 3 &mdash; UE / Device Onboarding</span>
   </div>
   <div style="display:flex;gap:8px;flex-wrap:wrap">
-    <a href="onboarding.html" style="background:#0d1117;border:1px solid #334155;border-radius:6px;padding:6px 12px;color:#64748b;font-size:0.78rem;font-weight:600;text-decoration:none">&larr; Phase 1 &middot; Switch</a>
-    <a href="ap_onboarding_20260326.html" style="background:#0d1117;border:1px solid #334155;border-radius:6px;padding:6px 12px;color:#64748b;font-size:0.78rem;font-weight:600;text-decoration:none">&larr; Phase 2 &middot; AP</a>
+    <a href="onboarding.html" style="background:#F7F7F5;border:1px solid #E2E2E2;border-radius:6px;padding:6px 12px;color:#555555;font-size:0.78rem;font-weight:600;text-decoration:none">&larr; Phase 1 &middot; Switch</a>
+    <a href="ap_onboarding_20260326.html" style="background:#F7F7F5;border:1px solid #E2E2E2;border-radius:6px;padding:6px 12px;color:#555555;font-size:0.78rem;font-weight:600;text-decoration:none">&larr; Phase 2 &middot; AP</a>
   </div>
 </div>
 
@@ -137,25 +140,25 @@ footer a:hover { text-decoration: underline; }
 
   <div style="display:flex;gap:0;margin:24px 0;flex-wrap:wrap">
     <!-- Phase 1 -->
-    <a href="onboarding.html" style="flex:1;min-width:200px;background:#1e1035;border:2px solid #7c3aed;border-right:none;border-radius:8px 0 0 8px;padding:20px;text-decoration:none;display:flex;flex-direction:column;gap:6px">
-      <span style="font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#7c3aed">Phase 1</span>
-      <span style="color:#a78bfa;font-size:1rem;font-weight:700">Switch</span>
-      <span style="color:#64748b;font-size:0.78rem;line-height:1.5">Factory reset &rarr; ZTP+ &rarr; EXOS migration &rarr; VLAN creation &rarr; management IP</span>
-      <span style="color:#7c3aed;font-size:0.78rem;font-weight:600;margin-top:4px">View guide &rarr;</span>
+    <a href="onboarding.html" style="flex:1;min-width:200px;background:#F7F7F5;border:2px solid #E2E2E2;border-right:none;border-radius:8px 0 0 8px;padding:20px;text-decoration:none;display:flex;flex-direction:column;gap:6px">
+      <span style="font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#326891">Phase 1</span>
+      <span style="color:#326891;font-size:1rem;font-weight:700">Switch</span>
+      <span style="color:#555555;font-size:0.78rem;line-height:1.5">Factory reset &rarr; ZTP+ &rarr; EXOS migration &rarr; VLAN creation &rarr; management IP</span>
+      <span style="color:#326891;font-size:0.78rem;font-weight:600;margin-top:4px">View guide &rarr;</span>
     </a>
     <!-- Phase 2 -->
-    <a href="ap_onboarding_20260326.html" style="flex:1;min-width:200px;background:#052019;border:2px solid #10b981;border-radius:0;padding:20px;text-decoration:none;display:flex;flex-direction:column;gap:6px">
-      <span style="font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#10b981">Phase 2</span>
-      <span style="color:#34d399;font-size:1rem;font-weight:700">Access Points</span>
-      <span style="color:#64748b;font-size:0.78rem;line-height:1.5">Port config &rarr; PoE &rarr; AP discovery &rarr; XIQ adoption &rarr; SSID policy &rarr; DHCP config</span>
-      <span style="color:#10b981;font-size:0.78rem;font-weight:600;margin-top:4px">View guide &rarr;</span>
+    <a href="ap_onboarding_20260326.html" style="flex:1;min-width:200px;background:#F0FBF4;border:2px solid #b8e0c6;border-radius:0;padding:20px;text-decoration:none;display:flex;flex-direction:column;gap:6px">
+      <span style="font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#1a5c2a">Phase 2</span>
+      <span style="color:#1a5c2a;font-size:1rem;font-weight:700">Access Points</span>
+      <span style="color:#555555;font-size:0.78rem;line-height:1.5">Port config &rarr; PoE &rarr; AP discovery &rarr; XIQ adoption &rarr; SSID policy &rarr; DHCP config</span>
+      <span style="color:#1a5c2a;font-size:0.78rem;font-weight:600;margin-top:4px">View guide &rarr;</span>
     </a>
     <!-- Phase 3 -->
-    <div style="flex:1;min-width:200px;background:#0c1a2e;border:2px solid #3b82f6;border-left:none;border-radius:0 8px 8px 0;padding:20px;display:flex;flex-direction:column;gap:6px">
-      <span style="font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#3b82f6">Phase 3 — You Are Here</span>
-      <span style="color:#60a5fa;font-size:1rem;font-weight:700">UE / Devices</span>
-      <span style="color:#64748b;font-size:0.78rem;line-height:1.5">Client connects &rarr; DHCP &rarr; routing &rarr; static routes on modem &rarr; ipforwarding &rarr; internet</span>
-      <span style="color:#3b82f6;font-size:0.78rem;font-weight:600;margin-top:4px">This document</span>
+    <div style="flex:1;min-width:200px;background:#EBF4FA;border:2px solid #326891;border-left:none;border-radius:0 8px 8px 0;padding:20px;display:flex;flex-direction:column;gap:6px">
+      <span style="font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#326891">Phase 3 — You Are Here</span>
+      <span style="color:#326891;font-size:1rem;font-weight:700">UE / Devices</span>
+      <span style="color:#555555;font-size:0.78rem;line-height:1.5">Client connects &rarr; DHCP &rarr; routing &rarr; static routes on modem &rarr; ipforwarding &rarr; internet</span>
+      <span style="color:#326891;font-size:0.78rem;font-weight:600;margin-top:4px">This document</span>
     </div>
   </div>
 </section>
@@ -573,16 +576,16 @@ show iproute:
 </section>
 
 <!-- Prev/Next navigation -->
-<div style="display:flex;justify-content:space-between;align-items:stretch;gap:16px;margin-top:64px;padding-top:32px;border-top:1px solid #1e293b;flex-wrap:wrap">
-  <a href="ap_onboarding_20260326.html" style="flex:1;min-width:220px;background:#052019;border:1px solid #10b981;border-radius:8px;padding:16px 20px;text-decoration:none;display:flex;flex-direction:column;gap:4px">
-    <span style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.08em;color:#34d399;font-weight:700">&larr; Phase 2</span>
-    <span style="color:#34d399;font-size:0.88rem;font-weight:600">AP3000 Onboarding</span>
-    <span style="color:#64748b;font-size:0.78rem">March 26, 2026 &mdash; SSH &rarr; VLANs &rarr; PoE &rarr; XIQ &rarr; DHCP</span>
+<div style="display:flex;justify-content:space-between;align-items:stretch;gap:16px;margin-top:64px;padding-top:32px;border-top:1px solid #E2E2E2;flex-wrap:wrap">
+  <a href="ap_onboarding_20260326.html" style="flex:1;min-width:220px;background:#F0FBF4;border:1px solid #b8e0c6;border-radius:8px;padding:16px 20px;text-decoration:none;display:flex;flex-direction:column;gap:4px">
+    <span style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.08em;color:#1a5c2a;font-weight:700">&larr; Phase 2</span>
+    <span style="color:#1a5c2a;font-size:0.88rem;font-weight:600">AP3000 Onboarding</span>
+    <span style="color:#555555;font-size:0.78rem">March 26, 2026 &mdash; SSH &rarr; VLANs &rarr; PoE &rarr; XIQ &rarr; DHCP</span>
   </a>
-  <a href="index.html" style="flex:1;min-width:220px;background:#1e293b;border:1px solid #334155;border-radius:8px;padding:16px 20px;text-decoration:none;display:flex;flex-direction:column;gap:4px;text-align:right">
-    <span style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.08em;color:#475569;font-weight:700">Home &rarr;</span>
-    <span style="color:#a78bfa;font-size:0.88rem;font-weight:600">Docs Home</span>
-    <span style="color:#64748b;font-size:0.78rem">All guides and session reports</span>
+  <a href="index.html" style="flex:1;min-width:220px;background:#F7F7F5;border:1px solid #E2E2E2;border-radius:8px;padding:16px 20px;text-decoration:none;display:flex;flex-direction:column;gap:4px;text-align:right">
+    <span style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.08em;color:#555555;font-weight:700">Home &rarr;</span>
+    <span style="color:#326891;font-size:0.88rem;font-weight:600">Docs Home</span>
+    <span style="color:#555555;font-size:0.78rem">All guides and session reports</span>
   </a>
 </div>
 
@@ -595,7 +598,7 @@ show iproute:
 
 
 
-<div style="text-align:center;padding:28px 24px 16px;border-top:1px solid #334155;margin-top:48px"><p style="font-family:'Segoe UI',Arial,sans-serif;font-size:0.8rem;font-weight:600;color:#cbd5e1;letter-spacing:0.06em">&copy; 2026 Khursheed Khan &nbsp;&middot;&nbsp; All rights reserved &nbsp;&middot;&nbsp; March 2026</p></div>
+<div style="text-align:center;padding:28px 24px 16px;border-top:1px solid #E2E2E2;margin-top:48px"><p style="font-family:'Libre Franklin',Arial,sans-serif;font-size:0.8rem;font-weight:600;color:#555555;letter-spacing:0.06em">&copy; 2026 Khursheed Khan &nbsp;&middot;&nbsp; All rights reserved &nbsp;&middot;&nbsp; March 2026</p></div>
 </div><script>
 const sections = document.querySelectorAll('section[id]');
 const navLinks = document.querySelectorAll('nav a');

@@ -4,50 +4,54 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>April 7, 2026 — XIQ Deploy + EXOS Syntax Lessons</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Libre+Franklin:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'Segoe UI', Arial, sans-serif; background: #0f172a; color: #e2e8f0; min-height: 100vh; }
+  body { font-family: 'Libre Franklin', Arial, sans-serif; background: #FFFFFF; color: #111111; min-height: 100vh; }
   .layout { display: flex; min-height: 100vh; }
-  .sidebar { width: 220px; flex-shrink: 0; background: #0d1a2e; border-right: 1px solid #1e293b; padding: 28px 0; position: sticky; top: 0; height: 100vh; overflow-y: auto; }
+  .sidebar { width: 220px; flex-shrink: 0; background: #F7F7F5; border-right: 1px solid #E2E2E2; padding: 28px 0; position: sticky; top: 0; height: 100vh; overflow-y: auto; }
   .main { flex: 1; padding: 40px 48px; max-width: 1000px; }
   @media (max-width: 700px) { .sidebar { display: none; } .main { padding: 24px 16px; } }
-  .sidebar-title { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: #f59e0b; padding: 0 20px 14px; border-bottom: 1px solid #1e293b; margin-bottom: 14px; }
-  .sidebar a { display: block; padding: 7px 20px; font-size: 0.78rem; color: #64748b; text-decoration: none; border-left: 2px solid transparent; }
-  .sidebar a:hover { color: #f59e0b; border-left-color: #f59e0b; background: #1e293b22; }
-  .sidebar .mod-label { font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #334155; padding: 12px 20px 4px; }
-  code { background: #0f172a; color: #34d399; padding: 2px 6px; border-radius: 3px; font-size: 0.8em; font-family: monospace; border: 1px solid #1e293b; }
-  pre { background: #0d1422; border: 1px solid #1e3a5f; border-radius: 6px; padding: 16px; font-size: 0.83rem; color: #34d399; overflow-x: auto; margin: 12px 0; font-family: monospace; line-height: 1.6; }
-  h2 { font-size: 1.2rem; color: #f1f5f9; margin-bottom: 8px; }
-  h3 { font-size: 0.9rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.08em; margin: 24px 0 12px; }
-  p { color: #94a3b8; font-size: 0.88rem; line-height: 1.7; margin-bottom: 12px; }
-  .module { margin-bottom: 48px; padding-bottom: 32px; border-bottom: 1px solid #1e293b; }
-  .mod-badge { display: inline-block; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; padding: 4px 10px; border-radius: 4px; margin-bottom: 14px; }
-  .mod-xiq  { background: #0c1a2e; color: #93c5fd; border: 1px solid #1e3a5f; }
-  .mod-warn { background: #1a1209; color: #fcd34d; border: 1px solid #713f12; }
-  .mod-done { background: #0d2b1f; color: #6ee7b7; border: 1px solid #065f46; }
-  .log-entry { border-left: 2px solid #334155; padding: 10px 0 10px 18px; margin-bottom: 8px; position: relative; }
-  .log-entry::before { content: ""; position: absolute; left: -5px; top: 14px; width: 8px; height: 8px; border-radius: 50%; background: #334155; }
-  .log-entry.done::before { background: #34d399; }
-  .log-entry.warn::before { background: #fbbf24; }
-  .log-time { font-size: 0.68rem; color: #475569; font-family: monospace; margin-bottom: 3px; }
-  .log-text { font-size: 0.83rem; color: #94a3b8; line-height: 1.5; }
-  .log-text strong { color: #e2e8f0; }
-  table { width: 100%; border-collapse: collapse; font-size: 0.83rem; margin-bottom: 20px; }
-  thead tr { background: #1e293b; }
-  th { padding: 8px 12px; text-align: left; font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: #64748b; }
-  tbody tr { border-bottom: 1px solid #1e293b; }
-  td { padding: 9px 12px; color: #94a3b8; }
-  td:first-child { font-family: monospace; color: #e2e8f0; }
+  .sidebar-title { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.18em; color: #326891; padding: 0 20px 14px; border-bottom: 2px solid #326891; margin-bottom: 14px; }
+  .sidebar a { display: block; padding: 7px 20px; font-size: 0.78rem; color: #555555; text-decoration: none; border-left: 2px solid transparent; }
+  .sidebar a:hover { color: #326891; border-left-color: #326891; background: #F7F7F5; }
+  .sidebar a.active { color: #326891; border-left-color: #326891; }
+  .sidebar .mod-label { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #666666; padding: 12px 20px 4px; }
+  code { background: #F7F7F5; color: #326891; padding: 2px 6px; border-radius: 3px; font-size: 0.8em; font-family: monospace; border: 1px solid #E2E2E2; }
+  pre { background: #F7F7F5; border: 1px solid #E2E2E2; border-radius: 6px; padding: 16px; font-size: 0.83rem; color: #111111; overflow-x: auto; margin: 12px 0; font-family: monospace; line-height: 1.6; }
+  h2 { font-family: 'Libre Baskerville', Georgia, serif; font-size: 1.2rem; color: #111111; margin-bottom: 8px; }
+  h3 { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.9rem; color: #326891; text-transform: uppercase; letter-spacing: 0.08em; margin: 24px 0 12px; }
+  p { color: #555555; font-size: 0.88rem; line-height: 1.7; margin-bottom: 12px; }
+  .module { margin-bottom: 48px; padding-bottom: 32px; border-bottom: 1px solid #E2E2E2; }
+  .mod-badge { display: inline-block; font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; padding: 4px 10px; border-radius: 4px; margin-bottom: 14px; }
+  .mod-xiq  { background: #EBF4FA; color: #326891; border: 1px solid #B8D4E8; }
+  .mod-warn { background: #FFF8E1; color: #7a5a00; border: 1px solid #F9A825; }
+  .mod-done { background: #F0FBF4; color: #1a5c2a; border: 1px solid #A7D7B0; }
+  .log-entry { border-left: 2px solid #E2E2E2; padding: 10px 0 10px 18px; margin-bottom: 8px; position: relative; }
+  .log-entry::before { content: ""; position: absolute; left: -5px; top: 14px; width: 8px; height: 8px; border-radius: 50%; background: #E2E2E2; }
+  .log-entry.done::before { background: #2E7D32; }
+  .log-entry.warn::before { background: #F9A825; }
+  .log-time { font-size: 0.68rem; color: #666666; font-family: monospace; margin-bottom: 3px; }
+  .log-text { font-size: 0.83rem; color: #555555; line-height: 1.5; }
+  .log-text strong { color: #111111; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.83rem; margin-bottom: 20px; border: 1px solid #E2E2E2; }
+  thead tr { background: #F7F7F5; }
+  th { padding: 8px 12px; text-align: left; font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: #111111; border: 1px solid #E2E2E2; }
+  tbody tr { border-bottom: 1px solid #E2E2E2; }
+  td { padding: 9px 12px; color: #555555; border: 1px solid #E2E2E2; }
+  td:first-child { font-family: monospace; color: #111111; }
   .status { display: inline-block; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; padding: 2px 8px; border-radius: 3px; }
-  .done-s  { background: #0d2b1f; color: #34d399; border: 1px solid #065f46; }
-  .prog-s  { background: #1a1a0d; color: #fbbf24; border: 1px solid #713f12; }
-  .plan-s  { background: #1e293b; color: #475569; border: 1px solid #334155; }
-  /* Yellow banners */
-  .yellow-banner { background: #FFD600; border: 3px solid #F9A825; border-radius: 6px; padding: 18px 20px; margin-bottom: 16px; }
-  .yellow-banner .yb-label { font-size: 0.63rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.15em; color: #333; margin-bottom: 6px; }
-  .yellow-banner p { color: #111; font-size: 0.88rem; margin-bottom: 8px; }
-  .yellow-banner pre { background: rgba(255,255,255,0.4); color: #111; border: none; }
-  .yellow-banner code { background: rgba(255,255,255,0.4); color: #111; border: none; }
+  .done-s  { background: #F0FBF4; color: #1a5c2a; border: 1px solid #A7D7B0; }
+  .prog-s  { background: #FFF8E1; color: #7a5a00; border: 1px solid #F9A825; }
+  .plan-s  { background: #F7F7F5; color: #666666; border: 1px solid #E2E2E2; }
+  /* Warning banners — NYT amber */
+  .yellow-banner { background: #FFF8E1; border: 2px solid #F9A825; border-radius: 6px; padding: 18px 20px; margin-bottom: 16px; }
+  .yellow-banner .yb-label { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.63rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.15em; color: #7a5a00; margin-bottom: 6px; }
+  .yellow-banner p { color: #111111; font-size: 0.88rem; margin-bottom: 8px; }
+  .yellow-banner pre { background: #FFFFFF; color: #111111; border: 1px solid #E2E2E2; }
+  .yellow-banner code { background: #FFFFFF; color: #326891; border: 1px solid #E2E2E2; }
 </style>
 </head>
 <body>
@@ -71,7 +75,7 @@
   <div class="main">
 
     <!-- AMBER TOP BANNER -->
-    <div style="background:#f59e0b;color:#111;border-radius:8px;padding:18px 24px;margin-bottom:32px;border:3px solid #d97706">
+    <div style="background:#FFF8E1;color:#111;border-radius:8px;padding:18px 24px;margin-bottom:32px;border:2px solid #F9A825">
       <div style="font-size:0.62rem;font-weight:700;text-transform:uppercase;letter-spacing:0.18em;margin-bottom:4px">Owner View — April 7, 2026</div>
       <div style="font-size:1.2rem;font-weight:700;margin-bottom:6px">XIQ-Only Deployment + EXOS Syntax Lessons</div>
       <div style="font-size:0.85rem">SW1 &#10003; &nbsp;|&nbsp; SW2 &#10003; via XIQ CLI &nbsp;|&nbsp; All 4 VLANs, 2 APs, 2 Switches — iPhone internet verified &#10003;</div>
@@ -188,10 +192,10 @@ enable dhcp ports 3 vlan &lt;name&gt;</pre>
       <div class="log-entry done"><div class="log-time">Quantum Fiber</div><div class="log-text"><strong>Static route added:</strong> 10.10.0.0/255.255.255.0 → 192.168.0.28.</div></div>
       <div class="log-entry warn"><div class="log-time">Blocker</div><div class="log-text"><strong>Mac cannot ping 10.10.0.1.</strong> Quantum Fiber router does NOT route LAN→LAN traffic via static routes. Static routes only apply to WAN-bound traffic. Switch can ping Mac but Mac cannot reach VLAN 10.</div></div>
 
-      <div style="background:#FFD600;border:3px solid #F9A825;border-radius:6px;padding:18px 20px;margin-top:16px">
-        <div style="font-size:0.63rem;font-weight:700;text-transform:uppercase;letter-spacing:0.15em;color:#333;margin-bottom:6px">⚠ Next Step — Direct Cable Required for VLAN 10 SSH</div>
+      <div style="background:#FFF8E1;border:2px solid #F9A825;border-radius:6px;padding:18px 20px;margin-top:16px">
+        <div style="font-size:0.63rem;font-weight:700;text-transform:uppercase;letter-spacing:0.15em;color:#7a5a00;margin-bottom:6px">Next Step — Direct Cable Required for VLAN 10 SSH</div>
         <p style="margin:0 0 8px;color:#111;font-size:0.88rem">To SSH to 10.10.0.1 / 10.10.0.2, plug laptop directly into a switch port assigned SW_Mgmt_VLAN10 port type. Set laptop static IP to 10.10.0.10/24, gateway 10.10.0.1. Then SSH directly — no router involved.</p>
-        <pre style="background:#fff8;border-radius:4px;padding:10px;font-size:0.83rem;margin:0;color:#111;">Laptop static IP: 10.10.0.10 / 255.255.255.0
+        <pre style="background:#F7F7F5;border-radius:4px;padding:10px;font-size:0.83rem;margin:0;color:#111;border:1px solid #E2E2E2;">Laptop static IP: 10.10.0.10 / 255.255.255.0
 Gateway: 10.10.0.1
 ssh admin@10.10.0.1   (SW1)
 ssh admin@10.10.0.2   (SW2)</pre>
@@ -225,7 +229,7 @@ ssh admin@10.10.0.2   (SW2)</pre>
       <div class="log-entry"><div class="log-time">Step 5</div><div class="log-text">Quantum Fiber router → add static route: 10.10.0.0/24 → 192.168.0.28</div></div>
       <div class="log-entry"><div class="log-time">Step 6</div><div class="log-text">Test: SSH to 10.10.0.1 (SW1) and 10.10.0.2 (SW2) — confirm management reachable on VLAN 10</div></div>
 
-      <div style="background:#0c1f1a;border-left:3px solid #10b981;border-radius:0 6px 6px 0;padding:14px 16px;margin-top:16px;font-size:0.82rem;color:#6ee7b7;line-height:1.6">
+      <div style="background:#F0FBF4;border-left:3px solid #2E7D32;border-radius:0 6px 6px 0;padding:14px 16px;margin-top:16px;font-size:0.82rem;color:#1a5c2a;line-height:1.6">
         <strong>Critical constraints:</strong> VLAN name must be <code>SwMgmt</code> — "Mgmt" and "Management" are reserved keywords in EXOS and will fail silently or error. Do NOT remove VLAN 1 from uplink ports — XIQ loses connectivity. Test SSH to 10.10.0.1 BEFORE making any changes to VLAN 1.
       </div>
     </div>
@@ -272,8 +276,8 @@ show iproute
 show vlan</pre>
     </div>
 
-    <div style="margin-top:32px;padding-top:20px;border-top:1px solid #1e293b;font-size:0.75rem;color:#334155;display:flex;justify-content:space-between">
-      <a href="lab_20260329.html" style="color:#60a5fa;text-decoration:none">&larr; March 29 Lab Guide</a>
+    <div style="margin-top:32px;padding-top:20px;border-top:1px solid #E2E2E2;font-size:0.75rem;color:#666666;display:flex;justify-content:space-between">
+      <a href="lab_20260329.html" style="color:#326891;text-decoration:none">&larr; March 29 Lab Guide</a>
       <span>April 7, 2026 &mdash; Khursheed Khan &mdash; Extreme Networks</span>
     </div>
 

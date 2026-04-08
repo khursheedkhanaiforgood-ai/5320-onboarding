@@ -4,47 +4,52 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>April 8, 2026 — E2E XIQ Deployment Walkthrough</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Libre+Franklin:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'Segoe UI', Arial, sans-serif; background: #0f172a; color: #e2e8f0; min-height: 100vh; }
+  body { font-family: 'Libre Franklin', Arial, sans-serif; background: #FFFFFF; color: #111111; min-height: 100vh; }
   .layout { display: flex; min-height: 100vh; }
-  .sidebar { width: 220px; flex-shrink: 0; background: #0d1a2e; border-right: 1px solid #1e293b; padding: 28px 0; position: sticky; top: 0; height: 100vh; overflow-y: auto; }
+  .sidebar { width: 220px; flex-shrink: 0; background: #F7F7F5; border-right: 1px solid #E2E2E2; padding: 28px 0; position: sticky; top: 0; height: 100vh; overflow-y: auto; }
   .main { flex: 1; padding: 40px 48px; max-width: 1100px; }
   @media (max-width: 700px) { .sidebar { display: none; } .main { padding: 24px 16px; } }
-  .sidebar-title { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: #60a5fa; padding: 0 20px 14px; border-bottom: 1px solid #1e293b; margin-bottom: 14px; }
-  .sidebar a { display: block; padding: 7px 20px; font-size: 0.78rem; color: #64748b; text-decoration: none; border-left: 2px solid transparent; }
-  .sidebar a:hover { color: #60a5fa; border-left-color: #60a5fa; }
-  .sidebar .mod-label { font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #334155; padding: 12px 20px 4px; }
-  code { background: #0f172a; color: #34d399; padding: 2px 6px; border-radius: 3px; font-size: 0.8em; font-family: monospace; border: 1px solid #1e293b; }
-  pre { background: #0d1422; border: 1px solid #1e3a5f; border-radius: 6px; padding: 16px; font-size: 0.83rem; color: #34d399; overflow-x: auto; margin: 12px 0; font-family: monospace; line-height: 1.6; }
-  h2 { font-size: 1.2rem; color: #f1f5f9; margin-bottom: 8px; }
-  h3 { font-size: 0.85rem; color: #60a5fa; text-transform: uppercase; letter-spacing: 0.08em; margin: 24px 0 12px; }
-  p { color: #94a3b8; font-size: 0.88rem; line-height: 1.7; margin-bottom: 12px; }
-  .module { margin-bottom: 48px; padding-bottom: 32px; border-bottom: 1px solid #1e293b; }
-  .mod-badge { display: inline-block; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; padding: 4px 10px; border-radius: 4px; margin-bottom: 14px; }
-  .mod-xiq { background: #0c1a2e; color: #93c5fd; border: 1px solid #1e3a5f; }
-  .mod-cli { background: #0d2b1f; color: #6ee7b7; border: 1px solid #065f46; }
-  .mod-arch { background: #1a1a0d; color: #fcd34d; border: 1px solid #713f12; }
-  .mod-ref { background: #1a0d1a; color: #f0abfc; border: 1px solid #6b21a8; }
-  table { width: 100%; border-collapse: collapse; font-size: 0.83rem; margin-bottom: 20px; }
-  thead tr { background: #1e293b; }
-  th { padding: 8px 12px; text-align: left; font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: #64748b; }
-  tbody tr { border-bottom: 1px solid #1e293b; }
-  td { padding: 9px 12px; color: #94a3b8; }
-  td:first-child { color: #e2e8f0; }
+  .sidebar-title { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.18em; color: #326891; padding: 0 20px 14px; border-bottom: 2px solid #326891; margin-bottom: 14px; }
+  .sidebar a { display: block; padding: 7px 20px; font-size: 0.78rem; color: #555555; text-decoration: none; border-left: 2px solid transparent; }
+  .sidebar a:hover { color: #326891; border-left-color: #326891; }
+  .sidebar a.active { color: #326891; border-left-color: #326891; }
+  .sidebar .mod-label { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #666666; padding: 12px 20px 4px; }
+  code { background: #F7F7F5; color: #326891; padding: 2px 6px; border-radius: 3px; font-size: 0.8em; font-family: monospace; border: 1px solid #E2E2E2; }
+  pre { background: #F7F7F5; border: 1px solid #E2E2E2; border-radius: 6px; padding: 16px; font-size: 0.83rem; color: #111111; overflow-x: auto; margin: 12px 0; font-family: monospace; line-height: 1.6; }
+  h1 { font-family: 'Libre Baskerville', Georgia, serif; font-size: 1.6rem; color: #111111; margin-bottom: 8px; }
+  h2 { font-family: 'Libre Baskerville', Georgia, serif; font-size: 1.2rem; color: #111111; margin-bottom: 8px; }
+  h3 { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.85rem; color: #326891; text-transform: uppercase; letter-spacing: 0.08em; margin: 24px 0 12px; }
+  p { color: #555555; font-size: 0.88rem; line-height: 1.7; margin-bottom: 12px; }
+  .module { margin-bottom: 48px; padding-bottom: 32px; border-bottom: 1px solid #E2E2E2; }
+  .mod-badge { display: inline-block; font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; padding: 4px 10px; border-radius: 4px; margin-bottom: 14px; }
+  .mod-xiq  { background: #EBF4FA; color: #326891; border: 1px solid #B8D4E8; }
+  .mod-cli  { background: #F0FBF4; color: #1a5c2a; border: 1px solid #A7D7B0; }
+  .mod-arch { background: #FFF8E1; color: #7a5a00; border: 1px solid #F9A825; }
+  .mod-ref  { background: #F5F3FF; color: #5b21b6; border: 1px solid #C4B5FD; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.83rem; margin-bottom: 20px; border: 1px solid #E2E2E2; }
+  thead tr { background: #F7F7F5; }
+  th { padding: 8px 12px; text-align: left; font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: #111111; border: 1px solid #E2E2E2; }
+  tbody tr { border-bottom: 1px solid #E2E2E2; }
+  td { padding: 9px 12px; color: #555555; border: 1px solid #E2E2E2; }
+  td:first-child { color: #111111; }
   .status { display: inline-block; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; padding: 2px 8px; border-radius: 3px; }
-  .done-s { background: #0d2b1f; color: #34d399; border: 1px solid #065f46; }
-  .cli-s  { background: #1a1209; color: #fcd34d; border: 1px solid #713f12; }
-  .xiq-s  { background: #0c1a2e; color: #93c5fd; border: 1px solid #1e3a5f; }
-  .diagram-wrap { background: #0d1422; border: 1px solid #1e3a5f; border-radius: 10px; padding: 24px; margin-bottom: 28px; overflow-x: auto; }
-  .yellow-banner { background: #FFD600; border: 3px solid #F9A825; border-radius: 6px; padding: 18px 20px; margin: 16px 0; }
-  .yellow-banner .yb-label { font-size: 0.63rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.15em; color: #333; margin-bottom: 6px; }
-  .yellow-banner p { color: #111; font-size: 0.88rem; margin-bottom: 6px; }
-  .yellow-banner code { background: rgba(255,255,255,0.4); color: #111; border: none; }
-  .step-row { display: flex; gap: 16px; align-items: flex-start; padding: 12px 0; border-bottom: 1px solid #1e293b22; }
-  .step-num { font-size: 0.65rem; font-weight: 700; color: #475569; font-family: monospace; min-width: 60px; padding-top: 2px; }
-  .step-body { flex: 1; font-size: 0.85rem; color: #94a3b8; line-height: 1.6; }
-  .step-body strong { color: #e2e8f0; }
+  .done-s { background: #F0FBF4; color: #1a5c2a; border: 1px solid #A7D7B0; }
+  .cli-s  { background: #FFF8E1; color: #7a5a00; border: 1px solid #F9A825; }
+  .xiq-s  { background: #EBF4FA; color: #326891; border: 1px solid #B8D4E8; }
+  .diagram-wrap { background: #F7F7F5; border: 1px solid #E2E2E2; border-radius: 10px; padding: 24px; margin-bottom: 28px; overflow-x: auto; }
+  .yellow-banner { background: #FFF8E1; border: 2px solid #F9A825; border-radius: 6px; padding: 18px 20px; margin: 16px 0; }
+  .yellow-banner .yb-label { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.63rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.15em; color: #7a5a00; margin-bottom: 6px; }
+  .yellow-banner p { color: #111111; font-size: 0.88rem; margin-bottom: 6px; }
+  .yellow-banner code { background: #FFFFFF; color: #326891; border: 1px solid #E2E2E2; }
+  .step-row { display: flex; gap: 16px; align-items: flex-start; padding: 12px 0; border-bottom: 1px solid #E2E2E2; }
+  .step-num { font-size: 0.65rem; font-weight: 700; color: #666666; font-family: monospace; min-width: 60px; padding-top: 2px; }
+  .step-body { flex: 1; font-size: 0.85rem; color: #555555; line-height: 1.6; }
+  .step-body strong { color: #111111; }
   .step-tool { font-size: 0.62rem; font-weight: 700; text-transform: uppercase; padding: 2px 7px; border-radius: 3px; margin-left: 8px; vertical-align: middle; }
 </style>
 </head>
@@ -71,8 +76,8 @@
 
     <!-- Header -->
     <div style="margin-bottom:36px">
-      <div style="font-size:0.62rem;font-weight:700;text-transform:uppercase;letter-spacing:0.18em;color:#60a5fa;margin-bottom:6px">April 8, 2026 — Khursheed Khan — Extreme Networks</div>
-      <h1 style="font-size:1.6rem;color:#f1f5f9;margin-bottom:8px">E2E XIQ Deployment — 2× 5320 + 2× AP3000</h1>
+      <div style="font-size:0.62rem;font-weight:700;text-transform:uppercase;letter-spacing:0.18em;color:#326891;margin-bottom:6px">April 8, 2026 — Khursheed Khan — Extreme Networks</div>
+      <h1 style="font-size:1.6rem;color:#111111;margin-bottom:8px">E2E XIQ Deployment — 2× 5320 + 2× AP3000</h1>
       <p style="max-width:680px">Full end-to-end deployment walkthrough covering both March 29 (CLI-only) and April 7 (XIQ + CLI hybrid) sessions. Includes architecture diagram, 11-step sequence, XIQ boundary lessons, and verified CLI command blocks.</p>
     </div>
 
@@ -327,9 +332,9 @@ show iproute                  # confirm U + f flags on all VLAN routes</pre>
       </div>
     </div>
 
-    <div style="margin-top:32px;padding-top:20px;border-top:1px solid #1e293b;font-size:0.75rem;color:#334155;display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px">
-      <a href="lab_20260329.html" style="color:#60a5fa;text-decoration:none">&larr; March 29 Lab Guide</a>
-      <a href="session_log_20260407.html" style="color:#60a5fa;text-decoration:none">&larr; April 7 Session Log</a>
+    <div style="margin-top:32px;padding-top:20px;border-top:1px solid #E2E2E2;font-size:0.75rem;color:#666666;display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px">
+      <a href="lab_20260329.html" style="color:#326891;text-decoration:none">&larr; March 29 Lab Guide</a>
+      <a href="session_log_20260407.html" style="color:#326891;text-decoration:none">&larr; April 7 Session Log</a>
       <span>April 8, 2026 &mdash; Khursheed Khan &mdash; Extreme Networks &mdash; © 2026</span>
     </div>
 
