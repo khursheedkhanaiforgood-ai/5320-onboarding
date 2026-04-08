@@ -126,10 +126,29 @@
     <a href="#exec3">Phase 3 — Trunk</a>
     <div class="mod-label">Log</div>
     <a href="#log">Session Log</a>
+    <div id="sidebar-apr7">
+      <div class="mod-label" style="color:#f59e0b">April 7, 2026</div>
+      <a href="#apr7-xiq">XIQ-Only Deploy</a>
+      <a href="#apr7-lessons">Critical Lessons</a>
+      <a href="#apr7-state">Current State</a>
+    </div>
   </nav>
 
   <!-- Main -->
   <div class="main">
+
+    <!-- April 7 top banner — always visible -->
+    <div id="apr7-banner" style="background:#f59e0b;color:#111;border-radius:8px;padding:18px 24px;margin-bottom:32px;border:3px solid #d97706">
+      <div style="font-size:0.62rem;font-weight:700;text-transform:uppercase;letter-spacing:0.18em;margin-bottom:4px">&#9733; Updated April 7, 2026 &mdash; builds on March 29</div>
+      <div style="font-size:1.1rem;font-weight:700;margin-bottom:8px">XIQ-Only Deployment + EXOS Syntax Lessons &mdash; SW1 Internet Verified &#10003;</div>
+      <div style="font-size:0.85rem;margin-bottom:12px">10-step XIQ flow, critical DHCP syntax fixes, ipforwarding lesson, SW2 in progress. Jump to April 7 section:</div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <a href="#apr7-xiq" style="background:#111;color:#fbbf24;padding:6px 14px;border-radius:4px;text-decoration:none;font-size:0.82rem;font-weight:700">XIQ Deploy Flow &darr;</a>
+        <a href="#apr7-lessons" style="background:#111;color:#fbbf24;padding:6px 14px;border-radius:4px;text-decoration:none;font-size:0.82rem;font-weight:700">Critical Lessons &darr;</a>
+        <a href="#apr7-state" style="background:#111;color:#fbbf24;padding:6px 14px;border-radius:4px;text-decoration:none;font-size:0.82rem;font-weight:700">Current State &darr;</a>
+      </div>
+    </div>
+
 
     <!-- Header -->
     <div class="page-header" id="overview">
@@ -975,12 +994,111 @@ show vlan detail</pre>
       <a href="standards_references.html">Standards Ref &rarr;</a>
     </div>
 
+    <!-- ═══════════════ APRIL 7 2026 — hidden behind #me ═══════════════ -->
+    <div id="apr7-section">
+
+      <div style="margin-top:56px;padding-top:32px;border-top:2px solid #f59e0b">
+        <div style="font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:0.18em;color:#f59e0b;margin-bottom:6px">April 7, 2026 — Owner Notes</div>
+        <h2 style="font-size:1.3rem;color:#f1f5f9;margin-bottom:8px">XIQ-Only Deployment + EXOS Syntax Lessons</h2>
+        <p style="color:#64748b;font-size:0.85rem;line-height:1.7">Second attempt at deploying two 5320 switches + two AP3000s entirely via XIQ (no CLI). XIQ handled L2 (VLANs, SVIs, port types, AP policies). CLI required for DHCP server, ipforwarding, and default route. iPhone internet verified on SW1 VLANs 20+30. SW2 VLANs 50+60 in progress.</p>
+      </div>
+
+      <!-- XIQ Flow -->
+      <div class="module" id="apr7-xiq" style="margin-top:36px">
+        <div class="module-header">
+          <span class="mod-badge mod-b">XIQ Deploy</span>
+          <div>
+            <div style="font-size:1.05rem;color:#e2e8f0;font-weight:700">XIQ-Only Deployment Flow</div>
+            <div class="mod-sub">10-step linked list — what worked, what didn't, in order</div>
+          </div>
+        </div>
+
+        <div class="log-entry done"><div class="log-time">Step 1</div><div class="log-text"><strong>Factory reset both switches.</strong> SW1: 192.168.0.28 (FJ012544G-00483). SW2: 192.168.0.11 (FJ012544G-00233). AP1 (SW1 port 3): 192.168.0.12. AP2 (SW2 port 3): 192.168.0.25. ZTP+ auto-onboarded both to XIQ.</div></div>
+        <div class="log-entry done"><div class="log-time">Step 2</div><div class="log-text"><strong>XIQ policies created.</strong> One switch policy (Test_SW1) for both switches. Separate AP policies: AP1 = VLANs 20/30, AP2 = VLANs 50/60.</div></div>
+        <div class="log-entry done"><div class="log-time">Step 3</div><div class="log-text"><strong>VLAN Attributes added.</strong> VLANs 20/30/50/60 added. Hiccup: table appeared empty after save — root cause was switches not yet assigned to Test_SW1 policy.</div></div>
+        <div class="log-entry done"><div class="log-time">Step 4</div><div class="log-text"><strong>Network Allocation configured.</strong> Corp_20 (10.20.0.0/24), Guest_30 (10.30.0.0/24), Corp_50 (10.50.0.0/24), Guest_60 (10.60.0.0/24). SVIs auto-set to .1 of each subnet. <strong style="color:#fbbf24">Lesson: never add VLAN 1 to Routing section — broke XIQ↔switch comms.</strong></div></div>
+        <div class="log-entry done"><div class="log-time">Step 5</div><div class="log-text"><strong>Routing — SVIs pushed successfully.</strong> IPv4 Forwarding enabled on all VLANs. XIQ pushed SVI IPs confirmed via <code>show vlan</code> (<code>f</code> flag). DHCP and default route NOT pushed by XIQ.</div></div>
+        <div class="log-entry done"><div class="log-time">Step 6</div><div class="log-text"><strong>Static Routes — BLOCKED (XIQ bug/limitation).</strong> Error: "next hop IP doesn't match any subnetworks configured for this device." Root cause confirmed by Extreme expert: XIQ cannot push L3 static routes via L2 interface. VLAN 1 (192.168.0.0/24) is unmanaged by XIQ. Deferred to CLI.</div></div>
+        <div class="log-entry done"><div class="log-time">Step 7</div><div class="log-text"><strong>Switch access — multiple failures.</strong> SSH failed (XIQ ZTP+ set unknown password). Console login failed (same). XIQ CLI script push attempted — no output (SSH issue on XIQ side). Eventually accessed via console after persistent attempts.</div></div>
+        <div class="log-entry done"><div class="log-time">Step 8</div><div class="log-text"><strong>Port Types — discovered missing config.</strong> <code>show vlan</code> showed VLANs 20/30 with 0/0 ports. XIQ had not tagged port 3 with data VLANs. Created port type <code>AP_Port</code>: Trunk, Native VLAN 1, Tagged 20/30/50/60, Edge Port ON, PoE ON. Assigned to port 3 both switches via XIQ. Pushed successfully — 1/1 ports confirmed.</div></div>
+        <div class="log-entry done"><div class="log-time">Step 9</div><div class="log-text"><strong>DHCP server — CLI required.</strong> Correct EXOS syntax discovered via <code>?</code> help. See Critical Lessons below.</div></div>
+        <div class="log-entry done"><div class="log-time">Step 10</div><div class="log-text"><strong>SW1 internet verified.</strong> iPhone gets 10.20.0.x on Corp SSID. Safari loads. Key fix: <code>enable ipforwarding vlan Default</code>. SW2 in progress.</div></div>
+      </div>
+
+      <!-- Critical Lessons -->
+      <div class="module" id="apr7-lessons" style="margin-top:8px">
+        <div class="module-header">
+          <span class="mod-badge mod-log">Lessons</span>
+          <div>
+            <div style="font-size:1.05rem;color:#e2e8f0;font-weight:700">Critical Lessons — EXOS CLI Syntax (verified April 7 2026)</div>
+            <div class="mod-sub">Never guess these — confirmed by trial and <code>?</code> on switch console</div>
+          </div>
+        </div>
+
+        <!-- Yellow banner 1 -->
+        <div style="background:#FFD600;border:3px solid #F9A825;border-radius:6px;padding:18px 20px;margin-bottom:16px">
+          <div style="font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:0.15em;color:#333;margin-bottom:6px">⚠ ipforwarding on Default VLAN — mandatory after every factory reset</div>
+          <p style="margin:0 0 8px;color:#111;font-size:0.88rem">Return traffic from internet arrives on VLAN 1 (Default). Without ipforwarding enabled here, clients get DHCP + gateway but Safari times out. Not set by XIQ. Must be done via CLI.</p>
+          <pre style="background:#fff8;border-radius:4px;padding:10px;font-size:0.83rem;margin:0;color:#111;">enable ipforwarding vlan Default
+save configuration</pre>
+        </div>
+
+        <!-- Yellow banner 2 -->
+        <div style="background:#FFD600;border:3px solid #F9A825;border-radius:6px;padding:18px 20px;margin-bottom:16px">
+          <div style="font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:0.15em;color:#333;margin-bottom:6px">⚠ Default route is automatic via DHCP — do NOT manually add it</div>
+          <p style="margin:0 0 8px;color:#111;font-size:0.88rem">EXOS installs a BOOTP default route automatically when the switch gets its management IP via DHCP. Check with <code style="background:#fff3;padding:1px 5px;border-radius:2px;">show iproute</code> — look for origin <code style="background:#fff3;padding:1px 5px;border-radius:2px;">bo</code>. Only <code style="background:#fff3;padding:1px 5px;border-radius:2px;">enable ipforwarding vlan Default</code> is manual.</p>
+        </div>
+
+        <!-- DHCP syntax table -->
+        <table class="data-table">
+          <thead><tr><th>Command</th><th>Correct Syntax</th></tr></thead>
+          <tbody>
+            <tr><td>DHCP address range</td><td><code>configure vlan &lt;name&gt; dhcp-address-range 10.20.0.100 - 10.20.0.200</code> — dash separator with spaces required</td></tr>
+            <tr><td>DHCP gateway</td><td><code>configure vlan &lt;name&gt; dhcp-options default-gateway 10.20.0.1</code> — NOT "gateway", NOT "router"</td></tr>
+            <tr><td>DHCP DNS</td><td><code>configure vlan &lt;name&gt; dhcp-options dns-server primary 8.8.8.8</code></td></tr>
+            <tr><td>Enable DHCP</td><td><code>enable dhcp ports 3 vlan &lt;name&gt;</code> — port number required, not optional</td></tr>
+            <tr><td>IP forwarding</td><td><code>enable ipforwarding vlan Default</code> — run on every VLAN that needs routing, incl. Default</td></tr>
+          </tbody>
+        </table>
+
+        <div class="lesson"><strong>XIQ vs CLI boundary (confirmed):</strong> XIQ pushes VLAN creation, SVI IPs, IPv4 Forwarding, port types, AP SSID policies. CLI required for: DHCP server, default-gateway DHCP option, <code>enable ipforwarding vlan Default</code>, DNS. Never add VLAN 1 to XIQ Routing section.</div>
+      </div>
+
+      <!-- Current State -->
+      <div class="module" id="apr7-state" style="margin-top:8px">
+        <div class="module-header">
+          <span class="mod-badge mod-c">State</span>
+          <div>
+            <div style="font-size:1.05rem;color:#e2e8f0;font-weight:700">Current Lab State — April 7 2026 EOD</div>
+          </div>
+        </div>
+        <table class="data-table">
+          <thead><tr><th>Item</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td>SW1 (192.168.0.28) — VLANs 20+30, DHCP, ipforwarding</td><td><span class="status status-live">&#10003; Done</span></td></tr>
+            <tr><td>iPhone internet on Corp/Guest SSIDs (SW1)</td><td><span class="status status-live">&#10003; Verified</span></td></tr>
+            <tr><td>SW2 (192.168.0.11) — VLANs 50+60, DHCP, ipforwarding</td><td><span class="status status-pending">In Progress</span></td></tr>
+            <tr><td>iPhone internet on Corp2/Guest2 SSIDs (SW2)</td><td><span class="status status-pending">Pending SW2</span></td></tr>
+            <tr><td>Sprint 1: NYT theme sitewide (13 pages)</td><td><span class="status status-locked">Planned</span></td></tr>
+            <tr><td>Sprint 2: VLAN 10 management isolation via XIQ</td><td><span class="status status-locked">Planned</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+    <!-- ═══════════════ END APRIL 7 ═══════════════ -->
+
   </div>
+</div>
 
+<script>
+  // Reveal April 7 section for owner
+  if (window.location.hash === '#me') {
+    document.getElementById('apr7-section').style.display = 'block';
+    document.getElementById('sidebar-apr7').style.display = 'block';
+    document.getElementById('apr7-banner').style.display = 'block';
+  }
 
-
-<div style="text-align:center;padding:28px 24px 16px;border-top:1px solid #334155;margin-top:48px"><p style="font-family:'Segoe UI',Arial,sans-serif;font-size:0.8rem;font-weight:600;color:#cbd5e1;letter-spacing:0.06em">&copy; 2026 Khursheed Khan &nbsp;&middot;&nbsp; All rights reserved &nbsp;&middot;&nbsp; March 2026</p></div>
-</div><script>
   // Active sidebar link tracking
   const links = document.querySelectorAll('.sidebar a');
   const sections = Array.from(links).map(l => document.querySelector(l.getAttribute('href'))).filter(Boolean);
@@ -995,6 +1113,5 @@ show vlan detail</pre>
   }, { threshold: 0.3 });
   sections.forEach(s => obs.observe(s));
 </script>
-
 </body>
 </html>
