@@ -106,6 +106,13 @@
   .footer-nav a:hover { border-color: #326891; }
 
   code { background: #F7F7F5; color: #326891; padding: 2px 6px; border-radius: 3px; font-size: 0.8em; font-family: monospace; border: 1px solid #E2E2E2; }
+
+  /* Terminal code blocks — dark background, bright text */
+  div[style*="background:#0d1117"] pre { color: #e2e8f0 !important; }
+  div[style*="background:#0d1117"] { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  @media print {
+    div[style*="background:#0d1117"] pre { color: #e2e8f0 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  }
 </style>
 </head>
 <body>
@@ -585,7 +592,7 @@
       <!-- ── STEP 2: Factory reset SW1 ── -->
       <p style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#7a5a00;margin-bottom:10px">Step 2 — Factory Reset SW1 (Console Cable)</p>
       <div style="background:#F7F7F5;border:1px solid #E2E2E2;border-radius:6px;padding:16px 18px;margin-bottom:22px">
-        <pre style="font-family:monospace;font-size:0.8rem;color:#111111;line-height:1.9;margin:0"># Connect console cable
+        <pre style="font-family:monospace;font-size:0.8rem;color:#e2e8f0;line-height:1.9;margin:0"># Connect console cable
 ls /dev/cu.*
 screen /dev/cu.usbserial-XXXXXX 115200
 
@@ -596,13 +603,13 @@ admin
 # Wipe configuration (EXOS command — NOT "delete configuration primary")
 unconfigure switch all
 # prompt: Yes (capital Y)</pre>
-        <div style="margin-top:12px;font-size:0.75rem;color:#666666">Wait ~5 minutes. Switch boots into ZTP+ mode, gets DHCP IP from home router, checks in with XIQ.</div>
+        <div style="margin-top:12px;font-size:0.75rem;color:#94a3b8">Wait ~5 minutes. Switch boots into ZTP+ mode, gets DHCP IP from home router, checks in with XIQ.</div>
       </div>
 
       <!-- ── STEP 3: Post-ZTP reconnect ── -->
       <p style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#7a5a00;margin-bottom:10px">Step 3 — Post-ZTP+: Find IP and SSH In</p>
       <div style="background:#F7F7F5;border:1px solid #E2E2E2;border-radius:6px;padding:16px 18px;margin-bottom:22px">
-        <pre style="font-family:monospace;font-size:0.8rem;color:#111111;line-height:1.9;margin:0"># Still on console after reboot — login
+        <pre style="font-family:monospace;font-size:0.8rem;color:#e2e8f0;line-height:1.9;margin:0"># Still on console after reboot — login
 admin
 [blank password]
 
@@ -621,7 +628,7 @@ ssh -o HostKeyAlgorithms=+ssh-rsa -o PubkeyAcceptedAlgorithms=+ssh-rsa admin@192
       <!-- ── STEP 4: SW1 VLAN + Port config ── -->
       <p style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#1a5c2a;margin-bottom:10px">Step 4 — SW1: Create VLANs and Configure Ports</p>
       <div style="background:#0d1117;border:1px solid #065f46;border-radius:6px;padding:16px 18px;margin-bottom:22px">
-        <pre style="font-family:monospace;font-size:0.8rem;color:#111111;line-height:1.9;margin:0"># Create VLANs
+        <pre style="font-family:monospace;font-size:0.8rem;color:#e2e8f0;line-height:1.9;margin:0"># Create VLANs
 create vlan Corp1 tag 20
 create vlan Guest1 tag 30
 
@@ -640,17 +647,17 @@ enable inline-power ports 3</pre>
       <!-- ── STEP 5: ipforwarding ── -->
       <p style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#1a5c2a;margin-bottom:10px">Step 5 — SW1: Enable IP Forwarding (All Routed VLANs)</p>
       <div style="background:#0d1117;border:1px solid #065f46;border-radius:6px;padding:16px 18px;margin-bottom:22px">
-        <pre style="font-family:monospace;font-size:0.8rem;color:#111111;line-height:1.9;margin:0"># Required on ALL three — lesson from March 27
+        <pre style="font-family:monospace;font-size:0.8rem;color:#e2e8f0;line-height:1.9;margin:0"># Required on ALL three — lesson from March 27
 enable ipforwarding vlan Default
 enable ipforwarding vlan Corp1
 enable ipforwarding vlan Guest1</pre>
-        <div style="margin-top:10px;font-size:0.75rem;color:#666666">Default VLAN must be enabled — return traffic from internet arrives here before being routed to Corp1/Guest1.</div>
+        <div style="margin-top:10px;font-size:0.75rem;color:#94a3b8">Default VLAN must be enabled — return traffic from internet arrives here before being routed to Corp1/Guest1.</div>
       </div>
 
       <!-- ── STEP 6: DHCP ── -->
       <p style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#1a5c2a;margin-bottom:10px">Step 6 — SW1: Configure DHCP for Both VLANs</p>
       <div style="background:#0d1117;border:1px solid #065f46;border-radius:6px;padding:16px 18px;margin-bottom:22px">
-        <pre style="font-family:monospace;font-size:0.8rem;color:#111111;line-height:1.9;margin:0"># Corp1 DHCP
+        <pre style="font-family:monospace;font-size:0.8rem;color:#e2e8f0;line-height:1.9;margin:0"># Corp1 DHCP
 configure vlan Corp1 dhcp-address-range 10.20.0.100 - 10.20.0.200
 configure vlan Corp1 dhcp-options default-gateway 10.20.0.1
 configure vlan Corp1 dhcp-options dns-server primary 8.8.8.8
@@ -666,7 +673,7 @@ enable dhcp ports 3 vlan Guest1</pre>
       <!-- ── STEP 7: Save ── -->
       <p style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#1a5c2a;margin-bottom:10px">Step 7 — SW1: Save Configuration</p>
       <div style="background:#0d1117;border:1px solid #065f46;border-radius:6px;padding:16px 18px;margin-bottom:22px">
-        <pre style="font-family:monospace;font-size:0.8rem;color:#111111;line-height:1.9;margin:0">save configuration
+        <pre style="font-family:monospace;font-size:0.8rem;color:#e2e8f0;line-height:1.9;margin:0">save configuration
 # prompt: y</pre>
       </div>
 
@@ -702,7 +709,7 @@ enable dhcp ports 3 vlan Guest1</pre>
       <!-- ── STEP 11: Verify ── -->
       <p style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#1a5c2a;margin-bottom:10px">Step 11 — Verify: Switch Commands + iPhone Test</p>
       <div style="background:#0d1117;border:1px solid #065f46;border-radius:6px;padding:16px 18px;margin-bottom:22px">
-        <pre style="font-family:monospace;font-size:0.8rem;color:#111111;line-height:1.9;margin:0"># On SW1 — confirm VLANs have IPs
+        <pre style="font-family:monospace;font-size:0.8rem;color:#e2e8f0;line-height:1.9;margin:0"># On SW1 — confirm VLANs have IPs
 show ipconfig
 
 # Confirm Port 3 VLAN membership
@@ -744,7 +751,7 @@ show iproute</pre>
       <!-- Step 1 -->
       <p style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#7a5a00;margin-bottom:10px">Step 1 — Factory Reset SW2 (Console Cable)</p>
       <div style="background:#F7F7F5;border:1px solid #E2E2E2;border-radius:6px;padding:16px 18px;margin-bottom:22px">
-        <pre style="font-family:monospace;font-size:0.8rem;color:#111111;line-height:1.9;margin:0"># Connect console cable to SW2
+        <pre style="font-family:monospace;font-size:0.8rem;color:#e2e8f0;line-height:1.9;margin:0"># Connect console cable to SW2
 ls /dev/cu.*
 screen /dev/cu.usbserial-XXXXXX 115200
 
@@ -769,7 +776,7 @@ unconfigure switch all
       <!-- Step 2 -->
       <p style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#1a5c2a;margin-bottom:10px">Step 2 — Enable Ports &amp; Find SW2 IP</p>
       <div style="background:#0d1117;border:1px solid #065f46;border-radius:6px;padding:16px 18px;margin-bottom:22px">
-        <pre style="font-family:monospace;font-size:0.8rem;color:#111111;line-height:1.9;margin:0">enable ports 1
+        <pre style="font-family:monospace;font-size:0.8rem;color:#e2e8f0;line-height:1.9;margin:0">enable ports 1
 enable ports 3
 show ipconfig
 # Note 192.168.0.x — needed for Quantum Fiber static routes</pre>
@@ -778,7 +785,7 @@ show ipconfig
       <!-- Step 3 -->
       <p style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#1a5c2a;margin-bottom:10px">Step 3 — SW2: Create VLANs and Configure Ports</p>
       <div style="background:#0d1117;border:1px solid #065f46;border-radius:6px;padding:16px 18px;margin-bottom:22px">
-        <pre style="font-family:monospace;font-size:0.8rem;color:#111111;line-height:1.9;margin:0">create vlan Corp2 tag 50
+        <pre style="font-family:monospace;font-size:0.8rem;color:#e2e8f0;line-height:1.9;margin:0">create vlan Corp2 tag 50
 create vlan Guest2 tag 60
 
 configure vlan Corp2 add ports 3 tagged
@@ -793,16 +800,16 @@ enable inline-power ports 3</pre>
       <!-- Step 4 -->
       <p style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#1a5c2a;margin-bottom:10px">Step 4 — SW2: Enable IP Forwarding (All Routed VLANs)</p>
       <div style="background:#0d1117;border:1px solid #065f46;border-radius:6px;padding:16px 18px;margin-bottom:22px">
-        <pre style="font-family:monospace;font-size:0.8rem;color:#111111;line-height:1.9;margin:0">enable ipforwarding vlan Default
+        <pre style="font-family:monospace;font-size:0.8rem;color:#e2e8f0;line-height:1.9;margin:0">enable ipforwarding vlan Default
 enable ipforwarding vlan Corp2
 enable ipforwarding vlan Guest2</pre>
-        <div style="margin-top:10px;font-size:0.75rem;color:#666666">All three required — Default VLAN must be enabled for return traffic from internet.</div>
+        <div style="margin-top:10px;font-size:0.75rem;color:#94a3b8">All three required — Default VLAN must be enabled for return traffic from internet.</div>
       </div>
 
       <!-- Step 5 -->
       <p style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#1a5c2a;margin-bottom:10px">Step 5 — SW2: Configure DHCP for Both VLANs</p>
       <div style="background:#0d1117;border:1px solid #065f46;border-radius:6px;padding:16px 18px;margin-bottom:22px">
-        <pre style="font-family:monospace;font-size:0.8rem;color:#111111;line-height:1.9;margin:0"># Corp2 DHCP
+        <pre style="font-family:monospace;font-size:0.8rem;color:#e2e8f0;line-height:1.9;margin:0"># Corp2 DHCP
 configure vlan Corp2 dhcp-address-range 10.50.0.100 - 10.50.0.200
 configure vlan Corp2 dhcp-options default-gateway 10.50.0.1
 configure vlan Corp2 dhcp-options dns-server primary 8.8.8.8
@@ -818,7 +825,7 @@ enable dhcp ports 3 vlan Guest2</pre>
       <!-- Step 6 -->
       <p style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#1a5c2a;margin-bottom:10px">Step 6 — SW2: Save Configuration</p>
       <div style="background:#0d1117;border:1px solid #065f46;border-radius:6px;padding:16px 18px;margin-bottom:22px">
-        <pre style="font-family:monospace;font-size:0.8rem;color:#111111;line-height:1.9;margin:0">save configuration</pre>
+        <pre style="font-family:monospace;font-size:0.8rem;color:#e2e8f0;line-height:1.9;margin:0">save configuration</pre>
       </div>
 
       <!-- Step 7 -->
@@ -853,7 +860,7 @@ enable dhcp ports 3 vlan Guest2</pre>
       <!-- Step 10 -->
       <p style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#1a5c2a;margin-bottom:10px">Step 10 — Verify SW2</p>
       <div style="background:#0d1117;border:1px solid #065f46;border-radius:6px;padding:16px 18px;margin-bottom:22px">
-        <pre style="font-family:monospace;font-size:0.8rem;color:#111111;line-height:1.9;margin:0">show ipconfig          # Corp2/Guest2 IPs on SW2
+        <pre style="font-family:monospace;font-size:0.8rem;color:#e2e8f0;line-height:1.9;margin:0">show ipconfig          # Corp2/Guest2 IPs on SW2
 show vlan detail       # Port 3 tagged on Corp2 + Guest2
 show iparp             # AP3000-B at 192.168.0.x
 show inline-power info ports 3   # delivering power
@@ -882,7 +889,7 @@ ping vr VR-Default 8.8.8.8       # SW2 internet ok</pre>
       <!-- Step 1 — SW1 -->
       <p style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#1a5c2a;margin-bottom:10px">Step 1 — SW1: Configure VLAN 10 Trunk</p>
       <div style="background:#0d1117;border:1px solid #065f46;border-radius:6px;padding:16px 18px;margin-bottom:22px">
-        <pre style="font-family:monospace;font-size:0.8rem;color:#111111;line-height:1.9;margin:0"># SSH to SW1 at 192.168.0.24
+        <pre style="font-family:monospace;font-size:0.8rem;color:#e2e8f0;line-height:1.9;margin:0"># SSH to SW1 at 192.168.0.24
 create vlan Mgmt tag 10
 configure vlan Mgmt add ports 10 tagged
 configure vlan Mgmt ipaddress 10.10.0.1/24
@@ -898,7 +905,7 @@ save configuration</pre>
       <!-- Step 2 — SW2 -->
       <p style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#326891;margin-bottom:10px">Step 2 — SW2: Configure VLAN 10 Trunk</p>
       <div style="background:#0d1117;border:1px solid #1e3a5f;border-radius:6px;padding:16px 18px;margin-bottom:22px">
-        <pre style="font-family:monospace;font-size:0.8rem;color:#111111;line-height:1.9;margin:0"># SSH to SW2 at 192.168.0.x
+        <pre style="font-family:monospace;font-size:0.8rem;color:#e2e8f0;line-height:1.9;margin:0"># SSH to SW2 at 192.168.0.x
 enable ports 10
 create vlan Mgmt tag 10
 configure vlan Mgmt add ports 10 tagged
@@ -915,7 +922,7 @@ save configuration</pre>
       <!-- Step 3 — Verify -->
       <p style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#1a5c2a;margin-bottom:10px">Step 3 — Verify Trunk &amp; Cross-Switch Routing</p>
       <div style="background:#0d1117;border:1px solid #065f46;border-radius:6px;padding:16px 18px;margin-bottom:22px">
-        <pre style="font-family:monospace;font-size:0.8rem;color:#111111;line-height:1.9;margin:0"># On SW1 — ping SW2's trunk IP
+        <pre style="font-family:monospace;font-size:0.8rem;color:#e2e8f0;line-height:1.9;margin:0"># On SW1 — ping SW2's trunk IP
 ping vr VR-Default 10.10.0.2
 
 # On SW2 — ping SW1's trunk IP
