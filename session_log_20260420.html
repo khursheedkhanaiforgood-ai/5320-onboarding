@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>April 20, 2026 — VLAN 40/70 Deployment</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; background: #0f172a; color: #e2e8f0; min-height: 100vh; }
+  .layout { display: flex; min-height: 100vh; }
+  .sidebar { width: 220px; flex-shrink: 0; background: #0d1a2e; border-right: 1px solid #1e293b; padding: 28px 0; position: sticky; top: 0; height: 100vh; overflow-y: auto; }
+  .main { flex: 1; padding: 40px 48px; max-width: 1000px; }
+  @media (max-width: 700px) { .sidebar { display: none; } .main { padding: 24px 16px; } }
+
+  .sidebar-title { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: #334155; padding: 0 20px 14px; border-bottom: 1px solid #1e293b; margin-bottom: 14px; }
+  .sidebar a { display: block; padding: 7px 20px; font-size: 0.78rem; color: #64748b; text-decoration: none; border-left: 2px solid transparent; }
+  .sidebar a:hover, .sidebar a.active { color: #a78bfa; border-left-color: #7c3aed; background: #1e293b22; }
+  .sidebar .mod-label { font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; padding: 12px 20px 4px; }
+
+  .module { margin-bottom: 48px; }
+  .module-header { display: flex; align-items: center; gap: 14px; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px solid #1e293b; }
+  .mod-badge { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; padding: 4px 10px; border-radius: 4px; flex-shrink: 0; }
+  .mod-xiq   { background: #0c1a2e; color: #93c5fd; border: 1px solid #1e3a5f; }
+  .mod-cli   { background: #0d2b1f; color: #6ee7b7; border: 1px solid #065f46; }
+  .mod-warn  { background: #1a1a0d; color: #fcd34d; border: 1px solid #713f12; }
+  .mod-fix   { background: #1a0d1a; color: #f0abfc; border: 1px solid #6b21a8; }
+  .mod-done  { background: #0d2b1f; color: #34d399; border: 1px solid #065f46; }
+  .mod-ref   { background: #1a0d1a; color: #f0abfc; border: 1px solid #6b21a8; }
+  h2 { font-size: 1.05rem; color: #f1f5f9; }
+  h3 { font-size: 0.88rem; color: #94a3b8; font-weight: 600; margin: 20px 0 10px; text-transform: uppercase; letter-spacing: 0.06em; }
+
+  pre { background: #0d1422; border: 1px solid #1e3a5f; border-radius: 6px; padding: 16px; font-size: 0.83rem; color: #e2e8f0; overflow-x: auto; margin: 12px 0; font-family: 'Menlo', 'Consolas', monospace; line-height: 1.7; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  code { background: #0f172a; color: #34d399; padding: 2px 6px; border-radius: 3px; font-size: 0.8em; font-family: monospace; border: 1px solid #1e293b; }
+
+  .step-label { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px; margin-top: 20px; }
+  .step-green  { color: #34d399; }
+  .step-amber  { color: #fbbf24; }
+  .step-blue   { color: #93c5fd; }
+
+  .cli-block { background: #0d1117; border: 1px solid #065f46; border-radius: 6px; padding: 16px 18px; margin-bottom: 20px; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .cli-block pre { background: transparent; border: none; padding: 0; margin: 0; color: #e2e8f0; }
+  .cli-note { margin-top: 10px; font-size: 0.75rem; color: #94a3b8; line-height: 1.6; }
+
+  .output-block { background: #0d1117; border: 1px solid #1e3a5f; border-radius: 6px; padding: 16px 18px; margin-bottom: 20px; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .output-block pre { background: transparent; border: none; padding: 0; margin: 0; color: #e2e8f0; font-size: 0.78rem; }
+
+  .banner-warn { background: #1a1209; border: 2px solid #d97706; border-radius: 6px; padding: 14px 18px; margin-bottom: 20px; font-size: 0.83rem; color: #fcd34d; line-height: 1.8; }
+  .banner-ok   { background: #0d2b1f; border: 2px solid #065f46; border-radius: 6px; padding: 14px 18px; margin-bottom: 20px; font-size: 0.83rem; color: #6ee7b7; line-height: 1.8; }
+  .banner-info { background: #0c1a2e; border: 1px solid #1e3a5f; border-radius: 6px; padding: 14px 18px; margin-bottom: 20px; font-size: 0.83rem; color: #93c5fd; line-height: 1.8; }
+  .banner-label { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px; }
+
+  .status-table { width: 100%; border-collapse: collapse; font-size: 0.83rem; margin-bottom: 20px; }
+  .status-table th { background: #1e293b; color: #94a3b8; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; padding: 8px 12px; text-align: left; }
+  .status-table td { padding: 9px 12px; border-bottom: 1px solid #1e293b; color: #e2e8f0; }
+  .tag-ok   { background: #0d2b1f; color: #34d399; border: 1px solid #065f46; border-radius: 3px; padding: 2px 8px; font-size: 0.68rem; font-weight: 700; }
+  .tag-warn { background: #1a1209; color: #fbbf24; border: 1px solid #713f12; border-radius: 3px; padding: 2px 8px; font-size: 0.68rem; font-weight: 700; }
+  .tag-info { background: #0c1a2e; color: #93c5fd; border: 1px solid #1e3a5f; border-radius: 3px; padding: 2px 8px; font-size: 0.68rem; font-weight: 700; }
+
+  .timeline { list-style: none; padding: 0; position: relative; }
+  .timeline::before { content: ''; position: absolute; left: 9px; top: 0; bottom: 0; width: 2px; background: #1e293b; }
+  .tl-item { display: flex; gap: 16px; padding: 0 0 18px 0; position: relative; }
+  .tl-dot { width: 20px; height: 20px; border-radius: 50%; flex-shrink: 0; border: 2px solid; margin-top: 2px; z-index: 1; }
+  .dot-ok    { background: #0d2b1f; border-color: #065f46; }
+  .dot-warn  { background: #1a1209; border-color: #d97706; }
+  .dot-fix   { background: #1a0d1a; border-color: #7c3aed; }
+  .tl-text { font-size: 0.83rem; color: #e2e8f0; line-height: 1.6; }
+  .tl-text strong { color: #f1f5f9; }
+  .tl-text .tl-sub { font-size: 0.75rem; color: #64748b; margin-top: 4px; }
+
+  .footer-nav { display: flex; justify-content: space-between; align-items: center; margin-top: 48px; padding-top: 20px; border-top: 1px solid #1e293b; font-size: 0.75rem; color: #334155; flex-wrap: wrap; gap: 10px; }
+  .footer-nav a { color: #60a5fa; text-decoration: none; }
+
+  @media print {
+    body { background: #0f172a !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .sidebar { display: none; }
+    pre, .cli-block, .output-block { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    pre { color: #e2e8f0 !important; }
+  }
+</style>
+</head>
+<body>
+<div class="layout">
+
+  <nav class="sidebar">
+    <div class="sidebar-title">Apr 20, 2026</div>
+    <a href="#overview">Overview</a>
+    <div class="mod-label" style="color:#93c5fd">XIQ</div>
+    <a href="#corrections">Corrections</a>
+    <a href="#xiq-policy">XIQ Policy</a>
+    <div class="mod-label" style="color:#6ee7b7">CLI</div>
+    <a href="#sw1-cli">SW1 — VLAN_40</a>
+    <a href="#sw2-cli">SW2 — VLAN_70</a>
+    <a href="#qf-routes">Quantum Fiber</a>
+    <div class="mod-label" style="color:#fcd34d">Troubleshoot</div>
+    <a href="#troubleshoot">169.254 → Fix</a>
+    <div class="mod-label" style="color:#f0abfc">Reference</div>
+    <a href="#lessons">Key Lessons</a>
+    <a href="#html-fix">HTML Fix</a>
+  </nav>
+
+  <div class="main">
+
+    <div style="margin-bottom:36px">
+      <div style="font-size:0.62rem;font-weight:700;text-transform:uppercase;letter-spacing:0.18em;color:#60a5fa;margin-bottom:6px">April 20, 2026 — Khursheed Khan — Extreme Networks</div>
+      <h1 style="font-size:1.6rem;color:#f1f5f9;margin-bottom:8px">VLAN 40/70 Deployment — 2× 5320 + 2× AP3000</h1>
+      <p style="max-width:680px;color:#64748b;font-size:0.88rem;line-height:1.7">Full wipe + fresh deployment with VLAN_40 (SW1) and VLAN_70 (SW2). XIQ policy push, CLI DHCP + ipforwarding, Quantum Fiber static routes, and AP policy split to resolve SSID roaming issue. Both iPhones verified with internet on correct subnets.</p>
+    </div>
+
+    <!-- STATUS SUMMARY -->
+    <div class="module" id="overview">
+      <div class="module-header">
+        <span class="mod-badge mod-done">Status</span>
+        <h2>End-of-Morning Summary — All Green ✅</h2>
+      </div>
+      <table class="status-table">
+        <thead><tr><th>Item</th><th>Detail</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr><td>SW1 (.28) VLAN_40 DHCP</td><td>10.40.0.100–200, gateway 10.40.0.1, port 3</td><td><span class="tag-ok">✅ DONE</span></td></tr>
+          <tr><td>SW1 internet</td><td>ping 8.8.8.8 → 4/4, 0% loss, avg 5ms</td><td><span class="tag-ok">✅ DONE</span></td></tr>
+          <tr><td>SW2 (.11) VLAN_70 DHCP</td><td>10.70.0.100–200, gateway 10.70.0.1, port 3</td><td><span class="tag-ok">✅ DONE</span></td></tr>
+          <tr><td>SW2 internet</td><td>ping 8.8.8.8 → 4/4, 0% loss, avg 7ms</td><td><span class="tag-ok">✅ DONE</span></td></tr>
+          <tr><td>Quantum Fiber static routes</td><td>10.40.0.0/24 → .28 · 10.70.0.0/24 → .11</td><td><span class="tag-ok">✅ DONE</span></td></tr>
+          <tr><td>AP policy split</td><td>AP_VLAN_40 (SW1 AP) · AP_VLAN_70 (SW2 AP)</td><td><span class="tag-ok">✅ DONE</span></td></tr>
+          <tr><td>iPhone on VLAN_40 SSID</td><td>10.40.0.x · internet confirmed</td><td><span class="tag-ok">✅ DONE</span></td></tr>
+          <tr><td>iPhone on VLAN_70 SSID</td><td>10.70.0.x · internet confirmed</td><td><span class="tag-ok">✅ DONE</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- CORRECTIONS -->
+    <div class="module" id="corrections">
+      <div class="module-header">
+        <span class="mod-badge mod-warn">Corrections</span>
+        <h2>Serial / IP / VLAN Corrections vs Prior Sessions</h2>
+      </div>
+      <div class="banner-warn">
+        <div class="banner-label">⚠ VLAN Numbers Corrected</div>
+        Previous session plan (Apr 10) targeted VLAN 80/90. Actual deployment uses <strong>VLAN 40 and VLAN 70</strong>.
+      </div>
+      <div class="banner-warn">
+        <div class="banner-label">⚠ Serial ↔ IP Mapping Corrected</div>
+        Prior memory had the serial numbers reversed. Confirmed April 20:
+      </div>
+      <table class="status-table">
+        <thead><tr><th>Switch</th><th>IP</th><th>Serial</th><th>VLAN</th><th>SVI</th></tr></thead>
+        <tbody>
+          <tr><td><strong>SW1</strong></td><td>192.168.0.28</td><td>FJ012544G-<strong>00233</strong></td><td>VLAN_40</td><td>10.40.0.1/24</td></tr>
+          <tr><td><strong>SW2</strong></td><td>192.168.0.11</td><td>FJ012544G-<strong>00483</strong></td><td>VLAN_70</td><td>10.70.0.1/24</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- XIQ POLICY -->
+    <div class="module" id="xiq-policy">
+      <div class="module-header">
+        <span class="mod-badge mod-xiq">XIQ</span>
+        <h2>Policy: KK_SW_Apr20_5320 — Switching/Routing</h2>
+      </div>
+      <div class="banner-info">
+        <div class="banner-label">Network Allocation</div>
+        VLAN_40 → 10.40.0.0/24 (254 clients) · VLAN_70 → 10.70.0.0/24 (254 clients)
+      </div>
+      <table class="status-table">
+        <thead><tr><th>Device</th><th>Serial</th><th>VLAN</th><th>SVI IP</th><th>IPv4 Fwd</th></tr></thead>
+        <tbody>
+          <tr><td>SW1 (.28)</td><td>FJ012544G-00233</td><td>VLAN_40</td><td>10.40.0.1/24</td><td><span class="tag-ok">Enabled</span></td></tr>
+          <tr><td>SW2 (.11)</td><td>FJ012544G-00483</td><td>VLAN_70</td><td>10.70.0.1/24</td><td><span class="tag-ok">Enabled</span></td></tr>
+        </tbody>
+      </table>
+      <div class="banner-warn">
+        <div class="banner-label">⚠ Static Routes — Empty (Known XIQ Limitation)</div>
+        XIQ cannot push static routes via L2 interface (same limitation as April 6/7). All L3 routing handled via Quantum Fiber UI. No action needed in XIQ.
+      </div>
+    </div>
+
+    <!-- SW1 CLI -->
+    <div class="module" id="sw1-cli">
+      <div class="module-header">
+        <span class="mod-badge mod-cli">SW1 CLI</span>
+        <h2>SW1 — 192.168.0.28 — VLAN_40 (10.40.0.1/24)</h2>
+      </div>
+      <div class="banner-info">
+        Access: <code>screen /dev/cu.usbserial-A9XH7AI0 115200</code> — if detached: <code>screen -r</code>. After factory reset clear host key: <code>ssh-keygen -R 192.168.0.28</code>
+      </div>
+
+      <p class="step-label step-green">CLI Commands (verified)</p>
+      <div class="cli-block">
+        <pre>configure vlan VLAN_40 dhcp-address-range 10.40.0.100 - 10.40.0.200
+configure vlan VLAN_40 dhcp-options default-gateway 10.40.0.1
+configure vlan VLAN_40 dhcp-options dns-server primary 8.8.8.8
+configure vlan VLAN_40 add ports 3 tagged
+enable dhcp ports 3 vlan VLAN_40
+enable ipforwarding vlan Default
+save configuration</pre>
+      </div>
+
+      <p class="step-label step-green">show dhcp-server — Verified</p>
+      <div class="output-block">
+        <pre>VLAN "VLAN_40":
+    DHCP Address Range   : 10.40.0.100->10.40.0.200
+    Default Gateway      : 10.40.0.1
+    Primary DNS Server   : 8.8.8.8
+    Ports DHCP Enabled   : 3</pre>
+      </div>
+
+      <p class="step-label step-green">show iproute — Verified</p>
+      <div class="output-block">
+        <pre>#bo  Default Route      192.168.0.1     1    UG-D---um--f- Default    0d:1h:49m:40s
+#d   10.40.0.0/24       10.40.0.1       1    U------um--f- VLAN_40    0d:0h:37m:46s
+#d   192.168.0.0/24     192.168.0.28    1    U------um--f- Default    0d:1h:49m:41s</pre>
+      </div>
+
+      <p class="step-label step-green">ping vr VR-Default 8.8.8.8 — Verified</p>
+      <div class="output-block">
+        <pre>4 packets transmitted, 4 packets received, 0% loss
+round-trip min/avg/max = 4/5/6 ms  ✅</pre>
+      </div>
+    </div>
+
+    <!-- SW2 CLI -->
+    <div class="module" id="sw2-cli">
+      <div class="module-header">
+        <span class="mod-badge mod-cli">SW2 CLI</span>
+        <h2>SW2 — 192.168.0.11 — VLAN_70 (10.70.0.1/24)</h2>
+      </div>
+
+      <p class="step-label step-green">CLI Commands (verified)</p>
+      <div class="cli-block">
+        <pre>configure vlan VLAN_70 dhcp-address-range 10.70.0.100 - 10.70.0.200
+configure vlan VLAN_70 dhcp-options default-gateway 10.70.0.1
+configure vlan VLAN_70 dhcp-options dns-server primary 8.8.8.8
+configure vlan VLAN_70 add ports 3 tagged
+enable dhcp ports 3 vlan VLAN_70
+enable ipforwarding vlan Default
+save configuration</pre>
+      </div>
+
+      <p class="step-label step-green">show ipconfig — Verified</p>
+      <div class="output-block">
+        <pre>Interface    IP Address          Flags
+Default      192.168.0.11    /24 EUf--R--g---
+VLAN_70      10.70.0.1       /24 EUf--R--g---</pre>
+        <div class="cli-note">f flag = IP Forwarding Enabled on both Default and VLAN_70 ✅</div>
+      </div>
+
+      <p class="step-label step-green">show iproute — Verified</p>
+      <div class="output-block">
+        <pre>#bo  Default Route      192.168.0.1     1    UG-D---um--f- Default    0d:2h:8m:7s
+#d   10.70.0.0/24       10.70.0.1       1    U------um--f- VLAN_70    0d:0h:55m:48s
+#d   192.168.0.0/24     192.168.0.11    1    U------um--f- Default    0d:2h:8m:7s</pre>
+      </div>
+
+      <p class="step-label step-green">show dhcp-server — Verified</p>
+      <div class="output-block">
+        <pre>VLAN "VLAN_70":
+    DHCP Address Range   : 10.70.0.100->10.70.0.200
+    Default Gateway      : 10.70.0.1
+    Primary DNS Server   : 8.8.8.8
+    Ports DHCP Enabled   : 3</pre>
+      </div>
+
+      <p class="step-label step-green">ping 8.8.8.8 — Verified</p>
+      <div class="output-block">
+        <pre>4 packets transmitted, 4 packets received, 0% loss
+round-trip min/avg/max = 5/7/10 ms  ✅</pre>
+      </div>
+    </div>
+
+    <!-- QUANTUM FIBER -->
+    <div class="module" id="qf-routes">
+      <div class="module-header">
+        <span class="mod-badge mod-warn">Quantum Fiber</span>
+        <h2>Static Routes — Added April 20</h2>
+      </div>
+      <div class="banner-info">
+        Quantum Fiber UI → Advanced → Static Routing
+      </div>
+      <div class="cli-block" style="border-color:#1e3a5f">
+        <pre>10.40.0.0 / 255.255.255.0  →  192.168.0.28   (SW1 — VLAN_40)
+10.70.0.0 / 255.255.255.0  →  192.168.0.11   (SW2 — VLAN_70)</pre>
+      </div>
+    </div>
+
+    <!-- TROUBLESHOOTING -->
+    <div class="module" id="troubleshoot">
+      <div class="module-header">
+        <span class="mod-badge mod-warn">Troubleshoot</span>
+        <h2>VLAN_70 — 169.254 APIPA → Root Cause → Fix</h2>
+      </div>
+      <ul class="timeline">
+        <li class="tl-item">
+          <div class="tl-dot dot-warn"></div>
+          <div class="tl-text">
+            <strong>Symptom:</strong> iPhone on VLAN_70 SSID gets 169.254.x.x (APIPA — no DHCP response)
+            <div class="tl-sub">VLAN_40 SSID working correctly on same AP policy</div>
+          </div>
+        </li>
+        <li class="tl-item">
+          <div class="tl-dot dot-warn"></div>
+          <div class="tl-text">
+            <strong>Switch verified clean:</strong> port 3 tagged VLAN_70, DHCP enabled port 3, ipforwarding ON, ping 8.8.8.8 OK
+            <div class="tl-sub">show vlan · show dhcp-server · show ports 3 information detail — all correct</div>
+          </div>
+        </li>
+        <li class="tl-item">
+          <div class="tl-dot dot-warn"></div>
+          <div class="tl-text">
+            <strong>FDB diagnosis:</strong> <code>show fdb ports 3</code> showed AP MAC only on Default VLAN — no VLAN_70 entry
+            <div class="tl-sub">AP connected on port 3 confirmed, but not sending VLAN_70 tagged frames</div>
+          </div>
+        </li>
+        <li class="tl-item">
+          <div class="tl-dot dot-warn"></div>
+          <div class="tl-text">
+            <strong>Root cause identified:</strong> Both APs shared policy <code>AP_X6680_Apr20</code> broadcasting both SSIDs. iPhone associated with AP on SW1 (stronger signal). VLAN_70 tagged frames went to SW1 which has no DHCP for VLAN_70.
+            <div class="tl-sub">XIQ policy correct · SSID VLAN mapping correct · wrong AP selected by phone</div>
+          </div>
+        </li>
+        <li class="tl-item">
+          <div class="tl-dot dot-fix"></div>
+          <div class="tl-text">
+            <strong>Fix:</strong> Split AP policies — <code>AP_VLAN_40</code> assigned to SW1 AP only · <code>AP_VLAN_70</code> assigned to SW2 AP only
+            <div class="tl-sub">Eliminates roaming ambiguity — each AP broadcasts only the SSID for its switch's VLAN</div>
+          </div>
+        </li>
+        <li class="tl-item">
+          <div class="tl-dot dot-ok"></div>
+          <div class="tl-text">
+            <strong>Result:</strong> Both SSIDs verified ✅ iPhone gets 10.40.0.x on VLAN_40 SSID · 10.70.0.x on VLAN_70 SSID · internet confirmed on both
+          </div>
+        </li>
+      </ul>
+    </div>
+
+    <!-- KEY LESSONS -->
+    <div class="module" id="lessons">
+      <div class="module-header">
+        <span class="mod-badge mod-ref">Lessons</span>
+        <h2>Key Lessons — April 20, 2026</h2>
+      </div>
+
+      <div class="banner-warn">
+        <div class="banner-label">⚠ Split AP policies when each switch has a different VLAN</div>
+        If two APs share one policy and both broadcast the same SSID, the phone picks the AP with the strongest signal — not the one on the correct switch. DHCP requests land on the wrong switch and fail. One AP policy per switch eliminates this.
+      </div>
+
+      <div class="banner-warn">
+        <div class="banner-label">⚠ EXOS config filenames — no dots allowed</div>
+        <code>save configuration sw1_vlan40_apr20</code> — underscores only. EXOS auto-appends <code>.cfg</code>. Using a dot gives: <em>%% Name cannot contain . character.</em>
+      </div>
+
+      <div class="banner-warn">
+        <div class="banner-label">⚠ SCP runs on Mac — not on the switch</div>
+        <code>scp admin@192.168.0.28:/usr/local/cfg/sw1_vlan40_apr20.cfg ~/Downloads/</code> — run this in a Mac terminal tab, not the screen console session.
+      </div>
+
+      <div class="banner-warn">
+        <div class="banner-label">⚠ Factory reset changes SSH host key — clear before SCP/SSH</div>
+        <code>ssh-keygen -R 192.168.0.28</code> after every wipe. Otherwise scp fails with REMOTE HOST IDENTIFICATION HAS CHANGED.
+      </div>
+
+      <div class="banner-info">
+        <div class="banner-label">Diagnose VLAN tagging issues with show fdb ports &lt;n&gt;</div>
+        If DHCP fails on a tagged VLAN, run <code>show fdb ports 3</code>. If the AP MAC only appears under Default (0001) and not under the expected VLAN, the AP is not sending tagged frames — investigate AP policy, not the switch.
+      </div>
+
+      <div class="banner-info">
+        <div class="banner-label">screen session detached — reattach not restart</div>
+        <code>screen -ls</code> to see detached sessions · <code>screen -r &lt;id&gt;</code> to reattach. The detached session holds the serial port — opening a new screen session will fail with "resource busy".
+      </div>
+    </div>
+
+    <!-- HTML FIX -->
+    <div class="module" id="html-fix">
+      <div class="module-header">
+        <span class="mod-badge mod-fix">HTML Fix</span>
+        <h2>lab_20260329.html — CLI Blocks Invisible (Fixed)</h2>
+      </div>
+      <div class="banner-warn">
+        <div class="banner-label">⚠ Root Cause</div>
+        NYT theme sitewide retheme (Apr 8) set all <code>pre</code> text to <code>#111111</code> (black) but left the dark code block backgrounds at <code>#0d1117</code>. Result: black text on near-black background — completely invisible on screen and in PDF print.
+      </div>
+      <div class="banner-ok">
+        <div class="banner-label">✅ Fix Applied — Pushed to main April 20</div>
+        17 pre blocks: <code>color:#111111</code> → <code>color:#e2e8f0</code> (near-white)<br>
+        3 annotation divs: <code>color:#666666</code> → <code>color:#94a3b8</code><br>
+        Added <code>@media print</code> with <code>-webkit-print-color-adjust: exact</code><br>
+        Added CSS rule: <code>div[style*="background:#0d1117"] pre { color: #e2e8f0 !important; }</code>
+      </div>
+    </div>
+
+    <div class="footer-nav">
+      <a href="lab_20260329.html">&larr; Lab Guide</a>
+      <a href="session_log_20260408.html">&larr; April 8 Session</a>
+      <span>April 20, 2026 &mdash; Khursheed Khan &mdash; Extreme Networks</span>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  const links = document.querySelectorAll('.sidebar a');
+  const sections = Array.from(links).map(l => document.querySelector(l.getAttribute('href'))).filter(Boolean);
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        links.forEach(l => l.classList.remove('active'));
+        const active = document.querySelector(`.sidebar a[href="#${e.target.id}"]`);
+        if (active) active.classList.add('active');
+      }
+    });
+  }, { threshold: 0.3 });
+  sections.forEach(s => obs.observe(s));
+</script>
+</body>
+</html>
