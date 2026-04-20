@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Session 1 — Trainer Answer Guide</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
 <style>
   html { scroll-behavior: smooth; }
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -66,6 +67,31 @@
 
   .divider { border: none; border-top: 1px solid #1e2d45; margin: 40px 0; }
 
+  /* Blueprint section */
+  .blueprint { background: #0d1422; border: 1px solid #1e3a5f; border-radius: 10px; padding: 24px; margin-bottom: 48px; scroll-margin-top: 28px; }
+  .blueprint h2 { font-size: 1rem; color: #60a5fa; margin-bottom: 4px; }
+  .blueprint .bp-sub { font-size: 0.75rem; color: #475569; margin-bottom: 18px; }
+  .mermaid-wrap { background: #060c18; border-radius: 8px; padding: 20px; margin-bottom: 20px; overflow-x: auto; }
+  .mermaid { text-align: center; }
+  .step-list { list-style: none; counter-reset: steps; }
+  .step-list li { counter-increment: steps; display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid #1e2d45; font-size: 0.83rem; color: #cbd5e1; line-height: 1.6; }
+  .step-list li:last-child { border-bottom: none; }
+  .step-list li::before { content: counter(steps); background: #1e3a5f; color: #60a5fa; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.65rem; font-weight: 700; flex-shrink: 0; margin-top: 1px; }
+  .step-list li strong { color: #93c5fd; }
+
+  /* Gap synthesis section */
+  .gap-synthesis { scroll-margin-top: 28px; margin-top: 52px; }
+  .gap-synthesis h2 { font-size: 1rem; color: #fb923c; margin-bottom: 4px; }
+  .gap-synthesis .gs-sub { font-size: 0.75rem; color: #475569; margin-bottom: 20px; }
+  .gap-card { background: #120e0a; border: 1px solid #92400e; border-radius: 8px; padding: 18px 20px; margin-bottom: 16px; }
+  .gap-card-title { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: #fb923c; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+  .gap-num { width: 20px; height: 20px; background: #92400e; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.6rem; font-weight: 700; flex-shrink: 0; }
+  .gap-voice { font-size: 0.83rem; color: #fed7aa; line-height: 1.65; font-style: italic; margin-bottom: 12px; border-left: 3px solid #92400e; padding-left: 12px; }
+  .gap-analysis { font-size: 0.82rem; color: #94a3b8; line-height: 1.65; margin-bottom: 10px; }
+  .gap-lab { background: #120e2b; border: 1px solid #4c1d95; border-radius: 5px; padding: 10px 12px; font-size: 0.78rem; color: #c4b5fd; }
+  .gap-lab strong { color: #a78bfa; display: block; margin-bottom: 3px; font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.1em; }
+  .gap-lab code { color: #a78bfa; background: #1a0e2b; padding: 1px 4px; border-radius: 3px; }
+
   @media (max-width: 700px) { .sidebar { display: none; } .main { padding: 24px 16px; } }
 </style>
 </head>
@@ -74,6 +100,9 @@
 <nav class="sidebar">
   <div class="sidebar-title">Session 1 — Answer Guide</div>
   <a class="back-link" href="team_training_qa_20260420.html">&#8592; Back to Tracker</a>
+  <div class="nav-label">Overview</div>
+  <a class="nav-item" href="#blueprint">&#9670; Session Blueprint</a>
+  <a class="nav-item" href="#gap-synthesis">&#9650; Gap Analysis</a>
   <div class="nav-label">Questions</div>
   <a class="nav-item" href="#q1">Q1 — Why OSI matters</a>
   <a class="nav-item" href="#q2">Q2 — Layers that light up</a>
@@ -99,6 +128,48 @@
       <span class="tag tag-purple">Dialogue from Apr 20, 2026</span>
     </div>
   </div>
+
+  <!-- BLUEPRINT -->
+  <div class="blueprint" id="blueprint">
+    <h2>Session 1 Blueprint — The Packet Journey L1 → L3</h2>
+    <div class="bp-sub">Synthesized from NotebookLM · April 20, 2026 · Extreme 5320 lab context</div>
+    <div class="mermaid-wrap">
+      <div class="mermaid">
+graph TD
+  subgraph L1["Layer 1 — Physical"]
+    A["📱 Wireless Client"] -->|"RF Air Interface"| B["AP3000 Antenna"]
+    B -->|"Bitstream captured"| C["AP Framing Logic"]
+  end
+  subgraph L2["Layer 2 — Data Link"]
+    C -->|"L2 Ethernet Frame"| D{"VLAN Tag Added\ne.g. VLAN 40"}
+    D -->|"Tagged frame on trunk"| E["5320 Switch\nFDB Lookup"]
+    E -->|"Dest MAC = switch own MAC"| G2{"L3 Decision Point"}
+    E -->|"Dest MAC = local device"| F["Forward out\nVLAN port — L2 only"]
+  end
+  subgraph L3["Layer 3 — Network"]
+    G2 -->|"Routing table lookup"| H["5320 owns gateway IPs\nVLAN_40: 10.40.0.1\nVLAN_70: 10.70.0.1"]
+    H -->|"Strip old L2 frame"| I["Rewrite Frame\nNew VLAN tag + new MACs"]
+    I -->|"Src MAC = 5320 VLAN70\nDst MAC = Device B"| J["Forward out\nVLAN 70 port"]
+  end
+  J --> K["✅ Device B\nIP unchanged end-to-end"]
+
+  style D fill:#1e3a5f,color:#93c5fd,stroke:#2d4a6e
+  style G2 fill:#3b1a00,color:#fb923c,stroke:#92400e
+  style H fill:#0d2b1f,color:#34d399,stroke:#065f46
+  style K fill:#0d2b1f,color:#34d399,stroke:#065f46
+      </div>
+    </div>
+    <ul class="step-list">
+      <li><strong>Ingress L1 → L2:</strong> Client transmits over RF. AP3000 antenna captures bitstream and AP framing logic converts it into an L2 Ethernet frame with MAC headers.</li>
+      <li><strong>VLAN Tagging:</strong> As the frame leaves the AP, it is tagged with a VLAN ID (e.g. VLAN 40) matching the SSID-to-VLAN mapping in the XIQ Network Policy. The tag is a 4-byte 802.1Q header inserted into the frame.</li>
+      <li><strong>L2 Forwarding and MAC Rewriting:</strong> The switch reads the destination MAC, looks up its FDB, and forwards out the correct port. At every L2 hop, the source and destination MACs are rewritten. The IP addresses stay unchanged end-to-end.</li>
+      <li><strong>The L2 Partition:</strong> VLANs are hard L2 boundaries. Traffic cannot cross from VLAN 40 to VLAN 70 without an additional L3 mechanism — even on the same physical switch.</li>
+      <li><strong>L3 Decision Point (the Gateway):</strong> When a device sends to a different subnet, it addresses the frame to its default gateway's MAC. The 5320 recognises this (destination MAC = its own VLAN SVI MAC) and opens the IP header to make a routing decision.</li>
+      <li><strong>Inter-VLAN Routing:</strong> The 5320 strips the old L2 frame (VLAN 40 tag), consults the routing table, creates a new L2 frame with a VLAN 70 tag, rewrites source MAC to its own VLAN 70 MAC and destination MAC to Device B's MAC, then forwards it out.</li>
+      <li><strong>Final Delivery:</strong> The packet arrives at Device B still carrying the original source and destination IPs — only the L2 wrapper changed at each hop.</li>
+    </ul>
+  </div>
+  <hr style="border:none;border-top:1px solid #1e2d45;margin-bottom:48px">
 
   <!-- Q1 -->
   <div class="q-entry" id="q1">
@@ -527,17 +598,69 @@
     </div>
   </div>
 
+  <!-- GAP SYNTHESIS -->
+  <hr style="border:none;border-top:1px solid #1e2d45;margin:48px 0 0">
+  <div class="gap-synthesis" id="gap-synthesis">
+    <h2>Gap Synthesis — Socratic Analysis</h2>
+    <div class="gs-sub">Three things the student almost owns but doesn't yet — in the student's own voice, with what the next lab should close</div>
+
+    <div class="gap-card">
+      <div class="gap-card-title"><div class="gap-num">1</div> dhcp-options default-gateway vs configure vlan ipaddress</div>
+      <div class="gap-voice">"I know there's a command that sets the gateway... configure vlan 10 dhcp-options default-gateway 10.10.10.1. Isn't that making the switch the gateway?"</div>
+      <div class="gap-analysis">
+        <strong style="color:#e2e8f0">What the student has:</strong> Knows the syntax exists. Has used DHCP options successfully in the lab — clients do get a correct gateway in their lease.<br><br>
+        <strong style="color:#e2e8f0">Where it breaks down:</strong> Confuses two separate roles. <code style="background:#0a0f1a;color:#fb923c;padding:1px 5px;border-radius:3px">dhcp-options default-gateway</code> tells DHCP <em>what to tell clients</em>. It does not create an IP address on the switch. If you only run that command, clients know to send traffic to 10.10.10.1 — but nobody at that IP answers their ARP. The switch isn't listening there.<br><br>
+        <strong style="color:#e2e8f0">The missing link:</strong> <code style="background:#0a0f1a;color:#fb923c;padding:1px 5px;border-radius:3px">configure vlan VLAN_40 ipaddress 10.40.0.1/24</code> is what makes the switch own that IP. Without it, clients have a gateway address that leads nowhere.
+      </div>
+      <div class="gap-lab">
+        <strong>&#9670; Lab that closes this gap</strong>
+        On SW1: run <code>show ipconfig</code> — check if VLAN_40 has an IP address assigned. If not, run <code>configure vlan VLAN_40 ipaddress 10.40.0.1/24</code> then <code>enable ipforwarding vlan VLAN_40</code>. From a VLAN_40 client, run <code>ping 10.40.0.1</code> — if it responds, the switch is now the gateway and owns the IP.
+      </div>
+    </div>
+
+    <div class="gap-card">
+      <div class="gap-card-title"><div class="gap-num">2</div> What exactly triggers the switch to route instead of just forward</div>
+      <div class="gap-voice">"Layer 2 doesn't look inside the frame... Layer 3 is where the IP header would change... if the IP header matches the IP address of that hardware, then it decodes..."</div>
+      <div class="gap-analysis">
+        <strong style="color:#e2e8f0">What the student has:</strong> Correctly stated that L2 switches don't open the IP header. Got the concept that L3 routing involves a match on the device's own IP.<br><br>
+        <strong style="color:#e2e8f0">Where it breaks down:</strong> Two slips: (1) said "Layer 3 is where the IP header would change" — the IP header does not change. Only the L2 wrapper changes. (2) The trigger for routing isn't "destination IP matches the switch" — it's <em>destination MAC matches the switch's own VLAN MAC</em>. The switch doesn't even look at the IP until it's confirmed the frame is addressed to itself.<br><br>
+        <strong style="color:#e2e8f0">The missing link:</strong> The exact sequence — client ARPs for gateway MAC → switch responds → client builds frame with destination MAC = switch VLAN MAC → switch receives frame, sees its own MAC, opens IP header, routes. The MAC is the trigger, not the IP.
+      </div>
+      <div class="gap-lab">
+        <strong>&#9670; Lab that closes this gap</strong>
+        From a VLAN_40 client: run <code>arp -a</code> — find the gateway entry (10.40.0.1). Confirm its MAC matches the 5320's MAC on VLAN_40 (<code>show ipconfig</code> on the switch shows the MAC per VLAN). That MAC-to-IP binding is the exact trigger mechanism made visible.
+      </div>
+    </div>
+
+    <div class="gap-card">
+      <div class="gap-card-title"><div class="gap-num">3</div> Inter-VLAN routing is understood conceptually but has never been tested</div>
+      <div class="gap-voice">"I know both VLANs need gateway IPs on the same switch... I didn't test it yet. I'll do that tomorrow morning."</div>
+      <div class="gap-analysis">
+        <strong style="color:#e2e8f0">What the student has:</strong> Arrived at the correct architecture — both VLAN gateway IPs on one switch, both in the routing table as connected routes. Got there through Socratic dialogue, not memorisation.<br><br>
+        <strong style="color:#e2e8f0">Where it breaks down:</strong> Has configured DHCP gateway options but hasn't confirmed the switch actually owns both IPs. Has never run a cross-VLAN ping. Doesn't know about <code>enable ipforwarding</code> — the EXOS command that's easy to miss, where the gateway IP is configured but packets are still silently dropped because forwarding isn't enabled on the VLAN.<br><br>
+        <strong style="color:#e2e8f0">The missing link:</strong> Theory is solid. Needs one hands-on session where the routing either works or fails with a specific error — and they debug it. That failure is what makes the concept permanent.
+      </div>
+      <div class="gap-lab">
+        <strong>&#9670; Lab that closes this gap — the inter-VLAN ping test</strong>
+        On SW1: <code>configure vlan VLAN_40 ipaddress 10.40.0.1/24</code> → <code>enable ipforwarding vlan VLAN_40</code> → <code>configure vlan VLAN_70 ipaddress 10.70.0.1/24</code> → <code>enable ipforwarding vlan VLAN_70</code> → <code>show iproute</code> (confirm both connected routes present) → from a VLAN_40 client, ping 10.70.0.1 → then ping a VLAN_70 device IP. Expected: success. If not: check <code>show ipconfig</code>, check <code>enable ipforwarding</code>, check FDB.
+      </div>
+    </div>
+
+  </div>
+
 </div><!-- /main -->
 
 <script>
+  mermaid.initialize({ startOnLoad: true, theme: 'dark', themeVariables: { primaryColor: '#1e3a5f', primaryTextColor: '#e2e8f0', primaryBorderColor: '#2d4a6e', lineColor: '#475569', sectionBkgColor: '#0d1422', altSectionBkgColor: '#0a0f1a', gridColor: '#1e2d45', fontSize: '13px' } });
+
   const navLinks = document.querySelectorAll('.nav-item');
-  const sections = ['q1','q2','q3','q4','q5','q6','q7','q8','q9','q10'].map(id => document.getElementById(id));
+  const sectionIds = ['blueprint','gap-synthesis','q1','q2','q3','q4','q5','q6','q7','q8','q9','q10'];
+  const sections = sectionIds.map(id => document.getElementById(id));
   window.addEventListener('scroll', () => {
     let current = 0;
-    sections.forEach((el, i) => { if (el && window.scrollY >= el.offsetTop - 80) current = i; });
+    sections.forEach((el, i) => { if (el && el.getBoundingClientRect().top <= 100) current = i; });
     navLinks.forEach((l, i) => l.classList.toggle('active', i === current));
-  });
-
+  }, { passive: true });
 </script>
 </body>
 </html>
