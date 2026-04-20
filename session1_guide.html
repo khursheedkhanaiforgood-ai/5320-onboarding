@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Session 1 — Trainer Answer Guide</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; background: #0a0f1a; color: #e2e8f0; display: flex; min-height: 100vh; }
+
+  .sidebar { width: 240px; flex-shrink: 0; background: #0d1422; border-right: 1px solid #1e2d45; padding: 24px 0; position: sticky; top: 0; height: 100vh; overflow-y: auto; }
+  .sidebar-title { font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.18em; color: #60a5fa; padding: 0 18px 14px; border-bottom: 1px solid #1e2d45; margin-bottom: 14px; }
+  .nav-label { font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #475569; padding: 10px 18px 4px; }
+  .nav-item { display: block; padding: 8px 18px; text-decoration: none; color: #94a3b8; font-size: 0.75rem; border-left: 3px solid transparent; cursor: pointer; transition: all 0.15s; }
+  .nav-item:hover, .nav-item.active { color: #60a5fa; border-left-color: #60a5fa; background: #131c2e; }
+  .nav-gap { color: #fb923c !important; }
+  .back-link { display: block; padding: 8px 18px; font-size: 0.72rem; color: #475569; text-decoration: none; border-bottom: 1px solid #1e2d45; margin-bottom: 10px; }
+  .back-link:hover { color: #94a3b8; }
+
+  .main { flex: 1; padding: 40px 48px; max-width: 860px; }
+  .page-header { margin-bottom: 36px; }
+  .page-header h1 { font-size: 1.4rem; color: #a78bfa; margin-bottom: 6px; }
+  .page-header p { color: #64748b; font-size: 0.85rem; line-height: 1.6; }
+  .tag-row { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+  .tag { font-size: 0.68rem; font-weight: 600; padding: 3px 10px; border-radius: 20px; }
+  .tag-blue { background: #1e3a5f; color: #60a5fa; }
+  .tag-orange { background: #3b1a00; color: #fb923c; }
+  .tag-purple { background: #2d1b69; color: #a78bfa; }
+
+  /* Question entry */
+  .q-entry { margin-bottom: 52px; scroll-margin-top: 28px; }
+  .q-entry-header { display: flex; align-items: flex-start; gap: 14px; margin-bottom: 18px; }
+  .q-num { width: 28px; height: 28px; border-radius: 50%; background: #1e3a5f; color: #60a5fa; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700; flex-shrink: 0; margin-top: 2px; }
+  .q-num.gap { background: #3b1a00; color: #fb923c; }
+  .q-entry-title { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #64748b; margin-bottom: 5px; }
+  .q-entry-text { font-size: 0.95rem; color: #e2e8f0; line-height: 1.6; font-style: italic; }
+  .q-flag { display: inline-block; font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; padding: 2px 7px; border-radius: 3px; margin-left: 8px; vertical-align: middle; background: #3b1a00; color: #fb923c; border: 1px solid #92400e; }
+
+  /* Panels */
+  .panel { border-radius: 8px; padding: 16px 18px; margin-bottom: 12px; }
+  .panel-label { font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.14em; margin-bottom: 10px; }
+  .panel-answer { background: #0d1f17; border: 1px solid #065f46; }
+  .panel-answer .panel-label { color: #34d399; }
+  .panel-answer p, .panel-answer li { font-size: 0.875rem; color: #a7f3d0; line-height: 1.7; }
+  .panel-answer ul { padding-left: 18px; }
+  .panel-answer li { margin-bottom: 4px; }
+  .panel-answer code { background: #0a1f17; color: #6ee7b7; padding: 1px 5px; border-radius: 3px; font-size: 0.82rem; }
+
+  .panel-dialogue { background: #0d1422; border: 1px solid #1e3a5f; }
+  .panel-dialogue .panel-label { color: #60a5fa; }
+  .dialogue-turn { margin-bottom: 14px; }
+  .dialogue-turn:last-child { margin-bottom: 0; }
+  .d-speaker { font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 4px; }
+  .d-trainer { color: #94a3b8; }
+  .d-student { color: #60a5fa; }
+  .d-text { font-size: 0.83rem; color: #cbd5e1; line-height: 1.65; background: #0a0f1a; border-radius: 5px; padding: 10px 12px; border-left: 3px solid #1e3a5f; }
+  .d-text.trainer-text { border-left-color: #334155; color: #94a3b8; }
+  .d-highlight { background: #1e3a5f; border-left-color: #60a5fa !important; color: #e2e8f0 !important; }
+
+  .panel-probe { background: #1a0e2b; border: 1px solid #4c1d95; }
+  .panel-probe .panel-label { color: #a78bfa; }
+  .probe-item { font-size: 0.83rem; color: #c4b5fd; line-height: 1.6; padding: 7px 0; border-bottom: 1px solid #2d1b69; display: flex; gap: 8px; }
+  .probe-item:last-child { border-bottom: none; padding-bottom: 0; }
+  .probe-arrow { color: #7c3aed; flex-shrink: 0; margin-top: 1px; }
+
+  .divider { border: none; border-top: 1px solid #1e2d45; margin: 40px 0; }
+
+  @media (max-width: 700px) { .sidebar { display: none; } .main { padding: 24px 16px; } }
+</style>
+</head>
+<body>
+
+<nav class="sidebar">
+  <div class="sidebar-title">Session 1 — Answer Guide</div>
+  <a class="back-link" href="team_training_qa_20260420.html">&#8592; Back to Tracker</a>
+  <div class="nav-label">Questions</div>
+  <a class="nav-item" onclick="scrollTo('q1')">Q1 — Why OSI matters</a>
+  <a class="nav-item" onclick="scrollTo('q2')">Q2 — Layers that light up</a>
+  <a class="nav-item" onclick="scrollTo('q3')">Q3 — Who tags the frame?</a>
+  <a class="nav-item" onclick="scrollTo('q4')">Q4 — MAC vs IP / what changes</a>
+  <a class="nav-item" onclick="scrollTo('q5')">Q5 — Does L2 switch open IP?</a>
+  <a class="nav-item" onclick="scrollTo('q6')">Q6 — L2 vs L3 device</a>
+  <a class="nav-item" onclick="scrollTo('q7')">Q7 — Same switch, diff VLANs</a>
+  <a class="nav-item nav-gap" onclick="scrollTo('q8')">Q8 — Gateway IP / SVI ⚠</a>
+  <a class="nav-item nav-gap" onclick="scrollTo('q9')">Q9 — dhcp-options vs ipaddress ⚠</a>
+  <a class="nav-item nav-gap" onclick="scrollTo('q10')">Q10 — Both VLANs same switch ⚠</a>
+</nav>
+
+<div class="main">
+
+  <div class="page-header">
+    <h1>Session 1 — Trainer Answer Guide</h1>
+    <p>OSI Model · Packet Journey L1→L3 · Inter-VLAN Routing<br>
+    Each entry: model answer · actual April 20 dialogue · probing follow-ups</p>
+    <div class="tag-row">
+      <span class="tag tag-blue">Trainer reference — not for student</span>
+      <span class="tag tag-orange">⚠ Gap flags = unresolved in session</span>
+      <span class="tag tag-purple">Dialogue from Apr 20, 2026</span>
+    </div>
+  </div>
+
+  <!-- Q1 -->
+  <div class="q-entry" id="q1">
+    <div class="q-entry-header">
+      <div class="q-num">1</div>
+      <div>
+        <div class="q-entry-title">Question 1</div>
+        <div class="q-entry-text">"I know the OSI model has 7 layers. But why does any of this matter? My laptop just sends data — is this theoretical or does it come up in real troubleshooting?"</div>
+      </div>
+    </div>
+
+    <div class="panel panel-answer">
+      <div class="panel-label">&#10003; Model Answer</div>
+      <p>The OSI model is a diagnostic framework, not a physical thing. It matters because it gives you a structured place to <strong>stop guessing</strong>. When something breaks, instead of randomly checking cables, IP configs, and firewall rules, you start at Layer 1 and work up — isolating where the failure actually is.</p>
+      <ul style="margin-top:10px">
+        <li>L1 broken → port is down, cable fault, no signal</li>
+        <li>L2 broken → device in wrong VLAN, MAC not in FDB, STP blocking port</li>
+        <li>L3 broken → wrong IP, missing route, gateway unreachable</li>
+      </ul>
+      <p style="margin-top:10px">Every experienced network engineer uses this mentally on every ticket. It's not academic — it's the fastest way to narrow a fault.</p>
+    </div>
+
+    <div class="panel panel-dialogue">
+      <div class="panel-label">&#9670; Apr 20 Dialogue</div>
+      <div class="dialogue-turn">
+        <div class="d-speaker d-student">Student (Alex)</div>
+        <div class="d-text d-highlight">"But honestly — why does any of this matter? Like, my laptop just... sends data. Why do I need to know about seven layers? Is this just a theoretical framework that nobody actually uses in real life, or does it come up in actual troubleshooting?"</div>
+      </div>
+      <div class="dialogue-turn">
+        <div class="d-speaker d-trainer">Trainer response</div>
+        <div class="d-text trainer-text">Trainer redirected: asked the student to walk through what happens when a packet from a real AP3000 hits the real 5320 — making OSI immediately practical by anchoring it to hardware already in front of them.</div>
+      </div>
+    </div>
+
+    <div class="panel panel-probe">
+      <div class="panel-label">&#9654; Probing Follow-ups</div>
+      <div class="probe-item"><span class="probe-arrow">›</span>If someone says "the network is down" — what's the first OSI layer you rule out and how?</div>
+      <div class="probe-item"><span class="probe-arrow">›</span>Can you name one real symptom that points specifically to a Layer 2 problem versus a Layer 3 problem?</div>
+      <div class="probe-item"><span class="probe-arrow">›</span>If you skip straight to checking IP configs and the problem is actually a bad cable — what did you waste?</div>
+    </div>
+  </div>
+  <hr class="divider">
+
+  <!-- Q2 -->
+  <div class="q-entry" id="q2">
+    <div class="q-entry-header">
+      <div class="q-num">2</div>
+      <div>
+        <div class="q-entry-title">Question 2</div>
+        <div class="q-entry-text">"When a packet from a wireless client arrives at the 5320 — coming through the AP3000 — which OSI layers does that packet interact with before it gets routed out? Which layers light up and in what order?"</div>
+      </div>
+    </div>
+
+    <div class="panel panel-answer">
+      <div class="panel-label">&#10003; Model Answer</div>
+      <ul>
+        <li><strong>L1 — Physical:</strong> Client transmits over RF (air interface). AP3000 antenna captures the signal as a bitstream.</li>
+        <li><strong>L2 — Data Link:</strong> AP converts bitstream into an Ethernet frame with source/destination MAC headers. Frame is tagged with the client's VLAN ID before being sent over the trunk to the switch.</li>
+        <li><strong>L3 — Network:</strong> When the frame reaches the 5320 and the destination IP is on a different subnet, the switch's routing engine examines the IP header to decide where to forward the packet.</li>
+      </ul>
+      <p style="margin-top:10px">L1 and L2 always fire. L3 only fires if the destination is outside the local subnet — otherwise L2 forwarding handles it entirely.</p>
+    </div>
+
+    <div class="panel panel-dialogue">
+      <div class="panel-label">&#9670; Apr 20 Dialogue</div>
+      <div class="dialogue-turn">
+        <div class="d-speaker d-trainer">Trainer (Khursheed)</div>
+        <div class="d-text trainer-text">"For it to have headers to track it to their destination — layer one and data link layer, which is the MAC layer."</div>
+      </div>
+      <div class="dialogue-turn">
+        <div class="d-speaker d-student">Student probed</div>
+        <div class="d-text d-highlight">"When you say 'destination' — are you talking about the MAC address destination (L2), or are you already thinking about the IP address destination (L3)? Because I'm sensing you might be blending those two together a little bit."</div>
+      </div>
+      <div class="dialogue-turn">
+        <div class="d-speaker d-trainer">Trainer clarified</div>
+        <div class="d-text trainer-text">Correctly separated: VLAN tag routes it to a gateway if leaving the local network; otherwise forwarded to next MAC address within the same L2 domain.</div>
+      </div>
+    </div>
+
+    <div class="panel panel-probe">
+      <div class="panel-label">&#9654; Probing Follow-ups</div>
+      <div class="probe-item"><span class="probe-arrow">›</span>At which point in that journey does the VLAN tag get added — before or after the AP sends the frame to the switch?</div>
+      <div class="probe-item"><span class="probe-arrow">›</span>If the destination is another device on the same VLAN — does the packet ever reach L3 on the switch?</div>
+      <div class="probe-item"><span class="probe-arrow">›</span>What's the physical medium at L1 for wireless versus wired — and does L2 behave differently?</div>
+    </div>
+  </div>
+  <hr class="divider">
+
+  <!-- Q3 -->
+  <div class="q-entry" id="q3">
+    <div class="q-entry-header">
+      <div class="q-num">3</div>
+      <div>
+        <div class="q-entry-title">Question 3</div>
+        <div class="q-entry-text">"You said the frame gets tagged with a VLAN when it leaves the AP. Who actually puts that tag on — is it the AP itself, or does it happen at the switch? And what does the tag look like — is it just a number?"</div>
+      </div>
+    </div>
+
+    <div class="panel panel-answer">
+      <div class="panel-label">&#10003; Model Answer</div>
+      <p>The AP puts the tag on. The AP is configured (via XIQ Network Policy / SSID-to-VLAN mapping) to tag outgoing frames with the VLAN ID that matches the SSID the client connected to. This happens before the frame hits the switch trunk port.</p>
+      <p style="margin-top:10px">The tag is a 4-byte field inserted into the Ethernet frame header (802.1Q standard): 2 bytes TPID (0x8100) + 2 bytes TCI containing a 12-bit VLAN ID (0–4094). So yes — it contains a number (the VLAN ID), plus priority bits.</p>
+      <p style="margin-top:10px">The switch trunk port receives the tagged frame and uses that VLAN ID to decide which VLAN the frame belongs to — it doesn't add the tag, it reads it.</p>
+    </div>
+
+    <div class="panel panel-dialogue">
+      <div class="panel-label">&#9670; Apr 20 Dialogue</div>
+      <div class="dialogue-turn">
+        <div class="d-speaker d-student">Student asked</div>
+        <div class="d-text d-highlight">"You said the frame gets tagged with a VLAN when it leaves the AP. But like... who puts that tag on? Is that the AP itself doing the tagging, or does it happen somewhere else? And what does that tag actually look like — is it just a number?"</div>
+      </div>
+      <div class="dialogue-turn">
+        <div class="d-speaker d-trainer">Trainer (Khursheed)</div>
+        <div class="d-text trainer-text">Answered that VLAN tagging happens as the frame leaves the AP — tagged with the VLAN that the wireless client's SSID maps to. Connected this directly to the XIQ policy (SSID → VLAN) already configured on their lab.</div>
+      </div>
+    </div>
+
+    <div class="panel panel-probe">
+      <div class="panel-label">&#9654; Probing Follow-ups</div>
+      <div class="probe-item"><span class="probe-arrow">›</span>If you configure the wrong VLAN in the XIQ SSID mapping — what happens to the client's tag, and what does the switch do with it?</div>
+      <div class="probe-item"><span class="probe-arrow">›</span>Does the switch port connected to the AP need to be access or trunk — and why?</div>
+      <div class="probe-item"><span class="probe-arrow">›</span>In your lab right now, how would you verify that VLAN 40 frames are actually arriving tagged at the 5320 port connected to your AP?</div>
+    </div>
+  </div>
+  <hr class="divider">
+
+  <!-- Q4 -->
+  <div class="q-entry" id="q4">
+    <div class="q-entry-header">
+      <div class="q-num">4</div>
+      <div>
+        <div class="q-entry-title">Question 4</div>
+        <div class="q-entry-text">"I said the frame has headers to track it to its destination. Am I talking about the MAC destination or the IP destination? What's the difference — and at each hop, which one is changing and which one stays the same?"</div>
+      </div>
+    </div>
+
+    <div class="panel panel-answer">
+      <div class="panel-label">&#10003; Model Answer</div>
+      <p><strong>Two different jobs running in parallel:</strong></p>
+      <ul style="margin-top:8px">
+        <li><strong>IP addresses (L3):</strong> Source and destination IPs stay the same end-to-end — from your laptop to Google's server across 10 routers. Never change.</li>
+        <li><strong>MAC addresses (L2):</strong> Rewritten at every hop. When a frame leaves your laptop, it's addressed to your gateway's MAC. When the router forwards it to the next hop, it strips that frame and creates a new one addressed to the next router's MAC. Repeat until the destination.</li>
+      </ul>
+      <p style="margin-top:10px">Think of it as: the IP is the final destination address on a package. The MAC is the label on the delivery truck — it changes at every depot, but the destination on the package never changes.</p>
+    </div>
+
+    <div class="panel panel-dialogue">
+      <div class="panel-label">&#9670; Apr 20 Dialogue</div>
+      <div class="dialogue-turn">
+        <div class="d-speaker d-student">Student (surprised)</div>
+        <div class="d-text d-highlight">"So every hop along the way, the MAC address in the frame header is changing? But the IP address stays the same the whole time? Is that right? Because that seems kind of wild to me — like two different addresses doing two different jobs at the same time..."</div>
+      </div>
+      <div class="dialogue-turn">
+        <div class="d-speaker d-trainer">Trainer (Khursheed)</div>
+        <div class="d-text trainer-text">"layer two, every switch... a layer two switch is going to discard the old frame header and put the new one. And then the layer three is where the IP header would change."</div>
+      </div>
+      <div class="dialogue-turn">
+        <div class="d-speaker d-student">Student corrected</div>
+        <div class="d-text d-highlight">"You said 'Layer 3 is where the IP header would change.' I think you mean the source MAC changes at every L2 hop, but the source and destination IP addresses stay the same throughout the journey — the IP header doesn't change."</div>
+      </div>
+    </div>
+
+    <div class="panel panel-probe">
+      <div class="panel-label">&#9654; Probing Follow-ups</div>
+      <div class="probe-item"><span class="probe-arrow">›</span>When your laptop sends a packet to 8.8.8.8 — what MAC address does it put in the destination field of the frame? Is it Google's MAC?</div>
+      <div class="probe-item"><span class="probe-arrow">›</span>At router hop #3 across the internet — the source IP in the packet is still your laptop's IP. How does the router at hop #3 even know your laptop's MAC address?</div>
+      <div class="probe-item"><span class="probe-arrow">›</span>What protocol does a device use to find the MAC address of its next hop before it can build the frame?</div>
+    </div>
+  </div>
+  <hr class="divider">
+
+  <!-- Q5 -->
+  <div class="q-entry" id="q5">
+    <div class="q-entry-header">
+      <div class="q-num">5</div>
+      <div>
+        <div class="q-entry-title">Question 5</div>
+        <div class="q-entry-text">"A Layer 2 switch — when it receives a frame, does it actually open up the IP header to decide where to forward it? Or does it just look at the destination MAC and move on without touching anything inside?"</div>
+      </div>
+    </div>
+
+    <div class="panel panel-answer">
+      <div class="panel-label">&#10003; Model Answer</div>
+      <p>A pure Layer 2 switch <strong>never opens the IP header</strong>. It looks only at the destination MAC address in the frame header, checks its FDB (Forwarding Database), finds the port that MAC lives on, and forwards the entire frame out that port — untouched.</p>
+      <p style="margin-top:10px">It doesn't care what's inside. It doesn't know if it's IP, IPX, or anything else. It just moves frames based on MAC addresses within a VLAN.</p>
+      <p style="margin-top:10px">The 5320 only opens the IP header when it's acting as an L3 gateway (i.e., the frame's destination MAC is the switch's own MAC address on a VLAN SVI).</p>
+    </div>
+
+    <div class="panel panel-dialogue">
+      <div class="panel-label">&#9670; Apr 20 Dialogue</div>
+      <div class="dialogue-turn">
+        <div class="d-speaker d-student">Student pushed</div>
+        <div class="d-text d-highlight">"A Layer 2 switch — your 5320 operating purely in switching mode on a given port — does it actually open the IP header at all? Or does it just look at the destination MAC address in the frame, find the port that MAC lives on, and forward the whole frame out that port... without ever caring what's inside?"</div>
+      </div>
+      <div class="dialogue-turn">
+        <div class="d-speaker d-trainer">Trainer (Khursheed)</div>
+        <div class="d-text trainer-text">"the layer two, so it doesn't really look into the data that's inside. It's just forwarding it to the port that's going to carry to the NextHop."</div>
+      </div>
+      <div class="dialogue-turn">
+        <div class="d-speaker d-student">Student confirmed</div>
+        <div class="d-text d-highlight">"Okay, that's a strong answer — you've got the core concept right."</div>
+      </div>
+    </div>
+
+    <div class="panel panel-probe">
+      <div class="panel-label">&#9654; Probing Follow-ups</div>
+      <div class="probe-item"><span class="probe-arrow">›</span>If a switch only forwards based on MAC — how does it know which port to send a brand new frame out of when it's never seen that MAC before?</div>
+      <div class="probe-item"><span class="probe-arrow">›</span>What's the FDB and how does the switch build it without ever looking at IP?</div>
+      <div class="probe-item"><span class="probe-arrow">›</span>The 5320 has both L2 and L3 capability. How does it know when to act as one versus the other?</div>
+    </div>
+  </div>
+  <hr class="divider">
+
+  <!-- Q6 -->
+  <div class="q-entry" id="q6">
+    <div class="q-entry-header">
+      <div class="q-num">6</div>
+      <div>
+        <div class="q-entry-title">Question 6</div>
+        <div class="q-entry-text">"What actually is the difference between a Layer 2 switch and a Layer 3 device? At what point does a device need to look at the IP header and make a routing decision — versus just forwarding based on MAC?"</div>
+      </div>
+    </div>
+
+    <div class="panel panel-answer">
+      <div class="panel-label">&#10003; Model Answer</div>
+      <p><strong>L2 switch:</strong> Forwards frames based on destination MAC. Operates within one broadcast domain (VLAN). Never looks at IP. Fast — decision is a simple table lookup.</p>
+      <p style="margin-top:8px"><strong>L3 device (router or L3 switch):</strong> A frame arrives addressed to the device's own MAC (meaning "this is for me"). The device then strips the L2 frame, examines the destination IP, looks up its routing table, builds a new L2 frame for the next hop, and forwards it. This is routing.</p>
+      <p style="margin-top:8px">The trigger: <strong>the destination MAC in the frame equals the device's own MAC.</strong> That's what signals "open the IP header and route this." If the destination MAC is someone else's, just switch it.</p>
+    </div>
+
+    <div class="panel panel-dialogue">
+      <div class="panel-label">&#9670; Apr 20 Dialogue</div>
+      <div class="dialogue-turn">
+        <div class="d-speaker d-student">Student asked</div>
+        <div class="d-text d-highlight">"What's the actual difference between a Layer 2 switch and a Layer 3 device? When does a device actually need to look at the IP header and make routing decisions based on it?"</div>
+      </div>
+      <div class="dialogue-turn">
+        <div class="d-speaker d-trainer">Trainer (Khursheed)</div>
+        <div class="d-text trainer-text">"the entire content of the packet is forwarded to the right port on the switch... layer two doesn't really look into the data... as opposed to layer three, which is the decision that needs to be made in terms of updating the IP address or not... if it's the actual device whose IP address matches the destination, then the content would be extracted from the frame."</div>
+      </div>
+      <div class="dialogue-turn">
+        <div class="d-speaker d-student">Student noted a gap</div>
+        <div class="d-text d-highlight">"You mentioned 'updating the IP address' at the gateway. Let me be precise: does the destination IP address actually change as the packet moves hop to hop across the internet?"</div>
+      </div>
+    </div>
+
+    <div class="panel panel-probe">
+      <div class="panel-label">&#9654; Probing Follow-ups</div>
+      <div class="probe-item"><span class="probe-arrow">›</span>A packet arrives at the 5320 with destination MAC = the switch's own VLAN 40 MAC. What does the switch do next?</div>
+      <div class="probe-item"><span class="probe-arrow">›</span>Same packet arrives with destination MAC = 00:11:22:33:44:55 (some other device). What does the switch do?</div>
+      <div class="probe-item"><span class="probe-arrow">›</span>Can the same physical 5320 act as both L2 and L3 at the same time on different VLANs?</div>
+    </div>
+  </div>
+  <hr class="divider">
+
+  <!-- Q7 -->
+  <div class="q-entry" id="q7">
+    <div class="q-entry-header">
+      <div class="q-num">7</div>
+      <div>
+        <div class="q-entry-title">Question 7</div>
+        <div class="q-entry-text">"I have Device A on port 1 in VLAN 10, and Device B on port 5 in VLAN 20 — same physical 5320. Can Device A reach Device B right now, without any extra configuration? Just yes or no, and why."</div>
+      </div>
+    </div>
+
+    <div class="panel panel-answer">
+      <div class="panel-label">&#10003; Model Answer</div>
+      <p><strong>No.</strong> VLANs are L2 partitions. Even though both devices are on the same physical switch, the switch refuses to forward frames between different VLAN IDs. VLAN 10 frames stay in VLAN 10; VLAN 20 frames stay in VLAN 20. They are in separate broadcast domains.</p>
+      <p style="margin-top:10px">To cross the boundary, you need an L3 mechanism — something with an IP address on each VLAN that can route between them. That's the role of the SVI (Switch Virtual Interface) / gateway IP.</p>
+    </div>
+
+    <div class="panel panel-dialogue">
+      <div class="panel-label">&#9670; Apr 20 Dialogue</div>
+      <div class="dialogue-turn">
+        <div class="d-speaker d-student">Student asked directly</div>
+        <div class="d-text d-highlight">"Device A plugged into port 1, assigned to VLAN 10. Device B plugged into port 5, assigned to VLAN 20. Both on the same physical switch. Can Device A reach Device B right now? Just yes or no, and then tell me why."</div>
+      </div>
+      <div class="dialogue-turn">
+        <div class="d-speaker d-trainer">Trainer (Khursheed)</div>
+        <div class="d-text d-highlight" style="border-left-color:#34d399!important;color:#a7f3d0!important">"No. It will not reach device B, although they are connected physically to the same switch. And the reason is because VLANs are separate subnetworks. They are partitioned, and there is no way without additional mechanism for any traffic to cross the boundary."</div>
+      </div>
+      <div class="dialogue-turn">
+        <div class="d-speaker d-student">Student confirmed</div>
+        <div class="d-text trainer-text">"Exactly. That's the core concept right there."</div>
+      </div>
+    </div>
+
+    <div class="panel panel-probe">
+      <div class="panel-label">&#9654; Probing Follow-ups</div>
+      <div class="probe-item"><span class="probe-arrow">›</span>What is that "additional mechanism" — name it specifically?</div>
+      <div class="probe-item"><span class="probe-arrow">›</span>If you plugged both devices into the same VLAN but different ports — would they be able to talk now? What changed?</div>
+      <div class="probe-item"><span class="probe-arrow">›</span>In your lab right now, VLAN_40 clients and VLAN_70 clients — can they reach each other? What would need to change?</div>
+    </div>
+  </div>
+  <hr class="divider">
+
+  <!-- Q8 -->
+  <div class="q-entry" id="q8">
+    <div class="q-entry-header">
+      <div class="q-num gap">8</div>
+      <div>
+        <div class="q-entry-title">Question 8 <span class="q-flag">Gap identified</span></div>
+        <div class="q-entry-text">"Device A is 10.10.10.5 on VLAN 10. Device B is 10.20.20.5 on VLAN 20. Device A can't reach Device B directly — it sends to its default gateway. What should that gateway IP be, and where does it live?"</div>
+      </div>
+    </div>
+
+    <div class="panel panel-answer">
+      <div class="panel-label">&#10003; Model Answer</div>
+      <p>Device A's default gateway should be <code>10.10.10.1</code> — an IP address owned by the <strong>5320 itself</strong> on VLAN 10. The switch becomes the gateway by having this IP assigned to its VLAN 10 interface (SVI equivalent).</p>
+      <p style="margin-top:10px">Similarly, VLAN 20 needs <code>10.20.20.1</code> assigned to the switch on VLAN 20. Both gateway IPs live on the same physical 5320 — that's what makes it the L3 router for both VLANs.</p>
+      <p style="margin-top:10px">EXOS command: <code>configure vlan VLAN_10 ipaddress 10.10.10.1/24</code> followed by <code>enable ipforwarding vlan VLAN_10</code>.</p>
+    </div>
+
+    <div class="panel panel-dialogue">
+      <div class="panel-label">&#9670; Apr 20 Dialogue</div>
+      <div class="dialogue-turn">
+        <div class="d-speaker d-student">Student asked</div>
+        <div class="d-text d-highlight">"What should Device A's default gateway IP address be? And where does that gateway live?"</div>
+      </div>
+      <div class="dialogue-turn">
+        <div class="d-speaker d-trainer">Trainer (Khursheed)</div>
+        <div class="d-text trainer-text">"If it's the ten ten zero one, then that is the gateway I would choose. And it's actually now the same device — the switch is now also the gateway because the other hardware Device B is connected on the same switch."</div>
+      </div>
+      <div class="dialogue-turn">
+        <div class="d-speaker d-student">Student confirmed and extended</div>
+        <div class="d-text d-highlight">"Yes! The 5320 itself becomes the gateway. Device A's default gateway is 10.10.10.1 — which is an IP address owned by the 5320 itself on VLAN 10."</div>
+      </div>
+    </div>
+
+    <div class="panel panel-probe">
+      <div class="panel-label">&#9654; Probing Follow-ups</div>
+      <div class="probe-item"><span class="probe-arrow">›</span>Device A does ARP: "Who has 10.10.10.1?" — who responds, and with what?</div>
+      <div class="probe-item"><span class="probe-arrow">›</span>After Device A gets the gateway's MAC, it sends the frame to the 5320. The 5320 receives it on VLAN 10, looks at destination IP 10.20.20.5. Walk me through exactly what it does next.</div>
+      <div class="probe-item"><span class="probe-arrow">›</span>In EXOS, what command assigns an IP address to a VLAN — and what second command do you also need to enable routing on it?</div>
+    </div>
+  </div>
+  <hr class="divider">
+
+  <!-- Q9 -->
+  <div class="q-entry" id="q9">
+    <div class="q-entry-header">
+      <div class="q-num gap">9</div>
+      <div>
+        <div class="q-entry-title">Question 9 <span class="q-flag">Gap identified</span></div>
+        <div class="q-entry-text">"I know there's a command like <code style="background:#0a0f1a;color:#60a5fa;padding:1px 5px;border-radius:3px">configure vlan 10 dhcp-options default-gateway 10.10.10.1</code> — isn't that the same as making the switch the gateway? Or is that doing something different?"</div>
+      </div>
+    </div>
+
+    <div class="panel panel-answer">
+      <div class="panel-label">&#10003; Model Answer — This is the key distinction</div>
+      <p>These are <strong>two completely different things</strong> and mixing them up is one of the most common EXOS misunderstandings:</p>
+      <ul style="margin-top:8px">
+        <li><code>configure vlan VLAN_10 dhcp-options default-gateway 10.10.10.1</code> — tells the DHCP server what gateway IP to hand out to clients in their DHCP lease. The switch is acting as a DHCP server telling clients "your gateway is X." The switch itself does NOT own that IP.</li>
+        <li><code>configure vlan VLAN_10 ipaddress 10.10.10.1/24</code> — assigns the IP address directly to the switch's VLAN 10 interface. Now the switch <em>owns</em> that IP and will respond to ARP requests for it. This is what makes it a gateway.</li>
+      </ul>
+      <p style="margin-top:10px">You need <strong>both</strong> in a complete setup: assign the IP so the switch is the gateway, then configure DHCP options to tell clients where the gateway is. But the switch can't be the gateway without the <code>ipaddress</code> command.</p>
+    </div>
+
+    <div class="panel panel-dialogue">
+      <div class="panel-label">&#9670; Apr 20 Dialogue</div>
+      <div class="dialogue-turn">
+        <div class="d-speaker d-trainer">Trainer (Khursheed) — reaching for syntax</div>
+        <div class="d-text trainer-text">"I think the syntax is, like, configure VLAN, VLAN ten, DHCP dash options default gateway, you know, ten, twenty, zero one... So you have to configure the VLAN and to know what the gateway is gonna be."</div>
+      </div>
+      <div class="dialogue-turn">
+        <div class="d-speaker d-student">Student flagged the gap</div>
+        <div class="d-text d-highlight">"What you just described — configure vlan 10 dhcp-options default-gateway — that's telling DHCP clients what gateway IP to use when they get a lease. That's useful, but it's not the same as the switch itself owning that gateway IP. The question is: does the 5320 itself need to have an IP address assigned to VLAN 10 in order to be the gateway?"</div>
+      </div>
+      <div class="dialogue-turn">
+        <div class="d-speaker d-trainer">Trainer acknowledged</div>
+        <div class="d-text trainer-text">"Yeah. It's that one. Configure VLAN ten with the IP address."</div>
+      </div>
+    </div>
+
+    <div class="panel panel-probe">
+      <div class="panel-label">&#9654; Probing Follow-ups</div>
+      <div class="probe-item"><span class="probe-arrow">›</span>If you only run the <code>dhcp-options default-gateway</code> command and skip the <code>ipaddress</code> command — what happens when a client ARPs for the gateway? Does anyone respond?</div>
+      <div class="probe-item"><span class="probe-arrow">›</span>In your live lab, your VLAN_40 clients get a correct gateway in their DHCP lease. Does that guarantee the 5320 actually owns that IP and can route traffic?</div>
+      <div class="probe-item"><span class="probe-arrow">›</span>What EXOS command would you run to verify the switch has IP addresses assigned to its VLANs right now?</div>
+    </div>
+  </div>
+  <hr class="divider">
+
+  <!-- Q10 -->
+  <div class="q-entry" id="q10">
+    <div class="q-entry-header">
+      <div class="q-num gap">10</div>
+      <div>
+        <div class="q-entry-title">Question 10 <span class="q-flag">Gap identified</span></div>
+        <div class="q-entry-text">"If the 5320 is going to route from VLAN 10 to VLAN 20 — does it only need the gateway IP for VLAN 10, or does it need IP addresses assigned for both VLANs? And do both have to live on the same switch?"</div>
+      </div>
+    </div>
+
+    <div class="panel panel-answer">
+      <div class="panel-label">&#10003; Model Answer</div>
+      <p><strong>Both VLANs need gateway IPs, and both must be on the same switch</strong> for local inter-VLAN routing.</p>
+      <ul style="margin-top:8px">
+        <li><code>configure vlan VLAN_10 ipaddress 10.10.10.1/24</code> + <code>enable ipforwarding vlan VLAN_10</code></li>
+        <li><code>configure vlan VLAN_20 ipaddress 10.20.20.1/24</code> + <code>enable ipforwarding vlan VLAN_20</code></li>
+      </ul>
+      <p style="margin-top:10px">Without the VLAN 20 IP: the switch receives the packet on VLAN 10, looks at the routing table for 10.20.20.x, finds no local route, and drops it. It doesn't know VLAN 20 is reachable.</p>
+      <p style="margin-top:10px">With both IPs: the switch's routing table automatically has connected routes for both subnets, so it knows exactly where to forward traffic between them. Both routes are directly connected — no static routes needed.</p>
+    </div>
+
+    <div class="panel panel-dialogue">
+      <div class="panel-label">&#9670; Apr 20 Dialogue</div>
+      <div class="dialogue-turn">
+        <div class="d-speaker d-trainer">Trainer (Khursheed) — the "aha" moment</div>
+        <div class="d-text d-highlight" style="border-left-color:#34d399!important;color:#a7f3d0!important">"Configure VLAN ten IP address ten ten ten one two fifty five... would that not need also to be done on the same switch for configure VLAN twenty IP address of ten twenty... Meaning, don't both IP addresses belong to both VLANs, but somehow need to be written into the same switch?"</div>
+      </div>
+      <div class="dialogue-turn">
+        <div class="d-speaker d-student">Student confirmed</div>
+        <div class="d-text d-highlight">"YES! Exactly right. Both VLANs need to have gateway IPs configured on the same switch for inter-VLAN routing to work."</div>
+      </div>
+      <div class="dialogue-turn">
+        <div class="d-speaker d-trainer">Trainer — action item</div>
+        <div class="d-text trainer-text">"I didn't test it yet. I'll do that in a session maybe tomorrow morning."</div>
+      </div>
+    </div>
+
+    <div class="panel panel-probe">
+      <div class="panel-label">&#9654; Probing Follow-ups</div>
+      <div class="probe-item"><span class="probe-arrow">›</span>You have two 5320 switches. Could you put VLAN 40's gateway on SW1 and VLAN 70's gateway on SW2 and still route between them? What would you need to add?</div>
+      <div class="probe-item"><span class="probe-arrow">›</span>After configuring both VLAN IPs on the 5320 — what EXOS command shows you the routing table to confirm both connected routes are there?</div>
+      <div class="probe-item"><span class="probe-arrow">›</span>You configured the gateway IPs but inter-VLAN pings still fail. What's the one EXOS command you probably forgot?</div>
+    </div>
+  </div>
+
+</div><!-- /main -->
+
+<script>
+  const navLinks = document.querySelectorAll('.nav-item');
+  const sections = ['q1','q2','q3','q4','q5','q6','q7','q8','q9','q10'].map(id => document.getElementById(id));
+  window.addEventListener('scroll', () => {
+    let current = 0;
+    sections.forEach((el, i) => { if (el && window.scrollY >= el.offsetTop - 80) current = i; });
+    navLinks.forEach((l, i) => l.classList.toggle('active', i === current));
+  });
+  function scrollTo(id) { document.getElementById(id).scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+</script>
+</body>
+</html>
