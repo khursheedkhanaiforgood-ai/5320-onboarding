@@ -1,0 +1,924 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>L2/L3 Training — Q&amp;A Tracker</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; background: #0a0f1a; color: #e2e8f0; display: flex; min-height: 100vh; }
+
+  /* Sidebar */
+  .sidebar { width: 240px; flex-shrink: 0; background: #0d1422; border-right: 1px solid #1e2d45; padding: 24px 0; position: sticky; top: 0; height: 100vh; overflow-y: auto; }
+  .sidebar-title { font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.18em; color: #60a5fa; padding: 0 18px 14px; border-bottom: 1px solid #1e2d45; margin-bottom: 14px; }
+  .overall-progress { padding: 0 18px 16px; border-bottom: 1px solid #1e2d45; margin-bottom: 14px; }
+  .overall-label { font-size: 0.68rem; color: #94a3b8; margin-bottom: 6px; }
+  .progress-bar-wrap { background: #1e2d45; border-radius: 4px; height: 6px; }
+  .progress-bar { background: #34d399; height: 6px; border-radius: 4px; transition: width 0.3s; }
+  .overall-count { font-size: 0.68rem; color: #34d399; margin-top: 4px; text-align: right; }
+  .nav-item { display: block; padding: 9px 18px; text-decoration: none; color: #94a3b8; font-size: 0.78rem; border-left: 3px solid transparent; transition: all 0.15s; cursor: pointer; }
+  .nav-item:hover { color: #e2e8f0; background: #131c2e; }
+  .nav-item.active { color: #60a5fa; border-left-color: #60a5fa; background: #131c2e; }
+  .nav-session-label { font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #475569; padding: 10px 18px 4px; }
+  .nav-progress { font-size: 0.62rem; color: #475569; float: right; }
+  .nav-progress.done { color: #34d399; }
+
+  /* Main */
+  .main { flex: 1; padding: 40px 48px; max-width: 860px; }
+  .page-header { margin-bottom: 36px; }
+  .page-header h1 { font-size: 1.5rem; color: #a78bfa; margin-bottom: 6px; }
+  .page-header p { color: #64748b; font-size: 0.88rem; line-height: 1.6; }
+  .tag-row { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+  .tag { font-size: 0.68rem; font-weight: 600; padding: 3px 10px; border-radius: 20px; }
+  .tag-blue { background: #1e3a5f; color: #60a5fa; }
+  .tag-green { background: #0d2b1f; color: #34d399; }
+  .tag-purple { background: #2d1b69; color: #a78bfa; }
+
+  /* Session blocks */
+  .session { margin-bottom: 48px; scroll-margin-top: 24px; }
+  .session-header { display: flex; align-items: center; gap: 14px; margin-bottom: 18px; padding-bottom: 12px; border-bottom: 1px solid #1e2d45; }
+  .session-num { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.78rem; font-weight: 700; flex-shrink: 0; }
+  .s1 { background: #1e3a5f; color: #60a5fa; }
+  .s2 { background: #0d2b1f; color: #34d399; }
+  .s3 { background: #2d1b69; color: #a78bfa; }
+  .s4 { background: #3b1a1a; color: #f87171; }
+  .s5 { background: #1a2b1a; color: #86efac; }
+  .s6 { background: #2b2210; color: #fbbf24; }
+  .session-meta { flex: 1; }
+  .session-title { font-size: 1.05rem; font-weight: 700; color: #e2e8f0; margin-bottom: 3px; }
+  .session-sub { font-size: 0.75rem; color: #64748b; }
+  .session-badge { font-size: 0.65rem; font-weight: 700; padding: 4px 10px; border-radius: 20px; background: #1e2d45; color: #94a3b8; white-space: nowrap; }
+  .session-prog-wrap { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; }
+  .session-prog-bar-wrap { flex: 1; background: #1e2d45; border-radius: 4px; height: 4px; }
+  .session-prog-bar { height: 4px; border-radius: 4px; transition: width 0.3s; }
+  .session-prog-label { font-size: 0.68rem; color: #64748b; white-space: nowrap; min-width: 48px; text-align: right; }
+
+  /* Question cards */
+  .q-list { display: flex; flex-direction: column; gap: 10px; }
+  .q-card { background: #0d1422; border: 1px solid #1e2d45; border-radius: 8px; padding: 14px 16px; transition: border-color 0.15s; }
+  .q-card:hover { border-color: #2d4a6e; }
+  .q-card.checked { border-color: #065f46; background: #0a1f17; }
+  .q-row { display: flex; align-items: flex-start; gap: 12px; }
+  .q-checkbox { width: 18px; height: 18px; border-radius: 4px; border: 2px solid #2d4a6e; background: transparent; cursor: pointer; flex-shrink: 0; margin-top: 2px; appearance: none; -webkit-appearance: none; transition: all 0.15s; }
+  .q-checkbox:checked { background: #059669; border-color: #059669; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M13.485 1.431a1.473 1.473 0 0 0-2.084 0l-6.414 6.473-2.05-2.068a1.473 1.473 0 0 0-2.084 2.066l3.09 3.12a1.474 1.474 0 0 0 2.083 0l7.459-7.529a1.474 1.474 0 0 0 0-2.062z'/%3E%3C/svg%3E"); background-size: 10px; background-repeat: no-repeat; background-position: center; }
+  .q-content { flex: 1; }
+  .q-speaker { font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 5px; }
+  .q-speaker.student { color: #60a5fa; }
+  .q-text { font-size: 0.875rem; color: #cbd5e1; line-height: 1.6; }
+  .q-card.checked .q-text { color: #64748b; }
+  .q-notes-toggle { font-size: 0.68rem; color: #475569; cursor: pointer; margin-top: 8px; text-decoration: underline; display: inline-block; }
+  .q-notes-toggle:hover { color: #94a3b8; }
+  .q-notes { display: none; margin-top: 8px; }
+  .q-notes textarea { width: 100%; background: #0a0f1a; border: 1px solid #1e2d45; border-radius: 4px; color: #94a3b8; font-size: 0.78rem; padding: 8px 10px; resize: vertical; min-height: 52px; font-family: inherit; }
+  .q-notes textarea:focus { outline: none; border-color: #2d4a6e; }
+  .q-notes.open { display: block; }
+
+  /* Session actions */
+  .session-actions { display: flex; gap: 10px; margin-top: 16px; }
+  .btn-reset { font-size: 0.72rem; color: #475569; border: 1px solid #1e2d45; background: transparent; padding: 5px 12px; border-radius: 4px; cursor: pointer; }
+  .btn-reset:hover { border-color: #ef4444; color: #ef4444; }
+  .btn-complete { font-size: 0.72rem; color: #34d399; border: 1px solid #065f46; background: transparent; padding: 5px 12px; border-radius: 4px; cursor: pointer; }
+  .btn-complete:hover { background: #0d2b1f; }
+
+  @media (max-width: 700px) { .sidebar { display: none; } .main { padding: 24px 16px; } }
+</style>
+</head>
+<body>
+
+<nav class="sidebar">
+  <div class="sidebar-title">L2/L3 Training Tracker</div>
+  <div class="overall-progress">
+    <div class="overall-label">Overall Progress</div>
+    <div class="progress-bar-wrap"><div class="progress-bar" id="overall-bar" style="width:0%"></div></div>
+    <div class="overall-count" id="overall-count">0 / 0 covered</div>
+  </div>
+  <div class="nav-session-label">Sessions</div>
+  <a class="nav-item active" onclick="scrollTo('s1')">S1 — OSI Model <span class="nav-progress" id="nav-p1">0/8</span></a>
+  <a class="nav-item" onclick="scrollTo('s2')">S2 — Layer 2 <span class="nav-progress" id="nav-p2">0/8</span></a>
+  <a class="nav-item" onclick="scrollTo('s3')">S3 — Layer 3 <span class="nav-progress" id="nav-p3">0/8</span></a>
+  <a class="nav-item" onclick="scrollTo('s4')">S4 — Wireless <span class="nav-progress" id="nav-p4">0/8</span></a>
+  <a class="nav-item" onclick="scrollTo('s5')">S5 — XIQ / Platform <span class="nav-progress" id="nav-p5">0/7</span></a>
+  <a class="nav-item" onclick="scrollTo('s6')">S6 — Troubleshooting <span class="nav-progress" id="nav-p6">0/8</span></a>
+</nav>
+
+<div class="main">
+
+  <div class="page-header">
+    <h1>L2 / L3 Networking — Training Q&amp;A</h1>
+    <p>30-day development plan · 6 sessions · 30 min each<br>
+    Questions are from the student. Check each one off as it's covered in the session.</p>
+    <div class="tag-row">
+      <span class="tag tag-blue">Student asks · Trainer explains</span>
+      <span class="tag tag-green">No answers here — keep separate</span>
+      <span class="tag tag-purple">Progress saved in browser</span>
+    </div>
+  </div>
+
+  <!-- SESSION 1 -->
+  <div class="session" id="s1">
+    <div class="session-header">
+      <div class="session-num s1">1</div>
+      <div class="session-meta">
+        <div class="session-title">OSI Model Fundamentals — Layers 1–3</div>
+        <div class="session-sub">What each layer does · how traffic moves · where problems live</div>
+      </div>
+      <div class="session-badge">30 min · 8 questions</div>
+    </div>
+    <div class="session-prog-wrap">
+      <div class="session-prog-bar-wrap"><div class="session-prog-bar s1" id="bar-s1" style="width:0%;background:#60a5fa"></div></div>
+      <div class="session-prog-label" id="label-s1">0 / 8</div>
+    </div>
+    <div class="q-list" id="list-s1">
+
+      <div class="q-card" data-session="s1">
+        <div class="q-row">
+          <input type="checkbox" class="q-checkbox">
+          <div class="q-content">
+            <div class="q-speaker student">Student</div>
+            <div class="q-text">So the OSI model — is it something that actually exists in hardware, or is it more just a way of thinking about how networks work?</div>
+            <span class="q-notes-toggle">+ notes</span>
+            <div class="q-notes"><textarea placeholder="Session notes..."></textarea></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="q-card" data-session="s1">
+        <div class="q-row">
+          <input type="checkbox" class="q-checkbox">
+          <div class="q-content">
+            <div class="q-speaker student">Student</div>
+            <div class="q-text">At Layer 1 it's just the physical stuff — cables and ports, right? Where does Wi-Fi fit into that?</div>
+            <span class="q-notes-toggle">+ notes</span>
+            <div class="q-notes"><textarea placeholder="Session notes..."></textarea></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="q-card" data-session="s1">
+        <div class="q-row">
+          <input type="checkbox" class="q-checkbox">
+          <div class="q-content">
+            <div class="q-speaker student">Student</div>
+            <div class="q-text">You said Layer 2 uses MAC addresses and Layer 3 uses IP addresses. Why do we need both? Can't we just use one?</div>
+            <span class="q-notes-toggle">+ notes</span>
+            <div class="q-notes"><textarea placeholder="Session notes..."></textarea></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="q-card" data-session="s1">
+        <div class="q-row">
+          <input type="checkbox" class="q-checkbox">
+          <div class="q-content">
+            <div class="q-speaker student">Student</div>
+            <div class="q-text">If a switch port shows UP/UP but the device still can't communicate — I can't blame the cable. So which layer do I look at next?</div>
+            <span class="q-notes-toggle">+ notes</span>
+            <div class="q-notes"><textarea placeholder="Session notes..."></textarea></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="q-card" data-session="s1">
+        <div class="q-row">
+          <input type="checkbox" class="q-checkbox">
+          <div class="q-content">
+            <div class="q-speaker student">Student</div>
+            <div class="q-text">When someone says "it's a Layer 2 problem" — what does that actually mean in plain terms? Like what's broken?</div>
+            <span class="q-notes-toggle">+ notes</span>
+            <div class="q-notes"><textarea placeholder="Session notes..."></textarea></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="q-card" data-session="s1">
+        <div class="q-row">
+          <input type="checkbox" class="q-checkbox">
+          <div class="q-content">
+            <div class="q-speaker student">Student</div>
+            <div class="q-text">Does a router have to process all seven layers every time it forwards a packet? That seems like a lot.</div>
+            <span class="q-notes-toggle">+ notes</span>
+            <div class="q-notes"><textarea placeholder="Session notes..."></textarea></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="q-card" data-session="s1">
+        <div class="q-row">
+          <input type="checkbox" class="q-checkbox">
+          <div class="q-content">
+            <div class="q-speaker student">Student</div>
+            <div class="q-text">I keep seeing ARP mentioned — is it Layer 2 or Layer 3? It seems like it does both.</div>
+            <span class="q-notes-toggle">+ notes</span>
+            <div class="q-notes"><textarea placeholder="Session notes..."></textarea></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="q-card" data-session="s1">
+        <div class="q-row">
+          <input type="checkbox" class="q-checkbox">
+          <div class="q-content">
+            <div class="q-speaker student">Student</div>
+            <div class="q-text">If I can ping my default gateway but I can't reach 8.8.8.8 — which layer is broken and how do you figure that out?</div>
+            <span class="q-notes-toggle">+ notes</span>
+            <div class="q-notes"><textarea placeholder="Session notes..."></textarea></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <div class="session-actions">
+      <button class="btn-complete" onclick="markAllSession('s1', true)">Mark all covered</button>
+      <button class="btn-reset" onclick="markAllSession('s1', false)">Reset session</button>
+    </div>
+  </div>
+
+  <!-- SESSION 2 -->
+  <div class="session" id="s2">
+    <div class="session-header">
+      <div class="session-num s2">2</div>
+      <div class="session-meta">
+        <div class="session-title">Layer 2 — MAC Addresses, Ethernet &amp; VLANs</div>
+        <div class="session-sub">Forwarding · FDB · VLAN segmentation · trunk vs access · STP</div>
+      </div>
+      <div class="session-badge">30 min · 8 questions</div>
+    </div>
+    <div class="session-prog-wrap">
+      <div class="session-prog-bar-wrap"><div class="session-prog-bar" id="bar-s2" style="width:0%;background:#34d399"></div></div>
+      <div class="session-prog-label" id="label-s2">0 / 8</div>
+    </div>
+    <div class="q-list" id="list-s2">
+
+      <div class="q-card" data-session="s2">
+        <div class="q-row">
+          <input type="checkbox" class="q-checkbox">
+          <div class="q-content">
+            <div class="q-speaker student">Student</div>
+            <div class="q-text">Where does a MAC address come from? Is it permanent or can it be changed?</div>
+            <span class="q-notes-toggle">+ notes</span>
+            <div class="q-notes"><textarea placeholder="Session notes..."></textarea></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="q-card" data-session="s2">
+        <div class="q-row">
+          <input type="checkbox" class="q-checkbox">
+          <div class="q-content">
+            <div class="q-speaker student">Student</div>
+            <div class="q-text">How does the switch know which port to send a frame out of? Does it have to check every port?</div>
+            <span class="q-notes-toggle">+ notes</span>
+            <div class="q-notes"><textarea placeholder="Session notes..."></textarea></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="q-card" data-session="s2">
+        <div class="q-row">
+          <input type="checkbox" class="q-checkbox">
+          <div class="q-content">
+            <div class="q-speaker student">Student</div>
+            <div class="q-text">What's the FDB? Is it the same as an ARP table or are those different things?</div>
+            <span class="q-notes-toggle">+ notes</span>
+            <div class="q-notes"><textarea placeholder="Session notes..."></textarea></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="q-card" data-session="s2">
+        <div class="q-row">
+          <input type="checkbox" class="q-checkbox">
+          <div class="q-content">
+            <div class="q-speaker student">Student</div>
+            <div class="q-text">If the switch doesn't know where a MAC address is — does it just drop the frame or does something else happen?</div>
+            <span class="q-notes-toggle">+ notes</span>
+            <div class="q-notes"><textarea placeholder="Session notes..."></textarea></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="q-card" data-session="s2">
+        <div class="q-row">
+          <input type="checkbox" class="q-checkbox">
+          <div class="q-content">
+            <div class="q-speaker student">Student</div>
+            <div class="q-text">OK so a VLAN — is it physically separating the network, or is it more like labelling? Because it's still the same switch.</div>
+            <span class="q-notes-toggle">+ notes</span>
+            <div class="q-notes"><textarea placeholder="Session notes..."></textarea></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="q-card" data-session="s2">
+        <div class="q-row">
+          <input type="checkbox" class="q-checkbox">
+          <div class="q-content">
+            <div class="q-speaker student">Student</div>
+            <div class="q-text">I keep getting confused between tagged and untagged ports. Can you walk me through the difference — like when would I use each one?</div>
+            <span class="q-notes-toggle">+ notes</span>
+            <div class="q-notes"><textarea placeholder="Session notes..."></textarea></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="q-card" data-session="s2">
+        <div class="q-row">
+          <input type="checkbox" class="q-checkbox">
+          <div class="q-content">
+            <div class="q-speaker student">Student</div>
+            <div class="q-text">If two devices are plugged into the same switch but in different VLANs — can they even talk to each other? Or are they completely isolated?</div>
+            <span class="q-notes-toggle">+ notes</span>
+            <div class="q-notes"><textarea placeholder="Session notes..."></textarea></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="q-card" data-session="s2">
+        <div class="q-row">
+          <input type="checkbox" class="q-checkbox">
+          <div class="q-content">
+            <div class="q-speaker student">Student</div>
+            <div class="q-text">What is STP? I heard it blocks ports on purpose — why would you ever want to block a switch port?</div>
+            <span class="q-notes-toggle">+ notes</span>
+            <div class="q-notes"><textarea placeholder="Session notes..."></textarea></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <div class="session-actions">
+      <button class="btn-complete" onclick="markAllSession('s2', true)">Mark all covered</button>
+      <button class="btn-reset" onclick="markAllSession('s2', false)">Reset session</button>
+    </div>
+  </div>
+
+  <!-- SESSION 3 -->
+  <div class="session" id="s3">
+    <div class="session-header">
+      <div class="session-num s3">3</div>
+      <div class="session-meta">
+        <div class="session-title">Layer 3 — IPv4, Subnetting &amp; Routing</div>
+        <div class="session-sub">IP structure · subnet math · default gateway · static routes · SVIs</div>
+      </div>
+      <div class="session-badge">30 min · 8 questions</div>
+    </div>
+    <div class="session-prog-wrap">
+      <div class="session-prog-bar-wrap"><div class="session-prog-bar" id="bar-s3" style="width:0%;background:#a78bfa"></div></div>
+      <div class="session-prog-label" id="label-s3">0 / 8</div>
+    </div>
+    <div class="q-list" id="list-s3">
+
+      <div class="q-card" data-session="s3">
+        <div class="q-row">
+          <input type="checkbox" class="q-checkbox">
+          <div class="q-content">
+            <div class="q-speaker student">Student</div>
+            <div class="q-text">I get that an IP address is like a home address. But what does the /24 at the end actually do — what is it telling me?</div>
+            <span class="q-notes-toggle">+ notes</span>
+            <div class="q-notes"><textarea placeholder="Session notes..."></textarea></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="q-card" data-session="s3">
+        <div class="q-row">
+          <input type="checkbox" class="q-checkbox">
+          <div class="q-content">
+            <div class="q-speaker student">Student</div>
+            <div class="q-text">If I have a device at 10.40.0.50/24 — what's the network address, what's the broadcast, and what's the valid range for hosts?</div>
+            <span class="q-notes-toggle">+ notes</span>
+            <div class="q-notes"><textarea placeholder="Session notes..."></textarea></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="q-card" data-session="s3">
+        <div class="q-row">
+          <input type="checkbox" class="q-checkbox">
+          <div class="q-content">
+            <div class="q-speaker student">Student</div>
+            <div class="q-text">How do I work out how many devices fit in a /24 versus a /25? Is there a quick way to calculate that?</div>
+            <span class="q-notes-toggle">+ notes</span>
+            <div class="q-notes"><textarea placeholder="Session notes..."></textarea></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="q-card" data-session="s3">
+        <div class="q-row">
+          <input type="checkbox" class="q-checkbox">
+          <div class="q-content">
+            <div class="q-speaker student">Student</div>
+            <div class="q-text">Why does every device need a default gateway? What actually happens if it's set wrong or missing?</div>
+            <span class="q-notes-toggle">+ notes</span>
+            <div class="q-notes"><textarea placeholder="Session notes..."></textarea></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="q-card" data-session="s3">
+        <div class="q-row">
+          <input type="checkbox" class="q-checkbox">
+          <div class="q-content">
+            <div class="q-speaker student">Student</div>
+            <div class="q-text">If two devices are on the same switch but in different subnets — can they communicate directly, or does something else have to get involved?</div>
+            <span class="q-notes-toggle">+ notes</span>
+            <div class="q-notes"><textarea placeholder="Session notes..."></textarea></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="q-card" data-session="s3">
+        <div class="q-row">
+          <input type="checkbox" class="q-checkbox">
+          <div class="q-content">
+            <div class="q-speaker student">Student</div>
+            <div class="q-text">What's a static route and when would you use one? Is there a reason not to just let the network figure it out automatically?</div>
+            <span class="q-notes-toggle">+ notes</span>
+            <div class="q-notes"><textarea placeholder="Session notes..."></textarea></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="q-card" data-session="s3">
+        <div class="q-row">
+          <input type="checkbox" class="q-checkbox">
+          <div class="q-content">
+            <div class="q-speaker student">Student</div>
+            <div class="q-text">I keep hearing about an SVI. What is it, and why do I need one just to route traffic between two VLANs on the same switch?</div>
+            <span class="q-notes-toggle">+ notes</span>
+            <div class="q-notes"><textarea placeholder="Session notes..."></textarea></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="q-card" data-session="s3">
+        <div class="q-row">
+          <input type="checkbox" class="q-checkbox">
+          <div class="q-content">
+            <div class="q-speaker student">Student</div>
+            <div class="q-text">A device gets a 169.254.x.x address. I know that's bad — but what exactly is happening and what does it point to?</div>
+            <span class="q-notes-toggle">+ notes</span>
+            <div class="q-notes"><textarea placeholder="Session notes..."></textarea></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <div class="session-actions">
+      <button class="btn-complete" onclick="markAllSession('s3', true)">Mark all covered</button>
+      <button class="btn-reset" onclick="markAllSession('s3', false)">Reset session</button>
+    </div>
+  </div>
+
+  <!-- SESSION 4 -->
+  <div class="session" id="s4">
+    <div class="session-header">
+      <div class="session-num s4">4</div>
+      <div class="session-meta">
+        <div class="session-title">Wireless Networking Fundamentals</div>
+        <div class="session-sub">RF · RSSI · frequency bands · channels · client association · VLAN mapping</div>
+      </div>
+      <div class="session-badge">30 min · 8 questions</div>
+    </div>
+    <div class="session-prog-wrap">
+      <div class="session-prog-bar-wrap"><div class="session-prog-bar" id="bar-s4" style="width:0%;background:#f87171"></div></div>
+      <div class="session-prog-label" id="label-s4">0 / 8</div>
+    </div>
+    <div class="q-list" id="list-s4">
+
+      <div class="q-card" data-session="s4">
+        <div class="q-row">
+          <input type="checkbox" class="q-checkbox">
+          <div class="q-content">
+            <div class="q-speaker student">Student</div>
+            <div class="q-text">RSSI is measured in dBm — is a bigger number better, or is it the other way around? I always get confused because the numbers are negative.</div>
+            <span class="q-notes-toggle">+ notes</span>
+            <div class="q-notes"><textarea placeholder="Session notes..."></textarea></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="q-card" data-session="s4">
+        <div class="q-row">
+          <input type="checkbox" class="q-checkbox">
+          <div class="q-content">
+            <div class="q-speaker student">Student</div>
+            <div class="q-text">Why do we have both 2.4 GHz and 5 GHz? If 5 GHz is faster, why would anyone use 2.4 GHz at all?</div>
+            <span class="q-notes-toggle">+ notes</span>
+            <div class="q-notes"><textarea placeholder="Session notes..."></textarea></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="q-card" data-session="s4">
+        <div class="q-row">
+          <input type="checkbox" class="q-checkbox">
+          <div class="q-content">
+            <div class="q-speaker student">Student</div>
+            <div class="q-text">What are non-overlapping channels and why do they matter? What happens if two nearby APs are on the same channel?</div>
+            <span class="q-notes-toggle">+ notes</span>
+            <div class="q-notes"><textarea placeholder="Session notes..."></textarea></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="q-card" data-session="s4">
+        <div class="q-row">
+          <input type="checkbox" class="q-checkbox">
+          <div class="q-content">
+            <div class="q-speaker student">Student</div>
+            <div class="q-text">My phone shows full Wi-Fi bars but performance is still bad. If signal strength is fine, what else could be causing it?</div>
+            <span class="q-notes-toggle">+ notes</span>
+            <div class="q-notes"><textarea placeholder="Session notes..."></textarea></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="q-card" data-session="s4">
+        <div class="q-row">
+          <input type="checkbox" class="q-checkbox">
+          <div class="q-content">
+            <div class="q-speaker student">Student</div>
+            <div class="q-text">If there are two APs both broadcasting the same SSID, how does my phone decide which one to connect to?</div>
+            <span class="q-notes-toggle">+ notes</span>
+            <div class="q-notes"><textarea placeholder="Session notes..."></textarea></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="q-card" data-session="s4">
+        <div class="q-row">
+          <input type="checkbox" class="q-checkbox">
+          <div class="q-content">
+            <div class="q-speaker student">Student</div>
+            <div class="q-text">What's the difference between authentication and association when a client connects to an AP? Are they the same thing?</div>
+            <span class="q-notes-toggle">+ notes</span>
+            <div class="q-notes"><textarea placeholder="Session notes..."></textarea></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="q-card" data-session="s4">
+        <div class="q-row">
+          <input type="checkbox" class="q-checkbox">
+          <div class="q-content">
+            <div class="q-speaker student">Student</div>
+            <div class="q-text">How does the AP know which VLAN to put a wireless client in? Is that configured on the AP or somewhere else?</div>
+            <span class="q-notes-toggle">+ notes</span>
+            <div class="q-notes"><textarea placeholder="Session notes..."></textarea></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="q-card" data-session="s4">
+        <div class="q-row">
+          <input type="checkbox" class="q-checkbox">
+          <div class="q-content">
+            <div class="q-speaker student">Student</div>
+            <div class="q-text">A client shows as connected to the AP in XIQ but gets a 169.254 address. Is that a wireless problem or something on the wired side?</div>
+            <span class="q-notes-toggle">+ notes</span>
+            <div class="q-notes"><textarea placeholder="Session notes..."></textarea></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <div class="session-actions">
+      <button class="btn-complete" onclick="markAllSession('s4', true)">Mark all covered</button>
+      <button class="btn-reset" onclick="markAllSession('s4', false)">Reset session</button>
+    </div>
+  </div>
+
+  <!-- SESSION 5 -->
+  <div class="session" id="s5">
+    <div class="session-header">
+      <div class="session-num s5">5</div>
+      <div class="session-meta">
+        <div class="session-title">ExtremeCloud IQ &amp; Platform One Operations</div>
+        <div class="session-sub">AP onboarding · network policies · monitoring · basic troubleshooting in XIQ</div>
+      </div>
+      <div class="session-badge">30 min · 7 questions</div>
+    </div>
+    <div class="session-prog-wrap">
+      <div class="session-prog-bar-wrap"><div class="session-prog-bar" id="bar-s5" style="width:0%;background:#86efac"></div></div>
+      <div class="session-prog-label" id="label-s5">0 / 7</div>
+    </div>
+    <div class="q-list" id="list-s5">
+
+      <div class="q-card" data-session="s5">
+        <div class="q-row">
+          <input type="checkbox" class="q-checkbox">
+          <div class="q-content">
+            <div class="q-speaker student">Student</div>
+            <div class="q-text">When I add an AP to XIQ by serial number — what is actually happening behind the scenes? How does the AP know to connect to the cloud?</div>
+            <span class="q-notes-toggle">+ notes</span>
+            <div class="q-notes"><textarea placeholder="Session notes..."></textarea></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="q-card" data-session="s5">
+        <div class="q-row">
+          <input type="checkbox" class="q-checkbox">
+          <div class="q-content">
+            <div class="q-speaker student">Student</div>
+            <div class="q-text">What is a Network Policy in XIQ? Is it basically like a config template that gets pushed to the AP?</div>
+            <span class="q-notes-toggle">+ notes</span>
+            <div class="q-notes"><textarea placeholder="Session notes..."></textarea></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="q-card" data-session="s5">
+        <div class="q-row">
+          <input type="checkbox" class="q-checkbox">
+          <div class="q-content">
+            <div class="q-speaker student">Student</div>
+            <div class="q-text">If I change something in a Network Policy in XIQ, does it automatically push to all the APs using that policy or do I have to do something?</div>
+            <span class="q-notes-toggle">+ notes</span>
+            <div class="q-notes"><textarea placeholder="Session notes..."></textarea></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="q-card" data-session="s5">
+        <div class="q-row">
+          <input type="checkbox" class="q-checkbox">
+          <div class="q-content">
+            <div class="q-speaker student">Student</div>
+            <div class="q-text">Where in XIQ do I go to find out what VLAN a specific client is on right now?</div>
+            <span class="q-notes-toggle">+ notes</span>
+            <div class="q-notes"><textarea placeholder="Session notes..."></textarea></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="q-card" data-session="s5">
+        <div class="q-row">
+          <input type="checkbox" class="q-checkbox">
+          <div class="q-content">
+            <div class="q-speaker student">Student</div>
+            <div class="q-text">An AP shows Disconnected in XIQ but the LED is on. Where do I even start — do I look at XIQ or the switch first?</div>
+            <span class="q-notes-toggle">+ notes</span>
+            <div class="q-notes"><textarea placeholder="Session notes..."></textarea></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="q-card" data-session="s5">
+        <div class="q-row">
+          <input type="checkbox" class="q-checkbox">
+          <div class="q-content">
+            <div class="q-speaker student">Student</div>
+            <div class="q-text">Can XIQ tell me if a client has a weak signal or bad connection — or does it just show whether they're connected or not?</div>
+            <span class="q-notes-toggle">+ notes</span>
+            <div class="q-notes"><textarea placeholder="Session notes..."></textarea></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="q-card" data-session="s5">
+        <div class="q-row">
+          <input type="checkbox" class="q-checkbox">
+          <div class="q-content">
+            <div class="q-speaker student">Student</div>
+            <div class="q-text">What's the difference between XIQ Pilot and Extreme Platform One? Are they two separate things or is one replacing the other?</div>
+            <span class="q-notes-toggle">+ notes</span>
+            <div class="q-notes"><textarea placeholder="Session notes..."></textarea></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <div class="session-actions">
+      <button class="btn-complete" onclick="markAllSession('s5', true)">Mark all covered</button>
+      <button class="btn-reset" onclick="markAllSession('s5', false)">Reset session</button>
+    </div>
+  </div>
+
+  <!-- SESSION 6 -->
+  <div class="session" id="s6">
+    <div class="session-header">
+      <div class="session-num s6">6</div>
+      <div class="session-meta">
+        <div class="session-title">Troubleshooting Methodology &amp; Packet Capture</div>
+        <div class="session-sub">Layered approach · ping · Wireshark basics · DHCP capture · intermittent faults</div>
+      </div>
+      <div class="session-badge">30 min · 8 questions</div>
+    </div>
+    <div class="session-prog-wrap">
+      <div class="session-prog-bar-wrap"><div class="session-prog-bar" id="bar-s6" style="width:0%;background:#fbbf24"></div></div>
+      <div class="session-prog-label" id="label-s6">0 / 8</div>
+    </div>
+    <div class="q-list" id="list-s6">
+
+      <div class="q-card" data-session="s6">
+        <div class="q-row">
+          <input type="checkbox" class="q-checkbox">
+          <div class="q-content">
+            <div class="q-speaker student">Student</div>
+            <div class="q-text">When someone says "start at Layer 1 and work up" — what does that actually look like in a real troubleshooting call? Walk me through it.</div>
+            <span class="q-notes-toggle">+ notes</span>
+            <div class="q-notes"><textarea placeholder="Session notes..."></textarea></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="q-card" data-session="s6">
+        <div class="q-row">
+          <input type="checkbox" class="q-checkbox">
+          <div class="q-content">
+            <div class="q-speaker student">Student</div>
+            <div class="q-text">Someone calls and says "the internet isn't working." What's the very first question you ask them and why?</div>
+            <span class="q-notes-toggle">+ notes</span>
+            <div class="q-notes"><textarea placeholder="Session notes..."></textarea></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="q-card" data-session="s6">
+        <div class="q-row">
+          <input type="checkbox" class="q-checkbox">
+          <div class="q-content">
+            <div class="q-speaker student">Student</div>
+            <div class="q-text">I've opened Wireshark but I have no idea what I'm looking at. What are the main things I should focus on in a basic capture?</div>
+            <span class="q-notes-toggle">+ notes</span>
+            <div class="q-notes"><textarea placeholder="Session notes..."></textarea></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="q-card" data-session="s6">
+        <div class="q-row">
+          <input type="checkbox" class="q-checkbox">
+          <div class="q-content">
+            <div class="q-speaker student">Student</div>
+            <div class="q-text">In Wireshark I can see a DHCP Discover going out but nothing comes back. What does that tell me about where the problem is?</div>
+            <span class="q-notes-toggle">+ notes</span>
+            <div class="q-notes"><textarea placeholder="Session notes..."></textarea></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="q-card" data-session="s6">
+        <div class="q-row">
+          <input type="checkbox" class="q-checkbox">
+          <div class="q-content">
+            <div class="q-speaker student">Student</div>
+            <div class="q-text">What's the difference between capturing on the client machine versus capturing on the switch port? When would you choose each one?</div>
+            <span class="q-notes-toggle">+ notes</span>
+            <div class="q-notes"><textarea placeholder="Session notes..."></textarea></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="q-card" data-session="s6">
+        <div class="q-row">
+          <input type="checkbox" class="q-checkbox">
+          <div class="q-content">
+            <div class="q-speaker student">Student</div>
+            <div class="q-text">How is ping actually useful for troubleshooting? What does a successful ping tell me, and what doesn't it tell me?</div>
+            <span class="q-notes-toggle">+ notes</span>
+            <div class="q-notes"><textarea placeholder="Session notes..."></textarea></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="q-card" data-session="s6">
+        <div class="q-row">
+          <input type="checkbox" class="q-checkbox">
+          <div class="q-content">
+            <div class="q-speaker student">Student</div>
+            <div class="q-text">How do I identify a device's MAC address when I'm looking at a packet in Wireshark? Where is it in the frame?</div>
+            <span class="q-notes-toggle">+ notes</span>
+            <div class="q-notes"><textarea placeholder="Session notes..."></textarea></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="q-card" data-session="s6">
+        <div class="q-row">
+          <input type="checkbox" class="q-checkbox">
+          <div class="q-content">
+            <div class="q-speaker student">Student</div>
+            <div class="q-text">What if the issue is intermittent — it works fine sometimes and breaks randomly? How do you even start troubleshooting something you can't consistently reproduce?</div>
+            <span class="q-notes-toggle">+ notes</span>
+            <div class="q-notes"><textarea placeholder="Session notes..."></textarea></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <div class="session-actions">
+      <button class="btn-complete" onclick="markAllSession('s6', true)">Mark all covered</button>
+      <button class="btn-reset" onclick="markAllSession('s6', false)">Reset session</button>
+    </div>
+  </div>
+
+</div><!-- /main -->
+
+<script>
+  const SESSIONS = ['s1','s2','s3','s4','s5','s6'];
+  const TOTALS = { s1:8, s2:8, s3:8, s4:8, s5:7, s6:8 };
+
+  function saveState() {
+    const state = {};
+    document.querySelectorAll('.q-card').forEach((card, i) => {
+      state['q_' + i] = card.querySelector('.q-checkbox').checked;
+      state['n_' + i] = card.querySelector('textarea').value;
+    });
+    localStorage.setItem('l2l3_tracker', JSON.stringify(state));
+  }
+
+  function loadState() {
+    const raw = localStorage.getItem('l2l3_tracker');
+    if (!raw) return;
+    const state = JSON.parse(raw);
+    document.querySelectorAll('.q-card').forEach((card, i) => {
+      if (state['q_' + i]) {
+        card.querySelector('.q-checkbox').checked = true;
+        card.classList.add('checked');
+      }
+      if (state['n_' + i]) {
+        card.querySelector('textarea').value = state['n_' + i];
+        if (state['n_' + i].trim()) {
+          card.querySelector('.q-notes').classList.add('open');
+        }
+      }
+    });
+    updateAll();
+  }
+
+  function updateAll() {
+    let totalDone = 0, totalAll = 0;
+    SESSIONS.forEach(sid => {
+      const cards = document.querySelectorAll(`#list-${sid} .q-card`);
+      const done = Array.from(cards).filter(c => c.querySelector('.q-checkbox').checked).length;
+      const total = TOTALS[sid];
+      const pct = total > 0 ? (done / total * 100) : 0;
+      document.getElementById('bar-' + sid).style.width = pct + '%';
+      document.getElementById('label-' + sid).textContent = done + ' / ' + total;
+      const navEl = document.getElementById('nav-p' + sid.replace('s',''));
+      navEl.textContent = done + '/' + total;
+      navEl.className = 'nav-progress' + (done === total ? ' done' : '');
+      totalDone += done;
+      totalAll += total;
+    });
+    const overallPct = totalAll > 0 ? (totalDone / totalAll * 100) : 0;
+    document.getElementById('overall-bar').style.width = overallPct + '%';
+    document.getElementById('overall-count').textContent = totalDone + ' / ' + totalAll + ' covered';
+  }
+
+  function markAllSession(sid, checked) {
+    document.querySelectorAll(`#list-${sid} .q-card`).forEach(card => {
+      card.querySelector('.q-checkbox').checked = checked;
+      card.classList.toggle('checked', checked);
+    });
+    updateAll();
+    saveState();
+  }
+
+  function scrollTo(sid) {
+    document.getElementById(sid).scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  // Checkbox interactions
+  document.querySelectorAll('.q-checkbox').forEach(cb => {
+    cb.addEventListener('change', function() {
+      this.closest('.q-card').classList.toggle('checked', this.checked);
+      updateAll();
+      saveState();
+    });
+  });
+
+  // Notes toggles
+  document.querySelectorAll('.q-notes-toggle').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const notes = this.nextElementSibling;
+      notes.classList.toggle('open');
+      this.textContent = notes.classList.contains('open') ? '- notes' : '+ notes';
+    });
+  });
+
+  // Notes autosave
+  document.querySelectorAll('textarea').forEach(ta => {
+    ta.addEventListener('input', saveState);
+  });
+
+  // Active sidebar link on scroll
+  const sectionEls = SESSIONS.map(s => document.getElementById(s));
+  const navLinks = document.querySelectorAll('.nav-item');
+  window.addEventListener('scroll', () => {
+    let current = 0;
+    sectionEls.forEach((el, i) => {
+      if (el && window.scrollY >= el.offsetTop - 80) current = i;
+    });
+    navLinks.forEach((l, i) => l.classList.toggle('active', i === current));
+  });
+
+  loadState();
+  updateAll();
+</script>
+</body>
+</html>
