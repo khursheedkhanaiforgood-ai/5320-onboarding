@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EOD Summary — April 20, 2026</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; background: #0a0f1a; color: #e2e8f0; min-height: 100vh; }
+
+  /* Sticky nav */
+  .topnav { position: sticky; top: 0; z-index: 100; background: #0d1422; border-bottom: 1px solid #1e3a5f; padding: 0 40px; display: flex; align-items: center; gap: 0; overflow-x: auto; }
+  .topnav .brand { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.14em; color: #60a5fa; padding: 14px 24px 14px 0; border-right: 1px solid #1e3a5f; margin-right: 8px; white-space: nowrap; }
+  .topnav a { display: block; padding: 14px 16px; font-size: 0.78rem; color: #64748b; text-decoration: none; white-space: nowrap; border-bottom: 2px solid transparent; transition: color 0.15s; }
+  .topnav a:hover { color: #e2e8f0; border-bottom-color: #3b82f6; }
+  .topnav a.active { color: #60a5fa; border-bottom-color: #3b82f6; }
+
+  .page { max-width: 960px; margin: 0 auto; padding: 48px 40px 80px; }
+
+  /* Header */
+  .page-header { margin-bottom: 48px; padding-bottom: 28px; border-bottom: 1px solid #1e293b; }
+  .page-header .eyebrow { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.18em; color: #60a5fa; margin-bottom: 8px; }
+  .page-header h1 { font-size: 2rem; color: #f1f5f9; font-weight: 700; margin-bottom: 10px; }
+  .page-header .sub { color: #475569; font-size: 0.88rem; line-height: 1.7; }
+  .pill { display: inline-block; background: #0d2b1f; color: #34d399; border: 1px solid #065f46; border-radius: 20px; padding: 3px 12px; font-size: 0.72rem; font-weight: 700; margin-right: 8px; }
+  .pill-blue { background: #0c1a2e; color: #93c5fd; border-color: #1e3a5f; }
+
+  /* Sections */
+  .section { margin-bottom: 56px; scroll-margin-top: 60px; }
+  .section-title { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.16em; color: #334155; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid #1e293b; display: flex; align-items: center; gap: 10px; }
+  .section-title::before { content: ''; display: block; width: 3px; height: 14px; border-radius: 2px; }
+  .s-accomplished .section-title::before { background: #34d399; }
+  .s-urls       .section-title::before { background: #60a5fa; }
+  .s-creds      .section-title::before { background: #f0abfc; }
+  .s-commands   .section-title::before { background: #fcd34d; }
+  .s-files      .section-title::before { background: #fb923c; }
+  .s-pending    .section-title::before { background: #f87171; }
+
+  /* Accomplished cards */
+  .acc-grid { display: flex; flex-direction: column; gap: 10px; }
+  .acc-item { display: flex; gap: 14px; align-items: flex-start; background: #0d1422; border: 1px solid #1e293b; border-radius: 8px; padding: 14px 16px; }
+  .acc-icon { font-size: 1rem; flex-shrink: 0; margin-top: 1px; }
+  .acc-body { flex: 1; }
+  .acc-title { font-size: 0.88rem; color: #f1f5f9; font-weight: 600; margin-bottom: 3px; }
+  .acc-detail { font-size: 0.78rem; color: #64748b; line-height: 1.6; }
+  .acc-item.highlight { border-color: #065f46; background: #0a1f16; }
+  .acc-item.highlight .acc-title { color: #34d399; }
+
+  /* URL cards */
+  .url-card { background: #0d1422; border: 1px solid #1e3a5f; border-radius: 8px; padding: 14px 18px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+  .url-label { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #475569; margin-bottom: 4px; }
+  .url-link { font-size: 0.83rem; color: #60a5fa; text-decoration: none; word-break: break-all; }
+  .url-link:hover { color: #93c5fd; }
+  .url-badge { font-size: 0.68rem; font-weight: 700; background: #0d2b1f; color: #34d399; border: 1px solid #065f46; border-radius: 4px; padding: 3px 10px; white-space: nowrap; }
+
+  /* Credentials */
+  .cred-table { width: 100%; border-collapse: collapse; font-size: 0.83rem; }
+  .cred-table th { background: #0d1422; color: #475569; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.08em; padding: 9px 14px; text-align: left; border-bottom: 1px solid #1e293b; }
+  .cred-table td { padding: 10px 14px; border-bottom: 1px solid #0f172a; color: #e2e8f0; }
+  .cred-table tr:hover td { background: #0d1422; }
+  .mono { font-family: 'Menlo', 'Consolas', monospace; color: #34d399; font-size: 0.8rem; }
+
+  /* Commands */
+  pre { background: #0d1117; border: 1px solid #1e3a5f; border-radius: 6px; padding: 14px 16px; font-size: 0.82rem; color: #e2e8f0; overflow-x: auto; margin-bottom: 12px; font-family: 'Menlo', 'Consolas', monospace; line-height: 1.7; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .cmd-label { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #475569; margin-bottom: 6px; margin-top: 18px; }
+  .cmd-label:first-child { margin-top: 0; }
+
+  /* Files */
+  .file-item { display: flex; align-items: center; gap: 12px; padding: 10px 14px; background: #0d1422; border: 1px solid #1e293b; border-radius: 6px; margin-bottom: 8px; font-size: 0.83rem; }
+  .file-item .fpath { font-family: monospace; color: #93c5fd; flex: 1; word-break: break-all; }
+  .file-item .fbadge { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; padding: 2px 8px; border-radius: 3px; white-space: nowrap; }
+  .fb-new { background: #0d2b1f; color: #34d399; border: 1px solid #065f46; }
+  .fb-updated { background: #1a1209; color: #fbbf24; border: 1px solid #713f12; }
+  .fb-pushed { background: #0c1a2e; color: #93c5fd; border: 1px solid #1e3a5f; }
+
+  /* Pending */
+  .pending-item { display: flex; gap: 12px; align-items: flex-start; padding: 12px 14px; background: #0d1422; border: 1px solid #1e293b; border-radius: 6px; margin-bottom: 8px; font-size: 0.83rem; color: #e2e8f0; }
+  .pending-item .p-priority { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; padding: 2px 8px; border-radius: 3px; white-space: nowrap; margin-top: 2px; flex-shrink: 0; }
+  .pp-next  { background: #1a1209; color: #fbbf24; border: 1px solid #713f12; }
+  .pp-soon  { background: #0c1a2e; color: #93c5fd; border: 1px solid #1e3a5f; }
+  .pp-later { background: #1e293b; color: #475569; border: 1px solid #334155; }
+
+  .footer { margin-top: 64px; padding-top: 20px; border-top: 1px solid #1e293b; font-size: 0.75rem; color: #1e293b; text-align: center; }
+
+  @media print {
+    body { background: #0a0f1a !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .topnav { position: relative; }
+    pre { color: #e2e8f0 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="topnav">
+  <div class="brand">EOD — Apr 20 2026</div>
+  <a href="#accomplished">Accomplished</a>
+  <a href="#urls">URLs</a>
+  <a href="#credentials">Credentials</a>
+  <a href="#commands">Commands</a>
+  <a href="#files">Files</a>
+  <a href="#pending">Pending</a>
+</nav>
+
+<div class="page">
+
+  <div class="page-header">
+    <div class="eyebrow">End of Day Summary</div>
+    <h1>April 20, 2026</h1>
+    <p class="sub">
+      5320 Onboarding — VLAN 40/70 Deployment &nbsp;·&nbsp; 2× Extreme 5320-16P &nbsp;·&nbsp; 2× AP3000
+    </p>
+    <div style="margin-top:14px">
+      <span class="pill">VLAN_40 ✅</span>
+      <span class="pill">VLAN_70 ✅</span>
+      <span class="pill">iPhone Verified ✅</span>
+      <span class="pill pill-blue">GitHub Pages Updated</span>
+    </div>
+  </div>
+
+  <!-- ACCOMPLISHED -->
+  <div class="section s-accomplished" id="accomplished">
+    <div class="section-title">Accomplished</div>
+    <div class="acc-grid">
+
+      <div class="acc-item">
+        <div class="acc-icon">🔁</div>
+        <div class="acc-body">
+          <div class="acc-title">Session resumed — VLAN correction</div>
+          <div class="acc-detail">Prior session plan targeted VLAN 80/90. Corrected to VLAN 40/70. Serial/IP mapping also corrected: SW1=192.168.0.28=FJ012544G-00233=VLAN_40 · SW2=192.168.0.11=FJ012544G-00483=VLAN_70.</div>
+        </div>
+      </div>
+
+      <div class="acc-item">
+        <div class="acc-icon">🔧</div>
+        <div class="acc-body">
+          <div class="acc-title">Fixed invisible CLI code blocks on lab_20260329.html</div>
+          <div class="acc-detail">NYT theme retheme (Apr 8) set pre text to #111111 on #0d1117 dark background — completely invisible. Fixed: 17 pre blocks → #e2e8f0, 3 annotation divs → #94a3b8, added @media print CSS. Pushed to main branch → live on GitHub Pages.</div>
+        </div>
+      </div>
+
+      <div class="acc-item">
+        <div class="acc-icon">📋</div>
+        <div class="acc-body">
+          <div class="acc-title">XIQ policy KK_SW_Apr20_5320 confirmed</div>
+          <div class="acc-detail">Network Allocation: VLAN_40 (10.40.0.0/24) · VLAN_70 (10.70.0.0/24). Routing: SW1→10.40.0.1/24, SW2→10.70.0.1/24. IPv4 Forwarding enabled on both. Static Routes empty (known XIQ limitation — handled via Quantum Fiber UI).</div>
+        </div>
+      </div>
+
+      <div class="acc-item highlight">
+        <div class="acc-icon">✅</div>
+        <div class="acc-body">
+          <div class="acc-title">SW1 (192.168.0.28) — VLAN_40 complete</div>
+          <div class="acc-detail">DHCP: 10.40.0.100–200, gateway 10.40.0.1, DNS 8.8.8.8, port 3 tagged + enabled. enable ipforwarding vlan Default. Config saved. ping 8.8.8.8 → 4/4, 0% loss, avg 5ms.</div>
+        </div>
+      </div>
+
+      <div class="acc-item highlight">
+        <div class="acc-icon">✅</div>
+        <div class="acc-body">
+          <div class="acc-title">SW2 (192.168.0.11) — VLAN_70 complete</div>
+          <div class="acc-detail">DHCP: 10.70.0.100–200, gateway 10.70.0.1, DNS 8.8.8.8, port 3 tagged + enabled. enable ipforwarding vlan Default. Config saved. ping 8.8.8.8 → 4/4, 0% loss, avg 7ms.</div>
+        </div>
+      </div>
+
+      <div class="acc-item highlight">
+        <div class="acc-icon">✅</div>
+        <div class="acc-body">
+          <div class="acc-title">Quantum Fiber static routes added</div>
+          <div class="acc-detail">10.40.0.0/255.255.255.0 → 192.168.0.28 (SW1) · 10.70.0.0/255.255.255.0 → 192.168.0.11 (SW2). Added via Quantum Fiber UI → Advanced → Static Routing.</div>
+        </div>
+      </div>
+
+      <div class="acc-item">
+        <div class="acc-icon">🔍</div>
+        <div class="acc-body">
+          <div class="acc-title">Troubleshot VLAN_70 DHCP failure (169.254 APIPA)</div>
+          <div class="acc-detail">iPhone got 169.254.x.x on VLAN_70 SSID. Diagnosed via show fdb ports 3 — AP MAC only in Default VLAN, no VLAN_70 tagged frames arriving. Root cause: both APs shared one policy, phone roamed to AP on SW1 which has no DHCP for VLAN_70.</div>
+        </div>
+      </div>
+
+      <div class="acc-item highlight">
+        <div class="acc-icon">✅</div>
+        <div class="acc-body">
+          <div class="acc-title">Fixed: split AP policies per switch</div>
+          <div class="acc-detail">Separated AP_X6680_Apr20 into AP_VLAN_40 (SW1 AP only) + AP_VLAN_70 (SW2 AP only). Eliminates SSID roaming ambiguity. iPhone confirmed 10.40.0.x on VLAN_40 SSID and 10.70.0.x on VLAN_70 SSID — internet on both. ALL GREEN.</div>
+        </div>
+      </div>
+
+      <div class="acc-item">
+        <div class="acc-icon">🌐</div>
+        <div class="acc-body">
+          <div class="acc-title">Published session_log_20260420.html + updated lab guide</div>
+          <div class="acc-detail">New session log: corrections, XIQ policy, SW1+SW2 CLI with full verified outputs, troubleshooting timeline, key lessons, HTML fix note. lab_20260329.html updated with Apr 20 sidebar entry and green link block. Pushed to main → GitHub Pages live.</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- URLS -->
+  <div class="section s-urls" id="urls">
+    <div class="section-title">URLs</div>
+
+    <div class="url-card">
+      <div>
+        <div class="url-label">Landing Page</div>
+        <a class="url-link" href="https://khursheedkhanaiforgood-ai.github.io/5320-onboarding/" target="_blank">https://khursheedkhanaiforgood-ai.github.io/5320-onboarding/</a>
+      </div>
+      <span class="url-badge">Live</span>
+    </div>
+
+    <div class="url-card">
+      <div>
+        <div class="url-label">Lab Guide (March 29 — Apr 20)</div>
+        <a class="url-link" href="https://khursheedkhanaiforgood-ai.github.io/5320-onboarding/lab_20260329.html" target="_blank">https://khursheedkhanaiforgood-ai.github.io/5320-onboarding/lab_20260329.html</a>
+      </div>
+      <span class="url-badge">Updated Today</span>
+    </div>
+
+    <div class="url-card">
+      <div>
+        <div class="url-label">April 20 Session Log — VLAN 40/70</div>
+        <a class="url-link" href="https://khursheedkhanaiforgood-ai.github.io/5320-onboarding/session_log_20260420.html" target="_blank">https://khursheedkhanaiforgood-ai.github.io/5320-onboarding/session_log_20260420.html</a>
+      </div>
+      <span class="url-badge">New Today</span>
+    </div>
+
+    <div class="url-card">
+      <div>
+        <div class="url-label">April 8 E2E Session Log</div>
+        <a class="url-link" href="https://khursheedkhanaiforgood-ai.github.io/5320-onboarding/session_log_20260408.html" target="_blank">https://khursheedkhanaiforgood-ai.github.io/5320-onboarding/session_log_20260408.html</a>
+      </div>
+      <span class="url-badge">Reference</span>
+    </div>
+
+    <div class="url-card">
+      <div>
+        <div class="url-label">GitHub Repository</div>
+        <a class="url-link" href="https://github.com/khursheedkhanaiforgood-ai/5320-onboarding" target="_blank">https://github.com/khursheedkhanaiforgood-ai/5320-onboarding</a>
+      </div>
+      <span class="url-badge">main branch</span>
+    </div>
+
+    <div class="url-card">
+      <div>
+        <div class="url-label">XIQ — KK_SW_Apr20_5320 Policy</div>
+        <a class="url-link" href="https://extremecloudiq.com" target="_blank">extremecloudiq.com → Configure → Network Policies → KK_SW_Apr20_5320</a>
+      </div>
+      <span class="url-badge">XIQ Pilot</span>
+    </div>
+
+  </div>
+
+  <!-- CREDENTIALS -->
+  <div class="section s-creds" id="credentials">
+    <div class="section-title">Credentials</div>
+    <table class="cred-table">
+      <thead><tr><th>Resource</th><th>Address</th><th>Username</th><th>Password</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td>SW1 Console</td><td class="mono">/dev/cu.usbserial-A9XH7AI0</td><td class="mono">admin</td><td class="mono">Extreme01!!</td><td>baud 115200</td></tr>
+        <tr><td>SW1 SSH</td><td class="mono">192.168.0.28</td><td class="mono">admin</td><td class="mono">Extreme01!!</td><td>-o HostKeyAlgorithms=+ssh-rsa</td></tr>
+        <tr><td>SW2 SSH</td><td class="mono">192.168.0.11</td><td class="mono">admin</td><td class="mono">Extreme01!!</td><td>-o HostKeyAlgorithms=+ssh-rsa</td></tr>
+        <tr><td>XIQ</td><td class="mono">extremecloudiq.com</td><td class="mono">khursheedkhan.aiforgood@gmail.com</td><td>—</td><td>Extreme Networks org</td></tr>
+        <tr><td>GitHub Pages login</td><td>lab HTML pages</td><td class="mono">admin</td><td class="mono">Extreme01!!</td><td>login-gated pages</td></tr>
+        <tr><td>Railway</td><td class="mono">5320-onboarding-production.up.railway.app</td><td>—</td><td>—</td><td>BRIDGE_TOKEN: 5320bridge</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- COMMANDS -->
+  <div class="section s-commands" id="commands">
+    <div class="section-title">Commands</div>
+
+    <div class="cmd-label">Console Access</div>
+    <pre>screen /dev/cu.usbserial-A9XH7AI0 115200
+screen -ls                          # list sessions
+screen -r &lt;id&gt;                      # reattach detached session
+ssh-keygen -R 192.168.0.28          # clear host key after factory reset</pre>
+
+    <div class="cmd-label">SW1 — VLAN_40 CLI (verified)</div>
+    <pre>configure vlan VLAN_40 dhcp-address-range 10.40.0.100 - 10.40.0.200
+configure vlan VLAN_40 dhcp-options default-gateway 10.40.0.1
+configure vlan VLAN_40 dhcp-options dns-server primary 8.8.8.8
+configure vlan VLAN_40 add ports 3 tagged
+enable dhcp ports 3 vlan VLAN_40
+enable ipforwarding vlan Default
+save configuration</pre>
+
+    <div class="cmd-label">SW2 — VLAN_70 CLI (verified)</div>
+    <pre>configure vlan VLAN_70 dhcp-address-range 10.70.0.100 - 10.70.0.200
+configure vlan VLAN_70 dhcp-options default-gateway 10.70.0.1
+configure vlan VLAN_70 dhcp-options dns-server primary 8.8.8.8
+configure vlan VLAN_70 add ports 3 tagged
+enable dhcp ports 3 vlan VLAN_70
+enable ipforwarding vlan Default
+save configuration</pre>
+
+    <div class="cmd-label">Verification</div>
+    <pre>show dhcp-server
+show iproute
+show ipconfig
+show vlan
+show fdb ports 3            # diagnose VLAN tagging — AP MAC should appear on correct VLAN
+ping vr VR-Default 8.8.8.8</pre>
+
+    <div class="cmd-label">Save Config to Named File</div>
+    <pre>save configuration sw1_vlan40_apr20     # no dots in filename — EXOS auto-adds .cfg
+save configuration sw2_vlan70_apr20</pre>
+
+    <div class="cmd-label">SCP Config to Mac</div>
+    <pre>scp -o HostKeyAlgorithms=+ssh-rsa -o PubkeyAcceptedAlgorithms=+ssh-rsa \
+  admin@192.168.0.28:/usr/local/cfg/sw1_vlan40_apr20.cfg ~/Downloads/
+scp -o HostKeyAlgorithms=+ssh-rsa -o PubkeyAcceptedAlgorithms=+ssh-rsa \
+  admin@192.168.0.11:/usr/local/cfg/sw2_vlan70_apr20.cfg ~/Downloads/</pre>
+
+    <div class="cmd-label">Quantum Fiber Static Routes</div>
+    <pre>10.40.0.0 / 255.255.255.0  →  192.168.0.28   (SW1 — VLAN_40)
+10.70.0.0 / 255.255.255.0  →  192.168.0.11   (SW2 — VLAN_70)</pre>
+
+  </div>
+
+  <!-- FILES -->
+  <div class="section s-files" id="files">
+    <div class="section-title">Files Changed Today</div>
+
+    <div class="file-item">
+      <span class="fbadge fb-new">New</span>
+      <span class="fpath">session_log_20260420.html</span>
+      <span style="font-size:0.75rem;color:#475569">Full April 20 session log — corrections, CLI, troubleshooting, lessons</span>
+    </div>
+    <div class="file-item">
+      <span class="fbadge fb-updated">Updated</span>
+      <span class="fpath">lab_20260329.html</span>
+      <span style="font-size:0.75rem;color:#475569">CLI blocks fix (17 pre blocks) + Apr 20 sidebar + link block</span>
+    </div>
+    <div class="file-item">
+      <span class="fbadge fb-new">New</span>
+      <span class="fpath">session_summary_20260420.html</span>
+      <span style="font-size:0.75rem;color:#475569">This file — EOD summary</span>
+    </div>
+    <div class="file-item">
+      <span class="fbadge fb-updated">Updated</span>
+      <span class="fpath">docs/lab_20260329.html</span>
+      <span style="font-size:0.75rem;color:#475569">Dev branch — same CLI block visibility fixes</span>
+    </div>
+    <div class="file-item">
+      <span class="fbadge fb-pushed">Pushed</span>
+      <span class="fpath">main branch → GitHub Pages</span>
+      <span style="font-size:0.75rem;color:#475569">3 commits: CLI fix · session log + lab update · EOD summary</span>
+    </div>
+    <div class="file-item">
+      <span class="fbadge fb-pushed">On Flash</span>
+      <span class="fpath">/usr/local/cfg/sw1_vlan40_apr20.cfg</span>
+      <span style="font-size:0.75rem;color:#475569">SW1 config backup — SCP to Mac pending</span>
+    </div>
+
+  </div>
+
+  <!-- PENDING -->
+  <div class="section s-pending" id="pending">
+    <div class="section-title">Pending</div>
+
+    <div class="pending-item">
+      <span class="p-priority pp-next">Next</span>
+      <div>
+        <strong>SCP SW2 config to Mac</strong><br>
+        <span style="color:#64748b;font-size:0.78rem"><code style="background:#0d1117;color:#34d399;padding:1px 6px;border-radius:3px">scp admin@192.168.0.11:/usr/local/cfg/sw2_vlan70_apr20.cfg ~/Downloads/</code> — run after saving named config on SW2</span>
+      </div>
+    </div>
+
+    <div class="pending-item">
+      <span class="p-priority pp-next">Next</span>
+      <div>
+        <strong>AP policy cleanup in XIQ</strong><br>
+        <span style="color:#64748b;font-size:0.78rem">Confirm AP_VLAN_40 and AP_VLAN_70 are correctly deployed. Delete old AP_X6680_Apr20 if no longer needed.</span>
+      </div>
+    </div>
+
+    <div class="pending-item">
+      <span class="p-priority pp-soon">Soon</span>
+      <div>
+        <strong>Sprint 2 — VLAN 10 management isolation</strong><br>
+        <span style="color:#64748b;font-size:0.78rem">Plug laptop directly into SW port (SW_Mgmt_VLAN10 type) → static IP 10.10.0.x/24 → SSH to 10.10.0.1 / 10.10.0.2. Quantum Fiber does not route LAN→LAN so must bypass router.</span>
+      </div>
+    </div>
+
+    <div class="pending-item">
+      <span class="p-priority pp-soon">Soon</span>
+      <div>
+        <strong>Railway end-to-end test</strong><br>
+        <span style="color:#64748b;font-size:0.78rem">bridge.py → Railway WebSocket → web UI with live 5320. BRIDGE_TOKEN: 5320bridge (rotation pending).</span>
+      </div>
+    </div>
+
+    <div class="pending-item">
+      <span class="p-priority pp-later">Later</span>
+      <div>
+        <strong>Inter-switch trunk — Phase 3</strong><br>
+        <span style="color:#64748b;font-size:0.78rem">Cable Port 10 SW1 ↔ Port 10 SW2. VLAN 10 trunk. Cross-switch routing test. Test hairpin via Quantum Fiber first before deciding if needed.</span>
+      </div>
+    </div>
+
+    <div class="pending-item">
+      <span class="p-priority pp-later">Later</span>
+      <div>
+        <strong>BRIDGE_TOKEN rotation</strong><br>
+        <span style="color:#64748b;font-size:0.78rem">Currently: 5320bridge — update in Railway Variables when rotating.</span>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="footer">
+    April 20, 2026 &nbsp;&mdash;&nbsp; Khursheed Khan &nbsp;&mdash;&nbsp; Extreme Networks &nbsp;&mdash;&nbsp; Generated with Claude Code
+  </div>
+
+</div>
+
+<script>
+  const navLinks = document.querySelectorAll('.topnav a');
+  const sections = Array.from(navLinks).map(l => document.querySelector(l.getAttribute('href'))).filter(Boolean);
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        navLinks.forEach(l => l.classList.remove('active'));
+        const a = document.querySelector(`.topnav a[href="#${e.target.id}"]`);
+        if (a) a.classList.add('active');
+      }
+    });
+  }, { threshold: 0.2, rootMargin: '-60px 0px -60% 0px' });
+  sections.forEach(s => obs.observe(s));
+</script>
+
+</body>
+</html>
