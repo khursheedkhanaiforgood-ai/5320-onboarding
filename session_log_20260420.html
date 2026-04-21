@@ -96,6 +96,11 @@
     <div class="mod-label" style="color:#f0abfc">Reference</div>
     <a href="#lessons">Key Lessons</a>
     <a href="#html-fix">HTML Fix</a>
+    <div class="mod-label" style="color:#a78bfa">Training</div>
+    <a href="#training-build">What Was Built</a>
+    <a href="#training-s1">Session 1 Gaps</a>
+    <a href="#training-wifi">WiFi Doc Intake</a>
+    <a href="#training-pending">S2–S6 Plan</a>
   </nav>
 
   <div class="main">
@@ -386,6 +391,117 @@ round-trip min/avg/max = 5/7/10 ms  ✅</pre>
         3 annotation divs: <code>color:#666666</code> → <code>color:#94a3b8</code><br>
         Added <code>@media print</code> with <code>-webkit-print-color-adjust: exact</code><br>
         Added CSS rule: <code>div[style*="background:#0d1117"] pre { color: #e2e8f0 !important; }</code>
+      </div>
+    </div>
+
+    <!-- TRAINING BUILD -->
+    <div class="module" id="training-build">
+      <div class="module-header">
+        <span class="mod-badge" style="background:#1a0d2e;color:#a78bfa;border:1px solid #7c3aed">Training</span>
+        <h2>L2/L3 Training — What Was Built Today</h2>
+      </div>
+      <div class="banner-info">
+        <div class="banner-label">Context</div>
+        Karl's 30-day engineer development plan (March 2026) was the source document. All 6 sessions map to it. Training format: Socratic dialogue, Claude as student, Khursheed as trainer. Deadline: Sessions 1–6 complete by April 22 · team review April 23.
+      </div>
+
+      <h3>Files Created</h3>
+      <table class="status-table">
+        <thead><tr><th>File</th><th>Purpose</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr><td>team_training_qa_20260420.html</td><td>Q&A tracker — 6 sessions, 47 questions, localStorage, "Answer" links</td><td><span class="tag-ok">✅ Done</span></td></tr>
+          <tr><td>session1_guide.html</td><td>Trainer guide — Q1–Q10, model answers, Apr 20 dialogue, NotebookLM synthesis, Mermaid flowchart, gap analysis</td><td><span class="tag-ok">✅ Done</span></td></tr>
+          <tr><td>index.html</td><td>Dark theme landing — Team Training section added</td><td><span class="tag-ok">✅ Done</span></td></tr>
+          <tr><td>index-nyt.html</td><td>NYT theme — Team Training section added (serif style)</td><td><span class="tag-ok">✅ Done</span></td></tr>
+          <tr><td>index-harpers.html</td><td>Harper's theme — Team Training section added (magazine style)</td><td><span class="tag-ok">✅ Done</span></td></tr>
+        </tbody>
+      </table>
+
+      <div class="banner-warn">
+        <div class="banner-label">⚠ Bug Fixed — Sidebar nav scroll conflict</div>
+        Both session1_guide.html and tracker had <code>onclick="scrollTo('s1')"</code> conflicting with native <code>window.scrollTo()</code>. Fixed: replaced all with <code>href="#id"</code> native anchors + <code>html &#123; scroll-behavior: smooth &#125;</code> + <code>getBoundingClientRect</code> active tracking.
+      </div>
+    </div>
+
+    <!-- SESSION 1 GAPS -->
+    <div class="module" id="training-s1">
+      <div class="module-header">
+        <span class="mod-badge" style="background:#1a0d2e;color:#a78bfa;border:1px solid #7c3aed">Session 1</span>
+        <h2>Session 1 Transcript Review — Gaps Identified</h2>
+      </div>
+      <div class="banner-info">
+        <div class="banner-label">Source</div>
+        Session1_Claude_Apr20.docx + NotebookLLM_Session1_Apr20.docx — both ingested and synthesized into session1_guide.html.
+      </div>
+
+      <h3>3 Confirmed Student Gaps (student voice in guide)</h3>
+      <table class="status-table">
+        <thead><tr><th>Gap</th><th>Evidence from Transcript</th><th>Lab That Closes It</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><strong>DHCP options confusion</strong></td>
+            <td>Used <code>configure vlan ipaddress</code> where <code>dhcp-options default-gateway</code> was needed — command accepted but wrong</td>
+            <td>Rerun DHCP config, compare show dhcp-server output</td>
+          </tr>
+          <tr>
+            <td><strong>L3 routing trigger</strong></td>
+            <td>Could not articulate precisely when a packet causes the switch to route vs. forward at L2 (destination MAC = SVI MAC = routing decision)</td>
+            <td>Wireshark capture at the SVI boundary</td>
+          </tr>
+          <tr>
+            <td><strong>Inter-VLAN routing untested</strong></td>
+            <td>enable ipforwarding was entered but ping from VLAN 40 → VLAN 70 was never confirmed</td>
+            <td>Ping test from client on VLAN 40 to client on VLAN 70 (Session 2)</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- WIFI DOC INTAKE -->
+    <div class="module" id="training-wifi">
+      <div class="module-header">
+        <span class="mod-badge" style="background:#1a0d2e;color:#a78bfa;border:1px solid #7c3aed">WiFi Doc</span>
+        <h2>WiFi Overview Intake — JJ Brown + KK Comments (March 2026)</h2>
+      </div>
+      <div class="banner-ok">
+        <div class="banner-label">✅ Document Read — Will Inform Sessions 4 + 5</div>
+        Full content ingested: RF fundamentals, channel planning, 2.4/5/6 GHz bands, DFS, WPA2/WPA3 auth flows, XIQ tunable parameters.
+      </div>
+
+      <h3>Khursheed's Self-Identified Gaps (from his own doc comments)</h3>
+      <table class="status-table">
+        <thead><tr><th>Gap</th><th>Quote from Doc</th><th>Target Session</th></tr></thead>
+        <tbody>
+          <tr><td>CWP / Security / Auth</td><td>"this is where I need most help"</td><td>Session 5</td></tr>
+          <tr><td>WPA2 vs WPA3</td><td>"I am NOT a security expert and do not yet know the implications"</td><td>Session 5</td></tr>
+          <tr><td>WPA Simulator</td><td>"My weakest link... must spend time here!"</td><td>Session 5</td></tr>
+          <tr><td>QoE impact of security choices</td><td>"how the implementation actually affects QoE"</td><td>Session 5</td></tr>
+          <tr><td>Channel planning / RRM</td><td>"do we have an automated channel-planning tool?"</td><td>Session 4</td></tr>
+          <tr><td>DFS — operator control</td><td>"DFS should be enabled at chip-level... fine point"</td><td>Session 4</td></tr>
+          <tr><td>Tunable RF params in XIQ</td><td>"full set, AP-by-AP vs. global, telemetry-driven updates?"</td><td>Session 4</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- TRAINING PENDING -->
+    <div class="module" id="training-pending">
+      <div class="module-header">
+        <span class="mod-badge" style="background:#1a0d2e;color:#a78bfa;border:1px solid #7c3aed">Pending</span>
+        <h2>Sessions 2–6 Plan — Due April 22</h2>
+      </div>
+      <table class="status-table">
+        <thead><tr><th>Session</th><th>Topic</th><th>Key Source</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr><td>S2</td><td>Inter-VLAN routing · ARP · MAC rewriting · routing table · ipforwarding</td><td>Session 1 gaps + lab</td><td><span class="tag-warn">Opening posed</span></td></tr>
+          <tr><td>S3</td><td>STP / RSTP / Loop prevention · port states · BPDU</td><td>Karl's 30-day plan</td><td><span class="tag-info">Not started</span></td></tr>
+          <tr><td>S4</td><td>RF fundamentals · channel planning · 2.4/5/6 GHz · DFS · EIRP</td><td>WiFi Overview (JJ+KK)</td><td><span class="tag-info">Questions pending update</span></td></tr>
+          <tr><td>S5</td><td>WPA2 vs WPA3 · SAE · 4-Way Handshake · 802.1X / EAP / RADIUS</td><td>WiFi Overview — KK's weakest area</td><td><span class="tag-info">Questions pending update</span></td></tr>
+          <tr><td>S6</td><td>XIQ management · RRM · auto channel/power · monitoring · telemetry</td><td>Karl's 30-day plan + WiFi doc</td><td><span class="tag-info">Not started</span></td></tr>
+        </tbody>
+      </table>
+      <div class="banner-warn">
+        <div class="banner-label">⚠ Deadline: April 22, 2026 — Team review April 23</div>
+        Sessions 2–6 must be complete by Wednesday. Each session needs: Socratic dialogue run, tracker questions updated from transcript, answer guide built, session_log + session_summary HTML.
       </div>
     </div>
 
