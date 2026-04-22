@@ -716,6 +716,22 @@ save configuration</pre>
         <div class="doc-excerpt">DFS can be selected/deselected in XIQ and via CLI. [JJ clarification — operator has control, not just chipset-level]</div>
       </div>
     </div>
+
+    <div class="doc-card" id="doc10" style="border-left:3px solid #7c3aed">
+      <div class="doc-card-header">
+        <div>
+          <div class="doc-title">10. Technical Lab Blueprint: Horizon Custom Fabrication (April 21 Session)</div>
+          <div class="doc-meta">Khursheed Khan · Full synthesis · Port map + CLI scripts + ACL + QoS + The Alex Vault lessons</div>
+        </div>
+        <span class="tag-blue" style="background:rgba(124,58,237,0.2);color:#c4b5fd;border-color:#7c3aed">Blueprint</span>
+      </div>
+      <div class="doc-excerpts">
+        <div class="doc-excerpt">The Karl Rule: I learned the hard way that ipforwarding MUST be enabled on every routed VLAN on the Primary switch. Without it, the switch has an IP on the VLAN, but it acts like a wall — it will not move packets between subnets, and the gateway remains "silent" to other VLANs.</div>
+        <div class="doc-excerpt">The DHCP Reach-Back Logic: On SW1, we must enable DHCP on Port 10. This was a breakthrough: it tells the Primary switch to "listen" for DHCP discovery packets coming across the trunk from clients physically connected to SW2.</div>
+        <div class="doc-excerpt">The AP Management Lifeline: I discovered that APs boot as "blank slates." They send untagged DHCP requests. By keeping the Default VLAN (VLAN 1) untagged on Port 3, the APs reach the modem, get a 192.168.0.x IP, and can call home to XIQ. If you tag VLAN 1, the APs will never onboard.</div>
+        <div class="doc-excerpt">The Loop Triangle Risk: We found that leaving the Default VLAN (VLAN 1) on the trunk (Port 10) while it's also connected to the modem creates a broadcast storm risk. We manually fixed this with: configure vlan Default delete ports 10</div>
+      </div>
+    </div>
   </div>
 
   <!-- VERIFICATION CHECKLIST — FULL FOR TOMORROW -->
