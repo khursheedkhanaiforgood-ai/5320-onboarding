@@ -3,633 +3,1179 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>EOD Summary — April 22, 2026 | Training Complete</title>
+<title>EOD Blueprint · Apr 22 2026 · Khursheed Khan — Extreme Networks</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #0f0f13;
-    --surface: #1a1a24;
-    --surface2: #22223a;
-    --border: #2e2e4a;
-    --text: #e2e2f0;
-    --muted: #9090b0;
-    --purple: #c4b5fd;
-    --purple-deep: #7c3aed;
-    --green: #34d399;
-    --green-deep: #065f46;
-    --blue: #60a5fa;
-    --amber: #fbbf24;
-    --red: #f87171;
-    --cyan: #22d3ee;
-    --pink: #f472b6;
+    --bg: #08090d;
+    --bg2: #0d0f14;
+    --bg3: #13161e;
+    --surface: #181c26;
+    --surface2: #20252f;
+    --border: #2b313f;
+    --border2: #3a4254;
+    --accent: #00d4aa;
+    --accent2: #4d9eff;
+    --accent3: #f5a623;
+    --accent4: #e05c5c;
+    --accent5: #9b6dff;
+    --accent6: #ff6b9d;
+    --text: #e8eaf0;
+    --text2: #9aa3b8;
+    --text3: #5a6380;
+    --green: #2dd68a;
+    --red: #e05c5c;
+    --yellow: #f5a623;
+    --blue: #4d9eff;
+    --purple: #9b6dff;
+    --cyan: #00d4ff;
   }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
   html { scroll-behavior: smooth; }
-  body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; font-size: 14px; line-height: 1.6; }
+  body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; font-size: 14px; line-height: 1.6; min-height: 100vh; }
 
-  /* Sidebar */
-  .sidebar { position: fixed; top: 0; left: 0; width: 230px; height: 100vh; background: var(--surface); border-right: 1px solid var(--border); overflow-y: auto; padding: 20px 0; z-index: 100; }
-  .sidebar .logo { padding: 0 18px 18px; border-bottom: 1px solid var(--border); margin-bottom: 14px; }
-  .sidebar .logo-title { font-size: 0.78rem; font-weight: 700; color: var(--green); text-transform: uppercase; letter-spacing: 0.12em; }
-  .sidebar .logo-sub { font-size: 0.7rem; color: var(--muted); margin-top: 2px; }
-  .sidebar a { display: block; padding: 6px 18px; font-size: 0.8rem; color: var(--muted); text-decoration: none; border-left: 2px solid transparent; transition: all 0.15s; }
-  .sidebar a:hover { color: var(--green); border-left-color: var(--green); background: rgba(52,211,153,0.06); }
-  .sidebar .section-label { padding: 10px 18px 4px; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.18em; color: #5a5a7a; }
+  /* NAV */
+  nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; background: rgba(8,9,13,0.96); backdrop-filter: blur(16px); border-bottom: 1px solid var(--border); padding: 0 32px; height: 56px; display: flex; align-items: center; justify-content: space-between; }
+  .nav-brand { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 16px; color: var(--accent); letter-spacing: 0.5px; display: flex; align-items: center; gap: 12px; }
+  .nav-brand .logo { width: 28px; height: 28px; background: linear-gradient(135deg, var(--accent), var(--accent2)); border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #000; font-weight: 800; font-size: 12px; }
+  .nav-brand span { color: var(--text2); font-weight: 400; font-size: 13px; }
+  .nav-meta { display: flex; gap: 20px; align-items: center; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text3); }
+  .nav-date { color: var(--accent); }
 
-  /* Main */
-  .main { margin-left: 230px; padding: 32px 40px 80px; max-width: 1100px; }
-  .page-header { margin-bottom: 36px; }
-  .page-date { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.18em; color: var(--green); margin-bottom: 6px; }
-  .page-title { font-size: 1.9rem; font-weight: 800; color: #fff; line-height: 1.2; }
-  .page-sub { font-size: 0.9rem; color: var(--muted); margin-top: 8px; }
+  /* LAYOUT */
+  .wrapper { display: flex; padding-top: 56px; min-height: 100vh; }
 
-  /* Hero banner */
-  .hero { background: linear-gradient(135deg, #0a1f12 0%, #0d1f2e 50%, #1a0d2e 100%); border: 2px solid var(--green); border-radius: 12px; padding: 28px 32px; margin-bottom: 32px; }
-  .hero-title { font-size: 1.4rem; font-weight: 800; color: var(--green); margin-bottom: 10px; }
-  .hero-body { font-size: 0.9rem; color: #a0e8c4; line-height: 1.8; }
-  .hero-stats { display: flex; gap: 32px; margin-top: 20px; flex-wrap: wrap; }
-  .hero-stat { text-align: center; }
-  .hero-stat-val { font-size: 2.2rem; font-weight: 900; color: var(--green); line-height: 1; }
-  .hero-stat-label { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-top: 4px; }
+  /* SIDEBAR */
+  aside { width: 260px; min-width: 260px; background: var(--bg2); border-right: 1px solid var(--border); position: fixed; top: 56px; bottom: 0; overflow-y: auto; padding: 24px 0; }
+  .sidebar-section { padding: 0 16px; margin-bottom: 28px; }
+  .sidebar-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text3); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 10px; padding: 0 6px; }
+  .sidebar-link { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-radius: 6px; color: var(--text2); text-decoration: none; font-size: 13px; transition: all 0.2s; cursor: pointer; border: none; background: none; width: 100%; text-align: left; font-family: 'Inter', sans-serif; }
+  .sidebar-link:hover { background: var(--surface); color: var(--text); }
+  .sidebar-link.active { background: var(--surface2); color: var(--accent); }
+  .sidebar-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+  .sidebar-count { margin-left: auto; font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text3); background: var(--surface2); padding: 2px 6px; border-radius: 3px; }
+  .sidebar-link.active .sidebar-count { background: var(--accent); color: #000; }
 
-  /* Cards */
-  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 22px 26px; margin-bottom: 24px; scroll-margin-top: 20px; }
-  .card-title { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.18em; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
-  .card-title .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  /* MAIN */
+  main { margin-left: 260px; flex: 1; padding: 48px 56px; max-width: 1200px; }
+  .section { display: none; animation: fadeIn 0.35s ease-out; }
+  .section.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 
-  /* Session blocks */
-  .session-block { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 18px 20px; margin-bottom: 16px; }
-  .session-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
-  .session-num { background: rgba(52,211,153,0.15); color: var(--green); border: 1px solid rgba(52,211,153,0.3); border-radius: 6px; padding: 4px 10px; font-size: 0.72rem; font-weight: 700; flex-shrink: 0; }
-  .session-title { font-size: 0.95rem; font-weight: 700; color: #fff; }
-  .session-date { font-size: 0.72rem; color: var(--muted); margin-left: auto; }
-  .session-body { font-size: 0.83rem; color: var(--muted); line-height: 1.7; }
-  .session-concepts { margin-top: 10px; }
-  .concept-tag { display: inline-block; background: rgba(96,165,250,0.1); color: var(--blue); border: 1px solid rgba(96,165,250,0.2); border-radius: 4px; padding: 2px 8px; font-size: 0.68rem; font-weight: 600; margin: 2px; }
+  /* HERO */
+  .hero { margin-bottom: 48px; padding-bottom: 40px; border-bottom: 1px solid var(--border); position: relative; }
+  .hero::before { content: ''; position: absolute; top: -20px; right: -20px; width: 300px; height: 300px; background: radial-gradient(circle, rgba(0,212,170,0.08) 0%, transparent 70%); pointer-events: none; }
+  .hero-tag { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--accent); letter-spacing: 3px; text-transform: uppercase; margin-bottom: 14px; display: flex; align-items: center; gap: 10px; }
+  .hero-tag::before { content: ''; width: 24px; height: 1px; background: var(--accent); }
+  .hero h1 { font-family: 'Syne', sans-serif; font-size: 44px; font-weight: 800; color: var(--text); line-height: 1.1; margin-bottom: 14px; letter-spacing: -1px; }
+  .hero h1 span { background: linear-gradient(135deg, var(--accent), var(--accent2)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+  .hero-sub { color: var(--text2); font-size: 16px; max-width: 700px; line-height: 1.7; }
+  .hero-meta { display: flex; gap: 12px; margin-top: 24px; flex-wrap: wrap; }
+  .meta-pill { display: flex; align-items: center; gap: 8px; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text2); background: var(--surface); padding: 6px 14px; border-radius: 20px; border: 1px solid var(--border); }
+  .meta-pill .dot { width: 6px; height: 6px; border-radius: 50%; }
 
-  /* Criteria table */
-  .criteria-row { display: grid; grid-template-columns: 1fr auto; gap: 16px; align-items: center; padding: 12px 16px; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; margin-bottom: 8px; }
-  .criteria-text { font-size: 0.85rem; color: var(--text); }
-  .pass-badge { background: rgba(52,211,153,0.15); color: var(--green); border: 1px solid rgba(52,211,153,0.3); border-radius: 12px; padding: 3px 14px; font-size: 0.72rem; font-weight: 800; white-space: nowrap; letter-spacing: 0.06em; }
+  /* STAT GRID */
+  .stat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 16px; margin-bottom: 44px; }
+  .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 18px 20px; position: relative; overflow: hidden; }
+  .stat-card::before { content: ''; position: absolute; top: 0; left: 0; width: 3px; height: 100%; background: var(--color); }
+  .stat-card-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 8px; }
+  .stat-card-value { font-family: 'Syne', sans-serif; font-size: 26px; font-weight: 800; color: var(--color); line-height: 1; margin-bottom: 4px; }
+  .stat-card-sub { font-size: 12px; color: var(--text2); }
 
-  /* Slide cards */
-  .slide-card { background: #0d1422; border: 1px solid var(--border); border-radius: 8px; padding: 14px 18px; margin-bottom: 10px; }
-  .slide-num { font-size: 0.68rem; font-weight: 700; color: var(--purple); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px; }
-  .slide-title { font-size: 0.9rem; font-weight: 700; color: #fff; margin-bottom: 8px; }
-  .slide-body { font-size: 0.8rem; color: var(--muted); line-height: 1.7; }
-  .slide-cli { margin-top: 8px; }
+  /* ALERTS */
+  .alert { border-radius: 8px; padding: 16px 20px; margin-bottom: 20px; display: flex; gap: 14px; align-items: flex-start; font-size: 13.5px; line-height: 1.65; }
+  .alert-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+  .alert-success { background: rgba(45,214,138,0.08); border: 1px solid rgba(45,214,138,0.25); color: var(--text2); }
+  .alert-success .alert-icon { color: var(--green); }
+  .alert-warn { background: rgba(245,166,35,0.08); border: 1px solid rgba(245,166,35,0.25); color: var(--text2); }
+  .alert-warn .alert-icon { color: var(--yellow); }
+  .alert-info { background: rgba(77,158,255,0.07); border: 1px solid rgba(77,158,255,0.2); color: var(--text2); }
+  .alert-info .alert-icon { color: var(--blue); }
+  .alert-purple { background: rgba(155,109,255,0.07); border: 1px solid rgba(155,109,255,0.2); color: var(--text2); }
+  .alert-purple .alert-icon { color: var(--purple); }
 
-  /* Items */
-  .item { display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border); }
-  .item:last-child { border-bottom: none; }
-  .item-check { color: var(--green); font-size: 1rem; flex-shrink: 0; margin-top: 1px; }
-  .item-warn { color: var(--amber); font-size: 1rem; flex-shrink: 0; margin-top: 1px; }
-  .item-body { flex: 1; }
-  .item-title { font-weight: 600; color: var(--text); font-size: 0.9rem; }
-  .item-sub { font-size: 0.8rem; color: var(--muted); margin-top: 2px; }
-  .tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; margin-left: 6px; vertical-align: middle; }
-  .tag-new { background: rgba(52,211,153,0.15); color: var(--green); }
-  .tag-key { background: rgba(196,181,253,0.15); color: var(--purple); }
-  .tag-pending { background: rgba(248,113,113,0.15); color: var(--red); }
-  .tag-wifi { background: rgba(34,211,238,0.15); color: var(--cyan); }
+  /* INLINE CODE */
+  .inline { font-family: 'JetBrains Mono', monospace; font-size: 12px; background: var(--bg3); color: var(--accent); padding: 2px 7px; border-radius: 4px; border: 1px solid var(--border); }
 
-  /* Code blocks */
-  pre { background: #0a0a12; border: 1px solid var(--border); border-radius: 6px; padding: 14px 16px; font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace; font-size: 0.8rem; color: #a5f3fc; overflow-x: auto; margin: 10px 0; line-height: 1.6; }
-  code { font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace; font-size: 0.82em; background: rgba(124,58,237,0.12); color: var(--purple); padding: 2px 5px; border-radius: 3px; }
+  /* SECTION HEADER */
+  .section-header { margin-bottom: 32px; }
+  .section-header h2 { font-family: 'Syne', sans-serif; font-size: 28px; font-weight: 800; color: var(--text); margin-bottom: 8px; }
+  .section-header p { color: var(--text2); font-size: 14px; }
+  .section-divider { display: flex; align-items: center; gap: 16px; margin: 28px 0 20px; }
+  .section-divider h3 { font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; color: var(--text3); text-transform: uppercase; letter-spacing: 1px; white-space: nowrap; }
+  .section-divider .line { flex: 1; height: 1px; background: var(--border); }
 
-  /* Tables */
-  table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+  /* SESSION ITEMS */
+  .session-list { display: flex; flex-direction: column; gap: 24px; }
+  .session-item { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 24px 28px; }
+  .session-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; }
+  .session-num { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 4px; }
+  .session-title { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+  .session-target { font-size: 12px; color: var(--text3); }
+  .session-status { font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--green); font-weight: 700; background: rgba(45,214,138,0.1); border: 1px solid rgba(45,214,138,0.25); padding: 6px 14px; border-radius: 6px; white-space: nowrap; }
+  .criteria-list { list-style: none; margin-bottom: 18px; }
+  .criteria-list li { padding: 5px 0; font-size: 13px; color: var(--text2); padding-left: 18px; position: relative; }
+  .criteria-list li::before { content: '→'; position: absolute; left: 0; color: var(--accent); font-family: 'JetBrains Mono', monospace; font-size: 11px; top: 7px; }
+  .session-qa { background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; padding: 16px 18px; margin-bottom: 12px; }
+  .session-qa:last-child { margin-bottom: 0; }
+  .qa-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--accent); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 10px; }
+  .qa-text { font-size: 13px; color: var(--text2); line-height: 1.7; }
+
+  /* CARD GRID */
+  .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; margin-bottom: 24px; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 20px; }
+  .card-title { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 14px; }
+  .card-row { display: flex; justify-content: space-between; align-items: center; padding: 7px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .card-row:last-child { border-bottom: none; }
+  .card-key { color: var(--text3); }
+  .card-val { color: var(--text); font-family: 'JetBrains Mono', monospace; font-size: 12px; }
+
+  /* WIFI STAGES */
+  .wifi-stage { border: 1px solid var(--border); border-radius: 10px; padding: 22px 26px; margin-bottom: 20px; position: relative; overflow: hidden; }
+  .wifi-stage::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--stage-color); }
+  .wifi-stage-num { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--stage-color); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 6px; }
+  .wifi-stage-title { font-family: 'Syne', sans-serif; font-size: 17px; font-weight: 700; color: var(--text); margin-bottom: 12px; }
+  .wifi-stage-body { font-size: 13.5px; color: var(--text2); line-height: 1.75; }
+  .wifi-stage-body strong { color: var(--text); font-weight: 600; }
+  .frame-diagram { background: var(--bg3); border: 1px solid var(--border); border-radius: 6px; padding: 14px 16px; margin: 14px 0; font-family: 'JetBrains Mono', monospace; font-size: 11.5px; line-height: 1.75; color: var(--accent); overflow-x: auto; }
+
+  /* LESSONS */
+  .lesson-item { display: flex; gap: 20px; padding: 18px 0; border-bottom: 1px solid var(--border); }
+  .lesson-item:last-child { border-bottom: none; }
+  .lesson-num { font-family: 'JetBrains Mono', monospace; font-size: 22px; font-weight: 700; color: var(--border2); min-width: 40px; line-height: 1.3; }
+  .lesson-body h4 { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; color: var(--accent); margin-bottom: 6px; }
+  .lesson-body p { font-size: 13px; color: var(--text2); line-height: 1.65; }
+  .lesson-cmd { font-family: 'JetBrains Mono', monospace; font-size: 11.5px; color: var(--accent); background: var(--bg3); border: 1px solid var(--border); padding: 8px 14px; border-radius: 6px; margin-top: 10px; display: block; overflow-x: auto; }
+
+  /* SIMULATORS */
+  .sim-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 18px; margin-bottom: 32px; }
+  .sim-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 22px; text-decoration: none; display: block; transition: all 0.2s; position: relative; overflow: hidden; }
+  .sim-card::before { content: '↗'; position: absolute; top: 20px; right: 20px; color: var(--text3); font-size: 18px; transition: all 0.2s; }
+  .sim-card:hover { border-color: var(--accent5); transform: translateY(-3px); }
+  .sim-card:hover::before { color: var(--accent5); transform: translate(2px, -2px); }
+  .sim-card-tag { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--accent5); text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 8px; }
+  .sim-card-title { font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 8px; padding-right: 28px; }
+  .sim-card-desc { font-size: 12.5px; color: var(--text2); line-height: 1.55; }
+
+  /* CHECKLISTS */
+  .checklist { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; margin-bottom: 24px; }
+  .checklist-header { background: var(--surface2); padding: 14px 22px; font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; color: var(--text2); border-bottom: 1px solid var(--border); }
+  .check-item { display: flex; align-items: flex-start; gap: 14px; padding: 13px 22px; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .check-item:last-child { border-bottom: none; }
+  .check-icon { font-size: 15px; flex-shrink: 0; margin-top: 1px; }
+  .check-text { flex: 1; color: var(--text2); }
+  .check-cmd { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--accent2); background: var(--bg3); padding: 3px 9px; border-radius: 4px; margin-top: 5px; display: inline-block; }
+
+  /* CRITERIA */
+  .criteria-pass-row { display: grid; grid-template-columns: 1fr 90px; gap: 16px; align-items: center; padding: 13px 18px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; margin-bottom: 8px; }
+  .criteria-pass-text { font-size: 13.5px; color: var(--text); }
+  .pass-pill { background: rgba(45,214,138,0.12); color: var(--green); border: 1px solid rgba(45,214,138,0.28); border-radius: 20px; padding: 4px 14px; font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700; text-align: center; }
+
+  /* OUTSTANDING */
+  .outstanding-list { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+  .outstanding-item { display: flex; align-items: center; gap: 16px; padding: 15px 22px; border-bottom: 1px solid var(--border); font-size: 13px; color: var(--text2); }
+  .outstanding-item:last-child { border-bottom: none; }
+  .out-badge { font-family: 'JetBrains Mono', monospace; font-size: 10px; padding: 4px 10px; border-radius: 4px; min-width: 80px; text-align: center; font-weight: 600; }
+  .badge-red    { background: rgba(224,92,92,0.15); color: var(--red); }
+  .badge-yellow { background: rgba(245,166,35,0.15); color: var(--yellow); }
+  .badge-blue   { background: rgba(77,158,255,0.12); color: var(--blue); }
+  .badge-purple { background: rgba(155,109,255,0.12); color: var(--purple); }
+  .badge-teal   { background: rgba(0,212,170,0.12); color: var(--accent); }
+  .badge-green  { background: rgba(45,214,138,0.12); color: var(--green); }
+
+  /* FLOW DIAGRAM */
+  .flow-diagram { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 28px; margin-bottom: 28px; text-align: center; }
+  .flow-stages { display: flex; gap: 8px; justify-content: center; align-items: center; flex-wrap: wrap; }
+  .flow-stage { background: var(--bg3); border: 1px solid var(--border); padding: 14px 18px; border-radius: 8px; text-align: left; min-width: 130px; }
+  .flow-stage-label { font-family: 'JetBrains Mono', monospace; font-size: 9px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text3); margin-bottom: 4px; }
+  .flow-stage-title { font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; color: var(--text); }
+  .flow-arrow { color: var(--accent); font-size: 16px; }
+
+  /* TABLES */
+  .table-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; margin-bottom: 24px; overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
   thead tr { background: var(--surface2); }
-  th { padding: 8px 12px; text-align: left; color: var(--muted); font-weight: 600; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.1em; border-bottom: 1px solid var(--border); }
-  td { padding: 8px 12px; border-bottom: 1px solid var(--border); color: var(--text); vertical-align: top; }
+  th { padding: 10px 16px; text-align: left; color: var(--text3); font-size: 11px; font-family: 'JetBrains Mono', monospace; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid var(--border); font-weight: 500; }
+  td { padding: 10px 16px; border-bottom: 1px solid var(--border); color: var(--text2); vertical-align: top; }
   tr:last-child td { border-bottom: none; }
-  tr:hover td { background: rgba(124,58,237,0.04); }
+  tr:hover td { background: rgba(255,255,255,0.02); }
+  .badge-tbl-green  { background: rgba(45,214,138,0.12); color: var(--green); border-radius: 4px; padding: 2px 8px; font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 600; }
+  .badge-tbl-blue   { background: rgba(77,158,255,0.12); color: var(--blue); border-radius: 4px; padding: 2px 8px; font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 600; }
+  .badge-tbl-teal   { background: rgba(0,212,170,0.12); color: var(--accent); border-radius: 4px; padding: 2px 8px; font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 600; }
+  .badge-tbl-yellow { background: rgba(245,166,35,0.12); color: var(--yellow); border-radius: 4px; padding: 2px 8px; font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 600; }
 
-  /* Badges */
-  .badge { display: inline-block; padding: 2px 9px; border-radius: 12px; font-size: 0.7rem; font-weight: 700; }
-  .badge-done { background: rgba(52,211,153,0.15); color: var(--green); }
-  .badge-pending { background: rgba(248,113,113,0.15); color: var(--red); }
-  .badge-warn { background: rgba(251,191,36,0.15); color: var(--amber); }
-  .badge-new { background: rgba(34,211,238,0.15); color: var(--cyan); }
+  /* CODE BLOCKS */
+  .code-section { background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; margin-bottom: 24px; }
+  .code-header { display: flex; justify-content: space-between; align-items: center; padding: 12px 18px; background: var(--surface); border-bottom: 1px solid var(--border); }
+  .code-title { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text2); }
+  .copy-btn { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text3); background: var(--bg3); border: 1px solid var(--border); padding: 4px 12px; border-radius: 4px; cursor: pointer; transition: all 0.15s; }
+  .copy-btn:hover { color: var(--accent); border-color: var(--accent); }
+  pre { padding: 20px; font-family: 'JetBrains Mono', monospace; font-size: 12px; line-height: 1.7; overflow-x: auto; color: var(--text); background: transparent; }
+  .c-comment { color: var(--text3); }
+  .c-cmd { color: #a5d6ff; }
+  .c-warn { color: var(--accent); font-weight: 700; }
 
-  /* Quote */
-  .quote { border-left: 3px solid var(--purple); padding: 14px 18px; margin: 10px 0; border-radius: 0 8px 8px 0; font-size: 0.88rem; font-style: italic; background: rgba(124,58,237,0.08); color: var(--purple); line-height: 1.7; }
-  .quote-attr { font-size: 0.72rem; font-style: normal; color: var(--muted); margin-top: 8px; font-weight: 600; }
+  /* QUOTE */
+  .quote-block { border-left: 3px solid var(--accent5); padding: 16px 20px; background: rgba(155,109,255,0.06); border-radius: 0 8px 8px 0; margin: 20px 0; }
+  .quote-text { font-size: 15px; color: var(--text); font-style: italic; line-height: 1.7; margin-bottom: 8px; }
+  .quote-attr { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--accent5); text-transform: uppercase; letter-spacing: 1px; }
 
-  .quote-green { border-left-color: var(--green); background: rgba(52,211,153,0.06); color: #a0e8c4; }
-  .quote-green .quote-attr { color: var(--green); }
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 7px; height: 7px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 4px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--text3); }
 
-  /* Warning/info banners */
-  .banner-warn { background: #1a1209; border: 1px solid #d97706; border-radius: 8px; padding: 14px 18px; margin-bottom: 12px; color: var(--amber); font-size: 0.83rem; line-height: 1.8; }
-  .banner-info { background: #0c1422; border: 1px solid #1e3a5f; border-radius: 8px; padding: 14px 18px; margin-bottom: 12px; color: #93c5fd; font-size: 0.83rem; line-height: 1.8; }
-  .banner-label { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px; }
-
-  /* URL buttons */
-  .url-block { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 8px; }
-  .url-btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: 6px; font-size: 0.8rem; font-weight: 600; text-decoration: none; transition: opacity 0.15s; }
-  .url-btn:hover { opacity: 0.85; }
-  .btn-purple { background: rgba(124,58,237,0.2); color: var(--purple); border: 1px solid rgba(124,58,237,0.3); }
-  .btn-green  { background: rgba(52,211,153,0.15); color: var(--green); border: 1px solid rgba(52,211,153,0.25); }
-  .btn-blue   { background: rgba(96,165,250,0.12); color: var(--blue); border: 1px solid rgba(96,165,250,0.22); }
-  .btn-amber  { background: rgba(251,191,36,0.12); color: var(--amber); border: 1px solid rgba(251,191,36,0.22); }
-
-  @media (max-width: 800px) { .sidebar { display: none; } .main { margin-left: 0; padding: 20px 16px; } }
+  @media (max-width: 900px) { aside { width: 220px; min-width: 220px; } main { margin-left: 220px; padding: 32px 24px; } }
+  @media (max-width: 700px) { aside { display: none; } main { margin-left: 0; padding: 24px 16px; } nav { padding: 0 16px; } .nav-meta { display: none; } }
 </style>
 </head>
 <body>
 
-<!-- SIDEBAR -->
-<nav class="sidebar">
-  <div class="logo">
-    <div class="logo-title">EOD — Apr 22</div>
-    <div class="logo-sub">All 6 Sessions Complete</div>
+<nav>
+  <div class="nav-brand">
+    <div class="logo">KK</div>
+    EOD BLUEPRINT<span> · Khursheed Khan · Extreme Networks</span>
   </div>
-  <div class="section-label">Overview</div>
-  <a href="#hero">Dashboard</a>
-  <a href="#accomplished">Accomplished</a>
-  <a href="#criteria">30-Day Criteria</a>
-  <div class="section-label">Sessions</div>
-  <a href="#sessions">All 6 Sessions</a>
-  <a href="#s4-deep">Session 4 — Wireless Deep</a>
-  <a href="#s6-deep">Session 6 — Troubleshooting</a>
-  <div class="section-label">Lab</div>
-  <a href="#pptx">Karl's Debrief (15 Slides)</a>
-  <a href="#wifi">WiFi Overview</a>
-  <a href="#lab-state">Lab State (Apr 21)</a>
-  <div class="section-label">Reference</div>
-  <a href="#docs">All Documents</a>
-  <a href="#kk-note">KK's Note to Karl</a>
-  <a href="#pending">Pending Items</a>
-  <a href="#urls">URLs</a>
+  <div class="nav-meta">
+    <div>30-Day Plan · 6/6 Sessions ✓</div>
+    <div class="nav-date">Apr 22 · 2026</div>
+  </div>
 </nav>
 
-<!-- MAIN -->
-<main class="main">
+<div class="wrapper">
 
-  <!-- PAGE HEADER -->
-  <div class="page-header">
-    <div class="page-date">Wednesday, April 22, 2026</div>
-    <div class="page-title">30-Day Plan — Training Complete</div>
-    <div class="page-sub">All 6 L2/L3 Socratic Sessions · All 5 Success Criteria · Karl Lab Deployed · Team Review Tomorrow 9 AM</div>
+<aside>
+  <div class="sidebar-section">
+    <div class="sidebar-label">Overview</div>
+    <button class="sidebar-link active" onclick="show('overview')"><div class="sidebar-dot" style="background:#00d4aa"></div>Summary</button>
+    <button class="sidebar-link" onclick="show('criteria')"><div class="sidebar-dot" style="background:#2dd68a"></div>30-Day Criteria</button>
+    <button class="sidebar-link" onclick="show('flow')"><div class="sidebar-dot" style="background:#4d9eff"></div>Day Flow</button>
   </div>
 
-  <!-- HERO BANNER -->
-  <div class="hero" id="hero">
-    <div class="hero-title">Mission Accomplished</div>
-    <div class="hero-body">
-      KK completed all six L2/L3 Socratic training sessions — L2 Fundamentals, L3 Routing, Wireless RF/Auth, XIQ Platform, Troubleshooting — plus the full Horizon Custom Fabrication lab build the day before.
-      All five success criteria from Karl's 30-day engineer development plan confirmed <strong>PASS</strong>.
-      Team review with Karl's team is tomorrow, April 23.
-    </div>
-    <div class="hero-stats">
-      <div class="hero-stat"><div class="hero-stat-val">6</div><div class="hero-stat-label">Sessions Complete</div></div>
-      <div class="hero-stat"><div class="hero-stat-val">5</div><div class="hero-stat-label">Criteria Passed</div></div>
-      <div class="hero-stat"><div class="hero-stat-val">12</div><div class="hero-stat-label">Documents Ingested</div></div>
-      <div class="hero-stat"><div class="hero-stat-val">2</div><div class="hero-stat-label">Lab Switches Deployed</div></div>
-    </div>
+  <div class="sidebar-section">
+    <div class="sidebar-label">30-Day Sessions</div>
+    <button class="sidebar-link" onclick="show('s1')"><div class="sidebar-dot" style="background:#00d4aa"></div>S1 · OSI Model<span class="sidebar-count">PASS</span></button>
+    <button class="sidebar-link" onclick="show('s2')"><div class="sidebar-dot" style="background:#4d9eff"></div>S2 · Layer 2<span class="sidebar-count">PASS</span></button>
+    <button class="sidebar-link" onclick="show('s3')"><div class="sidebar-dot" style="background:#9b6dff"></div>S3 · Layer 3<span class="sidebar-count">PASS</span></button>
+    <button class="sidebar-link" onclick="show('s4')"><div class="sidebar-dot" style="background:#f5a623"></div>S4 · Wireless<span class="sidebar-count">PASS</span></button>
+    <button class="sidebar-link" onclick="show('s5')"><div class="sidebar-dot" style="background:#ff6b9d"></div>S5 · XIQ Ops<span class="sidebar-count">PASS</span></button>
+    <button class="sidebar-link" onclick="show('s6')"><div class="sidebar-dot" style="background:#e05c5c"></div>S6 · Troubleshooting<span class="sidebar-count">PASS</span></button>
   </div>
 
-  <!-- ACCOMPLISHED -->
-  <div class="card" id="accomplished">
-    <div class="card-title"><div class="dot" style="background:var(--green)"></div><span style="color:var(--green)">Accomplished Today</span></div>
-    <div class="item">
-      <div class="item-check">✓</div>
-      <div class="item-body">
-        <div class="item-title">All 6 Socratic Sessions Completed <span class="tag tag-new">Done</span></div>
-        <div class="item-sub">S1 ran Apr 20 · S2–S6 ran Apr 22 · ~7 AM to 2 PM · complete Socratic dialogue transcript ingested</div>
-      </div>
-    </div>
-    <div class="item">
-      <div class="item-check">✓</div>
-      <div class="item-body">
-        <div class="item-title">Karl's Lab PowerPoint Ingested <span class="tag tag-new">New</span></div>
-        <div class="item-sub">15-slide debrief — "Karl's Lab Apr 21 Horizon Khursheed's Debrief.pptx" — never previously processed. Includes Karl Rule diagnostic matrix, EXOS ACL syntax, OWE Transition Mode, Defense Matrix, Alex closing quote.</div>
-      </div>
-    </div>
-    <div class="item">
-      <div class="item-check">✓</div>
-      <div class="item-body">
-        <div class="item-title">5 Success Criteria Confirmed PASS</div>
-        <div class="item-sub">All criteria from Karl's 30-day plan evaluated against Apr 22 transcript evidence — all five marked PASS</div>
-      </div>
-    </div>
-    <div class="item">
-      <div class="item-check">✓</div>
-      <div class="item-body">
-        <div class="item-title">WPA Simulator Deep-Dive — Session 4</div>
-        <div class="item-sub">Full 4-way handshake M1→M4 walkthrough: ANonce/SNonce/PTK/GTK, encryption boundary at AP, WPA2 vs WPA3 SAE Dragonfly, WiFi 6 vs 7 MLO</div>
-      </div>
-    </div>
-    <div class="item">
-      <div class="item-check">✓</div>
-      <div class="item-body">
-        <div class="item-title">WiFi Overview Document (JJ Brown + KK Comments) Fully Ingested</div>
-        <div class="item-sub">2.4/5/6 GHz bands, DFS channels, WPA3 SAE, 802.11be, capacity formulas, KK's 5 simulators catalogued</div>
-      </div>
-    </div>
-    <div class="item">
-      <div class="item-check">✓</div>
-      <div class="item-body">
-        <div class="item-title">Packet Capture Methodology — Session 6</div>
-        <div class="item-sub">L1→L2→L3 troubleshooting protocol locked. Wireshark capture points: Port 1 (uplink) + Port 3 (AP port). Filter: <code>ip.dst == 10.30.0.150</code></div>
-      </div>
-    </div>
-    <div class="item">
-      <div class="item-check">✓</div>
-      <div class="item-body">
-        <div class="item-title">12 Documents Indexed</div>
-        <div class="item-sub">Lab blueprint, two Claude AI transcripts, two NotebookLLM synthesis, WiFi Overview, KarlLab PPTX, 30-day plan, Apr22 Socratic, QoS docs, network requirements</div>
-      </div>
+  <div class="sidebar-section">
+    <div class="sidebar-label">Deep Dives</div>
+    <button class="sidebar-link" onclick="show('wifi-deep')"><div class="sidebar-dot" style="background:#00d4ff"></div>WiFi 6/7 Connection Flow</button>
+    <button class="sidebar-link" onclick="show('tshoot-method')"><div class="sidebar-dot" style="background:#e05c5c"></div>Packet Capture Method</button>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-label">Horizon Lab</div>
+    <button class="sidebar-link" onclick="show('topology')"><div class="sidebar-dot" style="background:#2dd68a"></div>Topology</button>
+    <button class="sidebar-link" onclick="show('config')"><div class="sidebar-dot" style="background:#9b6dff"></div>Config Scripts</button>
+    <button class="sidebar-link" onclick="show('testing')"><div class="sidebar-dot" style="background:#2dd68a"></div>Test Results</button>
+    <button class="sidebar-link" onclick="show('lessons')"><div class="sidebar-dot" style="background:#f5a623"></div>Lessons Learned</button>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-label">Resources</div>
+    <button class="sidebar-link" onclick="show('simulators')"><div class="sidebar-dot" style="background:#9b6dff"></div>Simulators (5)</button>
+    <button class="sidebar-link" onclick="show('outstanding')"><div class="sidebar-dot" style="background:#f5a623"></div>Outstanding</button>
+    <a class="sidebar-link" href="https://khursheedkhanaiforgood-ai.github.io/5320-onboarding/team_training_qa_20260420.html" target="_blank"><div class="sidebar-dot" style="background:#00d4aa"></div>Q&A Tracker ↗</a>
+    <a class="sidebar-link" href="session_log_20260422.html" target="_blank"><div class="sidebar-dot" style="background:#4d9eff"></div>Full Session Log ↗</a>
+  </div>
+</aside>
+
+<main>
+
+<!-- ═══════════════ OVERVIEW ═══════════════ -->
+<div class="section active" id="overview">
+  <div class="hero">
+    <div class="hero-tag">End of Day Blueprint · April 22 · 2026</div>
+    <h1>All Six Sessions <span>Complete.</span></h1>
+    <p class="hero-sub">Full Socratic traversal of the 30-day technical development plan, delivered alongside a working Primary/Secondary switch architecture for Horizon Custom Fabrication. Foundations from OSI fundamentals through WiFi 6/7 client connection flow and layered troubleshooting — all five success criteria validated.</p>
+    <div class="hero-meta">
+      <div class="meta-pill"><div class="dot" style="background:#2dd68a"></div>6/6 Sessions PASS</div>
+      <div class="meta-pill"><div class="dot" style="background:#4d9eff"></div>Horizon Lab Live</div>
+      <div class="meta-pill"><div class="dot" style="background:#9b6dff"></div>WiFi 6/7 Deep Dive</div>
+      <div class="meta-pill"><div class="dot" style="background:#f5a623"></div>8 Lessons Captured</div>
+      <div class="meta-pill"><div class="dot" style="background:#e05c5c"></div>Karl Rule Locked In</div>
+      <div class="meta-pill"><div class="dot" style="background:#ff6b9d"></div>Team Review Apr 23</div>
     </div>
   </div>
 
-  <!-- 30-DAY CRITERIA -->
-  <div class="card" id="criteria">
-    <div class="card-title"><div class="dot" style="background:var(--green)"></div><span style="color:var(--green)">30-Day Success Criteria — All PASS</span></div>
-    <div class="criteria-row">
-      <div class="criteria-text"><strong>1.</strong> Explain Layers 1–3 OSI and their role in troubleshooting</div>
-      <div class="pass-badge">✓ PASS</div>
-    </div>
-    <div class="criteria-row">
-      <div class="criteria-text"><strong>2.</strong> Describe key L2/L3 networking concepts (MAC/FDB, ARP, VLANs, trunks, STP, SVIs, routing)</div>
-      <div class="pass-badge">✓ PASS</div>
-    </div>
-    <div class="criteria-row">
-      <div class="criteria-text"><strong>3.</strong> Explain basic RF and wireless connectivity behavior (bands, channels, auth, association)</div>
-      <div class="pass-badge">✓ PASS</div>
-    </div>
-    <div class="criteria-row">
-      <div class="criteria-text"><strong>4.</strong> Navigate XIQ to locate client and AP information (onboarding, Monitor → Clients)</div>
-      <div class="pass-badge">✓ PASS</div>
-    </div>
-    <div class="criteria-row">
-      <div class="criteria-text"><strong>5.</strong> Walk through a troubleshooting scenario with logical process (L1→L2→L3, Karl Rule as root cause)</div>
-      <div class="pass-badge">✓ PASS</div>
-    </div>
-    <div style="margin-top:14px">
-      <div class="quote quote-green">
-        "I believe I can demonstrate to you the networking fundamentals, wireless concepts, platform operations next week... I recommend you open up the grilling to people the two of us trust."
-        <div class="quote-attr">— KK, self-assessment note to Karl, April 22, 2026</div>
-      </div>
+  <div class="stat-grid">
+    <div class="stat-card" style="--color:#00d4aa"><div class="stat-card-label">Session 1 · OSI</div><div class="stat-card-value">PASS</div><div class="stat-card-sub">L1/L2/L3 Mastered</div></div>
+    <div class="stat-card" style="--color:#4d9eff"><div class="stat-card-label">Session 2 · L2</div><div class="stat-card-value">PASS</div><div class="stat-card-sub">MAC, VLAN, FDB</div></div>
+    <div class="stat-card" style="--color:#9b6dff"><div class="stat-card-label">Session 3 · L3</div><div class="stat-card-value">PASS</div><div class="stat-card-sub">IPv4, Subnet, Routing</div></div>
+    <div class="stat-card" style="--color:#f5a623"><div class="stat-card-label">Session 4 · Wireless</div><div class="stat-card-value">PASS</div><div class="stat-card-sub">RF, RSSI, WiFi 6/7</div></div>
+    <div class="stat-card" style="--color:#ff6b9d"><div class="stat-card-label">Session 5 · XIQ</div><div class="stat-card-value">PASS</div><div class="stat-card-sub">AP Onboarding Ops</div></div>
+    <div class="stat-card" style="--color:#e05c5c"><div class="stat-card-label">Session 6 · TShoot</div><div class="stat-card-value">PASS</div><div class="stat-card-sub">Layered + PCAP</div></div>
+    <div class="stat-card" style="--color:#2dd68a"><div class="stat-card-label">Horizon Lab</div><div class="stat-card-value">LIVE</div><div class="stat-card-sub">SW1+SW2+2×AP3000</div></div>
+    <div class="stat-card" style="--color:#00d4ff"><div class="stat-card-label">WiFi Deep Dive</div><div class="stat-card-value">DONE</div><div class="stat-card-sub">5 stages · 6/7 compare</div></div>
+  </div>
+
+  <div class="alert alert-success">
+    <span class="alert-icon">✓</span>
+    <div><strong>Foundations locked in.</strong> Every success criterion in the 30-day plan demonstrated through Socratic dialogue, hands-on lab construction, and WiFi simulator walkthroughs. Working knowledge confirmed across OSI L1–L3, L2/L3 networking concepts, wireless fundamentals including WiFi 6/7 client connection mechanics, XIQ/Platform One operations, and layered troubleshooting methodology with packet capture awareness.</div>
+  </div>
+
+  <div class="alert alert-warn">
+    <span class="alert-icon">⚠</span>
+    <div><strong>The Karl Rule — never to be forgotten.</strong> <span class="inline">enable ipforwarding vlan Default</span> on SW1. Without it, clients get DHCP and ping the gateway but internet is ghosted. Return traffic hits the Default VLAN, routing is disabled, packet dropped. Permanently captured in all future templates.</div>
+  </div>
+
+  <div class="alert alert-purple">
+    <span class="alert-icon">◆</span>
+    <div><strong>KK Self-Assessment (End of Session 6):</strong> "I believe I can demonstrate to you the networking fundamentals, wireless concepts, platform operations next week. I covered all the topics listed in the 30-day plan. I recommend you open up the grilling to people the two of us trust." — Team review scheduled April 23.</div>
+  </div>
+
+  <div class="alert alert-info">
+    <span class="alert-icon">◆</span>
+    <div><strong>Next tier opportunities:</strong> WiFi L1 PHY deep dive (OFDM, CSMA/CA mechanics — bridging cellular RF background to unlicensed spectrum), DFS/AFC channel coordination, QoS/CoS marking at L2 and DSCP at L3, OWE legacy compatibility, 802.1X on wired Port 5, Wireshark practicum on SPAN/mirror port.</div>
+  </div>
+</div>
+
+<!-- ═══════════════ 30-DAY CRITERIA ═══════════════ -->
+<div class="section" id="criteria">
+  <div class="section-header">
+    <h2>30-Day Success Criteria</h2>
+    <p>All five criteria from Karl's engineer development plan — confirmed PASS via Apr 22 Socratic session transcript</p>
+  </div>
+
+  <div class="criteria-pass-row"><div class="criteria-pass-text"><strong>1.</strong> Explain Layers 1–3 OSI model and the role of each layer in troubleshooting</div><div class="pass-pill">✓ PASS</div></div>
+  <div class="criteria-pass-row"><div class="criteria-pass-text"><strong>2.</strong> Describe key L2/L3 networking concepts — MAC/FDB, ARP, VLANs, trunks, STP, SVIs, inter-subnet routing</div><div class="pass-pill">✓ PASS</div></div>
+  <div class="criteria-pass-row"><div class="criteria-pass-text"><strong>3.</strong> Explain basic RF and wireless connectivity behavior — bands, channels, auth, association, encryption</div><div class="pass-pill">✓ PASS</div></div>
+  <div class="criteria-pass-row"><div class="criteria-pass-text"><strong>4.</strong> Navigate XIQ to locate client and AP information — onboarding flow, Monitor → Clients, policy push</div><div class="pass-pill">✓ PASS</div></div>
+  <div class="criteria-pass-row"><div class="criteria-pass-text"><strong>5.</strong> Walk through a troubleshooting scenario with logical process — L1→L2→L3, Karl Rule as root cause, packet capture</div><div class="pass-pill">✓ PASS</div></div>
+
+  <div class="quote-block" style="margin-top:28px">
+    <div class="quote-text">"I believe I can demonstrate to you the networking fundamentals, wireless concepts, platform operations next week. I covered all the topics that were listed in the 30-day plan. I recommend you open up the grilling to people the two of us trust."</div>
+    <div class="quote-attr">— Khursheed Khan · End of Session 6 · April 22, 2026</div>
+  </div>
+</div>
+
+<!-- ═══════════════ DAY FLOW ═══════════════ -->
+<div class="section" id="flow">
+  <div class="section-header">
+    <h2>Day Flow</h2>
+    <p>How the Socratic dialogue, hands-on lab, and foundational sessions interleaved throughout April 21–22</p>
+  </div>
+
+  <div class="flow-diagram">
+    <div class="flow-stages">
+      <div class="flow-stage"><div class="flow-stage-label">Apr 20</div><div class="flow-stage-title">Session 1 · OSI</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-stage"><div class="flow-stage-label">Apr 21 AM</div><div class="flow-stage-title">Horizon Lab Build</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-stage"><div class="flow-stage-label">Apr 21 Midday</div><div class="flow-stage-title">Karl Rule Discovery</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-stage"><div class="flow-stage-label">Apr 22 AM</div><div class="flow-stage-title">S2–S3 L2/L3</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-stage"><div class="flow-stage-label">Apr 22 PM</div><div class="flow-stage-title">S4 WiFi Deep Dive</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-stage"><div class="flow-stage-label">Apr 22 EOD</div><div class="flow-stage-title">S5–S6 + Blueprint</div></div>
     </div>
   </div>
 
-  <!-- ALL 6 SESSIONS -->
-  <div class="card" id="sessions">
-    <div class="card-title"><div class="dot" style="background:var(--blue)"></div><span style="color:var(--blue)">All 6 Sessions — Complete</span></div>
+  <div class="alert alert-info">
+    <span class="alert-icon">ℹ</span>
+    <div><strong>Structure:</strong> Hands-on lab first (real hardware, real problems), then conceptual Socratic sessions to formalize foundations. The Karl Rule was discovered empirically during troubleshooting — a memorable anchor that made every subsequent session stick. Karl's 15-slide debrief PPTX ingested Apr 22 — first time processed.</div>
+  </div>
+</div>
 
-    <div class="session-block">
+<!-- ═══════════════ SESSION 1 ═══════════════ -->
+<div class="section" id="s1">
+  <div class="session-list">
+    <div class="session-item">
       <div class="session-header">
-        <div class="session-num">Session 1</div>
-        <div class="session-title">L2 Fundamentals — MAC, FDB, VLANs, STP</div>
-        <div class="session-date">Apr 20</div>
+        <div class="session-num-title">
+          <div class="session-num">Session 01 · Apr 20 + Apr 22</div>
+          <div class="session-title">OSI Model Fundamentals (Layers 1–3)</div>
+          <div class="session-target">Target: Working knowledge</div>
+        </div>
+        <div class="session-status">✓ PASS</div>
       </div>
-      <div class="session-body">10 questions. Ethernet frames, MAC address learning, flooding vs forwarding, FDB entries, access vs trunk ports, STP convergence, BPDU, root bridge election. Closed with inter-VLAN ping test (lab exercise pending at time).</div>
-      <div class="session-concepts">
-        <span class="concept-tag">MAC/FDB</span><span class="concept-tag">VLAN Segmentation</span><span class="concept-tag">Trunk Ports</span><span class="concept-tag">STP/BPDU</span><span class="concept-tag">Access Ports</span>
+      <ul class="criteria-list">
+        <li>Explain purpose and responsibilities of Layers 1, 2, and 3</li>
+        <li>Describe how traffic flows from physical transmission through switching and routing</li>
+        <li>Identify common troubleshooting areas associated with each layer</li>
+      </ul>
+      <div class="session-qa">
+        <div class="qa-label">Key Answer — L1/L2/L3 Purpose</div>
+        <div class="qa-text"><strong style="color:var(--text)">L1 Physical:</strong> Transmission medium / energy source — electromagnetic waves (wireless), light (fiber), voltage (copper). <strong style="color:var(--text)">L2 Data Link:</strong> Bit streams → frames with start/end delimiters, MAC addressing, VLAN tagging (802.1Q). <strong style="color:var(--text)">L3 Network:</strong> End-to-end IP routing, source-to-destination packet forwarding across subnets.</div>
       </div>
-    </div>
-
-    <div class="session-block">
-      <div class="session-header">
-        <div class="session-num">Session 2</div>
-        <div class="session-title">L2 Applied — Inter-VLAN Bridge, LLDP, VLAN 1 Loop</div>
-        <div class="session-date">Apr 22</div>
+      <div class="session-qa">
+        <div class="qa-label">Key Answer — Multi-Hop Packet Flow</div>
+        <div class="qa-text">Source device checks if destination IP is in its subnet. If yes → ARP for destination MAC, send directly. If no → ARP for default gateway MAC, send to gateway. At each hop: router reads destination IP, consults routing table, ARPs for next-hop MAC, rewrites L2 wrapper, forwards. <strong style="color:var(--text)">IP header unchanged end-to-end; only L2 MAC rewrites at each hop.</strong></div>
       </div>
-      <div class="session-body">8 questions. Inter-VLAN ping requires L3 routing (not a bridge). LLDP neighbour discovery. VLAN 1 loop prevention (delete ports 10 on both switches). MAC vs IP addressing role in forwarding plane. KK correctly identified VLAN 1 triangle loop risk from lab memory.</div>
-      <div class="session-concepts">
-        <span class="concept-tag">Inter-VLAN Routing</span><span class="concept-tag">LLDP</span><span class="concept-tag">VLAN 1 Loop</span><span class="concept-tag">Trunk Tagging</span>
-      </div>
-    </div>
-
-    <div class="session-block">
-      <div class="session-header">
-        <div class="session-num">Session 3</div>
-        <div class="session-title">L3 Routing — IPv4, SVIs, Static vs Dynamic, Campus Design</div>
-        <div class="session-date">Apr 22</div>
-      </div>
-      <div class="session-body">8 questions. IPv4 /24 vs /25 subnetting, ARP resolution, SVI as default gateway for each VLAN, static route configuration, OSPF as dynamic routing reference, campus network design (access/distribution/core hierarchy). KK correctly derived SW1 as L3 core owner from lab architecture.</div>
-      <div class="session-concepts">
-        <span class="concept-tag">IPv4 Subnetting</span><span class="concept-tag">SVIs</span><span class="concept-tag">Static Routes</span><span class="concept-tag">OSPF Reference</span><span class="concept-tag">Campus Design</span>
-      </div>
-    </div>
-
-    <div class="session-block" id="s4-deep">
-      <div class="session-header">
-        <div class="session-num">Session 4</div>
-        <div class="session-title">Wireless — RF, Channels, Auth, WPA Simulator Deep-Dive</div>
-        <div class="session-date">Apr 22</div>
-      </div>
-      <div class="session-body">8 questions. RSSI/dBm negative scale, 2.4 vs 5 GHz tradeoff, non-overlapping channels (1/6/11 for 2.4, DFS channels on 5), association vs authentication, WPA Simulator full walkthrough:
-        <br><br>
-        <strong>Full Client Lifecycle:</strong> Discovery (Beacon/Probe) → Auth (SAE Dragonfly handshake: no password transmitted, forward secrecy, mutual auth) → Association (capabilities exchange) → 4-Way Handshake (M1: ANonce from AP / M2: SNonce from client + MIC / M3: GTK encrypted + MIC / M4: ACK) → Data Plane (DHCP → DNS → TCP → Zoom).
-        <br><br>
-        <strong>Encryption boundary:</strong> WiFi L2 frame payload encrypted with PTK from AP antenna to client. Wired side (port 5) = unencrypted. 802.1X on wired port 5 not configured in lab = open access (noted for future sprint).
-        <br><br>
-        <strong>WiFi 6 vs 7:</strong> WiFi 6 = OFDMA + MU-MIMO + TWT. WiFi 7 = MLO (Multi-Link Operation) — client can aggregate 2.4+5+6 GHz simultaneously.
-      </div>
-      <div class="session-concepts">
-        <span class="concept-tag">RSSI/dBm</span><span class="concept-tag">DFS Channels</span><span class="concept-tag">SAE Dragonfly</span><span class="concept-tag">4-Way Handshake</span><span class="concept-tag">PTK/GTK</span><span class="concept-tag">WiFi 6/7 MLO</span>
-      </div>
-    </div>
-
-    <div class="session-block">
-      <div class="session-header">
-        <div class="session-num">Session 5</div>
-        <div class="session-title">XIQ Platform — AP Onboarding, Navigation, Troubleshooting</div>
-        <div class="session-date">Apr 22</div>
-      </div>
-      <div class="session-body">7 questions. AP onboarding flow: pre-register serial → Default VLAN boot → DHCP → Aerohive redirector → XIQ cloud → Network Policy push → channel/power applied. Monitor → Clients navigation (signal/VLAN/IP/roam history). Troubleshooting "connected but no internet" using lab knowledge: check AP port VLAN tagging, check SVI/ipforwarding on SW1, check DHCP leases, check Karl Rule.</div>
-      <div class="session-concepts">
-        <span class="concept-tag">AP Onboarding</span><span class="concept-tag">XIQ Monitor</span><span class="concept-tag">Network Policy Push</span><span class="concept-tag">Client Troubleshooting</span>
-      </div>
-    </div>
-
-    <div class="session-block" id="s6-deep">
-      <div class="session-header">
-        <div class="session-num">Session 6</div>
-        <div class="session-title">Troubleshooting + Packet Capture — L1→L2→L3 Methodology</div>
-        <div class="session-date">Apr 22</div>
-      </div>
-      <div class="session-body">8 questions. Scenario: VLAN 30 guest client has no internet.
-        <br><br>
-        <strong>L1 checks:</strong> Physical link, port LED, show ports.<br>
-        <strong>L2 checks:</strong> VLAN membership on port 3, tagged VLANs on trunk, MAC learned in FDB.<br>
-        <strong>L3 checks:</strong> DHCP lease exists, SVI 10.30.0.1 reachable, <code>enable ipforwarding vlan Default</code> on SW1 = <strong>Karl Rule</strong> as root cause.
-        <br><br>
-        <strong>Packet capture methodology:</strong> traceroute shows path (L3 hops) — packet capture shows actual frame content (L2+payload). Wireshark capture points: Port 1 (uplink to modem, see if reply returns) + Port 3 (AP port, see if client traffic leaves correctly). Filter: <code>ip.dst == 10.30.0.150</code>. Look for ICMP Echo Reply presence/absence to isolate where the drop occurs.
-      </div>
-      <div class="session-concepts">
-        <span class="concept-tag">L1→L2→L3</span><span class="concept-tag">Karl Rule</span><span class="concept-tag">Wireshark</span><span class="concept-tag">Packet Capture</span><span class="concept-tag">ICMP Echo</span>
+      <div class="session-qa">
+        <div class="qa-label">Key Answer — Troubleshooting per Layer</div>
+        <div class="qa-text"><strong style="color:var(--text)">L1:</strong> Client unreachable anywhere → cable, interface, physical link issue. <strong style="color:var(--text)">L2:</strong> Can't reach different VLAN → missing SVI/gateway IP, wrong VLAN on port. <strong style="color:var(--text)">L3:</strong> Local OK but no internet → return path broken — most often <span class="inline">ipforwarding vlan Default</span> disabled (Karl Rule).</div>
       </div>
     </div>
   </div>
+</div>
 
-  <!-- KARL'S PPTX -->
-  <div class="card" id="pptx">
-    <div class="card-title"><div class="dot" style="background:var(--purple)"></div><span style="color:var(--purple)">Karl's Lab Debrief — 15 Slides (NEW)</span></div>
-    <div class="banner-info"><div class="banner-label">File</div>Karl's Lab_Apr 21_Horizon_Khursheed's Debrief.pptx — first ingested Apr 22. Visual synthesis of the full lab build with field notes, CLI, and the Alex closing quote.</div>
-
-    <div class="slide-card">
-      <div class="slide-num">Slide 1</div>
-      <div class="slide-title">Goal: Primary/Secondary 5320 Architecture</div>
-      <div class="slide-body">Enterprise branch in a single afternoon. SW1 = L3 Core, SW2 = L2 Access. Prove the architecture before rolling out to customer sites.</div>
-    </div>
-    <div class="slide-card">
-      <div class="slide-num">Slides 2–3</div>
-      <div class="slide-title">Anatomy — Physical + Logical Topology</div>
-      <div class="slide-body">SW1 port map: Port 1 = uplink, Port 3 = AP (Default untagged, VLAN 20+30 tagged), Port 5 = wired client (VLAN 10 untagged), Port 10 = trunk. SW2 = mirror access ports only. VLAN table: 10/20/30 → 10.x.0.0/24 subnets.</div>
-    </div>
-    <div class="slide-card">
-      <div class="slide-num">Slide 4</div>
-      <div class="slide-title">Port 10 Trunk — VLAN 1 Removal</div>
-      <div class="slide-body">VLAN 1 must be explicitly removed from trunk port 10 on BOTH switches to prevent bridging loop. <code>configure vlan Default delete ports 10</code> — run on both.</div>
-    </div>
-    <div class="slide-card">
-      <div class="slide-num">Slide 5</div>
-      <div class="slide-title">DHCP Reach-Back — Port 10 Must Be Included</div>
-      <div class="slide-body">SW2 clients need DHCP from SW1. DHCP helper must include port 10 in the DHCP scope so reach-back frames traverse the trunk.</div>
-      <pre>enable dhcp ports 3,10 vlan VLAN_10
-enable dhcp ports 3,10 vlan VLAN_20
-enable dhcp ports 3,10 vlan VLAN_30</pre>
-    </div>
-    <div class="slide-card">
-      <div class="slide-num">Slides 6–7</div>
-      <div class="slide-title">Internet Ghosting → Karl Rule Explained</div>
-      <div class="slide-body">Without ipforwarding on Default VLAN: "Return traffic hits the Default VLAN (modem uplink). The switch checks the Default VLAN state, sees routing is disabled, and explicitly drops the packet." Client gets DHCP but zero internet — the ghost symptom.</div>
-      <pre>enable ipforwarding vlan Default   ← KARL RULE — run this first</pre>
-    </div>
-    <div class="slide-card">
-      <div class="slide-num">Slides 8–9</div>
-      <div class="slide-title">QoS Strategy + E2E Execution</div>
-      <div class="slide-body">CLI: VLAN 10/20 → qp6 (high priority), VLAN 30 → qp1 (low). XIQ: Corp_20 User Profile → Scheduling Weight 100, Guest_30 → Weight 10. Applied at both SW1 edge and AP radio level for true end-to-end QoS.</div>
-    </div>
-    <div class="slide-card">
-      <div class="slide-num">Slides 10–11</div>
-      <div class="slide-title">Threat Model + Defense Matrix</div>
-      <div class="slide-body">
-        <strong>North-South:</strong> XIQ L3 Firewall Rules in Guest_30 User Profile — DENY 10.30.0.0/24 → 10.10.0.0/24, DENY 10.30.0.0/24 → 10.20.0.0/24.<br>
-        <strong>East-West (intra-VLAN):</strong> XIQ Station Isolation — "Drop traffic between stations" action in Guest_30 firewall profile. Cannot be done with EXOS ACLs alone (L2 intra-VLAN traffic bypasses ACL engine).
+<!-- ═══════════════ SESSION 2 ═══════════════ -->
+<div class="section" id="s2">
+  <div class="session-list">
+    <div class="session-item">
+      <div class="session-header">
+        <div class="session-num-title">
+          <div class="session-num">Session 02 · Apr 22</div>
+          <div class="session-title">Layer 2 — MAC Addresses, Ethernet & VLANs</div>
+          <div class="session-target">Target: Working knowledge</div>
+        </div>
+        <div class="session-status">✓ PASS</div>
+      </div>
+      <ul class="criteria-list">
+        <li>Explain how MAC addresses are used in Layer 2 communication</li>
+        <li>Demonstrate understanding of VLAN segmentation and trunk ports</li>
+        <li>Understand FDB learning, flooding, and VLAN 1 loop prevention</li>
+      </ul>
+      <div class="session-qa">
+        <div class="qa-label">Key Answer — MAC Address Fundamentals</div>
+        <div class="qa-text">MAC addresses are 48-bit hex identifiers burned into NIC firmware. First 3 octets = <strong style="color:var(--text)">OUI (Organizationally Unique Identifier)</strong> identifying the manufacturer. Switches read <strong style="color:var(--text)">Source MAC</strong> to learn (populate FDB), read <strong style="color:var(--text)">Destination MAC</strong> to forward. Unknown destination MAC → flood to all ports on that VLAN. Broadcast MAC (ff:ff:ff:ff:ff:ff) → flood without FDB lookup.</div>
+      </div>
+      <div class="session-qa">
+        <div class="qa-label">Key Answer — VLAN Segmentation</div>
+        <div class="qa-text">VLANs are <strong style="color:var(--text)">logical L2 partitions</strong>. Two devices on the same physical switch in different VLANs cannot communicate at L2 — completely isolated unless an SVI (L3 gateway) exists. Trunk ports carry multiple VLANs (802.1Q tagged). Access ports carry one VLAN (untagged). VLAN 1 must be removed from inter-switch trunk port (<span class="inline">configure vlan Default delete ports 10</span>) to prevent bridging loop triangle.</div>
+      </div>
+      <div class="session-qa">
+        <div class="qa-label">Key Answer — FDB vs ARP Table</div>
+        <div class="qa-text"><strong style="color:var(--text)">FDB:</strong> MAC-to-port mapping on switches — L2 concept, per-VLAN. <strong style="color:var(--text)">ARP Table:</strong> IP-to-MAC mapping on end devices/routers — L3-to-L2 resolution. FDB entries age out (EXOS default 300s). After aging, next frame is flooded again until source is re-learned.</div>
       </div>
     </div>
-    <div class="slide-card">
-      <div class="slide-num">Slide 12</div>
-      <div class="slide-title">EXOS ACL Syntax Field Notes</div>
-      <div class="slide-body">Cisco-style one-liners FAIL on EXOS. Must use the policy editor with entry containers.</div>
-      <pre>edit policy GUEST_ISOLATION          # opens vi editor
-entry deny-to-corp {
-  if {
-    source-address 10.30.0.0/24;
-    destination-address 10.10.0.0/24;
-  } then {
-    deny;
-  }
-}
+  </div>
+</div>
+
+<!-- ═══════════════ SESSION 3 ═══════════════ -->
+<div class="section" id="s3">
+  <div class="session-list">
+    <div class="session-item">
+      <div class="session-header">
+        <div class="session-num-title">
+          <div class="session-num">Session 03 · Apr 22</div>
+          <div class="session-title">Layer 3 — IPv4, Subnetting & Routing</div>
+          <div class="session-target">Target: Working knowledge</div>
+        </div>
+        <div class="session-status">✓ PASS</div>
+      </div>
+      <ul class="criteria-list">
+        <li>Understand IPv4 addressing structure and subnetting basics</li>
+        <li>Explain default gateway behavior and inter-subnet routing via SVIs</li>
+        <li>Differentiate static vs dynamic routing (OSPF reference)</li>
+        <li>Apply campus network design hierarchy</li>
+      </ul>
+      <div class="session-qa">
+        <div class="qa-label">Key Answer — Subnet Math</div>
+        <div class="qa-text">IPv4 = 32 bits. <strong style="color:var(--text)">/24</strong> = 24 network bits, 8 host bits → 256 addresses (254 usable). <strong style="color:var(--text)">/25</strong> = 25 network, 7 host → 128 addresses (126 usable). For 10.40.0.50/25: block is 10.40.0.0–10.40.0.127. Network=.0, Broadcast=.127, Hosts=.1–.126. Same IP but /24 spans 10.40.0.0–10.40.0.255.</div>
+      </div>
+      <div class="session-qa">
+        <div class="qa-label">Key Answer — SVI as Default Gateway</div>
+        <div class="qa-text">SVI (Switched Virtual Interface) = a virtual L3 interface bound to a VLAN on a switch. It owns the gateway IP that DHCP clients use. In the Horizon lab: SW1 has SVI 10.10.0.1 (VLAN 10), 10.20.0.1 (VLAN 20), 10.30.0.1 (VLAN 30). SW2 has NO SVIs — pure L2 only. All routing decisions happen on SW1.</div>
+      </div>
+      <div class="session-qa">
+        <div class="qa-label">Key Answer — Static vs Dynamic Routing</div>
+        <div class="qa-text"><strong style="color:var(--text)">Static:</strong> Manually configured routing table entries. Simple, no overhead, brittle — if a link fails, packets are stuck. <strong style="color:var(--text)">Dynamic (OSPF):</strong> Routers advertise directly-connected subnets, learn topology from neighbors, calculate best path via SPF algorithm, auto-reconverge when topology changes. Same forwarding mechanism at each hop — the difference is only how the routing table is populated.</div>
+      </div>
+      <div class="session-qa">
+        <div class="qa-label">Key Answer — Campus Network Design</div>
+        <div class="qa-text">Three-tier hierarchy: <strong style="color:var(--text)">Access layer</strong> (client ports — untagged access ports, VLAN assignment) → <strong style="color:var(--text)">Distribution layer</strong> (VLAN aggregation + inter-VLAN routing via SVIs) → <strong style="color:var(--text)">Core layer</strong> (high-speed backbone, L3 forwarding only). <strong style="color:var(--text)">IP header never changes end-to-end; only L2 MAC wrapper rewrites at every hop.</strong></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ SESSION 4 ═══════════════ -->
+<div class="section" id="s4">
+  <div class="session-list">
+    <div class="session-item">
+      <div class="session-header">
+        <div class="session-num-title">
+          <div class="session-num">Session 04 · Apr 22</div>
+          <div class="session-title">Wireless Networking Fundamentals</div>
+          <div class="session-target">Target: Working knowledge</div>
+        </div>
+        <div class="session-status">✓ PASS</div>
+      </div>
+      <ul class="criteria-list">
+        <li>Explain how RF conditions affect wireless performance (RSSI, SNR, dBm scale)</li>
+        <li>Identify frequency bands, non-overlapping channels, and DFS behavior</li>
+        <li>Walk through client connection lifecycle using WPA Simulator</li>
+        <li>Compare WiFi 6 vs WiFi 7 (MLO)</li>
+      </ul>
+      <div class="session-qa">
+        <div class="qa-label">Key Answer — RSSI & dBm Scale</div>
+        <div class="qa-text"><strong style="color:var(--text)">dBm is logarithmic:</strong> -30 dBm is stronger than -70 dBm (closer to 0 = stronger). Every 10 dB = 10× power change; every 3 dB ≈ 2× (half power). Practical scale: -30 dBm excellent, -70 dBm weak-usable, -90 dBm unusable. <strong style="color:var(--text)">RSSI alone is insufficient</strong> — SNR (Signal-to-Noise Ratio) matters equally. Strong RSSI with high interference (bad SNR) means frames can't be decoded.</div>
+      </div>
+      <div class="session-qa">
+        <div class="qa-label">Key Answer — Frequency Bands</div>
+        <div class="qa-text"><strong style="color:var(--text)">2.4 GHz:</strong> 2.400–2.4835 GHz, 22 MHz channel width, only 3 non-overlapping (1/6/11), best range but most congested (IoT + legacy). <strong style="color:var(--text)">5 GHz:</strong> UNII-1/2A/2C/3, 20/40/80/160 MHz widths, ~25 non-overlap no-DFS / ~45 with DFS. DFS required on UNII-2A/2C (radar avoidance, 10s channel vacate). <strong style="color:var(--text)">6 GHz (WiFi 6E+):</strong> 1200 MHz of spectrum, 59 non-overlapping 20 MHz channels, no DFS, PSC channels for discovery. WiFi 6E and 7 only.</div>
+      </div>
+      <div class="session-qa">
+        <div class="qa-label">Key Answer — WiFi 6 vs WiFi 7</div>
+        <div class="qa-text"><strong style="color:var(--text)">WiFi 6 (802.11ax):</strong> OFDMA, 1024-QAM, 160 MHz max, single-band per connection, MU-MIMO 8×8, TWT for IoT battery. <strong style="color:var(--text)">WiFi 7 (802.11be):</strong> 4096-QAM, 320 MHz aggregation, MLO (Multi-Link Operation) — client simultaneously uses multiple bands. Example: video on 6 GHz (clean) + audio on 5 GHz (fallback) = 240 MHz aggregated. Mandates H2E for SAE — stronger side-channel attack resistance.</div>
+      </div>
+      <div class="session-qa">
+        <div class="qa-label">Key Answer — DFS & AFC</div>
+        <div class="qa-text"><strong style="color:var(--text)">DFS (5 GHz):</strong> AP detects radar chirps in firmware, immediately vacates channel, switches to clean channel, stays off 30+ min. Automatic, no config needed. <strong style="color:var(--text)">AFC (6 GHz Standard Power):</strong> AP queries cloud database every 24 hours with GPS + power level; server approves/blocks channels based on registered APs. ~30 min propagation delay when APs shut down.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ SESSION 5 ═══════════════ -->
+<div class="section" id="s5">
+  <div class="session-list">
+    <div class="session-item">
+      <div class="session-header">
+        <div class="session-num-title">
+          <div class="session-num">Session 05 · Apr 22</div>
+          <div class="session-title">ExtremeCloud IQ & Platform One Operations</div>
+          <div class="session-target">Target: Working to functional knowledge</div>
+        </div>
+        <div class="session-status">✓ PASS</div>
+      </div>
+      <ul class="criteria-list">
+        <li>Demonstrate ability to onboard and provision an access point</li>
+        <li>Navigate the management platform to locate AP and client information</li>
+        <li>Review basic configuration settings and network policies</li>
+        <li>Use platform tools to assist with troubleshooting</li>
+      </ul>
+      <div class="session-qa">
+        <div class="qa-label">Key Answer — AP Onboarding Flow</div>
+        <div class="qa-text">(1) Pre-register AP serial number in XIQ. (2) AP powers on, boots into Default VLAN (VLAN 1) untagged — <strong style="color:var(--text)">AP lifeline must be configured on Port 3.</strong> (3) AP sends DHCP Discover on Default VLAN. (4) AP contacts Aerohive redirector (cloud service). (5) Redirector returns XIQ URL + onboarding token. (6) AP contacts XIQ, proves identity via pre-registered serial. (7) AP downloads config and joins assigned Network Policy with SSIDs, security settings, VLAN mappings, channel/power.</div>
+      </div>
+      <div class="session-qa">
+        <div class="qa-label">Key Answer — XIQ Client Lookup</div>
+        <div class="qa-text"><strong style="color:var(--text)">Monitor → Clients</strong> (global list across all APs). Filter by AP, SSID, or user. Per-client detail: MAC, IP, SSID, VLAN, RSSI, connection time, association status, roam history. Alternative: Devices → [specific AP] → Clients tab.</div>
+      </div>
+      <div class="session-qa">
+        <div class="qa-label">Key Answer — "Connected but No Internet" Troubleshooting</div>
+        <div class="qa-text">Check two things first: (1) Is <span class="inline">enable ipforwarding vlan Default</span> on SW1? — Karl Rule. (2) Is the DHCP server enabled on trunk Port 10 between SW1 and SW2? — DHCP reach-back for SW2 clients. (3) Are modem static routes pointing VLAN subnets back to SW1 192.168.0.28? These are the three most common return-path issues in a Primary/Secondary architecture.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ SESSION 6 ═══════════════ -->
+<div class="section" id="s6">
+  <div class="session-list">
+    <div class="session-item">
+      <div class="session-header">
+        <div class="session-num-title">
+          <div class="session-num">Session 06 · Apr 22</div>
+          <div class="session-title">Troubleshooting Methodology & Packet Capture</div>
+          <div class="session-target">Target: Working knowledge</div>
+        </div>
+        <div class="session-status">✓ PASS</div>
+      </div>
+      <ul class="criteria-list">
+        <li>Apply a logical troubleshooting process (L1 → L2 → L3)</li>
+        <li>Identify the OSI layer where an issue is most likely occurring</li>
+        <li>Assist in isolating common network and wireless issues</li>
+        <li>Understand the purpose of packet captures and navigate basic Wireshark</li>
+      </ul>
+      <div class="session-qa">
+        <div class="qa-label">Key Answer — Layered Troubleshooting Sequence</div>
+        <div class="qa-text"><strong style="color:var(--text)">L1 Physical:</strong> Is the AP visible from the switch? Cable, link LEDs, <span class="inline">show ports 3 information</span>. <strong style="color:var(--text)">L2 Association:</strong> Can clients associate to the SSID? VLAN 30 tagged on Port 3? MAC in FDB? <strong style="color:var(--text)">L3 DHCP:</strong> Did the client get an IP in the correct subnet? 169.254.x.x = DHCP failure. <strong style="color:var(--text)">L3 Internet:</strong> Does SW1 have <span class="inline">enable ipforwarding vlan Default</span>? Are modem static routes configured? DHCP reach-back on Port 10?</div>
+      </div>
+      <div class="session-qa">
+        <div class="qa-label">Key Answer — Purpose of Packet Capture</div>
+        <div class="qa-text">Ping/traceroute give <strong style="color:var(--text)">high-level binary answers</strong> ("works or doesn't"). Packet capture gives <strong style="color:var(--text)">frame-level visibility:</strong> exact payloads (unencrypted), MAC/IP headers, VLAN tags, QoS priority markings, TCP sequence numbers, retransmissions, timing patterns. Enables root-cause diagnosis and trend analysis (congestion, performance degradation, anomalies) that high-level tools cannot reveal.</div>
+      </div>
+      <div class="session-qa">
+        <div class="qa-label">Key Answer — Where to Capture for Return-Path Diagnosis</div>
+        <div class="qa-text"><strong style="color:var(--text)">Port 1 (uplink to modem):</strong> Confirm ICMP Echo Requests leave SW1 AND Echo Replies arrive back from 8.8.8.8. Missing inbound → modem/internet issue. <strong style="color:var(--text)">Port 3 (AP port):</strong> Confirm Echo Requests from VLAN 30 client reach SW1 AND Echo Replies (tagged VLAN 30) return to client. Missing inbound on Port 3 while present on Port 1 → <span class="inline">ipforwarding vlan Default</span> disabled. Wireshark filter: <span class="inline">ip.dst == 10.30.0.150</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ WIFI DEEP DIVE ═══════════════ -->
+<div class="section" id="wifi-deep">
+  <div class="section-header">
+    <h2>WiFi 6/7 Client Connection Flow — Deep Dive</h2>
+    <p>Five-stage walkthrough: Discovery → Authentication → Association → 4-Way Handshake → Data Plane</p>
+  </div>
+
+  <div class="alert alert-info">
+    <span class="alert-icon">◆</span>
+    <div>Walk through this alongside the <a href="https://claude.ai/public/artifacts/89fa9685-e7ae-49c0-91d7-b2940c5b7694" target="_blank" style="color:var(--accent)">WPA Simulator</a> and the <a href="https://claude.ai/public/artifacts/29fe810e-8702-448c-b772-a851c611b952" target="_blank" style="color:var(--accent)">802.11be Simulator</a>. The simulators animate exactly what's described here.</div>
+  </div>
+
+  <div class="wifi-stage" style="--stage-color:#00d4aa">
+    <div class="wifi-stage-num">Stage 01</div>
+    <div class="wifi-stage-title">Discovery — iPhone Finds the AP</div>
+    <div class="wifi-stage-body">
+      <strong>Passive scan:</strong> iPhone hops through channels listening for Beacon frames (broadcast by APs every ~100ms). Each beacon contains SSID, BSSID (AP MAC), supported rates, channel, security type, RSSI.<br><br>
+      <strong>Active scan:</strong> iPhone broadcasts Probe Requests on each channel. Every AP in range responds with Probe Response containing the same info.<br><br>
+      <strong>iPhone builds "Available Networks" list</strong> and user taps their choice. WiFi 7 adds 6 GHz PSC (Preferred Scanning Channels) for faster discovery — 15 priority channels instead of scanning all 59.
+      <div class="frame-diagram">Beacon Frame:
+[Frame Control] [Timestamp] [Beacon Interval=100ms]
+[Capability Info] [SSID IE: "Horizon-Corp"] [Supported Rates]
+[Current Channel: 36] [RSSI] [Security IE: WPA3-SAE]</div>
+    </div>
+  </div>
+
+  <div class="wifi-stage" style="--stage-color:#00d4ff">
+    <div class="wifi-stage-num">Stage 02</div>
+    <div class="wifi-stage-title">Authentication — SAE Handshake (WPA3)</div>
+    <div class="wifi-stage-body">
+      User enters password and taps SSID. iPhone sends Authentication Request — <strong>but the password is never transmitted.</strong><br><br>
+      <strong>SAE Dragonfly exchange:</strong> Both iPhone and AP independently use the password as input to a cryptographic function, generating matching scalars and elements. They exchange these in Commit frames. If both used the same password, the math derives identical PMK on both sides.<br><br>
+      <strong>Confirm frames:</strong> Both sides prove they derived the same PMK via a MIC check. Mutual authentication complete — with forward secrecy. Capturing the entire exchange yields zero information about the password.
+      <div class="frame-diagram">SAE Flow (5 frames):
+  1. iPhone → AP:  Auth Request (Algo=SAE)
+  2. AP → iPhone:  SAE Commit (AP's scalar + element)
+  3. iPhone → AP:  SAE Commit (iPhone's scalar + element)
+  4. iPhone ↔ AP:  SAE Confirm (MIC verification both ways)
+  5. AP → iPhone:  Auth Response (Status=Success)</div>
+      WiFi 7 mandates H2E (Hash-to-Element) method for SAE — stronger side-channel attack resistance.
+    </div>
+  </div>
+
+  <div class="wifi-stage" style="--stage-color:#4d9eff">
+    <div class="wifi-stage-num">Stage 03</div>
+    <div class="wifi-stage-title">Association — iPhone Declares Capabilities</div>
+    <div class="wifi-stage-body">
+      iPhone sends Association Request containing <strong>all its capabilities:</strong> supported rates, HT (WiFi 4+), VHT (WiFi 5+), HE (WiFi 6), EHT (WiFi 7), security RSNE. AP evaluates and responds.<br><br>
+      <strong>Association Response:</strong> AP assigns an AID (Association ID — e.g., AID=5 for "client #5"). iPhone is now associated. Both sides know each other's negotiated parameters.<br><br>
+      <strong>WiFi 6:</strong> Single-band negotiation. <strong>WiFi 7:</strong> MLO negotiation — iPhone declares "I can do 5 + 6 GHz concurrently," AP agrees to dual-link operation.
+      <div class="frame-diagram">Association Request:
+  [Capability Info] [Listen Interval] [SSID]
+  [Supported Rates] [HT Cap] [VHT Cap]
+  [HE Cap] ← WiFi 6
+  [EHT Cap] ← WiFi 7 (includes MLO capabilities)
+  [RSNE: WPA3-Personal]
+
+Association Response:
+  [Status=Success] [AID=5]
+  [Supported Rates + negotiated capabilities]</div>
+    </div>
+  </div>
+
+  <div class="wifi-stage" style="--stage-color:#9b6dff">
+    <div class="wifi-stage-num">Stage 04</div>
+    <div class="wifi-stage-title">4-Way Handshake — Key Derivation (PTK + GTK)</div>
+    <div class="wifi-stage-body">
+      The PMK from SAE is temporary. The 4-Way Handshake derives the actual encryption keys for data traffic.<br><br>
+      <strong>M1 (AP → iPhone):</strong> ANonce (AP's random nonce), unencrypted.<br>
+      <strong>M2 (iPhone → AP):</strong> SNonce + MIC. Both sides now have ANonce + SNonce + MACs → independently derive identical PTK via PRF function.<br>
+      <strong>M3 (AP → iPhone):</strong> GTK (Group Transient Key for broadcast/multicast) <strong>encrypted with the newly-derived PTK</strong> + MIC confirmation.<br>
+      <strong>M4 (iPhone → AP):</strong> ACK. Both sides install PTK and GTK.<br><br>
+      After M4, <strong>all subsequent data frames are encrypted with PTK</strong> using CCMP (AES-128) or GCMP-256 (WiFi 7 192-bit mode).
+      <div class="frame-diagram">4-Way Handshake:
+  M1: AP → iPhone [ANonce]
+  M2: iPhone → AP [SNonce, MIC]        → both derive PTK
+  M3: AP → iPhone [GTK_encrypted, MIC]  → AP confirms PTK install
+  M4: iPhone → AP [ACK]                → iPhone confirms install
+
+PTK derivation formula:
+  PTK = PRF(PMK, "Pairwise key expansion",
+            Min(MAC_ap, MAC_client) + Max(MAC_ap, MAC_client) +
+            Min(ANonce, SNonce) + Max(ANonce, SNonce))</div>
+    </div>
+  </div>
+
+  <div class="wifi-stage" style="--stage-color:#f5a623">
+    <div class="wifi-stage-num">Stage 05</div>
+    <div class="wifi-stage-title">Data Plane — DHCP → DNS → TCP → Zoom</div>
+    <div class="wifi-stage-body">
+      Encryption is live. iPhone proceeds through the OSI stack for actual application traffic.<br><br>
+      <strong>Step 1 — DHCP:</strong> iPhone broadcasts DHCP Discover (encrypted with PTK in WiFi frame). AP decrypts, forwards unencrypted Ethernet to switch. SW1 DHCP server on VLAN 20 responds with 10.20.0.150, gateway 10.20.0.1, DNS 8.8.8.8.<br><br>
+      <strong>Step 2 — DNS:</strong> iPhone queries DNS for zoom.us → 203.0.113.100.<br><br>
+      <strong>Step 3 — TCP:</strong> iPhone opens socket [10.20.0.150:54321 ↔ 203.0.113.100:443], completes SYN → SYN-ACK → ACK.<br><br>
+      <strong>Step 4 — Zoom stream:</strong> Encrypted WiFi frames carry HTTPS-wrapped Zoom video. QoS priority=5 (high) ensures Corporate traffic gets serviced before Guest (priority=0) during congestion.
+      <div class="frame-diagram">Complete stack per Zoom video frame:
+
+L7 Application:  Zoom video codec output
+L6 Presentation: TLS/SSL encryption (HTTPS)
+L5 Session:      HTTPS session state
+L4 Transport:    TCP src=54321, dst=443
+L3 Network:      IP src=10.20.0.150, dst=203.0.113.100
+L2 Data Link:    WiFi frame with CCMP encryption (PTK)
+                 QoS Priority=5, BSSID, AID=5
+L1 Physical:     5 GHz channel 36 OFDM modulation</div>
+      <strong>Encryption scope:</strong> WiFi CCMP protects iPhone ↔ AP only. Once AP decrypts and forwards to switch, the Ethernet side is unencrypted. HTTPS (L7) provides end-to-end encryption beyond the AP boundary.
+    </div>
+  </div>
+
+  <div class="card-grid" style="margin-top:32px">
+    <div class="card">
+      <div class="card-title">WiFi 6 (802.11ax)</div>
+      <div class="card-row"><span class="card-key">Modulation</span><span class="card-val">1024-QAM</span></div>
+      <div class="card-row"><span class="card-key">Max channel</span><span class="card-val">160 MHz</span></div>
+      <div class="card-row"><span class="card-key">MIMO</span><span class="card-val">8×8</span></div>
+      <div class="card-row"><span class="card-key">Key feature</span><span class="card-val">OFDMA</span></div>
+      <div class="card-row"><span class="card-key">Multi-link</span><span class="card-val">Single band</span></div>
+      <div class="card-row"><span class="card-key">Throughput</span><span class="card-val">~1.2 Gbps</span></div>
+    </div>
+    <div class="card">
+      <div class="card-title">WiFi 7 (802.11be)</div>
+      <div class="card-row"><span class="card-key">Modulation</span><span class="card-val">4096-QAM</span></div>
+      <div class="card-row"><span class="card-key">Max channel</span><span class="card-val">320 MHz</span></div>
+      <div class="card-row"><span class="card-key">MIMO</span><span class="card-val">16×16 capable</span></div>
+      <div class="card-row"><span class="card-key">Key feature</span><span class="card-val">MLO (Multi-Link)</span></div>
+      <div class="card-row"><span class="card-key">Multi-link</span><span class="card-val">Concurrent 5+6 GHz</span></div>
+      <div class="card-row"><span class="card-key">Throughput</span><span class="card-val">~11.5 Gbps</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ TROUBLESHOOTING METHOD ═══════════════ -->
+<div class="section" id="tshoot-method">
+  <div class="section-header">
+    <h2>Packet Capture Method — Reference</h2>
+    <p>Two-capture-point diagnostic logic for return-path problems in the Horizon lab</p>
+  </div>
+
+  <div class="card-grid">
+    <div class="card">
+      <div class="card-title">Capture Point 1 — Port 1 (Uplink)</div>
+      <div style="color:var(--text2); font-size:13px; margin-bottom:12px">Mirror Port 1 to a Wireshark capture device. Run <span class="inline">traceroute 8.8.8.8</span> from a VLAN 30 client.</div>
+      <div class="card-row"><span class="card-key">Outbound ICMP</span><span class="card-val">Echo Request → 8.8.8.8</span></div>
+      <div class="card-row"><span class="card-key">Inbound ICMP</span><span class="card-val">Echo Reply from 8.8.8.8</span></div>
+      <div class="card-row"><span class="card-key">If IN missing</span><span class="card-val" style="color:var(--red)">Modem / ISP issue</span></div>
+      <div class="card-row"><span class="card-key">If both present</span><span class="card-val" style="color:var(--green)">Uplink path OK</span></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Capture Point 2 — Port 3 (AP Port)</div>
+      <div style="color:var(--text2); font-size:13px; margin-bottom:12px">Mirror Port 3 to a Wireshark capture device. Same traceroute running from VLAN 30 client.</div>
+      <div class="card-row"><span class="card-key">Outbound (VLAN 30)</span><span class="card-val">Client → 8.8.8.8</span></div>
+      <div class="card-row"><span class="card-key">Inbound (VLAN 30)</span><span class="card-val">Echo Reply → client</span></div>
+      <div class="card-row"><span class="card-key">If IN missing</span><span class="card-val" style="color:var(--red)">ipforwarding vlan Default</span></div>
+      <div class="card-row"><span class="card-key">If both present</span><span class="card-val" style="color:var(--green)">L3 forwarding OK</span></div>
+    </div>
+  </div>
+
+  <div class="alert alert-success">
+    <span class="alert-icon">✓</span>
+    <div><strong>Diagnostic matrix:</strong><br>
+    Port 1 (OUT ✓ IN ✗) → Modem/ISP problem, verify static routes to 10.x.0.0/24.<br>
+    Port 1 (OUT ✓ IN ✓) + Port 3 (OUT ✓ IN ✗) → <span class="inline">enable ipforwarding vlan Default</span> missing.<br>
+    Port 1 (OUT ✓ IN ✓) + Port 3 (OUT ✓ IN ✓) → Not a routing issue — check DNS, client isolation ACL, firewall.</div>
+  </div>
+
+  <div class="alert alert-info">
+    <span class="alert-icon">◆</span>
+    <div><strong>Wireshark filter tips:</strong><br>
+    <span class="inline">ip.src == 10.30.0.150 or ip.dst == 10.30.0.150</span> — isolate your client's traffic<br>
+    <span class="inline">icmp</span> — show only ping traffic<br>
+    <span class="inline">vlan.id == 30</span> — show only VLAN 30 tagged frames<br>
+    <span class="inline">bootp</span> — show DHCP traffic<br>
+    <span class="inline">wlan.fc.type_subtype == 0x04</span> — show Probe Requests (discovery debugging)</div>
+  </div>
+</div>
+
+<!-- ═══════════════ TOPOLOGY ═══════════════ -->
+<div class="section" id="topology">
+  <div class="section-header">
+    <h2>Horizon Custom Fabrication · Network Topology</h2>
+    <p>Primary/Secondary EXOS architecture — two 5320 switches, dual AP3000 coverage, three-VLAN segmentation</p>
+  </div>
+
+  <div class="card-grid">
+    <div class="card">
+      <div class="card-title">SW1 — Primary (L3 Core)</div>
+      <div class="card-row"><span class="card-key">Serial</span><span class="card-val">FJ012544G-00233</span></div>
+      <div class="card-row"><span class="card-key">Mgmt IP</span><span class="card-val">192.168.0.28/24</span></div>
+      <div class="card-row"><span class="card-key">Port 1</span><span class="card-val">Uplink → Quantum Modem</span></div>
+      <div class="card-row"><span class="card-key">Port 3</span><span class="card-val">AP1 trunk</span></div>
+      <div class="card-row"><span class="card-key">Port 5</span><span class="card-val">Wired · VLAN 10</span></div>
+      <div class="card-row"><span class="card-key">Port 10</span><span class="card-val">Trunk → SW2</span></div>
+      <div class="card-row"><span class="card-key">Role</span><span class="card-val">SVIs + DHCP Server</span></div>
+    </div>
+    <div class="card">
+      <div class="card-title">SW2 — Secondary (L2 Access)</div>
+      <div class="card-row"><span class="card-key">Serial</span><span class="card-val">FJ012544G-00483</span></div>
+      <div class="card-row"><span class="card-key">Mgmt IP</span><span class="card-val">192.168.0.11/24</span></div>
+      <div class="card-row"><span class="card-key">Port 3</span><span class="card-val">AP2 trunk</span></div>
+      <div class="card-row"><span class="card-key">Port 5</span><span class="card-val">Wired · VLAN 10</span></div>
+      <div class="card-row"><span class="card-key">Port 10</span><span class="card-val">Trunk → SW1</span></div>
+      <div class="card-row"><span class="card-key">Role</span><span class="card-val">Pure L2 — no SVIs</span></div>
+    </div>
+  </div>
+
+  <div class="section-divider"><h3>VLAN Design</h3><div class="line"></div></div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>VLAN</th><th>Name</th><th>Subnet</th><th>Gateway</th><th>DHCP Range</th><th>Purpose</th><th>Auth</th></tr></thead>
+      <tbody>
+        <tr><td><span class="badge-tbl-blue">VLAN 1</span></td><td>Default</td><td>192.168.0.0/24</td><td>Modem</td><td>Modem DHCP</td><td>Mgmt / AP Onboarding</td><td>—</td></tr>
+        <tr><td><span class="badge-tbl-teal">VLAN 10</span></td><td>Corporate Wired</td><td>10.10.0.0/24</td><td>10.10.0.1</td><td>.100–.200</td><td>Wired Corp (Port 5)</td><td>—</td></tr>
+        <tr><td><span class="badge-tbl-green">VLAN 20</span></td><td>Corporate Wireless</td><td>10.20.0.0/24</td><td>10.20.0.1</td><td>.100–.200</td><td>Horizon-Corp SSID</td><td>WPA2/WPA3 PSK</td></tr>
+        <tr><td><span class="badge-tbl-yellow">VLAN 30</span></td><td>Guest Wireless</td><td>10.30.0.0/24</td><td>10.30.0.1</td><td>.100–.200</td><td>Horizon-Guest SSID</td><td>OWE</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section-divider"><h3>Modem Static Routes</h3><div class="line"></div></div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Destination</th><th>Subnet Mask</th><th>Gateway</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td>10.10.0.0</td><td>255.255.255.0</td><td>192.168.0.28 (SW1)</td><td><span class="badge-tbl-green">✓ Active</span></td></tr>
+        <tr><td>10.20.0.0</td><td>255.255.255.0</td><td>192.168.0.28 (SW1)</td><td><span class="badge-tbl-green">✓ Active</span></td></tr>
+        <tr><td>10.30.0.0</td><td>255.255.255.0</td><td>192.168.0.28 (SW1)</td><td><span class="badge-tbl-green">✓ Active</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ═══════════════ CONFIG SCRIPTS ═══════════════ -->
+<div class="section" id="config">
+  <div class="section-header">
+    <h2>Configuration Scripts</h2>
+    <p>Complete corrected EXOS CLI — includes Karl Rule, AP lifeline, VLAN 1 loop prevention, DHCP reach-back</p>
+  </div>
+
+  <div class="alert alert-warn">
+    <span class="alert-icon">⚠</span>
+    <div><strong>Karl Rule (critical):</strong> <span class="inline">enable ipforwarding vlan Default</span> is mandatory on SW1. Without it, clients get DHCP and ping gateway but cannot reach internet. Do not omit — run this first, every build.</div>
+  </div>
+
+  <div class="code-section">
+    <div class="code-header">
+      <div class="code-title">⬡ SW1 — Primary L3 Core (192.168.0.28)</div>
+      <button class="copy-btn" onclick="copyCode('sw1-code')">copy</button>
+    </div>
+    <pre id="sw1-code"><span class="c-comment"># ============================================================
+# SW1 — PRIMARY L3 CORE
+# Horizon Custom Fabrication · Apr 21 2026
+# ============================================================
+
+# --- CRITICAL: Default VLAN forwarding (Karl Rule) ----------
+</span><span class="c-warn">enable ipforwarding vlan Default</span><span class="c-comment">           # ← DO NOT MISS THIS
+
+# --- AP Management: Default VLAN untagged on Port 3 --------
+</span><span class="c-cmd">configure vlan Default add ports 3 untagged</span>
+
+<span class="c-comment"># --- VLAN 1 Loop Prevention ---------------------------------
+</span><span class="c-cmd">configure vlan Default delete ports 10</span><span class="c-comment">     # No VLAN 1 on trunk!
+
+# --- VLAN 10: Corporate Wired --------------------------------
+</span><span class="c-cmd">create vlan VLAN_10_Corporate_Wired tag 10
+configure vlan VLAN_10_Corporate_Wired add ports 5 untagged
+configure vlan VLAN_10_Corporate_Wired add ports 10 tagged
+configure vlan VLAN_10_Corporate_Wired ipaddress 10.10.0.1/24
+enable ipforwarding vlan VLAN_10_Corporate_Wired
+configure vlan VLAN_10_Corporate_Wired dhcp-address-range 10.10.0.100 - 10.10.0.200
+configure vlan VLAN_10_Corporate_Wired dhcp-options default-gateway 10.10.0.1
+configure vlan VLAN_10_Corporate_Wired dhcp-options dns-server primary 8.8.8.8
+enable dhcp ports 5,10 vlan VLAN_10_Corporate_Wired</span><span class="c-comment">  # port 10 = SW2 reach-back
+
+# --- VLAN 20: Corporate Wireless ----------------------------
+</span><span class="c-cmd">create vlan VLAN_20_Corporate_Wireless tag 20
+configure vlan VLAN_20_Corporate_Wireless add ports 3 tagged
+configure vlan VLAN_20_Corporate_Wireless add ports 10 tagged
+configure vlan VLAN_20_Corporate_Wireless ipaddress 10.20.0.1/24
+enable ipforwarding vlan VLAN_20_Corporate_Wireless
+configure vlan VLAN_20_Corporate_Wireless dhcp-address-range 10.20.0.100 - 10.20.0.200
+configure vlan VLAN_20_Corporate_Wireless dhcp-options default-gateway 10.20.0.1
+configure vlan VLAN_20_Corporate_Wireless dhcp-options dns-server primary 8.8.8.8
+enable dhcp ports 3,10 vlan VLAN_20_Corporate_Wireless
+
+# --- VLAN 30: Guest Wireless --------------------------------
+</span><span class="c-cmd">create vlan VLAN_30_Guest_Wireless tag 30
+configure vlan VLAN_30_Guest_Wireless add ports 3 tagged
+configure vlan VLAN_30_Guest_Wireless add ports 10 tagged
+configure vlan VLAN_30_Guest_Wireless ipaddress 10.30.0.1/24
+enable ipforwarding vlan VLAN_30_Guest_Wireless
+configure vlan VLAN_30_Guest_Wireless dhcp-address-range 10.30.0.100 - 10.30.0.200
+configure vlan VLAN_30_Guest_Wireless dhcp-options default-gateway 10.30.0.1
+configure vlan VLAN_30_Guest_Wireless dhcp-options dns-server primary 8.8.8.8
+enable dhcp ports 3,10 vlan VLAN_30_Guest_Wireless
+
+# --- QoS: Corporate priority over Guest --------------------
+</span><span class="c-cmd">configure vlan VLAN_10_Corporate_Wired qosprofile qp6
+configure vlan VLAN_20_Corporate_Wireless qosprofile qp6
+configure vlan VLAN_30_Guest_Wireless qosprofile qp1</span>
+
+<span class="c-comment"># --- Save ------------------------------------------------
+</span><span class="c-warn">save configuration</span></pre>
+  </div>
+
+  <div class="code-section">
+    <div class="code-header">
+      <div class="code-title">⬡ SW2 — Secondary L2 Access (192.168.0.11)</div>
+      <button class="copy-btn" onclick="copyCode('sw2-code')">copy</button>
+    </div>
+    <pre id="sw2-code"><span class="c-comment"># ============================================================
+# SW2 — SECONDARY L2 ACCESS
+# Pure L2 — NO SVIs, NO ipforwarding, NO DHCP
+# ============================================================
+
+# --- AP Management: Default VLAN untagged on Port 3 --------
+</span><span class="c-cmd">configure vlan Default add ports 3 untagged</span>
+
+<span class="c-comment"># --- VLAN 1 Loop Prevention ---------------------------------
+</span><span class="c-cmd">configure vlan Default delete ports 10</span><span class="c-comment">     # Critical — no loop triangle
+
+# --- VLAN 10: Corporate Wired --------------------------------
+</span><span class="c-cmd">create vlan VLAN_10_Corporate_Wired tag 10
+configure vlan VLAN_10_Corporate_Wired add ports 5 untagged
+configure vlan VLAN_10_Corporate_Wired add ports 10 tagged
+
+# --- VLAN 20: Corporate Wireless ----------------------------
+</span><span class="c-cmd">create vlan VLAN_20_Corporate_Wireless tag 20
+configure vlan VLAN_20_Corporate_Wireless add ports 3 tagged
+configure vlan VLAN_20_Corporate_Wireless add ports 10 tagged
+
+# --- VLAN 30: Guest Wireless --------------------------------
+</span><span class="c-cmd">create vlan VLAN_30_Guest_Wireless tag 30
+configure vlan VLAN_30_Guest_Wireless add ports 3 tagged
+configure vlan VLAN_30_Guest_Wireless add ports 10 tagged</span>
+
+<span class="c-comment"># --- Save ------------------------------------------------
+</span><span class="c-warn">save configuration</span></pre>
+  </div>
+</div>
+
+<!-- ═══════════════ TEST RESULTS ═══════════════ -->
+<div class="section" id="testing">
+  <div class="section-header">
+    <h2>Test Results · Apr 21–22 2026</h2>
+    <p>Verification from the live lab session</p>
+  </div>
+
+  <div class="checklist">
+    <div class="checklist-header">Infrastructure & L2</div>
+    <div class="check-item"><span class="check-icon">✅</span><div class="check-text">SW1 VLANs 10/20/30 created with correct IPs and ipforwarding enabled<span class="check-cmd">show vlan detail</span></div></div>
+    <div class="check-item"><span class="check-icon">✅</span><div class="check-text">VLAN 1 removed from Port 10 on both switches — no loop triangle<span class="check-cmd">configure vlan Default delete ports 10</span></div></div>
+    <div class="check-item"><span class="check-icon">✅</span><div class="check-text">SW2 trunk active — SW2 visible on Port 10 via LLDP<span class="check-cmd">show lldp neighbors</span></div></div>
+    <div class="check-item"><span class="check-icon">✅</span><div class="check-text">AP1 (AH-556680) visible on SW1 Port 3 via LLDP</div></div>
+    <div class="check-item"><span class="check-icon">✅</span><div class="check-text">MAC addresses learning across trunk from SW2<span class="check-cmd">show fdb port 10</span></div></div>
+  </div>
+
+  <div class="checklist">
+    <div class="checklist-header">DHCP & Addressing</div>
+    <div class="check-item"><span class="check-icon">✅</span><div class="check-text">MacBook on SW1 Port 5 received 10.10.0.100 from SW1 DHCP</div></div>
+    <div class="check-item"><span class="check-icon">✅</span><div class="check-text">Wired client on SW2 Port 5 received 10.10.0.x via trunk reach-back</div></div>
+    <div class="check-item"><span class="check-icon">✅</span><div class="check-text">iPhone on Corporate SSID received 10.20.0.x from SW1 DHCP</div></div>
+    <div class="check-item"><span class="check-icon">✅</span><div class="check-text">iPhone on Guest SSID received 10.30.0.x from SW1 DHCP</div></div>
+  </div>
+
+  <div class="checklist">
+    <div class="checklist-header">Internet Access</div>
+    <div class="check-item"><span class="check-icon">✅</span><div class="check-text">SW1 pings 8.8.8.8 from management IP 192.168.0.28</div></div>
+    <div class="check-item"><span class="check-icon">✅</span><div class="check-text">SW1 pings 8.8.8.8 sourced from 10.10.0.1 (after Karl Rule fix)</div></div>
+    <div class="check-item"><span class="check-icon">✅</span><div class="check-text">MacBook internet working after enabling ipforwarding vlan Default</div></div>
+    <div class="check-item"><span class="check-icon">✅</span><div class="check-text">iPhone Corporate Wireless internet working</div></div>
+    <div class="check-item"><span class="check-icon">✅</span><div class="check-text">iPhone Guest Wireless internet working</div></div>
+  </div>
+
+  <div class="checklist">
+    <div class="checklist-header">Pending Verification (Before Apr 23 Review)</div>
+    <div class="check-item"><span class="check-icon">⏳</span><div class="check-text">Guest isolation ACL — block Guest → Corporate traffic (XIQ 3 firewall rules deployed, verify active)</div></div>
+    <div class="check-item"><span class="check-icon">⏳</span><div class="check-text">QoS — qp6 Corporate / qp1 Guest activation confirmed on SW1 trunk ports</div></div>
+    <div class="check-item"><span class="check-icon">⏳</span><div class="check-text">XIQ Client Isolation — Guest-to-Guest blocking ("Drop traffic between stations")</div></div>
+    <div class="check-item"><span class="check-icon">⏳</span><div class="check-text">Corporate SSID PSK Key Value — set before demo (was empty in XIQ)</div></div>
+    <div class="check-item"><span class="check-icon">⏳</span><div class="check-text">OWE Transition Mode toggle — enable on Guest_Wireless SSID → push policy</div></div>
+  </div>
+</div>
+
+<!-- ═══════════════ LESSONS ═══════════════ -->
+<div class="section" id="lessons">
+  <div class="section-header">
+    <h2>Lessons Learned</h2>
+    <p>Eight permanent takeaways from the Apr 21–22 lab — carry into every future build</p>
+  </div>
+
+  <div class="lesson-item">
+    <div class="lesson-num">01</div>
+    <div class="lesson-body">
+      <h4>The Karl Rule — enable ipforwarding vlan Default</h4>
+      <p>SW1 owns the Default VLAN interface (192.168.0.28/24), which is the path to the modem. Without ipforwarding on Default VLAN, return traffic from internet hits Default VLAN, routing is disabled, packet dropped. Clients get DHCP and ping gateway but are completely ghosted by internet. Slide 7 of Karl's PPTX: "The switch checks the Default VLAN state, sees routing is disabled, and explicitly drops the packet."</p>
+      <code class="lesson-cmd">enable ipforwarding vlan Default</code>
+    </div>
+  </div>
+
+  <div class="lesson-item">
+    <div class="lesson-num">02</div>
+    <div class="lesson-body">
+      <h4>DHCP Reach-Back — include Port 10 in enable dhcp command</h4>
+      <p>SW1's DHCP server only listens on ports explicitly listed in the enable dhcp command. If only Port 5 is listed, SW1 ignores DHCP requests arriving from SW2 via trunk on Port 10. Clients on SW2 get 169.254.x.x self-assigned IPs. Always include the trunk port for all data VLANs.</p>
+      <code class="lesson-cmd">enable dhcp ports 5,10 vlan VLAN_10_Corporate_Wired</code>
+    </div>
+  </div>
+
+  <div class="lesson-item">
+    <div class="lesson-num">03</div>
+    <div class="lesson-body">
+      <h4>VLAN 1 Loop Triangle — delete Port 10 from Default VLAN on both switches</h4>
+      <p>Both switches are connected to the modem via Port 1 on VLAN 1. If VLAN 1 is also on the Port 10 trunk, a loop triangle forms: SW1 ↔ Modem ↔ SW2 ↔ SW1. Without STP blocking a path, this creates a broadcast storm. Always remove VLAN 1 from the inter-switch trunk port on BOTH switches.</p>
+      <code class="lesson-cmd">configure vlan Default delete ports 10  ← run on SW1 AND SW2</code>
+    </div>
+  </div>
+
+  <div class="lesson-item">
+    <div class="lesson-num">04</div>
+    <div class="lesson-body">
+      <h4>AP Lifeline — Default VLAN untagged on Port 3</h4>
+      <p>An AP3000 boots with no config — it sends an untagged DHCP request. Port 3 must have VLAN 1 (Default) untagged so the AP gets a 192.168.0.x management IP from the modem and can reach XIQ to download its config. VLAN 20 and 30 ride tagged on the same port for SSID traffic.</p>
+      <code class="lesson-cmd">configure vlan Default add ports 3 untagged</code>
+    </div>
+  </div>
+
+  <div class="lesson-item">
+    <div class="lesson-num">05</div>
+    <div class="lesson-body">
+      <h4>Port Assignments Must Be Explicit — EXOS Does Not Auto-Assign</h4>
+      <p>Creating a VLAN and assigning an IP does not automatically associate ports. Port add commands must be run explicitly for every VLAN on every relevant port. VLANs showed 0 active ports during initial testing because port assignments were omitted.</p>
+      <code class="lesson-cmd">configure vlan VLAN_10_Corporate_Wired add ports 5 untagged</code>
+    </div>
+  </div>
+
+  <div class="lesson-item">
+    <div class="lesson-num">06</div>
+    <div class="lesson-body">
+      <h4>Guest-to-Guest Isolation — Must Use XIQ Station Isolation, Not ACLs</h4>
+      <p>EXOS ACLs operate at L3 and cannot stop L2 intra-VLAN traffic between guests on the same AP. Must use XIQ "Drop traffic between stations" firewall action in Guest_30 User Profile. This is the East-West defense (vs North-South = XIQ L3 Firewall Rules blocking Guest → Corporate).</p>
+      <code class="lesson-cmd">XIQ → User Profiles → Guest_30 → Firewall → Drop traffic between stations</code>
+    </div>
+  </div>
+
+  <div class="lesson-item">
+    <div class="lesson-num">07</div>
+    <div class="lesson-body">
+      <h4>EXOS ACL Syntax — entry containers with semicolons, explicit permit all</h4>
+      <p>Cisco-style one-liners FAIL on EXOS. Must use the policy editor with entry containers, semicolons, and an explicit permit-all at the end. For the Horizon lab: bypassed by using XIQ firewall rules instead of CLI ACLs.</p>
+      <code class="lesson-cmd">edit policy GUEST_ISOLATION   # opens vi editor
+entry deny-to-corp { if { source-address 10.30.0.0/24; } then { deny; } }
 entry permit-all { if { } then { permit; } }
-# Esc + :wq to save. For this lab: bypassed via XIQ.</pre>
-    </div>
-    <div class="slide-card">
-      <div class="slide-num">Slide 13</div>
-      <div class="slide-title">OWE Transition Mode</div>
-      <div class="slide-body">AP broadcasts TWO SSIDs simultaneously: (1) visible open transition SSID for legacy devices, (2) hidden secure OWE SSID. OWE-capable devices auto-migrate to the secure SSID. XIQ toggle: Guest_Wireless SSID → "Transition Mode for 2.4GHz and 5GHz".</div>
-    </div>
-    <div class="slide-card">
-      <div class="slide-num">Slide 14–15</div>
-      <div class="slide-title">Blueprint + Retrospective</div>
-      <div class="slide-body">The lab proved the Primary/Secondary architecture end-to-end. All security layers operational. The final Alex note:</div>
-    </div>
-    <div class="quote">
-      "By combining the raw routing power of the 5320s with the edge intelligence of the AP3000s, we built an enterprise-grade branch office in a single afternoon."
-      <div class="quote-attr">— Alex, slide 15 retrospective</div>
+# Esc + :wq to save</code>
     </div>
   </div>
 
-  <!-- WIFI OVERVIEW -->
-  <div class="card" id="wifi">
-    <div class="card-title"><div class="dot" style="background:var(--cyan)"></div><span style="color:var(--cyan)">WiFi Overview — JJ Brown + KK Comments</span></div>
-
-    <table>
-      <thead><tr><th>Band</th><th>Channels</th><th>Width</th><th>DFS</th><th>Notes</th></tr></thead>
-      <tbody>
-        <tr><td>2.4 GHz</td><td>3 non-overlapping (1, 6, 11)</td><td>22 MHz</td><td>No</td><td>Range &gt; throughput. Legacy devices.</td></tr>
-        <tr><td>5 GHz</td><td>UNII-1, 2A, 2C, 3</td><td>20/40/80/160 MHz</td><td>UNII-2A + 2C</td><td>High throughput. DFS radar detection required.</td></tr>
-        <tr><td>6 GHz (WiFi 6E)</td><td>59 non-overlapping 20 MHz</td><td>20–320 MHz</td><td>No</td><td>PSC channels for discovery. No legacy interference.</td></tr>
-      </tbody>
-    </table>
-
-    <h3 style="color:var(--muted);font-size:0.8rem;text-transform:uppercase;letter-spacing:0.1em;margin:18px 0 10px;">WPA2 vs WPA3 Auth</h3>
-    <table>
-      <thead><tr><th>Protocol</th><th>Method</th><th>Weakness</th><th>KK Note</th></tr></thead>
-      <tbody>
-        <tr><td>WPA2 PSK</td><td>4-Way Handshake (shared secret)</td><td>Offline dictionary attack on captured handshake</td><td>Session 4 simulator used</td></tr>
-        <tr><td>WPA3 SAE</td><td>Dragonfly (Simultaneous Auth of Equals)</td><td>No password transmitted — forward secrecy</td><td>KK flagged as weakest area</td></tr>
-        <tr><td>WPA3 Enterprise</td><td>802.1X / EAP + RADIUS</td><td>RADIUS server dependency</td><td>192-bit mode option</td></tr>
-      </tbody>
-    </table>
-
-    <h3 style="color:var(--muted);font-size:0.8rem;text-transform:uppercase;letter-spacing:0.1em;margin:18px 0 10px;">KK's Simulators (5 Total)</h3>
-    <table>
-      <thead><tr><th>Simulator</th><th>Purpose</th></tr></thead>
-      <tbody>
-        <tr><td>WiFi6-Simulator</td><td>OFDMA, MU-MIMO, TWT</td></tr>
-        <tr><td>WiFi7-Simulator (3 APs)</td><td>MLO — multi-link operation across 2.4+5+6 GHz</td></tr>
-        <tr><td>WPA-Simulator</td><td>Multi-queue concurrent auth — used in Session 4</td></tr>
-        <tr><td>RRM-Simulator</td><td>Radio Resource Management, 3 scenarios</td></tr>
-        <tr><td>802.11be-Simulator</td><td>WiFi 7 standard (EHT — Extremely High Throughput)</td></tr>
-      </tbody>
-    </table>
-
-    <div style="margin-top:14px">
-      <strong style="color:var(--muted);font-size:0.78rem;">Capacity Formula:</strong>
-      <pre>Required bandwidth / TCP throughput = airtime consumption %
-Example: 50 Mbps / 300 Mbps peak = 16.7% airtime per client</pre>
+  <div class="lesson-item">
+    <div class="lesson-num">08</div>
+    <div class="lesson-body">
+      <h4>XIQ IP Objects Must Exist Before Firewall Rules</h4>
+      <p>When adding firewall rules in XIQ User Profiles, all IP objects referenced must be pre-created in Common Objects. If you try to reference an object that doesn't exist: "IP object must be saved first" error blocks the entire rule. Create Guest_Network, Corp_Wired, Corp_Wireless in Common Objects first.</p>
+      <code class="lesson-cmd">XIQ → Common Objects → IP Objects → Create (before adding firewall rules)</code>
     </div>
   </div>
+</div>
 
-  <!-- LAB STATE -->
-  <div class="card" id="lab-state">
-    <div class="card-title"><div class="dot" style="background:var(--amber)"></div><span style="color:var(--amber)">Horizon Lab State — Apr 21 (Deployed)</span></div>
-
-    <table>
-      <thead><tr><th>Switch</th><th>Role</th><th>Serial</th><th>IP</th></tr></thead>
-      <tbody>
-        <tr><td>SW1</td><td>L3 Core — SVIs, DHCP, ipforwarding</td><td>FJ012544G-00233</td><td>192.168.0.28</td></tr>
-        <tr><td>SW2</td><td>L2 Access — no SVIs, no DHCP, no ipforwarding</td><td>FJ012544G-00483</td><td>192.168.0.11</td></tr>
-      </tbody>
-    </table>
-
-    <table style="margin-top:12px">
-      <thead><tr><th>VLAN</th><th>Name</th><th>Subnet</th><th>Gateway</th></tr></thead>
-      <tbody>
-        <tr><td>10</td><td>Corporate Wired</td><td>10.10.0.0/24</td><td>10.10.0.1 (SW1 SVI)</td></tr>
-        <tr><td>20</td><td>Corporate Wireless</td><td>10.20.0.0/24</td><td>10.20.0.1 (SW1 SVI)</td></tr>
-        <tr><td>30</td><td>Guest Wireless</td><td>10.30.0.0/24</td><td>10.30.0.1 (SW1 SVI)</td></tr>
-      </tbody>
-    </table>
-
-    <h3 style="color:var(--muted);font-size:0.78rem;text-transform:uppercase;letter-spacing:0.1em;margin:18px 0 10px;">8 Key Lessons Locked</h3>
-    <div class="item"><div class="item-check">1</div><div class="item-body"><div class="item-title">Karl Rule</div><div class="item-sub"><code>enable ipforwarding vlan Default</code> on SW1. Without it: clients get IPs, no internet. Return traffic dropped at unrouted Default VLAN.</div></div></div>
-    <div class="item"><div class="item-check">2</div><div class="item-body"><div class="item-title">DHCP Reach-Back</div><div class="item-sub"><code>enable dhcp ports 5,10 vlan VLAN_10</code> — port 10 MUST be included for SW2 clients</div></div></div>
-    <div class="item"><div class="item-check">3</div><div class="item-body"><div class="item-title">VLAN 1 Triangle Loop</div><div class="item-sub"><code>configure vlan Default delete ports 10</code> on BOTH switches. Loop prevention.</div></div></div>
-    <div class="item"><div class="item-check">4</div><div class="item-body"><div class="item-title">AP Lifeline</div><div class="item-sub"><code>configure vlan Default add ports 3 untagged</code> — AP boots dumb, needs untagged VLAN 1 to reach modem and call home to XIQ</div></div></div>
-    <div class="item"><div class="item-check">5</div><div class="item-body"><div class="item-title">EXOS ACL Syntax</div><div class="item-sub"><code>edit policy NAME</code> (vi editor). Use <code>source-address</code> keyword, entry containers with semicolons, explicit <code>permit all</code> at end. Cisco one-liners FAIL.</div></div></div>
-    <div class="item"><div class="item-check">6</div><div class="item-body"><div class="item-title">Guest-to-Guest Isolation</div><div class="item-sub">ACLs cannot stop L2 intra-VLAN traffic. Must use XIQ "Drop traffic between stations" firewall action on AP.</div></div></div>
-    <div class="item"><div class="item-check">7</div><div class="item-body"><div class="item-title">OWE Transition Mode</div><div class="item-sub">Enable toggle in XIQ Guest SSID — runs hidden open SSID alongside OWE SSID for legacy device backward compat.</div></div></div>
-    <div class="item"><div class="item-check">8</div><div class="item-body"><div class="item-title">XIQ IP Objects</div><div class="item-sub">Must create in Common Objects BEFORE adding firewall rules, or "IP object must be saved first" error blocks you.</div></div></div>
+<!-- ═══════════════ SIMULATORS ═══════════════ -->
+<div class="section" id="simulators">
+  <div class="section-header">
+    <h2>Reference Simulators</h2>
+    <p>Interactive Claude-built tools for wireless and networking training — use alongside Sessions 3, 4, and 6</p>
   </div>
 
-  <!-- DOCUMENTS -->
-  <div class="card" id="docs">
-    <div class="card-title"><div class="dot" style="background:var(--blue)"></div><span style="color:var(--blue)">All 12 Documents</span></div>
-    <table>
-      <thead><tr><th>#</th><th>File</th><th>Type</th><th>Notes</th></tr></thead>
-      <tbody>
-        <tr><td>1</td><td>Claude AI InterVLAN morning session</td><td>Claude AI</td><td>Apr 21 morning — InterVLAN first principles</td></tr>
-        <tr><td>2</td><td>NotebookLLM InterVLAN synthesis</td><td>NotebookLLM</td><td>InterVLAN synthesis doc</td></tr>
-        <tr><td>3</td><td>network_requirements.docx</td><td>Customer Brief</td><td>Horizon Custom Fabrication spec — starting doc Apr 21</td></tr>
-        <tr><td>4</td><td>Claude_NewLab_Karl_Dialogue_Apr21_v3.docx</td><td>Claude AI</td><td>Full Socratic lab build dialogue</td></tr>
-        <tr><td>5</td><td>KarlLab NotebookLLM v1</td><td>NotebookLLM</td><td>KarlLab v1 synthesis</td></tr>
-        <tr><td>6</td><td>NoteBookLLM_KarlLab_Apr21_v2.docx</td><td>NotebookLLM</td><td>VLAN 1 loop, LLDP, trunk deep-dive</td></tr>
-        <tr><td>7</td><td>Claude_FullDay_Apr21_Until_QoS_Classification.docx</td><td>Claude AI</td><td>Full day until QoS classification</td></tr>
-        <tr><td>8</td><td>NoteBookLLM_FinalItems_Apr21_QoS.docx</td><td>NotebookLLM</td><td>QoS + guest isolation strategy</td></tr>
-        <tr><td>9</td><td>WIFI Overview_v1_JJ_Khursheed's Comments_Marc 10 2026.docx</td><td>Reference</td><td><span class="badge badge-new">Ingested Apr 22</span> JJ Brown + KK comments — bands, DFS, WPA3, simulators</td></tr>
-        <tr><td>10</td><td>Technical_Lab_Blueprint_Apr21.docx</td><td>KK Synthesis</td><td>The Alex Vault — best single reference for lab</td></tr>
-        <tr><td>11</td><td>ClaudeAI_QoS_Apr21.docx</td><td>Claude AI</td><td>Full day + XIQ nav + final confirmation</td></tr>
-        <tr><td>12</td><td>Karl's Lab_Apr21_Horizon_Khursheed's Debrief.pptx</td><td>KK/Karl PPTX</td><td><span class="badge badge-new">NEW Apr 22</span> 15-slide visual debrief — Karl Rule matrix, EXOS ACL, OWE, Alex quote</td></tr>
-        <tr><td>13</td><td>ClaudeAI_Socratic_30day_Apr22.docx</td><td>Claude AI</td><td><span class="badge badge-new">NEW Apr 22</span> Complete 6-session Socratic transcript — 7AM to 2PM Apr 22</td></tr>
-        <tr><td>14</td><td>From Karl_30_day_engineer_development_plan_KK_Updates_March 27 2026-2.docx</td><td>Karl / Plan</td><td>30-day engineer development plan — 5 success criteria source</td></tr>
-      </tbody>
-    </table>
+  <div class="sim-grid">
+    <a class="sim-card" href="https://claude.ai/public/artifacts/7fd9feda-35cb-4676-a943-7e849c5041e9" target="_blank">
+      <div class="sim-card-tag">WiFi 7 · 802.11be</div>
+      <div class="sim-card-title">WiFi 7 Simulator</div>
+      <div class="sim-card-desc">Three APs (Cisco 9178, Extreme AP5010, Juniper Mist AP45), 28 parameters across 7 categories, MLO deep dive, three-way radar comparison, Export CLI.</div>
+    </a>
+    <a class="sim-card" href="https://claude.ai/public/artifacts/9614f45f-d375-41e0-bf72-9070f3f4982d" target="_blank">
+      <div class="sim-card-tag">WiFi 6 · 802.11ax</div>
+      <div class="sim-card-title">WiFi 6 Simulator</div>
+      <div class="sim-card-desc">Cisco 9136 vs Extreme AP4000. PHY, MAC/EDCA, OFDMA/MU, Beacon/Mgmt, Roaming, Security. Compare scores and radar chart.</div>
+    </a>
+    <a class="sim-card" href="https://claude.ai/public/artifacts/faa58764-9dfa-4f63-8f08-675b44c556cf" target="_blank">
+      <div class="sim-card-tag">RRM · Channel Planning</div>
+      <div class="sim-card-title">RRM Simulation</div>
+      <div class="sim-card-desc">Dense Office, Warehouse, Stadium scenarios. Drag APs and clients. CCI scoring, channel reassignment, power adjustment. Meraki vs Aruba vs Extreme RRM.</div>
+    </a>
+    <a class="sim-card" href="https://claude.ai/public/artifacts/89fa9685-e7ae-49c0-91d7-b2940c5b7694" target="_blank">
+      <div class="sim-card-tag">WPA2 / WPA3 / Enterprise</div>
+      <div class="sim-card-title">WPA Authentication Simulator</div>
+      <div class="sim-card-desc">Frame-by-frame WPA2-Personal, WPA3-SAE, WPA3-Enterprise with animated packet flow. Multi-UE concurrent auth (WiFi 7 mode). Used live in Session 4.</div>
+    </a>
+    <a class="sim-card" href="https://claude.ai/public/artifacts/29fe810e-8702-448c-b772-a851c611b952" target="_blank">
+      <div class="sim-card-tag">802.11be · AP5060 + MacBook M4</div>
+      <div class="sim-card-title">802.11be End-to-End Simulator</div>
+      <div class="sim-card-desc">AP5060U vs MacBook Pro M4. Full connection: Discovery → Association → EAP → 4-Way Handshake → Data Plane. KPI dashboard with RSSI/SNR/MCS.</div>
+    </a>
+    <a class="sim-card" href="https://khursheedkhanaiforgood-ai.github.io/5320-onboarding/team_training_qa_20260420.html" target="_blank">
+      <div class="sim-card-tag">Training Tracker</div>
+      <div class="sim-card-title">L2/L3 Q&A Tracker</div>
+      <div class="sim-card-desc">6 sessions, 49 questions. Progress tracking with checkbox per question. All sessions S1–S6 complete. Links to session guides and EOD summaries.</div>
+    </a>
+  </div>
+</div>
+
+<!-- ═══════════════ OUTSTANDING ═══════════════ -->
+<div class="section" id="outstanding">
+  <div class="section-header">
+    <h2>Outstanding Items</h2>
+    <p>Carry forward — urgent items for Apr 23 review, research for future sprints</p>
   </div>
 
-  <!-- KK NOTE TO KARL -->
-  <div class="card" id="kk-note">
-    <div class="card-title"><div class="dot" style="background:var(--pink)"></div><span style="color:var(--pink)">KK's Self-Assessment Note to Karl</span></div>
-    <div class="quote">
-      "I believe I can demonstrate to you the networking fundamentals, wireless concepts, platform operations next week. I covered all the topics that were listed in the 30-day plan. I recommend you open up the grilling to people the two of us trust."
-      <div class="quote-attr">— Khursheed Khan, April 22, 2026 · End of Session 6</div>
+  <div class="outstanding-list">
+    <div class="outstanding-item">
+      <span class="out-badge badge-red">Urgent</span>
+      <div>Set Corporate SSID PSK Key Value in XIQ — XIQ → Network Policy → AP_April21_KarlLab → Corporate_Wireless → Security → Key Value (was empty)</div>
     </div>
-    <div style="margin-top:14px;font-size:0.83rem;color:var(--muted);">
-      Context: KK independently flagged his confidence level and proposed the next accountability step — a live demonstration with trusted peers. This was unprompted, at the close of the final session.
+    <div class="outstanding-item">
+      <span class="out-badge badge-red">Urgent</span>
+      <div>Enable OWE Transition Mode toggle — XIQ → Guest_Wireless SSID → "Transition Mode for 2.4GHz and 5GHz" → push policy to APs</div>
     </div>
-  </div>
-
-  <!-- PENDING ITEMS -->
-  <div class="card" id="pending">
-    <div class="card-title"><div class="dot" style="background:var(--red)"></div><span style="color:var(--red)">Pending Items</span></div>
-
-    <div class="banner-warn">
-      <div class="banner-label">Urgent — Lab Verification (17 Tests)</div>
-      Run full verification checklist from session_log_20260421.html#verification before team review Apr 23.
+    <div class="outstanding-item">
+      <span class="out-badge badge-yellow">Pending</span>
+      <div>Verify ACL GUEST_ISOLATION is blocking Guest → Corporate traffic after XIQ firewall rules applied (3 rules: DENY→Corp_Wired, DENY→Corp_Wireless, DROP between stations)</div>
     </div>
-
-    <div class="item">
-      <div class="item-warn">⚠</div>
-      <div class="item-body">
-        <div class="item-title">Corporate SSID PSK — Password Not Set <span class="tag tag-pending">Urgent</span></div>
-        <div class="item-sub">XIQ → Network Policy → AP_April21_KarlLab → Corporate_Wireless → Security → Key Value field was EMPTY. Set before team demo.</div>
-      </div>
+    <div class="outstanding-item">
+      <span class="out-badge badge-yellow">Pending</span>
+      <div>Verify QoS profiles qp6 (Corp) and qp1 (Guest) active on SW1 trunk ports + XIQ Scheduling Weights 100/10 confirmed</div>
     </div>
-    <div class="item">
-      <div class="item-warn">⚠</div>
-      <div class="item-body">
-        <div class="item-title">OWE Transition Mode — Toggle Not Yet Confirmed <span class="tag tag-pending">Urgent</span></div>
-        <div class="item-sub">XIQ → Guest_Wireless SSID → "Transition Mode for 2.4GHz and 5GHz" toggle → push policy. Required for legacy device compat.</div>
-      </div>
+    <div class="outstanding-item">
+      <span class="out-badge badge-yellow">Pending</span>
+      <div>Full AP2 wireless test — connect clients to both Corp and Guest SSIDs via AP2 on SW2, verify DHCP and internet</div>
     </div>
-    <div class="item">
-      <div class="item-warn">⚠</div>
-      <div class="item-body">
-        <div class="item-title">Team Review — April 23, 9 AM</div>
-        <div class="item-sub">Present all 6 sessions + 5 PASS criteria to Karl's team. KK recommends live demo with trusted peers.</div>
-      </div>
+    <div class="outstanding-item">
+      <span class="out-badge badge-blue">Next Sprint</span>
+      <div>802.1X on wired Port 5 — currently open/unprotected. RADIUS integration, EAP methods, certificate-based auth</div>
     </div>
-    <div class="item">
-      <div class="item-check">→</div>
-      <div class="item-body">
-        <div class="item-title">Lab Verification Checklist (17 Tests)</div>
-        <div class="item-sub">CLI-1–6: VLAN/ipforwarding/Karl Rule/DHCP leases/LLDP/VLAN 1 off port 10 · TEST-1–4: DHCP on all VLANs · ISO-1–4: Guest→Corp blocked, Guest→Guest blocked · XIQ-1–3: APs online, firewall active, QoS confirmed</div>
-      </div>
+    <div class="outstanding-item">
+      <span class="out-badge badge-blue">Research</span>
+      <div>OWE deep dive — Opportunistic Wireless Encryption, legacy device compatibility, hidden open SSID Transition Mode mechanics</div>
     </div>
-    <div class="item">
-      <div class="item-check">→</div>
-      <div class="item-body">
-        <div class="item-title">Update team_training_qa_20260420.html — Mark S2–S6 Complete</div>
-        <div class="item-sub">Badge updates + session-done banners for sessions 2 through 6</div>
-      </div>
+    <div class="outstanding-item">
+      <span class="out-badge badge-blue">Research</span>
+      <div>QoS deep dive — DSCP vs CoS marking, LLDP-MED for voice VLAN priority, trust boundaries at AP port</div>
     </div>
-    <div class="item">
-      <div class="item-check">→</div>
-      <div class="item-body">
-        <div class="item-title">Future Sprint — 802.1X on Wired Port 5</div>
-        <div class="item-sub">Currently open/unprotected. Surfaced in Session 4 wireless auth deep-dive. Low priority post-review.</div>
-      </div>
+    <div class="outstanding-item">
+      <span class="out-badge badge-purple">Deep Dive</span>
+      <div>WiFi L1 PHY — OFDM subcarriers, CSMA/CA backoff, TPC power control — bridge cellular RF background to unlicensed spectrum</div>
+    </div>
+    <div class="outstanding-item">
+      <span class="out-badge badge-purple">Deep Dive</span>
+      <div>Packet Capture practicum — set up Wireshark on SPAN/mirror port on the 5320, practice filtering and analysis on live traffic</div>
     </div>
   </div>
-
-  <!-- URLS -->
-  <div class="card" id="urls">
-    <div class="card-title"><div class="dot" style="background:var(--blue)"></div><span style="color:var(--blue)">URLs & Files</span></div>
-    <div class="url-block">
-      <a class="url-btn btn-purple" href="https://khursheedkhanaiforgood-ai.github.io/5320-onboarding/lab_20260329.html" target="_blank">Lab Landing Page</a>
-      <a class="url-btn btn-green" href="https://khursheedkhanaiforgood-ai.github.io/5320-onboarding/session_log_20260421.html" target="_blank">Apr 21 Session Log</a>
-      <a class="url-btn btn-blue" href="https://khursheedkhanaiforgood-ai.github.io/5320-onboarding/session_summary_20260421.html" target="_blank">Apr 21 EOD Summary</a>
-      <a class="url-btn btn-amber" href="https://khursheedkhanaiforgood-ai.github.io/5320-onboarding/team_training_qa_20260420.html" target="_blank">Q&A Tracker (47 Q)</a>
-      <a class="url-btn btn-purple" href="https://khursheedkhanaiforgood-ai.github.io/5320-onboarding/session_log_20260422.html" target="_blank">Apr 22 Session Log</a>
-      <a class="url-btn btn-green" href="https://github.com/khursheedkhanaiforgood-ai/5320-onboarding" target="_blank">GitHub Repo</a>
-    </div>
-    <table style="margin-top:16px">
-      <thead><tr><th>File</th><th>Location</th><th>Status</th></tr></thead>
-      <tbody>
-        <tr><td>session_summary_20260422.html</td><td>/tmp/main-work/</td><td><span class="badge badge-new">This file</span></td></tr>
-        <tr><td>session_log_20260422.html</td><td>/tmp/main-work/</td><td><span class="badge badge-new">Built</span></td></tr>
-        <tr><td>session_log_20260421.html</td><td>GitHub Pages</td><td><span class="badge badge-done">Live</span></td></tr>
-        <tr><td>session_summary_20260421.html</td><td>GitHub Pages</td><td><span class="badge badge-done">Live</span></td></tr>
-        <tr><td>team_training_qa_20260420.html</td><td>GitHub Pages</td><td><span class="badge badge-warn">Needs S2–S6 update</span></td></tr>
-        <tr><td>lab_20260329.html</td><td>GitHub Pages</td><td><span class="badge badge-warn">Needs Apr 22 block</span></td></tr>
-      </tbody>
-    </table>
-  </div>
+</div>
 
 </main>
+</div>
+
+<script>
+  function show(id) {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+    const target = document.getElementById(id);
+    if (target) target.classList.add('active');
+    document.querySelectorAll('.sidebar-link').forEach(l => {
+      const attr = l.getAttribute('onclick');
+      if (attr && attr.includes(`'${id}'`)) l.classList.add('active');
+    });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function copyCode(id) {
+    const el = document.getElementById(id);
+    const text = el.innerText;
+    navigator.clipboard.writeText(text).then(() => {
+      const btn = document.querySelector(`[onclick="copyCode('${id}')"]`);
+      if (btn) { btn.textContent = 'copied ✓'; setTimeout(() => btn.textContent = 'copy', 2000); }
+    });
+  }
+</script>
 </body>
 </html>
