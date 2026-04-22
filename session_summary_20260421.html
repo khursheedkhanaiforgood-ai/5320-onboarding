@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EOD Summary — April 21, 2026 | Karl Lab</title>
+<style>
+  :root {
+    --bg: #0f0f13;
+    --surface: #1a1a24;
+    --surface2: #22223a;
+    --border: #2e2e4a;
+    --text: #e2e2f0;
+    --muted: #9090b0;
+    --purple: #c4b5fd;
+    --purple-deep: #7c3aed;
+    --green: #34d399;
+    --green-deep: #065f46;
+    --blue: #60a5fa;
+    --amber: #fbbf24;
+    --red: #f87171;
+    --cyan: #22d3ee;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; font-size: 14px; line-height: 1.6; }
+
+  /* Sidebar */
+  .sidebar { position: fixed; top: 0; left: 0; width: 220px; height: 100vh; background: var(--surface); border-right: 1px solid var(--border); overflow-y: auto; padding: 20px 0; z-index: 100; }
+  .sidebar .logo { padding: 0 18px 18px; border-bottom: 1px solid var(--border); margin-bottom: 14px; }
+  .sidebar .logo-title { font-size: 0.78rem; font-weight: 700; color: var(--purple); text-transform: uppercase; letter-spacing: 0.12em; }
+  .sidebar .logo-sub { font-size: 0.7rem; color: var(--muted); margin-top: 2px; }
+  .sidebar a { display: block; padding: 6px 18px; font-size: 0.8rem; color: var(--muted); text-decoration: none; border-left: 2px solid transparent; transition: all 0.15s; }
+  .sidebar a:hover, .sidebar a.active { color: var(--purple); border-left-color: var(--purple); background: rgba(124,58,237,0.08); }
+  .sidebar .section-label { padding: 10px 18px 4px; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.18em; color: #5a5a7a; }
+
+  /* Main */
+  .main { margin-left: 220px; padding: 32px 40px 80px; max-width: 1100px; }
+  .page-header { margin-bottom: 36px; }
+  .page-date { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.18em; color: var(--purple); margin-bottom: 6px; }
+  .page-title { font-size: 1.9rem; font-weight: 800; color: #fff; line-height: 1.2; }
+  .page-sub { font-size: 0.9rem; color: var(--muted); margin-top: 8px; }
+
+  /* Cards */
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 22px 26px; margin-bottom: 24px; }
+  .card-title { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.18em; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+  .card-title .dot { width: 8px; height: 8px; border-radius: 50%; }
+
+  /* Accomplished items */
+  .item { display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+  .item:last-child { border-bottom: none; }
+  .item-check { color: var(--green); font-size: 1rem; flex-shrink: 0; margin-top: 1px; }
+  .item-body { flex: 1; }
+  .item-title { font-weight: 600; color: var(--text); font-size: 0.9rem; }
+  .item-sub { font-size: 0.8rem; color: var(--muted); margin-top: 2px; }
+  .tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; margin-left: 6px; vertical-align: middle; }
+  .tag-new { background: rgba(52,211,153,0.15); color: var(--green); }
+  .tag-fix { background: rgba(251,191,36,0.15); color: var(--amber); }
+  .tag-key { background: rgba(196,181,253,0.15); color: var(--purple); }
+  .tag-pending { background: rgba(248,113,113,0.15); color: var(--red); }
+
+  /* Code blocks */
+  pre { background: #0a0a12; border: 1px solid var(--border); border-radius: 6px; padding: 14px 16px; font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace; font-size: 0.8rem; color: #a5f3fc; overflow-x: auto; margin: 10px 0; line-height: 1.5; }
+  code { font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace; font-size: 0.82em; background: rgba(124,58,237,0.12); color: var(--purple); padding: 2px 5px; border-radius: 3px; }
+
+  /* Tables */
+  table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+  thead tr { background: var(--surface2); }
+  th { padding: 8px 12px; text-align: left; color: var(--muted); font-weight: 600; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.1em; border-bottom: 1px solid var(--border); }
+  td { padding: 8px 12px; border-bottom: 1px solid var(--border); color: var(--text); }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(124,58,237,0.04); }
+
+  /* Status badges */
+  .badge { display: inline-block; padding: 2px 9px; border-radius: 12px; font-size: 0.7rem; font-weight: 700; }
+  .badge-done { background: rgba(52,211,153,0.15); color: var(--green); }
+  .badge-pending { background: rgba(248,113,113,0.15); color: var(--red); }
+  .badge-tomorrow { background: rgba(251,191,36,0.15); color: var(--amber); }
+
+  /* Quote blocks */
+  .quote { border-left: 3px solid; padding: 12px 16px; margin: 10px 0; border-radius: 0 6px 6px 0; font-size: 0.83rem; font-style: italic; }
+  .quote-claude { border-color: var(--blue); background: rgba(96,165,250,0.06); color: #93c5fd; }
+  .quote-nb { border-color: var(--purple); background: rgba(124,58,237,0.08); color: var(--purple); }
+
+  /* Buttons */
+  .btn-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 16px; }
+  .btn { display: inline-block; padding: 9px 18px; border-radius: 6px; font-size: 0.82rem; font-weight: 600; text-decoration: none; }
+  .btn-purple { background: var(--purple-deep); color: var(--purple); border: 1px solid #6d28d9; }
+  .btn-purple:hover { background: #6d28d9; }
+  .btn-green { background: rgba(6,95,70,0.5); color: var(--green); border: 1px solid var(--green-deep); }
+  .btn-outline { background: var(--surface2); color: var(--muted); border: 1px solid var(--border); }
+
+  /* OWE callout */
+  .callout { background: var(--surface2); border: 1px solid var(--border); border-left: 3px solid var(--cyan); border-radius: 6px; padding: 14px 18px; margin: 12px 0; }
+  .callout-title { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: var(--cyan); margin-bottom: 6px; }
+</style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<nav class="sidebar">
+  <div class="logo">
+    <div class="logo-title">EOD Summary</div>
+    <div class="logo-sub">April 21, 2026</div>
+  </div>
+  <div class="section-label">Sections</div>
+  <a href="#accomplished">&#10003; Accomplished</a>
+  <a href="#key-lessons">&#9889; Key Lessons</a>
+  <a href="#topology">&#127760; Topology</a>
+  <a href="#urls">&#128279; URLs</a>
+  <a href="#commands">&#62; Commands</a>
+  <a href="#files">&#128196; Files</a>
+  <a href="#docs">&#128218; Docs Ingested</a>
+  <a href="#owe">&#128275; OWE Answer</a>
+  <a href="#pending">&#128336; Pending</a>
+  <a href="#verification">&#9989; Verification</a>
+  <div class="section-label">Navigate</div>
+  <a href="session_log_20260421.html">&#128196; Full Session Log</a>
+  <a href="lab_20260329.html">&#8592; Lab Landing Page</a>
+</nav>
+
+<!-- Main -->
+<div class="main">
+
+  <div class="page-header">
+    <div class="page-date">April 21, 2026 &mdash; End-of-Day Summary</div>
+    <div class="page-title">Karl Lab: Full Primary/Secondary L2/L3</div>
+    <div class="page-sub">SW1 = L3 Core &middot; SW2 = L2 Access &middot; VLANs 10/20/30 &middot; QoS + Guest Isolation &middot; OWE</div>
+  </div>
+
+  <!-- Accomplished -->
+  <div class="card" id="accomplished">
+    <div class="card-title"><div class="dot" style="background:var(--green)"></div><span style="color:var(--green)">Accomplished Today</span></div>
+
+    <div class="item">
+      <div class="item-check">&#10003;</div>
+      <div class="item-body">
+        <div class="item-title">Primary/Secondary Architecture Designed + Built <span class="tag tag-new">NEW</span></div>
+        <div class="item-sub">SW1 = L3 core (all SVIs, all DHCP, ipforwarding). SW2 = pure L2 access (no SVIs, no DHCP). Socratic design-first, then live CLI execution.</div>
+      </div>
+    </div>
+
+    <div class="item">
+      <div class="item-check">&#10003;</div>
+      <div class="item-body">
+        <div class="item-title">3 VLANs Live — Corp Wired / Corp Wireless / Guest <span class="tag tag-new">NEW</span></div>
+        <div class="item-sub">VLAN 10 (10.10.0.1/24) · VLAN 20 (10.20.0.1/24) · VLAN 30 (10.30.0.1/24). All with DHCP on SW1, verified on client devices.</div>
+      </div>
+    </div>
+
+    <div class="item">
+      <div class="item-check">&#10003;</div>
+      <div class="item-body">
+        <div class="item-title">The Karl Rule Discovered and Deployed <span class="tag tag-fix">FIX</span></div>
+        <div class="item-sub"><code>enable ipforwarding vlan Default</code> — Without this, clients got IPs but had no internet. Return traffic from modem couldn't cross to data VLANs.</div>
+      </div>
+    </div>
+
+    <div class="item">
+      <div class="item-check">&#10003;</div>
+      <div class="item-body">
+        <div class="item-title">DHCP Trunk Reach-Back Configured <span class="tag tag-key">KEY</span></div>
+        <div class="item-sub"><code>enable dhcp ports 5,10 vlan VLAN_10</code> — Port 10 (uplink trunk) must be included or SW2-connected clients never get DHCP from SW1.</div>
+      </div>
+    </div>
+
+    <div class="item">
+      <div class="item-check">&#10003;</div>
+      <div class="item-body">
+        <div class="item-title">VLAN 1 Loop Eliminated <span class="tag tag-fix">FIX</span></div>
+        <div class="item-sub"><code>configure vlan Default delete ports 10</code> on both switches. Without this: SW1↔Modem↔SW2↔SW1 = broadcast storm.</div>
+      </div>
+    </div>
+
+    <div class="item">
+      <div class="item-check">&#10003;</div>
+      <div class="item-body">
+        <div class="item-title">AP Onboarding via Default VLAN on Port 3 <span class="tag tag-key">KEY</span></div>
+        <div class="item-sub"><code>configure vlan Default add ports 3 untagged</code> — AP boots dumb, gets 192.x.x.x from modem via untagged Default VLAN, calls home to XIQ. Then carries VLAN 20/30 tagged.</div>
+      </div>
+    </div>
+
+    <div class="item">
+      <div class="item-check">&#10003;</div>
+      <div class="item-body">
+        <div class="item-title">QoS Deployed — CLI + XIQ <span class="tag tag-new">NEW</span></div>
+        <div class="item-sub">SW1 CLI: <code>qp6</code> (Corp Wired/Wireless) + <code>qp1</code> (Guest). XIQ Scheduling Weights: Corp = 100, Guest = 10. 802.1p marking maps to hardware queues.</div>
+      </div>
+    </div>
+
+    <div class="item">
+      <div class="item-check">&#10003;</div>
+      <div class="item-body">
+        <div class="item-title">Guest Isolation Deployed via XIQ Firewall Rules <span class="tag tag-new">NEW</span></div>
+        <div class="item-sub">3 Deny rules in Guest_30 User Profile: Block Guest→Corp Wired, Guest→Corp Wireless. "Drop traffic between stations" for Guest-to-Guest isolation (L2 — ACLs can't stop intra-VLAN switching).</div>
+      </div>
+    </div>
+
+    <div class="item">
+      <div class="item-check">&#10003;</div>
+      <div class="item-body">
+        <div class="item-title">EXOS ACL Syntax Resolved <span class="tag tag-fix">FIX</span></div>
+        <div class="item-sub"><code>create access-list "ip-source-address..."</code> fails — "ip-source-address" is not a valid attribute. Correct: <code>edit policy NAME</code> (vi-style editor, Esc+:wq, <code>source-address</code> keyword). Bypassed entirely by using XIQ.</div>
+      </div>
+    </div>
+
+    <div class="item">
+      <div class="item-check">&#10003;</div>
+      <div class="item-body">
+        <div class="item-title">9 Source Documents Ingested and Synthesised <span class="tag tag-key">KEY</span></div>
+        <div class="item-sub">Claude AI dialogues + NotebookLLM syntheses across InterVLAN, New Lab, Karl Lab v1-v3, Full Day QoS, and Final Items. All excerpts in session log.</div>
+      </div>
+    </div>
+
+    <div class="item">
+      <div class="item-check">&#10003;</div>
+      <div class="item-body">
+        <div class="item-title">OWE Transition Mode Identified <span class="tag tag-new">NEW</span></div>
+        <div class="item-sub">Legacy device backward compatibility for Guest Wireless OWE SSID. XIQ toggle: "Transition Mode for 2.4GHz and 5GHz" in SSID config.</div>
+      </div>
+    </div>
+
+    <div class="item">
+      <div class="item-check">&#10003;</div>
+      <div class="item-body">
+        <div class="item-title">Quantum Fiber Static Routes Added</div>
+        <div class="item-sub">3 routes: 10.10.0.0/24, 10.20.0.0/24, 10.30.0.0/24 all pointing to SW1 (192.168.0.28).</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Key Lessons -->
+  <div class="card" id="key-lessons">
+    <div class="card-title"><div class="dot" style="background:var(--amber)"></div><span style="color:var(--amber)">Key Lessons (Verbatim Sources)</span></div>
+
+    <p style="font-size:0.85rem;color:var(--muted);margin-bottom:14px">Blue = Claude AI dialogue &middot; Purple = NotebookLLM synthesis</p>
+
+    <div class="quote quote-claude">
+      "The secondary switch doesn't need to know HOW to route — it just needs to know WHERE to send frames. That's the L2 contract. SW1 owns all the L3 intelligence: gateway IPs, DHCP scopes, routing decisions. SW2 is just a really fast frame-switcher."
+      <div style="font-size:0.72rem;color:var(--blue);margin-top:6px;font-style:normal">&#8212; Claude AI InterVLAN dialogue, April 21</div>
+    </div>
+
+    <div class="quote quote-nb">
+      "Karl Rule: The Default VLAN (VLAN 1) must have ipforwarding enabled on SW1. Without it, clients get IPs but have no internet — return traffic from the modem can't cross to data VLANs. This is the single most common deployment failure in EXOS primary/secondary setups."
+      <div style="font-size:0.72rem;color:var(--purple);margin-top:6px;font-style:normal">&#8212; NotebookLLM Karl Lab v2 synthesis, April 21</div>
+    </div>
+
+    <div class="quote quote-claude">
+      "When a client on VLAN 10 pings a client on VLAN 20, the packet goes: Client A → SW2 (L2 forward to trunk) → SW1 (L3 routing decision, rewrites src/dst MAC to gateway MACs) → SW2 (L2 forward to destination port). The IPs never change. Only the MACs change at each L3 hop."
+      <div style="font-size:0.72rem;color:var(--blue);margin-top:6px;font-style:normal">&#8212; Claude AI New Lab Karl dialogue, April 21</div>
+    </div>
+
+    <div class="quote quote-nb">
+      "XIQ handles what the CLI cannot: L3 firewall rules with IP Objects give you policy-based inter-VLAN blocking without touching EXOS ACL syntax. The division: SW1 CLI owns QoS marking and queue assignment. XIQ owns SSID-level enforcement, user profiles, and firewall rules."
+      <div style="font-size:0.72rem;color:var(--purple);margin-top:6px;font-style:normal">&#8212; NotebookLLM Final Items (QoS for Claude), April 21</div>
+    </div>
+
+    <div class="quote quote-claude">
+      "The DHCP trunk reach-back is a classic EXOS gotcha. You configure DHCP on SW1 for VLAN 10 — but if you only enable it on port 5 (the wired access port), DHCP Discover packets arriving over port 10 (the uplink trunk from SW2) get dropped. You must include port 10 in the dhcp enable command."
+      <div style="font-size:0.72rem;color:var(--blue);margin-top:6px;font-style:normal">&#8212; Claude AI Full Day session, April 21</div>
+    </div>
+
+    <div class="quote quote-nb">
+      "Guest-to-Guest isolation can't be solved with ACLs alone. ACLs operate at L3 — but two Guest devices on the same VLAN communicate directly at L2 (the switch just forwards frames). XIQ's 'Drop traffic between stations' firewall action is enforced on the AP itself, stopping the frames before they even hit the switch."
+      <div style="font-size:0.72rem;color:var(--purple);margin-top:6px;font-style:normal">&#8212; NotebookLLM Karl Lab synthesis, April 21</div>
+    </div>
+
+    <div class="quote quote-claude">
+      "LLDP is on by default in EXOS. This is the carrier for Fabric Attach. Even without pings working, 'show lldp neighbors' gives you ground truth about what's physically connected and tagged. If your AP appears in lldp neighbors, the trunk is working."
+      <div style="font-size:0.72rem;color:var(--blue);margin-top:6px;font-style:normal">&#8212; Claude AI InterVLAN dialogue, April 21</div>
+    </div>
+
+    <div class="quote quote-nb">
+      "OWE (Opportunistic Wireless Encryption) solves the open-network risk — but legacy devices can't connect to an OWE-only SSID. OWE Transition Mode solves this: run a hidden open SSID alongside the OWE SSID with the same name. OWE-capable devices connect encrypted; legacy devices fall back to the hidden open. XIQ exposes this as a single toggle."
+      <div style="font-size:0.72rem;color:var(--purple);margin-top:6px;font-style:normal">&#8212; NotebookLLM Final Items synthesis, April 21</div>
+    </div>
+  </div>
+
+  <!-- Topology -->
+  <div class="card" id="topology">
+    <div class="card-title"><div class="dot" style="background:var(--cyan)"></div><span style="color:var(--cyan)">Lab Topology — Karl Lab April 21</span></div>
+    <pre style="color:var(--text);font-size:0.78rem">
+Internet
+    |
+Quantum Fiber Modem (192.168.0.1)
+    |  (VLAN 1 / Default — untagged)
+    |── port 1 ──► SW1 (FJ012544G-00233) — 192.168.0.28
+                     L3 CORE
+                     ├── port 3 untagged Default → AP1 (untagged boot, XIQ call-home)
+                     ├── port 5 untagged VLAN 10 → Corp wired client
+                     ├── port 10 tagged (trunk: VLAN 10/20/30) ──► SW2
+                     │
+                     SVIs:  VLAN_10_Corporate_Wired    10.10.0.1/24  DHCP .100-.200
+                            VLAN_20_Corporate_Wireless 10.20.0.1/24  DHCP .100-.200
+                            VLAN_30_Guest_Wireless     10.30.0.1/24  DHCP .100-.200
+                            Default                    192.168.0.28  ipforwarding ON (Karl Rule)
+                     QoS:   VLAN 10/20 → qp6 (high)
+                            VLAN 30   → qp1 (low)
+
+SW2 (FJ012544G-00483) — 192.168.0.11
+    L2 ACCESS ONLY (no SVIs, no DHCP, no ipforwarding)
+    ├── port 10 tagged trunk ──► SW1
+    ├── port 3 untagged Default → AP2 (boot) / tagged VLAN 20/30 after XIQ policy push
+    └── access ports → wired clients (VLAN 10 untagged)
+
+XIQ Network Policy: AP_April21_KarlLab
+    Corporate_Wireless SSID → VLAN 20, PSK (WPA2/WPA3)
+    Guest_Wireless SSID     → VLAN 30, OWE + Transition Mode
+
+    Guest_30 User Profile (Firewall Rules):
+        DENY  Guest → Corp Wired   (10.30.0.0/24 → 10.10.0.0/24)
+        DENY  Guest → Corp Wireless(10.30.0.0/24 → 10.20.0.0/24)
+        DROP traffic between stations (Guest-to-Guest L2 isolation)
+
+Quantum Fiber Static Routes:
+    10.10.0.0/24 → 192.168.0.28 (SW1)
+    10.20.0.0/24 → 192.168.0.28 (SW1)
+    10.30.0.0/24 → 192.168.0.28 (SW1)
+    </pre>
+  </div>
+
+  <!-- SW1 Full Config -->
+  <div class="card" id="commands">
+    <div class="card-title"><div class="dot" style="background:var(--blue)"></div><span style="color:var(--blue)">SW1 Complete Config (EXOS CLI)</span></div>
+    <pre>
+# === VLAN 10 — Corporate Wired ===
+create vlan VLAN_10_Corporate_Wired tag 10
+configure vlan VLAN_10_Corporate_Wired add ports 5 untagged
+configure vlan VLAN_10_Corporate_Wired add ports 10 tagged
+configure vlan VLAN_10_Corporate_Wired ipaddress 10.10.0.1/24
+enable ipforwarding vlan VLAN_10_Corporate_Wired
+configure vlan VLAN_10_Corporate_Wired dhcp-address-range 10.10.0.100 - 10.10.0.200
+configure vlan VLAN_10_Corporate_Wired dhcp-options default-gateway 10.10.0.1
+configure vlan VLAN_10_Corporate_Wired dhcp-options dns-server primary 8.8.8.8
+enable dhcp ports 5,10 vlan VLAN_10_Corporate_Wired
+configure vlan VLAN_10_Corporate_Wired qosprofile qp6
+
+# === VLAN 20 — Corporate Wireless ===
+create vlan VLAN_20_Corporate_Wireless tag 20
+configure vlan VLAN_20_Corporate_Wireless add ports 3,10 tagged
+configure vlan VLAN_20_Corporate_Wireless ipaddress 10.20.0.1/24
+enable ipforwarding vlan VLAN_20_Corporate_Wireless
+configure vlan VLAN_20_Corporate_Wireless dhcp-address-range 10.20.0.100 - 10.20.0.200
+configure vlan VLAN_20_Corporate_Wireless dhcp-options default-gateway 10.20.0.1
+configure vlan VLAN_20_Corporate_Wireless dhcp-options dns-server primary 8.8.8.8
+enable dhcp ports 3,10 vlan VLAN_20_Corporate_Wireless
+configure vlan VLAN_20_Corporate_Wireless qosprofile qp6
+
+# === VLAN 30 — Guest Wireless ===
+create vlan VLAN_30_Guest_Wireless tag 30
+configure vlan VLAN_30_Guest_Wireless add ports 3,10 tagged
+configure vlan VLAN_30_Guest_Wireless ipaddress 10.30.0.1/24
+enable ipforwarding vlan VLAN_30_Guest_Wireless
+configure vlan VLAN_30_Guest_Wireless dhcp-address-range 10.30.0.100 - 10.30.0.200
+configure vlan VLAN_30_Guest_Wireless dhcp-options default-gateway 10.30.0.1
+configure vlan VLAN_30_Guest_Wireless dhcp-options dns-server primary 8.8.8.8
+enable dhcp ports 3,10 vlan VLAN_30_Guest_Wireless
+configure vlan VLAN_30_Guest_Wireless qosprofile qp1
+
+# === Default VLAN — AP boot + Karl Rule ===
+configure vlan Default add ports 3 untagged
+enable ipforwarding vlan Default           # Karl Rule — REQUIRED or no internet
+configure vlan Default delete ports 10     # Loop prevention
+
+save configuration</pre>
+
+    <div class="card-title" style="margin-top:20px"><div class="dot" style="background:var(--muted)"></div><span style="color:var(--muted)">SW2 Config (L2 access only)</span></div>
+    <pre>
+# SW2 — Pure L2, no SVIs, no DHCP, no ipforwarding
+create vlan VLAN_10_Corporate_Wired tag 10
+create vlan VLAN_20_Corporate_Wireless tag 20
+create vlan VLAN_30_Guest_Wireless tag 30
+
+# Trunk to SW1
+configure vlan VLAN_10_Corporate_Wired add ports 10 tagged
+configure vlan VLAN_20_Corporate_Wireless add ports 10 tagged
+configure vlan VLAN_30_Guest_Wireless add ports 10 tagged
+
+# AP port — boot untagged, then XIQ pushes tagged policy
+configure vlan Default add ports 3 untagged
+configure vlan Default delete ports 10    # Loop prevention
+configure vlan VLAN_20_Corporate_Wireless add ports 3 tagged
+configure vlan VLAN_30_Guest_Wireless add ports 3 tagged
+
+save configuration</pre>
+
+    <div class="card-title" style="margin-top:20px"><div class="dot" style="background:var(--muted)"></div><span style="color:var(--muted)">Useful Verification Commands</span></div>
+    <pre>
+show vlan detail                        # All VLANs, IPs, ports
+show ipconfig                           # IP addresses on all interfaces
+show ipfdb                              # IP forwarding database
+show vlan Default | grep Forwarding     # Verify Karl Rule applied
+show lldp neighbors                     # Physical connectivity ground truth
+show dhcp-server lease vlan VLAN_10_Corporate_Wired   # Client leases
+ping 10.20.0.1 vr VR-Default           # Inter-VLAN routing test</pre>
+  </div>
+
+  <!-- URLs -->
+  <div class="card" id="urls">
+    <div class="card-title"><div class="dot" style="background:var(--purple)"></div><span style="color:var(--purple)">URLs</span></div>
+    <table>
+      <thead><tr><th>Resource</th><th>URL</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td>Lab Landing Page</td><td><a href="lab_20260329.html" style="color:var(--blue)">lab_20260329.html</a></td><td>5320 main page with all session link blocks</td></tr>
+        <tr><td>Full Session Log</td><td><a href="session_log_20260421.html" style="color:var(--blue)">session_log_20260421.html</a></td><td>14-section detailed log with all excerpts</td></tr>
+        <tr><td>XIQ</td><td><a href="https://cloud.extremenetworks.com" style="color:var(--blue)">cloud.extremenetworks.com</a></td><td>Network Policy: AP_April21_KarlLab</td></tr>
+        <tr><td>GitHub Pages</td><td><a href="https://khursheedkhanaiforgood-ai.github.io/5320-lab/" style="color:var(--blue)">5320-lab GitHub Pages</a></td><td>Public docs site</td></tr>
+        <tr><td>GitHub Repo</td><td><a href="https://github.com/khursheedkhanaiforgood-ai/5320-lab" style="color:var(--blue)">5320-lab repo</a></td><td>Source for all HTML files</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Files -->
+  <div class="card" id="files">
+    <div class="card-title"><div class="dot" style="background:var(--cyan)"></div><span style="color:var(--cyan)">Files Created / Updated Today</span></div>
+    <table>
+      <thead><tr><th>File</th><th>Action</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td><code>session_log_20260421.html</code></td><td><span class="badge badge-done">NEW</span></td><td>Full 14-section lab log, all 9 docs, CLI configs, verification checklist</td></tr>
+        <tr><td><code>session_summary_20260421.html</code></td><td><span class="badge badge-done">NEW</span></td><td>This EOD dashboard</td></tr>
+        <tr><td><code>lab_20260329.html</code></td><td><span class="badge badge-done">UPDATED</span></td><td>Apr 21 link block + sidebar entry added</td></tr>
+        <tr><td><code>session_log_20260420.html</code></td><td><span class="badge badge-done">UPDATED</span></td><td>Training section added (Apr 20 morning)</td></tr>
+        <tr><td><code>session_summary_20260420.html</code></td><td><span class="badge badge-done">UPDATED</span></td><td>6 new accomplished items from Apr 20 training</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Docs Ingested -->
+  <div class="card" id="docs">
+    <div class="card-title"><div class="dot" style="background:var(--blue)"></div><span style="color:var(--blue)">Documents Ingested (9 Total)</span></div>
+    <table>
+      <thead><tr><th>#</th><th>Document</th><th>Source</th><th>Key Insight</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>Claude_InterVLAN_Apr21.docx</td><td style="color:var(--blue)">Claude AI</td><td>Primary/secondary architecture concept, L3 routing mechanics, SVI contract</td></tr>
+        <tr><td>2</td><td>NoteBook_LLM_InterVLAN_Apr21.docx</td><td style="color:var(--purple)">NotebookLLM</td><td>InterVLAN synthesis — MAC rewrite, ARP flows, frame switching path</td></tr>
+        <tr><td>3</td><td>network_requirements.docx</td><td style="color:var(--muted)">Horizon Custom Fab</td><td>VLAN 10/20/30 spec, Quantum Fiber uplink, PSK for Corp, OWE for Guest</td></tr>
+        <tr><td>4</td><td>Claude_NewLab_Karl_Dialogue_Apr21.docx</td><td style="color:var(--blue)">Claude AI</td><td>Karl Rule identified, DHCP trunk reach-back, AP Default VLAN port 3</td></tr>
+        <tr><td>5</td><td>NoteBookLLM_KarlLab_Apr21.docx</td><td style="color:var(--purple)">NotebookLLM</td><td>Karl Lab design review, ipforwarding flag, loop prevention analysis</td></tr>
+        <tr><td>6</td><td>Claude_NewLab_Karl_Dialogue_Apr21_v3.docx</td><td style="color:var(--blue)">Claude AI</td><td>Updated dialogue — LLDP verification, QoS queue mapping, XIQ vs CLI split</td></tr>
+        <tr><td>7</td><td>NoteBookLLM_KarlLab_Apr21_v2.docx</td><td style="color:var(--purple)">NotebookLLM</td><td>Karl Rule synthesis v2, guest isolation L2 vs L3 distinction</td></tr>
+        <tr><td>8</td><td>Claude_FullDay_Apr21_Until_QoS_Classification.docx</td><td style="color:var(--blue)">Claude AI</td><td>Full day log to QoS: DHCP debug, ACL failure, XIQ firewall approach</td></tr>
+        <tr><td>9</td><td>NoteBookLLM_FinalItems_April21_OWE_for_Claude.docx</td><td style="color:var(--purple)">NotebookLLM</td><td>QoS final items, XIQ scheduling weights, OWE Transition Mode</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- OWE Answer -->
+  <div class="card" id="owe">
+    <div class="card-title"><div class="dot" style="background:var(--cyan)"></div><span style="color:var(--cyan)">OWE — Backward Compatibility Answer</span></div>
+    <div class="callout">
+      <div class="callout-title">What is OWE Transition Mode?</div>
+      <p style="font-size:0.85rem;color:var(--text)">
+        OWE (Opportunistic Wireless Encryption, 802.11-2016/WPA3) encrypts traffic on open networks with no PSK required.
+        The problem: legacy devices (older Android, pre-WiFi 6 Windows, IoT) don't recognize OWE and refuse to connect.
+      </p>
+    </div>
+    <p style="font-size:0.85rem;color:var(--muted);margin:12px 0"><strong style="color:var(--text)">Solution:</strong> OWE Transition Mode — two SSIDs, one experience:</p>
+    <table style="margin-bottom:14px">
+      <thead><tr><th>SSID Type</th><th>Visible?</th><th>Security</th><th>Who connects</th></tr></thead>
+      <tbody>
+        <tr><td>OWE SSID (primary)</td><td>Yes</td><td>OWE encrypted</td><td>WPA3-capable devices</td></tr>
+        <tr><td>Open SSID (companion)</td><td>Hidden</td><td>None (open)</td><td>Legacy devices — auto fallback</td></tr>
+      </tbody>
+    </table>
+    <p style="font-size:0.85rem;color:var(--muted)"><strong style="color:var(--text)">XIQ location:</strong> Guest_Wireless SSID config → <strong>"Transition Mode for 2.4GHz and 5GHz"</strong> toggle. Enable it and XIQ broadcasts both SSIDs automatically.</p>
+    <p style="font-size:0.83rem;color:var(--muted);margin-top:8px"><strong style="color:var(--amber)">Tradeoff:</strong> Legacy devices get zero encryption. OWE-capable devices get encryption with zero friction (no PSK). This is the standard enterprise approach during WPA3 transition.</p>
+  </div>
+
+  <!-- Pending -->
+  <div class="card" id="pending">
+    <div class="card-title"><div class="dot" style="background:var(--red)"></div><span style="color:var(--red)">Pending / Tomorrow Morning</span></div>
+    <table>
+      <thead><tr><th>Item</th><th>Priority</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>Run Full Verification Checklist</strong></td>
+          <td><span class="badge badge-tomorrow">Tomorrow</span></td>
+          <td>17 tests: CLI-1–6, TEST-1–4, ISO-1–4, XIQ-1–3. See verification section below.</td>
+        </tr>
+        <tr>
+          <td><strong>Set Corporate SSID PSK password in XIQ</strong></td>
+          <td><span class="badge badge-pending">Pending</span></td>
+          <td>Key Value field was empty during config. Navigate: XIQ → Network Policy → AP_April21_KarlLab → Corporate_Wireless → Security → Key Value</td>
+        </tr>
+        <tr>
+          <td><strong>Enable OWE Transition Mode in XIQ</strong></td>
+          <td><span class="badge badge-pending">Pending</span></td>
+          <td>Guest_Wireless SSID → toggle "Transition Mode for 2.4GHz and 5GHz" → push policy update</td>
+        </tr>
+        <tr>
+          <td><strong>Training Sessions 2–6</strong></td>
+          <td><span class="badge badge-pending">Due Apr 22</span></td>
+          <td>Team review Apr 23. S2 opening already posed (inter-VLAN ping bridge question). Update S4+S5 tracker from WiFi Overview doc (DFS + WPA3).</td>
+        </tr>
+        <tr>
+          <td><strong>Document EXOS Policy ACL Syntax</strong></td>
+          <td><span class="badge badge-tomorrow">Backlog</span></td>
+          <td><code>edit policy NAME</code> → vi-style editor → <code>source-address</code> keyword → Esc+:wq → <code>configure access-list add NAME any</code></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Verification Checklist -->
+  <div class="card" id="verification">
+    <div class="card-title"><div class="dot" style="background:var(--green)"></div><span style="color:var(--green)">Full Verification Checklist (Run Tomorrow Morning)</span></div>
+
+    <p style="font-size:0.8rem;color:var(--muted);margin-bottom:14px">iPhone ICMP is blocked — use Safari, Fing app, Mac Terminal, or EXOS show commands as alternatives.</p>
+
+    <table>
+      <thead><tr><th>ID</th><th>Test</th><th>Command / Method</th><th>Pass Criteria</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td><strong>CLI-1</strong></td><td>All VLANs created with correct IPs</td><td><code>show vlan detail</code></td><td>VLAN 10/20/30 listed with 10.x.0.1/24 IPs</td><td><span class="badge badge-tomorrow">Tomorrow</span></td></tr>
+        <tr><td><strong>CLI-2</strong></td><td>ipforwarding enabled on all VLANs</td><td><code>show vlan VLAN_10_Corporate_Wired | grep Forward</code></td><td>"IPv4 Forwarding: Enabled"</td><td><span class="badge badge-tomorrow">Tomorrow</span></td></tr>
+        <tr><td><strong>CLI-3</strong></td><td>Karl Rule active on Default VLAN</td><td><code>show vlan Default | grep Forward</code></td><td>"IPv4 Forwarding: Enabled"</td><td><span class="badge badge-tomorrow">Tomorrow</span></td></tr>
+        <tr><td><strong>CLI-4</strong></td><td>DHCP leases issued</td><td><code>show dhcp-server lease vlan VLAN_10_Corporate_Wired</code></td><td>Client IPs listed in 10.10.0.100-200 range</td><td><span class="badge badge-tomorrow">Tomorrow</span></td></tr>
+        <tr><td><strong>CLI-5</strong></td><td>Trunk connectivity — LLDP</td><td><code>show lldp neighbors</code></td><td>SW2 and APs visible on expected ports</td><td><span class="badge badge-tomorrow">Tomorrow</span></td></tr>
+        <tr><td><strong>CLI-6</strong></td><td>VLAN 1 not on port 10</td><td><code>show vlan Default</code></td><td>Port 10 NOT listed in Default VLAN ports</td><td><span class="badge badge-tomorrow">Tomorrow</span></td></tr>
+        <tr><td><strong>TEST-1</strong></td><td>Corp Wired client gets IP</td><td>Connect laptop to SW1 port 5</td><td>Gets 10.10.0.x, GW 10.10.0.1</td><td><span class="badge badge-tomorrow">Tomorrow</span></td></tr>
+        <tr><td><strong>TEST-2</strong></td><td>Corp Wired has internet</td><td>Mac Terminal: <code>curl -s https://api.ipify.org</code></td><td>Returns public IP</td><td><span class="badge badge-tomorrow">Tomorrow</span></td></tr>
+        <tr><td><strong>TEST-3</strong></td><td>Corp Wireless client gets IP</td><td>Connect iPhone to Corporate SSID</td><td>Gets 10.20.0.x</td><td><span class="badge badge-tomorrow">Tomorrow</span></td></tr>
+        <tr><td><strong>TEST-4</strong></td><td>Guest Wireless client gets IP</td><td>Connect iPhone to Guest SSID</td><td>Gets 10.30.0.x</td><td><span class="badge badge-tomorrow">Tomorrow</span></td></tr>
+        <tr><td><strong>ISO-1</strong></td><td>Guest can't reach Corp Wired</td><td>Mac Terminal from Guest network: <code>curl -m 3 http://10.10.0.x</code></td><td>Connection timed out</td><td><span class="badge badge-tomorrow">Tomorrow</span></td></tr>
+        <tr><td><strong>ISO-2</strong></td><td>Guest can't reach Corp Wireless</td><td>Mac Terminal from Guest: <code>curl -m 3 http://10.20.0.x</code></td><td>Connection timed out</td><td><span class="badge badge-tomorrow">Tomorrow</span></td></tr>
+        <tr><td><strong>ISO-3</strong></td><td>Guest-to-Guest blocked (L2)</td><td>Two devices on Guest SSID — Fing scan</td><td>Devices not visible to each other</td><td><span class="badge badge-tomorrow">Tomorrow</span></td></tr>
+        <tr><td><strong>ISO-4</strong></td><td>Corp can reach internet</td><td>Safari on Corp iPhone → any public URL</td><td>Page loads</td><td><span class="badge badge-tomorrow">Tomorrow</span></td></tr>
+        <tr><td><strong>XIQ-1</strong></td><td>Both APs online in XIQ</td><td>XIQ → Monitor → Devices</td><td>AP1 + AP2 showing Connected/Green</td><td><span class="badge badge-tomorrow">Tomorrow</span></td></tr>
+        <tr><td><strong>XIQ-2</strong></td><td>Firewall rules active on Guest_30</td><td>XIQ → Network Policy → AP_April21_KarlLab → Guest_Wireless → Guest_30 profile</td><td>3 DENY rules visible</td><td><span class="badge badge-tomorrow">Tomorrow</span></td></tr>
+        <tr><td><strong>XIQ-3</strong></td><td>QoS scheduling weights applied</td><td>XIQ → Corp User Profile → QoS tab</td><td>Scheduling Weight = 100 (Corp), 10 (Guest)</td><td><span class="badge badge-tomorrow">Tomorrow</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="btn-row">
+    <a href="session_log_20260421.html" class="btn btn-purple">&#128196; Full Session Log &rarr;</a>
+    <a href="lab_20260329.html" class="btn btn-green">&#8592; Lab Landing Page</a>
+    <a href="team_training_qa_20260420.html" class="btn btn-outline">Training Tracker</a>
+  </div>
+
+</div>
+
+<script>
+  const links = document.querySelectorAll('.sidebar a[href^="#"]');
+  const sections = Array.from(links).map(l => document.querySelector(l.getAttribute('href'))).filter(Boolean);
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        links.forEach(l => l.classList.remove('active'));
+        const active = document.querySelector(`.sidebar a[href="#${e.target.id}"]`);
+        if (active) active.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-20% 0px -70% 0px' });
+  sections.forEach(s => obs.observe(s));
+</script>
+</body>
+</html>
