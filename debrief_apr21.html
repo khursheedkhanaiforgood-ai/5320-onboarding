@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Horizon Lab Debrief — Apr 21 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Syne:wght@700;800&family=Inter:wght@400;500;600&display=swap">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#08090d;--surface:#0f1117;--border:#1e2130;--border2:#252840;
+  --text:#e2e8f0;--muted:#64748b;--dim:#94a3b8;
+  --purple:#a78bfa;--purple2:#7c3aed;--purple-bg:#1a1030;
+  --green:#4ade80;--green2:#16a34a;--green-bg:#0d1a0d;
+  --blue:#38bdf8;--blue2:#0891b2;--blue-bg:#0a1a26;
+  --amber:#fbbf24;--amber-bg:#1a1200;
+  --red:#f87171;--red-bg:#200a0a;
+  --orange:#fb923c;--orange-bg:#1a0e00;
+  --nav-h:56px;--aside-w:260px;
+}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.6}
+
+nav{position:fixed;top:0;left:0;right:0;height:var(--nav-h);background:rgba(8,9,13,.92);border-bottom:1px solid var(--border);backdrop-filter:blur(12px);z-index:100;display:flex;align-items:center;padding:0 24px;gap:16px}
+.nav-brand{font-family:'Syne',sans-serif;font-size:1rem;font-weight:800;color:var(--orange);letter-spacing:.02em}
+.nav-sub{font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--muted);letter-spacing:.06em}
+.nav-right{margin-left:auto;display:flex;gap:8px;align-items:center}
+.back-link{font-size:.72rem;color:var(--muted);text-decoration:none;padding:4px 10px;border:1px solid var(--border);border-radius:4px}
+.back-link:hover{color:var(--text);border-color:var(--border2)}
+
+.layout{display:flex;margin-top:var(--nav-h);min-height:calc(100vh - var(--nav-h))}
+aside{width:var(--aside-w);flex-shrink:0;position:fixed;top:var(--nav-h);bottom:0;overflow-y:auto;background:var(--surface);border-right:1px solid var(--border);padding:20px 0}
+aside::-webkit-scrollbar{width:4px}
+aside::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+main{margin-left:var(--aside-w);flex:1;padding:32px 40px;max-width:1000px}
+
+.sidebar-section{font-family:'JetBrains Mono',monospace;font-size:.58rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);padding:0 20px;margin:18px 0 6px}
+.sidebar-link{display:flex;align-items:center;gap:10px;padding:7px 20px;cursor:pointer;font-size:.75rem;color:var(--dim);text-decoration:none;border-left:2px solid transparent;transition:background .15s}
+.sidebar-link:hover{background:rgba(251,146,60,.05);color:var(--text)}
+.sidebar-link.active{color:var(--orange);background:rgba(251,146,60,.08);border-left-color:var(--orange)}
+.s-num{font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--muted);flex-shrink:0;width:18px}
+
+.section{display:none;animation:fadeIn .3s ease-out}
+.section.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+.hero{margin-bottom:32px}
+.hero-tag{font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px}
+.hero-title{font-family:'Syne',sans-serif;font-size:1.8rem;font-weight:800;color:var(--text);margin-bottom:8px}
+.hero-title span{color:var(--orange)}
+.hero-sub{font-size:.85rem;color:var(--muted);line-height:1.7;max-width:680px}
+
+/* Slide card */
+.slide-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:32px}
+.slide-img{width:100%;display:block;border-bottom:1px solid var(--border)}
+.slide-body{padding:20px 24px}
+.slide-meta{display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.slide-num{font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--muted);border:1px solid var(--border);padding:2px 7px;border-radius:3px;flex-shrink:0}
+.slide-title{font-family:'Syne',sans-serif;font-size:1rem;font-weight:800;color:var(--text);flex:1}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+.tag{font-family:'JetBrains Mono',monospace;font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;padding:2px 8px;border-radius:3px;border:1px solid}
+.tag-s1{background:rgba(167,139,250,.08);color:var(--purple);border-color:var(--purple2)}
+.tag-s2{background:rgba(56,189,248,.08);color:var(--blue);border-color:var(--blue2)}
+.tag-s3{background:rgba(74,222,128,.08);color:var(--green);border-color:var(--green2)}
+.tag-s4{background:rgba(251,191,36,.08);color:var(--amber);border-color:#b45309}
+.tag-s5{background:rgba(251,146,60,.08);color:var(--orange);border-color:#c2410c}
+.tag-s6{background:rgba(248,113,113,.08);color:var(--red);border-color:#b91c1c}
+.tag-lab{background:rgba(255,255,255,.04);color:var(--dim);border-color:var(--border2)}
+.tag-karl{background:#0d2b1f;color:var(--green);border-color:var(--green2)}
+.slide-summary{font-size:.82rem;color:var(--dim);line-height:1.7;margin-bottom:12px}
+.lesson-link{display:inline-flex;align-items:center;gap:6px;font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--purple);text-decoration:none;border:1px solid var(--border);padding:4px 10px;border-radius:4px;transition:border-color .15s}
+.lesson-link:hover{border-color:var(--purple2)}
+.cli{background:#0a0b0f;border:1px solid var(--border);border-left:3px solid var(--green2);border-radius:0 4px 4px 0;padding:10px 14px;font-family:'JetBrains Mono',monospace;font-size:.78rem;color:#86efac;margin:10px 0;white-space:pre-wrap}
+.field-note{background:rgba(251,191,36,.05);border:1px solid #713f12;border-left:3px solid var(--amber);border-radius:0 6px 6px 0;padding:10px 14px;font-size:.78rem;color:#fcd34d;margin:10px 0;line-height:1.6}
+.field-note strong{color:var(--amber);font-family:'JetBrains Mono',monospace;font-size:.6rem;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:4px}
+.divider{border:none;border-top:1px solid var(--border);margin:32px 0}
+
+/* Slide grid for overview */
+.slide-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:24px}
+.slide-thumb{background:var(--surface);border:1px solid var(--border);border-radius:6px;overflow:hidden;cursor:pointer;transition:border-color .15s}
+.slide-thumb:hover{border-color:var(--orange)}
+.slide-thumb img{width:100%;display:block}
+.slide-thumb-label{font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--muted);padding:6px 8px;text-align:center}
+
+@media(max-width:700px){aside{display:none}main{margin-left:0;padding:20px 16px}}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-brand">HORIZON / APR 21 DEBRIEF</div>
+  <div class="nav-sub">KARL'S LAB &nbsp;·&nbsp; KHURSHEED KHAN &nbsp;·&nbsp; EXTREME NETWORKS</div>
+  <div class="nav-right">
+    <a class="back-link" href="session_summary_20260422.html">EOD Blueprint →</a>
+    <a class="back-link" href="index.html">← Index</a>
+  </div>
+</nav>
+
+<div class="layout">
+<aside>
+  <div class="sidebar-section">Overview</div>
+  <div class="sidebar-link active" onclick="show('overview')"><span class="s-num">—</span>All Slides</div>
+
+  <div class="sidebar-section">Architecture</div>
+  <div class="sidebar-link" onclick="show('s01')"><span class="s-num">01</span>Title</div>
+  <div class="sidebar-link" onclick="show('s02')"><span class="s-num">02</span>Primary / Secondary</div>
+  <div class="sidebar-link" onclick="show('s03')"><span class="s-num">03</span>Physical vs Logical</div>
+  <div class="sidebar-link" onclick="show('s04')"><span class="s-num">04</span>Port 10 Trunk Logic</div>
+
+  <div class="sidebar-section">Snags &amp; Fixes</div>
+  <div class="sidebar-link" onclick="show('s05')"><span class="s-num">05</span>DHCP Reach-Back</div>
+  <div class="sidebar-link" onclick="show('s06')"><span class="s-num">06</span>Internet Ghosting</div>
+  <div class="sidebar-link" onclick="show('s07')"><span class="s-num">07</span>The Karl Rule</div>
+
+  <div class="sidebar-section">QoS &amp; Security</div>
+  <div class="sidebar-link" onclick="show('s08')"><span class="s-num">08</span>QoS Express Lane</div>
+  <div class="sidebar-link" onclick="show('s09')"><span class="s-num">09</span>E2E QoS Execution</div>
+  <div class="sidebar-link" onclick="show('s10')"><span class="s-num">10</span>Guest Threat Model</div>
+  <div class="sidebar-link" onclick="show('s11')"><span class="s-num">11</span>Multi-Layer Security</div>
+
+  <div class="sidebar-section">Field Notes</div>
+  <div class="sidebar-link" onclick="show('s12')"><span class="s-num">12</span>EXOS ACL Syntax</div>
+  <div class="sidebar-link" onclick="show('s13')"><span class="s-num">13</span>OWE Transition Mode</div>
+
+  <div class="sidebar-section">Blueprint</div>
+  <div class="sidebar-link" onclick="show('s14')"><span class="s-num">14</span>Final Architecture</div>
+  <div class="sidebar-link" onclick="show('s15')"><span class="s-num">15</span>Hybrid Advantage</div>
+</aside>
+
+<main>
+
+<!-- OVERVIEW -->
+<div id="overview" class="section active">
+  <div class="hero">
+    <div class="hero-tag">Karl's Lab · Apr 21 2026 · Khursheed's Debrief · 15 Slides</div>
+    <div class="hero-title">Horizon Custom Fabrication — <span>Lab Debrief</span></div>
+    <div class="hero-sub">Building a Hybrid L3/L2 Network with Extreme 5320s &amp; Cloud IQ. Each slide tagged to the Apr 22 Socratic session lesson it corresponds to.</div>
+  </div>
+
+  <div class="slide-grid">
+    <div class="slide-thumb" onclick="show('s01')"><img src="debrief/image1.png" alt="Slide 1"><div class="slide-thumb-label">01 — Title</div></div>
+    <div class="slide-thumb" onclick="show('s02')"><img src="debrief/image2.png" alt="Slide 2"><div class="slide-thumb-label">02 — Primary/Secondary</div></div>
+    <div class="slide-thumb" onclick="show('s03')"><img src="debrief/image3.png" alt="Slide 3"><div class="slide-thumb-label">03 — Physical vs Logical</div></div>
+    <div class="slide-thumb" onclick="show('s04')"><img src="debrief/image4.png" alt="Slide 4"><div class="slide-thumb-label">04 — Port 10 Trunk</div></div>
+    <div class="slide-thumb" onclick="show('s05')"><img src="debrief/image5.png" alt="Slide 5"><div class="slide-thumb-label">05 — DHCP Reach-Back</div></div>
+    <div class="slide-thumb" onclick="show('s06')"><img src="debrief/image6.png" alt="Slide 6"><div class="slide-thumb-label">06 — Internet Ghosting</div></div>
+    <div class="slide-thumb" onclick="show('s07')"><img src="debrief/image7.png" alt="Slide 7"><div class="slide-thumb-label">07 — The Karl Rule</div></div>
+    <div class="slide-thumb" onclick="show('s08')"><img src="debrief/image8.png" alt="Slide 8"><div class="slide-thumb-label">08 — QoS Express Lane</div></div>
+    <div class="slide-thumb" onclick="show('s09')"><img src="debrief/image9.png" alt="Slide 9"><div class="slide-thumb-label">09 — E2E QoS</div></div>
+    <div class="slide-thumb" onclick="show('s10')"><img src="debrief/image10.png" alt="Slide 10"><div class="slide-thumb-label">10 — Guest Threat Model</div></div>
+    <div class="slide-thumb" onclick="show('s11')"><img src="debrief/image11.png" alt="Slide 11"><div class="slide-thumb-label">11 — Multi-Layer Security</div></div>
+    <div class="slide-thumb" onclick="show('s12')"><img src="debrief/image12.png" alt="Slide 12"><div class="slide-thumb-label">12 — EXOS ACL Syntax</div></div>
+    <div class="slide-thumb" onclick="show('s13')"><img src="debrief/image13.png" alt="Slide 13"><div class="slide-thumb-label">13 — OWE Transition</div></div>
+    <div class="slide-thumb" onclick="show('s14')"><img src="debrief/image14.png" alt="Slide 14"><div class="slide-thumb-label">14 — Final Blueprint</div></div>
+    <div class="slide-thumb" onclick="show('s15')"><img src="debrief/image15.png" alt="Slide 15"><div class="slide-thumb-label">15 — Hybrid Advantage</div></div>
+  </div>
+
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:18px 22px;font-size:.8rem;color:var(--muted)">
+    <div style="font-family:'JetBrains Mono',monospace;font-size:.6rem;text-transform:uppercase;letter-spacing:.08em;color:var(--orange);margin-bottom:10px">Session Tags Used</div>
+    <div style="display:flex;flex-wrap:wrap;gap:8px">
+      <span class="tag tag-s1">S1 OSI / L1–L3</span>
+      <span class="tag tag-s2">S2 L2 Switching</span>
+      <span class="tag tag-s3">S3 L3 Routing</span>
+      <span class="tag tag-s4">S4 Wireless</span>
+      <span class="tag tag-s5">S5 XIQ Ops</span>
+      <span class="tag tag-s6">S6 Troubleshooting</span>
+      <span class="tag tag-karl">Karl Rule</span>
+      <span class="tag tag-lab">Lab Build</span>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 01 -->
+<div id="s01" class="section">
+  <div class="slide-card">
+    <img class="slide-img" src="debrief/image1.png" alt="Slide 1">
+    <div class="slide-body">
+      <div class="slide-meta">
+        <span class="slide-num">SLIDE 01</span>
+        <span class="slide-title">Horizon Custom Fabrication — April 21 Lab Debrief</span>
+      </div>
+      <div class="tags"><span class="tag tag-lab">Lab Build</span><span class="tag tag-s1">S1 OSI / L1–L3</span></div>
+      <div class="slide-summary">Title slide. KK field note: <em>"Breaking down the architecture, the snags, and the 'Aha' moments."</em> Sets the frame: this is a debrief of a real hybrid L3/L2 build — not theory, not simulation. Every snag on this deck maps to an Apr 22 Socratic Q&amp;A answer.</div>
+      <a class="lesson-link" href="session_socratic_20260422.html">→ Session 1 Q1: OSI Layer Purposes</a>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 02 -->
+<div id="s02" class="section">
+  <div class="slide-card">
+    <img class="slide-img" src="debrief/image2.png" alt="Slide 2">
+    <div class="slide-body">
+      <div class="slide-meta">
+        <span class="slide-num">SLIDE 02</span>
+        <span class="slide-title">The Goal: Primary / Secondary Architecture</span>
+      </div>
+      <div class="tags"><span class="tag tag-s3">S3 L3 Routing</span><span class="tag tag-s2">S2 L2 Switching</span><span class="tag tag-lab">Lab Build</span></div>
+      <div class="slide-summary">
+        <strong style="color:var(--text)">SW1 (Primary):</strong> L3 Routing Brain · DHCP Pools · Security ACLs — all heavy lifting happens here.<br>
+        <strong style="color:var(--text)">SW2 (Secondary):</strong> L2 Access Edge — passes frames upstream with no routing.<br>
+        <strong style="color:var(--text)">Hardware Payload:</strong> 2× Extreme 5320-16P-2MXT-2X · 2× AP3000s (managed via XIQ) · 1× Quantum Fiber Modem (internet gateway).
+      </div>
+      <div class="field-note"><strong>Apr 22 Link</strong>S3 Q5 — KK's multi-hop routing walkthrough: SW2 is the L2 edge; SW1 is the gateway that does the routing decision. Exactly this architecture.</div>
+      <a class="lesson-link" href="session_socratic_20260422.html">→ Session 3 Q5: Multi-Hop Routing</a>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 03 -->
+<div id="s03" class="section">
+  <div class="slide-card">
+    <img class="slide-img" src="debrief/image3.png" alt="Slide 3">
+    <div class="slide-body">
+      <div class="slide-meta">
+        <span class="slide-num">SLIDE 03</span>
+        <span class="slide-title">Anatomy of the Build: Physical Wires vs. Logical Services</span>
+      </div>
+      <div class="tags"><span class="tag tag-s2">S2 L2 Switching</span><span class="tag tag-s3">S3 L3 Routing</span><span class="tag tag-s1">S1 OSI / L1–L3</span></div>
+      <div class="slide-summary">
+        <strong style="color:var(--text)">Physical Wire Map:</strong><br>
+        Port 1 — Uplink to Quantum Fiber Modem<br>
+        Port 3 — Copper to AP3000s (PoE)<br>
+        Port 10 — Inter-Switch Trunk<br><br>
+        <strong style="color:var(--text)">Logical Service Map:</strong><br>
+        VLAN 10 — Corporate Wired (10.10.0.1/24)<br>
+        VLAN 20 — Corporate Wireless (10.20.0.1/24)<br>
+        VLAN 30 — Guest Wireless (10.30.0.1/24)<br>
+        Default — AP Management &amp; Internet Exit (192.168.0.x)
+      </div>
+      <div class="field-note"><strong>Apr 22 Link</strong>S1 Q1 — L1 (physical wire), L2 (VLAN segmentation), L3 (IP per VLAN). This slide IS the OSI layer map made physical.</div>
+      <a class="lesson-link" href="session_socratic_20260422.html">→ Session 1 Q1: OSI Layer Purposes</a>
+      &nbsp;
+      <a class="lesson-link" href="session_socratic_20260422.html">→ Session 3 Q1: /24 CIDR Notation</a>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 04 -->
+<div id="s04" class="section">
+  <div class="slide-card">
+    <img class="slide-img" src="debrief/image4.png" alt="Slide 4">
+    <div class="slide-body">
+      <div class="slide-meta">
+        <span class="slide-num">SLIDE 04</span>
+        <span class="slide-title">The Backbone: Port 10 Inter-Switch Trunk Logic</span>
+      </div>
+      <div class="tags"><span class="tag tag-s2">S2 L2 Switching</span><span class="tag tag-lab">Lab Build</span></div>
+      <div class="slide-summary">Port 10 is the tagged backbone carrying all data VLANs (10/20/30) between the L3 core (SW1) and L2 access edge (SW2). Both switches understand 802.1Q tags — no untagged VLAN needed on this link.</div>
+      <div class="cli">configure vlan VLAN_10 add ports 10 tagged
+configure vlan VLAN_20 add ports 10 tagged
+configure vlan VLAN_30 add ports 10 tagged</div>
+      <div class="field-note"><strong>Field Note (KK)</strong>"If traffic leaves SW2, it gets tagged here, SW1 catches the tag, routes it, and sends it on its way."</div>
+      <div class="field-note"><strong>Apr 22 Link</strong>S2 competency — 802.1Q trunk vs access, FDB flooding. KK answered: "if FDB is not updated, then it floods" — exactly what happens if trunk tags are wrong on Port 10.</div>
+      <a class="lesson-link" href="session_socratic_20260422.html">→ Session 2: L2 Competencies (FDB / 802.1Q)</a>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 05 -->
+<div id="s05" class="section">
+  <div class="slide-card">
+    <img class="slide-img" src="debrief/image5.png" alt="Slide 5">
+    <div class="slide-body">
+      <div class="slide-meta">
+        <span class="slide-num">SLIDE 05</span>
+        <span class="slide-title">The DHCP Reach-Back Flow</span>
+      </div>
+      <div class="tags"><span class="tag tag-s3">S3 L3 Routing</span><span class="tag tag-s6">S6 Troubleshooting</span><span class="tag tag-lab">Lab Build</span></div>
+      <div class="slide-summary">
+        <strong style="color:var(--text)">1. The Ask:</strong> Client on AP (connected to SW2) sends DHCP Discover.<br>
+        <strong style="color:var(--text)">2. The Transit:</strong> SW2 has no DHCP server — request travels tagged across Port 10 trunk.<br>
+        <strong style="color:var(--text)">3. The Catch:</strong> SW1 (DHCP Server) MUST have DHCP listening on Port 10, or the request is silently dropped.
+      </div>
+      <div class="cli">enable dhcp ports 3,10 vlan VLAN_10
+enable dhcp ports 3,10 vlan VLAN_20
+enable dhcp ports 3,10 vlan VLAN_30</div>
+      <div class="field-note"><strong>The Snag</strong>Without adding port 10 to this command, SW1 ignores the trunk and SW2 clients are left stranded! (169.254.x.x APIPA addresses)</div>
+      <div class="field-note"><strong>Apr 22 Link</strong>S5 Q3 — KK's answer: "there was another issue yesterday on the return path with DHCP enabled on port 10, which was basically the trunk port that connected switch one to switch two." This is that issue.</div>
+      <a class="lesson-link" href="session_socratic_20260422.html">→ Session 5 Q3: Connected but No Internet</a>
+      &nbsp;
+      <a class="lesson-link" href="session_socratic_20260422.html">→ Session 6 Q1: L1→L3 Troubleshooting</a>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 06 -->
+<div id="s06" class="section">
+  <div class="slide-card">
+    <img class="slide-img" src="debrief/image6.png" alt="Slide 6">
+    <div class="slide-body">
+      <div class="slide-meta">
+        <span class="slide-num">SLIDE 06</span>
+        <span class="slide-title">The Snag: Internet Ghosting</span>
+      </div>
+      <div class="tags"><span class="tag tag-s6">S6 Troubleshooting</span><span class="tag tag-s3">S3 L3 Routing</span><span class="tag tag-karl">Karl Rule</span></div>
+      <div class="slide-summary">
+        <strong style="color:var(--text)">Symptoms:</strong> Clients connected · DHCP assigned 10.x.x.x IPs · Pings to 10.x.x.1 gateways succeeded · Safari timed out — no internet.<br><br>
+        <strong style="color:var(--text)">The Mystery:</strong> IPv4 Forwarding was enabled on VLANs 10, 20, 30. SW1 could ping the internet. The modem had static routes pointing back. Where were the packets dying?
+      </div>
+      <div class="field-note"><strong>Apr 22 Link</strong>S6 Q2 — "Oh, I see. Okay. So this is IP forwarding. Right? Isn't it IP forwarding on Default?" KK diagnosed it instantly. This slide is the exact scenario he solved.</div>
+      <a class="lesson-link" href="session_socratic_20260422.html">→ Session 6 Q2: Root Cause — Karl Rule</a>
+      &nbsp;
+      <a class="lesson-link" href="session_socratic_20260422.html">→ Session 1 Q3: L3 Troubleshooting</a>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 07 -->
+<div id="s07" class="section">
+  <div class="slide-card">
+    <img class="slide-img" src="debrief/image7.png" alt="Slide 7">
+    <div class="slide-body">
+      <div class="slide-meta">
+        <span class="slide-num">SLIDE 07</span>
+        <span class="slide-title">The Fix: The "Karl Rule"</span>
+      </div>
+      <div class="tags"><span class="tag tag-karl">Karl Rule</span><span class="tag tag-s6">S6 Troubleshooting</span><span class="tag tag-s3">S3 L3 Routing</span></div>
+      <div class="slide-summary">
+        <strong style="color:var(--text)">What We Thought:</strong> Traffic leaves data VLAN → goes to modem → modem knows how to come back.<br>
+        <strong style="color:var(--text)">What the Switch Did:</strong> Return traffic hits Default VLAN (modem uplink). Switch checks Default VLAN state — routing disabled — explicitly drops packet.<br>
+        <strong style="color:var(--text)">Root Cause:</strong> IPv4 Forwarding disabled on Default VLAN.
+      </div>
+      <div class="cli">enable ipforwarding vlan Default</div>
+      <div class="field-note"><strong>The Karl Rule</strong>"You must enable IP Forwarding on EVERY created interface in the fab — not just the data VLAN!"</div>
+      <div class="field-note"><strong>Apr 22 Link</strong>S6 Q2 verbatim: "Isn't it IP forwarding on Default?" → Claude: "YES — exactly! The Karl Rule." Also S1 Q3: "My problems have been in the forwarding and the default forwarding that I hadn't done."</div>
+      <a class="lesson-link" href="session_socratic_20260422.html">→ Session 6 Q2: Karl Rule Identification</a>
+      &nbsp;
+      <a class="lesson-link" href="session_socratic_20260422.html">→ Session 1 Q3: L3 Troubleshooting</a>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 08 -->
+<div id="s08" class="section">
+  <div class="slide-card">
+    <img class="slide-img" src="debrief/image8.png" alt="Slide 8">
+    <div class="slide-body">
+      <div class="slide-meta">
+        <span class="slide-num">SLIDE 08</span>
+        <span class="slide-title">QoS Strategy: Designing the Express Lane</span>
+      </div>
+      <div class="tags"><span class="tag tag-s4">S4 Wireless</span><span class="tag tag-lab">Lab Build</span></div>
+      <div class="slide-summary">
+        <strong style="color:var(--text)">The Concept:</strong> QoS only matters at points of congestion — Port 10 Trunk and Port 3 AP uplinks.<br>
+        <strong style="color:var(--text)">The Goal:</strong> Ensure Corporate users never feel Guest users hogging bandwidth.<br>
+        <strong style="color:var(--text)">Hardware Execution:</strong> Corporate → high-priority hardware queue <strong style="color:var(--green)">QP6</strong> (Express Lane). Guest → best-effort queue <strong style="color:var(--muted)">QP1</strong> (Local Lane).
+      </div>
+      <div class="field-note"><strong>Apr 22 Link</strong>S4 — WiFi connection flow includes QoS marking at the edge. The AP stamps the priority; the switch respects it. This slide shows the highway model KK discussed in Session 4.</div>
+      <a class="lesson-link" href="session_socratic_20260422.html">→ Session 4 Q5: E2E QoS in Data Plane</a>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 09 -->
+<div id="s09" class="section">
+  <div class="slide-card">
+    <img class="slide-img" src="debrief/image9.png" alt="Slide 9">
+    <div class="slide-body">
+      <div class="slide-meta">
+        <span class="slide-num">SLIDE 09</span>
+        <span class="slide-title">Executing End-to-End QoS</span>
+      </div>
+      <div class="tags"><span class="tag tag-s4">S4 Wireless</span><span class="tag tag-s5">S5 XIQ Ops</span><span class="tag tag-lab">Lab Build</span></div>
+      <div class="slide-summary">
+        <strong style="color:var(--text)">The Edge (XIQ Wireless Policy):</strong> QoS profiles assigned per SSID (Corporate = QP6, Guest = QP1).<br>
+        <strong style="color:var(--text)">The Transit:</strong> AP stamps the priority on the frame. Switch respects the stamp — seamless wireless-to-wired execution.<br>
+        <strong style="color:var(--text)">The Core (EXOS Switch):</strong> QP6 = Express Lane. QP1 = Local Lane.
+      </div>
+      <div class="field-note"><strong>Field Note (KK)</strong>"The AP stamps the priority; the switch respects the stamp. Seamless wireless-to-wired execution."</div>
+      <div class="field-note"><strong>Apr 22 Link</strong>S5 Q1 — AP onboarding: "the AP joins your Network Policy, gets SSIDs, security settings, VLAN assignments." QoS policy is part of the Network Policy push.</div>
+      <a class="lesson-link" href="session_socratic_20260422.html">→ Session 5 Q1: AP Onboarding + Network Policy</a>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 10 -->
+<div id="s10" class="section">
+  <div class="slide-card">
+    <img class="slide-img" src="debrief/image10.png" alt="Slide 10">
+    <div class="slide-body">
+      <div class="slide-meta">
+        <span class="slide-num">SLIDE 10</span>
+        <span class="slide-title">The Threat Model: Guest Network Isolation</span>
+      </div>
+      <div class="tags"><span class="tag tag-s6">S6 Troubleshooting</span><span class="tag tag-s2">S2 L2 Switching</span><span class="tag tag-lab">Lab Build</span></div>
+      <div class="slide-summary">
+        <strong style="color:var(--text)">North-South Traffic (red):</strong> Guest devices (10.30.x.x) attempting to reach Corporate subnets (10.10.x.x / 10.20.x.x).<br>
+        <strong style="color:var(--text)">East-West Traffic (orange):</strong> Guest devices communicating directly with other Guest devices on the same AP.<br>
+        <strong style="color:var(--text)">Philosophy:</strong> "Catch bad traffic as close to the edge as possible."
+      </div>
+      <div class="field-note"><strong>Apr 22 Link</strong>S6 Q1 — VLAN 30 internet troubleshooting scenario. KK walked L1→L2→L3. North-South and East-West isolation is exactly the threat this slide defines.</div>
+      <a class="lesson-link" href="session_socratic_20260422.html">→ Session 6 Q1: Layered Troubleshooting</a>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 11 -->
+<div id="s11" class="section">
+  <div class="slide-card">
+    <img class="slide-img" src="debrief/image11.png" alt="Slide 11">
+    <div class="slide-body">
+      <div class="slide-meta">
+        <span class="slide-num">SLIDE 11</span>
+        <span class="slide-title">Multi-Layered Security Enforcement</span>
+      </div>
+      <div class="tags"><span class="tag tag-s5">S5 XIQ Ops</span><span class="tag tag-s6">S6 Troubleshooting</span><span class="tag tag-lab">Lab Build</span></div>
+      <div class="slide-summary">
+        <strong style="color:var(--text)">North-South Isolation:</strong> XIQ L3 Firewall Rules applied to Guest SSID. Action: Deny 10.30.0.0/24 → 10.10.0.0/24 and 10.20.0.0/24.<br>
+        <strong style="color:var(--text)">East-West Isolation:</strong> XIQ Station Isolation — "Drop traffic between stations" in Advanced Settings.
+      </div>
+      <div class="field-note"><strong>Field Note (KK)</strong>"Pushing isolation to the AP via XIQ is cleaner than writing massive ACLs on the switch core. Stop the traffic before it hits the wire!"</div>
+      <div class="field-note"><strong>Apr 22 Link</strong>S5 Q1 — Network Policy push includes L3 Firewall Rules and Station Isolation. KK confirmed: "the AP joins your Network Policy, gets SSIDs, security settings."</div>
+      <a class="lesson-link" href="session_socratic_20260422.html">→ Session 5 Q1: AP Onboarding + Network Policy</a>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 12 -->
+<div id="s12" class="section">
+  <div class="slide-card">
+    <img class="slide-img" src="debrief/image12.png" alt="Slide 12">
+    <div class="slide-body">
+      <div class="slide-meta">
+        <span class="slide-num">SLIDE 12</span>
+        <span class="slide-title">Technical Field Notes: Strict EXOS ACL Syntax</span>
+      </div>
+      <div class="tags"><span class="tag tag-s6">S6 Troubleshooting</span><span class="tag tag-lab">Lab Build</span></div>
+      <div class="slide-summary">
+        <strong style="color:var(--text)">The Mistake:</strong> Cisco-style one-liner ACLs fail on EXOS 5320.
+      </div>
+      <div class="cli" style="color:var(--red)">access-list 100 deny ip 10.30.0.0 0.0.0.255 10.10.0.0 0.0.0.255  ✗ FAILS</div>
+      <div class="slide-summary" style="margin-top:8px"><strong style="color:var(--text)">The Reality — EXOS requires entry structure:</strong></div>
+      <div class="cli">entry deny_guest_to_corp {
+  if {
+    source-address 10.30.0.0/24;
+    destination-address 10.10.0.0/24;
+  } then {
+    deny;
+  }
+}
+entry permit_all {
+  if {} then { permit; }
+}</div>
+      <div class="field-note"><strong>CRITICAL Rules</strong>Must declare entry &lt;name&gt; { }. Conditions inside if { }. Every action ends with semicolon. Must include permit all at end — implicit deny kills internet access.</div>
+      <div class="field-note"><strong>Apr 22 Link</strong>S6 Q3 — Packet capture purpose: "What can it show that ping/traceroute cannot?" ACL drops are invisible to ping — only a packet capture reveals silently dropped traffic.</div>
+      <a class="lesson-link" href="session_socratic_20260422.html">→ Session 6 Q3: Packet Capture Purpose</a>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 13 -->
+<div id="s13" class="section">
+  <div class="slide-card">
+    <img class="slide-img" src="debrief/image13.png" alt="Slide 13">
+    <div class="slide-body">
+      <div class="slide-meta">
+        <span class="slide-num">SLIDE 13</span>
+        <span class="slide-title">Technical Field Notes: OWE Transition Mode</span>
+      </div>
+      <div class="tags"><span class="tag tag-s4">S4 Wireless</span><span class="tag tag-s5">S5 XIQ Ops</span><span class="tag tag-lab">Lab Build</span></div>
+      <div class="slide-summary">
+        <strong style="color:var(--text)">The Goal:</strong> Secure Guest network without a shared password using Enhanced Open (OWE).<br>
+        <strong style="color:var(--text)">The Snag:</strong> Legacy devices don't understand OWE — they fail to connect to the SSID entirely.<br>
+        <strong style="color:var(--text)">The Solution:</strong> Enable OWE Transition Mode.<br>
+        <strong style="color:var(--text)">How It Works:</strong> AP broadcasts a standard open network alongside a hidden OWE network. Capable devices auto-migrate to encrypted channel; legacy gear stays on open.
+      </div>
+      <div class="field-note"><strong>Apr 22 Link</strong>S4 — WiFi security progression: WPA2 → WPA3-SAE → OWE (for open networks). KK covered SAE Dragonfly in depth. OWE is the open-network equivalent — same philosophy: no password transmitted, forward secrecy.</div>
+      <a class="lesson-link" href="session_socratic_20260422.html">→ Session 4 Q5: SAE / WPA3 Authentication</a>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 14 -->
+<div id="s14" class="section">
+  <div class="slide-card">
+    <img class="slide-img" src="debrief/image14.png" alt="Slide 14">
+    <div class="slide-body">
+      <div class="slide-meta">
+        <span class="slide-num">SLIDE 14</span>
+        <span class="slide-title">The Final Synthesized Architecture Blueprint</span>
+      </div>
+      <div class="tags"><span class="tag tag-karl">Karl Rule</span><span class="tag tag-s3">S3 L3 Routing</span><span class="tag tag-s2">S2 L2 Switching</span><span class="tag tag-s4">S4 Wireless</span><span class="tag tag-lab">Lab Build</span></div>
+      <div class="slide-summary">
+        The capstone diagram of the complete Horizon build:<br><br>
+        SW1: <code style="color:var(--green)">ipforwarding vlan Default + Active</code> · Port 1→Modem · Port 3→APs · Port 10→Trunk · QP6 Express Lane<br>
+        SW2: Port 10→Trunk · DHCP Transit · Port 3→APs · QP1<br>
+        VLAN 30: Station Isolation shield on both APs<br>
+        All VLANs (10/20/30) carried tagged on Port 10 trunk between switches.
+      </div>
+      <div class="field-note"><strong>Apr 22 Link</strong>This diagram is the visual synthesis of every session: S1 (OSI layers = Port 1/3/10), S2 (L2 trunk), S3 (L3 routing + SVIs), S4 (wireless QoS + OWE), S5 (XIQ policy push), S6 (Karl Rule fix).</div>
+      <a class="lesson-link" href="session_socratic_20260422.html">→ Full Session Log — All 6 Sessions</a>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 15 -->
+<div id="s15" class="section">
+  <div class="slide-card">
+    <img class="slide-img" src="debrief/image15.png" alt="Slide 15">
+    <div class="slide-body">
+      <div class="slide-meta">
+        <span class="slide-num">SLIDE 15</span>
+        <span class="slide-title">Retrospective: The Hybrid Advantage</span>
+      </div>
+      <div class="tags"><span class="tag tag-s5">S5 XIQ Ops</span><span class="tag tag-s3">S3 L3 Routing</span><span class="tag tag-lab">Lab Build</span></div>
+      <div class="slide-summary">
+        <strong style="color:var(--text)">The Switch Builds the Pipes:</strong> EXOS CLI provides unmatched, granular hardware control for DHCP pools, physical hardware queues, and inter-VLAN routing.<br><br>
+        <strong style="color:var(--text)">The Cloud Directs the Traffic:</strong> ExtremeCloud IQ excels at pushing sweeping, edge-based security policies (Station Isolation) and user-centric traffic marking (Scheduling Weights).
+      </div>
+      <div style="background:var(--purple-bg);border:1px solid var(--purple2);border-radius:6px;padding:14px 16px;margin:12px 0;font-style:italic;font-size:.85rem;color:var(--dim);line-height:1.7">
+        "By combining the raw routing power of the 5320s with the edge intelligence of the AP3000s, we built an enterprise-grade branch office in a single afternoon."
+        <cite style="display:block;margin-top:6px;font-style:normal;font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--purple)">— Alex</cite>
+      </div>
+      <div class="field-note"><strong>Apr 22 Link</strong>S5 Q1 — KK's AP onboarding answer perfectly described this division: CLI for DHCP + ipforwarding (switch builds pipes); XIQ for SSIDs + security + QoS (cloud directs traffic).</div>
+      <a class="lesson-link" href="session_socratic_20260422.html">→ Session 5 Q1: AP Onboarding</a>
+    </div>
+  </div>
+</div>
+
+</main>
+</div>
+
+<script>
+function show(id){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.sidebar-link').forEach(l=>l.classList.remove('active'));
+  const t=document.getElementById(id);
+  if(t) t.classList.add('active');
+  document.querySelectorAll('.sidebar-link').forEach(l=>{
+    const a=l.getAttribute('onclick');
+    if(a&&a.includes("'"+id+"'")) l.classList.add('active');
+  });
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+</script>
+</body>
+</html>
