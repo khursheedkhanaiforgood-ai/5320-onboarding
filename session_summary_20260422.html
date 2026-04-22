@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EOD Summary — April 22, 2026 | Training Complete</title>
+<style>
+  :root {
+    --bg: #0f0f13;
+    --surface: #1a1a24;
+    --surface2: #22223a;
+    --border: #2e2e4a;
+    --text: #e2e2f0;
+    --muted: #9090b0;
+    --purple: #c4b5fd;
+    --purple-deep: #7c3aed;
+    --green: #34d399;
+    --green-deep: #065f46;
+    --blue: #60a5fa;
+    --amber: #fbbf24;
+    --red: #f87171;
+    --cyan: #22d3ee;
+    --pink: #f472b6;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; font-size: 14px; line-height: 1.6; }
+
+  /* Sidebar */
+  .sidebar { position: fixed; top: 0; left: 0; width: 230px; height: 100vh; background: var(--surface); border-right: 1px solid var(--border); overflow-y: auto; padding: 20px 0; z-index: 100; }
+  .sidebar .logo { padding: 0 18px 18px; border-bottom: 1px solid var(--border); margin-bottom: 14px; }
+  .sidebar .logo-title { font-size: 0.78rem; font-weight: 700; color: var(--green); text-transform: uppercase; letter-spacing: 0.12em; }
+  .sidebar .logo-sub { font-size: 0.7rem; color: var(--muted); margin-top: 2px; }
+  .sidebar a { display: block; padding: 6px 18px; font-size: 0.8rem; color: var(--muted); text-decoration: none; border-left: 2px solid transparent; transition: all 0.15s; }
+  .sidebar a:hover { color: var(--green); border-left-color: var(--green); background: rgba(52,211,153,0.06); }
+  .sidebar .section-label { padding: 10px 18px 4px; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.18em; color: #5a5a7a; }
+
+  /* Main */
+  .main { margin-left: 230px; padding: 32px 40px 80px; max-width: 1100px; }
+  .page-header { margin-bottom: 36px; }
+  .page-date { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.18em; color: var(--green); margin-bottom: 6px; }
+  .page-title { font-size: 1.9rem; font-weight: 800; color: #fff; line-height: 1.2; }
+  .page-sub { font-size: 0.9rem; color: var(--muted); margin-top: 8px; }
+
+  /* Hero banner */
+  .hero { background: linear-gradient(135deg, #0a1f12 0%, #0d1f2e 50%, #1a0d2e 100%); border: 2px solid var(--green); border-radius: 12px; padding: 28px 32px; margin-bottom: 32px; }
+  .hero-title { font-size: 1.4rem; font-weight: 800; color: var(--green); margin-bottom: 10px; }
+  .hero-body { font-size: 0.9rem; color: #a0e8c4; line-height: 1.8; }
+  .hero-stats { display: flex; gap: 32px; margin-top: 20px; flex-wrap: wrap; }
+  .hero-stat { text-align: center; }
+  .hero-stat-val { font-size: 2.2rem; font-weight: 900; color: var(--green); line-height: 1; }
+  .hero-stat-label { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-top: 4px; }
+
+  /* Cards */
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 22px 26px; margin-bottom: 24px; scroll-margin-top: 20px; }
+  .card-title { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.18em; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+  .card-title .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+  /* Session blocks */
+  .session-block { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 18px 20px; margin-bottom: 16px; }
+  .session-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+  .session-num { background: rgba(52,211,153,0.15); color: var(--green); border: 1px solid rgba(52,211,153,0.3); border-radius: 6px; padding: 4px 10px; font-size: 0.72rem; font-weight: 700; flex-shrink: 0; }
+  .session-title { font-size: 0.95rem; font-weight: 700; color: #fff; }
+  .session-date { font-size: 0.72rem; color: var(--muted); margin-left: auto; }
+  .session-body { font-size: 0.83rem; color: var(--muted); line-height: 1.7; }
+  .session-concepts { margin-top: 10px; }
+  .concept-tag { display: inline-block; background: rgba(96,165,250,0.1); color: var(--blue); border: 1px solid rgba(96,165,250,0.2); border-radius: 4px; padding: 2px 8px; font-size: 0.68rem; font-weight: 600; margin: 2px; }
+
+  /* Criteria table */
+  .criteria-row { display: grid; grid-template-columns: 1fr auto; gap: 16px; align-items: center; padding: 12px 16px; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; margin-bottom: 8px; }
+  .criteria-text { font-size: 0.85rem; color: var(--text); }
+  .pass-badge { background: rgba(52,211,153,0.15); color: var(--green); border: 1px solid rgba(52,211,153,0.3); border-radius: 12px; padding: 3px 14px; font-size: 0.72rem; font-weight: 800; white-space: nowrap; letter-spacing: 0.06em; }
+
+  /* Slide cards */
+  .slide-card { background: #0d1422; border: 1px solid var(--border); border-radius: 8px; padding: 14px 18px; margin-bottom: 10px; }
+  .slide-num { font-size: 0.68rem; font-weight: 700; color: var(--purple); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px; }
+  .slide-title { font-size: 0.9rem; font-weight: 700; color: #fff; margin-bottom: 8px; }
+  .slide-body { font-size: 0.8rem; color: var(--muted); line-height: 1.7; }
+  .slide-cli { margin-top: 8px; }
+
+  /* Items */
+  .item { display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+  .item:last-child { border-bottom: none; }
+  .item-check { color: var(--green); font-size: 1rem; flex-shrink: 0; margin-top: 1px; }
+  .item-warn { color: var(--amber); font-size: 1rem; flex-shrink: 0; margin-top: 1px; }
+  .item-body { flex: 1; }
+  .item-title { font-weight: 600; color: var(--text); font-size: 0.9rem; }
+  .item-sub { font-size: 0.8rem; color: var(--muted); margin-top: 2px; }
+  .tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; margin-left: 6px; vertical-align: middle; }
+  .tag-new { background: rgba(52,211,153,0.15); color: var(--green); }
+  .tag-key { background: rgba(196,181,253,0.15); color: var(--purple); }
+  .tag-pending { background: rgba(248,113,113,0.15); color: var(--red); }
+  .tag-wifi { background: rgba(34,211,238,0.15); color: var(--cyan); }
+
+  /* Code blocks */
+  pre { background: #0a0a12; border: 1px solid var(--border); border-radius: 6px; padding: 14px 16px; font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace; font-size: 0.8rem; color: #a5f3fc; overflow-x: auto; margin: 10px 0; line-height: 1.6; }
+  code { font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace; font-size: 0.82em; background: rgba(124,58,237,0.12); color: var(--purple); padding: 2px 5px; border-radius: 3px; }
+
+  /* Tables */
+  table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+  thead tr { background: var(--surface2); }
+  th { padding: 8px 12px; text-align: left; color: var(--muted); font-weight: 600; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.1em; border-bottom: 1px solid var(--border); }
+  td { padding: 8px 12px; border-bottom: 1px solid var(--border); color: var(--text); vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(124,58,237,0.04); }
+
+  /* Badges */
+  .badge { display: inline-block; padding: 2px 9px; border-radius: 12px; font-size: 0.7rem; font-weight: 700; }
+  .badge-done { background: rgba(52,211,153,0.15); color: var(--green); }
+  .badge-pending { background: rgba(248,113,113,0.15); color: var(--red); }
+  .badge-warn { background: rgba(251,191,36,0.15); color: var(--amber); }
+  .badge-new { background: rgba(34,211,238,0.15); color: var(--cyan); }
+
+  /* Quote */
+  .quote { border-left: 3px solid var(--purple); padding: 14px 18px; margin: 10px 0; border-radius: 0 8px 8px 0; font-size: 0.88rem; font-style: italic; background: rgba(124,58,237,0.08); color: var(--purple); line-height: 1.7; }
+  .quote-attr { font-size: 0.72rem; font-style: normal; color: var(--muted); margin-top: 8px; font-weight: 600; }
+
+  .quote-green { border-left-color: var(--green); background: rgba(52,211,153,0.06); color: #a0e8c4; }
+  .quote-green .quote-attr { color: var(--green); }
+
+  /* Warning/info banners */
+  .banner-warn { background: #1a1209; border: 1px solid #d97706; border-radius: 8px; padding: 14px 18px; margin-bottom: 12px; color: var(--amber); font-size: 0.83rem; line-height: 1.8; }
+  .banner-info { background: #0c1422; border: 1px solid #1e3a5f; border-radius: 8px; padding: 14px 18px; margin-bottom: 12px; color: #93c5fd; font-size: 0.83rem; line-height: 1.8; }
+  .banner-label { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px; }
+
+  /* URL buttons */
+  .url-block { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 8px; }
+  .url-btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: 6px; font-size: 0.8rem; font-weight: 600; text-decoration: none; transition: opacity 0.15s; }
+  .url-btn:hover { opacity: 0.85; }
+  .btn-purple { background: rgba(124,58,237,0.2); color: var(--purple); border: 1px solid rgba(124,58,237,0.3); }
+  .btn-green  { background: rgba(52,211,153,0.15); color: var(--green); border: 1px solid rgba(52,211,153,0.25); }
+  .btn-blue   { background: rgba(96,165,250,0.12); color: var(--blue); border: 1px solid rgba(96,165,250,0.22); }
+  .btn-amber  { background: rgba(251,191,36,0.12); color: var(--amber); border: 1px solid rgba(251,191,36,0.22); }
+
+  @media (max-width: 800px) { .sidebar { display: none; } .main { margin-left: 0; padding: 20px 16px; } }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<nav class="sidebar">
+  <div class="logo">
+    <div class="logo-title">EOD — Apr 22</div>
+    <div class="logo-sub">All 6 Sessions Complete</div>
+  </div>
+  <div class="section-label">Overview</div>
+  <a href="#hero">Dashboard</a>
+  <a href="#accomplished">Accomplished</a>
+  <a href="#criteria">30-Day Criteria</a>
+  <div class="section-label">Sessions</div>
+  <a href="#sessions">All 6 Sessions</a>
+  <a href="#s4-deep">Session 4 — Wireless Deep</a>
+  <a href="#s6-deep">Session 6 — Troubleshooting</a>
+  <div class="section-label">Lab</div>
+  <a href="#pptx">Karl's Debrief (15 Slides)</a>
+  <a href="#wifi">WiFi Overview</a>
+  <a href="#lab-state">Lab State (Apr 21)</a>
+  <div class="section-label">Reference</div>
+  <a href="#docs">All Documents</a>
+  <a href="#kk-note">KK's Note to Karl</a>
+  <a href="#pending">Pending Items</a>
+  <a href="#urls">URLs</a>
+</nav>
+
+<!-- MAIN -->
+<main class="main">
+
+  <!-- PAGE HEADER -->
+  <div class="page-header">
+    <div class="page-date">Wednesday, April 22, 2026</div>
+    <div class="page-title">30-Day Plan — Training Complete</div>
+    <div class="page-sub">All 6 L2/L3 Socratic Sessions · All 5 Success Criteria · Karl Lab Deployed · Team Review Tomorrow 9 AM</div>
+  </div>
+
+  <!-- HERO BANNER -->
+  <div class="hero" id="hero">
+    <div class="hero-title">Mission Accomplished</div>
+    <div class="hero-body">
+      KK completed all six L2/L3 Socratic training sessions — L2 Fundamentals, L3 Routing, Wireless RF/Auth, XIQ Platform, Troubleshooting — plus the full Horizon Custom Fabrication lab build the day before.
+      All five success criteria from Karl's 30-day engineer development plan confirmed <strong>PASS</strong>.
+      Team review with Karl's team is tomorrow, April 23.
+    </div>
+    <div class="hero-stats">
+      <div class="hero-stat"><div class="hero-stat-val">6</div><div class="hero-stat-label">Sessions Complete</div></div>
+      <div class="hero-stat"><div class="hero-stat-val">5</div><div class="hero-stat-label">Criteria Passed</div></div>
+      <div class="hero-stat"><div class="hero-stat-val">12</div><div class="hero-stat-label">Documents Ingested</div></div>
+      <div class="hero-stat"><div class="hero-stat-val">2</div><div class="hero-stat-label">Lab Switches Deployed</div></div>
+    </div>
+  </div>
+
+  <!-- ACCOMPLISHED -->
+  <div class="card" id="accomplished">
+    <div class="card-title"><div class="dot" style="background:var(--green)"></div><span style="color:var(--green)">Accomplished Today</span></div>
+    <div class="item">
+      <div class="item-check">✓</div>
+      <div class="item-body">
+        <div class="item-title">All 6 Socratic Sessions Completed <span class="tag tag-new">Done</span></div>
+        <div class="item-sub">S1 ran Apr 20 · S2–S6 ran Apr 22 · ~7 AM to 2 PM · complete Socratic dialogue transcript ingested</div>
+      </div>
+    </div>
+    <div class="item">
+      <div class="item-check">✓</div>
+      <div class="item-body">
+        <div class="item-title">Karl's Lab PowerPoint Ingested <span class="tag tag-new">New</span></div>
+        <div class="item-sub">15-slide debrief — "Karl's Lab Apr 21 Horizon Khursheed's Debrief.pptx" — never previously processed. Includes Karl Rule diagnostic matrix, EXOS ACL syntax, OWE Transition Mode, Defense Matrix, Alex closing quote.</div>
+      </div>
+    </div>
+    <div class="item">
+      <div class="item-check">✓</div>
+      <div class="item-body">
+        <div class="item-title">5 Success Criteria Confirmed PASS</div>
+        <div class="item-sub">All criteria from Karl's 30-day plan evaluated against Apr 22 transcript evidence — all five marked PASS</div>
+      </div>
+    </div>
+    <div class="item">
+      <div class="item-check">✓</div>
+      <div class="item-body">
+        <div class="item-title">WPA Simulator Deep-Dive — Session 4</div>
+        <div class="item-sub">Full 4-way handshake M1→M4 walkthrough: ANonce/SNonce/PTK/GTK, encryption boundary at AP, WPA2 vs WPA3 SAE Dragonfly, WiFi 6 vs 7 MLO</div>
+      </div>
+    </div>
+    <div class="item">
+      <div class="item-check">✓</div>
+      <div class="item-body">
+        <div class="item-title">WiFi Overview Document (JJ Brown + KK Comments) Fully Ingested</div>
+        <div class="item-sub">2.4/5/6 GHz bands, DFS channels, WPA3 SAE, 802.11be, capacity formulas, KK's 5 simulators catalogued</div>
+      </div>
+    </div>
+    <div class="item">
+      <div class="item-check">✓</div>
+      <div class="item-body">
+        <div class="item-title">Packet Capture Methodology — Session 6</div>
+        <div class="item-sub">L1→L2→L3 troubleshooting protocol locked. Wireshark capture points: Port 1 (uplink) + Port 3 (AP port). Filter: <code>ip.dst == 10.30.0.150</code></div>
+      </div>
+    </div>
+    <div class="item">
+      <div class="item-check">✓</div>
+      <div class="item-body">
+        <div class="item-title">12 Documents Indexed</div>
+        <div class="item-sub">Lab blueprint, two Claude AI transcripts, two NotebookLLM synthesis, WiFi Overview, KarlLab PPTX, 30-day plan, Apr22 Socratic, QoS docs, network requirements</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 30-DAY CRITERIA -->
+  <div class="card" id="criteria">
+    <div class="card-title"><div class="dot" style="background:var(--green)"></div><span style="color:var(--green)">30-Day Success Criteria — All PASS</span></div>
+    <div class="criteria-row">
+      <div class="criteria-text"><strong>1.</strong> Explain Layers 1–3 OSI and their role in troubleshooting</div>
+      <div class="pass-badge">✓ PASS</div>
+    </div>
+    <div class="criteria-row">
+      <div class="criteria-text"><strong>2.</strong> Describe key L2/L3 networking concepts (MAC/FDB, ARP, VLANs, trunks, STP, SVIs, routing)</div>
+      <div class="pass-badge">✓ PASS</div>
+    </div>
+    <div class="criteria-row">
+      <div class="criteria-text"><strong>3.</strong> Explain basic RF and wireless connectivity behavior (bands, channels, auth, association)</div>
+      <div class="pass-badge">✓ PASS</div>
+    </div>
+    <div class="criteria-row">
+      <div class="criteria-text"><strong>4.</strong> Navigate XIQ to locate client and AP information (onboarding, Monitor → Clients)</div>
+      <div class="pass-badge">✓ PASS</div>
+    </div>
+    <div class="criteria-row">
+      <div class="criteria-text"><strong>5.</strong> Walk through a troubleshooting scenario with logical process (L1→L2→L3, Karl Rule as root cause)</div>
+      <div class="pass-badge">✓ PASS</div>
+    </div>
+    <div style="margin-top:14px">
+      <div class="quote quote-green">
+        "I believe I can demonstrate to you the networking fundamentals, wireless concepts, platform operations next week... I recommend you open up the grilling to people the two of us trust."
+        <div class="quote-attr">— KK, self-assessment note to Karl, April 22, 2026</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ALL 6 SESSIONS -->
+  <div class="card" id="sessions">
+    <div class="card-title"><div class="dot" style="background:var(--blue)"></div><span style="color:var(--blue)">All 6 Sessions — Complete</span></div>
+
+    <div class="session-block">
+      <div class="session-header">
+        <div class="session-num">Session 1</div>
+        <div class="session-title">L2 Fundamentals — MAC, FDB, VLANs, STP</div>
+        <div class="session-date">Apr 20</div>
+      </div>
+      <div class="session-body">10 questions. Ethernet frames, MAC address learning, flooding vs forwarding, FDB entries, access vs trunk ports, STP convergence, BPDU, root bridge election. Closed with inter-VLAN ping test (lab exercise pending at time).</div>
+      <div class="session-concepts">
+        <span class="concept-tag">MAC/FDB</span><span class="concept-tag">VLAN Segmentation</span><span class="concept-tag">Trunk Ports</span><span class="concept-tag">STP/BPDU</span><span class="concept-tag">Access Ports</span>
+      </div>
+    </div>
+
+    <div class="session-block">
+      <div class="session-header">
+        <div class="session-num">Session 2</div>
+        <div class="session-title">L2 Applied — Inter-VLAN Bridge, LLDP, VLAN 1 Loop</div>
+        <div class="session-date">Apr 22</div>
+      </div>
+      <div class="session-body">8 questions. Inter-VLAN ping requires L3 routing (not a bridge). LLDP neighbour discovery. VLAN 1 loop prevention (delete ports 10 on both switches). MAC vs IP addressing role in forwarding plane. KK correctly identified VLAN 1 triangle loop risk from lab memory.</div>
+      <div class="session-concepts">
+        <span class="concept-tag">Inter-VLAN Routing</span><span class="concept-tag">LLDP</span><span class="concept-tag">VLAN 1 Loop</span><span class="concept-tag">Trunk Tagging</span>
+      </div>
+    </div>
+
+    <div class="session-block">
+      <div class="session-header">
+        <div class="session-num">Session 3</div>
+        <div class="session-title">L3 Routing — IPv4, SVIs, Static vs Dynamic, Campus Design</div>
+        <div class="session-date">Apr 22</div>
+      </div>
+      <div class="session-body">8 questions. IPv4 /24 vs /25 subnetting, ARP resolution, SVI as default gateway for each VLAN, static route configuration, OSPF as dynamic routing reference, campus network design (access/distribution/core hierarchy). KK correctly derived SW1 as L3 core owner from lab architecture.</div>
+      <div class="session-concepts">
+        <span class="concept-tag">IPv4 Subnetting</span><span class="concept-tag">SVIs</span><span class="concept-tag">Static Routes</span><span class="concept-tag">OSPF Reference</span><span class="concept-tag">Campus Design</span>
+      </div>
+    </div>
+
+    <div class="session-block" id="s4-deep">
+      <div class="session-header">
+        <div class="session-num">Session 4</div>
+        <div class="session-title">Wireless — RF, Channels, Auth, WPA Simulator Deep-Dive</div>
+        <div class="session-date">Apr 22</div>
+      </div>
+      <div class="session-body">8 questions. RSSI/dBm negative scale, 2.4 vs 5 GHz tradeoff, non-overlapping channels (1/6/11 for 2.4, DFS channels on 5), association vs authentication, WPA Simulator full walkthrough:
+        <br><br>
+        <strong>Full Client Lifecycle:</strong> Discovery (Beacon/Probe) → Auth (SAE Dragonfly handshake: no password transmitted, forward secrecy, mutual auth) → Association (capabilities exchange) → 4-Way Handshake (M1: ANonce from AP / M2: SNonce from client + MIC / M3: GTK encrypted + MIC / M4: ACK) → Data Plane (DHCP → DNS → TCP → Zoom).
+        <br><br>
+        <strong>Encryption boundary:</strong> WiFi L2 frame payload encrypted with PTK from AP antenna to client. Wired side (port 5) = unencrypted. 802.1X on wired port 5 not configured in lab = open access (noted for future sprint).
+        <br><br>
+        <strong>WiFi 6 vs 7:</strong> WiFi 6 = OFDMA + MU-MIMO + TWT. WiFi 7 = MLO (Multi-Link Operation) — client can aggregate 2.4+5+6 GHz simultaneously.
+      </div>
+      <div class="session-concepts">
+        <span class="concept-tag">RSSI/dBm</span><span class="concept-tag">DFS Channels</span><span class="concept-tag">SAE Dragonfly</span><span class="concept-tag">4-Way Handshake</span><span class="concept-tag">PTK/GTK</span><span class="concept-tag">WiFi 6/7 MLO</span>
+      </div>
+    </div>
+
+    <div class="session-block">
+      <div class="session-header">
+        <div class="session-num">Session 5</div>
+        <div class="session-title">XIQ Platform — AP Onboarding, Navigation, Troubleshooting</div>
+        <div class="session-date">Apr 22</div>
+      </div>
+      <div class="session-body">7 questions. AP onboarding flow: pre-register serial → Default VLAN boot → DHCP → Aerohive redirector → XIQ cloud → Network Policy push → channel/power applied. Monitor → Clients navigation (signal/VLAN/IP/roam history). Troubleshooting "connected but no internet" using lab knowledge: check AP port VLAN tagging, check SVI/ipforwarding on SW1, check DHCP leases, check Karl Rule.</div>
+      <div class="session-concepts">
+        <span class="concept-tag">AP Onboarding</span><span class="concept-tag">XIQ Monitor</span><span class="concept-tag">Network Policy Push</span><span class="concept-tag">Client Troubleshooting</span>
+      </div>
+    </div>
+
+    <div class="session-block" id="s6-deep">
+      <div class="session-header">
+        <div class="session-num">Session 6</div>
+        <div class="session-title">Troubleshooting + Packet Capture — L1→L2→L3 Methodology</div>
+        <div class="session-date">Apr 22</div>
+      </div>
+      <div class="session-body">8 questions. Scenario: VLAN 30 guest client has no internet.
+        <br><br>
+        <strong>L1 checks:</strong> Physical link, port LED, show ports.<br>
+        <strong>L2 checks:</strong> VLAN membership on port 3, tagged VLANs on trunk, MAC learned in FDB.<br>
+        <strong>L3 checks:</strong> DHCP lease exists, SVI 10.30.0.1 reachable, <code>enable ipforwarding vlan Default</code> on SW1 = <strong>Karl Rule</strong> as root cause.
+        <br><br>
+        <strong>Packet capture methodology:</strong> traceroute shows path (L3 hops) — packet capture shows actual frame content (L2+payload). Wireshark capture points: Port 1 (uplink to modem, see if reply returns) + Port 3 (AP port, see if client traffic leaves correctly). Filter: <code>ip.dst == 10.30.0.150</code>. Look for ICMP Echo Reply presence/absence to isolate where the drop occurs.
+      </div>
+      <div class="session-concepts">
+        <span class="concept-tag">L1→L2→L3</span><span class="concept-tag">Karl Rule</span><span class="concept-tag">Wireshark</span><span class="concept-tag">Packet Capture</span><span class="concept-tag">ICMP Echo</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- KARL'S PPTX -->
+  <div class="card" id="pptx">
+    <div class="card-title"><div class="dot" style="background:var(--purple)"></div><span style="color:var(--purple)">Karl's Lab Debrief — 15 Slides (NEW)</span></div>
+    <div class="banner-info"><div class="banner-label">File</div>Karl's Lab_Apr 21_Horizon_Khursheed's Debrief.pptx — first ingested Apr 22. Visual synthesis of the full lab build with field notes, CLI, and the Alex closing quote.</div>
+
+    <div class="slide-card">
+      <div class="slide-num">Slide 1</div>
+      <div class="slide-title">Goal: Primary/Secondary 5320 Architecture</div>
+      <div class="slide-body">Enterprise branch in a single afternoon. SW1 = L3 Core, SW2 = L2 Access. Prove the architecture before rolling out to customer sites.</div>
+    </div>
+    <div class="slide-card">
+      <div class="slide-num">Slides 2–3</div>
+      <div class="slide-title">Anatomy — Physical + Logical Topology</div>
+      <div class="slide-body">SW1 port map: Port 1 = uplink, Port 3 = AP (Default untagged, VLAN 20+30 tagged), Port 5 = wired client (VLAN 10 untagged), Port 10 = trunk. SW2 = mirror access ports only. VLAN table: 10/20/30 → 10.x.0.0/24 subnets.</div>
+    </div>
+    <div class="slide-card">
+      <div class="slide-num">Slide 4</div>
+      <div class="slide-title">Port 10 Trunk — VLAN 1 Removal</div>
+      <div class="slide-body">VLAN 1 must be explicitly removed from trunk port 10 on BOTH switches to prevent bridging loop. <code>configure vlan Default delete ports 10</code> — run on both.</div>
+    </div>
+    <div class="slide-card">
+      <div class="slide-num">Slide 5</div>
+      <div class="slide-title">DHCP Reach-Back — Port 10 Must Be Included</div>
+      <div class="slide-body">SW2 clients need DHCP from SW1. DHCP helper must include port 10 in the DHCP scope so reach-back frames traverse the trunk.</div>
+      <pre>enable dhcp ports 3,10 vlan VLAN_10
+enable dhcp ports 3,10 vlan VLAN_20
+enable dhcp ports 3,10 vlan VLAN_30</pre>
+    </div>
+    <div class="slide-card">
+      <div class="slide-num">Slides 6–7</div>
+      <div class="slide-title">Internet Ghosting → Karl Rule Explained</div>
+      <div class="slide-body">Without ipforwarding on Default VLAN: "Return traffic hits the Default VLAN (modem uplink). The switch checks the Default VLAN state, sees routing is disabled, and explicitly drops the packet." Client gets DHCP but zero internet — the ghost symptom.</div>
+      <pre>enable ipforwarding vlan Default   ← KARL RULE — run this first</pre>
+    </div>
+    <div class="slide-card">
+      <div class="slide-num">Slides 8–9</div>
+      <div class="slide-title">QoS Strategy + E2E Execution</div>
+      <div class="slide-body">CLI: VLAN 10/20 → qp6 (high priority), VLAN 30 → qp1 (low). XIQ: Corp_20 User Profile → Scheduling Weight 100, Guest_30 → Weight 10. Applied at both SW1 edge and AP radio level for true end-to-end QoS.</div>
+    </div>
+    <div class="slide-card">
+      <div class="slide-num">Slides 10–11</div>
+      <div class="slide-title">Threat Model + Defense Matrix</div>
+      <div class="slide-body">
+        <strong>North-South:</strong> XIQ L3 Firewall Rules in Guest_30 User Profile — DENY 10.30.0.0/24 → 10.10.0.0/24, DENY 10.30.0.0/24 → 10.20.0.0/24.<br>
+        <strong>East-West (intra-VLAN):</strong> XIQ Station Isolation — "Drop traffic between stations" action in Guest_30 firewall profile. Cannot be done with EXOS ACLs alone (L2 intra-VLAN traffic bypasses ACL engine).
+      </div>
+    </div>
+    <div class="slide-card">
+      <div class="slide-num">Slide 12</div>
+      <div class="slide-title">EXOS ACL Syntax Field Notes</div>
+      <div class="slide-body">Cisco-style one-liners FAIL on EXOS. Must use the policy editor with entry containers.</div>
+      <pre>edit policy GUEST_ISOLATION          # opens vi editor
+entry deny-to-corp {
+  if {
+    source-address 10.30.0.0/24;
+    destination-address 10.10.0.0/24;
+  } then {
+    deny;
+  }
+}
+entry permit-all { if { } then { permit; } }
+# Esc + :wq to save. For this lab: bypassed via XIQ.</pre>
+    </div>
+    <div class="slide-card">
+      <div class="slide-num">Slide 13</div>
+      <div class="slide-title">OWE Transition Mode</div>
+      <div class="slide-body">AP broadcasts TWO SSIDs simultaneously: (1) visible open transition SSID for legacy devices, (2) hidden secure OWE SSID. OWE-capable devices auto-migrate to the secure SSID. XIQ toggle: Guest_Wireless SSID → "Transition Mode for 2.4GHz and 5GHz".</div>
+    </div>
+    <div class="slide-card">
+      <div class="slide-num">Slide 14–15</div>
+      <div class="slide-title">Blueprint + Retrospective</div>
+      <div class="slide-body">The lab proved the Primary/Secondary architecture end-to-end. All security layers operational. The final Alex note:</div>
+    </div>
+    <div class="quote">
+      "By combining the raw routing power of the 5320s with the edge intelligence of the AP3000s, we built an enterprise-grade branch office in a single afternoon."
+      <div class="quote-attr">— Alex, slide 15 retrospective</div>
+    </div>
+  </div>
+
+  <!-- WIFI OVERVIEW -->
+  <div class="card" id="wifi">
+    <div class="card-title"><div class="dot" style="background:var(--cyan)"></div><span style="color:var(--cyan)">WiFi Overview — JJ Brown + KK Comments</span></div>
+
+    <table>
+      <thead><tr><th>Band</th><th>Channels</th><th>Width</th><th>DFS</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td>2.4 GHz</td><td>3 non-overlapping (1, 6, 11)</td><td>22 MHz</td><td>No</td><td>Range &gt; throughput. Legacy devices.</td></tr>
+        <tr><td>5 GHz</td><td>UNII-1, 2A, 2C, 3</td><td>20/40/80/160 MHz</td><td>UNII-2A + 2C</td><td>High throughput. DFS radar detection required.</td></tr>
+        <tr><td>6 GHz (WiFi 6E)</td><td>59 non-overlapping 20 MHz</td><td>20–320 MHz</td><td>No</td><td>PSC channels for discovery. No legacy interference.</td></tr>
+      </tbody>
+    </table>
+
+    <h3 style="color:var(--muted);font-size:0.8rem;text-transform:uppercase;letter-spacing:0.1em;margin:18px 0 10px;">WPA2 vs WPA3 Auth</h3>
+    <table>
+      <thead><tr><th>Protocol</th><th>Method</th><th>Weakness</th><th>KK Note</th></tr></thead>
+      <tbody>
+        <tr><td>WPA2 PSK</td><td>4-Way Handshake (shared secret)</td><td>Offline dictionary attack on captured handshake</td><td>Session 4 simulator used</td></tr>
+        <tr><td>WPA3 SAE</td><td>Dragonfly (Simultaneous Auth of Equals)</td><td>No password transmitted — forward secrecy</td><td>KK flagged as weakest area</td></tr>
+        <tr><td>WPA3 Enterprise</td><td>802.1X / EAP + RADIUS</td><td>RADIUS server dependency</td><td>192-bit mode option</td></tr>
+      </tbody>
+    </table>
+
+    <h3 style="color:var(--muted);font-size:0.8rem;text-transform:uppercase;letter-spacing:0.1em;margin:18px 0 10px;">KK's Simulators (5 Total)</h3>
+    <table>
+      <thead><tr><th>Simulator</th><th>Purpose</th></tr></thead>
+      <tbody>
+        <tr><td>WiFi6-Simulator</td><td>OFDMA, MU-MIMO, TWT</td></tr>
+        <tr><td>WiFi7-Simulator (3 APs)</td><td>MLO — multi-link operation across 2.4+5+6 GHz</td></tr>
+        <tr><td>WPA-Simulator</td><td>Multi-queue concurrent auth — used in Session 4</td></tr>
+        <tr><td>RRM-Simulator</td><td>Radio Resource Management, 3 scenarios</td></tr>
+        <tr><td>802.11be-Simulator</td><td>WiFi 7 standard (EHT — Extremely High Throughput)</td></tr>
+      </tbody>
+    </table>
+
+    <div style="margin-top:14px">
+      <strong style="color:var(--muted);font-size:0.78rem;">Capacity Formula:</strong>
+      <pre>Required bandwidth / TCP throughput = airtime consumption %
+Example: 50 Mbps / 300 Mbps peak = 16.7% airtime per client</pre>
+    </div>
+  </div>
+
+  <!-- LAB STATE -->
+  <div class="card" id="lab-state">
+    <div class="card-title"><div class="dot" style="background:var(--amber)"></div><span style="color:var(--amber)">Horizon Lab State — Apr 21 (Deployed)</span></div>
+
+    <table>
+      <thead><tr><th>Switch</th><th>Role</th><th>Serial</th><th>IP</th></tr></thead>
+      <tbody>
+        <tr><td>SW1</td><td>L3 Core — SVIs, DHCP, ipforwarding</td><td>FJ012544G-00233</td><td>192.168.0.28</td></tr>
+        <tr><td>SW2</td><td>L2 Access — no SVIs, no DHCP, no ipforwarding</td><td>FJ012544G-00483</td><td>192.168.0.11</td></tr>
+      </tbody>
+    </table>
+
+    <table style="margin-top:12px">
+      <thead><tr><th>VLAN</th><th>Name</th><th>Subnet</th><th>Gateway</th></tr></thead>
+      <tbody>
+        <tr><td>10</td><td>Corporate Wired</td><td>10.10.0.0/24</td><td>10.10.0.1 (SW1 SVI)</td></tr>
+        <tr><td>20</td><td>Corporate Wireless</td><td>10.20.0.0/24</td><td>10.20.0.1 (SW1 SVI)</td></tr>
+        <tr><td>30</td><td>Guest Wireless</td><td>10.30.0.0/24</td><td>10.30.0.1 (SW1 SVI)</td></tr>
+      </tbody>
+    </table>
+
+    <h3 style="color:var(--muted);font-size:0.78rem;text-transform:uppercase;letter-spacing:0.1em;margin:18px 0 10px;">8 Key Lessons Locked</h3>
+    <div class="item"><div class="item-check">1</div><div class="item-body"><div class="item-title">Karl Rule</div><div class="item-sub"><code>enable ipforwarding vlan Default</code> on SW1. Without it: clients get IPs, no internet. Return traffic dropped at unrouted Default VLAN.</div></div></div>
+    <div class="item"><div class="item-check">2</div><div class="item-body"><div class="item-title">DHCP Reach-Back</div><div class="item-sub"><code>enable dhcp ports 5,10 vlan VLAN_10</code> — port 10 MUST be included for SW2 clients</div></div></div>
+    <div class="item"><div class="item-check">3</div><div class="item-body"><div class="item-title">VLAN 1 Triangle Loop</div><div class="item-sub"><code>configure vlan Default delete ports 10</code> on BOTH switches. Loop prevention.</div></div></div>
+    <div class="item"><div class="item-check">4</div><div class="item-body"><div class="item-title">AP Lifeline</div><div class="item-sub"><code>configure vlan Default add ports 3 untagged</code> — AP boots dumb, needs untagged VLAN 1 to reach modem and call home to XIQ</div></div></div>
+    <div class="item"><div class="item-check">5</div><div class="item-body"><div class="item-title">EXOS ACL Syntax</div><div class="item-sub"><code>edit policy NAME</code> (vi editor). Use <code>source-address</code> keyword, entry containers with semicolons, explicit <code>permit all</code> at end. Cisco one-liners FAIL.</div></div></div>
+    <div class="item"><div class="item-check">6</div><div class="item-body"><div class="item-title">Guest-to-Guest Isolation</div><div class="item-sub">ACLs cannot stop L2 intra-VLAN traffic. Must use XIQ "Drop traffic between stations" firewall action on AP.</div></div></div>
+    <div class="item"><div class="item-check">7</div><div class="item-body"><div class="item-title">OWE Transition Mode</div><div class="item-sub">Enable toggle in XIQ Guest SSID — runs hidden open SSID alongside OWE SSID for legacy device backward compat.</div></div></div>
+    <div class="item"><div class="item-check">8</div><div class="item-body"><div class="item-title">XIQ IP Objects</div><div class="item-sub">Must create in Common Objects BEFORE adding firewall rules, or "IP object must be saved first" error blocks you.</div></div></div>
+  </div>
+
+  <!-- DOCUMENTS -->
+  <div class="card" id="docs">
+    <div class="card-title"><div class="dot" style="background:var(--blue)"></div><span style="color:var(--blue)">All 12 Documents</span></div>
+    <table>
+      <thead><tr><th>#</th><th>File</th><th>Type</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>Claude AI InterVLAN morning session</td><td>Claude AI</td><td>Apr 21 morning — InterVLAN first principles</td></tr>
+        <tr><td>2</td><td>NotebookLLM InterVLAN synthesis</td><td>NotebookLLM</td><td>InterVLAN synthesis doc</td></tr>
+        <tr><td>3</td><td>network_requirements.docx</td><td>Customer Brief</td><td>Horizon Custom Fabrication spec — starting doc Apr 21</td></tr>
+        <tr><td>4</td><td>Claude_NewLab_Karl_Dialogue_Apr21_v3.docx</td><td>Claude AI</td><td>Full Socratic lab build dialogue</td></tr>
+        <tr><td>5</td><td>KarlLab NotebookLLM v1</td><td>NotebookLLM</td><td>KarlLab v1 synthesis</td></tr>
+        <tr><td>6</td><td>NoteBookLLM_KarlLab_Apr21_v2.docx</td><td>NotebookLLM</td><td>VLAN 1 loop, LLDP, trunk deep-dive</td></tr>
+        <tr><td>7</td><td>Claude_FullDay_Apr21_Until_QoS_Classification.docx</td><td>Claude AI</td><td>Full day until QoS classification</td></tr>
+        <tr><td>8</td><td>NoteBookLLM_FinalItems_Apr21_QoS.docx</td><td>NotebookLLM</td><td>QoS + guest isolation strategy</td></tr>
+        <tr><td>9</td><td>WIFI Overview_v1_JJ_Khursheed's Comments_Marc 10 2026.docx</td><td>Reference</td><td><span class="badge badge-new">Ingested Apr 22</span> JJ Brown + KK comments — bands, DFS, WPA3, simulators</td></tr>
+        <tr><td>10</td><td>Technical_Lab_Blueprint_Apr21.docx</td><td>KK Synthesis</td><td>The Alex Vault — best single reference for lab</td></tr>
+        <tr><td>11</td><td>ClaudeAI_QoS_Apr21.docx</td><td>Claude AI</td><td>Full day + XIQ nav + final confirmation</td></tr>
+        <tr><td>12</td><td>Karl's Lab_Apr21_Horizon_Khursheed's Debrief.pptx</td><td>KK/Karl PPTX</td><td><span class="badge badge-new">NEW Apr 22</span> 15-slide visual debrief — Karl Rule matrix, EXOS ACL, OWE, Alex quote</td></tr>
+        <tr><td>13</td><td>ClaudeAI_Socratic_30day_Apr22.docx</td><td>Claude AI</td><td><span class="badge badge-new">NEW Apr 22</span> Complete 6-session Socratic transcript — 7AM to 2PM Apr 22</td></tr>
+        <tr><td>14</td><td>From Karl_30_day_engineer_development_plan_KK_Updates_March 27 2026-2.docx</td><td>Karl / Plan</td><td>30-day engineer development plan — 5 success criteria source</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- KK NOTE TO KARL -->
+  <div class="card" id="kk-note">
+    <div class="card-title"><div class="dot" style="background:var(--pink)"></div><span style="color:var(--pink)">KK's Self-Assessment Note to Karl</span></div>
+    <div class="quote">
+      "I believe I can demonstrate to you the networking fundamentals, wireless concepts, platform operations next week. I covered all the topics that were listed in the 30-day plan. I recommend you open up the grilling to people the two of us trust."
+      <div class="quote-attr">— Khursheed Khan, April 22, 2026 · End of Session 6</div>
+    </div>
+    <div style="margin-top:14px;font-size:0.83rem;color:var(--muted);">
+      Context: KK independently flagged his confidence level and proposed the next accountability step — a live demonstration with trusted peers. This was unprompted, at the close of the final session.
+    </div>
+  </div>
+
+  <!-- PENDING ITEMS -->
+  <div class="card" id="pending">
+    <div class="card-title"><div class="dot" style="background:var(--red)"></div><span style="color:var(--red)">Pending Items</span></div>
+
+    <div class="banner-warn">
+      <div class="banner-label">Urgent — Lab Verification (17 Tests)</div>
+      Run full verification checklist from session_log_20260421.html#verification before team review Apr 23.
+    </div>
+
+    <div class="item">
+      <div class="item-warn">⚠</div>
+      <div class="item-body">
+        <div class="item-title">Corporate SSID PSK — Password Not Set <span class="tag tag-pending">Urgent</span></div>
+        <div class="item-sub">XIQ → Network Policy → AP_April21_KarlLab → Corporate_Wireless → Security → Key Value field was EMPTY. Set before team demo.</div>
+      </div>
+    </div>
+    <div class="item">
+      <div class="item-warn">⚠</div>
+      <div class="item-body">
+        <div class="item-title">OWE Transition Mode — Toggle Not Yet Confirmed <span class="tag tag-pending">Urgent</span></div>
+        <div class="item-sub">XIQ → Guest_Wireless SSID → "Transition Mode for 2.4GHz and 5GHz" toggle → push policy. Required for legacy device compat.</div>
+      </div>
+    </div>
+    <div class="item">
+      <div class="item-warn">⚠</div>
+      <div class="item-body">
+        <div class="item-title">Team Review — April 23, 9 AM</div>
+        <div class="item-sub">Present all 6 sessions + 5 PASS criteria to Karl's team. KK recommends live demo with trusted peers.</div>
+      </div>
+    </div>
+    <div class="item">
+      <div class="item-check">→</div>
+      <div class="item-body">
+        <div class="item-title">Lab Verification Checklist (17 Tests)</div>
+        <div class="item-sub">CLI-1–6: VLAN/ipforwarding/Karl Rule/DHCP leases/LLDP/VLAN 1 off port 10 · TEST-1–4: DHCP on all VLANs · ISO-1–4: Guest→Corp blocked, Guest→Guest blocked · XIQ-1–3: APs online, firewall active, QoS confirmed</div>
+      </div>
+    </div>
+    <div class="item">
+      <div class="item-check">→</div>
+      <div class="item-body">
+        <div class="item-title">Update team_training_qa_20260420.html — Mark S2–S6 Complete</div>
+        <div class="item-sub">Badge updates + session-done banners for sessions 2 through 6</div>
+      </div>
+    </div>
+    <div class="item">
+      <div class="item-check">→</div>
+      <div class="item-body">
+        <div class="item-title">Future Sprint — 802.1X on Wired Port 5</div>
+        <div class="item-sub">Currently open/unprotected. Surfaced in Session 4 wireless auth deep-dive. Low priority post-review.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- URLS -->
+  <div class="card" id="urls">
+    <div class="card-title"><div class="dot" style="background:var(--blue)"></div><span style="color:var(--blue)">URLs & Files</span></div>
+    <div class="url-block">
+      <a class="url-btn btn-purple" href="https://khursheedkhanaiforgood-ai.github.io/5320-onboarding/lab_20260329.html" target="_blank">Lab Landing Page</a>
+      <a class="url-btn btn-green" href="https://khursheedkhanaiforgood-ai.github.io/5320-onboarding/session_log_20260421.html" target="_blank">Apr 21 Session Log</a>
+      <a class="url-btn btn-blue" href="https://khursheedkhanaiforgood-ai.github.io/5320-onboarding/session_summary_20260421.html" target="_blank">Apr 21 EOD Summary</a>
+      <a class="url-btn btn-amber" href="https://khursheedkhanaiforgood-ai.github.io/5320-onboarding/team_training_qa_20260420.html" target="_blank">Q&A Tracker (47 Q)</a>
+      <a class="url-btn btn-purple" href="https://khursheedkhanaiforgood-ai.github.io/5320-onboarding/session_log_20260422.html" target="_blank">Apr 22 Session Log</a>
+      <a class="url-btn btn-green" href="https://github.com/khursheedkhanaiforgood-ai/5320-onboarding" target="_blank">GitHub Repo</a>
+    </div>
+    <table style="margin-top:16px">
+      <thead><tr><th>File</th><th>Location</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td>session_summary_20260422.html</td><td>/tmp/main-work/</td><td><span class="badge badge-new">This file</span></td></tr>
+        <tr><td>session_log_20260422.html</td><td>/tmp/main-work/</td><td><span class="badge badge-new">Built</span></td></tr>
+        <tr><td>session_log_20260421.html</td><td>GitHub Pages</td><td><span class="badge badge-done">Live</span></td></tr>
+        <tr><td>session_summary_20260421.html</td><td>GitHub Pages</td><td><span class="badge badge-done">Live</span></td></tr>
+        <tr><td>team_training_qa_20260420.html</td><td>GitHub Pages</td><td><span class="badge badge-warn">Needs S2–S6 update</span></td></tr>
+        <tr><td>lab_20260329.html</td><td>GitHub Pages</td><td><span class="badge badge-warn">Needs Apr 22 block</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+</main>
+</body>
+</html>
