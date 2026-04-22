@@ -613,32 +613,35 @@ save configuration</pre>
       </div>
     </div>
 
-    <div class="doc-card" id="doc3">
+    <div class="doc-card" id="doc3" style="border-left:3px solid #f59e0b">
       <div class="doc-card-header">
         <div>
-          <div class="doc-title">3. network_requirements.docx</div>
-          <div class="doc-meta">Customer brief · Horizon Custom Fabrication · VLANs 10/20/30</div>
+          <div class="doc-title">3. network_requirements.docx — Simulated Customer Brief (Today's Starting Point)</div>
+          <div class="doc-meta">Horizon Custom Fabrication · Single-site light manufacturing · ~25–40 employees · This document drove the entire April 21 lab</div>
         </div>
-        <span class="tag-blue">Requirements</span>
+        <span class="tag-blue" style="background:rgba(245,158,11,0.15);color:#f59e0b;border-color:#d97706">Customer Brief</span>
       </div>
       <div class="doc-excerpts">
-        <div class="doc-excerpt">Deployment of 2× Extreme EXOS switches, 2× Wireless Access Points (PlatformOne managed). Three VLANs: Corporate Wired — VLAN 10, Corporate Wireless — VLAN 20, Guest Wireless — VLAN 30.</div>
-        <div class="doc-excerpt">Corporate SSID: PSK. Guest SSID: OWE (Opportunistic Wireless Encryption). Primary switch provides SVIs. Secondary switch operates as access switch.</div>
+        <div class="doc-excerpt">Company Name: Horizon Custom Fabrication. Industry: Light Manufacturing / Office + Shop Floor. Location: Single-site (small office + warehouse environment). Users: ~25–40 employees.</div>
+        <div class="doc-excerpt">Three VLANs: Corporate Wired – VLAN 10 / Corporate Wireless – VLAN 20 / Guest Wireless – VLAN 30. Primary switch provides SVIs. Secondary switch operates as access switch.</div>
+        <div class="doc-excerpt">Corporate SSID: PSK. Guest SSID: OWE (Opportunistic Wireless Encryption). Deliverables: Discovery questions, Network design, Configuration (EXOS + PlatformOne). Success Criteria: Functional segmented network.</div>
       </div>
     </div>
 
     <div class="doc-card" id="doc4">
       <div class="doc-card-header">
         <div>
-          <div class="doc-title">4. Claude_NewLab_Karl_Dialogue_Apr21.docx + v3</div>
-          <div class="doc-meta">Claude AI · Full Horizon lab Socratic build · IP design through guest isolation</div>
+          <div class="doc-title">4. Claude_NewLab_Karl_Dialogue_Apr21_v3.docx — Full Socratic Build</div>
+          <div class="doc-meta">Claude AI · Complete Horizon lab design: VLAN plan → port layout → full CLI → DHCP → ACL → guest isolation → deployment summary</div>
         </div>
         <span class="tag-blue">Claude AI</span>
       </div>
       <div class="doc-excerpts">
-        <div class="doc-excerpt">10.10.0.1, 10.20.0.1, 10.30.0.1 — simple and straightforward with the gateways. [VLAN number = third octet]</div>
-        <div class="doc-excerpt">I learnt about access list so that guest does not get onto the gateway for the corps... Option A, limit it from going into any other networks.</div>
-        <div class="doc-excerpt">The feature you're looking for is called Client Isolation — it's configured on the AP/SSID in PlatformOne. When Client Isolation is enabled: a guest client on AP1 cannot talk directly to a guest client on AP2.</div>
+        <div class="doc-excerpt">10.10.0.1, 10.20.0.1, 10.30.0.1 — simple and straightforward with the gateways. [KK — VLAN number maps directly to third octet, making it easy to read and troubleshoot]</div>
+        <div class="doc-excerpt">SW2 is pure L2 — no SVIs, no ipforwarding, no DHCP. [KK writes perfect SW2 config with no gaps — pure L2 access switch confirmed]</div>
+        <div class="doc-excerpt">Yes, SW2 must reach DHCP on SW2 for any clients that hang off on SW2. Only way to get there is via port_10. [KK — DHCP reach-back logic: why port 10 must be in the enable dhcp command]</div>
+        <div class="doc-excerpt">Reject all request to 10/20 that originate from 30, let all others flow. [KK — ACL logic for guest isolation: 2 deny rules + implicit permit]</div>
+        <div class="doc-excerpt">APs... no traffic between APs? [KK self-identifies that guest-to-guest requires client isolation on the AP, not an ACL — because L2 traffic never reaches the routing engine]</div>
       </div>
     </div>
 
