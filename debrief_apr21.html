@@ -125,6 +125,17 @@ main{margin-left:var(--aside-w);flex:1;padding:32px 40px;max-width:1000px}
   <div class="sidebar-section">Blueprint</div>
   <div class="sidebar-link" onclick="show('s14')"><span class="s-num">14</span>Final Architecture</div>
   <div class="sidebar-link" onclick="show('s15')"><span class="s-num">15</span>Hybrid Advantage</div>
+
+  <div class="sidebar-section">Tech Blueprint Doc</div>
+  <div class="sidebar-link" onclick="show('bp-arch')"><span class="s-num">§1</span>Architecture</div>
+  <div class="sidebar-link" onclick="show('bp-ports')"><span class="s-num">§2</span>Port Mapping</div>
+  <div class="sidebar-link" onclick="show('bp-sw1')"><span class="s-num">§3</span>SW1 CLI Script</div>
+  <div class="sidebar-link" onclick="show('bp-sw2')"><span class="s-num">§4</span>SW2 CLI Script</div>
+  <div class="sidebar-link" onclick="show('bp-xiq')"><span class="s-num">§5</span>XIQ Policy</div>
+  <div class="sidebar-link" onclick="show('bp-sec')"><span class="s-num">§6</span>Security / ACLs</div>
+  <div class="sidebar-link" onclick="show('bp-qos')"><span class="s-num">§7</span>QoS</div>
+  <div class="sidebar-link" onclick="show('bp-vault')"><span class="s-num">§8</span>Alex Vault</div>
+  <div class="sidebar-link" onclick="show('bp-modem')"><span class="s-num">§9</span>Modem Routes</div>
 </aside>
 
 <main>
@@ -515,6 +526,339 @@ entry permit_all {
       <div class="field-note"><strong>Apr 22 Link</strong>S5 Q1 — KK's AP onboarding answer perfectly described this division: CLI for DHCP + ipforwarding (switch builds pipes); XIQ for SSIDs + security + QoS (cloud directs traffic).</div>
       <a class="lesson-link" href="session_socratic_20260422.html">→ Session 5 Q1: AP Onboarding</a>
     </div>
+  </div>
+</div>
+
+
+<!-- BLUEPRINT §1 Architecture Overview -->
+<div id="bp-arch" class="section">
+  <div class="hero">
+    <div class="hero-tag">Tech Blueprint Doc · §1</div>
+    <div class="hero-title">Architecture <span>Overview</span></div>
+    <div class="hero-sub">Horizon Custom Fabrication — Apr 21 Lab</div>
+  </div>
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:24px;margin-bottom:20px">
+    <table style="width:100%;border-collapse:collapse;font-size:.82rem">
+      <thead><tr style="border-bottom:1px solid var(--border2)">
+        <th style="text-align:left;padding:8px 12px;color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:.65rem;text-transform:uppercase">Device</th>
+        <th style="text-align:left;padding:8px 12px;color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:.65rem;text-transform:uppercase">Role</th>
+        <th style="text-align:left;padding:8px 12px;color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:.65rem;text-transform:uppercase">Key Config</th>
+      </tr></thead>
+      <tbody>
+        <tr style="border-bottom:1px solid var(--border)"><td style="padding:10px 12px;color:var(--green);font-family:'JetBrains Mono',monospace">SW1 (5320)</td><td style="padding:10px 12px">L3 Core / DHCP Server</td><td style="padding:10px 12px;color:var(--dim)">SVIs · ipforwarding · DHCP pools · QoS QP6</td></tr>
+        <tr style="border-bottom:1px solid var(--border)"><td style="padding:10px 12px;color:var(--blue);font-family:'JetBrains Mono',monospace">SW2 (5320)</td><td style="padding:10px 12px">L2 Access Switch</td><td style="padding:10px 12px;color:var(--dim)">VLAN trunking · no SVIs · no routing · QP1</td></tr>
+        <tr style="border-bottom:1px solid var(--border)"><td style="padding:10px 12px;color:var(--purple);font-family:'JetBrains Mono',monospace">AP3000 ×2</td><td style="padding:10px 12px">Wireless Edge</td><td style="padding:10px 12px;color:var(--dim)">XIQ managed · Corp + Guest SSIDs · OWE</td></tr>
+        <tr><td style="padding:10px 12px;color:var(--amber);font-family:'JetBrains Mono',monospace">Modem</td><td style="padding:10px 12px">WAN Gateway</td><td style="padding:10px 12px;color:var(--dim)">192.168.0.1 · static routes → 192.168.0.28</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:20px">
+    <div style="background:var(--green-bg);border:1px solid var(--green2);border-radius:6px;padding:16px">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--green);text-transform:uppercase;margin-bottom:6px">VLAN 10 — Corp Wired</div>
+      <div style="font-size:1rem;font-weight:600;color:var(--text)">10.10.0.0/24</div>
+      <div style="font-size:.75rem;color:var(--dim);margin-top:4px">SW1 SVI · DHCP pool</div>
+    </div>
+    <div style="background:var(--blue-bg);border:1px solid var(--blue2);border-radius:6px;padding:16px">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--blue);text-transform:uppercase;margin-bottom:6px">VLAN 20 — Corp Wireless</div>
+      <div style="font-size:1rem;font-weight:600;color:var(--text)">10.20.0.0/24</div>
+      <div style="font-size:.75rem;color:var(--dim);margin-top:4px">SW1 SVI · DHCP pool</div>
+    </div>
+    <div style="background:var(--amber-bg);border:1px solid #92400e;border-radius:6px;padding:16px">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--amber);text-transform:uppercase;margin-bottom:6px">VLAN 30 — Guest</div>
+      <div style="font-size:1rem;font-weight:600;color:var(--text)">10.30.0.0/24</div>
+      <div style="font-size:.75rem;color:var(--dim);margin-top:4px">SW1 SVI · DHCP pool · isolated</div>
+    </div>
+  </div>
+</div>
+
+<!-- BLUEPRINT §2 Port Mapping -->
+<div id="bp-ports" class="section">
+  <div class="hero">
+    <div class="hero-tag">Tech Blueprint Doc · §2</div>
+    <div class="hero-title">Port <span>Mapping</span></div>
+  </div>
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:24px;margin-bottom:20px">
+    <div style="font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--muted);text-transform:uppercase;margin-bottom:16px">SW1 Port Layout</div>
+    <table style="width:100%;border-collapse:collapse;font-size:.82rem">
+      <thead><tr style="border-bottom:1px solid var(--border2)">
+        <th style="text-align:left;padding:8px 12px;color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:.62rem;text-transform:uppercase">Port</th>
+        <th style="text-align:left;padding:8px 12px;color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:.62rem;text-transform:uppercase">Connected To</th>
+        <th style="text-align:left;padding:8px 12px;color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:.62rem;text-transform:uppercase">VLAN Mode</th>
+        <th style="text-align:left;padding:8px 12px;color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:.62rem;text-transform:uppercase">Purpose</th>
+      </tr></thead>
+      <tbody>
+        <tr style="border-bottom:1px solid var(--border)"><td style="padding:9px 12px;font-family:'JetBrains Mono',monospace;color:var(--orange)">Port 1</td><td style="padding:9px 12px">Modem / WAN</td><td style="padding:9px 12px;color:var(--dim)">VLAN Default untagged</td><td style="padding:9px 12px;color:var(--dim)">WAN uplink</td></tr>
+        <tr style="border-bottom:1px solid var(--border)"><td style="padding:9px 12px;font-family:'JetBrains Mono',monospace;color:var(--orange)">Port 3</td><td style="padding:9px 12px">AP3000 (local)</td><td style="padding:9px 12px;color:var(--dim)">Default untagged + 10/20/30 tagged</td><td style="padding:9px 12px;color:var(--dim)">AP lifeline + SSID trunk</td></tr>
+        <tr style="border-bottom:1px solid var(--border)"><td style="padding:9px 12px;font-family:'JetBrains Mono',monospace;color:var(--orange)">Port 5</td><td style="padding:9px 12px">Wired client</td><td style="padding:9px 12px;color:var(--dim)">VLAN 10 untagged</td><td style="padding:9px 12px;color:var(--dim)">Corp wired access</td></tr>
+        <tr><td style="padding:9px 12px;font-family:'JetBrains Mono',monospace;color:var(--orange)">Port 10</td><td style="padding:9px 12px">SW2 inter-switch</td><td style="padding:9px 12px;color:var(--dim)">VLAN 10/20/30 tagged (no Default)</td><td style="padding:9px 12px;color:var(--dim)">Trunk — DHCP reach-back</td></tr>
+      </tbody>
+    </table>
+    <div style="font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--muted);text-transform:uppercase;margin:20px 0 16px">SW2 Port Layout</div>
+    <table style="width:100%;border-collapse:collapse;font-size:.82rem">
+      <thead><tr style="border-bottom:1px solid var(--border2)">
+        <th style="text-align:left;padding:8px 12px;color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:.62rem;text-transform:uppercase">Port</th>
+        <th style="text-align:left;padding:8px 12px;color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:.62rem;text-transform:uppercase">Connected To</th>
+        <th style="text-align:left;padding:8px 12px;color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:.62rem;text-transform:uppercase">VLAN Mode</th>
+      </tr></thead>
+      <tbody>
+        <tr style="border-bottom:1px solid var(--border)"><td style="padding:9px 12px;font-family:'JetBrains Mono',monospace;color:var(--blue)">Port 3</td><td style="padding:9px 12px">AP3000 (remote)</td><td style="padding:9px 12px;color:var(--dim)">Default untagged + 10/20/30 tagged</td></tr>
+        <tr><td style="padding:9px 12px;font-family:'JetBrains Mono',monospace;color:var(--blue)">Port 10</td><td style="padding:9px 12px">SW1 inter-switch</td><td style="padding:9px 12px;color:var(--dim)">VLAN 10/20/30 tagged (no Default)</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div style="background:var(--red-bg);border:1px solid #7f1d1d;border-radius:6px;padding:14px 16px;font-size:.82rem">
+    <strong style="color:var(--red)">Loop Triangle Risk:</strong> <span style="color:var(--dim)">If VLAN Default is left on Port 10, the modem → SW1 → SW2 → (back to modem via Port 10) triangle creates a broadcast storm. Always: <code style="color:var(--red)">configure vlan Default delete ports 10</code></span>
+  </div>
+</div>
+
+<!-- BLUEPRINT §3 SW1 CLI Script -->
+<div id="bp-sw1" class="section">
+  <div class="hero">
+    <div class="hero-tag">Tech Blueprint Doc · §3</div>
+    <div class="hero-title">SW1 <span>CLI Script</span></div>
+    <div class="hero-sub">L3 Core — Full Configuration Sequence</div>
+  </div>
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:0;overflow:hidden;margin-bottom:16px">
+    <div style="background:var(--border);padding:10px 16px;font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--muted);text-transform:uppercase">Step 1 — Create VLANs</div>
+    <pre style="background:var(--bg);padding:16px;font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--green);line-height:1.8;overflow-x:auto">create vlan VLAN_10 tag 10
+create vlan VLAN_20 tag 20
+create vlan VLAN_30 tag 30</pre>
+  </div>
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:0;overflow:hidden;margin-bottom:16px">
+    <div style="background:var(--border);padding:10px 16px;font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--muted);text-transform:uppercase">Step 2 — AP Lifeline + Loop Prevention</div>
+    <pre style="background:var(--bg);padding:16px;font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--green);line-height:1.8;overflow-x:auto">configure vlan Default add ports 3 untagged
+configure vlan Default delete ports 10
+configure vlan VLAN_10 add ports 3,5,10 tagged
+configure vlan VLAN_20 add ports 3,10 tagged
+configure vlan VLAN_30 add ports 3,10 tagged</pre>
+  </div>
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:0;overflow:hidden;margin-bottom:16px">
+    <div style="background:var(--border);padding:10px 16px;font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--muted);text-transform:uppercase">Step 3 — SVIs + Routing (Karl Rule included)</div>
+    <pre style="background:var(--bg);padding:16px;font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--green);line-height:1.8;overflow-x:auto">configure vlan VLAN_10 ipaddress 10.10.0.1 255.255.255.0
+configure vlan VLAN_20 ipaddress 10.20.0.1 255.255.255.0
+configure vlan VLAN_30 ipaddress 10.30.0.1 255.255.255.0
+enable ipforwarding vlan VLAN_10
+enable ipforwarding vlan VLAN_20
+enable ipforwarding vlan VLAN_30
+enable ipforwarding vlan Default    <span style="color:var(--amber)"># KARL RULE — without this, return traffic is dropped</span></pre>
+  </div>
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:0;overflow:hidden;margin-bottom:16px">
+    <div style="background:var(--border);padding:10px 16px;font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--muted);text-transform:uppercase">Step 4 — DHCP Pools (port 10 = DHCP reach-back to SW2)</div>
+    <pre style="background:var(--bg);padding:16px;font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--green);line-height:1.8;overflow-x:auto">enable dhcp ports 3,5,10 vlan VLAN_10
+configure vlan VLAN_10 dhcp-address-range 10.10.0.100-10.10.0.200
+configure vlan VLAN_10 dhcp-options default-gateway 10.10.0.1
+configure vlan VLAN_10 dhcp-options dns-server 8.8.8.8 8.8.4.4
+
+enable dhcp ports 3,10 vlan VLAN_20
+configure vlan VLAN_20 dhcp-address-range 10.20.0.100-10.20.0.200
+configure vlan VLAN_20 dhcp-options default-gateway 10.20.0.1
+configure vlan VLAN_20 dhcp-options dns-server 8.8.8.8 8.8.4.4
+
+enable dhcp ports 3,10 vlan VLAN_30
+configure vlan VLAN_30 dhcp-address-range 10.30.0.100-10.30.0.200
+configure vlan VLAN_30 dhcp-options default-gateway 10.30.0.1
+configure vlan VLAN_30 dhcp-options dns-server 8.8.8.8 8.8.4.4</pre>
+  </div>
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:0;overflow:hidden;margin-bottom:16px">
+    <div style="background:var(--border);padding:10px 16px;font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--muted);text-transform:uppercase">Step 5 — QoS (Express Lane for Corp traffic)</div>
+    <pre style="background:var(--bg);padding:16px;font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--green);line-height:1.8;overflow-x:auto">configure qosprofile qp6 name "Corporate-Express" ports 3,10
+configure qosprofile qp1 name "Guest-BestEffort" ports 3,10</pre>
+  </div>
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:0;overflow:hidden">
+    <div style="background:var(--border);padding:10px 16px;font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--muted);text-transform:uppercase">Step 6 — Default Route to Modem</div>
+    <pre style="background:var(--bg);padding:16px;font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--green);line-height:1.8;overflow-x:auto">configure iproute add default 192.168.0.1</pre>
+  </div>
+</div>
+
+<!-- BLUEPRINT §4 SW2 CLI Script -->
+<div id="bp-sw2" class="section">
+  <div class="hero">
+    <div class="hero-tag">Tech Blueprint Doc · §4</div>
+    <div class="hero-title">SW2 <span>CLI Script</span></div>
+    <div class="hero-sub">L2 Access — No SVIs, No Routing, No DHCP</div>
+  </div>
+  <div style="background:var(--blue-bg);border:1px solid var(--blue2);border-radius:6px;padding:14px 16px;font-size:.82rem;margin-bottom:20px">
+    <strong style="color:var(--blue)">L2 Only Rule:</strong> <span style="color:var(--dim)">SW2 has NO SVIs, NO ipforwarding, NO DHCP. It is a pure L2 trunk switch. DHCP reach-back happens because Port 10 is included in SW1's DHCP enable command.</span>
+  </div>
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:0;overflow:hidden;margin-bottom:16px">
+    <div style="background:var(--border);padding:10px 16px;font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--muted);text-transform:uppercase">Step 1 — Create VLANs (mirror SW1)</div>
+    <pre style="background:var(--bg);padding:16px;font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--blue);line-height:1.8;overflow-x:auto">create vlan VLAN_10 tag 10
+create vlan VLAN_20 tag 20
+create vlan VLAN_30 tag 30</pre>
+  </div>
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:0;overflow:hidden;margin-bottom:16px">
+    <div style="background:var(--border);padding:10px 16px;font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--muted);text-transform:uppercase">Step 2 — AP Lifeline + Trunk to SW1</div>
+    <pre style="background:var(--bg);padding:16px;font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--blue);line-height:1.8;overflow-x:auto">configure vlan Default add ports 3 untagged
+configure vlan Default delete ports 10
+configure vlan VLAN_10 add ports 3,10 tagged
+configure vlan VLAN_20 add ports 3,10 tagged
+configure vlan VLAN_30 add ports 3,10 tagged</pre>
+  </div>
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:0;overflow:hidden">
+    <div style="background:var(--border);padding:10px 16px;font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--muted);text-transform:uppercase">Verification</div>
+    <pre style="background:var(--bg);padding:16px;font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--blue);line-height:1.8;overflow-x:auto">show vlan detail
+show ports information detail
+show fdb</pre>
+  </div>
+</div>
+
+<!-- BLUEPRINT §5 XIQ Policy -->
+<div id="bp-xiq" class="section">
+  <div class="hero">
+    <div class="hero-tag">Tech Blueprint Doc · §5</div>
+    <div class="hero-title">XIQ <span>Policy</span></div>
+    <div class="hero-sub">ExtremeCloud IQ — SSID + Security + QoS Scheduling</div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px">
+    <div style="background:var(--surface);border:1px solid var(--green2);border-radius:8px;padding:20px">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--green);text-transform:uppercase;margin-bottom:10px">Corporate SSID</div>
+      <ul style="font-size:.82rem;color:var(--dim);list-style:none;line-height:2">
+        <li>· SSID: <code style="color:var(--text)">Corporate_Wireless</code></li>
+        <li>· VLAN: <code style="color:var(--text)">20</code></li>
+        <li>· Security: <code style="color:var(--text)">WPA3-SAE / WPA2 mix</code></li>
+        <li>· Scheduling: <code style="color:var(--text)">qp6 (weight 6)</code></li>
+        <li>· Station Isolation: OFF</li>
+      </ul>
+    </div>
+    <div style="background:var(--surface);border:1px solid #92400e;border-radius:8px;padding:20px">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--amber);text-transform:uppercase;margin-bottom:10px">Guest SSID</div>
+      <ul style="font-size:.82rem;color:var(--dim);list-style:none;line-height:2">
+        <li>· SSID: <code style="color:var(--text)">Guest_Wireless</code></li>
+        <li>· VLAN: <code style="color:var(--text)">30</code></li>
+        <li>· Security: <code style="color:var(--text)">OWE (Opportunistic)</code></li>
+        <li>· Scheduling: <code style="color:var(--text)">qp1 (weight 1)</code></li>
+        <li>· Station Isolation: <strong style="color:var(--amber)">ON</strong></li>
+      </ul>
+    </div>
+  </div>
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:20px">
+    <div style="font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--muted);text-transform:uppercase;margin-bottom:12px">XIQ Navigation Path — AP Onboarding</div>
+    <div style="font-size:.82rem;color:var(--dim);line-height:2">
+      <span style="color:var(--blue)">Manage → Devices</span> → confirm AP status = <span style="color:var(--green)">Connected</span><br>
+      <span style="color:var(--blue)">Monitor → Clients</span> → verify client associations per SSID<br>
+      <span style="color:var(--blue)">Configure → Network Policy</span> → AP_April21_KarlLab → push policy<br>
+      <span style="color:var(--blue)">ML Insights → Quality Index</span> → per-AP health score
+    </div>
+  </div>
+</div>
+
+<!-- BLUEPRINT §6 Security / ACLs -->
+<div id="bp-sec" class="section">
+  <div class="hero">
+    <div class="hero-tag">Tech Blueprint Doc · §6</div>
+    <div class="hero-title">Security <span>/ ACLs</span></div>
+    <div class="hero-sub">Guest Isolation — North-South + East-West</div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px">
+    <div style="background:var(--red-bg);border:1px solid #7f1d1d;border-radius:8px;padding:20px">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--red);text-transform:uppercase;margin-bottom:10px">North-South — XIQ L3 Firewall</div>
+      <div style="font-size:.8rem;color:var(--dim);line-height:1.8">DENY VLAN 30 → VLAN 10 (10.30.x → 10.10.x)<br>DENY VLAN 30 → VLAN 20 (10.30.x → 10.20.x)<br>PERMIT VLAN 30 → Internet (default route)</div>
+    </div>
+    <div style="background:var(--amber-bg);border:1px solid #92400e;border-radius:8px;padding:20px">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--amber);text-transform:uppercase;margin-bottom:10px">East-West — Station Isolation</div>
+      <div style="font-size:.8rem;color:var(--dim);line-height:1.8">XIQ Station Isolation toggle per SSID<br>Prevents guest-to-guest lateral movement<br>Applied on AP3000 at association level</div>
+    </div>
+  </div>
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:0;overflow:hidden">
+    <div style="background:var(--border);padding:10px 16px;font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--muted);text-transform:uppercase">EXOS ACL Syntax (if applied on switch)</div>
+    <pre style="background:var(--bg);padding:16px;font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--red);line-height:1.8;overflow-x:auto">create access-list guest_isolation "entry deny_corp {
+  if { source-address 10.30.0.0/24; destination-address 10.10.0.0/24; }
+  then { deny; }
+} entry deny_wireless {
+  if { source-address 10.30.0.0/24; destination-address 10.20.0.0/24; }
+  then { deny; }
+} entry permit_all {
+  if { } then { permit; }
+}"
+configure access-list guest_isolation vlan VLAN_30 ingress</pre>
+  </div>
+</div>
+
+<!-- BLUEPRINT §7 QoS -->
+<div id="bp-qos" class="section">
+  <div class="hero">
+    <div class="hero-tag">Tech Blueprint Doc · §7</div>
+    <div class="hero-title">QoS <span>Configuration</span></div>
+    <div class="hero-sub">Hardware Queue Profiles — SW1 + SW2 + XIQ</div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px">
+    <div style="background:var(--green-bg);border:1px solid var(--green2);border-radius:8px;padding:20px">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--green);text-transform:uppercase;margin-bottom:10px">QP6 — Corporate Express Lane</div>
+      <div style="font-size:.8rem;color:var(--dim);line-height:1.8">Applied to: Ports 3, 10<br>Weight: 6 (high priority)<br>Traffic: VLAN 10 + 20 (Corp wired + wireless)<br>XIQ Scheduling Weight: 6</div>
+    </div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:20px">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--muted);text-transform:uppercase;margin-bottom:10px">QP1 — Guest Best Effort</div>
+      <div style="font-size:.8rem;color:var(--dim);line-height:1.8">Applied to: Ports 3, 10<br>Weight: 1 (low priority)<br>Traffic: VLAN 30 (Guest)<br>XIQ Scheduling Weight: 1</div>
+    </div>
+  </div>
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:0;overflow:hidden">
+    <div style="background:var(--border);padding:10px 16px;font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--muted);text-transform:uppercase">EXOS QoS CLI</div>
+    <pre style="background:var(--bg);padding:16px;font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--green);line-height:1.8;overflow-x:auto">configure qosprofile qp6 name "Corporate-Express" ports 3,10
+configure qosprofile qp1 name "Guest-BestEffort" ports 3,10
+show qosprofile</pre>
+  </div>
+</div>
+
+<!-- BLUEPRINT §8 Alex Vault -->
+<div id="bp-vault" class="section">
+  <div class="hero">
+    <div class="hero-tag">Tech Blueprint Doc · §8</div>
+    <div class="hero-title">Alex <span>Vault</span></div>
+    <div class="hero-sub">Critical Field Lessons — Errors That Bit Us</div>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:16px">
+    <div style="background:var(--red-bg);border:1px solid #7f1d1d;border-left:4px solid var(--red);border-radius:8px;padding:20px">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:.72rem;font-weight:700;color:var(--red);margin-bottom:6px">THE KARL RULE</div>
+      <div style="font-size:.85rem;color:var(--text);margin-bottom:8px"><code style="background:var(--bg);padding:2px 6px;border-radius:3px;color:var(--amber)">enable ipforwarding vlan Default</code></div>
+      <div style="font-size:.8rem;color:var(--dim);line-height:1.7">Without this, return traffic from the modem is dropped at the unrouted Default VLAN. Internet reaches SW1 on Port 1 (Default) — but replies can't route back because Default has no ipforwarding. Symptom: clients ping 192.168.0.1 (modem) but can't reach 8.8.8.8. Fix: enable ipforwarding on EVERY VLAN that carries routable traffic, including Default.</div>
+    </div>
+    <div style="background:var(--blue-bg);border:1px solid var(--blue2);border-left:4px solid var(--blue);border-radius:8px;padding:20px">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:.72rem;font-weight:700;color:var(--blue);margin-bottom:6px">DHCP REACH-BACK — PORT 10 MUST BE IN DHCP ENABLE</div>
+      <div style="font-size:.85rem;color:var(--text);margin-bottom:8px"><code style="background:var(--bg);padding:2px 6px;border-radius:3px;color:var(--blue)">enable dhcp ports 3,10 vlan VLAN_20</code></div>
+      <div style="font-size:.8rem;color:var(--dim);line-height:1.7">SW2 clients send DHCP Discover → Port 10 trunk → SW1. SW1's DHCP server only listens on ports listed in the enable command. If Port 10 is omitted, SW2 clients never get an IP. Symptom: SW1-side clients get IPs, SW2-side clients stuck at APIPA (169.x). Fix: include port 10 in every DHCP enable command for VLANs used across the trunk.</div>
+    </div>
+    <div style="background:var(--amber-bg);border:1px solid #92400e;border-left:4px solid var(--amber);border-radius:8px;padding:20px">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:.72rem;font-weight:700;color:var(--amber);margin-bottom:6px">LOOP TRIANGLE RISK — DELETE DEFAULT FROM PORT 10</div>
+      <div style="font-size:.85rem;color:var(--text);margin-bottom:8px"><code style="background:var(--bg);padding:2px 6px;border-radius:3px;color:var(--amber)">configure vlan Default delete ports 10</code></div>
+      <div style="font-size:.8rem;color:var(--dim);line-height:1.7">If Default VLAN remains on Port 10 (the inter-switch trunk), a loop forms: Modem → SW1 Port 1 → Default VLAN → Port 10 → SW2 → back to modem. This creates a broadcast storm. The Default VLAN (192.168.0.x range) should ONLY exist on Port 1 (WAN uplink) and Port 3 (AP lifeline). Never on the inter-switch trunk.</div>
+    </div>
+    <div style="background:var(--green-bg);border:1px solid var(--green2);border-left:4px solid var(--green);border-radius:8px;padding:20px">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:.72rem;font-weight:700;color:var(--green);margin-bottom:6px">AP LIFELINE — DEFAULT UNTAGGED ON PORT 3</div>
+      <div style="font-size:.85rem;color:var(--text);margin-bottom:8px"><code style="background:var(--bg);padding:2px 6px;border-radius:3px;color:var(--green)">configure vlan Default add ports 3 untagged</code></div>
+      <div style="font-size:.8rem;color:var(--dim);line-height:1.7">An AP boots as a dumb device — no VLAN tag, just a DHCP request on the wire. If Port 3 (the AP port) doesn't have Default VLAN untagged, the AP can't reach XIQ to get its config. Once XIQ pushes the config, the AP knows to use tagged VLANs 10/20/30 for SSIDs. The untagged Default is the bootstrapping lifeline.</div>
+    </div>
+  </div>
+</div>
+
+<!-- BLUEPRINT §9 Modem Routes -->
+<div id="bp-modem" class="section">
+  <div class="hero">
+    <div class="hero-tag">Tech Blueprint Doc · §9</div>
+    <div class="hero-title">Modem <span>Static Routes</span></div>
+    <div class="hero-sub">Return Path Configuration — Without This, Nothing Works</div>
+  </div>
+  <div style="background:var(--amber-bg);border:1px solid #92400e;border-radius:6px;padding:14px 16px;font-size:.82rem;margin-bottom:20px">
+    <strong style="color:var(--amber)">Why modem routes are required:</strong> <span style="color:var(--dim)">SW1 knows all subnets (it has SVIs). The modem does NOT. When a guest on 10.30.0.x pings Google, the reply comes back to modem from ISP. The modem looks at the source (10.30.0.x) and doesn't know where to send it — unless you add a static route pointing all three subnets to SW1's WAN IP.</span>
+  </div>
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:24px;margin-bottom:20px">
+    <div style="font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--muted);text-transform:uppercase;margin-bottom:16px">Required Static Routes on Modem (192.168.0.1)</div>
+    <table style="width:100%;border-collapse:collapse;font-size:.82rem">
+      <thead><tr style="border-bottom:1px solid var(--border2)">
+        <th style="text-align:left;padding:8px 12px;color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:.62rem;text-transform:uppercase">Destination</th>
+        <th style="text-align:left;padding:8px 12px;color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:.62rem;text-transform:uppercase">Subnet Mask</th>
+        <th style="text-align:left;padding:8px 12px;color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:.62rem;text-transform:uppercase">Gateway</th>
+        <th style="text-align:left;padding:8px 12px;color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:.62rem;text-transform:uppercase">VLAN</th>
+      </tr></thead>
+      <tbody>
+        <tr style="border-bottom:1px solid var(--border)"><td style="padding:10px 12px;font-family:'JetBrains Mono',monospace;color:var(--green)">10.10.0.0</td><td style="padding:10px 12px;font-family:'JetBrains Mono',monospace;color:var(--dim)">255.255.255.0</td><td style="padding:10px 12px;font-family:'JetBrains Mono',monospace;color:var(--orange)">192.168.0.28</td><td style="padding:10px 12px;color:var(--dim)">VLAN 10 — Corp Wired</td></tr>
+        <tr style="border-bottom:1px solid var(--border)"><td style="padding:10px 12px;font-family:'JetBrains Mono',monospace;color:var(--blue)">10.20.0.0</td><td style="padding:10px 12px;font-family:'JetBrains Mono',monospace;color:var(--dim)">255.255.255.0</td><td style="padding:10px 12px;font-family:'JetBrains Mono',monospace;color:var(--orange)">192.168.0.28</td><td style="padding:10px 12px;color:var(--dim)">VLAN 20 — Corp Wireless</td></tr>
+        <tr><td style="padding:10px 12px;font-family:'JetBrains Mono',monospace;color:var(--amber)">10.30.0.0</td><td style="padding:10px 12px;font-family:'JetBrains Mono',monospace;color:var(--dim)">255.255.255.0</td><td style="padding:10px 12px;font-family:'JetBrains Mono',monospace;color:var(--orange)">192.168.0.28</td><td style="padding:10px 12px;color:var(--dim)">VLAN 30 — Guest</td></tr>
+      </tbody>
+    </table>
+    <div style="margin-top:14px;font-size:.78rem;color:var(--muted)">SW1 WAN IP = <code style="color:var(--orange)">192.168.0.28</code> (assigned by modem DHCP or set static)</div>
+  </div>
+  <div style="background:var(--green-bg);border:1px solid var(--green2);border-radius:6px;padding:14px 16px;font-size:.82rem">
+    <strong style="color:var(--green)">Verification:</strong> <span style="color:var(--dim)">From a guest client (10.30.x), ping 192.168.0.1 (modem) → should succeed. Ping 8.8.8.8 → should succeed. Ping 10.10.0.1 (SW1 Corp SVI) → should FAIL (L3 firewall blocks it). If all three behave correctly, routing + isolation is working.</span>
   </div>
 </div>
 
