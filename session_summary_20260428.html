@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EOD Blueprint · Apr 28 2026 · SW2 Debug — Horizon Lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Syne:wght@700;800&family=Inter:wght@400;500;600&display=swap">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#08090d;--surface:#0f1117;--border:#1e2130;--border2:#252840;
+  --text:#e2e8f0;--muted:#64748b;--dim:#94a3b8;
+  --green:#4ade80;--green2:#16a34a;--green-bg:#0d1a0d;
+  --blue:#38bdf8;--blue2:#0891b2;--blue-bg:#0a1a26;
+  --amber:#fbbf24;--amber-bg:#1a1200;
+  --red:#f87171;--red-bg:#200a0a;
+  --orange:#fb923c;--orange-bg:#1a0e00;
+  --purple:#a78bfa;--purple-bg:#1a1030;
+  --nav-h:56px;--aside-w:240px;
+}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.6}
+nav{position:fixed;top:0;left:0;right:0;height:var(--nav-h);background:rgba(8,9,13,.92);border-bottom:1px solid var(--border);backdrop-filter:blur(12px);z-index:100;display:flex;align-items:center;padding:0 24px;gap:16px}
+.nav-brand{font-family:'Syne',sans-serif;font-size:1rem;font-weight:800;color:var(--green);letter-spacing:.02em}
+.nav-sub{font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--muted);letter-spacing:.06em}
+.nav-right{margin-left:auto;display:flex;gap:8px;align-items:center}
+.back-link{font-size:.72rem;color:var(--muted);text-decoration:none;padding:4px 10px;border:1px solid var(--border);border-radius:4px}
+.back-link:hover{color:var(--text);border-color:var(--border2)}
+.layout{display:flex;margin-top:var(--nav-h);min-height:calc(100vh - var(--nav-h))}
+aside{width:var(--aside-w);flex-shrink:0;position:fixed;top:var(--nav-h);bottom:0;overflow-y:auto;background:var(--surface);border-right:1px solid var(--border);padding:20px 0}
+aside::-webkit-scrollbar{width:4px}
+aside::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+main{margin-left:var(--aside-w);flex:1;padding:32px 40px;max-width:960px}
+.sidebar-section{font-family:'JetBrains Mono',monospace;font-size:.58rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);padding:0 20px;margin:18px 0 6px}
+.sidebar-link{display:flex;align-items:center;gap:10px;padding:7px 20px;cursor:pointer;font-size:.75rem;color:var(--dim);border-left:2px solid transparent;transition:background .15s}
+.sidebar-link:hover{background:rgba(74,222,128,.05);color:var(--text)}
+.sidebar-link.active{color:var(--green);background:rgba(74,222,128,.08);border-left-color:var(--green)}
+.s-num{font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--muted);flex-shrink:0;width:18px}
+.section{display:none;animation:fadeIn .3s ease-out}
+.section.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.hero{margin-bottom:32px}
+.hero-tag{font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px}
+.hero-title{font-family:'Syne',sans-serif;font-size:1.8rem;font-weight:800;color:var(--text);margin-bottom:8px}
+.hero-title span{color:var(--green)}
+.hero-sub{font-size:.85rem;color:var(--dim)}
+.stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:28px}
+.stat{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:16px}
+.stat-label{font-family:'JetBrains Mono',monospace;font-size:.58rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:6px}
+.stat-value{font-family:'Syne',sans-serif;font-size:1.4rem;font-weight:800}
+.stat-sub{font-size:.72rem;color:var(--dim);margin-top:3px}
+pre{background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:16px;font-family:'JetBrains Mono',monospace;font-size:.78rem;line-height:1.8;overflow-x:auto;margin:12px 0}
+code{font-family:'JetBrains Mono',monospace;font-size:.82rem;background:rgba(255,255,255,.05);padding:1px 5px;border-radius:3px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:20px;margin-bottom:16px}
+.card-title{font-family:'Syne',sans-serif;font-size:.95rem;font-weight:700;margin-bottom:12px}
+.tag{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:.6rem;padding:2px 7px;border-radius:3px;margin-right:4px;margin-bottom:4px}
+.tag-fix{background:var(--green-bg);color:var(--green);border:1px solid var(--green2)}
+.tag-warn{background:var(--amber-bg);color:var(--amber);border:1px solid #92400e}
+.tag-info{background:var(--blue-bg);color:var(--blue);border:1px solid var(--blue2)}
+.verdict{display:inline-flex;align-items:center;gap:6px;background:var(--green-bg);border:1px solid var(--green2);border-radius:4px;padding:4px 10px;font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--green);font-weight:700}
+.issue-block{background:var(--red-bg);border:1px solid #7f1d1d;border-left:3px solid var(--red);border-radius:6px;padding:16px;margin-bottom:12px}
+.fix-block{background:var(--green-bg);border:1px solid var(--green2);border-left:3px solid var(--green);border-radius:6px;padding:16px;margin-bottom:12px}
+.info-block{background:var(--blue-bg);border:1px solid var(--blue2);border-left:3px solid var(--blue);border-radius:6px;padding:16px;margin-bottom:12px}
+.amber-block{background:var(--amber-bg);border:1px solid #92400e;border-left:3px solid var(--amber);border-radius:6px;padding:16px;margin-bottom:12px}
+h3{font-family:'Syne',sans-serif;font-size:.9rem;font-weight:700;margin-bottom:10px}
+table{width:100%;border-collapse:collapse;font-size:.82rem}
+th{text-align:left;padding:8px 12px;color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:.62rem;text-transform:uppercase;border-bottom:1px solid var(--border2)}
+td{padding:9px 12px;border-bottom:1px solid var(--border)}
+</style>
+</head>
+<body>
+<nav>
+  <div class="nav-brand">Horizon Lab</div>
+  <div class="nav-sub">EOD BLUEPRINT · APR 28 2026 · SW2 DEBUG</div>
+  <div class="nav-right">
+    <a class="back-link" href="index.html">← Index</a>
+    <a class="back-link" href="debrief_apr21.html">Apr 21 Debrief</a>
+    <a class="back-link" href="session_summary_20260422.html">Apr 22 EOD</a>
+  </div>
+</nav>
+<div class="layout">
+<aside>
+  <div class="sidebar-section">Apr 28 Session</div>
+  <div class="sidebar-link active" onclick="show('overview')"><span class="s-num">01</span>Overview</div>
+  <div class="sidebar-link" onclick="show('root-cause')"><span class="s-num">02</span>Root Cause</div>
+  <div class="sidebar-link" onclick="show('fix')"><span class="s-num">03</span>Fix Applied</div>
+  <div class="sidebar-link" onclick="show('topology')"><span class="s-num">04</span>Updated Topology</div>
+  <div class="sidebar-link" onclick="show('verified')"><span class="s-num">05</span>Verified State</div>
+  <div class="sidebar-section">Reference</div>
+  <div class="sidebar-link" onclick="show('commands')"><span class="s-num">06</span>All Commands</div>
+  <div class="sidebar-link" onclick="show('pending')"><span class="s-num">07</span>Pending</div>
+</aside>
+<main>
+
+<!-- OVERVIEW -->
+<div id="overview" class="section active">
+  <div class="hero">
+    <div class="hero-tag">EOD Blueprint · Apr 28 2026</div>
+    <div class="hero-title">SW2 Debug — <span>Resolved</span></div>
+    <div class="hero-sub">SW2 misconfigured with direct modem route · Port 1 disconnected · VLAN 1 trunk fix · XIQ back online</div>
+  </div>
+  <div class="stat-row">
+    <div class="stat">
+      <div class="stat-label">Session</div>
+      <div class="stat-value" style="color:var(--green)">Fixed</div>
+      <div class="stat-sub">SW2 fully resolved</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Root Cause</div>
+      <div class="stat-value" style="color:var(--red);font-size:1rem">DHCP route</div>
+      <div class="stat-sub">192.168.0.1 on SW2</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Commands Run</div>
+      <div class="stat-value" style="color:var(--blue)">4</div>
+      <div class="stat-sub">Both switches</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">XIQ Status</div>
+      <div class="stat-value" style="color:var(--green)">UP</div>
+      <div class="stat-sub">Both APs online</div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">What Happened</div>
+    <div style="font-size:.85rem;color:var(--dim);line-height:1.9">
+      SW2 was found with a <strong style="color:var(--red)">DHCP-learned default route</strong> pointing directly to the modem (<code>192.168.0.1</code>) — left over from when SW2 Port 1 was cabled to the modem. That cable was physically disconnected, leaving SW2 with a stale route to an unreachable gateway.<br><br>
+      Additionally, <strong style="color:var(--amber)">Default VLAN (VLAN 1) was not on Port 10</strong> (the inter-switch trunk). This meant AP2 — which boots untagged on VLAN 1 and needs to reach XIQ — had no path from SW2 to SW1 to the internet. AP2 was offline.<br><br>
+      With SW2 Port 1 now disconnected from the modem, the original loop triangle risk is eliminated. VLAN 1 on the Port 10 trunk is now safe and necessary.
+    </div>
+  </div>
+  <div class="verdict">&#10003; XIQ ONLINE — Both APs confirmed up</div>
+</div>
+
+<!-- ROOT CAUSE -->
+<div id="root-cause" class="section">
+  <div class="hero">
+    <div class="hero-tag">Root Cause Analysis</div>
+    <div class="hero-title">Two <span>Issues</span></div>
+  </div>
+  <div class="issue-block">
+    <h3 style="color:var(--red)">Issue 1 — Bad Default Route on SW2</h3>
+    <pre style="color:var(--red)">Ori  Destination     Gateway      Flags        VLAN
+#bo  Default Route   192.168.0.1  UG-D---um    Default   ← DHCP-learned, wrong gateway</pre>
+    <div style="font-size:.82rem;color:var(--dim);margin-top:8px">
+      <span class="tag tag-warn">DHCP-learned</span> The <code>#bo</code> origin flag = BOOTP/DHCP. Cannot delete with <code>configure iproute delete</code> — returns error. Must disable DHCP client on the VLAN to remove it.<br><br>
+      SW2 Port 1 was previously cabled to the modem. When disconnected, the DHCP lease expired but the route remained stale. Gateway 192.168.0.1 was unreachable — SW2 had no path to it.
+    </div>
+  </div>
+  <div class="issue-block">
+    <h3 style="color:var(--red)">Issue 2 — Default VLAN Missing from Port 10 Trunk</h3>
+    <div style="font-size:.82rem;color:var(--dim);margin-top:4px">
+      Default VLAN was intentionally removed from Port 10 during the Apr 21 build to prevent a loop triangle:<br><br>
+      <code style="color:var(--amber)">Modem → SW1 Port 1 → Default VLAN → Port 10 → SW2 → SW2 Port 1 → Modem</code><br><br>
+      That loop required SW2 Port 1 to be connected to the modem. <strong style="color:var(--green)">That path no longer exists.</strong> Without Default VLAN on Port 10, AP2 (on SW2 Port 3, untagged) had no way to forward its DHCP request to SW1 and out to XIQ.
+    </div>
+  </div>
+  <div class="info-block">
+    <h3 style="color:var(--blue)">Why the Loop Triangle is Gone</h3>
+    <div style="font-size:.82rem;color:var(--dim);margin-top:4px">
+      The loop required a <strong>second path</strong> from SW2 back to the modem. SW2 Port 1 was that path. Now that Port 1 is disconnected, VLAN 1 can safely travel on the Port 10 trunk — there is only one path: AP2 → SW2 Port 3 → VLAN 1 → Port 10 trunk → SW1 → Port 1 → Modem.
+    </div>
+  </div>
+</div>
+
+<!-- FIX APPLIED -->
+<div id="fix" class="section">
+  <div class="hero">
+    <div class="hero-tag">Fix Applied</div>
+    <div class="hero-title">Commands <span>Run</span></div>
+  </div>
+  <div class="fix-block">
+    <h3 style="color:var(--green)">SW2 — Step 1: Remove Bad Default Route</h3>
+    <pre style="color:var(--green)">disable dhcp vlan Default</pre>
+    <div style="font-size:.8rem;color:var(--dim)">Kills the DHCP client on Default VLAN. Auto-removes the DHCP-learned default route. Routing table → 0 routes. SW2 is now pure L2.</div>
+  </div>
+  <div class="fix-block">
+    <h3 style="color:var(--green)">SW2 — Step 2: Add VLAN 1 to Trunk</h3>
+    <pre style="color:var(--green)">configure vlan Default add ports 10 tagged
+save configuration</pre>
+    <div style="font-size:.8rem;color:var(--dim)">VLAN 1 now crosses the Port 10 trunk. AP2 untagged traffic on Port 3 → forwarded via Port 10 → reaches SW1 → internet → XIQ.</div>
+  </div>
+  <div class="fix-block">
+    <h3 style="color:var(--green)">SW1 — Mirror the Trunk</h3>
+    <pre style="color:var(--green)">configure vlan Default add ports 10 tagged
+save configuration</pre>
+    <div style="font-size:.8rem;color:var(--dim)">SW1 Port 10 must also accept tagged VLAN 1 frames from SW2. Both ends of the trunk must agree.</div>
+  </div>
+  <div style="margin-top:20px">
+    <div class="verdict">&#10003; XIQ UP — Both APs online after fix</div>
+  </div>
+</div>
+
+<!-- UPDATED TOPOLOGY -->
+<div id="topology" class="section">
+  <div class="hero">
+    <div class="hero-tag">Network Topology</div>
+    <div class="hero-title">Updated <span>Apr 28 2026</span></div>
+  </div>
+  <div class="card" style="margin-bottom:20px">
+    <div class="card-title">Physical Layout</div>
+    <table>
+      <thead><tr><th>Device</th><th>Port</th><th>Connected To</th><th>VLAN Mode</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td style="color:var(--green);font-family:'JetBrains Mono',monospace">SW1</td><td>Port 1</td><td>Modem (192.168.0.1)</td><td>Default untagged</td><td style="color:var(--green)">UP</td></tr>
+        <tr><td style="color:var(--green);font-family:'JetBrains Mono',monospace">SW1</td><td>Port 3</td><td>AP1</td><td>Default untagged + 10/20/30 tagged</td><td style="color:var(--green)">UP</td></tr>
+        <tr><td style="color:var(--green);font-family:'JetBrains Mono',monospace">SW1</td><td>Port 5</td><td>Wired client</td><td>VLAN 10 untagged</td><td style="color:var(--dim)">—</td></tr>
+        <tr><td style="color:var(--green);font-family:'JetBrains Mono',monospace">SW1</td><td>Port 10</td><td>SW2 Port 10</td><td>Default tagged + 10/20/30 tagged</td><td style="color:var(--green)">UP ✓ NEW</td></tr>
+        <tr><td style="color:var(--blue);font-family:'JetBrains Mono',monospace">SW2</td><td>Port 1</td><td><em>DISCONNECTED</em></td><td>—</td><td style="color:var(--muted)">Unplugged Apr 28</td></tr>
+        <tr><td style="color:var(--blue);font-family:'JetBrains Mono',monospace">SW2</td><td>Port 3</td><td>AP2</td><td>Default untagged + 10/20/30 tagged</td><td style="color:var(--green)">UP</td></tr>
+        <tr><td style="color:var(--blue);font-family:'JetBrains Mono',monospace">SW2</td><td>Port 10</td><td>SW1 Port 10</td><td>Default tagged + 10/20/30 tagged</td><td style="color:var(--green)">UP ✓ NEW</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="amber-block">
+    <h3 style="color:var(--amber)">Key Design Change vs Apr 21</h3>
+    <div style="font-size:.82rem;color:var(--dim);line-height:1.9">
+      Apr 21: Default VLAN deleted from Port 10 (both switches) to prevent loop triangle.<br>
+      Apr 28: Default VLAN <strong style="color:var(--green)">added tagged to Port 10</strong> (both switches) — safe because SW2 Port 1 modem path is gone.<br><br>
+      <strong style="color:var(--amber)">Karl Rule still applies on SW1:</strong> <code>enable ipforwarding vlan Default</code> — required for internet routing.
+    </div>
+  </div>
+</div>
+
+<!-- VERIFIED STATE -->
+<div id="verified" class="section">
+  <div class="hero">
+    <div class="hero-tag">Post-Fix Verification</div>
+    <div class="hero-title">Switch <span>State</span></div>
+  </div>
+  <div class="card" style="margin-bottom:16px">
+    <div class="card-title" style="color:var(--green)">SW1 — show vlan (verified)</div>
+    <pre style="color:var(--green)">Default         1    192.168.0.28/24  -f--T   3/19 active   ← Port 10 now active
+VLAN_10         10   10.10.0.1/24     -f--    1/2  active
+VLAN_20         20   10.20.0.1/24     -f--    2/2  active
+VLAN_30         30   10.30.0.1/24     -f--    2/2  active</pre>
+    <div style="font-size:.8rem;color:var(--dim)"><code>f</code> flag = IP Forwarding enabled on all VLANs. Default jumped to 3 active ports after Port 10 added.</div>
+  </div>
+  <div class="card" style="margin-bottom:16px">
+    <div class="card-title" style="color:var(--blue)">SW2 — show iproute (verified)</div>
+    <pre style="color:var(--blue)">Total number of routes = 0   ← pure L2, no routing entries</pre>
+    <div style="font-size:.8rem;color:var(--dim)">Routing table empty. DHCP client disabled. No default route. Pure L2 confirmed.</div>
+  </div>
+  <div class="card">
+    <div class="card-title" style="color:var(--blue)">SW2 — show vlan (verified)</div>
+    <pre style="color:var(--blue)">Default         1    ----T    no IP, no forwarding   ← correct for pure L2
+VLAN_10         10   ----     1/2 active
+VLAN_20         20   ----     2/2 active
+VLAN_30         30   ----     2/2 active</pre>
+    <div style="font-size:.8rem;color:var(--dim)">No <code>f</code> flag on any VLAN. No SVIs. Pure L2 access switch confirmed.</div>
+  </div>
+</div>
+
+<!-- ALL COMMANDS -->
+<div id="commands" class="section">
+  <div class="hero">
+    <div class="hero-tag">Command Reference</div>
+    <div class="hero-title">All Commands <span>Apr 28</span></div>
+  </div>
+  <div class="card" style="margin-bottom:16px">
+    <div class="card-title">SW2 — Full Sequence</div>
+    <pre style="color:var(--blue)">disable dhcp vlan Default
+configure vlan Default add ports 10 tagged
+save configuration</pre>
+  </div>
+  <div class="card" style="margin-bottom:16px">
+    <div class="card-title">SW1 — Full Sequence</div>
+    <pre style="color:var(--green)">configure vlan Default add ports 10 tagged
+save configuration</pre>
+  </div>
+  <div class="card">
+    <div class="card-title">Verification Commands</div>
+    <pre style="color:var(--dim)">show iproute          ← SW2: should show 0 routes
+show vlan             ← both: check active port counts + flags
+show vlan Default     ← both: confirm Port 10 in Tag row
+show ipconfig         ← SW1: confirm all 4 SVIs EUf</pre>
+  </div>
+  <div class="info-block" style="margin-top:16px">
+    <h3 style="color:var(--blue)">Error Messages Encountered (and Why)</h3>
+    <pre style="color:var(--red);font-size:.74rem">Error: Cannot delete the default route with gateway(192.168.0.1)
+→ DHCP-learned routes cannot be deleted with configure iproute delete
+→ Fix: disable dhcp vlan Default removes it automatically
+
+Error: Gateway is not on directly attached subnet
+→ 192.168.0.28 not reachable — Default VLAN not on Port 10
+→ Fix: add Default VLAN to Port 10 first (or don't add route at all for pure L2)</pre>
+  </div>
+</div>
+
+<!-- PENDING -->
+<div id="pending" class="section">
+  <div class="hero">
+    <div class="hero-tag">Next Steps</div>
+    <div class="hero-title">Still <span>Pending</span></div>
+  </div>
+  <div class="amber-block" style="margin-bottom:16px">
+    <h3 style="color:var(--amber)">Verification Checklist — 17 Tests</h3>
+    <div style="font-size:.82rem;color:var(--dim);line-height:1.9">
+      From <a href="session_log_20260421.html#verification" style="color:var(--blue)">session_log_20260421.html#verification</a><br>
+      CLI-1–6 · TEST-1–4 · ISO-1–4 · XIQ-1–3
+    </div>
+  </div>
+  <div class="amber-block" style="margin-bottom:16px">
+    <h3 style="color:var(--amber)">Corporate SSID PSK Key Value</h3>
+    <div style="font-size:.82rem;color:var(--dim)">XIQ → Network Policy → AP_April21_KarlLab → Corporate_Wireless → Security → Key Value — still empty</div>
+  </div>
+  <div class="amber-block" style="margin-bottom:16px">
+    <h3 style="color:var(--amber)">OWE Transition Mode Toggle</h3>
+    <div style="font-size:.82rem;color:var(--dim)">Guest_Wireless SSID → "Transition Mode for 2.4GHz and 5GHz" → push policy</div>
+  </div>
+  <div class="card">
+    <div class="card-title">Deferred (Lower Priority)</div>
+    <div style="font-size:.82rem;color:var(--dim);line-height:1.9">
+      · Index page dedup — session_summary_20260422.html linked twice (banner + EOD card) — user decision to leave for now<br>
+      · VLAN 10 on SW2 shows 1/2 active — likely no wired client plugged in, verify when deploying wired client
+    </div>
+  </div>
+</div>
+
+</main>
+</div>
+<script>
+function show(id){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.sidebar-link').forEach(l=>l.classList.remove('active'));
+  const t=document.getElementById(id);
+  if(t) t.classList.add('active');
+  document.querySelectorAll('.sidebar-link').forEach(l=>{
+    const a=l.getAttribute('onclick');
+    if(a&&a.includes("'"+id+"'")) l.classList.add('active');
+  });
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+</script>
+</body>
+</html>
