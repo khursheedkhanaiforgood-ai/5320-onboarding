@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EOD Summary — Apr 28 2026 | Horizon Debrief Complete</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Syne:wght@700;800&family=Inter:wght@400;500;600&display=swap">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#08090d;--surface:#0f1117;--border:#1e2130;--border2:#252840;
+  --text:#e2e8f0;--muted:#64748b;--dim:#94a3b8;
+  --green:#4ade80;--green2:#16a34a;--green-bg:#0d1a0d;
+  --blue:#38bdf8;--blue2:#0891b2;--blue-bg:#0a1a26;
+  --amber:#fbbf24;--amber-bg:#1a1200;
+  --red:#f87171;--red-bg:#200a0a;
+  --orange:#fb923c;--cyan:#22d3ee;--cyan-bg:#041a1f;--cyan2:#0e7490;
+  --purple:#a78bfa;--purple2:#7c3aed;--purple-bg:#1a1030;
+  --nav-h:54px;--aside-w:240px;
+}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.6}
+nav{position:fixed;top:0;left:0;right:0;height:var(--nav-h);background:rgba(8,9,13,.93);border-bottom:1px solid var(--border);backdrop-filter:blur(12px);z-index:100;display:flex;align-items:center;padding:0 24px;gap:16px}
+.nav-brand{font-family:'Syne',sans-serif;font-size:.95rem;font-weight:800;color:var(--cyan);letter-spacing:.02em}
+.nav-sub{font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--muted);letter-spacing:.06em}
+.nav-right{margin-left:auto;display:flex;gap:8px}
+.back-link{font-size:.72rem;color:var(--muted);text-decoration:none;padding:4px 10px;border:1px solid var(--border);border-radius:4px}
+.back-link:hover{color:var(--text);border-color:var(--border2)}
+.layout{display:flex;margin-top:var(--nav-h);min-height:calc(100vh - var(--nav-h))}
+aside{width:var(--aside-w);flex-shrink:0;position:fixed;top:var(--nav-h);bottom:0;overflow-y:auto;background:var(--surface);border-right:1px solid var(--border);padding:20px 0}
+main{margin-left:var(--aside-w);flex:1;padding:32px 40px;max-width:960px}
+.s-section{font-family:'JetBrains Mono',monospace;font-size:.57rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);padding:0 18px;margin:16px 0 5px}
+.s-link{display:flex;align-items:center;gap:9px;padding:7px 18px;cursor:pointer;font-size:.74rem;color:var(--dim);text-decoration:none;border-left:2px solid transparent;transition:background .15s}
+.s-link:hover{background:rgba(34,211,238,.04);color:var(--text)}
+.s-link.active{color:var(--cyan);background:rgba(34,211,238,.07);border-left-color:var(--cyan)}
+.section{display:none;animation:fadeIn .25s ease-out}
+.section.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.hero{margin-bottom:28px}
+.hero-tag{font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px}
+.hero-title{font-family:'Syne',sans-serif;font-size:1.7rem;font-weight:800;color:var(--text);margin-bottom:8px}
+.hero-title span{color:var(--cyan)}
+.hero-sub{font-size:.83rem;color:var(--muted);line-height:1.7;max-width:660px}
+.stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:28px}
+.stat{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:16px;text-align:center}
+.stat-n{font-family:'Syne',sans-serif;font-size:2rem;font-weight:800;color:var(--cyan)}
+.stat-l{font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-top:4px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:20px 22px;margin-bottom:16px}
+.card-title{font-family:'JetBrains Mono',monospace;font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-bottom:14px}
+.item{display:flex;gap:10px;align-items:flex-start;padding:8px 0;border-bottom:1px solid var(--border);font-size:.82rem;color:var(--dim);line-height:1.6}
+.item:last-child{border-bottom:none}
+.dot{width:6px;height:6px;border-radius:50%;margin-top:6px;flex-shrink:0}
+.dot-g{background:var(--green)}
+.dot-b{background:var(--blue)}
+.dot-a{background:var(--amber)}
+.dot-c{background:var(--cyan)}
+.dot-r{background:var(--red)}
+.badge{font-family:'JetBrains Mono',monospace;font-size:.58rem;font-weight:700;padding:2px 7px;border-radius:3px;border:1px solid;flex-shrink:0;margin-top:2px}
+.badge-done{background:var(--green-bg);color:var(--green);border-color:var(--green2)}
+.badge-pend{background:var(--amber-bg);color:var(--amber);border-color:#713f12}
+.badge-new{background:var(--cyan-bg);color:var(--cyan);border-color:var(--cyan2)}
+pre.cli{background:var(--bg);border:1px solid var(--border);border-left:3px solid var(--cyan2);border-radius:0 6px 6px 0;padding:12px 16px;font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--cyan);line-height:1.9;overflow-x:auto}
+.fn{background:rgba(251,191,36,.05);border:1px solid #713f12;border-left:3px solid var(--amber);border-radius:0 6px 6px 0;padding:10px 14px;font-size:.78rem;color:#fcd34d;margin:10px 0;line-height:1.6}
+.fn strong{color:var(--amber);font-family:'JetBrains Mono',monospace;font-size:.6rem;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:4px}
+table{width:100%;border-collapse:collapse;font-size:.8rem}
+th{text-align:left;padding:8px 12px;color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:.6rem;text-transform:uppercase;border-bottom:1px solid var(--border2)}
+td{padding:9px 12px;border-bottom:1px solid var(--border);color:var(--dim)}
+td:first-child{font-family:'JetBrains Mono',monospace;color:var(--text)}
+@media(max-width:700px){aside{display:none}main{margin-left:0;padding:20px 16px}}
+</style>
+</head>
+<body>
+<nav>
+  <div class="nav-brand">EOD SUMMARY — APR 28 2026</div>
+  <div class="nav-sub">HORIZON LAB · DEBRIEF COMPLETE · KHURSHEED KHAN</div>
+  <div class="nav-right">
+    <a class="back-link" href="session_summary_20260428.html">← SW2 Debug EOD</a>
+    <a class="back-link" href="debrief_apr21.html">Debrief →</a>
+    <a class="back-link" href="index-nyt.html">Index →</a>
+  </div>
+</nav>
+
+<div class="layout">
+<aside>
+  <div class="s-section">Session</div>
+  <a class="s-link active" onclick="show('overview')">Overview</a>
+  <div class="s-section">Accomplished</div>
+  <a class="s-link" onclick="show('config-blocks')">CLI Config Blocks (S04–S15)</a>
+  <a class="s-link" onclick="show('pure-l2')">Pure L2 Update Deck</a>
+  <div class="s-section">Reference</div>
+  <a class="s-link" onclick="show('files')">Files Changed</a>
+  <a class="s-link" onclick="show('commands')">Key Commands</a>
+  <a class="s-link" onclick="show('pending')">Pending Items</a>
+</aside>
+
+<main>
+
+<!-- OVERVIEW -->
+<div id="overview" class="section active">
+  <div class="hero">
+    <div class="hero-tag">Horizon Custom Fabrication · Apr 28 2026 · EOD P2</div>
+    <div class="hero-title">Debrief <span>Complete</span></div>
+    <div class="hero-sub">All 15 PPTX slides now have CLI config blocks. Pure L2 Update deck (12 slides) extracted from PPTX and fully integrated into debrief_apr21.html.</div>
+  </div>
+
+  <div class="stat-row">
+    <div class="stat"><div class="stat-n">15</div><div class="stat-l">Slides with CLI blocks</div></div>
+    <div class="stat"><div class="stat-n">12</div><div class="stat-l">Pure L2 slides added</div></div>
+    <div class="stat"><div class="stat-n">2</div><div class="stat-l">Commits pushed</div></div>
+    <div class="stat"><div class="stat-n" style="color:var(--green)">✓</div><div class="stat-l">XIQ Online (Apr 28)</div></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title" style="color:var(--cyan)">Session Summary</div>
+    <div class="item"><span class="dot dot-g"></span><span><strong style="color:var(--text)">Config blocks on all 15 slides</strong> — Added <code style="color:var(--cyan)">.config-block</code> divs with exact EXOS CLI + XIQ nav paths to every original PPTX slide in debrief_apr21.html. Slides S04–S15 done this session; slides S01–S03 were done in prior session. Upgraded 4 legacy <code style="color:var(--muted)">.cli</code> divs (S04, S05, S07, S12) to new format with <code style="color:var(--muted)">c-comment</code>, <code style="color:var(--amber)">c-warn</code>, <code style="color:var(--red)">c-strike</code> spans.</span></div>
+    <div class="item"><span class="dot dot-c"></span><span><strong style="color:var(--text)">Pure L2 Update deck</strong> — Extracted all 12 slide images from <code style="color:var(--cyan)">Horizon_Pure_L2_Update.pptx</code> (PPTX is pure-image format). Copied to <code style="color:var(--cyan)">pure_l2/</code> folder. Added new sidebar section "Pure L2 Update — Apr 28" with L1–L12 links and full slide sections (image + summary + config block per slide).</span></div>
+    <div class="item"><span class="dot dot-g"></span><span><strong style="color:var(--text)">Both commits pushed to GitHub Pages</strong> — debrief_apr21.html: 205 insertions (config blocks). pure_l2 deck: 330 insertions + 12 new PNG files.</span></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title" style="color:var(--green)">Full Day — Apr 28 Recap</div>
+    <div class="item"><span class="dot dot-a"></span><span><strong style="color:var(--text)">Morning:</strong> SW2 debug — DHCP-learned bad default route (#bo flag), physically disconnected SW2 Port 1 from modem, restored Default VLAN tagged on Port 10 trunk both switches, XIQ came back online. EOD HTML: session_summary_20260428.html.</span></div>
+    <div class="item"><span class="dot dot-b"></span><span><strong style="color:var(--text)">Afternoon:</strong> Added Apr 28 day section to index-nyt.html. Ingested EOD_Blueprint_Apr23_2026.html. Fixed Meridian/Horizon conflation across all 3 index pages. Created Meridian memory.</span></div>
+    <div class="item"><span class="dot dot-c"></span><span><strong style="color:var(--text)">Evening:</strong> CLI config blocks on all 15 debrief slides. Processed Pure L2 Update PPTX into 12-slide deck section. Memory updated.</span></div>
+  </div>
+</div>
+
+<!-- CONFIG BLOCKS -->
+<div id="config-blocks" class="section">
+  <div class="hero">
+    <div class="hero-tag">Accomplished · Task 1</div>
+    <div class="hero-title">CLI Config Blocks — <span>All 15 Slides</span></div>
+    <div class="hero-sub">Every original PPTX slide in debrief_apr21.html now has the exact EXOS CLI or XIQ nav path that deployed the concept shown on that slide.</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title" style="color:var(--cyan)">CSS Infrastructure (in &lt;style&gt;)</div>
+    <pre class="cli">.config-block{margin-top:16px;background:var(--bg);border:1px solid var(--border);border-top:2px solid var(--green2);border-radius:6px;overflow:hidden}
+.config-block-label{font-family:'JetBrains Mono',...;color:var(--green);background:var(--green-bg);...}
+.config-block pre{padding:14px 16px;font-family:'JetBrains Mono',...;color:var(--green);...}
+.config-block .c-comment{color:var(--muted)}   /* dim grey — explanatory */
+.config-block .c-warn{color:var(--amber)}       /* amber — prerequisite / caution */
+.config-block .c-strike{color:var(--red);text-decoration:line-through}  /* wrong/old */</pre>
+  </div>
+
+  <div class="card">
+    <div class="card-title" style="color:var(--green)">Slide Config Block Map</div>
+    <table>
+      <thead><tr><th>Slide</th><th>Topic</th><th>Config Block Content</th></tr></thead>
+      <tbody>
+        <tr><td>S01</td><td>Title / Hardware</td><td>Hardware inventory comments (SW1, SW2, APs, Modem)</td></tr>
+        <tr><td>S02</td><td>Primary / Secondary Roles</td><td>VLAN creation + SVIs + ipforwarding both switches</td></tr>
+        <tr><td>S03</td><td>Physical vs Logical</td><td>Port assignments — Ports 1/3/5/10, all VLANs</td></tr>
+        <tr><td>S04</td><td>Port 10 Trunk</td><td>VLAN 10/20/30 + Default tagged on Port 10; Apr 28 note</td></tr>
+        <tr><td>S05</td><td>DHCP Reach-Back</td><td>Full DHCP pools — all 3 VLANs, ports 3/5/10</td></tr>
+        <tr><td>S06</td><td>Internet Ghosting</td><td>Diagnostic commands: show iproute, show ipconfig, ping tests</td></tr>
+        <tr><td>S07</td><td>Karl Rule</td><td>ipforwarding all VLANs including Default + default route</td></tr>
+        <tr><td>S08</td><td>QoS Strategy</td><td>qosprofile qp6/qp1 on ports 3,10 (both switches)</td></tr>
+        <tr><td>S09</td><td>E2E QoS</td><td>XIQ scheduling weights (6/1) + EXOS qosprofile</td></tr>
+        <tr><td>S10</td><td>Guest Threat Model</td><td>XIQ Guest SSID → L3 Firewall rules nav path</td></tr>
+        <tr><td>S11</td><td>Multi-Layer Security</td><td>XIQ rules + EXOS ACL backup (belt + suspenders)</td></tr>
+        <tr><td>S12</td><td>EXOS ACL Syntax</td><td>c-strike wrong Cisco syntax + correct EXOS entry structure</td></tr>
+        <tr><td>S13</td><td>OWE Transition Mode</td><td>XIQ Guest SSID → OWE → Transition Mode nav + pending note</td></tr>
+        <tr><td>S14</td><td>Final Blueprint</td><td>Complete SW1 config summary (VLANs, ports, SVIs, DHCP, QoS)</td></tr>
+        <tr><td>S15</td><td>Hybrid Advantage</td><td>CLI pipes (EXOS) vs cloud traffic (XIQ) split</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- PURE L2 DECK -->
+<div id="pure-l2" class="section">
+  <div class="hero">
+    <div class="hero-tag">Accomplished · Task 2</div>
+    <div class="hero-title">Pure L2 Update — <span>12-Slide Deck</span></div>
+    <div class="hero-sub">Horizon_Pure_L2_Update.pptx processed and fully integrated. Source: PPTX is pure-image format — images extracted from zip archive, copied to pure_l2/.</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title" style="color:var(--cyan)">Extraction Method</div>
+    <pre class="cli">unzip Horizon_Pure_L2_Update.pptx -d /tmp/pure_l2_pptx
+# Each slide = one full-size PNG in ppt/media/
+# slide1.xml → image1.png, slide2.xml → image2.png, ... (confirmed via _rels)
+cp /tmp/pure_l2_pptx/ppt/media/image*.png /tmp/main-work/pure_l2/</pre>
+  </div>
+
+  <div class="card">
+    <div class="card-title" style="color:var(--cyan)">Slide Map — Pure L2 Section</div>
+    <table>
+      <thead><tr><th>ID</th><th>Title</th><th>Key Content</th></tr></thead>
+      <tbody>
+        <tr><td>L1</td><td>Title</td><td>"Pure L2 Recovery & Port 10 Trunk Standardization"</td></tr>
+        <tr><td>L2</td><td>Objectives</td><td>4 objectives: storm eliminated, trunk standardized, XIQ maintained, strict roles</td></tr>
+        <tr><td>L3</td><td>Loop Triangle</td><td>Root cause: dual physical uplinks + no STP. c-strike workaround, permanent fix shown</td></tr>
+        <tr><td>L4</td><td>Architectural Fix</td><td>Physically disconnect SW2 Port 1 → single uplink → restore Default on Port 10</td></tr>
+        <tr><td>L5</td><td>Updated Topology</td><td>SW1/SW2 port maps + verification commands (show iproute, show vlan Default)</td></tr>
+        <tr><td>L6</td><td>AP2 Phone-Home</td><td>Challenge: no Port 1 on SW2 → how does AP2 reach XIQ? Answer: Default tagged on trunk</td></tr>
+        <tr><td>L7</td><td>Frame Journey</td><td>AP2 → SW2 Port3 (untagged) → 802.1Q tag → Port10 → SW1 → Port1 → Modem → XIQ</td></tr>
+        <tr><td>L8</td><td>SW1 Config</td><td>Strike workaround (delete ports 10) → add permanent fix (add ports 10 tagged)</td></tr>
+        <tr><td>L9</td><td>SW2 Config</td><td>⚠ Prerequisite physical disconnect → configure vlan Default add ports 10 tagged</td></tr>
+        <tr><td>L10</td><td>Diagnostic Matrix</td><td>Table: Apr 22 Workaround vs Pure L2 Architecture (4 dimensions)</td></tr>
+        <tr><td>L11</td><td>Lesson 08</td><td>"Pure L2 Means a Single Uplink" — dual-path was true root cause, not VLAN 1</td></tr>
+        <tr><td>L12</td><td>Next Steps</td><td>SW2 recovery ✓ COMPLETE. Queue: Guest Isolation, Inter-VLAN verify, QoS, PSK, OWE</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="fn"><strong>Sidebar Addition</strong>New sidebar section "Pure L2 Update — Apr 28" added to debrief_apr21.html with 12 sidebar links (L1–L12). Each section has: slide image, summary, config block with EXOS CLI.</div>
+</div>
+
+<!-- FILES -->
+<div id="files" class="section">
+  <div class="hero">
+    <div class="hero-tag">Reference · Files</div>
+    <div class="hero-title">Files <span>Changed</span></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title" style="color:var(--cyan)">Commit 1 — Config Blocks (c6224ec)</div>
+    <table>
+      <thead><tr><th>File</th><th>Change</th></tr></thead>
+      <tbody>
+        <tr><td>debrief_apr21.html</td><td>+205 lines — .config-block on slides S04–S15, upgraded .cli divs</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <div class="card-title" style="color:var(--cyan)">Commit 2 — Pure L2 Deck (04d3b4a)</div>
+    <table>
+      <thead><tr><th>File</th><th>Change</th></tr></thead>
+      <tbody>
+        <tr><td>debrief_apr21.html</td><td>+330 lines — sidebar section + 12 slide sections</td></tr>
+        <tr><td>pure_l2/image1–12.png</td><td>12 new files — extracted from Horizon_Pure_L2_Update.pptx</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <div class="card-title" style="color:var(--muted)">Source Files (Downloads)</div>
+    <div class="item"><span class="dot dot-c"></span><span><code style="color:var(--cyan)">/Users/khukhan/Downloads/Horizon_Pure_L2_Update.pptx</code> — 12-slide pure-image PPTX. Extracted via unzip to /tmp/pure_l2_pptx/</span></div>
+    <div class="item"><span class="dot dot-b"></span><span><code style="color:var(--cyan)">/Users/khukhan/Downloads/Horizon_Hybrid_Lab_Debrief_(2).pptx</code> — original 15-slide debrief (config blocks sourced from here)</span></div>
+  </div>
+</div>
+
+<!-- COMMANDS -->
+<div id="commands" class="section">
+  <div class="hero">
+    <div class="hero-tag">Reference · Commands</div>
+    <div class="hero-title">Key <span>Commands</span></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title" style="color:var(--cyan)">PPTX Image Extraction</div>
+    <pre class="cli">unzip "/Users/khukhan/Downloads/Horizon_Pure_L2_Update.pptx" -d /tmp/pure_l2_pptx
+ls /tmp/pure_l2_pptx/ppt/media/          # image1.png … image12.png
+cat /tmp/pure_l2_pptx/ppt/slides/_rels/slide1.xml.rels  # confirm slide→image mapping
+cp /tmp/pure_l2_pptx/ppt/media/image*.png /tmp/main-work/pure_l2/</pre>
+  </div>
+
+  <div class="card">
+    <div class="card-title" style="color:var(--green)">Git Commits</div>
+    <pre class="cli">git add debrief_apr21.html && git commit -m "Add CLI config blocks to all 15 PPTX slides"
+git add debrief_apr21.html pure_l2/ && git commit -m "Add Pure L2 Update deck (12 slides)"
+git push origin main</pre>
+  </div>
+
+  <div class="card">
+    <div class="card-title" style="color:var(--amber)">SW2 Debug — Apr 28 Morning (carried forward)</div>
+    <pre class="cli"># SW2 — remove DHCP client (was giving bad default route to modem)
+disable dhcp vlan Default
+# SW1 + SW2 — restore Default VLAN on trunk (safe: Port 1 disconnected)
+configure vlan Default add ports 10 tagged
+save configuration</pre>
+  </div>
+</div>
+
+<!-- PENDING -->
+<div id="pending" class="section">
+  <div class="hero">
+    <div class="hero-tag">Reference · Pending</div>
+    <div class="hero-title">Pending <span>Items</span></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title" style="color:var(--amber)">Lab — Still Outstanding</div>
+    <div class="item"><span class="badge badge-pend">PENDING</span><span><strong style="color:var(--text)">Verification Checklist</strong> — 17 tests in session_log_20260421.html#verification. CLI-1–6, TEST-1–4, ISO-1–4, XIQ-1–3.</span></div>
+    <div class="item"><span class="badge badge-pend">PENDING</span><span><strong style="color:var(--text)">Corporate SSID PSK Key Value</strong> — XIQ → Network Policy → AP_April21_KarlLab → Corporate_Wireless → Security → Key Value (still empty).</span></div>
+    <div class="item"><span class="badge badge-pend">PENDING</span><span><strong style="color:var(--text)">OWE Transition Mode toggle</strong> — Guest_Wireless SSID → Transition Mode → push policy to APs.</span></div>
+    <div class="item"><span class="badge badge-pend">PENDING</span><span><strong style="color:var(--text)">Wireless Guest Isolation (VLAN 30/60)</strong> — Pure L2 L12 next step.</span></div>
+    <div class="item"><span class="badge badge-pend">PENDING</span><span><strong style="color:var(--text)">Inter-VLAN Routing Verification</strong> — VLAN 10 → VLAN 20 confirmed working.</span></div>
+    <div class="item"><span class="badge badge-pend">PENDING</span><span><strong style="color:var(--text)">QoS Classification Rules</strong> — verify QP6/QP1 operational on both switches.</span></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title" style="color:var(--green)">Completed This Session</div>
+    <div class="item"><span class="badge badge-done">DONE</span><span>CLI config blocks on all 15 debrief slides (S01–S15)</span></div>
+    <div class="item"><span class="badge badge-done">DONE</span><span>Pure L2 Update deck — 12 slides extracted + integrated into debrief_apr21.html</span></div>
+    <div class="item"><span class="badge badge-done">DONE</span><span>SW2 pure L2 debug resolved — XIQ online, both APs connected</span></div>
+    <div class="item"><span class="badge badge-done">DONE</span><span>Apr 28 day section added to index-nyt.html</span></div>
+    <div class="item"><span class="badge badge-done">DONE</span><span>Meridian/Horizon conflation fixed across all 3 index pages + memory saved</span></div>
+    <div class="item"><span class="badge badge-done">DONE</span><span>EOD Blueprint Apr 23 + Apr 22 ingested to all index pages</span></div>
+    <div class="item"><span class="badge badge-done">DONE</span><span>Memory updated for project_karl_lab_apr21, project_meridian_retail</span></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title" style="color:var(--blue)">Deferred (Intentional)</div>
+    <div class="item"><span class="badge" style="background:var(--blue-bg);color:var(--blue);border-color:var(--blue2)">DEFER</span><span>session_summary_20260422.html linked twice on index pages — user decided Apr 28 to keep both, intentionally deferred.</span></div>
+  </div>
+</div>
+
+</main>
+</div>
+
+<script>
+function show(id){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.s-link').forEach(l=>l.classList.remove('active'));
+  const t=document.getElementById(id);
+  if(t) t.classList.add('active');
+  document.querySelectorAll('.s-link').forEach(l=>{
+    const a=l.getAttribute('onclick');
+    if(a&&a.includes("'"+id+"'")) l.classList.add('active');
+  });
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+</script>
+</body>
+</html>
