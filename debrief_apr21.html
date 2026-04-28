@@ -142,6 +142,20 @@ main{margin-left:var(--aside-w);flex:1;padding:32px 40px;max-width:1000px}
   <div class="sidebar-link" onclick="show('bp-qos')"><span class="s-num">§7</span>QoS</div>
   <div class="sidebar-link" onclick="show('bp-vault')"><span class="s-num">§8</span>Alex Vault</div>
   <div class="sidebar-link" onclick="show('bp-modem')"><span class="s-num">§9</span>Modem Routes</div>
+
+  <div class="sidebar-section">Pure L2 Update — Apr 28</div>
+  <div class="sidebar-link" onclick="show('l2-01')"><span class="s-num">L1</span>Title</div>
+  <div class="sidebar-link" onclick="show('l2-02')"><span class="s-num">L2</span>Objectives</div>
+  <div class="sidebar-link" onclick="show('l2-03')"><span class="s-num">L3</span>Loop Triangle</div>
+  <div class="sidebar-link" onclick="show('l2-04')"><span class="s-num">L4</span>Architectural Fix</div>
+  <div class="sidebar-link" onclick="show('l2-05')"><span class="s-num">L5</span>Updated Topology</div>
+  <div class="sidebar-link" onclick="show('l2-06')"><span class="s-num">L6</span>AP2 Phone-Home</div>
+  <div class="sidebar-link" onclick="show('l2-07')"><span class="s-num">L7</span>Frame Journey</div>
+  <div class="sidebar-link" onclick="show('l2-08')"><span class="s-num">L8</span>SW1 Config Update</div>
+  <div class="sidebar-link" onclick="show('l2-09')"><span class="s-num">L9</span>SW2 Config Update</div>
+  <div class="sidebar-link" onclick="show('l2-10')"><span class="s-num">L10</span>Diagnostic Matrix</div>
+  <div class="sidebar-link" onclick="show('l2-11')"><span class="s-num">L11</span>Lesson 08</div>
+  <div class="sidebar-link" onclick="show('l2-12')"><span class="s-num">L12</span>Next Steps</div>
 </aside>
 
 <main>
@@ -1044,6 +1058,322 @@ show qosprofile</pre>
   </div>
   <div style="background:var(--green-bg);border:1px solid var(--green2);border-radius:6px;padding:14px 16px;font-size:.82rem">
     <strong style="color:var(--green)">Verification:</strong> <span style="color:var(--dim)">From a guest client (10.30.x), ping 192.168.0.1 (modem) → should succeed. Ping 8.8.8.8 → should succeed. Ping 10.10.0.1 (SW1 Corp SVI) → should FAIL (L3 firewall blocks it). If all three behave correctly, routing + isolation is working.</span>
+  </div>
+</div>
+
+<!-- PURE L2 UPDATE — L1 Title -->
+<div id="l2-01" class="section">
+  <div class="slide-card">
+    <img class="slide-img" src="pure_l2/image1.png" alt="Pure L2 Slide 1">
+    <div class="slide-body">
+      <div class="slide-meta">
+        <span class="slide-num">PURE L2 · L1</span>
+        <span class="slide-title">Lab Architecture Update: 'Pure L2' Recovery &amp; Port 10 Trunk Standardization</span>
+      </div>
+      <div class="tags"><span class="tag tag-s2">S2 L2 Switching</span><span class="tag tag-lab">Lab Build</span><span class="tag" style="background:rgba(34,211,238,.08);color:#22d3ee;border-color:#0e7490">Apr 28 Fix</span></div>
+      <div class="slide-summary">Title slide of the Apr 28 architectural update deck. Documents the transition from the Apr 22 temporary workaround to a permanent, professional architectural fix for SW2. The core change: physically enforcing SW2 as a strictly pure L2 access switch by removing its direct physical uplink to the modem.</div>
+    </div>
+  </div>
+</div>
+
+<!-- PURE L2 UPDATE — L2 Objectives -->
+<div id="l2-02" class="section">
+  <div class="slide-card">
+    <img class="slide-img" src="pure_l2/image2.png" alt="Pure L2 Slide 2">
+    <div class="slide-body">
+      <div class="slide-meta">
+        <span class="slide-num">PURE L2 · L2</span>
+        <span class="slide-title">Stabilizing the Horizon Lab Architecture — Objectives</span>
+      </div>
+      <div class="tags"><span class="tag tag-s2">S2 L2 Switching</span><span class="tag tag-s3">S3 L3 Routing</span><span class="tag tag-lab">Lab Build</span></div>
+      <div class="slide-summary">
+        <strong style="color:var(--text)">Four objectives achieved:</strong><br>
+        ✓ Eliminated the L2 broadcast storm risk definitively<br>
+        ✓ Standardized the Port 10 inter-switch trunk<br>
+        ✓ Maintained full AP3000 integration and ExtremeCloud IQ (XIQ) connectivity<br>
+        ✓ Established strict primary (L3) / secondary (Pure L2) switch roles
+      </div>
+      <div class="field-note"><strong>Context</strong>This deck records the transition from the Apr 22 temporary workaround to a permanent fix. The Apr 22 fix (delete Default from Port 10) halted the storm but broke AP2's management path to XIQ.</div>
+    </div>
+  </div>
+</div>
+
+<!-- PURE L2 UPDATE — L3 Loop Triangle -->
+<div id="l2-03" class="section">
+  <div class="slide-card">
+    <img class="slide-img" src="pure_l2/image3.png" alt="Pure L2 Slide 3">
+    <div class="slide-body">
+      <div class="slide-meta">
+        <span class="slide-num">PURE L2 · L3</span>
+        <span class="slide-title">The Diagnosis: The Loop Triangle</span>
+      </div>
+      <div class="tags"><span class="tag tag-s6">S6 Troubleshooting</span><span class="tag tag-s2">S2 L2 Switching</span></div>
+      <div class="slide-summary">
+        <strong style="color:var(--text)">Root Cause:</strong> Both EXOS switches maintained direct physical links to the Quantum Fiber modem (Port 1, Default VLAN 1). Simultaneously, they were linked to each other via the Port 10 trunk. Without STP blocking a path, this dual-uplink architecture created a cyclical L2 broadcast storm.<br><br>
+        <strong style="color:var(--text)">Apr 22 Workaround:</strong> Deleting VLAN 1 from Port 10 halted the storm but broke the management path for AP2.
+      </div>
+      <div class="config-block"><div class="config-block-label">The Loop Path (Root Cause)</div><pre><span class="c-comment"># Broadcast storm cycle:</span>
+<span class="c-comment"># Modem → SW1 Port1 (Default) → Port10 trunk → SW2 → SW2 Port1 → Modem</span>
+<span class="c-comment"># No STP = no loop break = broadcast amplification</span>
+
+<span class="c-comment"># Apr 22 workaround (temporary — broke AP2):</span>
+<span class="c-strike">configure vlan Default delete ports 10</span>   <span class="c-comment"># halted storm but broke AP2 XIQ path</span>
+
+<span class="c-comment"># Permanent fix (Apr 28):</span>
+<span class="c-warn"># ⚠ Physically disconnect SW2 Port 1 cable from modem FIRST</span>
+configure vlan Default add ports 10 tagged  <span class="c-comment"># restore AP2 management path</span></pre></div>
+    </div>
+  </div>
+</div>
+
+<!-- PURE L2 UPDATE — L4 Architectural Fix -->
+<div id="l2-04" class="section">
+  <div class="slide-card">
+    <img class="slide-img" src="pure_l2/image4.png" alt="Pure L2 Slide 4">
+    <div class="slide-body">
+      <div class="slide-meta">
+        <span class="slide-num">PURE L2 · L4</span>
+        <span class="slide-title">The Architectural Fix: Forcing "Pure L2"</span>
+      </div>
+      <div class="tags"><span class="tag tag-s2">S2 L2 Switching</span><span class="tag tag-lab">Lab Build</span><span class="tag" style="background:rgba(34,211,238,.08);color:#22d3ee;border-color:#0e7490">Apr 28 Fix</span></div>
+      <div class="slide-summary">
+        <strong style="color:var(--text)">The Solution:</strong> SW2 must operate strictly as a downstream L2 access switch. By physically disconnecting Port 1 on SW2, we force all traffic linearly up the Port 10 trunk. This eliminates the loop architecture entirely, allowing us to safely restore VLAN 1 to the inter-switch trunk.<br><br>
+        <strong style="color:var(--text)">Before (Flawed):</strong> SW2 had two uplinks — Port 1 to modem + Port 10 to SW1 = loop triangle.<br>
+        <strong style="color:var(--text)">After (Pure L2):</strong> SW2 has one uplink only — Port 10 to SW1. Linear topology, zero storm risk.
+      </div>
+      <div class="config-block"><div class="config-block-label">Physical + Logical Fix</div><pre><span class="c-warn"># STEP 1 — Physical action (prerequisite for everything below)</span>
+<span class="c-warn"># Unplug the cable from SW2 Port 1 (was connected to modem)</span>
+
+<span class="c-comment"># STEP 2 — Now safe to restore Default VLAN on trunk (both switches)</span>
+configure vlan Default add ports 10 tagged   <span class="c-comment"># SW1</span>
+configure vlan Default add ports 10 tagged   <span class="c-comment"># SW2</span>
+
+<span class="c-comment"># Result: single linear path SW2 → Port10 → SW1 → Port1 → Modem</span>
+<span class="c-comment"># No loop possible — only one physical path to modem exists</span></pre></div>
+    </div>
+  </div>
+</div>
+
+<!-- PURE L2 UPDATE — L5 Updated Topology -->
+<div id="l2-05" class="section">
+  <div class="slide-card">
+    <img class="slide-img" src="pure_l2/image5.png" alt="Pure L2 Slide 5">
+    <div class="slide-body">
+      <div class="slide-meta">
+        <span class="slide-num">PURE L2 · L5</span>
+        <span class="slide-title">Updated Horizon Lab Topology</span>
+      </div>
+      <div class="tags"><span class="tag tag-s2">S2 L2 Switching</span><span class="tag tag-s3">S3 L3 Routing</span><span class="tag tag-lab">Lab Build</span></div>
+      <div class="slide-summary">
+        <strong style="color:var(--text)">SW1 — Primary L3 Core (192.168.0.28):</strong><br>
+        Port 1: Sole Uplink to Quantum Fiber Modem (Untagged, Default VLAN 1)<br>
+        Port 3: AP1 (Tagged VLAN 10/20/30, Untagged VLAN 1)<br>
+        Port 10: Inter-Switch Trunk<br><br>
+        <strong style="color:var(--text)">SW2 — Secondary L2 Access:</strong><br>
+        Port 1: Physically Disconnected ✗<br>
+        Port 3: AP2 (Tagged VLAN 10/20/30, Untagged VLAN 1)<br>
+        Port 10: Sole Uplink to SW1 (Trunk)<br>
+        Note: SW2 contains NO Management IP or SVIs
+      </div>
+      <div class="config-block"><div class="config-block-label">Final Topology State — Verification</div><pre><span class="c-comment"># SW2 — confirm pure L2 state</span>
+show iproute              <span class="c-comment"># expect: 0 routes (no IP routing)</span>
+show ipconfig             <span class="c-comment"># expect: no VLANs with IP addresses</span>
+show vlan Default         <span class="c-comment"># expect: no IP, IPv4 Forwarding: Disabled</span>
+show ports 1 information  <span class="c-comment"># expect: Link State: Ready (not Active — cable out)</span>
+show vlan detail          <span class="c-comment"># expect: Default on ports 3,10; VLANs 10/20/30 on ports 3,10</span></pre></div>
+    </div>
+  </div>
+</div>
+
+<!-- PURE L2 UPDATE — L6 AP2 Phone-Home Challenge -->
+<div id="l2-06" class="section">
+  <div class="slide-card">
+    <img class="slide-img" src="pure_l2/image6.png" alt="Pure L2 Slide 6">
+    <div class="slide-body">
+      <div class="slide-meta">
+        <span class="slide-num">PURE L2 · L6</span>
+        <span class="slide-title">The Verification Challenge: AP2 Phone-Home</span>
+      </div>
+      <div class="tags"><span class="tag tag-s6">S6 Troubleshooting</span><span class="tag tag-s4">S4 Wireless</span><span class="tag tag-s5">S5 XIQ Ops</span></div>
+      <div class="slide-summary">
+        <strong style="color:var(--text)">The Problem:</strong> With Port 1 physically disconnected on SW2, the direct path to the modem's DHCP server is gone. How does AP2 (connected to SW2 Port 3) acquire its management IP address from the Quantum Fiber modem and establish its connection back to ExtremeCloud IQ (XIQ)?<br><br>
+        <strong style="color:var(--text)">The Answer:</strong> Default VLAN tagged on the Port 10 trunk. AP2's untagged management traffic enters SW2 Port 3, gets an 802.1Q tag applied, travels the trunk to SW1, reaches the modem via SW1 Port 1, gets a 192.168.0.x IP, then phones home to XIQ.
+      </div>
+      <div class="field-note"><strong>Key Insight</strong>The AP doesn't need a direct path to the modem — it needs a routable path. Once Default VLAN is on the Port 10 trunk, SW2 provides that routable path through SW1.</div>
+    </div>
+  </div>
+</div>
+
+<!-- PURE L2 UPDATE — L7 Frame Journey -->
+<div id="l2-07" class="section">
+  <div class="slide-card">
+    <img class="slide-img" src="pure_l2/image7.png" alt="Pure L2 Slide 7">
+    <div class="slide-body">
+      <div class="slide-meta">
+        <span class="slide-num">PURE L2 · L7</span>
+        <span class="slide-title">Frame Journey: AP2 to ExtremeCloud IQ</span>
+      </div>
+      <div class="tags"><span class="tag tag-s1">S1 OSI / L1–L3</span><span class="tag tag-s2">S2 L2 Switching</span><span class="tag tag-s4">S4 Wireless</span></div>
+      <div class="slide-summary">
+        <strong style="color:var(--text)">1. Ingress:</strong> AP2 management traffic enters SW2 Port 3 untagged on the Default VLAN.<br>
+        <strong style="color:var(--text)">2. Encapsulation:</strong> SW2 applies an 802.1Q VLAN 1 tag and forwards the frame across the Port 10 trunk.<br>
+        <strong style="color:var(--text)">3. Transit:</strong> SW1 receives the tagged traffic on Port 10.<br>
+        <strong style="color:var(--text)">4. Egress:</strong> SW1 strips the VLAN tag and routes the frame untagged out of Port 1 directly to the Quantum Fiber modem → XIQ.
+      </div>
+      <div class="config-block"><div class="config-block-label">Frame Path — Config That Makes It Work</div><pre><span class="c-comment"># SW2 Port 3 — AP2 connects here (untagged = management lifeline)</span>
+configure vlan Default add ports 3 untagged
+configure vlan VLAN_10 add ports 3 tagged
+configure vlan VLAN_20 add ports 3 tagged
+configure vlan VLAN_30 add ports 3 tagged
+
+<span class="c-comment"># SW2 Port 10 — trunk to SW1 (Default tagged = AP2 management path)</span>
+configure vlan Default add ports 10 tagged  <span class="c-comment"># ← this is the key line</span>
+configure vlan VLAN_10 add ports 10 tagged
+configure vlan VLAN_20 add ports 10 tagged
+configure vlan VLAN_30 add ports 10 tagged
+
+<span class="c-comment"># SW1 Port 1 — untagged Default exits here to modem → XIQ</span>
+configure vlan Default add ports 1 untagged</pre></div>
+    </div>
+  </div>
+</div>
+
+<!-- PURE L2 UPDATE — L8 SW1 Config Update -->
+<div id="l2-08" class="section">
+  <div class="slide-card">
+    <img class="slide-img" src="pure_l2/image8.png" alt="Pure L2 Slide 8">
+    <div class="slide-body">
+      <div class="slide-meta">
+        <span class="slide-num">PURE L2 · L8</span>
+        <span class="slide-title">Code Execution: SW1 Configuration Update</span>
+      </div>
+      <div class="tags"><span class="tag tag-s2">S2 L2 Switching</span><span class="tag tag-lab">Lab Build</span><span class="tag" style="background:rgba(34,211,238,.08);color:#22d3ee;border-color:#0e7490">Apr 28 Fix</span></div>
+      <div class="slide-summary">Replacing the Apr 22 workaround on the Primary L3 Core. We must explicitly allow the Default VLAN back onto the inter-switch link. This is safe now because SW2 Port 1 is physically disconnected — the loop triangle no longer exists.</div>
+      <div class="config-block"><div class="config-block-label">SW1 — Remove Workaround, Apply Permanent Fix</div><pre><span class="c-comment"># ─── Apr 22 Workaround (LOOP PREVENTION — now obsolete) ───</span>
+<span class="c-strike">configure vlan Default delete ports 10</span>
+
+<span class="c-comment"># ─── Architectural Fix (Pure L2 Trunk) ────────────────────</span>
+configure vlan Default add ports 10 tagged
+
+<span class="c-comment"># Verify SW1 — Default should appear on ports 1, 3, and 10</span>
+show vlan Default
+<span class="c-comment"># Port 1: untagged (WAN uplink to modem)</span>
+<span class="c-comment"># Port 3: untagged (AP1 management lifeline)</span>
+<span class="c-comment"># Port 10: tagged (AP2 management reach-back via SW2)</span></pre></div>
+    </div>
+  </div>
+</div>
+
+<!-- PURE L2 UPDATE — L9 SW2 Config Update -->
+<div id="l2-09" class="section">
+  <div class="slide-card">
+    <img class="slide-img" src="pure_l2/image9.png" alt="Pure L2 Slide 9">
+    <div class="slide-body">
+      <div class="slide-meta">
+        <span class="slide-num">PURE L2 · L9</span>
+        <span class="slide-title">Code Execution: SW2 Configuration Update</span>
+      </div>
+      <div class="tags"><span class="tag tag-s2">S2 L2 Switching</span><span class="tag tag-lab">Lab Build</span><span class="tag" style="background:rgba(34,211,238,.08);color:#22d3ee;border-color:#0e7490">Apr 28 Fix</span></div>
+      <div class="slide-summary">Executing the Pure L2 reality on the Secondary Access switch. The physical disconnection is a prerequisite to the logical configuration — you cannot add Default back to Port 10 while Port 1 is still physically connected to the modem (loop risk).</div>
+      <div class="field-note"><strong>⚠ PREREQUISITE</strong>Physically disconnect the cable from SW2 Port 1 BEFORE running any CLI below. The physical action must precede the logical change.</div>
+      <div class="config-block"><div class="config-block-label">SW2 — Pure L2 Configuration</div><pre><span class="c-warn"># ⚠ PHYSICALLY DISCONNECT PORT 1 CABLE FIRST — then proceed</span>
+
+<span class="c-comment"># SW2 — SECONDARY L2 ACCESS</span>
+<span class="c-comment"># Standardize trunk — restore Default VLAN for AP2 management path</span>
+configure vlan Default add ports 10 tagged
+
+<span class="c-comment"># Verify isolation — SW2 must have ZERO IP config</span>
+show vlan Default
+<span class="c-comment"># Expected output: no IP address configured, IPv4 Forwarding: Disabled</span>
+show iproute
+<span class="c-comment"># Expected output: 0 routes — no entries at all</span>
+show ipconfig
+<span class="c-comment"># Expected: all VLANs show no IP address, forwarding disabled</span></pre></div>
+    </div>
+  </div>
+</div>
+
+<!-- PURE L2 UPDATE — L10 Diagnostic Matrix -->
+<div id="l2-10" class="section">
+  <div class="slide-card">
+    <img class="slide-img" src="pure_l2/image10.png" alt="Pure L2 Slide 10">
+    <div class="slide-body">
+      <div class="slide-meta">
+        <span class="slide-num">PURE L2 · L10</span>
+        <span class="slide-title">Diagnostic Matrix: Workaround vs. Architecture</span>
+      </div>
+      <div class="tags"><span class="tag tag-s6">S6 Troubleshooting</span><span class="tag tag-s2">S2 L2 Switching</span></div>
+      <div class="slide-summary">
+        <strong style="color:var(--text)">Side-by-side comparison — Apr 22 Workaround vs. Pure L2 Architecture:</strong>
+      </div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;overflow:hidden;margin:12px 0">
+        <table style="width:100%;border-collapse:collapse;font-size:.8rem">
+          <thead><tr style="border-bottom:1px solid var(--border2)">
+            <th style="text-align:left;padding:8px 12px;color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:.6rem;text-transform:uppercase">Dimension</th>
+            <th style="text-align:left;padding:8px 12px;color:var(--amber);font-family:'JetBrains Mono',monospace;font-size:.6rem;text-transform:uppercase">Apr 22 Workaround</th>
+            <th style="text-align:left;padding:8px 12px;color:var(--green);font-family:'JetBrains Mono',monospace;font-size:.6rem;text-transform:uppercase">Pure L2 Architecture</th>
+          </tr></thead>
+          <tbody>
+            <tr style="border-bottom:1px solid var(--border)"><td style="padding:9px 12px;color:var(--dim)">Broadcast Storm Risk</td><td style="padding:9px 12px;color:var(--red)">Loop Triangle (High Risk)</td><td style="padding:9px 12px;color:var(--green)">Linear Topology (Zero Risk)</td></tr>
+            <tr style="border-bottom:1px solid var(--border)"><td style="padding:9px 12px;color:var(--dim)">AP2 Cloud Access</td><td style="padding:9px 12px;color:var(--red)">Broken (Failed DHCP)</td><td style="padding:9px 12px;color:var(--green)">Fully Restored via Trunk</td></tr>
+            <tr style="border-bottom:1px solid var(--border)"><td style="padding:9px 12px;color:var(--dim)">Port 10 Inter-Switch Trunk</td><td style="padding:9px 12px;color:var(--amber)">Fractured (Missing VLAN 1)</td><td style="padding:9px 12px;color:var(--green)">Standardized (All VLANs Tagged)</td></tr>
+            <tr><td style="padding:9px 12px;color:var(--dim)">SW2 Hardware Role</td><td style="padding:9px 12px;color:var(--amber)">Confused (Dual Uplinks)</td><td style="padding:9px 12px;color:var(--green)">Defined (Strict L2 Access)</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PURE L2 UPDATE — L11 Lesson 08 -->
+<div id="l2-11" class="section">
+  <div class="slide-card">
+    <img class="slide-img" src="pure_l2/image11.png" alt="Pure L2 Slide 11">
+    <div class="slide-body">
+      <div class="slide-meta">
+        <span class="slide-num">PURE L2 · L11</span>
+        <span class="slide-title">Lesson 08: Pure L2 Means a Single Uplink</span>
+      </div>
+      <div class="tags"><span class="tag tag-s2">S2 L2 Switching</span><span class="tag tag-s1">S1 OSI / L1–L3</span><span class="tag tag-karl">Karl Rule</span></div>
+      <div style="background:var(--blue-bg);border:1px solid var(--blue2);border-radius:8px;padding:18px 20px;margin:14px 0;font-style:italic;font-size:.9rem;color:var(--text);line-height:1.8;text-align:center">
+        "The dual-path physical architecture was the true root cause of the broadcast storm, not VLAN 1 itself."
+      </div>
+      <div class="slide-summary">
+        You cannot maintain two active, parallel uplinks to an unmanaged modem without Spanning Tree Protocol (STP). Secondary access switches must rely entirely on the primary L3 core for upstream routing.<br><br>
+        <strong style="color:var(--text)">The VLAN 1 delete was a symptom fix, not the root fix.</strong> Deleting Default from Port 10 broke the loop — but it also broke AP2's management path and left the dual-uplink physical risk in place. The real fix is eliminating one of the physical uplinks.
+      </div>
+      <div class="field-note"><strong>Lesson Codified</strong>"If SW2 has a direct wire to the modem AND a wire to SW1, you have a loop by design — regardless of VLAN config. VLAN config can mask the loop temporarily, but only disconnecting the physical cable eliminates it."</div>
+    </div>
+  </div>
+</div>
+
+<!-- PURE L2 UPDATE — L12 Next Steps -->
+<div id="l2-12" class="section">
+  <div class="slide-card">
+    <img class="slide-img" src="pure_l2/image12.png" alt="Pure L2 Slide 12">
+    <div class="slide-body">
+      <div class="slide-meta">
+        <span class="slide-num">PURE L2 · L12</span>
+        <span class="slide-title">Outstanding Items &amp; Next Steps</span>
+      </div>
+      <div class="tags"><span class="tag tag-lab">Lab Build</span><span class="tag tag-s4">S4 Wireless</span><span class="tag tag-s3">S3 L3 Routing</span></div>
+      <div style="background:var(--green-bg);border:1px solid var(--green2);border-radius:6px;padding:12px 16px;font-size:.85rem;color:var(--green);margin:12px 0;font-family:'JetBrains Mono',monospace;text-align:center;font-weight:700;letter-spacing:.04em">
+        ✓ COMPLETE — SW2 Pure L2 Recovery
+      </div>
+      <div class="slide-summary">
+        SW2 Architecture Recovery is officially complete. The lab underlay is stabilized. Focus now shifts back to overlay services and client isolation.
+      </div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:18px 20px;margin:12px 0">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--muted);text-transform:uppercase;margin-bottom:12px">Next in Queue</div>
+        <div style="font-size:.84rem;color:var(--dim);line-height:2.2">
+          <span style="color:var(--amber)">▶</span> Wireless Guest Isolation (VLAN 30/60)<br>
+          <span style="color:var(--amber)">▶</span> Inter-VLAN Routing Verification (VLAN 10 → VLAN 20)<br>
+          <span style="color:var(--amber)">▶</span> Application of QoS Classification Rules<br>
+          <span style="color:var(--amber)">▶</span> Corporate SSID PSK Key Value (XIQ → AP_April21_KarlLab → Corporate_Wireless)<br>
+          <span style="color:var(--amber)">▶</span> OWE Transition Mode toggle (Guest_Wireless → push policy)
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 
