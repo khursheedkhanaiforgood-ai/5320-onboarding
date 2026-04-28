@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Horizon EXOS→VOSS Migration | Extreme 5320</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Syne:wght@700;800&family=Inter:wght@400;500;600&display=swap">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#08090d;--surface:#0f1117;--border:#1e2130;--border2:#252840;
+  --text:#e2e8f0;--muted:#64748b;--dim:#94a3b8;
+  --green:#4ade80;--green2:#16a34a;--green-bg:#0d1a0d;
+  --blue:#38bdf8;--blue2:#0891b2;--blue-bg:#0a1a26;
+  --amber:#fbbf24;--amber-bg:#1a1200;
+  --red:#f87171;--red-bg:#200a0a;
+  --purple:#a78bfa;--purple2:#7c3aed;--purple-bg:#1a1030;
+  --cyan:#22d3ee;--cyan2:#0e7490;--cyan-bg:#041a1f;
+  --orange:#fb923c;
+  --nav-h:56px;--aside-w:264px;
+}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.6}
+nav{position:fixed;top:0;left:0;right:0;height:var(--nav-h);background:rgba(8,9,13,.93);border-bottom:1px solid var(--border);backdrop-filter:blur(12px);z-index:100;display:flex;align-items:center;padding:0 24px;gap:16px}
+.nav-brand{font-family:'Syne',sans-serif;font-size:.95rem;font-weight:800;color:var(--cyan);letter-spacing:.02em}
+.nav-sub{font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--muted);letter-spacing:.06em}
+.nav-right{margin-left:auto;display:flex;gap:8px}
+.back-link{font-size:.72rem;color:var(--muted);text-decoration:none;padding:4px 10px;border:1px solid var(--border);border-radius:4px}
+.back-link:hover{color:var(--text);border-color:var(--border2)}
+.layout{display:flex;margin-top:var(--nav-h);min-height:calc(100vh - var(--nav-h))}
+aside{width:var(--aside-w);flex-shrink:0;position:fixed;top:var(--nav-h);bottom:0;overflow-y:auto;background:var(--surface);border-right:1px solid var(--border);padding:20px 0}
+aside::-webkit-scrollbar{width:4px}
+aside::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+main{margin-left:var(--aside-w);flex:1;padding:32px 40px;max-width:1040px}
+.s-section{font-family:'JetBrains Mono',monospace;font-size:.57rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);padding:0 20px;margin:16px 0 5px}
+.s-link{display:flex;align-items:center;gap:10px;padding:7px 20px;cursor:pointer;font-size:.74rem;color:var(--dim);text-decoration:none;border-left:2px solid transparent;transition:background .15s}
+.s-link:hover{background:rgba(34,211,238,.05);color:var(--text)}
+.s-link.active{color:var(--cyan);background:rgba(34,211,238,.08);border-left-color:var(--cyan)}
+.s-num{font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--muted);flex-shrink:0;width:22px}
+.section{display:none;animation:fadeIn .25s ease-out}
+.section.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.hero{margin-bottom:28px}
+.hero-tag{font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px}
+.hero-title{font-family:'Syne',sans-serif;font-size:1.75rem;font-weight:800;color:var(--text);margin-bottom:8px}
+.hero-title span{color:var(--cyan)}
+.hero-sub{font-size:.83rem;color:var(--muted);line-height:1.7;max-width:680px}
+.phase-badge{display:inline-flex;align-items:center;gap:6px;font-family:'JetBrains Mono',monospace;font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;padding:4px 10px;border-radius:4px;border:1px solid;margin-bottom:14px}
+.pb-glue{background:var(--purple-bg);color:var(--purple);border-color:var(--purple2)}
+.pb-90{background:var(--cyan-bg);color:var(--cyan);border-color:var(--cyan2)}
+.pb-gps{background:var(--blue-bg);color:var(--blue);border-color:var(--blue2)}
+.pb-victory{background:var(--green-bg);color:var(--green);border-color:var(--green2)}
+.pb-warn{background:var(--red-bg);color:var(--red);border-color:#7f1d1d}
+.slide-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:24px}
+.slide-body{padding:20px 24px}
+.slide-meta{display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+.slide-num{font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--muted);border:1px solid var(--border);padding:2px 7px;border-radius:3px;flex-shrink:0}
+.slide-title{font-family:'Syne',sans-serif;font-size:1rem;font-weight:800;color:var(--text);flex:1}
+.slide-summary{font-size:.82rem;color:var(--dim);line-height:1.75;margin-bottom:14px}
+.config-block{margin-top:14px;background:var(--bg);border:1px solid var(--border);border-top:2px solid var(--cyan2);border-radius:6px;overflow:hidden}
+.config-block-label{font-family:'JetBrains Mono',monospace;font-size:.58rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--cyan);background:var(--cyan-bg);padding:6px 14px;border-bottom:1px solid var(--border)}
+.config-block pre{padding:14px 16px;font-family:'JetBrains Mono',monospace;font-size:.76rem;color:var(--cyan);line-height:1.9;margin:0;overflow-x:auto}
+.c-comment{color:var(--muted)}
+.c-warn{color:var(--amber)}
+.c-label{color:var(--purple)}
+.c-sw2{color:var(--blue)}
+.field-note{background:rgba(251,191,36,.05);border:1px solid #713f12;border-left:3px solid var(--amber);border-radius:0 6px 6px 0;padding:10px 14px;font-size:.78rem;color:#fcd34d;margin:10px 0;line-height:1.6}
+.field-note strong{color:var(--amber);font-family:'JetBrains Mono',monospace;font-size:.6rem;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:4px}
+.insight{background:var(--cyan-bg);border:1px solid var(--cyan2);border-radius:6px;padding:14px 18px;margin:12px 0;font-style:italic;font-size:.84rem;color:var(--dim);line-height:1.75}
+.insight cite{display:block;margin-top:6px;font-style:normal;font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--cyan)}
+.vs-table{width:100%;border-collapse:collapse;font-size:.8rem;margin:14px 0}
+.vs-table th{text-align:left;padding:8px 14px;font-family:'JetBrains Mono',monospace;font-size:.6rem;text-transform:uppercase;letter-spacing:.08em;border-bottom:1px solid var(--border2)}
+.vs-table td{padding:9px 14px;border-bottom:1px solid var(--border);vertical-align:top}
+.vs-table td:first-child{color:var(--dim)}
+.vs-table td:nth-child(2){color:var(--amber);font-family:'JetBrains Mono',monospace;font-size:.76rem}
+.vs-table td:nth-child(3){color:var(--cyan);font-family:'JetBrains Mono',monospace;font-size:.76rem}
+.check-row{display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--border);font-size:.82rem}
+.check-row:last-child{border-bottom:none}
+.check-n{font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--cyan);background:var(--cyan-bg);border:1px solid var(--cyan2);padding:2px 7px;border-radius:3px;flex-shrink:0;margin-top:1px}
+@media(max-width:700px){aside{display:none}main{margin-left:0;padding:20px 16px}}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-brand">HORIZON — EXOS→VOSS MIGRATION</div>
+  <div class="nav-sub">EXTREME 5320 &nbsp;·&nbsp; FABRIC ENGINE &nbsp;·&nbsp; KHURSHEED KHAN</div>
+  <div class="nav-right">
+    <a class="back-link" href="debrief_apr21.html">← EXOS Debrief</a>
+    <a class="back-link" href="index-nyt.html">Index →</a>
+  </div>
+</nav>
+
+<div class="layout">
+<aside>
+  <div class="s-section">Overview</div>
+  <a class="s-link active" onclick="show('overview')"><span class="s-num">—</span>The Journey</a>
+
+  <div class="s-section">Phase 0 — Pre-Flight</div>
+  <a class="s-link" onclick="show('preflight')"><span class="s-num">P0</span>Backup + OS Flip</a>
+
+  <div class="s-section">The Glue</div>
+  <a class="s-link" onclick="show('foundation')"><span class="s-num">G1</span>IS-IS Brain</a>
+
+  <div class="s-section">The 90%</div>
+  <a class="s-link" onclick="show('nni')"><span class="s-num">90a</span>NNI — Port 10</a>
+  <a class="s-link" onclick="show('isid')"><span class="s-num">90b</span>I-SID Service Map</a>
+  <a class="s-link" onclick="show('fa')"><span class="s-num">90c</span>Fabric Attach (Port 3)</a>
+  <a class="s-link" onclick="show('anycast')"><span class="s-num">90d</span>Anycast Gateway</a>
+
+  <div class="s-section">The GPS</div>
+  <a class="s-link" onclick="show('ipshortcut')"><span class="s-num">GPS</span>IP Shortcuts</a>
+
+  <div class="s-section">Full CLI Scripts</div>
+  <a class="s-link" onclick="show('sw1-cli')"><span class="s-num">SW1</span>Switch 1 — Gateway</a>
+  <a class="s-link" onclick="show('sw2-cli')"><span class="s-num">SW2</span>Switch 2 — Edge</a>
+
+  <div class="s-section">Victory Lap</div>
+  <a class="s-link" onclick="show('verify')"><span class="s-num">V1</span>Verification Commands</a>
+  <a class="s-link" onclick="show('failover')"><span class="s-num">V2</span>Failover Test</a>
+
+  <div class="s-section">Reference</div>
+  <a class="s-link" onclick="show('comparison')"><span class="s-num">R1</span>EXOS vs VOSS Table</a>
+  <a class="s-link" onclick="show('portmap')"><span class="s-num">R2</span>Port Taxonomy</a>
+  <a class="s-link" onclick="show('sources')"><span class="s-num">R3</span>Sources</a>
+</aside>
+
+<main>
+
+<!-- OVERVIEW -->
+<div id="overview" class="section active">
+  <div class="hero">
+    <div class="hero-tag">Horizon Custom Fabrication · Apr 22–28 2026 · EXOS → VOSS</div>
+    <div class="hero-title">From Manual Plumbing to the <span>Self-Healing Fabric Cloud</span></div>
+    <div class="hero-sub">Same two Extreme 5320 switches. Same ports. Same VLANs. Different OS — and a completely different way of thinking about the network. This index captures the full migration arc from Socratic sessions on Apr 22 and Apr 28 2026.</div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:28px">
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:16px;text-align:center">
+      <div style="font-family:'Syne',sans-serif;font-size:2rem;font-weight:800;color:var(--cyan)">7</div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-top:4px">Build Steps</div>
+    </div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:16px;text-align:center">
+      <div style="font-family:'Syne',sans-serif;font-size:2rem;font-weight:800;color:var(--green)">0</div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-top:4px">Manual Trunk Tags</div>
+    </div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:16px;text-align:center">
+      <div style="font-family:'Syne',sans-serif;font-size:2rem;font-weight:800;color:var(--amber)">&lt;50ms</div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-top:4px">Failover Time</div>
+    </div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:16px;text-align:center">
+      <div style="font-family:'Syne',sans-serif;font-size:2rem;font-weight:800;color:var(--purple)">0-1</div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-top:4px">Dropped Pings</div>
+    </div>
+  </div>
+
+  <div class="slide-card">
+    <div class="slide-body">
+      <div class="slide-meta"><span class="slide-num">THE SHIFT</span><span class="slide-title">EXOS: Managing Pipes → VOSS: Managing Services</span></div>
+      <div class="slide-summary">
+        <strong style="color:var(--text)">In EXOS</strong> you manually built each pipe: "VLAN 20 needs to flow from SW1 Port 3 → Port 10 → SW2 Port 10 → Port 3." You touched every port on every switch for every VLAN. Adding a new service meant touching every box.<br><br>
+        <strong style="color:var(--text)">In VOSS</strong> you think about services and edges only: "VLAN 20 is a service (I-SID 100020). I define it at the edge ports where users connect. The Fabric figures out how to stretch it between switches automatically." Port 10 becomes a black box — you never tag a VLAN on it again.
+      </div>
+      <div class="insight">"In our EXOS lab, we spent all our time fighting with Port 10 tags and loop risks. In VOSS, we spend all our time at the edge. Once the backbone is up, we just define the Intent at the edge and let the IS-IS brain handle the plumbing automatically."<cite>— Alex (NotebookLM, Apr 28 2026)</cite></div>
+    </div>
+  </div>
+
+  <div class="slide-card">
+    <div class="slide-body">
+      <div class="slide-meta"><span class="slide-num">RECAP</span><span class="slide-title">VOSS in 3 Steps — KK's Apr 28 Summary</span></div>
+      <div class="slide-summary">KK's final synthesis at the end of the Apr 28 Socratic session — confirmed correct:</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin:12px 0">
+        <div style="background:var(--cyan-bg);border:1px solid var(--cyan2);border-radius:6px;padding:14px">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--cyan);text-transform:uppercase;margin-bottom:6px">Step 1</div>
+          <div style="font-size:.84rem;font-weight:600;color:var(--text);margin-bottom:4px">Build the NNI</div>
+          <div style="font-size:.78rem;color:var(--dim)">Port 10 → IS-IS backbone. All services flow automatically — no VLAN tagging ever again.</div>
+        </div>
+        <div style="background:var(--cyan-bg);border:1px solid var(--cyan2);border-radius:6px;padding:14px">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--cyan);text-transform:uppercase;margin-bottom:6px">Step 2</div>
+          <div style="font-size:.84rem;font-weight:600;color:var(--text);margin-bottom:4px">Provision Edge Services</div>
+          <div style="font-size:.78rem;color:var(--dim)">I-SID mapping on both switches + Fabric Attach on Port 3 + wired UNI on Port 5.</div>
+        </div>
+        <div style="background:var(--cyan-bg);border:1px solid var(--cyan2);border-radius:6px;padding:14px">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--cyan);text-transform:uppercase;margin-bottom:6px">Step 3</div>
+          <div style="font-size:.84rem;font-weight:600;color:var(--text);margin-bottom:4px">Deploy Anycast + GPS</div>
+          <div style="font-size:.78rem;color:var(--dim)">Same gateway IPs on both switches + IP Shortcuts for automatic internet route sharing.</div>
+        </div>
+      </div>
+      <div class="field-note"><strong>Glue Steps</strong>Before NNI: IS-IS brain (system-id + nickname, Step G1). After Anycast: IP Shortcuts (ip-shortcut, GPS step). Plus modem static routes — these don't go away in VOSS.</div>
+    </div>
+  </div>
+</div>
+
+<!-- P0 PRE-FLIGHT -->
+<div id="preflight" class="section">
+  <div class="hero">
+    <div class="hero-tag">Phase 0 · Pre-Flight</div>
+    <div class="hero-title">Backup + <span>OS Flip</span></div>
+  </div>
+  <div class="slide-card">
+    <div class="slide-body">
+      <div class="phase-badge pb-warn">⚠ Destructive Step</div>
+      <div class="slide-summary">Changing from EXOS to VOSS reformats the switch storage and wipes all configuration. Back up everything before proceeding.</div>
+      <div class="config-block"><div class="config-block-label">EXOS Backup — Before OS Change</div><pre><span class="c-comment"># On each EXOS switch — save config to USB</span>
+save configuration as-script switch1_backup.xsf
+cp /usr/local/cfg/switch1_backup.xsf /usr/local/ext/
+ls /usr/local/ext
+show file /usr/local/ext/switch1_backup.xsf
+unmount /usr/local/ext    <span class="c-warn"># MUST safe-eject before removing USB</span>
+
+<span class="c-comment"># XIQ backup</span>
+<span class="c-comment"># Manage → Devices → Select switch → Backups → Create Backup</span>
+<span class="c-comment"># Configure → Network Policies → Clone → name: EXOS_Pre_Migration_Backup</span></pre></div>
+      <div class="config-block" style="border-top-color:var(--red)"><div class="config-block-label" style="color:var(--red);background:var(--red-bg)">OS Flip Procedure</div><pre><span class="c-warn"># Method 1 — Boot menu (physical access)</span>
+<span class="c-warn"># Reboot switch → press SPACE BAR at bootloader prompt</span>
+<span class="c-warn"># Select: "Change the switch OS to Fabric Engine (VOSS)"</span>
+
+<span class="c-comment"># Method 2 — XIQ (remote)</span>
+<span class="c-comment"># Manage → Devices → Select switch → Actions → Change OS → VOSS</span>
+
+<span class="c-comment"># Method 3 — EXOS CLI</span>
+<span class="c-comment"># Use the OS conversion wizard in EXOS (if available on firmware)</span>
+
+<span class="c-warn"># ⚠ After flip: ALL config is wiped. Switch reboots as VOSS.</span>
+<span class="c-warn"># ⚠ Run the build sequence below from a clean state.</span></pre></div>
+    </div>
+  </div>
+</div>
+
+<!-- G1 IS-IS BRAIN -->
+<div id="foundation" class="section">
+  <div class="hero">
+    <div class="hero-tag">The Glue · Phase G1</div>
+    <div class="hero-title">IS-IS Brain — <span>Global Foundation</span></div>
+  </div>
+  <div class="slide-card">
+    <div class="slide-body">
+      <div class="phase-badge pb-glue">The Glue</div>
+      <div class="slide-summary">
+        Every switch needs a unique identity before it can join the Fabric. IS-IS (Intermediate System to Intermediate System) is the control plane — the "brain" that builds the network map and calculates shortest paths. SPBM (Shortest Path Bridging MAC) is the data plane — the "muscle" that carries MAC-in-MAC (802.1ah) encapsulated frames across the NNI.<br><br>
+        Think of it like a group chat: every switch needs a unique name, and they all need to be in the same "neighborhood" (manual-area) to find each other.
+      </div>
+      <div class="config-block"><div class="config-block-label">Step G1 — IS-IS Brain Setup (SW1)</div><pre><span class="c-comment"># Enter IS-IS configuration — establish the control plane identity</span>
+router isis
+ system-id 0000.0000.0001    <span class="c-warn"># SW1's unique fabric identity (like a MAC for IS-IS)</span>
+ manual-area 00.0001         <span class="c-warn"># Both switches MUST match — same area = same neighborhood</span>
+ exit
+
+<span class="c-comment"># Configure SPBM instance — the data plane engine</span>
+spbm 1
+ spbm ethertype 0x8100       <span class="c-warn"># MUST match on both switches — mismatch = silent adjacency fail</span>
+ spbm nick-name 0.00.01      <span class="c-warn"># Human-readable shortname (appears in show isis adj, show ip route)</span>
+ exit
+
+<span class="c-comment"># Activate the IS-IS engine globally</span>
+router isis enable</pre></div>
+      <div class="config-block" style="border-top-color:var(--blue2)"><div class="config-block-label" style="color:var(--blue);background:var(--blue-bg)">Step G1 — SW2 (unique IDs only)</div><pre><span class="c-sw2">router isis
+ system-id 0000.0000.0002    </span><span class="c-comment"># Must be different from SW1</span>
+<span class="c-sw2"> manual-area 00.0001         </span><span class="c-comment"># Must be IDENTICAL to SW1</span>
+<span class="c-sw2"> exit
+spbm 1
+ spbm ethertype 0x8100       </span><span class="c-comment"># Must be IDENTICAL to SW1</span>
+<span class="c-sw2"> spbm nick-name 0.00.02      </span><span class="c-comment"># Must be different from SW1</span>
+<span class="c-sw2"> exit
+router isis enable</span></pre></div>
+      <div class="field-note"><strong>Most Common Adjacency Failure</strong>ethertype mismatch between switches (0x8100 vs 0x88a8). Causes silent drop — no error, no adjacency. Always verify: <code>show spbm</code> on both switches and confirm ethertype matches.</div>
+    </div>
+  </div>
+</div>
+
+<!-- 90a NNI -->
+<div id="nni" class="section">
+  <div class="hero">
+    <div class="hero-tag">The 90% · Phase 90a</div>
+    <div class="hero-title">NNI — <span>Port 10 Backbone</span></div>
+  </div>
+  <div class="slide-card">
+    <div class="slide-body">
+      <div class="phase-badge pb-90">The 90%</div>
+      <div class="slide-summary">
+        <strong style="color:var(--text)">In EXOS</strong> Port 10 was a manual trunk — you had to tag every VLAN individually:<br>
+        <code style="color:var(--amber)">configure vlan VLAN_10 add ports 10 tagged</code> (repeat for every VLAN)<br><br>
+        <strong style="color:var(--text)">In VOSS</strong> Port 10 becomes a Network-to-Network Interface (NNI) — a black box link. One command at the interface level, and every I-SID you define anywhere on either switch automatically stretches across it. You never declare which VLANs cross it — they all do.
+      </div>
+      <div class="config-block"><div class="config-block-label">Step 90a — NNI on Port 10 (Both Switches)</div><pre><span class="c-comment"># This single block replaces ALL manual VLAN tagging on Port 10</span>
+<span class="c-comment"># Replaces: configure vlan VLAN_10/20/30/Default add ports 10 tagged</span>
+interface gigabitEthernet 1/10
+ isis enable        <span class="c-comment"># Enable IS-IS on this port</span>
+ isis spbm 1        <span class="c-comment"># Associate with SPBM instance 1</span>
+ no shutdown
+ exit</pre></div>
+      <div class="insight">"Port 10 stops being a 'per-VLAN pipe' and becomes something that carries all services automatically. The inter-switch link becomes a black box. You never tag a VLAN on it again."<cite>— Claude Socratic session, Apr 28 2026</cite></div>
+    </div>
+  </div>
+</div>
+
+<!-- 90b I-SID -->
+<div id="isid" class="section">
+  <div class="hero">
+    <div class="hero-tag">The 90% · Phase 90b</div>
+    <div class="hero-title">I-SID — <span>Service Map</span></div>
+  </div>
+  <div class="slide-card">
+    <div class="slide-body">
+      <div class="phase-badge pb-90">The 90%</div>
+      <div class="slide-summary">
+        In EXOS, VLAN 20 only meant something locally on that one switch — no global identity. In VOSS, you map each VLAN to an I-SID (Individual Service Identifier) — a 24-bit global service ID that both switches recognize. Once mapped, the service automatically "stretches" across the NNI without any trunk tagging.<br><br>
+        <strong style="color:var(--text)">Convention:</strong> VLAN ID + 100,000 = I-SID. Both switches must have identical mappings — think of it as a translation dictionary. Both sides need the same dictionary.
+      </div>
+      <div class="config-block"><div class="config-block-label">Step 90b — I-SID Mapping (Both Switches, Identical)</div><pre><span class="c-comment"># Create VLANs first</span>
+vlan create 10,20,30 type port-mstprstp 0
+
+<span class="c-comment"># Map VLANs to global I-SIDs (convention: VLAN + 100,000)</span>
+vlan i-sid 10 100010    <span class="c-comment"># Management / Corporate Wired</span>
+vlan i-sid 20 100020    <span class="c-comment"># Corporate Wireless</span>
+vlan i-sid 30 100030    <span class="c-comment"># Guest Wireless</span>
+
+<span class="c-warn"># Must run on BOTH switches — IS-IS advertises I-SID existence</span>
+<span class="c-warn"># but both switches need the VLAN→I-SID mapping at config time.</span>
+<span class="c-warn"># Mismatch = service stretches but no local delivery.</span></pre></div>
+      <div class="field-note"><strong>The Suitcase Analogy</strong>Each I-SID is a global suitcase. Anything you put in the VLAN 20 suitcase on SW1 automatically pops out of the VLAN 20 suitcase on SW2. You never tell Port 10 about it — the Fabric delivers the suitcase automatically.</div>
+    </div>
+  </div>
+</div>
+
+<!-- 90c FABRIC ATTACH -->
+<div id="fa" class="section">
+  <div class="hero">
+    <div class="hero-tag">The 90% · Phase 90c</div>
+    <div class="hero-title">Fabric Attach — <span>Port 3 AP Automation</span></div>
+  </div>
+  <div class="slide-card">
+    <div class="slide-body">
+      <div class="phase-badge pb-90">The 90%</div>
+      <div class="slide-summary">
+        <strong style="color:var(--text)">In EXOS</strong> Port 3 required manual tagged trunk configuration for every SSID VLAN. Every new SSID = touch both switches.<br><br>
+        <strong style="color:var(--text)">In VOSS with Fabric Attach</strong> the AP and switch have an LLDP conversation:<br>
+        AP → Switch: "I have Corporate SSID users — I need I-SID 100020"<br>
+        AP → Switch: "I have Guest SSID users — I need I-SID 100030"<br>
+        Switch → AP: "Understood — dynamically provisioning VLAN 20 and 30 on Port 3 now."<br><br>
+        The switch auto-provisions VLANs on the port on-the-fly. You never manually configure which VLANs live on Port 3.
+      </div>
+      <div class="config-block"><div class="config-block-label">Step 90c — Fabric Attach on Port 3 (Both Switches)</div><pre><span class="c-comment"># Enable FA globally first</span>
+fa enable
+
+<span class="c-comment"># Port 3 — AP3000 (Fabric Attach auto-provisioning)</span>
+interface gigabitEthernet 1/3
+ auto-sense enable    <span class="c-comment"># Allow switch to auto-detect FA capable device</span>
+ fa enable            <span class="c-comment"># Enable Fabric Attach on this port</span>
+ no shutdown
+ exit
+
+<span class="c-comment"># No manual VLAN tagging on Port 3 — ever.</span>
+<span class="c-comment"># AP requests I-SIDs via LLDP; switch grants them dynamically.</span>
+<span class="c-comment"># Verify: show fa assignment (should show I-SID 100020/100030 Active)</span></pre></div>
+      <div class="config-block" style="border-top-color:var(--green2)"><div class="config-block-label" style="color:var(--green);background:var(--green-bg)">Port 5 — Wired Corporate (UNI)</div><pre><span class="c-comment"># Simple VLAN membership — replaces "configure vlan VLAN_10 add ports 5 untagged"</span>
+vlan members add 10 1/5    <span class="c-comment"># Untagged access port for wired corporate clients</span></pre></div>
+    </div>
+  </div>
+</div>
+
+<!-- 90d ANYCAST -->
+<div id="anycast" class="section">
+  <div class="hero">
+    <div class="hero-tag">The 90% · Phase 90d</div>
+    <div class="hero-title">Anycast Gateway — <span>Shared Identity</span></div>
+  </div>
+  <div class="slide-card">
+    <div class="slide-body">
+      <div class="phase-badge pb-90">The 90%</div>
+      <div class="slide-summary">
+        <strong style="color:var(--text)">In EXOS</strong> only SW1 owned the gateway IPs (10.10.0.1, 10.20.0.1, 10.30.0.1). SW2 was pure L2 with no gateway. Client on SW2 had to cross Port 10 to be routed — even for local traffic.<br><br>
+        <strong style="color:var(--text)">In VOSS</strong> both switches own the exact same IP and MAC address for each VLAN gateway. The IS-IS control plane coordinates this — no VRRP priority management needed. A client on SW2 uses SW2's local Anycast gateway — Port 10 is not involved for local routing.<br><br>
+        <strong style="color:var(--text)">What changes for SW2 clients:</strong> (1) Local routing — source and destination on same switch never leaves SW2; (2) Seamless roaming — iPhone moving between APs sees same gateway IP/MAC, no ARP re-discovery; (3) Failover — if Port 10 fails, SW2 clients never lose their gateway.
+      </div>
+      <div class="config-block"><div class="config-block-label">Step 90d — Anycast Gateway (Both Switches, Identical IPs)</div><pre><span class="c-comment"># Run this IDENTICAL block on BOTH switches</span>
+<span class="c-comment"># Same IP on both — IS-IS coordinates, no conflict</span>
+interface vlan 10
+ ip address 10.10.0.1/24    <span class="c-comment"># Corp Wired gateway</span>
+ exit
+interface vlan 20
+ ip address 10.20.0.1/24    <span class="c-comment"># Corp Wireless gateway</span>
+ exit
+interface vlan 30
+ ip address 10.30.0.1/24    <span class="c-comment"># Guest Wireless gateway</span>
+ exit
+
+<span class="c-warn"># Note: In VOSS, assigning an IP to an interface vlan automatically</span>
+<span class="c-warn"># enables routing on that VLAN — no "enable ipforwarding" needed.</span>
+<span class="c-warn"># The Karl Rule becomes implicit.</span></pre></div>
+      <div class="insight">"In our old EXOS setup, Switch 2 was just a 'dumb' follower that had to send everything to Switch 1 to get to the internet. With Anycast, Switch 2 becomes a fully independent gateway — both switches share identical GPS and the authority to drive the car."<cite>— Alex (NotebookLM, Apr 22 2026)</cite></div>
+    </div>
+  </div>
+</div>
+
+<!-- GPS IP SHORTCUTS -->
+<div id="ipshortcut" class="section">
+  <div class="hero">
+    <div class="hero-tag">The GPS</div>
+    <div class="hero-title">IP Shortcuts — <span>Automatic Route Sharing</span></div>
+  </div>
+  <div class="slide-card">
+    <div class="slide-body">
+      <div class="phase-badge pb-gps">The GPS</div>
+      <div class="slide-summary">
+        <strong style="color:var(--text)">In EXOS</strong> SW2 had no idea how to reach the internet. You either set a static default route on SW2 or — in the Horizon L2 lab — SW2 had no routes at all (pure L2). The Karl Rule required explicit <code style="color:var(--amber)">enable ipforwarding vlan Default</code> to bridge the path.<br><br>
+        <strong style="color:var(--text)">In VOSS</strong> IP Shortcuts tells IS-IS to share the routing table. When SW1 learns the default route (0.0.0.0/0) from the modem on Port 1, it automatically advertises that route to SW2 through the IS-IS brain. SW2 learns "the internet exit is through SW1 via Port 10 NNI" — no static routes, no Karl Rule, no manual configuration on SW2.<br><br>
+        <strong style="color:var(--text)">Important:</strong> Modem static routes still required. The Anycast Gateway handles east-west routing (clients to clients). North-south (internet) still needs the modem to know where your subnets live — same as EXOS.
+      </div>
+      <div class="config-block"><div class="config-block-label">Step GPS — IP Shortcuts (Both Switches) + Internet Exit (SW1 Only)</div><pre><span class="c-comment"># Both switches — enable IS-IS route sharing</span>
+router isis
+ ip-shortcut    <span class="c-comment"># Share routing table across the fabric backbone</span>
+ exit
+
+<span class="c-comment"># SW1 ONLY — Internet Exit via dedicated Transit VLAN 100</span>
+<span class="c-comment"># (Why Transit VLAN instead of Default? Clean separation — one job: internet exit.)</span>
+<span class="c-comment"># (IP Shortcuts work cleanly; no Default VLAN ambiguity.)</span>
+vlan create 100 name "Internet_Exit" type port-mstprstp 0
+vlan members add 100 1/1                    <span class="c-comment"># Port 1 → Modem</span>
+interface vlan 100
+ ip address 192.168.0.28/24                 <span class="c-comment"># SW1 WAN IP (adjust to your modem subnet)</span>
+ exit
+ip route 0.0.0.0 0.0.0.0 192.168.0.1 weight 1 enable    <span class="c-comment"># Default route to modem</span>
+
+<span class="c-comment"># Modem static routes — UNCHANGED from EXOS (still required)</span>
+<span class="c-comment"># 10.10.0.0/24 → 192.168.0.28  (SW1)</span>
+<span class="c-comment"># 10.20.0.0/24 → 192.168.0.28  (SW1)</span>
+<span class="c-comment"># 10.30.0.0/24 → 192.168.0.28  (SW1)</span>
+
+save config</pre></div>
+      <div class="field-note"><strong>Verify on SW2 — show ip route</strong>You should see: <code style="color:var(--cyan)">0.0.0.0/0 → 0.00.01 [ISIS/SPB]</code> — that's SW2 saying "the internet is via SW1's nickname." No static route was ever configured on SW2.</div>
+    </div>
+  </div>
+</div>
+
+<!-- SW1 FULL CLI -->
+<div id="sw1-cli" class="section">
+  <div class="hero">
+    <div class="hero-tag">Full CLI · SW1</div>
+    <div class="hero-title">Switch 1 — <span>Gateway (Complete Script)</span></div>
+    <div class="hero-sub">Run top to bottom on SW1 after OS flip. SW1 = IS-IS brain + DHCP server + internet exit.</div>
+  </div>
+  <div class="config-block" style="border-top-color:var(--cyan2)"><div class="config-block-label">SW1 — Full Build Sequence</div><pre>enable
+configure terminal
+
+<span class="c-comment"># ── STEP G1: IS-IS Brain ─────────────────────────────────────────</span>
+router isis
+ system-id 0000.0000.0001
+ manual-area 00.0001
+ exit
+spbm 1
+ spbm ethertype 0x8100
+ spbm nick-name 0.00.01
+ exit
+router isis enable
+
+<span class="c-comment"># ── STEP 90b: Service Definitions ────────────────────────────────</span>
+vlan create 10,20,30 type port-mstprstp 0
+vlan i-sid 10 100010
+vlan i-sid 20 100020
+vlan i-sid 30 100030
+
+<span class="c-comment"># ── STEP 90a: NNI on Port 10 ─────────────────────────────────────</span>
+interface gigabitEthernet 1/10
+ isis enable
+ isis spbm 1
+ no shutdown
+ exit
+
+<span class="c-comment"># ── STEP 90c: Fabric Attach on Port 3 ────────────────────────────</span>
+fa enable
+interface gigabitEthernet 1/3
+ auto-sense enable
+ fa enable
+ no shutdown
+ exit
+
+<span class="c-comment"># ── STEP 90c: Wired Client on Port 5 ─────────────────────────────</span>
+vlan members add 10 1/5
+
+<span class="c-comment"># ── STEP 90d: Anycast Gateways ───────────────────────────────────</span>
+interface vlan 10
+ ip address 10.10.0.1/24
+ exit
+interface vlan 20
+ ip address 10.20.0.1/24
+ exit
+interface vlan 30
+ ip address 10.30.0.1/24
+ exit
+
+<span class="c-comment"># ── STEP GPS: Internet Exit + IP Shortcuts ───────────────────────</span>
+vlan create 100 name "Internet_Exit" type port-mstprstp 0
+vlan members add 100 1/1
+interface vlan 100
+ ip address 192.168.0.28/24
+ exit
+ip route 0.0.0.0 0.0.0.0 192.168.0.1 weight 1 enable
+router isis
+ ip-shortcut
+ exit
+
+save config</pre></div>
+</div>
+
+<!-- SW2 FULL CLI -->
+<div id="sw2-cli" class="section">
+  <div class="hero">
+    <div class="hero-tag">Full CLI · SW2</div>
+    <div class="hero-title">Switch 2 — <span>Edge (Complete Script)</span></div>
+    <div class="hero-sub">Run top to bottom on SW2 after OS flip. SW2 = edge switch — no DHCP pools, learns internet route via IP Shortcuts from SW1.</div>
+  </div>
+  <div class="config-block" style="border-top-color:var(--blue2)"><div class="config-block-label" style="color:var(--blue);background:var(--blue-bg)">SW2 — Full Build Sequence</div><pre><span class="c-sw2">enable
+configure terminal
+
+</span><span class="c-comment"># ── STEP G1: IS-IS Brain (unique IDs) ────────────────────────────</span>
+<span class="c-sw2">router isis
+ system-id 0000.0000.0002    </span><span class="c-comment"># Different from SW1</span>
+<span class="c-sw2"> manual-area 00.0001         </span><span class="c-comment"># MUST match SW1</span>
+<span class="c-sw2"> exit
+spbm 1
+ spbm ethertype 0x8100       </span><span class="c-comment"># MUST match SW1</span>
+<span class="c-sw2"> spbm nick-name 0.00.02      </span><span class="c-comment"># Different from SW1</span>
+<span class="c-sw2"> exit
+router isis enable
+
+</span><span class="c-comment"># ── STEP 90b: Service Definitions (identical to SW1) ─────────────</span>
+<span class="c-sw2">vlan create 10,20,30 type port-mstprstp 0
+vlan i-sid 10 100010
+vlan i-sid 20 100020
+vlan i-sid 30 100030
+
+</span><span class="c-comment"># ── STEP 90a: NNI on Port 10 ─────────────────────────────────────</span>
+<span class="c-sw2">interface gigabitEthernet 1/10
+ isis enable
+ isis spbm 1
+ no shutdown
+ exit
+
+</span><span class="c-comment"># ── STEP 90c: Fabric Attach on Port 3 ────────────────────────────</span>
+<span class="c-sw2">fa enable
+interface gigabitEthernet 1/3
+ auto-sense enable
+ fa enable
+ no shutdown
+ exit
+
+</span><span class="c-comment"># ── STEP 90c: Wired Client on Port 5 ─────────────────────────────</span>
+<span class="c-sw2">vlan members add 10 1/5
+
+</span><span class="c-comment"># ── STEP 90d: Anycast Gateways (identical to SW1) ────────────────</span>
+<span class="c-sw2">interface vlan 10
+ ip address 10.10.0.1/24
+ exit
+interface vlan 20
+ ip address 10.20.0.1/24
+ exit
+interface vlan 30
+ ip address 10.30.0.1/24
+ exit
+
+</span><span class="c-comment"># ── STEP GPS: IP Shortcuts only — NO internet exit on SW2 ────────</span>
+<span class="c-sw2">router isis
+ ip-shortcut    </span><span class="c-comment"># Learns 0.0.0.0/0 from SW1 automatically</span>
+<span class="c-sw2"> exit
+
+save config</span></pre></div>
+  <div class="field-note"><strong>SW2 Difference from SW1</strong>No Transit VLAN 100. No default route. No DHCP pools. SW2 is an edge switch — it routes locally via Anycast and learns the internet exit automatically via IP Shortcuts. That's the whole point.</div>
+</div>
+
+<!-- VERIFICATION -->
+<div id="verify" class="section">
+  <div class="hero">
+    <div class="hero-tag">Victory Lap · V1</div>
+    <div class="hero-title">Verification — <span>Four Truth Commands</span></div>
+    <div class="hero-sub">Run in this order after building the fabric. Bottom-up verification — same philosophy as EXOS troubleshooting, VOSS-specific commands.</div>
+  </div>
+  <div class="slide-card">
+    <div class="slide-body">
+      <div class="phase-badge pb-victory">Victory Lap</div>
+      <div style="display:flex;flex-direction:column;gap:2px">
+        <div class="check-row"><span class="check-n">V1</span><div><strong style="color:var(--text)">show isis adj</strong> — Are the switches talking to each other?<br><span style="color:var(--dim);font-size:.8rem">Expect: SW2's system-id listed with State = <code style="color:var(--green)">UP</code>. Empty = NNI broken — check Port 10 <code>isis enable</code> + <code>isis spbm 1</code> on both switches.</span></div></div>
+        <div class="check-row"><span class="check-n">V2</span><div><strong style="color:var(--text)">show i-sid</strong> — Are services stretched across the fabric?<br><span style="color:var(--dim);font-size:.8rem">Expect: I-SID 100010/100020/100030 with Type=ELAN, State=<code style="color:var(--green)">Active</code>. State=<code style="color:var(--amber)">Local Only</code> = NNI not carrying fabric correctly.</span></div></div>
+        <div class="check-row"><span class="check-n">V3</span><div><strong style="color:var(--text)">show ip route</strong> (on SW2) — Does SW2 know where the internet is?<br><span style="color:var(--dim);font-size:.8rem">Expect: <code style="color:var(--cyan)">0.0.0.0/0 → 0.00.01 [ISIS/SPB]</code>. That's SW2 saying "internet is via SW1's nickname" — learned automatically. No static route was configured.</span></div></div>
+        <div class="check-row"><span class="check-n">V4</span><div><strong style="color:var(--text)">show fa assignment</strong> — Did the APs negotiate their VLANs?<br><span style="color:var(--dim);font-size:.8rem">Expect: Port 1/3 → I-SID 100020 VLAN 20 State=<code style="color:var(--green)">Active</code>, I-SID 100030 VLAN 30 State=<code style="color:var(--green)">Active</code>. No entry = check <code>auto-sense enable</code> + <code>fa enable</code> on Port 3.</span></div></div>
+      </div>
+      <div class="config-block"><div class="config-block-label">Verification Sequence</div><pre>show isis adj              <span class="c-comment"># V1 — switches found each other?</span>
+show i-sid                 <span class="c-comment"># V2 — services stretched?</span>
+show ip route              <span class="c-comment"># V3 — internet route learned on SW2?</span>
+show fa assignment         <span class="c-comment"># V4 — APs provisioned dynamically?</span>
+
+<span class="c-comment"># Additional health checks</span>
+show spbm                  <span class="c-comment"># Confirm ethertype 0x8100 on both switches</span>
+show isis interface        <span class="c-comment"># NNI OperState must be Up</span>
+show fa neighbor           <span class="c-comment"># AP3000 visible on Port 1/3</span>
+show application iqagent status  <span class="c-comment"># XIQ: Connection=Connected</span></pre></div>
+    </div>
+  </div>
+</div>
+
+<!-- FAILOVER TEST -->
+<div id="failover" class="section">
+  <div class="hero">
+    <div class="hero-tag">Victory Lap · V2</div>
+    <div class="hero-title">Failover Test — <span>Sub-Second Healing</span></div>
+  </div>
+  <div class="slide-card">
+    <div class="slide-body">
+      <div class="phase-badge pb-victory">Final Boss Test</div>
+      <div class="slide-summary">The definitive proof that VOSS handles failure with far greater precision than EXOS Spanning Tree. Pull the NNI cable during a live ping — expect 0–1 dropped pings.</div>
+      <div class="config-block"><div class="config-block-label">Step 1 — Start Continuous Monitor (from MacBook on SW2)</div><pre><span class="c-comment"># Open two terminal windows</span>
+ping 10.20.0.1      <span class="c-comment"># Window 1 — Anycast Gateway (east-west)</span>
+ping 8.8.8.8        <span class="c-comment"># Window 2 — Internet (north-south)</span></pre></div>
+      <div class="config-block" style="border-top-color:var(--red)"><div class="config-block-label" style="color:var(--red);background:var(--red-bg)">Step 2 — Pull the Trigger</div><pre><span class="c-warn"># Physically unplug the Port 10 NNI cable between SW1 and SW2</span>
+<span class="c-comment"># Expected: 0–1 dropped pings</span>
+<span class="c-comment"># Why: Anycast Gateway — SW2 already owns 10.20.0.1 locally</span>
+<span class="c-comment"># IS-IS recalculates path in under 50ms</span></pre></div>
+      <div class="config-block"><div class="config-block-label">Step 3 — Verify Isolated State (Cable Still Unplugged)</div><pre>show isis adj              <span class="c-comment"># Adjacency gone — switches are islands</span>
+show ip route              <span class="c-comment"># 0.0.0.0/0 no longer points to 0.00.01</span>
+show isis spbm i-sid       <span class="c-comment"># I-SIDs listed as "Local Only" on SW2</span></pre></div>
+      <div class="config-block" style="border-top-color:var(--green2)"><div class="config-block-label" style="color:var(--green);background:var(--green-bg)">Step 4 — Auto-Heal Recovery</div><pre><span class="c-comment"># Plug cable back into Port 10</span>
+<span class="c-comment"># Within seconds — IS-IS detects neighbor, re-establishes adjacency</span>
+<span class="c-comment"># Traffic moves back to optimal path automatically</span>
+<span class="c-comment"># No manual intervention needed</span>
+show isis adj              <span class="c-comment"># State back to UP</span>
+show ip route              <span class="c-comment"># 0.0.0.0/0 → 0.00.01 restored</span></pre></div>
+      <div class="field-note"><strong>EXOS vs VOSS Failover</strong>EXOS (STP/MLAG): 3–10 dropped pings while Spanning Tree recalculates. VOSS (IS-IS + Anycast): 0–1 dropped pings — faster than the human ear can detect a gap in a voice call.</div>
+    </div>
+  </div>
+</div>
+
+<!-- COMPARISON TABLE -->
+<div id="comparison" class="section">
+  <div class="hero">
+    <div class="hero-tag">Reference · R1</div>
+    <div class="hero-title">EXOS vs VOSS — <span>Side by Side</span></div>
+  </div>
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:20px">
+    <table class="vs-table">
+      <thead><tr><th>Task</th><th style="color:var(--amber)">EXOS</th><th style="color:var(--cyan)">VOSS</th></tr></thead>
+      <tbody>
+        <tr><td>Inter-switch trunk</td><td>Tag each VLAN manually on Port 10 (one cmd per VLAN)</td><td>isis spbm 1 on Port 10 — one cmd, all services flow</td></tr>
+        <tr><td>AP port config</td><td>Manual: tag VLAN 20+30 on Port 3</td><td>fa enable — AP negotiates I-SIDs via LLDP</td></tr>
+        <tr><td>Wired client port</td><td>configure vlan VLAN_10 add ports 5 untagged</td><td>vlan members add 10 1/5</td></tr>
+        <tr><td>Gateway ownership</td><td>SW1 only owns gateway IPs</td><td>Both switches own same IPs (Anycast)</td></tr>
+        <tr><td>Internet return path</td><td>enable ipforwarding vlan Default (Karl Rule)</td><td>ip-shortcut — SW2 learns route automatically</td></tr>
+        <tr><td>New VLAN added</td><td>Touch every port on every switch</td><td>vlan i-sid on both switches — done</td></tr>
+        <tr><td>IP forwarding</td><td>explicit: enable ipforwarding vlan X</td><td>implicit — assign IP = routing enabled</td></tr>
+        <tr><td>Loop prevention</td><td>STP + manually delete Default from Port 10</td><td>IS-IS calculates shortest path — no STP needed</td></tr>
+        <tr><td>Failover time</td><td>3–10 dropped pings (STP reconvergence)</td><td>0–1 dropped pings (IS-IS &lt;50ms)</td></tr>
+        <tr><td>SW2 role</td><td>Pure L2 — no routes, no gateways</td><td>Full L3 edge — owns Anycast IPs, knows internet route</td></tr>
+        <tr><td>Save config</td><td>save configuration</td><td>save config</td></tr>
+        <tr><td>Default route</td><td>configure iproute add default &lt;IP&gt;</td><td>ip route 0.0.0.0 0.0.0.0 &lt;IP&gt; weight 1 enable</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- PORT MAP -->
+<div id="portmap" class="section">
+  <div class="hero">
+    <div class="hero-tag">Reference · R2</div>
+    <div class="hero-title">Port Taxonomy — <span>Horizon Layout</span></div>
+  </div>
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:20px">
+    <table class="vs-table">
+      <thead><tr><th>Port</th><th style="color:var(--cyan)">VOSS Role</th><th style="color:var(--muted)">Type</th><th style="color:var(--muted)">Purpose</th></tr></thead>
+      <tbody>
+        <tr><td style="color:var(--orange)">Port 1</td><td>Transit VLAN 100</td><td>UNI (Edge)</td><td>Internet uplink to modem — SW1 only</td></tr>
+        <tr><td style="color:var(--orange)">Port 3</td><td>Fabric Attach</td><td>UNI (Edge)</td><td>AP3000 — auto-sense + fa enable, dynamic VLAN provisioning</td></tr>
+        <tr><td style="color:var(--orange)">Port 5</td><td>VLAN 10 member</td><td>UNI (Edge)</td><td>Wired corporate client — untagged access</td></tr>
+        <tr><td style="color:var(--cyan)">Port 10</td><td>NNI</td><td>Fabric Backbone</td><td>SW1 ↔ SW2 IS-IS link — no VLAN tagging, ever</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="field-note"><strong>KK's Apr 28 Answer — Correct</strong>"Edge: Ports 1, 3, 5. NNI: Port 10." Ports 1/3/5 are UNI (User-Network Interface) — where services meet users. Port 10 is NNI (Network-to-Network Interface) — the Fabric backbone. Never manually configure VLANs on Port 10 in VOSS.</div>
+</div>
+
+<!-- SOURCES -->
+<div id="sources" class="section">
+  <div class="hero">
+    <div class="hero-tag">Reference · R3</div>
+    <div class="hero-title">Source <span>Documents</span></div>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:12px">
+    <div style="background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--amber);border-radius:0 8px 8px 0;padding:18px 20px">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--amber);text-transform:uppercase;margin-bottom:6px">Source 1 — Apr 8 2026</div>
+      <div style="font-size:.88rem;font-weight:600;color:var(--text);margin-bottom:4px">Google AI EXOS→VOSS Dialogue (Option A Architecture)</div>
+      <div style="font-size:.8rem;color:var(--dim)">Original VOSS design session. Option A Resilient Fabric Core. Port 17 NNI. I-SID map (100010–100060). Full CLI scripts. Troubleshooting decision tree. Digital Twin system definition. Stored in: project_voss_fabric_migration.md</div>
+    </div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--cyan2);border-radius:0 8px 8px 0;padding:18px 20px">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--cyan);text-transform:uppercase;margin-bottom:6px">Source 2 — Apr 22 2026</div>
+      <div style="font-size:.88rem;font-weight:600;color:var(--text);margin-bottom:4px">NoteBook_LLM_EXOS-VOSS_APR 22 2026.docx</div>
+      <div style="font-size:.8rem;color:var(--dim)">NotebookLM synthesis. Half 1: WiFi 7 MLO. Half 2: VOSS migration with Port 10 NNI (Horizon layout). Port translation table. Full CLI scripts. Anycast. IP Shortcuts. Failover test. XIQ Network 360, Client 360, Floor Plan.</div>
+    </div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--cyan2);border-radius:0 8px 8px 0;padding:18px 20px">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--cyan);text-transform:uppercase;margin-bottom:6px">Source 3 — Apr 28 2026</div>
+      <div style="font-size:.88rem;font-weight:600;color:var(--text);margin-bottom:4px">ClaudeAI_EXOS-VOSS_Horizonz_Apr 28 2026.docx</div>
+      <div style="font-size:.8rem;color:var(--dim)">Socratic Claude AI dialogue. 7-step VOSS build sequence (Steps 1–7). I-SID must-run-on-both explanation. Fabric Attach LLDP conversation detail. Karl Rule evolution (IP Shortcuts + Anycast). Single vs dual modem scenarios. SW2 three gains in VOSS. Verification 4-command sequence. Transit VLAN 100 rationale.</div>
+    </div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--cyan2);border-radius:0 8px 8px 0;padding:18px 20px">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--cyan);text-transform:uppercase;margin-bottom:6px">Source 4 — Apr 28 2026</div>
+      <div style="font-size:.88rem;font-weight:600;color:var(--text);margin-bottom:4px">NoteBook_LLM_EXOS-VOSS_Apr 28 2026.docx</div>
+      <div style="font-size:.8rem;color:var(--dim)">NotebookLM synthesis. 9-step deployment logic table (Seq/Step/Action/Why). 11-slide storyboard for EXOS→VOSS Migration Masterclass. "90% + Glue + GPS + Victory Lap" progression. Alex student reflections. Convergence sub-50ms proof. "Brain-NNI-Services-GPS" checklist.</div>
+    </div>
+  </div>
+</div>
+
+</main>
+</div>
+
+<script>
+function show(id){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.s-link').forEach(l=>l.classList.remove('active'));
+  const t=document.getElementById(id);
+  if(t) t.classList.add('active');
+  document.querySelectorAll('.s-link').forEach(l=>{
+    const a=l.getAttribute('onclick');
+    if(a&&a.includes("'"+id+"'")) l.classList.add('active');
+  });
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+</script>
+</body>
+</html>
