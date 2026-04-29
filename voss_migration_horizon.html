@@ -124,6 +124,17 @@ main{margin-left:var(--aside-w);flex:1;padding:32px 40px;max-width:1040px}
   <a class="s-link" onclick="show('portmap')"><span class="s-num">R2</span>Port Taxonomy</a>
   <a class="s-link" onclick="show('sources')"><span class="s-num">R3</span>Sources</a>
 
+  <div class="s-section">Heart of VOSS · Apr 22 Dialogue</div>
+  <a class="s-link" onclick="show('d1')"><span class="s-num">D1</span>The Four Laws</a>
+  <a class="s-link" onclick="show('d2')"><span class="s-num">D2</span>I-SID Service Model</a>
+  <a class="s-link" onclick="show('d3')"><span class="s-num">D3</span>Port Translation</a>
+  <a class="s-link" onclick="show('d4')"><span class="s-num">D4</span>Anycast — Why It Matters</a>
+  <a class="s-link" onclick="show('d5')"><span class="s-num">D5</span>IP Shortcuts + GPS Check</a>
+  <a class="s-link" onclick="show('d6')"><span class="s-num">D6</span>Fabric Failover Test</a>
+  <a class="s-link" onclick="show('d7')"><span class="s-num">D7</span>XIQ Monitoring</a>
+  <a class="s-link" onclick="show('d8')"><span class="s-num">D8</span>XIQ Alerts + Webhooks</a>
+  <a class="s-link" onclick="show('d9')"><span class="s-num">D9</span>Alex's Milestone</a>
+
   <div class="s-section">Masterclass Deck · Apr 28</div>
   <a class="s-link" onclick="show('mc-01')"><span class="s-num">M1</span>Three Pillars</a>
   <a class="s-link" onclick="show('mc-02')"><span class="s-num">M2</span>Mindset Shift</a>
@@ -724,6 +735,497 @@ show ip route              <span class="c-comment"># 0.0.0.0/0 → 0.00.01 resto
   </div>
 </div>
 
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- HEART OF VOSS — NoteBookLLM Apr 22 2026 Dialogue (462 paras)  -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+
+<!-- D1 — THE FOUR LAWS -->
+<div id="d1" class="section">
+  <div class="hero">
+    <div class="hero-tag">Heart of VOSS · D1 · NoteBookLLM Apr 22 2026 · The Core Standards</div>
+    <div class="hero-title">The Four <span>"Laws" of VOSS</span></div>
+    <div class="hero-sub">The architecture of Fabric Engine is built on a single protocol stack that replaces the complex "alphabet soup" (STP, OSPF, BGP) of traditional networking. These are the RFCs and IEEE standards that govern every behaviour you see in the CLI.</div>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:14px;margin-bottom:24px">
+    <div style="background:var(--surface);border:1px solid var(--border);border-left:4px solid var(--cyan);border-radius:0 8px 8px 0;padding:18px 20px">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--cyan);background:var(--cyan-bg);border:1px solid var(--cyan2);padding:3px 8px;border-radius:3px">IEEE 802.1aq</span>
+        <span style="font-family:'Syne',sans-serif;font-size:.95rem;font-weight:800;color:var(--text)">Shortest Path Bridging — SPBM</span>
+        <span style="font-size:.75rem;color:var(--muted);font-style:italic">The Foundation</span>
+      </div>
+      <div style="font-size:.83rem;color:var(--dim);line-height:1.75">The primary architectural standard. It <strong style="color:var(--text)">replaces Spanning Tree (STP)</strong>. Instead of blocking redundant links to prevent loops, SPBM allows every link to stay active and uses a shortest-path algorithm to move data. No more blocked ports. No more convergence storms.</div>
+    </div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-left:4px solid var(--purple);border-radius:0 8px 8px 0;padding:18px 20px">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--purple);background:var(--purple-bg);border:1px solid var(--purple2);padding:3px 8px;border-radius:3px">RFC 6329</span>
+        <span style="font-family:'Syne',sans-serif;font-size:.95rem;font-weight:800;color:var(--text)">IS-IS Extensions for SPB</span>
+        <span style="font-size:.75rem;color:var(--muted);font-style:italic">The Brain</span>
+      </div>
+      <div style="font-size:.83rem;color:var(--dim);line-height:1.75">The <strong style="color:var(--text)">Control Plane</strong>. Uses the IS-IS link-state protocol to build the network topology map and distribute I-SID service information automatically across the core. Switches use this to "learn" the fabric without IP-based routing protocols.</div>
+    </div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-left:4px solid var(--amber);border-radius:0 8px 8px 0;padding:18px 20px">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--amber);background:var(--amber-bg);border:1px solid #713f12;padding:3px 8px;border-radius:3px">IEEE 802.1ah</span>
+        <span style="font-family:'Syne',sans-serif;font-size:.95rem;font-weight:800;color:var(--text)">Provider Backbone Bridging — MAC-in-MAC</span>
+        <span style="font-size:.75rem;color:var(--muted);font-style:italic">The Muscle</span>
+      </div>
+      <div style="font-size:.83rem;color:var(--dim);line-height:1.75">The <strong style="color:var(--text)">Data Plane</strong>. Uses MAC-in-MAC encapsulation to wrap user traffic in a "Backbone" header. This hides your devices' MAC addresses from the core of the network, making the fabric incredibly scalable and stable. A laptop MAC on Port 5 is never visible to the NNI.</div>
+    </div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-left:4px solid var(--green);border-radius:0 8px 8px 0;padding:18px 20px">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--green);background:var(--green-bg);border:1px solid var(--green2);padding:3px 8px;border-radius:3px">IEEE 802.1Qcj / LLDP</span>
+        <span style="font-family:'Syne',sans-serif;font-size:.95rem;font-weight:800;color:var(--text)">Fabric Attach</span>
+        <span style="font-size:.75rem;color:var(--muted);font-style:italic">The Handshake</span>
+      </div>
+      <div style="font-size:.83rem;color:var(--dim);line-height:1.75">Allows non-fabric devices like the AP3000 to "handshake" with the switch via LLDP and <strong style="color:var(--text)">dynamically request the I-SID services they need</strong>. The AP says "I need I-SID 100020 for Corporate and 100030 for Guest" — the switch provisions the VLANs on-the-fly without any static port config.</div>
+    </div>
+  </div>
+  <div class="insight">Moving from EXOS to VOSS is moving from managing individual boxes to orchestrating services. The four standards above replace STP, VRRP, manual trunking, and static port configs — all at once.<cite>— Alex (NotebookLLM Apr 22 2026): "We've moved from an 'alphabet soup' to a single, elegant stack."</cite></div>
+</div>
+
+<!-- D2 — I-SID SERVICE MODEL -->
+<div id="d2" class="section">
+  <div class="hero">
+    <div class="hero-tag">Heart of VOSS · D2 · I-SID — Service Identity</div>
+    <div class="hero-title">Stop Managing VLANs. <span>Start Managing Services.</span></div>
+    <div class="hero-sub">An I-SID is a 24-bit global service ID (1 to 16.7 million). While a VLAN ID only matters locally on a single switch, an I-SID is recognised by every switch in the Fabric — the Rosetta Stone that bridges both worlds.</div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px">
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:18px">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--muted);margin-bottom:10px;text-transform:uppercase;letter-spacing:.08em">VLAN — Local Scope</div>
+      <div style="font-size:.82rem;color:var(--dim);line-height:1.75">VLAN 20 means "Corporate Wireless" on SW1.<br>On SW2, VLAN 20 could mean anything — there's no shared dictionary.<br>Every trunk port must be manually configured.</div>
+    </div>
+    <div style="background:var(--cyan-bg);border:1px solid var(--cyan2);border-radius:8px;padding:18px">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--cyan);margin-bottom:10px;text-transform:uppercase;letter-spacing:.08em">I-SID — Global Scope</div>
+      <div style="font-size:.82rem;color:var(--dim);line-height:1.75">I-SID 100020 means "Corporate Wireless" <em>everywhere</em>.<br>Every switch in the Fabric knows this suitcase.<br>No trunk tagging. No port config updates when VLANs change.</div>
+    </div>
+  </div>
+  <div style="font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--cyan);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">The Rosetta Stone — VLAN ID + 100,000 = I-SID</div>
+  <table class="vs-table" style="margin-bottom:20px">
+    <tr><th>VLAN</th><th>Name</th><th>I-SID</th><th style="color:var(--dim)">Scope</th></tr>
+    <tr><td>10</td><td style="color:var(--cyan)">MGMT / Corp Wired</td><td>100010</td><td style="color:var(--dim)">Both switches</td></tr>
+    <tr><td>20</td><td style="color:var(--cyan)">Alpha / Corp Wireless</td><td>100020</td><td style="color:var(--dim)">Both switches</td></tr>
+    <tr><td>30</td><td style="color:var(--cyan)">Bravo / Guest Wireless</td><td>100030</td><td style="color:var(--dim)">Both switches</td></tr>
+    <tr><td>50</td><td style="color:var(--cyan)">Delta</td><td>100050</td><td style="color:var(--dim)">Both switches</td></tr>
+    <tr><td>60</td><td style="color:var(--cyan)">Gamma</td><td>100060</td><td style="color:var(--dim)">Both switches</td></tr>
+    <tr><td>100</td><td style="color:var(--muted)">Internet_Exit</td><td style="color:var(--muted)">—</td><td style="color:var(--muted)">SW1 only · no I-SID needed</td></tr>
+  </table>
+  <div class="config-block">
+    <div class="config-block-label">CLI — Run on BOTH switches (identical)</div>
+    <pre><span class="c-comment"># 1. Create the VLANs in the VOSS database</span>
+vlan create 10,20,30,50,60 type port-mstprstp 0
+
+<span class="c-comment"># 2. Map VLANs to their standardised Fabric I-SIDs</span>
+vlan i-sid 10 100010
+vlan i-sid 20 100020
+vlan i-sid 30 100030
+vlan i-sid 50 100050
+vlan i-sid 60 100060
+
+<span class="c-comment"># 3. Add names for XIQ + CLI identification</span>
+vlan name 10 "MGMT"
+vlan name 20 "Alpha"
+vlan name 30 "Bravo"
+vlan name 50 "Delta"
+vlan name 60 "Gamma"
+
+<span class="c-comment"># 4. Verify — expect all I-SIDs listed, Type: ELAN, State: Active</span>
+show i-sid</pre>
+  </div>
+  <div class="field-note" style="margin-top:14px"><strong>Critical: Stop Tagging!</strong>Once you enable IS-IS on your uplink ports, these VLANs are automatically "stretched" across the Fabric. You must <strong>stop</strong> here — never manually tag these VLANs on trunk ports in VOSS. The Fabric treats the core as a black box.</div>
+  <div class="insight" style="margin-top:14px">It's like we just created five global 'Suitcases' (I-SIDs). Anything we put in the VLAN 20 suitcase on Switch 1 automatically pops out of the VLAN 20 suitcase on Switch 2 without us building individual pipes.<cite>— Alex, NotebookLLM Apr 22 2026</cite></div>
+</div>
+
+<!-- D3 — PORT TRANSLATION -->
+<div id="d3" class="section">
+  <div class="hero">
+    <div class="hero-tag">Heart of VOSS · D3 · Port Translation — EXOS → VOSS</div>
+    <div class="hero-title">Ports 1 / 3 / 5 / 10 — <span>Same Jacks, New Logic</span></div>
+    <div class="hero-sub">Every physical port from the EXOS lab maps to a VOSS concept. The cables don't move. The intent changes completely.</div>
+  </div>
+  <table class="vs-table" style="margin-bottom:20px">
+    <tr><th>Port</th><th style="color:var(--amber)">EXOS Role</th><th style="color:var(--cyan)">VOSS Role</th><th style="color:var(--dim)">Interface Type</th></tr>
+    <tr><td>Port 10</td><td style="color:var(--amber)">Manual trunk — tag every VLAN</td><td>NNI — <code style="color:var(--cyan)">isis spbm 1</code> → Fabric black box</td><td style="color:var(--dim)">Network-to-Network Interface</td></tr>
+    <tr><td>Port 3</td><td style="color:var(--amber)">Static trunk for VLAN 20/30</td><td>Fabric Attach — AP requests I-SIDs via LLDP</td><td style="color:var(--dim)">User-Network Interface (UNI-FA)</td></tr>
+    <tr><td>Port 5</td><td style="color:var(--amber)">Static access port VLAN 10</td><td><code style="color:var(--cyan)">vlan members add 10 1/5</code></td><td style="color:var(--dim)">User-Network Interface (UNI)</td></tr>
+    <tr><td>Port 1</td><td style="color:var(--amber)">Default VLAN untagged → modem</td><td>Transit VLAN 100 → Internet Exit</td><td style="color:var(--dim)">UNI — SW1 only</td></tr>
+  </table>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+    <div class="config-block">
+      <div class="config-block-label">Switch 1 — Primary (Full Stack)</div>
+      <pre><span class="c-comment"># 1. IS-IS Brain</span>
+router isis
+  system-id 0000.0000.0001
+  manual-area 00.0001
+  exit
+spbm 1
+  spbm ethertype 0x8100
+  spbm nick-name 0.00.01
+  exit
+router isis enable
+
+<span class="c-comment"># 2. I-SID mapping (same on both)</span>
+vlan create 10,20,30,50,60 type port-mstprstp 0
+vlan i-sid 10 100010
+vlan i-sid 20 100020
+vlan i-sid 30 100030
+vlan i-sid 50 100050
+vlan i-sid 60 100060
+
+<span class="c-comment"># 3. Port 10 — NNI</span>
+interface gigabitEthernet 1/10
+  isis enable
+  isis spbm 1
+  no shutdown
+  exit
+
+<span class="c-comment"># 4. Port 3 — Fabric Attach</span>
+interface gigabitEthernet 1/3
+  auto-sense enable
+  fa enable
+  no shutdown
+  exit
+
+<span class="c-comment"># 5. Port 5 — Wired UNI</span>
+vlan members add 10 1/5
+
+<span class="c-comment"># 6. Port 1 — Internet Exit (SW1 only)</span>
+vlan create 100 name "Internet_Exit" type port-mstprstp 0
+vlan members add 100 1/1
+interface vlan 100
+  ip address 192.168.0.28/24
+  exit
+ip route 0.0.0.0 0.0.0.0 192.168.0.1 weight 1 enable
+
+<span class="c-comment"># 7. IP Shortcuts</span>
+router isis
+  ip-shortcut
+  exit
+save config</pre>
+    </div>
+    <div class="config-block">
+      <div class="config-block-label" style="color:var(--blue)">Switch 2 — Edge (Join the Fabric)</div>
+      <pre><span class="c-sw2"><span class="c-comment"># 1. IS-IS Brain (unique system-id)</span>
+router isis
+  system-id 0000.0000.0002
+  manual-area 00.0001
+  exit
+spbm 1
+  spbm ethertype 0x8100
+  spbm nick-name 0.00.02
+  exit
+router isis enable
+
+<span class="c-comment"># 2. I-SID mapping (must match SW1)</span>
+vlan create 10,20,30,50,60 type port-mstprstp 0
+vlan i-sid 10 100010
+vlan i-sid 20 100020
+vlan i-sid 30 100030
+vlan i-sid 50 100050
+vlan i-sid 60 100060
+
+<span class="c-comment"># 3. Port 10 — NNI</span>
+interface gigabitEthernet 1/10
+  isis enable
+  isis spbm 1
+  no shutdown
+  exit
+
+<span class="c-comment"># 4. Port 3 — Fabric Attach</span>
+interface gigabitEthernet 1/3
+  auto-sense enable
+  fa enable
+  no shutdown
+  exit
+
+<span class="c-comment"># 5. Port 5 — Wired UNI</span>
+vlan members add 10 1/5
+
+<span class="c-comment"># 6. IP Shortcuts (no Transit VLAN on SW2)</span>
+router isis
+  ip-shortcut
+  exit
+save config</span></pre>
+    </div>
+  </div>
+  <div class="insight" style="margin-top:16px">Instead of managing a complicated matrix of which VLAN is tagged on which port, we just define the NNI link on Port 10 and the AP port on Port 3. The Fabric handles the rest of the plumbing behind the scenes.<cite>— Alex, NotebookLLM Apr 22 2026</cite></div>
+</div>
+
+<!-- D4 — ANYCAST — WHY IT MATTERS -->
+<div id="d4" class="section">
+  <div class="hero">
+    <div class="hero-tag">Heart of VOSS · D4 · Anycast Gateway — What Breaks Without It</div>
+    <div class="hero-title">Why Anycast Is <span>Not Optional</span></div>
+    <div class="hero-sub">Without the Anycast IP Gateway, SW2 routing capability is wasted. Four specific things break or degrade — here's exactly what each one looks like.</div>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:24px">
+    <div style="background:var(--red-bg);border:1px solid #7f1d1d;border-radius:8px;padding:16px 18px">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:.65rem;font-weight:700;color:var(--red);margin-bottom:6px">1 — THE PING DROP DURING FAILOVER</div>
+      <div style="font-size:.83rem;color:var(--dim);line-height:1.75">Without Anycast, the switches don't share a virtual identity. If Port 10 fails, SW2 cannot immediately take over as the gateway — it doesn't "own" that IP locally. You would see a <strong style="color:var(--red)">3–10+ second delay</strong> while the network recalculates, instead of 0–1 dropped pings.</div>
+    </div>
+    <div style="background:var(--red-bg);border:1px solid #7f1d1d;border-radius:8px;padding:16px 18px">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:.65rem;font-weight:700;color:var(--red);margin-bottom:6px">2 — ROAMING GAPS FOR WIFI CLIENTS</div>
+      <div style="font-size:.83rem;color:var(--dim);line-height:1.75">Without Anycast, your MacBook/iPhone experiences a <strong style="color:var(--red)">roaming delay</strong> when walking from AP1 (SW1) to AP2 (SW2). The device has to re-discover its gateway and perform a new ARP handshake because the gateway identity changed. With Anycast, the IP and MAC stay identical — the device moves seamlessly without dropping a Zoom call.</div>
+    </div>
+    <div style="background:var(--red-bg);border:1px solid #7f1d1d;border-radius:8px;padding:16px 18px">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:.65rem;font-weight:700;color:var(--amber);margin-bottom:6px">3 — TRAFFIC "TROMBONING"</div>
+      <div style="font-size:.83rem;color:var(--dim);line-height:1.75">Without a distributed anycast gateway, traffic must travel to the single "primary" switch just to be routed — even if the destination is physically closer to the secondary switch. Data bounces back and forth across the NNI unnecessarily. Anycast ensures the nearest switch handles the routing decision immediately at the edge.</div>
+    </div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:16px 18px">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:.65rem;font-weight:700;color:var(--muted);margin-bottom:6px">4 — MANAGEMENT COMPLEXITY</div>
+      <div style="font-size:.83rem;color:var(--dim);line-height:1.75">Without shared gateway IPs, you must manage independent gateway IPs for every switch. The unified 10.0.20.1 "Alpha" service would require different IPs on each switch (.1 on SW1, .2 on SW2), making DHCP configurations much more complex.</div>
+    </div>
+  </div>
+  <div class="config-block">
+    <div class="config-block-label">Anycast Gateway CLI — Run on BOTH SW1 and SW2 (identical IPs)</div>
+    <pre><span class="c-comment"># IS-IS coordinates ownership — no conflict, no VRRP needed</span>
+interface vlan 10
+  ip address 10.0.10.1/24
+  exit
+interface vlan 20
+  ip address 10.0.20.1/24
+  exit
+interface vlan 30
+  ip address 10.0.30.1/24
+  exit
+interface vlan 50
+  ip address 10.0.50.1/24
+  exit
+interface vlan 60
+  ip address 10.0.60.1/24
+  exit
+
+<span class="c-comment"># Horizon-specific (Apr 21 lab subnets)</span>
+<span class="c-comment"># interface vlan 10 → 10.10.0.1/24</span>
+<span class="c-comment"># interface vlan 20 → 10.20.0.1/24</span>
+<span class="c-comment"># interface vlan 30 → 10.30.0.1/24</span></pre>
+  </div>
+  <div class="insight" style="margin-top:14px">In our EXOS setup, Switch 2 was just a "dumb" follower that sent everything to Switch 1 to reach the internet. With Anycast, Switch 2 becomes a fully independent gateway. It's like we gave both switches an identical GPS and the authority to drive the car.<cite>— Alex, NotebookLLM Apr 22 2026</cite></div>
+</div>
+
+<!-- D5 — IP SHORTCUTS + GPS CHECK -->
+<div id="d5" class="section">
+  <div class="hero">
+    <div class="hero-tag">Heart of VOSS · D5 · IP Shortcuts — The "Set It and Forget It" Route</div>
+    <div class="hero-title">SW2 Learns the Internet Route <span>Without a Cable to the Modem</span></div>
+    <div class="hero-sub">In EXOS, you had to add a manual static route on SW2 pointing to SW1. In VOSS, you enable IP Shortcut — and IS-IS does the rest.</div>
+  </div>
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:20px;margin-bottom:20px">
+    <div style="font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--cyan);text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px">The Concept</div>
+    <div style="display:flex;flex-direction:column;gap:10px;font-size:.83rem;color:var(--dim);line-height:1.7">
+      <div><span style="color:var(--cyan);font-weight:600">1.</span> SW1 is physically connected to the modem and has a default route (<code style="color:var(--cyan);background:var(--bg);padding:1px 5px;border-radius:3px">0.0.0.0/0 → 192.168.0.1</code>).</div>
+      <div><span style="color:var(--cyan);font-weight:600">2.</span> With <code style="color:var(--cyan);background:var(--bg);padding:1px 5px;border-radius:3px">ip-shortcut</code> enabled, the IS-IS brain "advertises" this exit point to every switch in the Fabric via the NNI backbone.</div>
+      <div><span style="color:var(--cyan);font-weight:600">3.</span> SW2's routing table is automatically populated — no manual config, no second modem cable.</div>
+      <div><span style="color:var(--cyan);font-weight:600">4.</span> The next-hop shown on SW2 is <em>not</em> an IP address — it's SW1's nick-name (<code style="color:var(--cyan);background:var(--bg);padding:1px 5px;border-radius:3px">0.00.01</code>). This is proof the Fabric, not IP routing, is handling the path.</div>
+    </div>
+  </div>
+  <div class="config-block" style="margin-bottom:20px">
+    <div class="config-block-label">CLI — Both Switches</div>
+    <pre><span class="c-comment"># Enter the IS-IS brain and turn on route sharing</span>
+router isis
+  ip-shortcut
+  exit
+
+<span class="c-comment"># This was already in the full scripts — this is the specific command</span>
+<span class="c-comment"># that unlocks the "Shortcut" behaviour</span></pre>
+  </div>
+  <div style="font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--cyan);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">GPS Check — Verify on SW2</div>
+  <div class="config-block" style="margin-bottom:16px">
+    <div class="config-block-label">Run on SW2 CLI — The Proof</div>
+    <pre>show ip route
+
+<span class="c-comment"># What you WANT to see:</span>
+<span class="c-comment"># Destination : 0.0.0.0/0</span>
+<span class="c-comment"># Next Hop    : 0.00.01        ← SW1 nick-name, NOT an IP!</span>
+<span class="c-comment"># Protocol    : SPB or ISIS</span>
+
+<span class="c-comment"># If next-hop shows an IP address → ip-shortcut is not active</span>
+<span class="c-comment"># If route is missing entirely  → check ip-shortcut on BOTH switches</span></pre>
+  </div>
+  <div class="insight">It's like a group chat for routers. Once Switch 1 posts the "location pin" for the internet, Switch 2 immediately updates its own map. We've moved from manual hop-by-hop navigation to a shared, real-time GPS system.<cite>— Alex, NotebookLLM Apr 22 2026</cite></div>
+</div>
+
+<!-- D6 — FABRIC FAILOVER TEST -->
+<div id="d6" class="section">
+  <div class="hero">
+    <div class="hero-tag">Heart of VOSS · D6 · The Ultimate Proof — Fabric Failover Test</div>
+    <div class="hero-title">Pull the Cable. <span>Count the Dropped Pings.</span></div>
+    <div class="hero-sub">This is where we prove VOSS handles failure with far greater precision than EXOS Spanning Tree. The expected result: 0–1 dropped pings. EXOS would have dropped 3–10.</div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px">
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:18px">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--cyan);margin-bottom:10px;text-transform:uppercase">Step 1 — Start Continuous Monitors</div>
+      <div style="font-size:.82rem;color:var(--dim);margin-bottom:12px">From your MacBook <strong style="color:var(--text)">(connected to SW2)</strong>, open two terminals:</div>
+      <div class="config-block"><pre>Window 1 (Gateway):
+ping 10.0.20.1 -t
+
+Window 2 (Internet):
+ping 8.8.8.8 -t</pre></div>
+    </div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:18px">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--red);margin-bottom:10px;text-transform:uppercase">Step 2 — Pull the Trigger</div>
+      <div style="font-size:.82rem;color:var(--dim);line-height:1.7">Physically unplug the <strong style="color:var(--text)">NNI cable (Port 10)</strong> connecting SW1 and SW2.</div>
+      <div style="margin-top:14px;background:var(--green-bg);border:1px solid var(--green2);border-radius:6px;padding:12px 14px;font-size:.83rem;color:var(--green)"><strong>Expected: 0–1 dropped pings</strong><br><span style="color:var(--dim);font-size:.8rem">IS-IS recalculates in &lt;50ms — faster than the human ear detects a gap in audio</span></div>
+    </div>
+  </div>
+  <div style="font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--amber);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">Step 3 — Verify the Isolated State (Cable still unplugged)</div>
+  <div class="config-block" style="margin-bottom:20px">
+    <div class="config-block-label">Run on SW2 CLI — See the Fabric "Thinking"</div>
+    <pre><span class="c-comment"># Test 1 — IS-IS adjacency gone → switches are now islands</span>
+show isis adj
+<span class="c-comment"># Expected: SW1 adjacency ABSENT (was UP, now gone)</span>
+
+<span class="c-comment"># Test 2 — Default route no longer points to SW1 nick-name</span>
+show ip route
+<span class="c-comment"># Expected: 0.0.0.0/0 now points to local modem (if Port 1 plugged in)</span>
+<span class="c-comment"># or route is gone entirely (if SW2 has no local modem connection)</span>
+
+<span class="c-comment"># Test 3 — I-SIDs are now "Local Only"</span>
+show isis spbm i-sid
+<span class="c-comment"># Expected: I-SIDs 100020/100030 listed as "Local Only"</span>
+<span class="c-comment"># Means the East-West path to SW1 is severed</span></pre>
+  </div>
+  <div style="background:var(--green-bg);border:1px solid var(--green2);border-radius:8px;padding:16px 18px;margin-bottom:16px">
+    <div style="font-family:'JetBrains Mono',monospace;font-size:.65rem;font-weight:700;color:var(--green);margin-bottom:8px">Step 4 — Auto-Heal Recovery</div>
+    <div style="font-size:.83rem;color:var(--dim);line-height:1.75">Plug Port 10 back in. Within seconds, VOSS detects its neighbour, re-establishes the IS-IS adjacency, and moves traffic back to the optimal path <strong style="color:var(--green)">automatically — no manual intervention required</strong>. Run <code style="color:var(--cyan);background:var(--bg);padding:1px 5px;border-radius:3px">show isis adj</code> again to watch SW2's nick-name 0.00.02 reappear.</div>
+  </div>
+  <div class="insight">It's like we cut a bridge, but the cars didn't even tap their brakes — because they already had a second bridge built and ready to go. We've built a network that heals before the user even knows it's broken.<cite>— Alex, NotebookLLM Apr 22 2026</cite></div>
+</div>
+
+<!-- D7 — XIQ MONITORING -->
+<div id="d7" class="section">
+  <div class="hero">
+    <div class="hero-tag">Heart of VOSS · D7 · XIQ Monitoring — Seeing the Invisible Fabric</div>
+    <div class="hero-title">After the Failover: <span>What XIQ Records</span></div>
+    <div class="hero-sub">Three views in ExtremeCloud IQ turn the Fabric from CLI abstractions into a living, visual map — Event Logs, Network 360, and Client 360.</div>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:20px">
+    <div class="slide-card">
+      <div style="background:var(--cyan-bg);padding:10px 18px;font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--cyan);letter-spacing:.08em;font-weight:700">1 — EVENT LOGS &nbsp;·&nbsp; Manage → Events</div>
+      <div class="slide-body">
+        <div style="font-size:.83rem;color:var(--dim);margin-bottom:12px">Filter: Device = SW1 + SW2 · Category = System · Severity = Critical/Major</div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div class="check-row"><span class="check-n">A</span><div><span style="color:var(--red)">IS-IS Adjacency Down</span> — "Neighbor 0.00.02 on port 1/10 changed state to DOWN" — the moment IS-IS brain realises the bridge is gone</div></div>
+          <div class="check-row"><span class="check-n">B</span><div><span style="color:var(--amber)">L3 Gateway Transition</span> — path to gateway has changed. With Anycast, this transition is near-instantaneous as the local switch takes over</div></div>
+          <div class="check-row"><span class="check-n">C</span><div><span style="color:var(--green)">Fabric Attach (FA) Updates</span> — "FA Assignment Updated" — switch re-signals the service paths for the AP3000</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="slide-card">
+      <div style="background:var(--cyan-bg);padding:10px 18px;font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--cyan);letter-spacing:.08em;font-weight:700">2 — NETWORK 360 &nbsp;·&nbsp; ML Insights → Network 360 Monitor</div>
+      <div class="slide-body">
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div class="check-row"><span class="check-n">A</span><div><strong style="color:var(--text)">Topology Map</strong> — Two 5320 switches connected by a line. In VOSS, XIQ specifically identifies this as an <span style="color:var(--cyan)">SPB/Fabric link</span></div></div>
+          <div class="check-row"><span class="check-n">B</span><div><strong style="color:var(--text)">Colour Code</strong> — <span style="color:var(--green)">Green = IS-IS adjacency healthy</span>. <span style="color:var(--red)">Red/Orange = East-West break</span> — no CLI needed to locate the fault</div></div>
+          <div class="check-row"><span class="check-n">C</span><div><strong style="color:var(--text)">Health Score (0–100)</strong> — score above 90 = Voice/Alpha traffic prioritised, Fabric paths optimal</div></div>
+          <div class="check-row"><span class="check-n">D</span><div><strong style="color:var(--text)">Device 360 (right-click warning icon)</strong> — Fabric Attach Tab shows which I-SIDs (100010–100060) APs have requested. Interface view: hover Port 10 for NNI bandwidth, Port 3 for PoE draw</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="slide-card">
+      <div style="background:var(--cyan-bg);padding:10px 18px;font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--cyan);letter-spacing:.08em;font-weight:700">3 — CLIENT 360 &nbsp;·&nbsp; Manage → Clients → MAC Address</div>
+      <div class="slide-body">
+        <div style="font-size:.83rem;color:var(--dim);margin-bottom:12px">The "time-travel" view. Tracks a single voice packet from radio wave to internet exit.</div>
+        <div style="display:flex;align-items:stretch;gap:0;background:var(--bg);border:1px solid var(--border);border-radius:6px;overflow:hidden;margin-bottom:12px">
+          <div style="flex:1;padding:12px;border-right:1px solid var(--border);text-align:center;font-size:.78rem;color:var(--dim)"><div style="font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--blue);margin-bottom:4px">WIRELESS HOP</div>iPhone → AP3000<br>RSSI + SNR score<br><span style="color:var(--green);font-size:.75rem">Green = healthy air</span></div>
+          <div style="display:flex;align-items:center;padding:0 4px;color:var(--muted)">→</div>
+          <div style="flex:1;padding:12px;border-right:1px solid var(--border);text-align:center;font-size:.78rem;color:var(--dim)"><div style="font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--cyan);margin-bottom:4px">FABRIC ENTRY</div>AP3000 → Port 3<br>SW2</div>
+          <div style="display:flex;align-items:center;padding:0 4px;color:var(--muted)">→</div>
+          <div style="flex:1;padding:12px;border-right:1px solid var(--border);text-align:center;font-size:.78rem;color:var(--cyan)"><div style="font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--amber);margin-bottom:4px">FABRIC TRANSIT</div>MAC-in-MAC tunnel<br>Port 10 NNI<br><span style="font-size:.72rem">&lt;50ms</span></div>
+          <div style="display:flex;align-items:center;padding:0 4px;color:var(--muted)">→</div>
+          <div style="flex:1;padding:12px;text-align:center;font-size:.78rem;color:var(--green)"><div style="font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--green);margin-bottom:4px">INTERNET EXIT</div>Port 1 → SW1<br>QuantumFiber modem</div>
+        </div>
+        <div style="font-size:.8rem;color:var(--dim)"><strong style="color:var(--text)">SLA Tab:</strong> Voice/SIP/RTP latency should stay below 50ms even during failover — confirms 802.1p CoS 6 tags are honoured.<br><strong style="color:var(--text)">Wireshark:</strong> Diagnostics → Remote Sniffer → Port 10 → open in Wireshark → see actual Fabric (MAC-in-MAC) headers wrapping voice data. Proves IS-IS and SPB are aligned.</div>
+      </div>
+    </div>
+  </div>
+  <div class="insight" style="margin-top:16px">We did all that hard work in the CLI to build the 'muscle' of the network, and now XIQ gives us the 'eyes' to watch it perform. It's like having a 24/7 network auditor watching our Fabric.<cite>— Alex, NotebookLLM Apr 22 2026</cite></div>
+</div>
+
+<!-- D8 — XIQ ALERTS + WEBHOOKS -->
+<div id="d8" class="section">
+  <div class="hero">
+    <div class="hero-tag">Heart of VOSS · D8 · XIQ Alerts + Webhooks — The Early Warning System</div>
+    <div class="hero-title">Make the Network <span>Scream If It Feels Pain</span></div>
+    <div class="hero-sub">Set up once — get notified the moment Port 10 NNI drops or IS-IS adjacency changes. No manual polling required.</div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px">
+    <div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--cyan);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">XIQ Alert Policy</div>
+      <div style="display:flex;flex-direction:column;gap:6px;font-size:.82rem;color:var(--dim)">
+        <div>1. Navigate: <span style="color:var(--cyan)">Configure → Alerts → Alert Policies</span></div>
+        <div>2. Click "+" → new policy name: <code style="color:var(--cyan);background:var(--bg);padding:1px 5px;border-radius:3px">Horizon_Fabric_Alerts</code></div>
+        <div>3. Add Rule → Device Type: Switch → Category: System</div>
+        <div>4. Select events:</div>
+      </div>
+      <div style="margin:10px 0;display:flex;flex-direction:column;gap:6px">
+        <div style="background:var(--red-bg);border:1px solid #7f1d1d;border-radius:4px;padding:6px 10px;font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--red)">Fabric Link Down</div>
+        <div style="background:var(--red-bg);border:1px solid #7f1d1d;border-radius:4px;padding:6px 10px;font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--red)">IS-IS Neighbor State Change</div>
+        <div style="background:var(--amber-bg);border:1px solid #713f12;border-radius:4px;padding:6px 10px;font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--amber)">Anycast Gateway Conflict</div>
+      </div>
+      <div style="font-size:.82rem;color:var(--dim)">5. Notification: email + XIQ mobile app push (ensure Push Notifications ON). Set threshold to <strong style="color:var(--text)">Immediate</strong>.</div>
+    </div>
+    <div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--purple);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">VOSS Local Logging (CLI)</div>
+      <div class="config-block">
+        <div class="config-block-label" style="color:var(--purple)">VOSS XML-Notification (to syslog/web server)</div>
+        <pre><span class="c-comment"># Create the target</span>
+create log target xml-notification &lt;name&gt;
+  url &lt;server_url&gt;
+
+<span class="c-comment"># Apply filter</span>
+configure log target xml-notification &lt;name&gt;
+  filter &lt;filter-name&gt; severity critical</pre>
+      </div>
+    </div>
+  </div>
+  <div style="font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--cyan);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">Webhook → Slack / Discord</div>
+  <div style="display:flex;flex-direction:column;gap:8px;font-size:.82rem;color:var(--dim);margin-bottom:14px">
+    <div><strong style="color:var(--text)">Step 1 — Get the URL:</strong> Slack: Apps → Incoming WebHooks → add to channel → copy URL. Discord: Channel Settings → Integrations → Webhooks → New Webhook → copy URL.</div>
+    <div><strong style="color:var(--text)">Step 2 — Configure in XIQ:</strong> Configure → Alerts → Webhook Settings → "+" → Name: <code style="color:var(--cyan);background:var(--bg);padding:1px 5px;border-radius:3px">Slack_Fabric_Monitors</code> → Paste URL → Payload Format: <code style="color:var(--cyan);background:var(--bg);padding:1px 5px;border-radius:3px">JSON</code></div>
+    <div><strong style="color:var(--text)">Step 3 — Map to policy:</strong> Alert Policy → Horizon_Fabric_Alerts → Notification → check Webhook destination → Save and Push</div>
+  </div>
+  <div class="field-note"><strong>Final Boss Test</strong>Unplug Port 10 NNI. Within seconds a JSON-formatted message appears in your Slack/Discord: <code style="color:var(--amber)">"IS-IS Adjacency state changed to DOWN on unit 1 port 10"</code> — the entire chain from physical wire to chat app is verified.</div>
+</div>
+
+<!-- D9 — ALEX'S MILESTONE -->
+<div id="d9" class="section">
+  <div class="hero">
+    <div class="hero-tag">Heart of VOSS · D9 · Alex's Project Milestone Report · Apr 22 2026</div>
+    <div class="hero-title">From "Managing Boxes" to <span>"Orchestrating Services"</span></div>
+  </div>
+  <div style="background:var(--cyan-bg);border:1px solid var(--cyan2);border-radius:10px;padding:24px 28px;margin-bottom:24px">
+    <div style="font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--cyan);text-transform:uppercase;letter-spacing:.1em;margin-bottom:16px">Alex's Milestone Summary (verbatim)</div>
+    <div style="display:flex;flex-direction:column;gap:10px;font-size:.85rem;color:var(--dim);line-height:1.75">
+      <div>✓ &nbsp;Migrated from a manual EXOS setup to a <strong style="color:var(--text)">self-healing VOSS Fabric</strong></div>
+      <div>✓ &nbsp;Automated services using <strong style="color:var(--text)">I-SIDs and Fabric Attach</strong> for the AP3000s</div>
+      <div>✓ &nbsp;Enabled <strong style="color:var(--text)">Anycast Gateways</strong> for seamless roaming and <strong style="color:var(--text)">IP Shortcuts</strong> for automated routing</div>
+      <div>✓ &nbsp;Validated the entire path visually using <strong style="color:var(--text)">Network 360 and Client 360</strong></div>
+      <div>✓ &nbsp;Verified <strong style="color:var(--text)">sub-second failover</strong> with physically pulled cables</div>
+      <div>✓ &nbsp;Set up <strong style="color:var(--text)">XIQ Alert Policies and Webhooks</strong> for real-time monitoring</div>
+    </div>
+  </div>
+  <div style="font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--cyan);text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px">The Complete Mental Model — VOSS in One Sentence Per Layer</div>
+  <table class="vs-table" style="margin-bottom:20px">
+    <tr><th>Layer</th><th style="color:var(--cyan)">What It Does</th><th style="color:var(--dim)">Analogy</th></tr>
+    <tr><td>IS-IS (RFC 6329)</td><td>Builds the map, shares routes, distributes I-SID knowledge</td><td style="color:var(--dim)">Group chat where every switch posts its location pin</td></tr>
+    <tr><td>SPBM (802.1aq)</td><td>Finds the shortest active path, no blocked ports</td><td style="color:var(--dim)">GPS that always uses the fastest route, not just one road</td></tr>
+    <tr><td>MAC-in-MAC (802.1ah)</td><td>Wraps user traffic in a Fabric header — hides device MACs</td><td style="color:var(--dim)">Sealed suitcase — contents invisible to the core</td></tr>
+    <tr><td>Fabric Attach (LLDP)</td><td>AP requests I-SIDs dynamically — no static port config</td><td style="color:var(--dim)">AP tells the switch what it needs; switch plumbs it on-demand</td></tr>
+    <tr><td>Anycast Gateway</td><td>Both switches share identical gateway IPs — IS-IS coordinates</td><td style="color:var(--dim)">Two drivers with identical GPS — either can take the wheel</td></tr>
+    <tr><td>IP Shortcuts</td><td>SW1's default route propagates to SW2 via IS-IS automatically</td><td style="color:var(--dim)">SW1 posts the internet exit — SW2 subscribes instantly</td></tr>
+  </table>
+  <div style="font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">Next Frontier — Mentioned at End of Dialogue</div>
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:16px 18px;font-size:.83rem;color:var(--dim);line-height:1.75">
+    <span style="color:var(--cyan);font-weight:600">XIQ CoPilot — AI-Driven Anomaly Detection:</span> Predicts a link failure before the cable is even pulled. Uses ML Insights to detect degraded IS-IS adjacency health, rising NNI error rates, or AP roaming patterns that precede a disconnect — surfaced as proactive alerts rather than reactive events.
+  </div>
+  <div class="insight" style="margin-top:16px">The management plane (XIQ) is just recording a victory lap for the control plane (IS-IS). We've moved from being Firefighters to Architects who receive notifications when the system takes care of itself.<cite>— Alex, NotebookLLM Apr 22 2026</cite></div>
+  <div style="margin-top:20px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:16px 18px">
+    <div style="font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">Source Document</div>
+    <div style="font-size:.82rem;color:var(--dim)">The heart of EXOS-VOSS from NoteBookLLM_Apr 22 2026.docx — 462 paragraphs · Full Socratic dialogue (KK + Alex persona) · Apr 22 2026 · Covers: 4 IEEE/RFC laws, I-SID provisioning, port translation CLI, Anycast rationale, IP Shortcuts, failover test, XIQ monitoring (Event Logs / Network 360 / Client 360 / Wireshark), Alert Policies, Webhook integration.</div>
+  </div>
+</div>
 
 <!-- ═══════════════════════════════════════════════════════════════ -->
 <!-- MASTERCLASS DECK — VOSS_Migration_Masterclass_Horizon.pptx    -->
