@@ -151,7 +151,7 @@
   <div class="page-header">
     <div class="label">New Architecture — Workstream</div>
     <h1>VOSS + IPE + Extreme RDC <span class="branch-badge">feature/new-arch-voss-ipe</span></h1>
-    <div class="meta">Initiated April 30, 2026 &nbsp;·&nbsp; Completely separate from existing EXOS/VLAN 40-70 work &nbsp;·&nbsp; Status: <strong style="color:var(--accent3)">PLANNING</strong></div>
+    <div class="meta">Initiated April 30, 2026 &nbsp;·&nbsp; IPE = Integrated Application Hosting Edge ✓ &nbsp;·&nbsp; Status: <strong style="color:var(--accent3)">PLANNING · Phase 0</strong></div>
   </div>
 
   <div class="callout purple">
@@ -205,7 +205,7 @@
           <div class="arrow new">↓</div>
           <div class="node highlight-amber">
             <div class="n-label">IPE ⭐ NEW</div>
-            <div class="n-sub">TBD — device / role to confirm</div>
+            <div class="n-sub">Integrated Application Hosting Edge</div>
           </div>
           <div class="arrow new">↓</div>
           <div class="node">
@@ -245,9 +245,9 @@
         <p>SW2 (currently 192.168.0.11, EXOS, VLAN 70) will be wiped and re-imaged to VOSS/FabricEngine. New OS, new CLI paradigm, new Fabric Connect architecture. All existing VLAN 70 config will be replaced.</p>
       </div>
       <div class="card new-item">
-        <div class="card-label">New Device — IPE</div>
-        <h3>IPE (to be confirmed)</h3>
-        <p>New device/role inserted between SW2 and the HomeModem. Handles the connectivity path to Extreme Networks RDC in Raleigh. Device type, model, software, and connectivity protocol TBD — see Open Questions.</p>
+        <div class="card-label">New Device — IPE ✓ Confirmed</div>
+        <h3>Integrated Application Hosting Edge</h3>
+        <p>Extreme Networks IPE — sits between SW2 (VOSS) and the HomeModem. Hosts applications at the network edge and provides the path to Extreme Networks RDC Raleigh. Physical model, OS version, and WAN connectivity protocol TBD — see Open Questions.</p>
       </div>
       <div class="card changed">
         <div class="card-label">Changed — AP2</div>
@@ -264,6 +264,25 @@
         <h3>Shared WAN uplink</h3>
         <p>HomeModem (192.168.0.1) is the shared internet gateway for both paths. No changes needed to the modem itself. Quantum Fiber static routes for Path A (10.40.0.0/24) remain. New routes for VOSS/Fabric subnets TBD.</p>
       </div>
+      <div class="card new-item" style="grid-column:1/-1">
+        <div class="card-label">IPE — Three Simultaneous Roles</div>
+        <h3>Integrated Application Hosting Edge</h3>
+        <p style="margin-bottom:12px">The IPE wears three hats at once — this is what makes it architecturally interesting:</p>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
+          <div style="background:var(--code-bg);border:1px solid var(--border);border-radius:6px;padding:12px">
+            <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--purple);margin-bottom:6px">Role 1 — WAN Gateway</div>
+            <div style="font-size:12px;color:var(--muted);line-height:1.6">Connects SW2's VOSS fabric to the HomeModem. Acts as the L3 WAN uplink for Path B — all traffic from AP2/SW2 exits through the IPE to reach the internet and RDC.</div>
+          </div>
+          <div style="background:var(--code-bg);border:1px solid var(--border);border-radius:6px;padding:12px">
+            <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--accent3);margin-bottom:6px">Role 2 — Fabric Edge Node</div>
+            <div style="font-size:12px;color:var(--muted);line-height:1.6">Participates in the VOSS/FabricEngine domain alongside SW2. Fabric Extend or direct SPB adjacency connects it to SW2's IS-IS fabric, extending the fabric domain toward the RDC.</div>
+          </div>
+          <div style="background:var(--code-bg);border:1px solid var(--border);border-radius:6px;padding:12px">
+            <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--accent2);margin-bottom:6px">Role 3 — App Host</div>
+            <div style="font-size:12px;color:var(--muted);line-height:1.6">Runs Docker-based applications at the network edge. Hosts agents, analytics, or service connectors locally — reducing latency vs cloud-only execution. Connected back to RDC for management and data plane.</div>
+          </div>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -277,9 +296,10 @@
 
     <ul class="checklist" style="margin-top:16px">
       <li>
-        <div class="badge q">Q1</div>
-        <div><strong>What exactly is the IPE?</strong><br>
-        Device model? Physical appliance or virtual? Is it an Extreme Networks product (e.g. VSP running VOSS as a fabric edge, or a dedicated WAN edge device)? Does "IPE" stand for a specific Extreme term — IP Fabric Edge, Intelligent Policy Engine, something else? This is the most critical unknown — everything else depends on it.</div>
+        <div class="badge done">Q1</div>
+        <div><strong>What is the IPE? — <span style="color:var(--accent2)">ANSWERED ✓</span></strong><br>
+        IPE = <strong>Integrated Application Hosting Edge</strong> (Extreme Networks). The IPE sits at the customer network edge, hosts applications locally (Docker-based on supported VOSS/FabricEngine hardware), and connects back to Extreme Networks RDC in Raleigh for centralized service delivery. It acts simultaneously as a WAN gateway (HomeModem uplink), a VOSS fabric edge node (connecting to SW2), and an application execution environment.<br><br>
+        <strong>Still to confirm:</strong> physical device model (VSP 4900 / VSP 7400 / dedicated IPE appliance?), VOSS version, whether IPE runs its own VOSS instance or is an extension of SW2's fabric domain.</div>
       </li>
       <li>
         <div class="badge q">Q2</div>
@@ -410,8 +430,8 @@ show sys-info | include SW_Version</pre>
   <section id="phase2">
     <h2>Phase 2 — IPE Deployment + RDC Connectivity (detail)</h2>
 
-    <div class="callout">
-      <strong>Blocked on Q1 + Q2.</strong> Phase 2 cannot be planned in detail until the IPE device type and RDC connectivity protocol are confirmed. Placeholder steps are documented below — update when Q1/Q2 are resolved.
+    <div class="callout purple">
+      <strong>IPE = Integrated Application Hosting Edge (confirmed).</strong> Q1 is answered. Phase 2 is now blocked on <strong>Q2 only</strong> (connectivity protocol to RDC) + physical device model. Steps below are partially filled — update when Q2 is resolved.
     </div>
 
     <ul class="checklist" style="margin-top:16px">
