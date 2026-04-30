@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>New Architecture — VOSS + IPE + RDC | 5320 Onboarding</title>
+<style>
+  :root {
+    --bg: #0a0f1e;
+    --surface: #111827;
+    --border: #1e2d40;
+    --accent: #3b82f6;
+    --accent2: #10b981;
+    --accent3: #f59e0b;
+    --accent4: #ef4444;
+    --purple: #8b5cf6;
+    --teal: #0e7490;
+    --text: #e2e8f0;
+    --muted: #94a3b8;
+    --code-bg: #0f1f35;
+    --nav-w: 230px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); display: flex; min-height: 100vh; }
+
+  nav {
+    width: var(--nav-w); min-width: var(--nav-w); background: var(--surface);
+    border-right: 1px solid var(--border); position: sticky; top: 0;
+    height: 100vh; overflow-y: auto; padding: 24px 0; flex-shrink: 0;
+  }
+  nav .logo { padding: 0 20px 20px; border-bottom: 1px solid var(--border); }
+  nav .logo-title { font-size: 12px; font-weight: 700; color: var(--purple); text-transform: uppercase; letter-spacing: 1px; }
+  nav .logo-sub { font-size: 11px; color: var(--muted); margin-top: 3px; }
+  nav ul { list-style: none; padding: 16px 0; }
+  nav ul li a {
+    display: block; padding: 7px 20px; font-size: 13px; color: var(--muted);
+    text-decoration: none; border-left: 3px solid transparent; transition: all 0.15s;
+  }
+  nav ul li a:hover { color: var(--text); background: rgba(139,92,246,0.08); }
+  nav ul li a.active { color: var(--purple); border-left-color: var(--purple); background: rgba(139,92,246,0.1); }
+  nav .nav-group { padding: 14px 20px 4px; font-size: 10px; font-weight: 700; color: #4a5568; text-transform: uppercase; letter-spacing: 1px; }
+  nav .sep { margin: 12px 20px; border-top: 1px solid var(--border); }
+
+  main { flex: 1; padding: 40px 48px; max-width: 1000px; }
+  .page-header { border-bottom: 1px solid var(--border); padding-bottom: 24px; margin-bottom: 40px; }
+  .page-header .label { font-size: 11px; font-weight: 700; color: var(--purple); text-transform: uppercase; letter-spacing: 1.5px; }
+  .page-header h1 { font-size: 32px; font-weight: 700; margin-top: 8px; line-height: 1.2; }
+  .page-header .meta { color: var(--muted); font-size: 14px; margin-top: 10px; }
+  .branch-badge { display: inline-block; background: rgba(139,92,246,0.15); color: var(--purple); border: 1px solid rgba(139,92,246,0.4); border-radius: 4px; padding: 2px 10px; font-family: monospace; font-size: 12px; margin-left: 10px; }
+
+  section { margin-bottom: 48px; scroll-margin-top: 32px; }
+  section h2 { font-size: 20px; font-weight: 700; color: var(--text); margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; }
+
+  /* Topology diagram */
+  .topo { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px; }
+  .topo-path { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 24px; }
+  .topo-path.existing { border-top: 3px solid var(--accent2); }
+  .topo-path.new-arch  { border-top: 3px solid var(--purple); }
+  .topo-path h3 { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 18px; }
+  .topo-path h3.green  { color: var(--accent2); }
+  .topo-path h3.purple { color: var(--purple); }
+  .topo-node { display: flex; flex-direction: column; align-items: center; gap: 0; }
+  .node { background: var(--code-bg); border: 1px solid var(--border); border-radius: 8px; padding: 10px 16px; width: 100%; text-align: center; position: relative; }
+  .node .n-label { font-size: 13px; font-weight: 600; color: var(--text); }
+  .node .n-sub { font-size: 11px; color: var(--muted); margin-top: 3px; }
+  .node.highlight-green { border-color: var(--accent2); background: rgba(16,185,129,0.08); }
+  .node.highlight-purple { border-color: var(--purple); background: rgba(139,92,246,0.08); }
+  .node.highlight-amber { border-color: var(--accent3); background: rgba(245,158,11,0.08); }
+  .node.highlight-blue { border-color: var(--accent); background: rgba(59,130,246,0.08); }
+  .node.highlight-red { border-color: var(--accent4); background: rgba(239,68,68,0.08); }
+  .arrow { text-align: center; color: var(--muted); font-size: 18px; line-height: 1; padding: 4px 0; }
+  .arrow.new { color: var(--purple); }
+  .conn-label { font-size: 10px; color: var(--muted); text-align: center; margin-top: -2px; margin-bottom: 2px; }
+
+  /* Cards */
+  .card-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 18px 20px; }
+  .card .card-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 6px; }
+  .card h3 { font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 8px; }
+  .card p { font-size: 13px; color: var(--muted); line-height: 1.6; }
+  .card.unchanged { border-left: 3px solid var(--accent2); }
+  .card.changed   { border-left: 3px solid var(--purple); }
+  .card.new-item  { border-left: 3px solid var(--accent3); }
+  .card.question  { border-left: 3px solid var(--accent4); }
+
+  /* Checklist */
+  .checklist { list-style: none; display: flex; flex-direction: column; gap: 12px; }
+  .checklist li { display: flex; align-items: flex-start; gap: 12px; font-size: 14px; color: var(--muted); line-height: 1.6; }
+  .badge { flex-shrink: 0; width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; }
+  .badge.q    { background: rgba(239,68,68,0.2); color: var(--accent4); }
+  .badge.todo { background: rgba(245,158,11,0.2); color: var(--accent3); }
+  .badge.done { background: rgba(16,185,129,0.2); color: var(--accent2); }
+  .badge.ph   { background: rgba(139,92,246,0.2); color: var(--purple); }
+  .checklist li strong { color: var(--text); }
+
+  /* Phase table */
+  .phase-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .phase-table th { text-align: left; padding: 10px 14px; background: var(--surface); color: var(--muted); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; border-bottom: 1px solid var(--border); }
+  .phase-table td { padding: 11px 14px; border-bottom: 1px solid var(--border); vertical-align: top; color: var(--muted); }
+  .phase-table td:first-child { color: var(--text); font-weight: 600; white-space: nowrap; width: 120px; }
+  .phase-table td:nth-child(2) { color: var(--purple); font-weight: 500; width: 160px; }
+  .phase-badge { display: inline-block; padding: 2px 8px; border-radius: 3px; font-size: 11px; font-weight: 700; }
+  .ph-plan   { background: rgba(59,130,246,0.15); color: var(--accent); }
+  .ph-active { background: rgba(139,92,246,0.15); color: var(--purple); }
+  .ph-later  { background: rgba(75,85,99,0.3); color: var(--muted); }
+
+  pre { background: var(--code-bg); border: 1px solid var(--border); border-radius: 6px; padding: 16px; font-family: 'Cascadia Code', 'Fira Code', monospace; font-size: 12px; color: #93c5fd; overflow-x: auto; margin-top: 12px; line-height: 1.7; }
+  code { font-family: 'Cascadia Code', 'Fira Code', monospace; font-size: 12px; background: rgba(59,130,246,0.1); padding: 1px 5px; border-radius: 3px; color: #93c5fd; }
+
+  .callout { background: var(--surface); border: 1px solid var(--accent3); border-left: 4px solid var(--accent3); border-radius: 6px; padding: 14px 18px; margin: 16px 0; font-size: 13px; color: var(--muted); line-height: 1.6; }
+  .callout strong { color: var(--accent3); }
+  .callout.purple { border-color: var(--purple); border-left-color: var(--purple); }
+  .callout.purple strong { color: var(--purple); }
+  .callout.info { border-color: var(--accent); border-left-color: var(--accent); }
+  .callout.info strong { color: var(--accent); }
+
+  footer { margin-top: 60px; padding-top: 24px; border-top: 1px solid var(--border); font-size: 12px; color: var(--muted); display: flex; justify-content: space-between; align-items: center; }
+  footer a { color: var(--accent); text-decoration: none; }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">
+    <div class="logo-title">New Architecture</div>
+    <div class="logo-sub">VOSS + IPE + RDC · Apr 30, 2026</div>
+  </div>
+  <ul>
+    <div class="nav-group">Architecture</div>
+    <li><a href="#topology" class="active">Topology</a></li>
+    <li><a href="#delta">What Changes</a></li>
+    <li><a href="#questions">Open Questions</a></li>
+
+    <div class="nav-group">Workstream</div>
+    <li><a href="#phases">Phases</a></li>
+    <li><a href="#phase1">Phase 1 — VOSS Upgrade</a></li>
+    <li><a href="#phase2">Phase 2 — IPE + RDC</a></li>
+    <li><a href="#phase3">Phase 3 — Integration</a></li>
+
+    <div class="sep"></div>
+    <div class="nav-group">Separation</div>
+    <li><a href="#boundary">Branch Boundary</a></li>
+
+    <div class="nav-group">Links</div>
+    <li><a href="session_summary_20260430.html">5320 Existing EOD ↗</a></li>
+    <li><a href="index.html">← Landing Page</a></li>
+  </ul>
+</nav>
+
+<main>
+  <div class="page-header">
+    <div class="label">New Architecture — Workstream</div>
+    <h1>VOSS + IPE + Extreme RDC <span class="branch-badge">feature/new-arch-voss-ipe</span></h1>
+    <div class="meta">Initiated April 30, 2026 &nbsp;·&nbsp; Completely separate from existing EXOS/VLAN 40-70 work &nbsp;·&nbsp; Status: <strong style="color:var(--accent3)">PLANNING</strong></div>
+  </div>
+
+  <div class="callout purple">
+    <strong>Branch isolation:</strong> All work on this page lives on <code>feature/new-arch-voss-ipe</code> branched from <code>main</code>. The existing EXOS/VLAN 40-70 work on SW1, AP1, and the feature/auto-deploy-agent branch is <strong>untouched</strong> and continues independently.
+  </div>
+
+  <!-- Topology -->
+  <section id="topology">
+    <h2>Topology — Two Parallel Paths</h2>
+
+    <div class="topo">
+      <!-- Path A — existing -->
+      <div class="topo-path existing">
+        <h3 class="green">PATH A — Unchanged (SW1)</h3>
+        <div class="topo-node">
+          <div class="node highlight-green">
+            <div class="n-label">AP1</div>
+            <div class="n-sub">192.168.0.12 · AP3000</div>
+          </div>
+          <div class="arrow">↓</div>
+          <div class="node highlight-green">
+            <div class="n-label">SW1</div>
+            <div class="n-sub">192.168.0.28 · EXOS/SwitchEngine</div>
+          </div>
+          <div class="arrow">↓</div>
+          <div class="node">
+            <div class="n-label">HomeModem</div>
+            <div class="n-sub">192.168.0.1</div>
+          </div>
+          <div class="arrow">↓</div>
+          <div class="node highlight-blue">
+            <div class="n-label">Internet</div>
+            <div class="n-sub">Standard broadband path</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Path B — new architecture -->
+      <div class="topo-path new-arch">
+        <h3 class="purple">PATH B — New Architecture (SW2)</h3>
+        <div class="topo-node">
+          <div class="node highlight-purple">
+            <div class="n-label">AP2</div>
+            <div class="n-sub">192.168.0.25 · AP3000</div>
+          </div>
+          <div class="arrow new">↓</div>
+          <div class="node highlight-purple">
+            <div class="n-label">SW2 ⬆ UPGRADE</div>
+            <div class="n-sub">EXOS → VOSS / FabricEngine</div>
+          </div>
+          <div class="arrow new">↓</div>
+          <div class="node highlight-amber">
+            <div class="n-label">IPE ⭐ NEW</div>
+            <div class="n-sub">TBD — device / role to confirm</div>
+          </div>
+          <div class="arrow new">↓</div>
+          <div class="node">
+            <div class="n-label">HomeModem</div>
+            <div class="n-sub">192.168.0.1 (shared WAN uplink)</div>
+          </div>
+          <div class="arrow new">↓</div>
+          <div class="node">
+            <div class="n-label">Internet</div>
+          </div>
+          <div class="arrow new">↓</div>
+          <div class="node highlight-red">
+            <div class="n-label">Extreme Networks RDC</div>
+            <div class="n-sub">Raleigh, NC · Service Offerings</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout info">
+      <strong>Shared WAN uplink:</strong> Both paths exit through the same HomeModem. SW1 uses it for standard internet. SW2 uses it as the transport to reach the Extreme Networks RDC in Raleigh. The IPE sits between SW2 and the HomeModem and handles the RDC connection.
+    </div>
+  </section>
+
+  <!-- What changes -->
+  <section id="delta">
+    <h2>What Changes vs What Stays</h2>
+    <div class="card-grid">
+      <div class="card unchanged">
+        <div class="card-label">Unchanged — Path A</div>
+        <h3>SW1 + AP1</h3>
+        <p>SW1 (192.168.0.28) remains EXOS/SwitchEngine. VLAN 40, DHCP, ipforwarding, Quantum Fiber static route all stay as-is. AP1 (192.168.0.12) stays on SW1. No changes to existing XIQ policy or config.</p>
+      </div>
+      <div class="card changed">
+        <div class="card-label">Changed — SW2</div>
+        <h3>EXOS → VOSS/FabricEngine</h3>
+        <p>SW2 (currently 192.168.0.11, EXOS, VLAN 70) will be wiped and re-imaged to VOSS/FabricEngine. New OS, new CLI paradigm, new Fabric Connect architecture. All existing VLAN 70 config will be replaced.</p>
+      </div>
+      <div class="card new-item">
+        <div class="card-label">New Device — IPE</div>
+        <h3>IPE (to be confirmed)</h3>
+        <p>New device/role inserted between SW2 and the HomeModem. Handles the connectivity path to Extreme Networks RDC in Raleigh. Device type, model, software, and connectivity protocol TBD — see Open Questions.</p>
+      </div>
+      <div class="card changed">
+        <div class="card-label">Changed — AP2</div>
+        <h3>AP2 re-homed to VOSS SW2</h3>
+        <p>AP2 (192.168.0.25) will be re-adopted under the new VOSS/Fabric architecture. New XIQ policy, new SSIDs, new VLAN scheme TBD. AP2 connects to SW2 post-upgrade.</p>
+      </div>
+      <div class="card new-item">
+        <div class="card-label">New — RDC Services</div>
+        <h3>Extreme Networks RDC, Raleigh</h3>
+        <p>Path B terminates at Extreme Networks Regional Data Centre. Service offerings accessible via this path TBD — could include XIQ private cloud, XMC, Fabric services, EVPN, SD-WAN, or lab/demo infrastructure.</p>
+      </div>
+      <div class="card unchanged">
+        <div class="card-label">Unchanged — HomeModem</div>
+        <h3>Shared WAN uplink</h3>
+        <p>HomeModem (192.168.0.1) is the shared internet gateway for both paths. No changes needed to the modem itself. Quantum Fiber static routes for Path A (10.40.0.0/24) remain. New routes for VOSS/Fabric subnets TBD.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Open Questions -->
+  <section id="questions">
+    <h2>Open Questions — Must Resolve Before Coding</h2>
+
+    <div class="callout">
+      <strong>These must be answered before any configuration can be written.</strong> They define the architecture, IP scheme, protocols, and device procurement.
+    </div>
+
+    <ul class="checklist" style="margin-top:16px">
+      <li>
+        <div class="badge q">Q1</div>
+        <div><strong>What exactly is the IPE?</strong><br>
+        Device model? Physical appliance or virtual? Is it an Extreme Networks product (e.g. VSP running VOSS as a fabric edge, or a dedicated WAN edge device)? Does "IPE" stand for a specific Extreme term — IP Fabric Edge, Intelligent Policy Engine, something else? This is the most critical unknown — everything else depends on it.</div>
+      </li>
+      <li>
+        <div class="badge q">Q2</div>
+        <div><strong>How does the IPE connect to the RDC?</strong><br>
+        What transport/protocol: IPsec VPN tunnel? Fabric Extend (VXLAN over IP)? SPB (Shortest Path Bridging) over WAN? GRE? SD-WAN overlay? The protocol determines the VOSS Fabric architecture and the configuration required on both ends.</div>
+      </li>
+      <li>
+        <div class="badge q">Q3</div>
+        <div><strong>What services are available at the Extreme Networks RDC Raleigh?</strong><br>
+        XIQ private cloud? XMC (Extreme Management Center)? Fabric Connect demo lab? EVPN/VXLAN services? PoC infrastructure? This defines what we're integrating toward and shapes the end-to-end test plan.</div>
+      </li>
+      <li>
+        <div class="badge q">Q4</div>
+        <div><strong>VOSS upgrade path for SW2?</strong><br>
+        How does SW2 go from EXOS SwitchEngine 33.x to VOSS/FabricEngine? Is there a conversion tool or is it a clean flash? What VOSS version targets? Does SW2 (5320-16P-2MXT-2X) support VOSS natively or does it need a specific firmware?</div>
+      </li>
+      <li>
+        <div class="badge q">Q5</div>
+        <div><strong>Fabric architecture scope?</strong><br>
+        Will SW2 run a full SPB Fabric Connect domain? Or is this a simpler VOSS deployment without Fabric (just VOSS CLI + SVIs)? If Fabric Connect, what are the B-VLANs, IS-IS instance, and I-SID assignments?</div>
+      </li>
+      <li>
+        <div class="badge q">Q6</div>
+        <div><strong>New IP addressing scheme for Path B?</strong><br>
+        VLAN 70 (10.70.0.0/24) was the old scheme on SW2 under EXOS. What replaces it in the VOSS world? New subnets for client VLANs on AP2? New management IP for SW2?</div>
+      </li>
+      <li>
+        <div class="badge q">Q7</div>
+        <div><strong>XIQ policy for VOSS SW2?</strong><br>
+        Will SW2 (VOSS) still be managed via XIQ? Or does VOSS use XMC instead? If XIQ, does it support VOSS/FabricEngine switch templates? What's the onboarding flow — ZTP+ still valid for VOSS?</div>
+      </li>
+    </ul>
+  </section>
+
+  <!-- Phases -->
+  <section id="phases">
+    <h2>Workstream Phases — Overview</h2>
+    <table class="phase-table">
+      <thead>
+        <tr><th>Phase</th><th>Name</th><th>Status</th><th>Deliverable</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Phase 0</td>
+          <td>Architecture Design</td>
+          <td><span class="phase-badge ph-active">IN PROGRESS</span></td>
+          <td>Resolve Q1–Q7. Finalize topology diagram, IP scheme, protocol choice, device list.</td>
+        </tr>
+        <tr>
+          <td>Phase 1</td>
+          <td>SW2 VOSS Upgrade</td>
+          <td><span class="phase-badge ph-plan">PLANNED</span></td>
+          <td>Wipe SW2 from EXOS → flash VOSS/FabricEngine. Basic VOSS CLI: hostname, mgmt IP, SSH. Verified login.</td>
+        </tr>
+        <tr>
+          <td>Phase 2</td>
+          <td>IPE Deployment</td>
+          <td><span class="phase-badge ph-plan">PLANNED</span></td>
+          <td>Procure/configure IPE. Connect SW2 ↔ IPE ↔ HomeModem. Verify IPE reaches RDC (ping/tunnel up).</td>
+        </tr>
+        <tr>
+          <td>Phase 3</td>
+          <td>Fabric / VOSS Config</td>
+          <td><span class="phase-badge ph-later">LATER</span></td>
+          <td>VOSS Fabric Connect (if applicable): IS-IS, B-VLANs, I-SIDs, fabric attach for AP2. SVIs + DHCP on VOSS.</td>
+        </tr>
+        <tr>
+          <td>Phase 4</td>
+          <td>AP2 + XIQ Integration</td>
+          <td><span class="phase-badge ph-later">LATER</span></td>
+          <td>AP2 re-adopted under new VOSS switch policy. SSIDs live, DHCP working, internet via RDC path verified.</td>
+        </tr>
+        <tr>
+          <td>Phase 5</td>
+          <td>RDC Services Integration</td>
+          <td><span class="phase-badge ph-later">LATER</span></td>
+          <td>Access and validate target service offerings at Extreme Networks RDC Raleigh from Path B.</td>
+        </tr>
+        <tr>
+          <td>Phase 6</td>
+          <td>E2E Test + Documentation</td>
+          <td><span class="phase-badge ph-later">LATER</span></td>
+          <td>Full E2E test: iPhone on AP2 SSID → SW2 (VOSS) → IPE → RDC services. Lab report + architecture doc published.</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- Phase 1 -->
+  <section id="phase1">
+    <h2>Phase 1 — SW2 VOSS Upgrade (detail)</h2>
+    <ul class="checklist">
+      <li>
+        <div class="badge todo">1</div>
+        <div><strong>Confirm VOSS image availability for 5320-16P-2MXT-2X</strong><br>
+        Verify the 5320 hardware supports VOSS/FabricEngine. Download correct firmware from Extreme Networks portal. Note: 5320 ships with EXOS — confirm conversion procedure (conversion image vs clean flash).</div>
+      </li>
+      <li>
+        <div class="badge todo">2</div>
+        <div><strong>Delete SW2 from XIQ before wipe</strong><br>
+        XIQ → Manage → Devices → Delete SW2. Otherwise ZTP+ will re-push EXOS config on next boot.</div>
+      </li>
+      <li>
+        <div class="badge todo">3</div>
+        <div><strong>Wipe SW2</strong><br>
+        Connect via console (/dev/cu.usbserial-A9VKJO11, 115200 baud). Run: <code>unconfigure switch all</code> → confirm y. Then flash VOSS image per conversion procedure.</div>
+      </li>
+      <li>
+        <div class="badge todo">4</div>
+        <div><strong>VOSS initial config</strong><br>
+        Set hostname, management IP, SSH credentials. Verify VOSS CLI access. Key difference: VOSS uses <code>enable</code> → <code>config terminal</code> paradigm vs EXOS. Default credentials on VOSS: rwa/rwa.</div>
+      </li>
+      <li>
+        <div class="badge todo">5</div>
+        <div><strong>Clear SSH known_hosts on Mac after wipe</strong><br>
+        <code>ssh-keygen -R 192.168.0.11</code> before reconnecting.</div>
+      </li>
+    </ul>
+
+    <pre># VOSS initial SSH (after upgrade — default creds)
+ssh rwa@&lt;SW2-new-IP&gt;
+
+# VOSS show version
+show sys-info | include SW_Version</pre>
+  </section>
+
+  <!-- Phase 2 -->
+  <section id="phase2">
+    <h2>Phase 2 — IPE Deployment + RDC Connectivity (detail)</h2>
+
+    <div class="callout">
+      <strong>Blocked on Q1 + Q2.</strong> Phase 2 cannot be planned in detail until the IPE device type and RDC connectivity protocol are confirmed. Placeholder steps are documented below — update when Q1/Q2 are resolved.
+    </div>
+
+    <ul class="checklist" style="margin-top:16px">
+      <li>
+        <div class="badge ph">P</div>
+        <div><strong>[PLACEHOLDER] Procure / provision IPE device</strong><br>
+        Once device type is confirmed: obtain hardware or spin up VM. Connect: SW2 uplink port → IPE LAN port. IPE WAN port → HomeModem LAN port (or direct to modem if HomeModem has multiple LAN ports).</div>
+      </li>
+      <li>
+        <div class="badge ph">P</div>
+        <div><strong>[PLACEHOLDER] Configure IPE for RDC tunnel</strong><br>
+        Depends on protocol (IPsec / Fabric Extend / GRE). Configure tunnel endpoints: IPE local = HomeModem WAN IP (or dynamic). IPE remote = Extreme Networks RDC Raleigh endpoint IP/hostname. Credentials from Extreme Networks team.</div>
+      </li>
+      <li>
+        <div class="badge ph">P</div>
+        <div><strong>[PLACEHOLDER] Verify tunnel UP</strong><br>
+        From SW2 or IPE: ping RDC gateway. Verify routing table shows RDC-bound prefix via IPE. Confirm tunnel status (IKE SA up / SPB adjacency up / GRE tunnel up — depending on protocol).</div>
+      </li>
+      <li>
+        <div class="badge ph">P</div>
+        <div><strong>[PLACEHOLDER] Update Quantum Fiber static routes</strong><br>
+        If new Path B subnets are introduced, add static routes on HomeModem for the new prefixes → SW2/IPE. Old 10.70.0.0/24 route can be removed (VLAN 70 is being replaced).</div>
+      </li>
+    </ul>
+  </section>
+
+  <!-- Phase 3 -->
+  <section id="phase3">
+    <h2>Phase 3 — Full Integration Test (placeholder)</h2>
+    <ul class="checklist">
+      <li>
+        <div class="badge ph">P</div>
+        <div><strong>AP2 SSID → SW2 (VOSS) → IPE → RDC → Service response</strong><br>
+        iPhone connects to AP2 SSID. Gets DHCP from VOSS switch. Traffic routes via IPE to RDC. Service offering accessible (TBD what service — XIQ, XMC dashboard, EVPN VPN, etc.).</div>
+      </li>
+      <li>
+        <div class="badge ph">P</div>
+        <div><strong>Path A unaffected</strong><br>
+        Verify SW1 + AP1 still function normally. VLAN 40, DHCP, internet on iPhone via AP1 SSID. SW1 and SW2 fully independent — no shared config, no routing dependency between the two paths.</div>
+      </li>
+      <li>
+        <div class="badge ph">P</div>
+        <div><strong>Architecture document published</strong><br>
+        Update this page with confirmed answers to Q1–Q7, actual config snippets, test results. Commit to feature/new-arch-voss-ipe and merge to main when stable.</div>
+      </li>
+    </ul>
+  </section>
+
+  <!-- Branch boundary -->
+  <section id="boundary">
+    <h2>Branch Boundary — What Lives Where</h2>
+    <div class="card-grid">
+      <div class="card unchanged">
+        <div class="card-label">feature/auto-deploy-agent · main</div>
+        <h3>Existing 5320 work</h3>
+        <p>All EXOS/VLAN 40-70 config, AP1, SW1, Railway agent, training sprint pages, session summaries up to Apr 30. Untouched by this workstream.</p>
+      </div>
+      <div class="card changed">
+        <div class="card-label">feature/new-arch-voss-ipe</div>
+        <h3>This workstream</h3>
+        <p>All VOSS/IPE/RDC architecture work. SW2 upgrade, IPE config, Fabric design, Phase 0–6 docs. Nothing from this branch merges to main until Phase 6 is complete and tested.</p>
+      </div>
+    </div>
+
+    <pre style="margin-top:20px"># Branch created from: origin/main (Apr 30, 2026)
+# Working branch:      feature/new-arch-voss-ipe
+# Never merge to main  until Phase 6 complete + E2E test PASS
+
+git checkout feature/new-arch-voss-ipe
+git log --oneline -5</pre>
+  </section>
+
+  <footer>
+    <span>© 2026 Khursheed Khan &nbsp;·&nbsp; All rights reserved &nbsp;·&nbsp; Branch: feature/new-arch-voss-ipe &nbsp;·&nbsp; AI-assisted with Claude Code</span>
+    <span><a href="index.html">5320 Onboarding ↗</a></span>
+  </footer>
+</main>
+
+<script>
+  const sections = document.querySelectorAll('section[id]');
+  const links = document.querySelectorAll('nav a');
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        links.forEach(l => l.classList.remove('active'));
+        const a = document.querySelector(`nav a[href="#${e.target.id}"]`);
+        if (a) a.classList.add('active');
+      }
+    });
+  }, { threshold: 0.25 });
+  sections.forEach(s => obs.observe(s));
+</script>
+</body>
+</html>
