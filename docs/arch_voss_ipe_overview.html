@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>New Architecture — VOSS + IPE (Physical) + Fabric Extend | 5320 Onboarding</title>
+<title>New Architecture — VOSS Fabric Edge + IPE Black Box + FE → RDC | 5320 Onboarding</title>
 <style>
   :root {
     --bg: #0a0f1e; --surface: #111827; --border: #1e2d40;
@@ -133,12 +133,12 @@
 <nav>
   <div class="logo">
     <div class="logo-title">NEW_Architecture</div>
-    <div class="logo-sub">VOSS + IPE (Physical) + FE → RDC</div>
+    <div class="logo-sub">VOSS Fabric Edge + IPE Black Box + FE → RDC</div>
   </div>
   <ul>
     <div class="nav-group">Architecture</div>
     <li><a href="#topology" class="active">Topology</a></li>
-    <li><a href="#ipe">IPE — Physical Device</a></li>
+    <li><a href="#ipe">IPE — The Black Box</a></li>
     <li><a href="#fabric">Fabric Architecture</a></li>
     <li><a href="#comparison">SW1 vs SW2</a></li>
     <li><a href="#questions">Open Questions</a></li>
@@ -207,9 +207,9 @@
           <div class="arrow purple">↓ Fabric Attach (fa enable + auto-sense)</div>
           <div class="node purple">
             <div class="n-label">SW2 · VOSS / Fabric Engine</div>
-            <div class="n-sub">IS-IS · Nickname 0.00.02 · I-SID Edge · IAH host</div>
+            <div class="n-sub">IS-IS · Nickname 0.00.02 · I-SID Edge · Transit Port → IPE</div>
           </div>
-          <div class="arrow purple">↓ IAH virtual interface → physical uplink port</div>
+          <div class="arrow purple">↓ Physical cable — Transit Port (Port 1) → IPE</div>
           <div class="node amber">
             <div class="n-label">IPE — Physical Box ⭐</div>
             <div class="n-sub">Integrated Application Hosting Edge · Model TBD</div>
@@ -230,49 +230,64 @@
     </div>
 
     <div class="callout purple">
-      <strong>Two-tier edge:</strong> SW2 (VOSS) runs the IAH environment internally and connects via a physical uplink port to the <strong>IPE — a separate physical box</strong>. The IPE sits between SW2 and the HomeModem, handling the WAN-facing side of the Fabric Extend tunnel to the RDC. SW2 handles the fabric/I-SID logic; the IPE handles the internet path.
+      <strong>Clean role separation:</strong> SW2 (VOSS) is the local Fabric intelligence — it maps services to I-SIDs and hands traffic off via a physical cable from its <strong>Transit Port (Port 1)</strong> to the IPE. SW2 uses a Static Route or IP Shortcuts pointing RDC-destined traffic to the IPE's IP as next-hop. The <strong>IPE (physical box)</strong> owns everything beyond that — Fabric Extend tunnel encapsulation, IPsec, and the WAN path to the RDC. SW2 has no IAH, no tunnel config — it just routes to the IPE.
     </div>
   </section>
 
   <!-- IPE Physical Device -->
   <section id="ipe">
-    <h2>IPE — Physical Box (Integrated Application Hosting Edge)</h2>
+    <h2>IPE — The Black Box (Physical Extreme Networks Appliance)</h2>
 
-    <div class="callout">
-      <strong>Confirmed Apr 30 2026:</strong> The IPE is a <strong>physical device</strong> — not a virtual service inside SW2. It is a dedicated Extreme Networks appliance (Integrated Application Hosting Edge) that physically sits between SW2 and the HomeModem. Device model and specs to be confirmed.
+    <div class="callout green">
+      <strong>Architecture confirmed Apr 30 2026 (NoteBookLLM dialogue):</strong> IPE is a <strong>physical external hardware appliance</strong>. SW2 does NOT run IAH internally. SW2 has a dedicated <strong>Transit Port (Port 1)</strong> that cables directly to the IPE. SW2 uses Static Route / IP Shortcuts to forward RDC-bound traffic to the IPE as next-hop. The IPE owns the Fabric Extend tunnel — SW2's VOSS config has zero tunnel or IAH involvement.
     </div>
 
     <div class="card-grid three">
       <div class="card new-item">
         <div class="card-label">Physical Placement</div>
-        <h3>SW2 uplink → IPE → HomeModem</h3>
-        <p>IPE is cabled between SW2's uplink/IAH port and a LAN port on the HomeModem. It is the physical WAN gateway for Path B. All traffic from SW2 destined for the internet or RDC exits through the IPE.</p>
+        <h3>SW2 Transit Port → IPE → HomeModem</h3>
+        <p>IPE is cabled: SW2 Port 1 (Transit Port) → IPE LAN port. IPE WAN port → HomeModem LAN port. It is the physical WAN gateway for all Path B traffic. SW2 sees the IPE as its next-hop for RDC-destined routes.</p>
       </div>
       <div class="card new-item">
-        <div class="card-label">Fabric Role</div>
-        <h3>Fabric Extend Tunnel Endpoint</h3>
-        <p>The IPE is the local endpoint of the Fabric Extend tunnel. It encapsulates SW2's I-SIDs into IP/IPsec frames for transport across the HomeModem/internet to the Extreme Networks RDC in Raleigh — the far-end FE endpoint.</p>
+        <div class="card-label">Fabric Extend Owner</div>
+        <h3>FE-Tunnel Terminates on IPE</h3>
+        <p>The Fabric Extend tunnel is configured <strong>on the IPE</strong> — not on SW2. IPE encapsulates I-SIDs in IP/IPsec headers and sends them over the HomeModem to the RDC in Raleigh. SW2 simply routes traffic to the IPE and the IPE does the heavy lifting.</p>
       </div>
       <div class="card new-item">
         <div class="card-label">Application Hosting</div>
-        <h3>Edge Compute Platform</h3>
-        <p>The IPE hosts applications at the network edge (Docker-based, similar to VOSS IAH). Runs service connectors, analytics agents, or RDC-managed applications locally — reducing latency vs pure cloud execution.</p>
+        <h3>IAH Runs on the IPE</h3>
+        <p>The "Integrated Application Hosting" feature belongs to the IPE device itself. The IPE hosts Docker-based applications at the edge — service connectors, analytics, RDC-managed agents — all running on the IPE hardware, not on SW2.</p>
       </div>
     </div>
 
-    <h3>Traffic Flow — Step by Step</h3>
-    <pre>① iPhone → AP2 (Wi-Fi)
-② AP2 → SW2 port (Fabric Attach — AP2 signals I-SID via LLDP/FA TLVs)
-③ SW2 auto-sense maps AP2 service to I-SID → no manual port config needed
-④ SW2 encapsulates traffic in SPB / I-SID frame
-⑤ SW2 IAH virtual interface → physical uplink port → IPE (physical box)
-⑥ IPE: Fabric Extend encapsulation (wraps I-SID in IP + IPsec header)
-⑦ IPE → HomeModem → Internet  (Fabric Extend tunnel)
-⑧ Internet → Extreme Networks RDC, Raleigh NC (FE remote endpoint)
-⑨ RDC decapsulates → delivers to service offering</pre>
+    <h3>Traffic Flow — Corrected Step by Step</h3>
+    <pre>① iPhone → AP2 (Wi-Fi association)
+② AP2 → SW2 port (Fabric Attach — AP2 LLDP FA TLVs signal I-SID request)
+③ SW2 auto-sense maps AP2 service to I-SID → zero-touch, no manual port config
+④ SW2: I-SID frame forwarded per Fabric rules toward RDC destination
+⑤ SW2 Static Route / IP Shortcuts → next-hop = IPE IP → exits via Transit Port (Port 1)
+⑥ Physical cable: SW2 Port 1 → IPE LAN port  (the "Secure Edge Handoff")
+⑦ IPE: Fabric Extend encapsulation → wraps I-SID frame in IP + IPsec header
+⑧ IPE WAN port → HomeModem → Internet  (encrypted Fabric Extend tunnel)
+⑨ Internet → Extreme Networks RDC, Raleigh NC  (far-end FE endpoint on RDC)
+⑩ RDC decapsulates → delivers traffic to service offering</pre>
+
+    <h3>SW2 VOSS Role vs IPE Role — Clear Boundary</h3>
+    <div class="card-grid">
+      <div class="card changed">
+        <div class="card-label">SW2 (VOSS) — Local Intelligence</div>
+        <h3>Fabric Edge: I-SIDs + Routing</h3>
+        <p>IS-IS Control Plane, Nickname, I-SID mapping, Fabric Attach on AP2 port. Defines Transit Port (Port 1) as the physical link to IPE. Configures Static Route or IP Shortcuts so RDC-bound traffic exits via Transit Port to IPE as next-hop. <strong>No tunnel config. No IAH. No FE on SW2.</strong></p>
+      </div>
+      <div class="card new-item">
+        <div class="card-label">IPE (Physical Box) — Heavy Lifting</div>
+        <h3>Tunnel + WAN + App Hosting</h3>
+        <p>Owns the Fabric Extend tunnel (FE-Tunnel configured here). IPsec encapsulation of I-SID frames. WAN uplink to HomeModem. Fabric Extend to RDC in Raleigh. Hosts IAH applications (Docker). <strong>SW2 knows nothing about the tunnel — it just routes to the IPE.</strong></p>
+      </div>
+    </div>
 
     <div class="callout info">
-      <strong>Still needed for IPE:</strong> Physical device model/part number, VOSS/FabricEngine version it runs, management IP scheme, how it is provisioned (ZTP? CLI? XIQ?), and whether it requires any configuration before it can participate in the Fabric Extend tunnel.
+      <strong>Still needed for IPE:</strong> Device model/part number, management access method (CLI / XIQ / dedicated UI), VOSS/FE version, management IP scheme, and RDC endpoint configuration details (IP address in Raleigh, IPsec keys/certs).
     </div>
   </section>
 
@@ -303,21 +318,27 @@
       </div>
     </div>
 
-    <h3>VOSS CLI Skeleton (Phase 1 Pre-Flight)</h3>
-    <pre># === VOSS IS-IS / Fabric Foundation (Phase 1) ===
+    <h3>VOSS CLI Skeleton — SW2 Only (Phase 1 Pre-Flight)</h3>
+    <pre># === Phase 1: IS-IS / Fabric Foundation ===
 router isis
   system-id &lt;auto-from-MAC&gt;
   nickname 0.00.02              ! SW2 unique Fabric identity
   spbm 1
     b-vid 4051,4052 primary     ! Backbone VLANs
 
-# === Fabric Extend Tunnel (Phase 3 — needs RDC endpoint) ===
-interface tunnel &lt;id&gt;
-  tunnel mode gre ip
-  tunnel source &lt;SW2-or-IPE-WAN-IP&gt;
-  tunnel destination &lt;RDC-gateway-IP-Raleigh&gt;
+# === Phase 2: Transit Port to IPE (physical cable) ===
+interface GigabitEthernet 1/1   ! Transit Port — cabled to IPE LAN port
+  no shutdown
+  ! assign L3 / routed interface toward IPE
 
-# === Fabric Attach on AP2 port (Phase 4) ===
+# Static Route: all RDC-destined traffic → IPE as next-hop
+! ip route &lt;RDC-subnet&gt; &lt;IPE-LAN-IP&gt;
+! OR use IP Shortcuts (VOSS) — determined during Phase 2
+
+# === Phase 3: FE-Tunnel is configured ON THE IPE — not here ===
+! SW2 has no tunnel config — it routes to IPE; IPE owns the FE tunnel
+
+# === Phase 4: Fabric Attach on AP2 port ===
 interface GigabitEthernet 1/&lt;ap2-port&gt;
   fa enable
   auto-sense enable</pre>
@@ -339,8 +360,9 @@ interface GigabitEthernet 1/&lt;ap2-port&gt;
         <tr><td>Network Logic</td><td class="sw1">VLAN-Centric (hop-by-hop)</td><td class="sw2">Service-Centric (I-SID edge, SPB)</td></tr>
         <tr><td>WAN Path</td><td class="sw1">Direct: SW1 → HomeModem → Internet</td><td class="sw2">SW2 → IPE (physical) → HomeModem → FE Tunnel → RDC Raleigh</td></tr>
         <tr><td>AP Integration</td><td class="sw1">Standard trunk (manual VLAN tagging)</td><td class="sw2">Fabric Attach — AP2 auto-signals I-SIDs, zero-touch</td></tr>
-        <tr><td>WAN Device</td><td class="sw1">None — direct L3 to HomeModem</td><td class="sw2">IPE — dedicated physical box (Extreme Networks)</td></tr>
-        <tr><td>Tunnel Protocol</td><td class="sw1">N/A</td><td class="sw2">Fabric Extend (SPB over IP/IPsec)</td></tr>
+        <tr><td>WAN Device</td><td class="sw1">None — direct L3 to HomeModem</td><td class="sw2">IPE — physical box. SW2 Transit Port (Port 1) → IPE → HomeModem</td></tr>
+        <tr><td>Tunnel Protocol</td><td class="sw1">N/A</td><td class="sw2">Fabric Extend (SPB over IP/IPsec) — configured ON IPE, not SW2</td></tr>
+        <tr><td>SW2 Tunnel Config</td><td class="sw1">N/A</td><td class="sw2">None — SW2 only needs Static Route / IP Shortcuts → IPE as next-hop</td></tr>
         <tr><td>Addressing</td><td class="sw1">VLAN 40: 10.40.0.0/24, SVI 10.40.0.1</td><td class="sw2">TBD — new scheme for VOSS (Q6 open)</td></tr>
         <tr><td>Management</td><td class="sw1">XIQ + EXOS CLI</td><td class="sw2">TBD — XIQ VOSS / XMC / CLI (Q7 open)</td></tr>
         <tr><td>Isolation</td><td class="sw1">Completely independent of SW2/IPE</td><td class="sw2">Completely independent of SW1</td></tr>
@@ -402,7 +424,7 @@ interface GigabitEthernet 1/&lt;ap2-port&gt;
       <tbody>
         <tr><td>Phase 0</td><td>Architecture Design</td><td><span class="phase-badge ph-done">COMPLETE</span></td><td>Q1/Q2/Q4/Q5 answered. Topology, Fabric scope, IPE role (physical box), FE protocol all locked. 3 open questions remain.</td></tr>
         <tr><td>Phase 1</td><td>SW2 VOSS Upgrade</td><td><span class="phase-badge ph-next">NEXT</span></td><td>Bootloader OS conversion → VOSS running. IS-IS + Nickname 0.00.02. SSH verified. Pre-Flight CLI script executed.</td></tr>
-        <tr><td>Phase 2</td><td>IPE Physical Setup</td><td><span class="phase-badge ph-plan">PLANNED</span></td><td>IPE cabled: SW2 uplink → IPE → HomeModem. IPE powered, managed, WAN reachable. IAH virtual interface on SW2 communicating with IPE.</td></tr>
+        <tr><td>Phase 2</td><td>IPE Physical Setup</td><td><span class="phase-badge ph-plan">PLANNED</span></td><td>IPE cabled: SW2 Transit Port (Port 1) → IPE → HomeModem. IPE powered, reachable. SW2 Transit Port + Static Route/IP Shortcuts to IPE configured. IPE WAN UP.</td></tr>
         <tr><td>Phase 3</td><td>Fabric Extend + RDC</td><td><span class="phase-badge ph-plan">PLANNED</span></td><td>FE-Tunnel UP. IS-IS adjacency across tunnel. I-SIDs reachable at RDC. Q3 (services) confirmed via live test.</td></tr>
         <tr><td>Phase 4</td><td>AP2 Fabric Attach</td><td><span class="phase-badge ph-later">LATER</span></td><td><code>fa enable</code> + <code>auto-sense</code> on SW2 port. AP2 zero-touch provisioned. SSID live. iPhone → RDC path verified.</td></tr>
         <tr><td>Phase 5</td><td>E2E Test + Docs</td><td><span class="phase-badge ph-later">LATER</span></td><td>Full end-to-end: iPhone → AP2 → SW2 → IPE → HomeModem → RDC. Path A (SW1/AP1) unaffected confirmed. Architecture doc published.</td></tr>
@@ -435,13 +457,14 @@ show sys-info | include SW_Version</pre>
 
   <!-- Phase 2 Detail -->
   <section id="phase2">
-    <h2>Phase 2 — IPE Physical Setup</h2>
-    <div class="callout"><strong>Blocked on:</strong> IPE device model + management procedure. Steps below are the logical sequence — fill in device-specific details once IPE model is confirmed (resolves Q1 remainder).</div>
+    <h2>Phase 2 — IPE Physical Integration (Secure Edge Handoff)</h2>
+    <div class="callout"><strong>Blocked on:</strong> IPE device model + RDC endpoint details. Steps below are the logical sequence — no IAH config on SW2, only Transit Port + routing.</div>
     <ul class="checklist">
-      <li><div class="badge ph">P</div><div><strong>Confirm IPE device model + procure/receive unit</strong><br>Get the exact Extreme Networks IPE model number. Confirm VOSS/FabricEngine version it runs and management access method (CLI / XIQ / dedicated UI).</div></li>
-      <li><div class="badge ph">P</div><div><strong>Cable: SW2 uplink → IPE LAN port → HomeModem</strong><br>Physical: SW2 designated uplink port → IPE LAN-side port. IPE WAN-side port → available LAN port on HomeModem. Verify IPE gets WAN IP (DHCP from HomeModem or static).</div></li>
-      <li><div class="badge ph">P</div><div><strong>Configure IPE</strong><br>Hostname, management IP, enable IAH/application hosting environment. Verify IPE can ping 8.8.8.8 via HomeModem uplink.</div></li>
-      <li><div class="badge ph">P</div><div><strong>Enable IAH virtual interface on SW2 toward IPE</strong><br>VOSS IAH config on SW2 creates virtual interface that maps to the physical uplink to the IPE. Verify SW2 IAH interface is UP and can reach IPE management IP.</div></li>
+      <li><div class="badge ph">P</div><div><strong>Confirm IPE device model + receive unit</strong><br>Get the exact Extreme Networks IPE part number. Confirm management access method (CLI / dedicated UI / XIQ). Note: the FE-Tunnel is configured ON the IPE — not on SW2.</div></li>
+      <li><div class="badge ph">P</div><div><strong>Physical cabling: SW2 Port 1 → IPE → HomeModem</strong><br>SW2 Port 1 (Transit Port) → IPE LAN port. IPE WAN port → HomeModem LAN port. Verify IPE gets a WAN IP from HomeModem (DHCP or static). Verify IPE can ping 8.8.8.8.</div></li>
+      <li><div class="badge ph">P</div><div><strong>Configure SW2 Transit Port (Port 1)</strong><br>Define SW2 Port 1 as the routed/L3 interface toward the IPE. Configure Static Route or IP Shortcuts: <code>ip route &lt;RDC-subnet&gt; &lt;IPE-LAN-IP&gt;</code>. This is the only SW2 config needed for the IPE handoff — no IAH, no tunnel.</div></li>
+      <li><div class="badge ph">P</div><div><strong>Verify Secure Edge Handoff</strong><br>From SW2: ping IPE LAN IP via Transit Port. Confirm Static Route is installed. Trace route to RDC subnet — first hop should be IPE. All tunnel logic lives on IPE from this point forward.</div></li>
+      <li><div class="badge ph">P</div><div><strong>Configure Fabric Extend on IPE (not SW2)</strong><br>On the IPE: configure FE-Tunnel with source = IPE WAN IP, destination = RDC gateway in Raleigh. IPsec keys/certs from Extreme Networks team. Once FE-Tunnel is UP on IPE, I-SIDs flow transparently to RDC.</div></li>
     </ul>
   </section>
 
