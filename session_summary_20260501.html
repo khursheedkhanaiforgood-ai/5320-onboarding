@@ -77,6 +77,7 @@
     <li><a href="#next">Work To Do</a></li>
     <li><a href="#cli-ref">CLI Reference</a></li>
     <div class="nav-group">Reference</div>
+    <li><a href="#running-config">Running Config</a></li>
     <li><a href="#arch">Architecture</a></li>
     <li><a href="#hw">Hardware</a></li>
   </ul>
@@ -310,6 +311,96 @@ save config</pre>
         <tr><td>Use ip name-server to fix IQAgent DNS</td><td>Doesn't feed /etc/resolv.conf — use ZTP+/DHCP at boot instead</td></tr>
         <tr><td>Use unconfigure switch all on VOSS</td><td>That's EXOS only — VOSS reset is delete /intflash/config.cfg</td></tr>
       </table>
+    </div>
+  </section>
+
+  <section id="running-config">
+    <h2>Running Config — KhKLab-SW-01 (May 1 2026)</h2>
+    <div class="alert alert-blue">Captured via: <code>script ~/sw2_running_config_20260501.txt</code> → screen → show running-config. Local file: <code>/Users/khukhan/sw2_running_config_20260501.txt</code></div>
+
+    <div class="card">
+      <h3>Critical Findings from Running Config</h3>
+      <div class="status-row"><span class="badge badge-red">MISSING</span> No Nickname — <code>spbm 1 ip enable</code> exists but no <code>nickname</code> line. Must add for fabric identity.</div>
+      <div class="status-row"><span class="badge badge-yellow">NOTE</span> VLAN 4047 "SD-WAN" NOT in running config — dynamically assigned by auto-sense from IPE. Do not manually configure.</div>
+      <div class="status-row"><span class="badge badge-blue">MGMT IP</span> 10.158.4.1/32 is a CLIP (loopback) — SSH requires routing via VIQ fabric network. Not reachable from 192.168.0.x Mac.</div>
+    </div>
+
+    <div class="card">
+      <h3>VIQ Management Network (discovered from config)</h3>
+      <table>
+        <tr><th>Element</th><th>Value</th></tr>
+        <tr><td>DNS server</td><td>10.152.0.11</td></tr>
+        <tr><td>Syslog / NMS server</td><td>10.152.0.110</td></tr>
+        <tr><td>Domain name</td><td>RDUFishbowl.local</td></tr>
+        <tr><td>SNMP users</td><td>FB-SNMP (group FB-SNMP-group), snmpuser</td></tr>
+        <tr><td>CLIP mgmt IP</td><td>10.158.4.1/32 (loopback — VGR)</td></tr>
+      </table>
+    </div>
+
+    <div class="card">
+      <h3>Clean Running Config (key sections)</h3>
+<pre># SYSTEM
+prompt "KhKLab-SW-01"
+password hash sha2
+clock time-zone America New_York
+ip domain-name "RDUFishbowl.local"
+ip name-server primary 10.152.0.11
+syslog host 1 address 10.152.0.110
+
+# SPBM
+spbm
+spbm ethertype 0x8100
+
+# VLAN
+vlan members remove 1 1/1-1/20 portmember
+vlan create 4048 name "onboarding-vlan" type pvlan-mstprstp 0 secondary 4049
+vlan i-sid 4048 15999999
+
+# MANAGEMENT CLIP (loopback)
+mgmt clip vrf GlobalRouter
+ip address 10.158.4.1/32
+enable
+exit
+
+# PORTS (all 1/1–1/20 identical)
+interface GigabitEthernet 1/x
+auto-sense enable
+no shutdown
+exit
+
+# ISIS / SPBM
+router isis
+spbm 1 ip enable          ← NOTE: no nickname configured yet
+exit
+router isis
+sys-name "KhKLab-SW-01"
+is-type l1
+exit
+router isis enable
+
+# AUTO-SENSE
+auto-sense auto-mlt enable
+auto-sense onboarding i-sid 15999999
+
+# I-SID
+i-sid name 15999999 "Onboarding I-SID"
+
+# CFM / QOS
+cfm spbm enable
+qos queue-profile 1 member add 1/1-1/20</pre>
+    </div>
+
+    <div class="card">
+      <h3>Next Session — Add Nickname (CRITICAL)</h3>
+<pre>configure terminal
+router isis
+spbm 1
+nickname 0.00.02
+b-vid 4051,4052 primary 4051
+exit
+exit
+save config</pre>
+      <p style="font-size:13px; color:var(--muted);">Nickname is SW2's fabric identity. Without it, no fabric services (I-SID 100050/100060) will propagate correctly.</p>
     </div>
   </section>
 
