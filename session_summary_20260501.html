@@ -229,8 +229,8 @@ save config</pre>
       <div class="todo-item">
         <div class="todo-num">1</div>
         <div class="todo-body">
-          <h4>Run Corp/Guest CLI block on KhKLab-SW-01 <span class="badge badge-green" style="margin-left:8px;">NICKNAME DONE</span></h4>
-          <p>vlan create 50/60 → vlan i-sid 100050/100060 → fa enable on port 1/3 → save config. Nickname 0.00.02 already set — fabric identity confirmed.</p>
+          <h4>Add Nickname first, then Corp/Guest CLI block</h4>
+          <p>enable → configure terminal → router isis → spbm 1 nick-name 0.00.02 → exit exit → save config. Then: vlan create 50/60 → vlan i-sid 100050/100060 → fa enable on port 1/3 → save config.</p>
         </div>
       </div>
       <div class="todo-item">
@@ -321,7 +321,7 @@ save config</pre>
 
     <div class="card">
       <h3>Critical Findings from Running Config</h3>
-      <div class="status-row"><span class="badge badge-green">DONE</span> Nickname set: <code>spbm 1 nick-name 0.00.02</code> — SW2's permanent fabric identity for RDC Raleigh path. Config saved.</div>
+      <div class="status-row"><span class="badge badge-red">MISSING</span> Nickname not yet set — <code>spbm 1 nick-name 0.00.02</code> must run inside <code>router isis</code> context (fails at exec prompt <code>1&gt;</code>).</div>
       <div class="status-row"><span class="badge badge-yellow">NOTE</span> VLAN 4047 "SD-WAN" NOT in running config — dynamically assigned by auto-sense from IPE. Do not manually configure.</div>
       <div class="status-row"><span class="badge badge-blue">MGMT IP</span> 10.158.4.1/32 is a CLIP (loopback) — SSH requires routing via VIQ fabric network. Not reachable from 192.168.0.x Mac.</div>
     </div>
@@ -392,12 +392,15 @@ qos queue-profile 1 member add 1/1-1/20</pre>
     </div>
 
     <div class="card">
-      <h3>Nickname — CONFIGURED (May 1 2026)</h3>
-<pre>router isis
-spbm 1 nick-name 0.00.02   ← hyphenated syntax (confirmed working)
+      <h3>Next Session — Add Nickname (CRITICAL — context required)</h3>
+<pre>enable
+configure terminal
+router isis
+spbm 1 nick-name 0.00.02   ← hyphenated; FAILS at 1&gt; exec prompt
+exit
 exit
 save config</pre>
-      <div class="alert alert-green">SW2 now has its permanent fabric identity. I-SID services (100050/100060) will propagate correctly across the SPB fabric to RDC Raleigh.</div>
+      <div class="alert alert-red">Running <code>spbm 1 nick-name 0.00.02</code> at the <code>1&gt;</code> exec prompt gives "Invalid input". Must be inside <code>configure terminal → router isis</code> context first.</div>
     </div>
   </section>
 
