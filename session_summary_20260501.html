@@ -78,6 +78,7 @@
     <li><a href="#cli-ref">CLI Reference</a></li>
     <div class="nav-group">Reference</div>
     <li><a href="#running-config">Running Config</a></li>
+    <li><a href="#ipe-dashboard">IPE Dashboard</a></li>
     <li><a href="#arch">Architecture</a></li>
     <li><a href="#hw">Hardware</a></li>
   </ul>
@@ -404,6 +405,45 @@ save config</pre>
     </div>
   </section>
 
+  <section id="ipe-dashboard">
+    <h2>IPE — ExtremeCloud SD-WAN Dashboard (May 1 2026)</h2>
+    <div class="alert alert-green">Source: ExtremeCloud SD-WAN_IPE_May 1 2026.pdf — confirmed live dashboard screenshot</div>
+    <div class="card">
+      <h3>Device Identity</h3>
+      <table>
+        <tr><th>Field</th><th>Value</th></tr>
+        <tr><td>Device Name</td><td>KhKLab-IPE40AX</td></tr>
+        <tr><td>Model</td><td>ipe-40ax-V2</td></tr>
+        <tr><td>Serial</td><td>A0925V0322A0</td></tr>
+        <tr><td>Firmware</td><td>24.5.4.1</td></tr>
+        <tr><td>Mgmt IP</td><td>172.16.0.57</td></tr>
+        <tr><td>Site Role</td><td>Spoke (Spoke-Hub topology)</td></tr>
+        <tr><td>Tenant / Network</td><td>RDU-FishBowl</td></tr>
+        <tr><td>State</td><td>Managed / Active</td></tr>
+        <tr><td>Orchestrator sync</td><td>Connected — config in-sync 2026-05-01 10:09:11</td></tr>
+        <tr><td>Fabric Switch Peer</td><td>KhKLab-SW-01 — Active, 1 peer up</td></tr>
+      </table>
+    </div>
+    <div class="card">
+      <h3>Interface Throughput (live at time of screenshot)</h3>
+      <table>
+        <tr><th>Interface</th><th>Status</th><th>Throughput</th><th>Connected To</th></tr>
+        <tr><td>lan1</td><td><span class="badge badge-green">ACTIVE</span></td><td>25.18 kbps</td><td>SW2 Port 1/1 (VLAN 4047 SD-WAN)</td></tr>
+        <tr><td>lan2</td><td><span class="badge badge-red">INACTIVE</span></td><td>0 bits</td><td>Not connected</td></tr>
+        <tr><td>wan1</td><td><span class="badge badge-red">INACTIVE</span></td><td>0 bits</td><td>Not connected</td></tr>
+        <tr><td>wan2</td><td><span class="badge badge-green">ACTIVE</span></td><td>59.96 kbps</td><td>QuantumFiber modem (WAN path to internet)</td></tr>
+        <tr><td>wan3</td><td><span class="badge badge-red">INACTIVE</span></td><td>0 bits</td><td>Not connected</td></tr>
+      </table>
+      <div class="alert alert-blue" style="margin-top:12px;">
+        <strong>wan2 is the active internet path:</strong> QuantumFiber → Internet → VIQ cloud. lan1 confirms the IPE↔SW2 fabric link is live. 59.96 kbps on wan2 = management + orchestrator traffic.
+      </div>
+    </div>
+    <div class="card">
+      <h3>Topology</h3>
+      <p>World map in dashboard shows two markers near North America — <strong>KhKLab Spoke</strong> (this site) and the <strong>RDC Raleigh Hub</strong>. The Spoke-Hub SD-WAN tunnel is the WAN path for fabric services once Corp/Guest are live.</p>
+    </div>
+  </section>
+
   <section id="arch">
     <h2>Architecture — Current State</h2>
     <div class="card">
@@ -471,12 +511,19 @@ SW2 Port 10 ←─────────────────────�
         </table>
       </div>
       <div class="card">
-        <h3>IPE</h3>
+        <h3>KhKLab-IPE40AX</h3>
         <table>
-          <tr><td>Type</td><td>Integrated Application Hosting Edge</td></tr>
-          <tr><td>LAN1</td><td>→ SW2 Port 1/1 (VLAN 4047)</td></tr>
-          <tr><td>WAN2</td><td>→ QuantumFiber modem</td></tr>
-          <tr><td>VIQ status</td><td>Onboarded ✅</td></tr>
+          <tr><td>Model</td><td>ipe-40ax-V2 (Extreme Networks)</td></tr>
+          <tr><td>Serial</td><td>A0925V0322A0</td></tr>
+          <tr><td>Firmware</td><td>24.5.4.1</td></tr>
+          <tr><td>Mgmt IP</td><td>172.16.0.57</td></tr>
+          <tr><td>Tenant</td><td>RDU-FishBowl (SD-WAN)</td></tr>
+          <tr><td>Role</td><td>Spoke → RDC Raleigh Hub</td></tr>
+          <tr><td>LAN1</td><td>→ SW2 Port 1/1 (VLAN 4047, 25.18 kbps)</td></tr>
+          <tr><td>WAN2</td><td>→ QuantumFiber modem (59.96 kbps active)</td></tr>
+          <tr><td>Fabric peer</td><td>KhKLab-SW-01 — Active, 1 peer up</td></tr>
+          <tr><td>NMS</td><td>XIQSE at 10.152.0.110</td></tr>
+          <tr><td>Orchestrator</td><td>Connected, in-sync ✅</td></tr>
         </table>
       </div>
     </div>
