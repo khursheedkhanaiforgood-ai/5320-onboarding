@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VOSS Lab — EOD May 1, 2026</title>
+<style>
+  :root {
+    --bg: #0a0f1e; --surface: #111827; --border: #1e2d40;
+    --accent: #3b82f6; --accent2: #10b981; --accent3: #f59e0b;
+    --accent4: #ef4444; --accent5: #8b5cf6;
+    --text: #e2e8f0; --muted: #94a3b8; --code-bg: #0f1f35; --nav-w: 230px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); display: flex; min-height: 100vh; }
+  nav { width: var(--nav-w); min-width: var(--nav-w); background: var(--surface); border-right: 1px solid var(--border); position: sticky; top: 0; height: 100vh; overflow-y: auto; padding: 24px 0; flex-shrink: 0; }
+  nav .logo { padding: 0 20px 20px; border-bottom: 1px solid var(--border); }
+  nav .logo-title { font-size: 12px; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: 1px; }
+  nav .logo-sub { font-size: 11px; color: var(--muted); margin-top: 3px; }
+  nav ul { list-style: none; padding: 16px 0; }
+  nav ul li a { display: block; padding: 7px 20px; font-size: 13px; color: var(--muted); text-decoration: none; border-left: 3px solid transparent; transition: all 0.15s; }
+  nav ul li a:hover { color: var(--text); background: rgba(59,130,246,0.08); }
+  nav ul li a.active { color: var(--accent); border-left-color: var(--accent); background: rgba(59,130,246,0.1); }
+  nav .nav-group { padding: 14px 20px 4px; font-size: 10px; font-weight: 700; color: #4a5568; text-transform: uppercase; letter-spacing: 1px; }
+  main { flex: 1; padding: 40px 48px; max-width: 980px; }
+  .page-header { border-bottom: 1px solid var(--border); padding-bottom: 24px; margin-bottom: 40px; }
+  .page-header .label { font-size: 11px; font-weight: 700; color: var(--accent3); text-transform: uppercase; letter-spacing: 1.5px; }
+  .page-header h1 { font-size: 30px; font-weight: 700; margin-top: 8px; line-height: 1.2; }
+  .page-header .meta { color: var(--muted); font-size: 14px; margin-top: 10px; }
+  section { margin-bottom: 48px; scroll-margin-top: 32px; }
+  section h2 { font-size: 20px; font-weight: 700; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 20px 24px; margin-bottom: 16px; }
+  .card h3 { font-size: 15px; font-weight: 700; margin-bottom: 12px; }
+  .card p, .card li { font-size: 14px; color: var(--muted); line-height: 1.7; }
+  .card ul { padding-left: 18px; }
+  pre, code { font-family: 'Fira Code', 'Cascadia Code', monospace; }
+  pre { background: var(--code-bg); border: 1px solid var(--border); border-radius: 8px; padding: 16px 20px; font-size: 13px; overflow-x: auto; margin: 12px 0; line-height: 1.6; }
+  code { background: var(--code-bg); padding: 2px 6px; border-radius: 4px; font-size: 13px; color: #7dd3fc; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; margin: 12px 0; }
+  th { text-align: left; padding: 8px 12px; background: var(--code-bg); color: var(--muted); font-weight: 700; font-size: 11px; text-transform: uppercase; border-bottom: 1px solid var(--border); }
+  td { padding: 9px 12px; border-bottom: 1px solid var(--border); color: var(--muted); vertical-align: top; line-height: 1.5; }
+  tr:last-child td { border-bottom: none; }
+  td:first-child { color: var(--text); font-weight: 500; }
+  .badge { display: inline-block; padding: 2px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; text-transform: uppercase; }
+  .badge-green { background: rgba(16,185,129,0.15); color: #10b981; }
+  .badge-red { background: rgba(239,68,68,0.15); color: #ef4444; }
+  .badge-yellow { background: rgba(245,158,11,0.15); color: #f59e0b; }
+  .badge-blue { background: rgba(59,130,246,0.15); color: #3b82f6; }
+  .badge-purple { background: rgba(139,92,246,0.15); color: #8b5cf6; }
+  .status-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; font-size: 14px; }
+  .alert { border-radius: 8px; padding: 14px 18px; margin: 12px 0; font-size: 14px; border-left: 4px solid; }
+  .alert-red { background: rgba(239,68,68,0.08); border-color: #ef4444; color: #fca5a5; }
+  .alert-green { background: rgba(16,185,129,0.08); border-color: #10b981; color: #6ee7b7; }
+  .alert-yellow { background: rgba(245,158,11,0.08); border-color: #f59e0b; color: #fcd34d; }
+  .alert-blue { background: rgba(59,130,246,0.08); border-color: #3b82f6; color: #93c5fd; }
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .todo-item { display: flex; gap: 12px; padding: 14px 0; border-bottom: 1px solid var(--border); }
+  .todo-item:last-child { border-bottom: none; }
+  .todo-num { background: var(--accent); color: #fff; width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; flex-shrink: 0; margin-top: 1px; }
+  .todo-body h4 { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+  .todo-body p { font-size: 13px; color: var(--muted); line-height: 1.6; }
+</style>
+</head>
+<body>
+<nav>
+  <div class="logo">
+    <div class="logo-title">KhKLab VOSS</div>
+    <div class="logo-sub">May 1 2026 — EOD</div>
+  </div>
+  <ul>
+    <div class="nav-group">Today</div>
+    <li><a href="#accomplished">Accomplished</a></li>
+    <li><a href="#switch-state">Switch State</a></li>
+    <li><a href="#concepts">VOSS Concepts</a></li>
+    <li><a href="#corp-guest">Corp/Guest Plan</a></li>
+    <div class="nav-group">Next Session</div>
+    <li><a href="#next">Work To Do</a></li>
+    <li><a href="#cli-ref">CLI Reference</a></li>
+    <div class="nav-group">Reference</div>
+    <li><a href="#arch">Architecture</a></li>
+    <li><a href="#hw">Hardware</a></li>
+  </ul>
+</nav>
+
+<main>
+  <div class="page-header">
+    <div class="label">EOD Session Summary</div>
+    <h1>IPE Live · VIQ Onboarded · Corp/Guest Plan Ready</h1>
+    <div class="meta">May 1, 2026 &nbsp;·&nbsp; KhKLab-SW-01 &nbsp;·&nbsp; Branch: feature/new-arch-voss-ipe</div>
+  </div>
+
+  <section id="accomplished">
+    <h2>Accomplished Today</h2>
+    <div class="card">
+      <div class="status-row"><span class="badge badge-green">DONE</span> IPE physically connected: IPE LAN1 → SW2 Port 1, IPE WAN2 → QuantumFiber modem</div>
+      <div class="status-row"><span class="badge badge-green">DONE</span> VIQ instance set up — orchestrator onboarded IPE and discovered SW2</div>
+      <div class="status-row"><span class="badge badge-green">DONE</span> SW2 renamed by VIQ to KhKLab-SW-01 — foundation config pushed</div>
+      <div class="status-row"><span class="badge badge-green">DONE</span> Switch state verified: SD-WAN VLAN, onboarding I-SID, B-VLANs confirmed</div>
+      <div class="status-row"><span class="badge badge-green">DONE</span> Corp/Guest VLAN + I-SID values confirmed: VLAN 50/60, I-SID 100050/100060</div>
+      <div class="status-row"><span class="badge badge-green">DONE</span> Service-at-the-Edge CLI block fully designed and ready to run</div>
+      <div class="status-row"><span class="badge badge-yellow">PENDING</span> Corp/Guest CLI not yet executed — saved for next session</div>
+      <div class="status-row"><span class="badge badge-yellow">PENDING</span> VIQ SSID policy not yet created — next session</div>
+    </div>
+  </section>
+
+  <section id="switch-state">
+    <h2>Current Switch State — KhKLab-SW-01</h2>
+    <div class="card">
+      <h3>show vlan members</h3>
+<pre>VLAN 1     → no ports       (Default, unused)
+VLAN 4047  → Port 1/1       "SD-WAN" — IPE uplink (VIQ configured)
+VLAN 4048  → Port 1/3, 1/10 "onboarding-vlan" — AP2 + SW1 trunk
+VLAN 4051  → empty          B-VLAN (SPB backbone)
+VLAN 4052  → empty          B-VLAN (SPB backbone)</pre>
+    </div>
+    <div class="card">
+      <h3>show i-sid</h3>
+<pre>I-SID 15999999  ELAN  VLAN 4048  Ports: u:1/3, u:1/10  Origin: A (Auto-sense)
+                → "Onboarding I-SID" — greenfield/ZTD state
+I-SID 16777001  ELAN  N/A        No ports               Origin: C
+                → "FAN-ISID" — FA control, do NOT touch</pre>
+      <div class="alert alert-blue">This is the "blank canvas" state. No production services defined yet. Auto-sense identified ports 1/3 and 1/10 as potential fabric entry points. No VLANs 50/60 exist yet.</div>
+    </div>
+    <div class="card">
+      <h3>What VIQ Already Built</h3>
+      <table>
+        <tr><th>Element</th><th>Value</th><th>Note</th></tr>
+        <tr><td>VLAN 4047 "SD-WAN"</td><td>Port 1/1</td><td>IPE uplink — internet exit path</td></tr>
+        <tr><td>VLAN 4048 "onboarding-vlan"</td><td>Ports 1/3, 1/10</td><td>Management / ZTD fabric</td></tr>
+        <tr><td>I-SID 15999999</td><td>VLAN 4048</td><td>Onboarding service, auto-sense origin</td></tr>
+        <tr><td>I-SID 16777001</td><td>N/A</td><td>FAN-ISID, FA control — do not modify</td></tr>
+        <tr><td>B-VLANs 4051/4052</td><td>empty</td><td>SPB backbone ready, no services yet</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <section id="concepts">
+    <h2>VOSS Concepts Learned Today</h2>
+    <div class="card">
+      <h3>1. I-SID — The "Service Suitcase"</h3>
+      <p>In EXOS, a VLAN is just a VLAN. In VOSS, every VLAN that crosses the fabric gets a 24-bit I-SID (Service Instance Identifier) — like a VNI in VXLAN. The I-SID is the global identity of the service across all fabric nodes.</p>
+      <p style="margin-top:8px;"><strong>Convention in this lab:</strong> I-SID = VLAN number + 100,000. So VLAN 50 → I-SID 100050.</p>
+      <p style="margin-top:8px;"><strong>Command:</strong> <code>vlan i-sid 50 100050</code> — simpler than the manual <code>i-sid elan c-vid</code> approach.</p>
+    </div>
+    <div class="card">
+      <h3>2. Fabric Attach (FA) — Auto-Provisioning</h3>
+      <p>AP2 already speaks FA (confirmed at boot: <code>clientWapType1</code> on port 1/3). When VIQ pushes Corp/Guest SSIDs to AP2, the AP sends IEEE 802.1Qcj LLDP TLVs to SW2:</p>
+      <pre>"I need VLAN 50 (I-SID 100050) on this port"
+"I need VLAN 60 (I-SID 100060) on this port"</pre>
+      <p>SW2 auto-approves and dynamically tags port 1/3 with those VLANs. <strong>You never manually tag the AP port.</strong></p>
+    </div>
+    <div class="card">
+      <h3>3. Greenfield / ZTD State</h3>
+      <p>The "A" (Auto-sense) origin on I-SID 15999999 means the switch has auto-discovered ports but no production services are defined. This is the clean starting point before Corp/Guest services are added.</p>
+    </div>
+    <div class="card">
+      <h3>4. IP Shortcuts (for next session)</h3>
+      <p>Enabling <code>ip-shortcut</code> under <code>router isis</code> turns SW2 into a "Service Gateway" — it advertises its IP routes (including the default route via IPE) through the SPB fabric. Other fabric nodes automatically learn the internet exit without needing static routes.</p>
+    </div>
+    <div class="card">
+      <h3>VOSS vs EXOS: Port Tagging</h3>
+      <table>
+        <tr><th>EXOS</th><th>VOSS</th></tr>
+        <tr><td>Manually tag port: vlan add ports X tagged</td><td>FA auto-tags port when AP requests I-SID</td></tr>
+        <tr><td>Static VLAN membership</td><td>Dynamic via Fabric Attach handshake</td></tr>
+        <tr><td>VLAN is local</td><td>VLAN maps to global I-SID (fabric-wide)</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <section id="corp-guest">
+    <h2>Corp / Guest Service Plan</h2>
+    <div class="card">
+      <h3>Service Design</h3>
+      <table>
+        <tr><th>Service</th><th>VLAN</th><th>I-SID</th><th>Gateway</th><th>DHCP Pool</th></tr>
+        <tr><td>Corp</td><td>50</td><td>100050</td><td>10.50.0.1/24</td><td>10.50.0.100–200</td></tr>
+        <tr><td>Guest</td><td>60</td><td>100060</td><td>10.60.0.1/24</td><td>10.60.0.100–200</td></tr>
+      </table>
+      <p style="margin-top:8px; font-size:13px; color: var(--muted);">Note: Gateway IPs not confirmed yet — choose at next session based on existing subnet plan.</p>
+    </div>
+    <div class="card">
+      <h3>CLI Block — READY TO RUN (Corp/Guest only)</h3>
+<pre># Create VLANs
+vlan create 50 name "Corp" type port-mstprstp 0
+vlan create 60 name "Guest" type port-mstprstp 0
+
+# Map to global Fabric I-SIDs (VLAN + 100,000 convention)
+vlan i-sid 50 100050
+vlan i-sid 60 100060
+
+# AP port — FA auto-sense (already active, locking in)
+interface gigabitEthernet 1/3
+  auto-sense enable
+  fa enable
+  no shutdown
+exit
+
+save config</pre>
+      <div class="alert alert-yellow">Do NOT manually add VLAN 50 or 60 to port 1/3. FA does this automatically when AP2 sends its SSID request to SW2.</div>
+    </div>
+    <div class="card">
+      <h3>VIQ Policy — What to Configure (Next Session)</h3>
+      <ul>
+        <li>Configure &gt; Wireless Networks → Create SSID "Corp" → VLAN 50</li>
+        <li>Configure &gt; Wireless Networks → Create SSID "Guest" → VLAN 60</li>
+        <li>Network Policy → Switching → Fabric Attach mappings:
+          <ul>
+            <li>VLAN 50 → I-SID 100050</li>
+            <li>VLAN 60 → I-SID 100060</li>
+          </ul>
+        </li>
+        <li>Port 1/3 on SW2: assign "Auto-Sense / Universal" profile</li>
+        <li>Push policy to AP2</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>Verification Command After Push</h3>
+<pre>show fa assignment</pre>
+      <p>Expected result: Port 1/3 listed as <strong>Active / Dynamic</strong> for I-SIDs 100050 and 100060. This confirms FA auto-provisioning worked.</p>
+    </div>
+  </section>
+
+  <section id="next">
+    <h2>Work To Do — Next Session</h2>
+    <div class="card">
+      <div class="todo-item">
+        <div class="todo-num">1</div>
+        <div class="todo-body">
+          <h4>Run Corp/Guest CLI block on KhKLab-SW-01</h4>
+          <p>vlan create 50/60 → vlan i-sid 100050/100060 → fa enable on port 1/3 → save config</p>
+        </div>
+      </div>
+      <div class="todo-item">
+        <div class="todo-num">2</div>
+        <div class="todo-body">
+          <h4>Build VIQ Network Policy with SSID Corp/Guest → VLAN 50/60 → I-SID 100050/100060</h4>
+          <p>Create SSIDs, FA mappings, assign to AP2. Push policy.</p>
+        </div>
+      </div>
+      <div class="todo-item">
+        <div class="todo-num">3</div>
+        <div class="todo-body">
+          <h4>Verify with: show fa assignment</h4>
+          <p>Port 1/3 must show Active/Dynamic for both I-SIDs. Then verify: show i-sid (ports should appear under 100050/100060).</p>
+        </div>
+      </div>
+      <div class="todo-item">
+        <div class="todo-num">4</div>
+        <div class="todo-body">
+          <h4>Resolve Port 1/1 conflict before IPE transit config</h4>
+          <p>VIQ put VLAN 4047 (SD-WAN) on Port 1/1. NotebookLLM proposes VLAN 100 (IPE_Transit) also on 1/1. Verify what VIQ already configured before running transit block. Run: show interfaces gigabitEthernet 1/1</p>
+        </div>
+      </div>
+      <div class="todo-item">
+        <div class="todo-num">5</div>
+        <div class="todo-body">
+          <h4>Configure IPE transit path + IP Shortcuts</h4>
+          <p>Default route via IPE LAN IP. Enable ip-shortcut under router isis to make SW2 the fabric internet exit. Correct VOSS syntax: two-step ip route (weight 1, then enable).</p>
+        </div>
+      </div>
+      <div class="todo-item">
+        <div class="todo-num">6</div>
+        <div class="todo-body">
+          <h4>End-to-end test: Corp/Guest client → internet via IPE</h4>
+          <p>Connect to Corp SSID → DHCP from 10.50.0.x pool → ping 8.8.8.8 → traceroute confirms path through IPE.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="cli-ref">
+    <h2>VOSS CLI Quick Reference</h2>
+    <div class="card">
+      <h3>Key Commands Confirmed on KhKLab-SW-01</h3>
+<pre># VLAN + I-SID (service definition)
+vlan create &lt;id&gt; name "Name" type port-mstprstp 0
+vlan i-sid &lt;vlan&gt; &lt;isid&gt;          ← I-SID = VLAN + 100,000 convention
+
+# FA on AP port
+interface gigabitEthernet 1/3
+  auto-sense enable
+  fa enable
+  no shutdown
+exit
+
+# Static route (VOSS two-step)
+ip route 0.0.0.0/0 &lt;next-hop&gt; weight 1
+ip route 0.0.0.0/0 &lt;next-hop&gt; enable
+
+# IP Shortcuts (SPB internet exit)
+router isis
+  ip-shortcut enable
+exit
+
+# Verification
+show vlan members
+show i-sid
+show fa assignment         ← KEY: shows dynamic FA port bindings
+show ip interface
+save config</pre>
+    </div>
+    <div class="card">
+      <h3>Critical Warnings</h3>
+      <table>
+        <tr><th>Do NOT</th><th>Reason</th></tr>
+        <tr><td>Manually tag port 1/3 with VLAN 50 or 60</td><td>FA does this dynamically — manual tag breaks the handshake</td></tr>
+        <tr><td>Touch I-SID 16777001 (FAN-ISID)</td><td>FA control channel — modifying breaks FA entirely</td></tr>
+        <tr><td>Add VLAN to Port 1/1 without checking</td><td>VIQ already configured VLAN 4047 (SD-WAN) there</td></tr>
+        <tr><td>Use ip name-server to fix IQAgent DNS</td><td>Doesn't feed /etc/resolv.conf — use ZTP+/DHCP at boot instead</td></tr>
+        <tr><td>Use unconfigure switch all on VOSS</td><td>That's EXOS only — VOSS reset is delete /intflash/config.cfg</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <section id="arch">
+    <h2>Architecture — Current State</h2>
+    <div class="card">
+<pre>PATH A (EXOS — unchanged)           PATH B (VOSS/IPE — active)
+──────────────────────              ──────────────────────────────────
+AP1 (192.168.0.12)                  AP2 (192.168.0.25)
+    ↓                                   ↓ Port 1/3  [FA: clientWapType1]
+SW1 EXOS (192.168.0.28)             KhKLab-SW-01 (VOSS 9.3.2.0)
+    ↓                                   ↓ Port 1/1 [VLAN 4047 SD-WAN]
+QuantumFiber (existing)             IPE (Extreme Networks — physical)
+                                        ↓ LAN1→SW2 / WAN2→QuantumFiber
+                                    QuantumFiber → Internet → VIQ
+
+SW2 Port 10 ←──────────────────────→ SW1 Port 10 (VLAN 4048 onboarding)</pre>
+    </div>
+    <div class="card">
+      <h3>IP Plan</h3>
+      <table>
+        <tr><th>Device</th><th>IP</th><th>Note</th></tr>
+        <tr><td>QuantumFiber modem</td><td>192.168.0.1</td><td>Shared WAN gateway</td></tr>
+        <tr><td>SW1 EXOS</td><td>192.168.0.28</td><td>Path A unchanged</td></tr>
+        <tr><td>KhKLab-SW-01 (SW2 VOSS)</td><td>TBD — check VIQ</td><td>VIQ manages IP assignment</td></tr>
+        <tr><td>IPE LAN</td><td>TBD</td><td>Connected on VLAN 4047 SD-WAN</td></tr>
+        <tr><td>Corp VLAN 50</td><td>10.50.0.1/24</td><td>Proposed — confirm next session</td></tr>
+        <tr><td>Guest VLAN 60</td><td>10.60.0.1/24</td><td>Proposed — confirm next session</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <section id="hw">
+    <h2>Hardware Reference</h2>
+    <div class="two-col">
+      <div class="card">
+        <h3>KhKLab-SW-01 (SW2 VOSS)</h3>
+        <table>
+          <tr><td>Model</td><td>5320-16P-2MXT-2X</td></tr>
+          <tr><td>Serial</td><td>FJ012544G-00483</td></tr>
+          <tr><td>OS</td><td>VOSS / FabricEngine 9.3.2.0.GA</td></tr>
+          <tr><td>Console</td><td>/dev/cu.usbserial-A9VKJO11 115200</td></tr>
+          <tr><td>Login</td><td>rwa / &lt;changed from default&gt;</td></tr>
+          <tr><td>Port 1/1</td><td>→ IPE (VLAN 4047 SD-WAN)</td></tr>
+          <tr><td>Port 1/3</td><td>→ AP2 (VLAN 4048 onboarding, FA active)</td></tr>
+          <tr><td>Port 1/10</td><td>→ SW1 Port 10 (VLAN 4048)</td></tr>
+        </table>
+      </div>
+      <div class="card">
+        <h3>SW1 EXOS (unchanged)</h3>
+        <table>
+          <tr><td>Model</td><td>5320-16P-2MXT-2X</td></tr>
+          <tr><td>Serial</td><td>FJ012544G-00233</td></tr>
+          <tr><td>OS</td><td>EXOS SwitchEngine 33.5.2b118</td></tr>
+          <tr><td>IP</td><td>192.168.0.28</td></tr>
+          <tr><td>Login</td><td>admin / Extreme01!!</td></tr>
+          <tr><td>XIQ Policy</td><td>KK_SW_5320_Apr21_KarlLab</td></tr>
+        </table>
+      </div>
+      <div class="card">
+        <h3>AP2</h3>
+        <table>
+          <tr><td>Model</td><td>AP3000</td></tr>
+          <tr><td>IP</td><td>192.168.0.25</td></tr>
+          <tr><td>Port</td><td>SW2 Port 1/3</td></tr>
+          <tr><td>FA Status</td><td>clientWapType1 — Active</td></tr>
+          <tr><td>SSIDs pending</td><td>Corp (VLAN 50), Guest (VLAN 60)</td></tr>
+        </table>
+      </div>
+      <div class="card">
+        <h3>IPE</h3>
+        <table>
+          <tr><td>Type</td><td>Integrated Application Hosting Edge</td></tr>
+          <tr><td>LAN1</td><td>→ SW2 Port 1/1 (VLAN 4047)</td></tr>
+          <tr><td>WAN2</td><td>→ QuantumFiber modem</td></tr>
+          <tr><td>VIQ status</td><td>Onboarded ✅</td></tr>
+        </table>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script>
+  const sections = document.querySelectorAll('section[id]');
+  const links = document.querySelectorAll('nav ul li a');
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        links.forEach(l => l.classList.remove('active'));
+        const active = document.querySelector(`nav a[href="#${e.target.id}"]`);
+        if (active) active.classList.add('active');
+      }
+    });
+  }, { threshold: 0.2 });
+  sections.forEach(s => observer.observe(s));
+</script>
+</body>
+</html>
