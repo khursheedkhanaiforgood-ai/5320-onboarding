@@ -229,8 +229,8 @@ save config</pre>
       <div class="todo-item">
         <div class="todo-num">1</div>
         <div class="todo-body">
-          <h4>Run Corp/Guest CLI block on KhKLab-SW-01</h4>
-          <p>vlan create 50/60 → vlan i-sid 100050/100060 → fa enable on port 1/3 → save config</p>
+          <h4>Run Corp/Guest CLI block on KhKLab-SW-01 <span class="badge badge-green" style="margin-left:8px;">NICKNAME DONE</span></h4>
+          <p>vlan create 50/60 → vlan i-sid 100050/100060 → fa enable on port 1/3 → save config. Nickname 0.00.02 already set — fabric identity confirmed.</p>
         </div>
       </div>
       <div class="todo-item">
@@ -321,7 +321,7 @@ save config</pre>
 
     <div class="card">
       <h3>Critical Findings from Running Config</h3>
-      <div class="status-row"><span class="badge badge-red">MISSING</span> No Nickname — <code>spbm 1 ip enable</code> exists but no <code>nickname</code> line. Must add for fabric identity.</div>
+      <div class="status-row"><span class="badge badge-green">DONE</span> Nickname set: <code>spbm 1 nick-name 0.00.02</code> — SW2's permanent fabric identity for RDC Raleigh path. Config saved.</div>
       <div class="status-row"><span class="badge badge-yellow">NOTE</span> VLAN 4047 "SD-WAN" NOT in running config — dynamically assigned by auto-sense from IPE. Do not manually configure.</div>
       <div class="status-row"><span class="badge badge-blue">MGMT IP</span> 10.158.4.1/32 is a CLIP (loopback) — SSH requires routing via VIQ fabric network. Not reachable from 192.168.0.x Mac.</div>
     </div>
@@ -392,16 +392,12 @@ qos queue-profile 1 member add 1/1-1/20</pre>
     </div>
 
     <div class="card">
-      <h3>Next Session — Add Nickname (CRITICAL)</h3>
-<pre>configure terminal
-router isis
-spbm 1
-nickname 0.00.02
-b-vid 4051,4052 primary 4051
-exit
+      <h3>Nickname — CONFIGURED (May 1 2026)</h3>
+<pre>router isis
+spbm 1 nick-name 0.00.02   ← hyphenated syntax (confirmed working)
 exit
 save config</pre>
-      <p style="font-size:13px; color:var(--muted);">Nickname is SW2's fabric identity. Without it, no fabric services (I-SID 100050/100060) will propagate correctly.</p>
+      <div class="alert alert-green">SW2 now has its permanent fabric identity. I-SID services (100050/100060) will propagate correctly across the SPB fabric to RDC Raleigh.</div>
     </div>
   </section>
 
