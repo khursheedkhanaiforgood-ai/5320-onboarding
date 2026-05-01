@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>5320 / VOSS — Full Session Log | April 30, 2026</title>
+<style>
+  :root {
+    --bg: #0a0f1e;
+    --surface: #111827;
+    --border: #1e2d40;
+    --accent: #3b82f6;
+    --accent2: #10b981;
+    --accent3: #f59e0b;
+    --accent4: #ef4444;
+    --accent5: #8b5cf6;
+    --text: #e2e8f0;
+    --muted: #94a3b8;
+    --code-bg: #0f1f35;
+    --nav-w: 230px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); display: flex; min-height: 100vh; }
+
+  nav {
+    width: var(--nav-w); min-width: var(--nav-w); background: var(--surface);
+    border-right: 1px solid var(--border); position: sticky; top: 0;
+    height: 100vh; overflow-y: auto; padding: 24px 0; flex-shrink: 0;
+  }
+  nav .logo { padding: 0 20px 20px; border-bottom: 1px solid var(--border); }
+  nav .logo-title { font-size: 12px; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: 1px; }
+  nav .logo-sub { font-size: 11px; color: var(--muted); margin-top: 3px; }
+  nav ul { list-style: none; padding: 16px 0; }
+  nav ul li a {
+    display: block; padding: 7px 20px; font-size: 13px; color: var(--muted);
+    text-decoration: none; border-left: 3px solid transparent; transition: all 0.15s;
+  }
+  nav ul li a:hover { color: var(--text); background: rgba(59,130,246,0.08); }
+  nav ul li a.active { color: var(--accent); border-left-color: var(--accent); background: rgba(59,130,246,0.1); }
+  nav .nav-group { padding: 14px 20px 4px; font-size: 10px; font-weight: 700; color: #4a5568; text-transform: uppercase; letter-spacing: 1px; }
+
+  main { flex: 1; padding: 40px 48px; max-width: 980px; }
+  .page-header { border-bottom: 1px solid var(--border); padding-bottom: 24px; margin-bottom: 40px; }
+  .page-header .label { font-size: 11px; font-weight: 700; color: var(--accent3); text-transform: uppercase; letter-spacing: 1.5px; }
+  .page-header h1 { font-size: 30px; font-weight: 700; margin-top: 8px; line-height: 1.2; }
+  .page-header .meta { color: var(--muted); font-size: 14px; margin-top: 10px; }
+
+  section { margin-bottom: 48px; scroll-margin-top: 32px; }
+  section h2 { font-size: 20px; font-weight: 700; color: var(--text); margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; }
+
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 20px 24px; margin-bottom: 16px; }
+  .card h3 { font-size: 15px; font-weight: 700; margin-bottom: 10px; }
+  .card p, .card li { font-size: 14px; color: var(--muted); line-height: 1.7; }
+  .card ul { padding-left: 18px; }
+
+  .status-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; font-size: 14px; }
+  .badge { display: inline-block; padding: 2px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+  .badge-green { background: rgba(16,185,129,0.15); color: #10b981; }
+  .badge-red { background: rgba(239,68,68,0.15); color: #ef4444; }
+  .badge-yellow { background: rgba(245,158,11,0.15); color: #f59e0b; }
+  .badge-blue { background: rgba(59,130,246,0.15); color: #3b82f6; }
+  .badge-purple { background: rgba(139,92,246,0.15); color: #8b5cf6; }
+
+  pre, code { font-family: 'Fira Code', 'Cascadia Code', 'Consolas', monospace; }
+  pre { background: var(--code-bg); border: 1px solid var(--border); border-radius: 8px; padding: 16px 20px; font-size: 13px; overflow-x: auto; margin: 12px 0; line-height: 1.6; }
+  code { background: var(--code-bg); padding: 2px 6px; border-radius: 4px; font-size: 13px; color: #7dd3fc; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { text-align: left; padding: 8px 12px; background: var(--code-bg); color: var(--muted); font-weight: 700; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid var(--border); }
+  td { padding: 9px 12px; border-bottom: 1px solid var(--border); color: var(--muted); vertical-align: top; line-height: 1.5; }
+  tr:last-child td { border-bottom: none; }
+  td:first-child { color: var(--text); font-weight: 500; }
+
+  .alert { border-radius: 8px; padding: 14px 18px; margin: 12px 0; font-size: 14px; border-left: 4px solid; }
+  .alert-red { background: rgba(239,68,68,0.08); border-color: #ef4444; color: #fca5a5; }
+  .alert-green { background: rgba(16,185,129,0.08); border-color: #10b981; color: #6ee7b7; }
+  .alert-yellow { background: rgba(245,158,11,0.08); border-color: #f59e0b; color: #fcd34d; }
+  .alert-blue { background: rgba(59,130,246,0.08); border-color: #3b82f6; color: #93c5fd; }
+
+  .todo-item { display: flex; gap: 12px; align-items: flex-start; padding: 14px 0; border-bottom: 1px solid var(--border); }
+  .todo-item:last-child { border-bottom: none; }
+  .todo-num { background: var(--accent); color: #fff; width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; flex-shrink: 0; margin-top: 1px; }
+  .todo-body h4 { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+  .todo-body p { font-size: 13px; color: var(--muted); line-height: 1.6; }
+
+  .timeline-item { display: flex; gap: 16px; padding: 12px 0; }
+  .tl-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--accent); margin-top: 5px; flex-shrink: 0; }
+  .tl-dot.green { background: var(--accent2); }
+  .tl-dot.red { background: var(--accent4); }
+  .tl-dot.yellow { background: var(--accent3); }
+  .tl-content { flex: 1; }
+  .tl-content .tl-title { font-size: 14px; font-weight: 600; }
+  .tl-content .tl-detail { font-size: 13px; color: var(--muted); margin-top: 3px; line-height: 1.5; }
+
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 700px) { .two-col { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">
+    <div class="logo-title">5320 Lab</div>
+    <div class="logo-sub">Apr 30 2026 — Full EOD</div>
+  </div>
+  <ul>
+    <div class="nav-group">Today</div>
+    <li><a href="#summary">Session Summary</a></li>
+    <li><a href="#voss-install">VOSS Installation</a></li>
+    <li><a href="#preflight">Pre-Flight CLI</a></li>
+    <li><a href="#xiq-issue">XIQ DNS Issue</a></li>
+    <div class="nav-group">Tomorrow</div>
+    <li><a href="#tomorrow">Fresh Start Plan</a></li>
+    <li><a href="#voss-ref">VOSS CLI Reference</a></li>
+    <li><a href="#open-q">Open Questions</a></li>
+    <div class="nav-group">Parked</div>
+    <li><a href="#parked">5 Parked Items</a></li>
+    <li><a href="#arch">Architecture</a></li>
+    <li><a href="#hw">Hardware</a></li>
+  </ul>
+</nav>
+
+<main>
+
+  <div class="page-header">
+    <div class="label">EOD Session Summary</div>
+    <h1>VOSS Boot + Pre-Flight + XIQ Connectivity</h1>
+    <div class="meta">April 30, 2026 &nbsp;·&nbsp; Branch: feature/new-arch-voss-ipe &nbsp;·&nbsp; SW2 wiped clean tomorrow</div>
+  </div>
+
+  <!-- SUMMARY -->
+  <section id="summary">
+    <h2>Session Summary</h2>
+    <div class="card">
+      <div class="status-row"><span class="badge badge-green">DONE</span> VOSS 9.3.2.0.GA installed on SW2 via XIQ</div>
+      <div class="status-row"><span class="badge badge-green">DONE</span> SW2 booted successfully — AP2 auto-detected via Fabric Attach on port 1/3</div>
+      <div class="status-row"><span class="badge badge-green">DONE</span> Logged in, rwa password changed (default rwa/rwa → new password)</div>
+      <div class="status-row"><span class="badge badge-green">DONE</span> Hostname SW2-VOSS set</div>
+      <div class="status-row"><span class="badge badge-green">DONE</span> VLAN 1 IP 192.168.0.31/24 configured, Port 1 member</div>
+      <div class="status-row"><span class="badge badge-green">DONE</span> Default route 0.0.0.0/0 → 192.168.0.1, internet confirmed (ping 8.8.8.8 alive)</div>
+      <div class="status-row"><span class="badge badge-red">FAILED</span> XIQ connectivity — IQAgent DNS resolution broken after manual static IP config</div>
+      <div class="status-row"><span class="badge badge-yellow">DECISION</span> Wipe SW2 completely tomorrow, fresh start with proper ZTP+ approach</div>
+    </div>
+  </section>
+
+  <!-- VOSS INSTALLATION -->
+  <section id="voss-install">
+    <h2>VOSS Installation</h2>
+    <div class="card">
+      <h3>Method: XIQ Push (no console/bootloader needed)</h3>
+      <p>Initiated from XIQ device inventory. XIQ pushed the VOSS image directly.</p>
+      <p style="margin-top: 8px;">XIQ showed SW2 at 86% "Rebooting" — normal during install.</p>
+    </div>
+    <div class="card">
+      <h3>Boot Console Output — Key Lines</h3>
+<pre>Extreme Networks Fabric Engine Release 9.3.2.0
+INSTALLING VOSS
+Extracting release 9.3.2.0.GA
+VOSS Successfully Installed, Rebooting
+
+-- After reboot --
+Could not open primary config file /intflash/config.cfg   ← NORMAL on clean boot
+Trial Period will expire in 24 days
+ISIS Enabled without assigning the nickname.               ← NORMAL, nickname needed
+ZTP+ discovery failed - No DNS server configured.          ← pre-config, expected
+FA INFO Fabric Attach Element Authentication Succeeded on interface 1/3  ← AP2 found!
+Boot sequence successful</pre>
+      <div class="alert alert-green">AP2 (port 1/3) auto-detected via Fabric Attach even before any config — great sign for when fabric is properly configured.</div>
+      <div class="alert alert-yellow">Port 1/10 (→ SW1) showed FA rejection "status 9" — normal, SW1 is EXOS not a Fabric device.</div>
+    </div>
+    <div class="card">
+      <h3>VOSS Default Login</h3>
+<pre>Login: rwa
+Password: rwa     ← forced change on first login</pre>
+      <p><strong>Note:</strong> New rwa password set during this session. Keep it safe — it's NOT in any file.</p>
+    </div>
+  </section>
+
+  <!-- PRE-FLIGHT CLI -->
+  <section id="preflight">
+    <h2>Pre-Flight CLI (What We Ran)</h2>
+
+    <div class="alert alert-blue">Decision: Skip IS-IS/SPB/Nickname via CLI — push from XIQ as a policy after connectivity is established.</div>
+
+    <div class="card">
+      <h3>Commands Run (in order)</h3>
+<pre>enable
+configure terminal
+
+sys name SW2-VOSS                        ← hostname set, prompt confirmed
+
+-- VLAN 1 management IP --
+interface vlan 1
+ip address 192.168.0.31 255.255.255.0
+exit
+
+-- Default route (VOSS syntax — needs weight + enable) --
+ip route 0.0.0.0/0 192.168.0.1 weight 1
+ip route 0.0.0.0/0 192.168.0.1 enable
+
+-- DNS --
+ip name-server primary 8.8.8.8
+
+-- Add Port 1 to VLAN 1 (for HomeModem connection) --
+vlan members add 1 1/1     ← warning: Auto-Sense disabled on this port, expected
+
+save config
+
+-- At end of session (troubleshooting DHCP attempt) --
+interface vlan 1
+no ip address 192.168.0.31   ← static IP removed, NEEDS RESTORE before wipe</pre>
+    </div>
+
+    <div class="card">
+      <h3>VOSS ip route Syntax (learned the hard way)</h3>
+<pre>-- WRONG (Cisco-style) --
+ip route 0.0.0.0 0.0.0.0 192.168.0.1
+
+-- WRONG (missing enable) --
+ip route 0.0.0.0/0 192.168.0.1
+
+-- CORRECT --
+ip route 0.0.0.0/0 192.168.0.1 weight 1
+ip route 0.0.0.0/0 192.168.0.1 enable</pre>
+    </div>
+
+    <div class="card">
+      <h3>show vlan members Output</h3>
+<pre>VLAN 1    → 1/1 (added manually, our HomeModem connection)
+VLAN 4048 → 1/3, 1/10 (auto-sense put AP2 + SW1 here — DO NOT touch)
+VLAN 4051 → empty (B-VLAN for SPB, pre-created by VOSS)
+VLAN 4052 → empty (B-VLAN for SPB, pre-created by VOSS)</pre>
+      <div class="alert alert-yellow">VOSS does NOT put ports in VLAN 1 by default. Must add explicitly. This is different from EXOS.</div>
+    </div>
+
+    <div class="card">
+      <h3>show ip interface (confirmed UP)</h3>
+<pre>INTERFACE    IP               NET              ADMIN   OPER   VLAN
+Vlan1        192.168.0.31     255.255.255.0    enable  up     1</pre>
+      <p>Internet confirmed: <code>ping 192.168.0.1</code> alive, <code>ping 8.8.8.8</code> alive, traceroute to internet working.</p>
+    </div>
+  </section>
+
+  <!-- XIQ ISSUE -->
+  <section id="xiq-issue">
+    <h2>XIQ DNS Issue — Root Cause Analysis</h2>
+
+    <div class="alert alert-red">IQAgent could not resolve hac.extremecloudiq.com despite ip name-server primary 8.8.8.8 being configured. 0 DNS requests ever sent.</div>
+
+    <div class="card">
+      <h3>What Happened</h3>
+      <ul>
+        <li>VOSS booted → cloud agent tried ZTP+ → failed (no DNS at that point — correct)</li>
+        <li>We configured static IP + DNS → restarted IQAgent</li>
+        <li>IQAgent still showed "DNS Unable to resolve [hac.extremecloudiq.com]"</li>
+        <li><code>show ip dns</code> → Status: Inactive, Total requests: 0</li>
+        <li>Tried direct IP (34.253.190.222) → HTTPS connection failed: "Unable to get management IP"</li>
+        <li>Root cause: TLS cert is issued for hostname, not IP. Connection fails at handshake.</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h3>Root Cause</h3>
+      <p>The VOSS <code>ip name-server primary 8.8.8.8</code> CLI command configures DNS for the VOSS management plane, but the IQAgent (HiveAgent) runs as a Linux-level process and likely reads <code>/etc/resolv.conf</code> — which is only populated by DHCP at boot, not by the CLI command.</p>
+      <br>
+      <p>When ZTP+ gets DHCP at boot, the DHCP lease includes DNS servers which go into <code>/etc/resolv.conf</code>. With a manual static IP, no DHCP lease = no <code>/etc/resolv.conf</code> = IQAgent can't resolve hostnames.</p>
+    </div>
+
+    <div class="card">
+      <h3>Things Tried (all failed)</h3>
+<pre>iqagent server hac.extremecloudiq.com   ← DNS still fails
+iqagent server 34.253.190.222           ← TLS cert mismatch
+no ip address + ip address dhcp         ← VOSS VLAN interface doesn't support DHCP client
+bash / debug bash enable                ← not accessible from standard CLI</pre>
+    </div>
+
+    <div class="card">
+      <h3>XIQ Inventory State at EOD</h3>
+      <p>SW2 still showing as "Switch Engine 5320-16P-2MXT-2X" / 33.5.2.118 / 192.168.0.11 in XIQ — stale cache. "Device Update Failed" because XIQ pushed EXOS policy to VOSS device.</p>
+    </div>
+  </section>
+
+  <!-- TOMORROW -->
+  <section id="tomorrow">
+    <h2>Tomorrow — Fresh Start Plan</h2>
+
+    <div class="alert alert-blue">User decision: wipe SW2 completely and start clean. Correct call — the manual bootstrap created a messy state.</div>
+
+    <div class="card">
+      <h3>Step 1 — Wipe SW2 (VOSS factory reset)</h3>
+<pre>-- From VOSS CLI --
+enable
+delete /intflash/config.cfg
+reload</pre>
+      <div class="alert alert-red">VOSS reset = <code>delete /intflash/config.cfg</code> — NOT <code>unconfigure switch all</code> (that's EXOS). Don't confuse them.</div>
+      <p style="margin-top: 8px;">After reload: SW2 boots clean. rwa/rwa default restored.</p>
+    </div>
+
+    <div class="card">
+      <h3>Step 2 — Pre-Wire BEFORE Boot</h3>
+      <p>Before powering on SW2, connect <strong>Port 1 to HomeModem LAN port</strong>. This ensures DHCP runs at boot and ZTP+ gets DNS automatically from HomeModem's DHCP pool.</p>
+      <div class="alert alert-green">HomeModem DHCP gives: IP + subnet + gateway + DNS. ZTP+ uses that DNS to resolve hac.extremecloudiq.com. No manual ip name-server needed.</div>
+    </div>
+
+    <div class="card">
+      <h3>Step 3 — Let ZTP+ Do the Work</h3>
+      <p>SW2 boots → ZTP+ starts → DHCP on Port 1 → gets IP from HomeModem → DNS resolves XIQ → cloud agent connects → SW2 appears in XIQ Inbox as Fabric Engine device.</p>
+      <br>
+      <p><strong>In XIQ:</strong> Accept device from Inbox → assign a VOSS/Fabric Engine network policy → push IS-IS + SPB + Nickname 0.00.02 + VLANs from XIQ.</p>
+      <div class="alert alert-yellow">Delete the old EXOS SW2 entry from XIQ inventory BEFORE boot so it comes in clean.</div>
+    </div>
+
+    <div class="card">
+      <h3>Step 4 — After XIQ Connects, Set Static IP</h3>
+      <p>Once XIQ is managing SW2, configure a static management IP (192.168.0.31) via XIQ device template. Then Port 1 can be reconfigured as the Transit Port to IPE (10.0.1.1/30).</p>
+    </div>
+
+    <div class="card">
+      <h3>Step 5 — Get RDC Tunnel Parameters (CRITICAL BLOCKER)</h3>
+      <p>Before IPE can be configured, need from Extreme Networks RDC team:</p>
+      <table>
+        <tr><th>Parameter</th><th>Status</th></tr>
+        <tr><td>RDC IPE public IP or FQDN</td><td>NEEDED</td></tr>
+        <tr><td>FE-Tunnel pre-shared key (PSK)</td><td>NEEDED</td></tr>
+        <tr><td>I-SIDs expected at RDC</td><td>NEEDED</td></tr>
+        <tr><td>B-VLAN IDs used at RDC</td><td>NEEDED</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <!-- VOSS CLI REFERENCE -->
+  <section id="voss-ref">
+    <h2>VOSS CLI Reference (Learned Today)</h2>
+
+    <div class="card">
+      <h3>Navigation</h3>
+<pre>enable                    → privileged mode  (prompt: #)
+configure terminal        → config mode      (prompt: (config)#)
+application               → app sub-mode     (prompt: (config-app)#)
+interface vlan 1          → VLAN interface   (prompt: (config-if)#)
+exit / end                → back up one / back to exec</pre>
+    </div>
+
+    <div class="card">
+      <h3>IP / Routing</h3>
+<pre>ip address 192.168.0.31 255.255.255.0     ← on interface vlan context
+no ip address 192.168.0.31               ← remove (no mask needed)
+ip route 0.0.0.0/0 192.168.0.1 weight 1  ← create static route (CIDR, weight required)
+ip route 0.0.0.0/0 192.168.0.1 enable    ← activate route (separate command)
+ip name-server primary 8.8.8.8           ← DNS (note: does NOT feed IQAgent)</pre>
+    </div>
+
+    <div class="card">
+      <h3>VLAN</h3>
+<pre>show vlan members                         ← see all VLAN port assignments
+vlan members add 1 1/1                    ← add port 1/1 to VLAN 1 (auto-sense warning OK)
+vlan members remove 1 1/1                 ← remove port from VLAN</pre>
+    </div>
+
+    <div class="card">
+      <h3>IQAgent (Cloud / XIQ)</h3>
+<pre>application                              ← enter application sub-mode
+  iqagent enable                         ← start cloud agent
+  no iqagent enable                      ← stop cloud agent
+  iqagent server hac.extremecloudiq.com  ← set XIQ server (must disable first)
+  iqagent server &lt;IP&gt;                    ← fails TLS if cert hostname mismatch
+  iqagent ?                              → only: enable / proxy / server</pre>
+    </div>
+
+    <div class="card">
+      <h3>Show Commands</h3>
+<pre>show ip interface                        ← all L3 interfaces + status
+show vlan members                        ← VLAN port membership
+show ip vrf                              ← VRF table (only GlobalRouter on 5320)
+show ip dns                              ← DNS server status + request count
+show log file | include CLOUD            ← filter log for cloud agent entries
+show running-config | include name-server  ← check DNS config saved</pre>
+    </div>
+
+    <div class="card">
+      <h3>System</h3>
+<pre>sys name SW2-VOSS                        ← set hostname (in global config)
+save config                              ← save to /intflash/config.cfg
+delete /intflash/config.cfg              ← VOSS factory reset (then reload)
+reload                                   ← reboot</pre>
+    </div>
+
+    <div class="card">
+      <h3>VOSS vs EXOS Quick Diff</h3>
+      <table>
+        <tr><th>Topic</th><th>EXOS</th><th>VOSS</th></tr>
+        <tr><td>Factory reset</td><td>unconfigure switch all</td><td>delete /intflash/config.cfg</td></tr>
+        <tr><td>All ports default VLAN</td><td>VLAN 1 by default</td><td>No default — must add manually</td></tr>
+        <tr><td>Static route</td><td>configure iproute add default &lt;gw&gt;</td><td>ip route 0.0.0.0/0 &lt;gw&gt; weight 1 + enable</td></tr>
+        <tr><td>Hostname</td><td>configure snmp sysName &lt;name&gt;</td><td>sys name &lt;name&gt;</td></tr>
+        <tr><td>DHCP client on VLAN</td><td>Supported</td><td>NOT supported (VLAN interface)</td></tr>
+        <tr><td>CLI mode levels</td><td>Flat</td><td>enable → config → sub-modes</td></tr>
+        <tr><td>Default login</td><td>admin / (blank)</td><td>rwa / rwa</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <!-- OPEN QUESTIONS -->
+  <section id="open-q">
+    <h2>Open Questions — Architecture</h2>
+    <table>
+      <tr><th>#</th><th>Question</th><th>Status</th></tr>
+      <tr><td>Q1</td><td>What is the IPE?</td><td><span class="badge badge-green">ANSWERED</span> Integrated Application Hosting Edge — physical Extreme Networks appliance</td></tr>
+      <tr><td>Q2</td><td>RDC connectivity protocol (IPsec / FE / SPB / GRE)?</td><td><span class="badge badge-yellow">OPEN</span> RDC side pre-configured — need their tunnel params</td></tr>
+      <tr><td>Q3</td><td>Service offerings at RDC Raleigh?</td><td><span class="badge badge-yellow">OPEN</span></td></tr>
+      <tr><td>Q4</td><td>VOSS upgrade path for 5320?</td><td><span class="badge badge-green">ANSWERED</span> XIQ push, 9.3.2.0.GA — no console/bootloader needed</td></tr>
+      <tr><td>Q5</td><td>Fabric architecture scope? (full SPB vs simple VOSS)</td><td><span class="badge badge-yellow">OPEN</span></td></tr>
+      <tr><td>Q6</td><td>New IP addressing scheme for Path B?</td><td><span class="badge badge-green">ANSWERED</span> See Architecture section</td></tr>
+      <tr><td>Q7</td><td>XIQ or XMC for managing VOSS SW2?</td><td><span class="badge badge-blue">DECIDED</span> XIQ — via ZTP+ fresh onboard tomorrow</td></tr>
+    </table>
+  </section>
+
+  <!-- PARKED ITEMS -->
+  <section id="parked">
+    <h2>5 Parked Items (Existing 5320 Work)</h2>
+    <div class="alert alert-yellow">These are unrelated to the new VOSS/IPE architecture. Parked until after Path B is live.</div>
+    <div class="card">
+      <div class="todo-item">
+        <div class="todo-num">1</div>
+        <div class="todo-body">
+          <h4>iPhone Test — VLAN 40/70 SSIDs</h4>
+          <p>Connect iPhone to VLAN 40 and VLAN 70 SSIDs. Verify DHCP from correct pool (10.40.x.x / 10.70.x.x) + internet reachable. SW1/SW2 EXOS path (Path A) only.</p>
+        </div>
+      </div>
+      <div class="todo-item">
+        <div class="todo-num">2</div>
+        <div class="todo-body">
+          <h4>EOD HTML Apr 20 — session_summary_20260420.html</h4>
+          <p>Create and publish: VLAN correction, XIQ policy KK_SW_Apr20_5320, SW1/SW2 VLAN 40+70, Quantum Fiber static routes, HTML fix. Commit to main branch.</p>
+        </div>
+      </div>
+      <div class="todo-item">
+        <div class="todo-num">3</div>
+        <div class="todo-body">
+          <h4>Railway E2E Test</h4>
+          <p>bridge.py → Railway WebSocket → web UI with live 5320. End-to-end connectivity test. URL: https://5320-onboarding-production.up.railway.app</p>
+        </div>
+      </div>
+      <div class="todo-item">
+        <div class="todo-num">4</div>
+        <div class="todo-body">
+          <h4>Sprint 2 — VLAN 10 Management</h4>
+          <p>Plug laptop into SW_Mgmt_VLAN10 port, static IP 10.10.0.x, SSH to 10.10.0.1 (SW1) and 10.10.0.2 (SW2 EXOS). EXOS path only.</p>
+        </div>
+      </div>
+      <div class="todo-item">
+        <div class="todo-num">5</div>
+        <div class="todo-body">
+          <h4>BRIDGE_TOKEN Rotation</h4>
+          <p>Current token: <code>5320bridge</code> (cleartext). Update Railway environment variable + docs + #me fragment on GitHub Pages. Security item.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ARCHITECTURE -->
+  <section id="arch">
+    <h2>Architecture Reference</h2>
+    <div class="card">
+      <h3>Two-Path Topology</h3>
+<pre>PATH A (unchanged — EXOS)          PATH B (new — VOSS/IPE)
+──────────────────────             ──────────────────────────────────
+AP1 (192.168.0.12)                 AP2 (192.168.0.25)
+    ↓                                  ↓  [Fabric Attach — auto]
+SW1 (192.168.0.28) EXOS            SW2-VOSS (192.168.0.31)
+    ↓                                  ↓ Port 1 (transit 10.0.1.1/30)
+HomeModem (192.168.0.1)            IPE (LAN 10.0.1.2 / WAN 192.168.0.30)
+    ↓                                  ↓
+Internet                           HomeModem (192.168.0.1)
+                                       ↓
+                                   Internet → FE-Tunnel → RDC Raleigh</pre>
+    </div>
+    <div class="card">
+      <h3>IP Address Plan</h3>
+      <table>
+        <tr><th>Device / Interface</th><th>IP</th><th>Note</th></tr>
+        <tr><td>HomeModem</td><td>192.168.0.1</td><td>Shared uplink gateway</td></tr>
+        <tr><td>SW1 (EXOS)</td><td>192.168.0.28</td><td>Path A unchanged</td></tr>
+        <tr><td>SW2 Management (VOSS)</td><td>192.168.0.31</td><td>VLAN 1 SVI</td></tr>
+        <tr><td>IPE WAN port</td><td>192.168.0.30</td><td>On HomeModem subnet</td></tr>
+        <tr><td>SW2 Port 1 (Transit)</td><td>10.0.1.1/30</td><td>Point-to-point to IPE</td></tr>
+        <tr><td>IPE LAN port</td><td>10.0.1.2/30</td><td>Point-to-point from SW2</td></tr>
+        <tr><td>VOSS client subnet</td><td>10.90.0.0/24</td><td>AP2 users on Path B</td></tr>
+      </table>
+    </div>
+    <div class="card">
+      <h3>SW2 Role Boundary (never confuse)</h3>
+      <table>
+        <tr><th>SW2 (VOSS)</th><th>IPE (Physical Box)</th></tr>
+        <tr><td>IS-IS, Nickname 0.00.02, I-SIDs, Fabric Attach</td><td>FE-Tunnel (Fabric Extend) configured here</td></tr>
+        <tr><td>Transit Port (Port 1) → cable to IPE</td><td>IAH (application hosting) runs on IPE</td></tr>
+        <tr><td>Static route → IPE as next-hop</td><td>IPsec encapsulation of I-SIDs</td></tr>
+        <tr><td>NO tunnel, NO IAH config</td><td>WAN → HomeModem → FE tunnel → RDC</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <!-- HARDWARE -->
+  <section id="hw">
+    <h2>Hardware Reference</h2>
+    <div class="two-col">
+      <div class="card">
+        <h3>SW2 — Target</h3>
+        <table>
+          <tr><td>Model</td><td>5320-16P-2MXT-2X</td></tr>
+          <tr><td>Serial</td><td>FJ012544G-00483</td></tr>
+          <tr><td>MAC</td><td>D8:E0:16:3B:54:00</td></tr>
+          <tr><td>OS (now)</td><td>VOSS 9.3.2.0.GA</td></tr>
+          <tr><td>Mgmt IP</td><td>192.168.0.31 (target)</td></tr>
+          <tr><td>Console</td><td>/dev/cu.usbserial-A9VKJO11 115200</td></tr>
+          <tr><td>Login</td><td>rwa / &lt;new password&gt;</td></tr>
+          <tr><td>VOSS reset</td><td>delete /intflash/config.cfg + reload</td></tr>
+        </table>
+      </div>
+      <div class="card">
+        <h3>SW1 — Unchanged</h3>
+        <table>
+          <tr><td>Model</td><td>5320-16P-2MXT-2X</td></tr>
+          <tr><td>Serial</td><td>FJ012544G-00233</td></tr>
+          <tr><td>OS</td><td>EXOS SwitchEngine 33.5.2b118</td></tr>
+          <tr><td>Mgmt IP</td><td>192.168.0.28</td></tr>
+          <tr><td>Login</td><td>admin / Extreme01!!</td></tr>
+          <tr><td>XIQ Policy</td><td>KK_SW_5320_Apr21_KarlLab</td></tr>
+        </table>
+      </div>
+      <div class="card">
+        <h3>AP2 — Path B</h3>
+        <table>
+          <tr><td>Model</td><td>AP3000</td></tr>
+          <tr><td>Serial</td><td>HA012519Y-11587</td></tr>
+          <tr><td>IP</td><td>192.168.0.25</td></tr>
+          <tr><td>Connected to</td><td>SW2 Port 3</td></tr>
+          <tr><td>FA status</td><td>Auto-detected at boot (clientWapType1)</td></tr>
+        </table>
+      </div>
+      <div class="card">
+        <h3>IPE — Pending</h3>
+        <table>
+          <tr><td>Type</td><td>Integrated Application Hosting Edge</td></tr>
+          <tr><td>Model</td><td>TBD</td></tr>
+          <tr><td>LAN IP</td><td>10.0.1.2/30</td></tr>
+          <tr><td>WAN IP</td><td>192.168.0.30/24</td></tr>
+          <tr><td>Status</td><td>Physical unit not yet in hand</td></tr>
+        </table>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<script>
+  const sections = document.querySelectorAll('section[id]');
+  const links = document.querySelectorAll('nav ul li a');
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        links.forEach(l => l.classList.remove('active'));
+        const active = document.querySelector(`nav a[href="#${e.target.id}"]`);
+        if (active) active.classList.add('active');
+      }
+    });
+  }, { threshold: 0.2 });
+  sections.forEach(s => observer.observe(s));
+</script>
+</body>
+</html>
