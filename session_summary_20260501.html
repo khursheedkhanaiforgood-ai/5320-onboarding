@@ -173,99 +173,123 @@ I-SID 16777001  ELAN  N/A        No ports               Origin: C
   <section id="corp-guest">
     <h2>Corp / Guest Service Plan</h2>
     <div class="card">
-      <h3>Service Design</h3>
+      <h3>Service Design — CONFIRMED</h3>
       <table>
-        <tr><th>Service</th><th>VLAN</th><th>I-SID</th><th>Gateway</th><th>DHCP Pool</th></tr>
-        <tr><td>Corp</td><td>50</td><td>100050</td><td>10.50.0.1/24</td><td>10.50.0.100–200</td></tr>
-        <tr><td>Guest</td><td>60</td><td>100060</td><td>10.60.0.1/24</td><td>10.60.0.100–200</td></tr>
+        <tr><th>Service</th><th>VLAN</th><th>Name</th><th>I-SID</th><th>Gateway</th><th>DHCP Pool</th></tr>
+        <tr><td>Corp</td><td>70</td><td>Corp_New</td><td>100070</td><td>10.70.0.1/24</td><td>10.70.0.100–200</td></tr>
+        <tr><td>Guest</td><td>80</td><td>Guest_New</td><td>100080</td><td>10.80.0.1/24</td><td>10.80.0.100–200</td></tr>
       </table>
-      <p style="margin-top:8px; font-size:13px; color: var(--muted);">Note: Gateway IPs not confirmed yet — choose at next session based on existing subnet plan.</p>
     </div>
     <div class="card">
-      <h3>CLI Block — READY TO RUN (Corp/Guest only)</h3>
-<pre># Create VLANs
-vlan create 50 name "Corp" type port-mstprstp 0
-vlan create 60 name "Guest" type port-mstprstp 0
+      <h3>Full CLI Block — READY TO RUN MONDAY (Steps 1–4)</h3>
+<pre># Step 1: Lock Area Address
+configure terminal
+router isis
+  manual-area 49.b0b1
+exit
 
-# Map to global Fabric I-SIDs (VLAN + 100,000 convention)
-vlan i-sid 50 100050
-vlan i-sid 60 100060
+# Step 2: Service VLANs + I-SID Mapping
+vlan create 70 name "Corp_New" type port-mstprstp 0
+vlan create 80 name "Guest_New" type port-mstprstp 0
+vlan i-sid 70 100070
+vlan i-sid 80 100080
 
-# AP port — FA auto-sense (already active, locking in)
+# Step 3: DHCP (confirmed VOSS syntax)
+ip dhcp-server subnet 10.70.0.0/24
+  pool 10.70.0.100 10.70.0.200
+  router 10.70.0.1
+  domain-name-servers 8.8.8.8
+exit
+ip dhcp-server subnet 10.80.0.0/24
+  pool 10.80.0.100 10.80.0.200
+  router 10.80.0.1
+  domain-name-servers 8.8.8.8
+exit
+ip dhcp-server enable
+
+# Step 4: Fabric Attach on Port 1/3
 interface gigabitEthernet 1/3
   auto-sense enable
   fa enable
   no shutdown
 exit
-
 save config</pre>
-      <div class="alert alert-yellow">Do NOT manually add VLAN 50 or 60 to port 1/3. FA does this automatically when AP2 sends its SSID request to SW2.</div>
+      <div class="alert alert-yellow">Do NOT manually add VLAN 70 or 80 to port 1/3. FA does this automatically when AP2 sends its SSID request to SW2.</div>
     </div>
     <div class="card">
-      <h3>VIQ Policy — What to Configure (Next Session)</h3>
-      <ul>
-        <li>Configure &gt; Wireless Networks → Create SSID "Corp" → VLAN 50</li>
-        <li>Configure &gt; Wireless Networks → Create SSID "Guest" → VLAN 60</li>
-        <li>Network Policy → Switching → Fabric Attach mappings:
-          <ul>
-            <li>VLAN 50 → I-SID 100050</li>
-            <li>VLAN 60 → I-SID 100060</li>
-          </ul>
-        </li>
-        <li>Port 1/3 on SW2: assign "Auto-Sense / Universal" profile</li>
-        <li>Push policy to AP2</li>
-      </ul>
+      <h3>DHCP Syntax — Confirmed VOSS Keywords</h3>
+      <table>
+        <tr><th>NotebookLLM (WRONG)</th><th>Actual VOSS</th></tr>
+        <tr><td><code>ip dhcp-server pool Corp_Pool</code></td><td><code>ip dhcp-server subnet 10.70.0.0/24</code></td></tr>
+        <tr><td><code>range 10.70.0.100 10.70.0.200</code></td><td><code>pool 10.70.0.100 10.70.0.200</code></td></tr>
+        <tr><td><code>default-router 10.70.0.1</code></td><td><code>router 10.70.0.1</code></td></tr>
+        <tr><td><code>interface vlan 70 → ip dhcp-server enable</code></td><td>Not valid — global enable only</td></tr>
+        <tr><td><code>domain-name-servers 8.8.8.8</code></td><td><code>domain-name-servers 8.8.8.8</code> ✅</td></tr>
+      </table>
     </div>
     <div class="card">
-      <h3>Verification Command After Push</h3>
-<pre>show fa assignment</pre>
-      <p>Expected result: Port 1/3 listed as <strong>Active / Dynamic</strong> for I-SIDs 100050 and 100060. This confirms FA auto-provisioning worked.</p>
+      <h3>Step 5: IPE Transit — PENDING (Monday)</h3>
+      <div class="alert alert-red">Do NOT run Step 5 yet. Three unknowns remain: (1) IPE lan1 IP unknown — run <code>show ip arp vrf GlobalRouter</code> to discover. (2) VLAN 100 may conflict with VIQ auto-sense VLAN 4047 on Port 1/1. (3) ip route syntax must be CIDR + two steps.</div>
+<pre># Discover IPE lan1 IP first:
+show ip arp vrf GlobalRouter
+show ip interface
+
+# Then correct transit block:
+ip route 0.0.0.0/0 &lt;IPE_lan1_IP&gt; weight 1
+ip route 0.0.0.0/0 &lt;IPE_lan1_IP&gt; enable</pre>
+    </div>
+    <div class="card">
+      <h3>Verification After Steps 1–4</h3>
+<pre>show fa assignment       ← Port 1/3 Active/Dynamic for I-SIDs 100070/100080
+show i-sid               ← VLANs 70/80 should appear with fabric ports
+show vlan members        ← VLAN 70/80 created
+show ip dhcp-server      ← subnets active</pre>
     </div>
   </section>
 
   <section id="next">
-    <h2>Work To Do — Next Session</h2>
+    <h2>Work To Do — Monday</h2>
     <div class="card">
       <div class="todo-item">
         <div class="todo-num">1</div>
         <div class="todo-body">
-          <h4>Run Corp/Guest CLI block on KhKLab-SW-01 <span class="badge badge-green" style="margin-left:8px;">NICKNAME DONE</span></h4>
-          <p>vlan create 50/60 → vlan i-sid 100050/100060 → fa enable on port 1/3 → save config. Fabric identity (nickname 0.00.02) already confirmed.</p>
+          <h4>Run Steps 1–4 CLI block <span class="badge badge-green" style="margin-left:8px;">READY</span></h4>
+          <p>manual-area 49.b0b1 → VLAN 70/80 + I-SID 100070/100080 → DHCP subnets (confirmed VOSS syntax) → FA enable on Port 1/3 → save config. Full block in Corp/Guest section above.</p>
         </div>
       </div>
       <div class="todo-item">
         <div class="todo-num">2</div>
         <div class="todo-body">
-          <h4>Build VIQ Network Policy with SSID Corp/Guest → VLAN 50/60 → I-SID 100050/100060</h4>
-          <p>Create SSIDs, FA mappings, assign to AP2. Push policy.</p>
+          <h4>Discover IPE lan1 IP</h4>
+          <p><code>show ip arp vrf GlobalRouter</code> — ARP entry on VLAN 4047 / Port 1/1 = IPE lan1 IP = default route next-hop.</p>
         </div>
       </div>
       <div class="todo-item">
         <div class="todo-num">3</div>
         <div class="todo-body">
-          <h4>Verify with: show fa assignment</h4>
-          <p>Port 1/3 must show Active/Dynamic for both I-SIDs. Then verify: show i-sid (ports should appear under 100050/100060).</p>
+          <h4>Run Step 5: IPE default route (two-step VOSS syntax)</h4>
+          <p><code>ip route 0.0.0.0/0 &lt;IPE_lan1_IP&gt; weight 1</code> then <code>ip route 0.0.0.0/0 &lt;IPE_lan1_IP&gt; enable</code>. Do NOT create VLAN 100 — VLAN 4047 already on Port 1/1.</p>
         </div>
       </div>
       <div class="todo-item">
         <div class="todo-num">4</div>
         <div class="todo-body">
-          <h4>Resolve Port 1/1 conflict before IPE transit config</h4>
-          <p>VIQ put VLAN 4047 (SD-WAN) on Port 1/1. NotebookLLM proposes VLAN 100 (IPE_Transit) also on 1/1. Verify what VIQ already configured before running transit block. Run: show interfaces gigabitEthernet 1/1</p>
+          <h4>Build VIQ Network Policy: Corp/Guest SSIDs → VLAN 70/80 → I-SID 100070/100080</h4>
+          <p>Create SSIDs, FA mappings, assign to AP2. Push policy to trigger FA TLV handshake on Port 1/3.</p>
         </div>
       </div>
       <div class="todo-item">
         <div class="todo-num">5</div>
         <div class="todo-body">
-          <h4>Configure IPE transit path + IP Shortcuts</h4>
-          <p>Default route via IPE LAN IP. Enable ip-shortcut under router isis to make SW2 the fabric internet exit. Correct VOSS syntax: two-step ip route (weight 1, then enable).</p>
+          <h4>Verify: show fa assignment + show i-sid</h4>
+          <p>Port 1/3 must show Active/Dynamic for I-SIDs 100070/100080. VLAN 70/80 ports should appear under show i-sid.</p>
         </div>
       </div>
       <div class="todo-item">
         <div class="todo-num">6</div>
         <div class="todo-body">
-          <h4>End-to-end test: Corp/Guest client → internet via IPE</h4>
-          <p>Connect to Corp SSID → DHCP from 10.50.0.x pool → ping 8.8.8.8 → traceroute confirms path through IPE.</p>
+          <h4>E2E test: iPhone → Corp SSID → DHCP 10.70.0.x → ping 8.8.8.8 via IPE</h4>
+          <p>Traceroute should confirm path through IPE wan2 → QuantumFiber → internet.</p>
         </div>
       </div>
     </div>
@@ -301,6 +325,27 @@ show i-sid
 show fa assignment         ← KEY: shows dynamic FA port bindings
 show ip interface
 save config</pre>
+    </div>
+    <div class="card">
+      <h3>DHCP Server (confirmed VOSS syntax)</h3>
+<pre>ip dhcp-server subnet 10.70.0.0/24    ← enters (config-dhcp)# context
+  pool 10.70.0.100 10.70.0.200        ← range (NOT "range" keyword)
+  router 10.70.0.1                    ← default-gw (NOT "default-router")
+  domain-name-servers 8.8.8.8         ← confirmed ✅
+exit
+ip dhcp-server enable                 ← global enable</pre>
+    </div>
+    <div class="card">
+      <h3>SPB Nickname (confirmed full procedure)</h3>
+<pre>configure terminal
+no router isis enable         ← MUST disable IS-IS first (runtime change not allowed)
+router isis
+spbm 1 nick-name 0.00.02     ← hyphenated; inside router isis context
+exit
+router isis enable
+exit
+save config
+show isis spbm                ← verify NICK NAME column</pre>
     </div>
     <div class="card">
       <h3>Critical Warnings</h3>
