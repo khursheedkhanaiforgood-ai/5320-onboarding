@@ -1,0 +1,1384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EOD Blueprint — May 4 2026 | EAPOL & Packet Forensics</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0e17;
+    --surface: #111827;
+    --surface2: #1a2235;
+    --border: #1e2d45;
+    --accent: #00d4ff;
+    --accent2: #ff6b35;
+    --accent3: #39ff14;
+    --accent4: #ffd700;
+    --danger: #ff3b5c;
+    --text: #e2e8f0;
+    --muted: #64748b;
+    --mono: 'Space Mono', monospace;
+    --sans: 'Syne', sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    overflow-x: hidden;
+  }
+
+  /* SCAN LINE EFFECT */
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,212,255,0.01) 2px,
+      rgba(0,212,255,0.01) 4px
+    );
+    pointer-events: none;
+    z-index: 999;
+  }
+
+  /* HEADER */
+  .header {
+    border-bottom: 1px solid var(--border);
+    padding: 2rem 3rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .header::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2), var(--accent3));
+  }
+
+  .header-left h1 {
+    font-size: 2.4rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1;
+    background: linear-gradient(135deg, var(--accent), #7dd3fc);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .header-left .subtitle {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    color: var(--accent2);
+    margin-top: 0.5rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+  }
+
+  .header-right {
+    text-align: right;
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    color: var(--muted);
+    line-height: 1.8;
+  }
+
+  .header-right .date {
+    color: var(--accent3);
+    font-size: 0.85rem;
+    font-weight: 700;
+  }
+
+  /* STAT BAR */
+  .stat-bar {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .stat {
+    padding: 1.2rem 1.5rem;
+    border-right: 1px solid var(--border);
+    position: relative;
+  }
+
+  .stat:last-child { border-right: none; }
+
+  .stat-label {
+    font-family: var(--mono);
+    font-size: 0.6rem;
+    color: var(--muted);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 0.4rem;
+  }
+
+  .stat-value {
+    font-family: var(--mono);
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--accent);
+  }
+
+  .stat-value.danger { color: var(--danger); }
+  .stat-value.warn { color: var(--accent2); }
+  .stat-value.ok { color: var(--accent3); }
+  .stat-value.gold { color: var(--accent4); }
+
+  /* MAIN LAYOUT */
+  .main {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    min-height: calc(100vh - 200px);
+  }
+
+  .panel {
+    border-right: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .panel:nth-child(even) { border-right: none; }
+
+  .panel-header {
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    background: var(--surface);
+  }
+
+  .panel-num {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    color: var(--muted);
+    background: var(--border);
+    padding: 0.2rem 0.5rem;
+    border-radius: 2px;
+  }
+
+  .panel-title {
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .panel-body { padding: 1.5rem; }
+
+  /* KEY HIERARCHY DIAGRAM */
+  .key-tree {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    line-height: 2;
+  }
+
+  .key-node {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.4rem 0.75rem;
+    border-radius: 4px;
+    margin: 0.2rem 0;
+    border-left: 3px solid transparent;
+  }
+
+  .key-node.root {
+    background: rgba(0,212,255,0.08);
+    border-left-color: var(--accent);
+    color: var(--accent);
+    font-weight: 700;
+  }
+
+  .key-node.mid {
+    background: rgba(255,107,53,0.08);
+    border-left-color: var(--accent2);
+    color: var(--accent2);
+    margin-left: 1.5rem;
+  }
+
+  .key-node.leaf {
+    background: rgba(57,255,20,0.06);
+    border-left-color: var(--accent3);
+    color: var(--accent3);
+    margin-left: 3rem;
+    font-size: 0.65rem;
+  }
+
+  .key-node.leaf.gold {
+    border-left-color: var(--accent4);
+    color: var(--accent4);
+    background: rgba(255,215,0,0.06);
+  }
+
+  .key-connector {
+    color: var(--muted);
+    margin-left: 0.75rem;
+    font-size: 0.65rem;
+  }
+
+  /* HANDSHAKE TIMELINE */
+  .handshake-timeline { position: relative; }
+
+  .hs-msg {
+    display: grid;
+    grid-template-columns: 80px 1fr 80px;
+    align-items: center;
+    margin: 0.75rem 0;
+    gap: 0.5rem;
+  }
+
+  .hs-entity {
+    font-family: var(--mono);
+    font-size: 0.6rem;
+    font-weight: 700;
+    text-align: center;
+    padding: 0.3rem;
+    border-radius: 3px;
+  }
+
+  .hs-entity.ap {
+    background: rgba(0,212,255,0.15);
+    color: var(--accent);
+    border: 1px solid rgba(0,212,255,0.3);
+  }
+
+  .hs-entity.client {
+    background: rgba(57,255,20,0.1);
+    color: var(--accent3);
+    border: 1px solid rgba(57,255,20,0.3);
+  }
+
+  .hs-arrow {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.2rem;
+  }
+
+  .hs-line {
+    height: 1px;
+    background: var(--border);
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+
+  .hs-label {
+    font-family: var(--mono);
+    font-size: 0.58rem;
+    color: var(--muted);
+    text-align: center;
+    line-height: 1.3;
+  }
+
+  .hs-label .msg-num {
+    color: var(--accent4);
+    font-weight: 700;
+  }
+
+  .hs-label .bits {
+    color: var(--accent2);
+    font-size: 0.52rem;
+  }
+
+  .arrow-right { color: var(--accent); font-size: 0.9rem; }
+  .arrow-left { color: var(--accent3); font-size: 0.9rem; }
+
+  /* FRAME ANATOMY */
+  .frame-box {
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+    margin: 0.75rem 0;
+    font-family: var(--mono);
+    font-size: 0.65rem;
+  }
+
+  .frame-title {
+    background: var(--surface2);
+    padding: 0.4rem 0.75rem;
+    color: var(--accent4);
+    font-weight: 700;
+    font-size: 0.6rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .frame-fields { display: flex; }
+
+  .frame-field {
+    flex: 1;
+    padding: 0.5rem 0.6rem;
+    border-right: 1px solid var(--border);
+    text-align: center;
+  }
+
+  .frame-field:last-child { border-right: none; }
+
+  .ff-label {
+    color: var(--muted);
+    font-size: 0.52rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 0.3rem;
+  }
+
+  .ff-value {
+    color: var(--accent);
+    font-size: 0.68rem;
+    font-weight: 700;
+  }
+
+  .ff-value.warn { color: var(--accent2); }
+  .ff-value.ok { color: var(--accent3); }
+  .ff-value.danger { color: var(--danger); }
+  .ff-value.gold { color: var(--accent4); }
+
+  /* FORENSIC EVIDENCE */
+  .evidence-block {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 1rem;
+    margin: 0.75rem 0;
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    line-height: 1.8;
+  }
+
+  .evidence-block .ev-title {
+    color: var(--danger);
+    font-weight: 700;
+    font-size: 0.6rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 0.6rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .ev-title::before {
+    content: '⚠';
+    font-size: 0.8rem;
+  }
+
+  .evidence-block .ev-line {
+    display: flex;
+    gap: 1rem;
+    padding: 0.2rem 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+  }
+
+  .ev-key { color: var(--muted); min-width: 140px; }
+  .ev-val { color: var(--text); }
+  .ev-val.bad { color: var(--danger); }
+  .ev-val.suspicious { color: var(--accent2); }
+
+  /* HEX DISPLAY */
+  .hex-block {
+    background: #050810;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 0.75rem;
+    font-family: var(--mono);
+    font-size: 0.62rem;
+    line-height: 1.7;
+    margin: 0.5rem 0;
+    overflow-x: auto;
+  }
+
+  .hex-offset { color: var(--muted); }
+  .hex-radiotap { color: #4a5568; }
+  .hex-fc { color: var(--accent4); font-weight: 700; }
+  .hex-dur { color: var(--danger); font-weight: 700; }
+  .hex-ra { color: var(--accent); }
+  .hex-ta { color: var(--accent3); }
+  .hex-comment { color: var(--accent2); font-style: italic; }
+
+  /* WPA COMPARISON */
+  .compare-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin: 0.75rem 0;
+  }
+
+  .compare-card {
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+
+  .compare-card-header {
+    padding: 0.6rem 1rem;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .compare-card.wpa2 .compare-card-header {
+    background: rgba(255,59,92,0.15);
+    color: var(--danger);
+    border-bottom: 1px solid rgba(255,59,92,0.3);
+  }
+
+  .compare-card.wpa3 .compare-card-header {
+    background: rgba(57,255,20,0.1);
+    color: var(--accent3);
+    border-bottom: 1px solid rgba(57,255,20,0.3);
+  }
+
+  .compare-card-body {
+    padding: 0.75rem 1rem;
+    font-family: var(--mono);
+    font-size: 0.62rem;
+    line-height: 1.9;
+  }
+
+  .compare-item {
+    display: flex;
+    gap: 0.5rem;
+    padding: 0.15rem 0;
+  }
+
+  .ci-icon { width: 14px; flex-shrink: 0; }
+  .ci-text { color: var(--muted); }
+  .ci-text strong { color: var(--text); }
+
+  /* COLLISION CHAIN */
+  .collision-chain {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    margin: 0.75rem 0;
+  }
+
+  .cc-step {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.5rem 0.75rem;
+    border-radius: 4px;
+    font-family: var(--mono);
+    font-size: 0.62rem;
+    border-left: 3px solid var(--border);
+  }
+
+  .cc-step.trigger { border-left-color: var(--danger); background: rgba(255,59,92,0.06); }
+  .cc-step.effect { border-left-color: var(--accent2); background: rgba(255,107,53,0.06); }
+  .cc-step.result { border-left-color: var(--accent4); background: rgba(255,215,0,0.06); }
+
+  .cc-num {
+    color: var(--muted);
+    min-width: 20px;
+    font-weight: 700;
+  }
+
+  .cc-desc { color: var(--text); line-height: 1.4; }
+  .cc-frame { color: var(--accent); }
+
+  /* MASTERY CHECKLIST */
+  .checklist {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    margin: 0.75rem 0;
+  }
+
+  .check-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 0.6rem 0.75rem;
+    border-radius: 4px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    font-size: 0.72rem;
+    line-height: 1.4;
+  }
+
+  .check-icon {
+    color: var(--accent3);
+    font-size: 0.8rem;
+    flex-shrink: 0;
+    margin-top: 0.1rem;
+  }
+
+  .check-text strong { color: var(--accent); }
+  .check-text { color: var(--muted); }
+
+  /* NEXT SESSION */
+  .next-items {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  .next-item {
+    display: flex;
+    gap: 0.75rem;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    font-size: 0.68rem;
+    align-items: flex-start;
+  }
+
+  .next-item .priority {
+    font-family: var(--mono);
+    font-size: 0.55rem;
+    font-weight: 700;
+    padding: 0.15rem 0.4rem;
+    border-radius: 2px;
+    flex-shrink: 0;
+    margin-top: 0.1rem;
+  }
+
+  .priority.p1 { background: rgba(255,59,92,0.2); color: var(--danger); }
+  .priority.p2 { background: rgba(255,107,53,0.2); color: var(--accent2); }
+  .priority.p3 { background: rgba(0,212,255,0.1); color: var(--accent); }
+
+  /* FULL WIDTH PANELS */
+  .full-width {
+    grid-column: 1 / -1;
+    border-right: none;
+  }
+
+  /* NAV TABLE */
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: var(--mono);
+    font-size: 0.62rem;
+  }
+
+  .data-table th {
+    background: var(--surface2);
+    padding: 0.5rem 0.75rem;
+    text-align: left;
+    color: var(--muted);
+    font-size: 0.58rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--border);
+    font-weight: 400;
+  }
+
+  .data-table td {
+    padding: 0.45rem 0.75rem;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    color: var(--text);
+  }
+
+  .data-table tr:hover td { background: rgba(255,255,255,0.02); }
+
+  .tag {
+    display: inline-block;
+    padding: 0.1rem 0.4rem;
+    border-radius: 2px;
+    font-size: 0.55rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .tag.rts { background: rgba(0,212,255,0.15); color: var(--accent); }
+  .tag.cts { background: rgba(57,255,20,0.1); color: var(--accent3); }
+  .tag.cts0 { background: rgba(255,59,92,0.15); color: var(--danger); }
+  .tag.data { background: rgba(255,215,0,0.1); color: var(--accent4); }
+  .tag.eapol { background: rgba(255,107,53,0.15); color: var(--accent2); }
+  .tag.mgmt { background: rgba(100,116,139,0.2); color: var(--muted); }
+
+  /* FOOTER */
+  .footer {
+    border-top: 1px solid var(--border);
+    padding: 1rem 3rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: var(--mono);
+    font-size: 0.62rem;
+    color: var(--muted);
+  }
+
+  .footer-sig { color: var(--accent3); }
+
+  /* PULSE ANIMATION */
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
+
+  .live-dot {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--danger);
+    animation: pulse 1.5s infinite;
+    margin-right: 0.4rem;
+  }
+
+  /* Section divider */
+  .section-divider {
+    grid-column: 1 / -1;
+    padding: 0.6rem 1.5rem;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    border-top: 1px solid var(--border);
+    font-family: var(--mono);
+    font-size: 0.6rem;
+    color: var(--accent2);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-left">
+    <h1>EOD Blueprint</h1>
+    <div class="subtitle">802.11 EAPOL 4-Way Handshake & Pcap Forensics — Horizon Lab</div>
+  </div>
+  <div class="header-right">
+    <div class="date">May 04, 2026</div>
+    <div>Engineer: Khursheed</div>
+    <div>Capture: Mon-Schools BSS</div>
+    <div>AP: ExtremeNetworks 34:85:84:90:aa:65</div>
+    <div>Duration: 55 seconds / 306,041 frames</div>
+  </div>
+</div>
+
+<!-- STAT BAR -->
+<div class="stat-bar">
+  <div class="stat">
+    <div class="stat-label">Total Frames</div>
+    <div class="stat-value">306K</div>
+  </div>
+  <div class="stat">
+    <div class="stat-label">Unique Clients</div>
+    <div class="stat-value ok">24</div>
+  </div>
+  <div class="stat">
+    <div class="stat-label">CTS Response Rate</div>
+    <div class="stat-value warn">44.6%</div>
+  </div>
+  <div class="stat">
+    <div class="stat-label">Rogue MAC Frames</div>
+    <div class="stat-value danger">2,504</div>
+  </div>
+  <div class="stat">
+    <div class="stat-label">4-Way Handshake</div>
+    <div class="stat-value gold">14ms</div>
+  </div>
+  <div class="stat">
+    <div class="stat-label">SSID Security</div>
+    <div class="stat-value">WPA2</div>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- SECTION DIVIDER -->
+  <div class="section-divider">► Part 1 — 4-Way Handshake Deep Dive</div>
+
+  <!-- PANEL 1: KEY HIERARCHY -->
+  <div class="panel">
+    <div class="panel-header">
+      <span class="panel-num">01</span>
+      <span class="panel-title" style="color: var(--accent)">Key Hierarchy — WPA2-PSK vs WPA3-SAE</span>
+    </div>
+    <div class="panel-body">
+
+      <div style="font-family: var(--mono); font-size: 0.6rem; color: var(--muted); margin-bottom: 0.75rem; letter-spacing: 0.1em; text-transform: uppercase;">WPA2-PSK PATH — No Forward Secrecy</div>
+      <div class="key-tree">
+        <div class="key-node root">PASSWORD (Static)</div>
+        <div class="key-connector">└─ PBKDF2(password, SSID, 4096 iterations)</div>
+        <div class="key-node mid">PMK — Pairwise Master Key (static, 256-bit)</div>
+        <div class="key-connector" style="margin-left:1.5rem">└─ PRF(PMK, "Pairwise key expansion" ‖ AA ‖ SPA ‖ ANonce ‖ SNonce)</div>
+        <div class="key-node leaf">PTK — Pairwise Transient Key (per session)</div>
+        <div class="key-node leaf" style="margin-left:4rem">KCK — Key Confirmation Key → MIC computation</div>
+        <div class="key-node leaf" style="margin-left:4rem">KEK — Key Encryption Key → encrypts GTK in M3</div>
+        <div class="key-node leaf gold" style="margin-left:4rem">TK — Temporal Key → encrypts data frames</div>
+        <div class="key-node leaf gold" style="margin-left:1.5rem">GTK — Group Temporal Key → broadcast/multicast decrypt</div>
+      </div>
+
+      <div style="font-family: var(--mono); font-size: 0.6rem; color: var(--muted); margin: 1.2rem 0 0.75rem; letter-spacing: 0.1em; text-transform: uppercase;">WPA3-SAE PATH — Perfect Forward Secrecy</div>
+      <div class="key-tree">
+        <div class="key-node root" style="border-left-color: var(--accent3); color: var(--accent3); background: rgba(57,255,20,0.08)">PASSWORD + DH Exchange (ephemeral)</div>
+        <div class="key-connector">└─ SAE Commit/Confirm → fresh DH keypair each session</div>
+        <div class="key-node mid" style="border-left-color: var(--accent3); color: var(--accent3)">PMK — Ephemeral (dies after session)</div>
+        <div class="key-connector" style="margin-left:1.5rem">└─ Same PTK derivation as WPA2</div>
+        <div class="key-node leaf">PTK / KCK / KEK / TK → identical structure</div>
+      </div>
+
+      <div style="margin-top: 1rem; padding: 0.75rem; background: rgba(255,59,92,0.06); border: 1px solid rgba(255,59,92,0.2); border-radius: 4px; font-family: var(--mono); font-size: 0.62rem;">
+        <div style="color: var(--danger); font-weight: 700; margin-bottom: 0.4rem;">⚠ WPA2-PSK VULNERABILITY</div>
+        <div style="color: var(--muted); line-height: 1.7;">Attacker captures M1+M2 (ANonce+SNonce visible in cleartext). Tries passwords from dictionary → derives candidate PMK → computes candidate PTK → checks MIC in M2. Match = password found. ALL past sessions decryptable retroactively.</div>
+      </div>
+
+      <div style="margin-top: 0.75rem; padding: 0.75rem; background: rgba(57,255,20,0.05); border: 1px solid rgba(57,255,20,0.2); border-radius: 4px; font-family: var(--mono); font-size: 0.62rem;">
+        <div style="color: var(--accent3); font-weight: 700; margin-bottom: 0.4rem;">✓ WPA3-SAE PROTECTION</div>
+        <div style="color: var(--muted); line-height: 1.7;">Even if attacker gets password later — cannot reconstruct ephemeral DH private keys → cannot re-derive PMK → past sessions protected forever. Forward secrecy = past traffic stays safe.</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- PANEL 2: HANDSHAKE TIMELINE -->
+  <div class="panel">
+    <div class="panel-header">
+      <span class="panel-num">02</span>
+      <span class="panel-title" style="color: var(--accent2)">Live 4-Way Handshake — Frame by Frame</span>
+    </div>
+    <div class="panel-body">
+
+      <div style="font-family: var(--mono); font-size: 0.6rem; color: var(--muted); margin-bottom: 1rem;">Capture: Jan 25 2023 09:21:17 PST | Mon-Schools BSS | Total: 14ms</div>
+
+      <!-- MSG 1 -->
+      <div class="frame-box">
+        <div class="frame-title">Frame 4057 — Message 1 of 4 &nbsp;|&nbsp; AP → Client &nbsp;|&nbsp; t=0.752s</div>
+        <div class="frame-fields">
+          <div class="frame-field">
+            <div class="ff-label">Key ACK</div>
+            <div class="ff-value ok">SET</div>
+          </div>
+          <div class="frame-field">
+            <div class="ff-label">Key MIC</div>
+            <div class="ff-value danger">NOT SET</div>
+          </div>
+          <div class="frame-field">
+            <div class="ff-label">Secure</div>
+            <div class="ff-value danger">NOT SET</div>
+          </div>
+          <div class="frame-field">
+            <div class="ff-label">Install</div>
+            <div class="ff-value danger">NOT SET</div>
+          </div>
+          <div class="frame-field">
+            <div class="ff-label">Replay Ctr</div>
+            <div class="ff-value gold">1</div>
+          </div>
+        </div>
+        <div style="padding: 0.5rem 0.75rem; font-family: var(--mono); font-size: 0.6rem; color: var(--muted); border-top: 1px solid var(--border);">
+          ANonce: a8bd4b51...e9becb4b &nbsp;|&nbsp; PMKID: ab5d84fc...0ad0 &nbsp;|&nbsp; MIC=0 because PTK doesn't exist yet
+        </div>
+      </div>
+
+      <!-- MSG 2 -->
+      <div class="frame-box">
+        <div class="frame-title">Frame 4116 — Message 2 of 4 &nbsp;|&nbsp; Client → AP &nbsp;|&nbsp; t=0.763s (+11ms)</div>
+        <div class="frame-fields">
+          <div class="frame-field">
+            <div class="ff-label">Key ACK</div>
+            <div class="ff-value danger">NOT SET</div>
+          </div>
+          <div class="frame-field">
+            <div class="ff-label">Key MIC</div>
+            <div class="ff-value ok">SET</div>
+          </div>
+          <div class="frame-field">
+            <div class="ff-label">Secure</div>
+            <div class="ff-value danger">NOT SET</div>
+          </div>
+          <div class="frame-field">
+            <div class="ff-label">Install</div>
+            <div class="ff-value danger">NOT SET</div>
+          </div>
+          <div class="frame-field">
+            <div class="ff-label">Replay Ctr</div>
+            <div class="ff-value gold">1</div>
+          </div>
+        </div>
+        <div style="padding: 0.5rem 0.75rem; font-family: var(--mono); font-size: 0.6rem; color: var(--muted); border-top: 1px solid var(--border);">
+          SNonce: 7fb3fe29...e7bae &nbsp;|&nbsp; MIC: 5dda98d7...8480 &nbsp;|&nbsp; RSN IE + PMKID echo &nbsp;|&nbsp; KCK used to compute MIC — proves PMK
+        </div>
+      </div>
+
+      <!-- MSG 3 -->
+      <div class="frame-box">
+        <div class="frame-title">Frame 4123 — Message 3 of 4 &nbsp;|&nbsp; AP → Client &nbsp;|&nbsp; t=0.764s (+1ms)</div>
+        <div class="frame-fields">
+          <div class="frame-field">
+            <div class="ff-label">Key ACK</div>
+            <div class="ff-value ok">SET</div>
+          </div>
+          <div class="frame-field">
+            <div class="ff-label">Key MIC</div>
+            <div class="ff-value ok">SET</div>
+          </div>
+          <div class="frame-field">
+            <div class="ff-label">Secure</div>
+            <div class="ff-value ok">SET</div>
+          </div>
+          <div class="frame-field">
+            <div class="ff-label">Install</div>
+            <div class="ff-value ok">SET</div>
+          </div>
+          <div class="frame-field">
+            <div class="ff-label">Replay Ctr</div>
+            <div class="ff-value gold">2</div>
+          </div>
+        </div>
+        <div style="padding: 0.5rem 0.75rem; font-family: var(--mono); font-size: 0.6rem; color: var(--muted); border-top: 1px solid var(--border);">
+          GTK encrypted with KEK &nbsp;|&nbsp; Encrypted Key Data=SET &nbsp;|&nbsp; "Install your TK now" &nbsp;|&nbsp; RSC: 34be0000...
+        </div>
+      </div>
+
+      <!-- MSG 4 -->
+      <div class="frame-box">
+        <div class="frame-title">Frame 4138 — Message 4 of 4 &nbsp;|&nbsp; Client → AP &nbsp;|&nbsp; t=0.766s (+2ms)</div>
+        <div class="frame-fields">
+          <div class="frame-field">
+            <div class="ff-label">Key ACK</div>
+            <div class="ff-value danger">NOT SET</div>
+          </div>
+          <div class="frame-field">
+            <div class="ff-label">Key MIC</div>
+            <div class="ff-value ok">SET</div>
+          </div>
+          <div class="frame-field">
+            <div class="ff-label">Secure</div>
+            <div class="ff-value ok">SET</div>
+          </div>
+          <div class="frame-field">
+            <div class="ff-label">Nonce</div>
+            <div class="ff-value warn">ALL ZEROS</div>
+          </div>
+          <div class="frame-field">
+            <div class="ff-label">Replay Ctr</div>
+            <div class="ff-value gold">2</div>
+          </div>
+        </div>
+        <div style="padding: 0.5rem 0.75rem; font-family: var(--mono); font-size: 0.6rem; color: var(--muted); border-top: 1px solid var(--border);">
+          MIC: b06d7a71...718f &nbsp;|&nbsp; Keys installed both sides &nbsp;|&nbsp; Encrypted data begins immediately after
+        </div>
+      </div>
+
+      <div style="margin-top: 0.75rem; font-family: var(--mono); font-size: 0.6rem; color: var(--muted); padding: 0.6rem; background: var(--surface2); border-radius: 4px; border: 1px solid var(--border);">
+        <span style="color: var(--accent4);">KEY INSIGHT:</span> Replay Counter prevents KRACK attack. MIC proves integrity. Neither alone is sufficient — MIC can't detect replays, counter can't detect tampering.
+      </div>
+
+    </div>
+  </div>
+
+  <!-- SECTION DIVIDER -->
+  <div class="section-divider">► Part 2 — Frame Anatomy & RTS/CTS/NAV</div>
+
+  <!-- PANEL 3: FRAME SIGNATURES -->
+  <div class="panel">
+    <div class="panel-header">
+      <span class="panel-num">03</span>
+      <span class="panel-title" style="color: var(--accent3)">Raw Frame Signatures — Hex Annotated</span>
+    </div>
+    <div class="panel-body">
+
+      <div style="font-family: var(--mono); font-size: 0.6rem; color: var(--muted); margin-bottom: 0.5rem; letter-spacing: 0.08em; text-transform: uppercase;">RTS Frame 1 — Client → AP</div>
+      <div class="hex-block">
+        <span class="hex-offset">0000  </span><span class="hex-radiotap">00 00 18 00 6f 00 00 00 0d 65 d1 63 38 c1 01 00  </span><span style="color:#2d3748">← radiotap 24B</span><br>
+        <span class="hex-offset">0010  </span><span class="hex-radiotap">00 18 90 15 40 01 c6 a1 </span><span class="hex-fc">b4 00 </span><span class="hex-dur">9c 0b </span><span class="hex-ra">34 85 84 90</span><br>
+        <span class="hex-offset">0020  </span><span class="hex-ra">aa 65 </span><span class="hex-ta">a8 1d 16 53 99 6f</span><br>
+        <br>
+        <span class="hex-fc">b4 00</span> = FC: Type=Control(01) Subtype=1011=RTS<br>
+        <span class="hex-dur">9c 0b</span> = Duration = 0x0b9c = <span style="color:var(--danger); font-weight:700">2972µs NAV</span><br>
+        <span class="hex-ra">34:85:84:90:aa:65</span> = Receiver (AP)<br>
+        <span class="hex-ta">a8:1d:16:53:99:6f</span> = Transmitter (Client)<br>
+        Total MAC header: <span style="color:var(--accent4)">16 bytes</span>
+      </div>
+
+      <div style="font-family: var(--mono); font-size: 0.6rem; color: var(--muted); margin: 0.75rem 0 0.5rem; letter-spacing: 0.08em; text-transform: uppercase;">CTS Frame 2 — AP → Client (response)</div>
+      <div class="hex-block">
+        <span class="hex-offset">0000  </span><span class="hex-radiotap">00 00 18 00 6f 00 00 00 0d 65 d1 63 38 c1 01 00  </span><span style="color:#2d3748">← radiotap 24B</span><br>
+        <span class="hex-offset">0010  </span><span class="hex-radiotap">00 18 90 15 40 01 dc a1 </span><span class="hex-fc">c4 00 </span><span class="hex-dur">6c 0b </span><span class="hex-ra">a8 1d 16 53</span><br>
+        <span class="hex-offset">0020  </span><span class="hex-ra">99 6f</span><br>
+        <br>
+        <span class="hex-fc">c4 00</span> = FC: Type=Control(01) Subtype=1100=CTS<br>
+        <span class="hex-dur">6c 0b</span> = Duration = 0x0b6c = <span style="color:var(--danger); font-weight:700">2924µs NAV</span> (2972-16SIFS-32CTS_tx)<br>
+        <span class="hex-ra">a8:1d:16:53:99:6f</span> = Receiver only (echoes RTS sender)<br>
+        <span style="color: var(--danger)">NO transmitter field</span> — CTS is 6 bytes shorter than RTS<br>
+        Total MAC header: <span style="color:var(--accent4)">10 bytes</span>
+      </div>
+
+      <div style="font-family: var(--mono); font-size: 0.6rem; color: var(--muted); margin: 0.75rem 0 0.5rem; letter-spacing: 0.08em; text-transform: uppercase;">CTS-to-Self Frame 28 — Rogue Device</div>
+      <div class="hex-block">
+        <span class="hex-offset">0000  </span><span class="hex-radiotap">00 00 18 00 6f 00 00 00 0d 65 d1 63 c0 d4 01 00  </span><span style="color:#2d3748">← radiotap 24B</span><br>
+        <span class="hex-offset">0010  </span><span class="hex-radiotap">00 0c 90 15 40 01 da a1 </span><span class="hex-fc">c4 00 </span><span class="hex-dur">00 00 </span><span style="color:var(--danger)">e0 3e 44 10</span><br>
+        <span class="hex-offset">0020  </span><span style="color:var(--danger)">aa 64</span><br>
+        <br>
+        <span class="hex-fc">c4 00</span> = FC: same as CTS<br>
+        <span class="hex-dur">00 00</span> = Duration = <span style="color:var(--danger); font-weight:700">0µs — NAV RESET</span><br>
+        <span style="color:var(--danger)">e0:3e:44:10:aa:64</span> = Unknown OUI, locally-administered bit SET (e0=11100000)<br>
+        <span style="color: var(--accent2)">Spoofed/randomized MAC — not a real hardware address</span>
+      </div>
+
+      <div style="margin-top: 0.75rem; padding: 0.6rem 0.75rem; background: var(--surface2); border-radius: 4px; border: 1px solid var(--border); font-family: var(--mono); font-size: 0.6rem;">
+        <div style="color: var(--accent4); margin-bottom: 0.3rem; font-weight: 700;">NAV MATH</div>
+        <div style="color: var(--muted);">RTS sets NAV=2972µs → every listener freezes</div>
+        <div style="color: var(--muted);">CTS decrements: 2972 - 16(SIFS) - 32(CTS tx) = <span style="color:var(--accent)">2924µs</span></div>
+        <div style="color: var(--muted);">CTS-to-Self Duration=0 → <span style="color:var(--danger)">ALL NAV timers reset immediately</span></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- PANEL 4: FRAME TAXONOMY TABLE -->
+  <div class="panel">
+    <div class="panel-header">
+      <span class="panel-num">04</span>
+      <span class="panel-title" style="color: var(--accent4)">Complete Frame Taxonomy — 306K Frames Categorized</span>
+    </div>
+    <div class="panel-body">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Type</th>
+            <th>Subtype</th>
+            <th>Count</th>
+            <th>Direction</th>
+            <th>Purpose</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="tag rts">RTS</span></td>
+            <td style="font-family:var(--mono); color:var(--muted)">0x001b</td>
+            <td style="font-family:var(--mono); color:var(--accent)">87,265</td>
+            <td style="font-family:var(--mono); color:var(--muted)">Both ways</td>
+            <td style="color:var(--muted); font-size:0.6rem;">Medium reservation — sets NAV timer</td>
+          </tr>
+          <tr>
+            <td><span class="tag cts">Block Ack</span></td>
+            <td style="font-family:var(--mono); color:var(--muted)">0x0019</td>
+            <td style="font-family:var(--mono); color:var(--accent3)">79,193</td>
+            <td style="font-family:var(--mono); color:var(--muted)">Both ways</td>
+            <td style="color:var(--muted); font-size:0.6rem;">Aggregate ACK with bitmap for burst frames</td>
+          </tr>
+          <tr>
+            <td><span class="tag data">QoS Data</span></td>
+            <td style="font-family:var(--mono); color:var(--muted)">0x0028</td>
+            <td style="font-family:var(--mono); color:var(--accent4)">81,198</td>
+            <td style="font-family:var(--mono); color:var(--muted)">Both ways</td>
+            <td style="color:var(--muted); font-size:0.6rem;">Encrypted payload — 138B to 1506B</td>
+          </tr>
+          <tr>
+            <td><span class="tag cts">CTS</span></td>
+            <td style="font-family:var(--mono); color:var(--muted)">0x001c</td>
+            <td style="font-family:var(--mono); color:var(--accent3)">38,954</td>
+            <td style="font-family:var(--mono); color:var(--muted)">Both ways</td>
+            <td style="color:var(--muted); font-size:0.6rem;">Medium grant + NAV decrement</td>
+          </tr>
+          <tr>
+            <td><span class="tag mgmt">Block Ack Req</span></td>
+            <td style="font-family:var(--mono); color:var(--muted)">0x0018</td>
+            <td style="font-family:var(--mono); color:var(--muted)">7,581</td>
+            <td style="font-family:var(--mono); color:var(--muted)">Both ways</td>
+            <td style="color:var(--muted); font-size:0.6rem;">"Acknowledge my burst" trigger</td>
+          </tr>
+          <tr>
+            <td><span class="tag mgmt">QoS Null</span></td>
+            <td style="font-family:var(--mono); color:var(--muted)">0x002c</td>
+            <td style="font-family:var(--mono); color:var(--muted)">3,865</td>
+            <td style="font-family:var(--mono); color:var(--muted)">Client→AP</td>
+            <td style="color:var(--muted); font-size:0.6rem;">Power save toggle (PWR=1/0)</td>
+          </tr>
+          <tr>
+            <td><span class="tag mgmt">ACK</span></td>
+            <td style="font-family:var(--mono); color:var(--muted)">0x001d</td>
+            <td style="font-family:var(--mono); color:var(--muted)">5,713</td>
+            <td style="font-family:var(--mono); color:var(--muted)">Both ways</td>
+            <td style="color:var(--muted); font-size:0.6rem;">Single frame acknowledgement</td>
+          </tr>
+          <tr>
+            <td><span class="tag mgmt">Beacon</span></td>
+            <td style="font-family:var(--mono); color:var(--muted)">0x0008</td>
+            <td style="font-family:var(--mono); color:var(--muted)">1,047</td>
+            <td style="font-family:var(--mono); color:var(--muted)">AP→All</td>
+            <td style="color:var(--muted); font-size:0.6rem;">BSS advertisement every 100 TUs</td>
+          </tr>
+          <tr>
+            <td><span class="tag mgmt">Probe Req/Rsp</span></td>
+            <td style="font-family:var(--mono); color:var(--muted)">0x0004/5</td>
+            <td style="font-family:var(--mono); color:var(--muted)">70</td>
+            <td style="font-family:var(--mono); color:var(--muted)">Both ways</td>
+            <td style="color:var(--muted); font-size:0.6rem;">Active scanning — wildcard & targeted</td>
+          </tr>
+          <tr>
+            <td><span class="tag mgmt">Auth/Assoc</span></td>
+            <td style="font-family:var(--mono); color:var(--muted)">0x000b/0/1</td>
+            <td style="font-family:var(--mono); color:var(--muted)">4</td>
+            <td style="font-family:var(--mono); color:var(--muted)">Both ways</td>
+            <td style="color:var(--muted); font-size:0.6rem;">Open System auth + association</td>
+          </tr>
+          <tr>
+            <td><span class="tag eapol">EAPOL</span></td>
+            <td style="font-family:var(--mono); color:var(--muted)">802.1X Key</td>
+            <td style="font-family:var(--mono); color:var(--accent2)">4</td>
+            <td style="font-family:var(--mono); color:var(--muted)">Both ways</td>
+            <td style="color:var(--muted); font-size:0.6rem;">4-Way Handshake — 14ms total</td>
+          </tr>
+          <tr>
+            <td><span class="tag mgmt">Action</span></td>
+            <td style="font-family:var(--mono); color:var(--muted)">0x000d</td>
+            <td style="font-family:var(--mono); color:var(--muted)">18</td>
+            <td style="font-family:var(--mono); color:var(--muted)">Both ways</td>
+            <td style="color:var(--muted); font-size:0.6rem;">802.11k Neighbor Report post-EAPOL</td>
+          </tr>
+          <tr style="background: rgba(255,59,92,0.06);">
+            <td><span class="tag cts0">CTS-to-Self</span></td>
+            <td style="font-family:var(--mono); color:var(--muted)">0x001c</td>
+            <td style="font-family:var(--mono); color:var(--danger)">2,504</td>
+            <td style="font-family:var(--mono); color:var(--danger)">Rogue</td>
+            <td style="color:var(--danger); font-size:0.6rem;">⚠ NAV attack — e0:3e:44 Duration=0</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div style="margin-top: 0.75rem; font-family: var(--mono); font-size: 0.6rem; color: var(--muted);">
+        <span style="color: var(--accent4);">CAPTURE PERSPECTIVE:</span> Monitor mode — third device sniffing passively. AP frames show RSSI (-36dBm), proving sniffer is not the AP. Channel: 5520MHz (Ch 104, 5GHz OFDM).
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION DIVIDER -->
+  <div class="section-divider">► Part 3 — Rogue Device Forensics</div>
+
+  <!-- PANEL 5: ROGUE DEVICE -->
+  <div class="panel">
+    <div class="panel-header">
+      <span class="panel-num">05</span>
+      <span class="panel-title" style="color: var(--danger)"><span class="live-dot"></span>Rogue Device Analysis — e0:3e:44:10:aa:64</span>
+    </div>
+    <div class="panel-body">
+
+      <div class="evidence-block">
+        <div class="ev-title">Forensic Evidence — NAV Disruption Attack</div>
+        <div class="ev-line">
+          <span class="ev-key">MAC Address</span>
+          <span class="ev-val bad">e0:3e:44:10:aa:64</span>
+        </div>
+        <div class="ev-line">
+          <span class="ev-key">OUI Registration</span>
+          <span class="ev-val bad">UNKNOWN — not in IEEE registry</span>
+        </div>
+        <div class="ev-line">
+          <span class="ev-key">Locally Admin bit</span>
+          <span class="ev-val bad">SET (e0=11100000) — spoofed/randomized</span>
+        </div>
+        <div class="ev-line">
+          <span class="ev-key">Frame types sent</span>
+          <span class="ev-val suspicious">CTS only — 100% of frames</span>
+        </div>
+        <div class="ev-line">
+          <span class="ev-key">Duration value</span>
+          <span class="ev-val bad">0x0000 = 0µs — ALL frames</span>
+        </div>
+        <div class="ev-line">
+          <span class="ev-key">Total frames</span>
+          <span class="ev-val bad">2,504 over 55 seconds</span>
+        </div>
+        <div class="ev-line">
+          <span class="ev-key">Rate</span>
+          <span class="ev-val bad">~45 NAV resets per second</span>
+        </div>
+        <div class="ev-line">
+          <span class="ev-key">Data frames</span>
+          <span class="ev-val bad">ZERO — never transmits data</span>
+        </div>
+        <div class="ev-line">
+          <span class="ev-key">Association</span>
+          <span class="ev-val bad">Never associates with any AP</span>
+        </div>
+        <div class="ev-line">
+          <span class="ev-key">Verdict</span>
+          <span class="ev-val bad">Virtual Carrier Sense Attack (NAV attack)</span>
+        </div>
+      </div>
+
+      <div class="collision-chain">
+        <div style="font-family: var(--mono); font-size: 0.6rem; color: var(--muted); margin-bottom: 0.3rem; letter-spacing: 0.08em; text-transform: uppercase;">Attack → Collision Causal Chain</div>
+        <div class="cc-step trigger">
+          <span class="cc-num">1</span>
+          <span class="cc-desc">e0:3e:44 fires CTS Duration=0 &nbsp;<span class="cc-frame">[Frame 28, t=0.005s]</span></span>
+        </div>
+        <div class="cc-step effect">
+          <span class="cc-num">2</span>
+          <span class="cc-desc">All 24 clients see NAV=0 simultaneously — backoff timers reset</span>
+        </div>
+        <div class="cc-step effect">
+          <span class="cc-num">3</span>
+          <span class="cc-desc">Multiple clients countdown expires at same instant — all transmit RTS</span>
+        </div>
+        <div class="cc-step result">
+          <span class="cc-num">4</span>
+          <span class="cc-desc">Collision at AP receiver — garbled signal, no CTS returned &nbsp;<span class="cc-frame">[Frames 33,34,35]</span></span>
+        </div>
+        <div class="cc-step result">
+          <span class="cc-num">5</span>
+          <span class="cc-desc">AP retry storm: 3-7 consecutive RTS to same client, no CTS &nbsp;<span class="cc-frame">[Frames 38-41]</span></span>
+        </div>
+        <div class="cc-step trigger">
+          <span class="cc-num">6</span>
+          <span class="cc-desc">e0:3e:44 fires again &nbsp;<span class="cc-frame">[Frame 67, t=0.013s]</span> → cascade repeats</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- PANEL 6: IMPACT QUANTIFICATION -->
+  <div class="panel">
+    <div class="panel-header">
+      <span class="panel-num">06</span>
+      <span class="panel-title" style="color: var(--accent2)">Impact Quantification & Connection Timeline</span>
+    </div>
+    <div class="panel-body">
+
+      <div style="font-family: var(--mono); font-size: 0.6rem; color: var(--muted); margin-bottom: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase;">CTS Response Rate Analysis</div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.5rem; margin-bottom: 1rem;">
+        <div style="padding: 0.75rem; background: var(--surface2); border: 1px solid var(--border); border-radius: 4px; text-align: center; font-family: var(--mono);">
+          <div style="font-size: 0.55rem; color: var(--muted); margin-bottom: 0.3rem;">RTS SENT</div>
+          <div style="font-size: 1.2rem; color: var(--accent); font-weight: 700;">87,265</div>
+        </div>
+        <div style="padding: 0.75rem; background: var(--surface2); border: 1px solid var(--border); border-radius: 4px; text-align: center; font-family: var(--mono);">
+          <div style="font-size: 0.55rem; color: var(--muted); margin-bottom: 0.3rem;">CTS RECEIVED</div>
+          <div style="font-size: 1.2rem; color: var(--accent3); font-weight: 700;">38,954</div>
+        </div>
+        <div style="padding: 0.75rem; background: rgba(255,59,92,0.08); border: 1px solid rgba(255,59,92,0.3); border-radius: 4px; text-align: center; font-family: var(--mono);">
+          <div style="font-size: 0.55rem; color: var(--muted); margin-bottom: 0.3rem;">MISSING CTS</div>
+          <div style="font-size: 1.2rem; color: var(--danger); font-weight: 700;">48,311</div>
+        </div>
+      </div>
+
+      <div style="font-family: var(--mono); font-size: 0.6rem; color: var(--muted); margin-bottom: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase;">Full Connection Timeline — Client c9:fa:e3</div>
+
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Frame</th>
+            <th>Time</th>
+            <th>Event</th>
+            <th>Delta</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="font-family:var(--mono); color:var(--muted)">4014</td>
+            <td style="font-family:var(--mono); color:var(--muted)">0.746s</td>
+            <td><span class="tag mgmt">AUTH REQ</span> Open System Seq=1</td>
+            <td style="font-family:var(--mono); color:var(--muted)">—</td>
+          </tr>
+          <tr>
+            <td style="font-family:var(--mono); color:var(--muted)">4023</td>
+            <td style="font-family:var(--mono); color:var(--muted)">0.746s</td>
+            <td><span class="tag mgmt">AUTH RSP</span> Status=Success</td>
+            <td style="font-family:var(--mono); color:var(--accent3)">0ms</td>
+          </tr>
+          <tr>
+            <td style="font-family:var(--mono); color:var(--muted)">4032</td>
+            <td style="font-family:var(--mono); color:var(--muted)">0.749s</td>
+            <td><span class="tag mgmt">ASSOC REQ</span> SSID=Mon-Schools</td>
+            <td style="font-family:var(--mono); color:var(--accent3)">+3ms</td>
+          </tr>
+          <tr>
+            <td style="font-family:var(--mono); color:var(--muted)">4037</td>
+            <td style="font-family:var(--mono); color:var(--muted)">0.749s</td>
+            <td><span class="tag mgmt">ASSOC RSP</span> Status=0x0000</td>
+            <td style="font-family:var(--mono); color:var(--accent3)">0ms</td>
+          </tr>
+          <tr>
+            <td style="font-family:var(--mono); color:var(--muted)">4057</td>
+            <td style="font-family:var(--mono); color:var(--muted)">0.752s</td>
+            <td><span class="tag eapol">EAPOL M1</span> ANonce + PMKID</td>
+            <td style="font-family:var(--mono); color:var(--accent2)">+3ms</td>
+          </tr>
+          <tr>
+            <td style="font-family:var(--mono); color:var(--muted)">4116</td>
+            <td style="font-family:var(--mono); color:var(--muted)">0.763s</td>
+            <td><span class="tag eapol">EAPOL M2</span> SNonce + MIC</td>
+            <td style="font-family:var(--mono); color:var(--accent2)">+11ms</td>
+          </tr>
+          <tr>
+            <td style="font-family:var(--mono); color:var(--muted)">4123</td>
+            <td style="font-family:var(--mono); color:var(--muted)">0.764s</td>
+            <td><span class="tag eapol">EAPOL M3</span> GTK(KEK) + Install</td>
+            <td style="font-family:var(--mono); color:var(--accent2)">+1ms</td>
+          </tr>
+          <tr>
+            <td style="font-family:var(--mono); color:var(--muted)">4138</td>
+            <td style="font-family:var(--mono); color:var(--muted)">0.766s</td>
+            <td><span class="tag eapol">EAPOL M4</span> Confirm — Keys Live</td>
+            <td style="font-family:var(--mono); color:var(--accent2)">+2ms</td>
+          </tr>
+          <tr>
+            <td style="font-family:var(--mono); color:var(--muted)">4154</td>
+            <td style="font-family:var(--mono); color:var(--muted)">0.770s</td>
+            <td><span class="tag mgmt">ACTION</span> 802.11k Neighbor Report</td>
+            <td style="font-family:var(--mono); color:var(--accent3)">+4ms</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div style="margin-top: 0.75rem; padding: 0.6rem 0.75rem; background: var(--surface2); border: 1px solid var(--border); border-radius: 4px; font-family: var(--mono); font-size: 0.6rem; color: var(--muted);">
+        <span style="color: var(--accent4);">ROGUE IMPACT ESTIMATE:</span> 2,504 NAV resets × ~4 collision events each = ~10,000 attributable collisions. Estimated contribution to missing CTS: <span style="color: var(--danger);">20-25% of 48,311</span> missing responses.
+      </div>
+
+    </div>
+  </div>
+
+  <!-- SECTION DIVIDER -->
+  <div class="section-divider">► Part 4 — Mastery Summary & Next Steps</div>
+
+  <!-- PANEL 7: MASTERY -->
+  <div class="panel">
+    <div class="panel-header">
+      <span class="panel-num">07</span>
+      <span class="panel-title" style="color: var(--accent3)">Concepts Mastered This Session</span>
+    </div>
+    <div class="panel-body">
+      <div class="checklist">
+        <div class="check-item">
+          <div class="check-icon">✓</div>
+          <div class="check-text"><strong>PMK Origin Paths</strong> — WPA2-PSK: PBKDF2(password) = static PMK. WPA3-SAE: DH exchange = ephemeral PMK. No RADIUS = PSK path.</div>
+        </div>
+        <div class="check-item">
+          <div class="check-icon">✓</div>
+          <div class="check-text"><strong>PTK Derivation</strong> — PRF(PMK, label, AA, SPA, ANonce, SNonce) → KCK + KEK + TK. All inputs visible in cleartext except PMK.</div>
+        </div>
+        <div class="check-item">
+          <div class="check-icon">✓</div>
+          <div class="check-text"><strong>MIC Purpose</strong> — Integrity only, not encryption. M2 MIC proves client knows PMK. Computed with KCK (subset of PTK).</div>
+        </div>
+        <div class="check-item">
+          <div class="check-icon">✓</div>
+          <div class="check-text"><strong>KEK vs TK</strong> — KEK encrypts GTK inside M3 before TK is installed. Install bit = load TK into hardware crypto engine.</div>
+        </div>
+        <div class="check-item">
+          <div class="check-icon">✓</div>
+          <div class="check-text"><strong>GTK Impact</strong> — Group key decrypts ALL broadcast/multicast. Cracking GTK reveals ARP, DHCP, mDNS — full VLAN topology.</div>
+        </div>
+        <div class="check-item">
+          <div class="check-icon">✓</div>
+          <div class="check-text"><strong>Replay Counter</strong> — Prevents KRACK attack. MIC proves integrity; Replay Counter proves freshness. Both required.</div>
+        </div>
+        <div class="check-item">
+          <div class="check-icon">✓</div>
+          <div class="check-text"><strong>Forward Secrecy</strong> — WPA3-SAE: DH ephemeral keys discarded after session. Password leak cannot decrypt past captures.</div>
+        </div>
+        <div class="check-item">
+          <div class="check-icon">✓</div>
+          <div class="check-text"><strong>NAV / Virtual Carrier Sense</strong> — Duration field in every frame. RTS sets NAV, CTS decrements. CTS-to-Self Duration=0 resets all timers.</div>
+        </div>
+        <div class="check-item">
+          <div class="check-icon">✓</div>
+          <div class="check-text"><strong>RTS/CTS Directionality</strong> — Either side initiates. AP sends 70% of RTS in this capture (heavy downlink to 24 clients).</div>
+        </div>
+        <div class="check-item">
+          <div class="check-icon">✓</div>
+          <div class="check-text"><strong>Monitor Mode vs AP Capture</strong> — RSSI on AP TX frames = third-party sniffer. All frames show receive signal level.</div>
+        </div>
+        <div class="check-item">
+          <div class="check-icon">✓</div>
+          <div class="check-text"><strong>Rogue Device Fingerprinting</strong> — Unknown OUI + locally-administered MAC bit + single frame type + no association = NAV attack signature.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PANEL 8: NEXT SESSION -->
+  <div class="panel">
+    <div class="panel-header">
+      <span class="panel-num">08</span>
+      <span class="panel-title" style="color: var(--accent2)">Next Steps — Horizon Lab & Deep Dives</span>
+    </div>
+    <div class="panel-body">
+
+      <div style="font-family: var(--mono); font-size: 0.6rem; color: var(--muted); margin-bottom: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase;">SW2 VOSS Immediate Checklist</div>
+      <div class="next-items">
+        <div class="next-item">
+          <span class="priority p1">P1</span>
+          <span style="color: var(--muted); font-size: 0.68rem;">Confirm <code style="color:var(--accent)">router ?</code> syntax in config-dhcp mode on SW2</span>
+        </div>
+        <div class="next-item">
+          <span class="priority p1">P1</span>
+          <span style="color: var(--muted); font-size: 0.68rem;">Run <code style="color:var(--accent)">show ip interface</code> + <code style="color:var(--accent)">show ip arp vrf GlobalRouter</code> — verify VLAN 4047 on Port1/1</span>
+        </div>
+        <div class="next-item">
+          <span class="priority p1">P1</span>
+          <span style="color: var(--muted); font-size: 0.68rem;">Find IPE lan1 IP via IPE Edit Configuration — required before writing SW2 default route</span>
+        </div>
+        <div class="next-item">
+          <span class="priority p1">P1</span>
+          <span style="color: var(--muted); font-size: 0.68rem;">Safe CLI block: manual-area 49.b0b1 → vlan create 70/80 → vlan i-sid 100070/100080 → fa enable Port1/3</span>
+        </div>
+        <div class="next-item">
+          <span class="priority p2">P2</span>
+          <span style="color: var(--muted); font-size: 0.68rem;">DHCP config for VLAN 70 (Corp_New) and VLAN 80 (Guest_New) on SW2</span>
+        </div>
+        <div class="next-item">
+          <span class="priority p2">P2</span>
+          <span style="color: var(--muted); font-size: 0.68rem;">IPE transit config — GRE tunnel SW2 → RDU Raleigh</span>
+        </div>
+        <div class="next-item">
+          <span class="priority p2">P2</span>
+          <span style="color: var(--muted); font-size: 0.68rem;">VIQ policy — Corp/Guest SSIDs on VLAN 70/80 for AP2 via Fabric Attach</span>
+        </div>
+        <div class="next-item">
+          <span class="priority p3">P3</span>
+          <span style="color: var(--muted); font-size: 0.68rem;">ACL GUEST_ISOLATION verification on BOTH switches (Anycast Gateway = SW2 routes locally)</span>
+        </div>
+      </div>
+
+      <div style="font-family: var(--mono); font-size: 0.6rem; color: var(--muted); margin: 1rem 0 0.5rem; letter-spacing: 0.08em; text-transform: uppercase;">Deep Dive Queue</div>
+      <div class="next-items">
+        <div class="next-item">
+          <span class="priority p2">WL</span>
+          <span style="color: var(--muted); font-size: 0.68rem;">OWE (Opportunistic Wireless Encryption) deep dive — unauthenticated encryption for open networks</span>
+        </div>
+        <div class="next-item">
+          <span class="priority p2">WL</span>
+          <span style="color: var(--muted); font-size: 0.68rem;">Packet capture practicum — SPAN port on SW1, decode encrypted frames with known PTK</span>
+        </div>
+        <div class="next-item">
+          <span class="priority p3">WL</span>
+          <span style="color: var(--muted); font-size: 0.68rem;">802.1X wired port authentication — EAP-TLS vs PEAP on SW1 Port5</span>
+        </div>
+        <div class="next-item">
+          <span class="priority p3">WL</span>
+          <span style="color: var(--muted); font-size: 0.68rem;">WiFi L1 PHY deep dive — OFDM subcarriers, guard intervals, MCS table, spatial streams</span>
+        </div>
+        <div class="next-item">
+          <span class="priority p3">SEC</span>
+          <span style="color: var(--muted); font-size: 0.68rem;">KRACK attack lab — reproduce replay counter vulnerability in controlled environment</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+  <div>EOD Blueprint — May 04 2026 &nbsp;|&nbsp; Horizon Custom Fabrication Lab &nbsp;|&nbsp; SW1=EXOS / SW2=VOSS / AP1+AP2=AP3000</div>
+  <div class="footer-sig">Khursheed × Claude — Socratic Session Complete ✓</div>
+</div>
+
+</body>
+</html>
