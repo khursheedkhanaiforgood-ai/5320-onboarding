@@ -3,1066 +3,430 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>EOD Blueprint — May 7 2026 | DHCP & WPA2 Key-State Forensics</title>
-<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<title>5320 Lab Journal — DHCP &amp; WPA2 Key-State Forensics, May 7 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Libre+Franklin:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --bg: #0a0e17;
-    --surface: #111827;
-    --surface2: #1a2235;
-    --border: #1e2d45;
-    --accent: #00d4ff;
-    --accent2: #ff6b35;
-    --accent3: #39ff14;
-    --accent4: #ffd700;
-    --danger: #ff3b5c;
-    --text: #e2e8f0;
-    --muted: #64748b;
-    --mono: 'Space Mono', monospace;
-    --sans: 'Syne', sans-serif;
-  }
-
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: var(--sans);
-    overflow-x: hidden;
-  }
-
-  body::before {
-    content: '';
-    position: fixed;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background: repeating-linear-gradient(
-      0deg,
-      transparent,
-      transparent 2px,
-      rgba(0,212,255,0.01) 2px,
-      rgba(0,212,255,0.01) 4px
-    );
-    pointer-events: none;
-    z-index: 999;
-  }
-
-  .header {
-    border-bottom: 1px solid var(--border);
-    padding: 2rem 3rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .header::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0; height: 2px;
-    background: linear-gradient(90deg, var(--accent), var(--accent2), var(--accent3));
-  }
-
-  .header-left h1 {
-    font-size: 2.4rem;
-    font-weight: 800;
-    letter-spacing: -0.02em;
-    line-height: 1;
-    background: linear-gradient(135deg, var(--accent), #7dd3fc);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-  }
-
-  .header-left .subtitle {
-    font-family: var(--mono);
-    font-size: 0.7rem;
-    color: var(--accent2);
-    margin-top: 0.5rem;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-  }
-
-  .header-right {
-    text-align: right;
-    font-family: var(--mono);
-    font-size: 0.7rem;
-    color: var(--muted);
-    line-height: 1.8;
-  }
-
-  .header-right .date {
-    color: var(--accent3);
-    font-size: 0.85rem;
-    font-weight: 700;
-  }
-
-  .stat-bar {
-    display: grid;
-    grid-template-columns: repeat(6, 1fr);
-    border-bottom: 1px solid var(--border);
-  }
-
-  .stat {
-    padding: 1.2rem 1.5rem;
-    border-right: 1px solid var(--border);
-    position: relative;
-  }
-
-  .stat:last-child { border-right: none; }
-
-  .stat-label {
-    font-family: var(--mono);
-    font-size: 0.6rem;
-    color: var(--muted);
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    margin-bottom: 0.4rem;
-  }
-
-  .stat-value {
-    font-family: var(--mono);
-    font-size: 1.4rem;
-    font-weight: 700;
-    color: var(--accent);
-  }
-
-  .stat-value.danger { color: var(--danger); }
-  .stat-value.warn { color: var(--accent2); }
-  .stat-value.ok { color: var(--accent3); }
-  .stat-value.gold { color: var(--accent4); }
-
-  .main {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 0;
-    min-height: calc(100vh - 200px);
-  }
-
-  .panel {
-    border-right: 1px solid var(--border);
-    border-bottom: 1px solid var(--border);
-  }
-
-  .panel:nth-child(even) { border-right: none; }
-  .panel.full-width { grid-column: 1 / -1; }
-
-  .panel-header {
-    padding: 1rem 1.5rem;
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    background: var(--surface);
-  }
-
-  .panel-num {
-    font-family: var(--mono);
-    font-size: 0.65rem;
-    color: var(--muted);
-    background: var(--border);
-    padding: 0.2rem 0.5rem;
-    border-radius: 2px;
-  }
-
-  .panel-title {
-    font-size: 0.8rem;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-  }
-
-  .panel-body { padding: 1.5rem; }
-
-  /* Framework flow diagram */
-  .framework-flow {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 0.75rem;
-    margin: 1rem 0;
-  }
-  .frame-step {
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    padding: 1rem;
-    background: rgba(0,212,255,0.04);
-    position: relative;
-  }
-  .frame-step.active { border-color: var(--accent); background: rgba(0,212,255,0.1); }
-  .frame-step .step-num {
-    font-family: var(--mono);
-    font-size: 0.55rem;
-    color: var(--accent2);
-    letter-spacing: 0.15em;
-    margin-bottom: 0.3rem;
-  }
-  .frame-step .step-title {
-    font-size: 0.85rem;
-    font-weight: 700;
-    color: var(--accent);
-    margin-bottom: 0.4rem;
-  }
-  .frame-step .step-detail {
-    font-family: var(--mono);
-    font-size: 0.62rem;
-    color: var(--text);
-    line-height: 1.5;
-  }
-  .frame-arrow {
-    position: absolute;
-    right: -1rem;
-    top: 50%;
-    transform: translateY(-50%);
-    color: var(--accent2);
-    font-size: 1.2rem;
-    z-index: 5;
-  }
-
-  /* Tables */
-  table.data {
-    width: 100%;
-    border-collapse: collapse;
-    font-family: var(--mono);
-    font-size: 0.7rem;
-    margin: 0.5rem 0;
-  }
-  table.data th {
-    text-align: left;
-    padding: 0.5rem;
-    border-bottom: 2px solid var(--accent);
-    color: var(--accent);
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    font-size: 0.62rem;
-  }
-  table.data td {
-    padding: 0.5rem;
-    border-bottom: 1px solid var(--border);
-    vertical-align: top;
-  }
-  table.data tr:hover { background: rgba(0,212,255,0.04); }
-  table.data .verdict-pass { color: var(--accent3); font-weight: 700; }
-  table.data .verdict-fail { color: var(--danger); font-weight: 700; }
-  table.data .verdict-warn { color: var(--accent2); font-weight: 700; }
-
-  /* Timeline */
-  .timeline-item {
-    display: grid;
-    grid-template-columns: 60px 1fr;
-    gap: 0.75rem;
-    padding: 0.5rem 0;
-    border-bottom: 1px solid var(--border);
-    font-family: var(--mono);
-    font-size: 0.72rem;
-  }
-  .timeline-item:last-child { border-bottom: none; }
-  .timeline-time {
-    color: var(--accent2);
-    font-weight: 700;
-  }
-  .timeline-event { color: var(--text); line-height: 1.5; }
-
-  /* Hypothesis cards */
-  .hypothesis-card {
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    padding: 0.9rem;
-    margin: 0.5rem 0;
-    border-left-width: 4px;
-  }
-  .hypothesis-card.rejected { border-left-color: var(--danger); }
-  .hypothesis-card.partial  { border-left-color: var(--accent2); }
-  .hypothesis-card.win      { border-left-color: var(--accent3); background: rgba(57,255,20,0.06); }
-  .hyp-name {
-    font-weight: 700;
-    color: var(--accent);
-    font-size: 0.78rem;
-    margin-bottom: 0.3rem;
-  }
-  .hyp-verdict {
-    font-family: var(--mono);
-    font-size: 0.62rem;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    margin-bottom: 0.4rem;
-  }
-  .hyp-verdict.rejected { color: var(--danger); }
-  .hyp-verdict.partial  { color: var(--accent2); }
-  .hyp-verdict.win      { color: var(--accent3); }
-  .hyp-detail {
-    font-family: var(--mono);
-    font-size: 0.65rem;
-    color: var(--text);
-    line-height: 1.6;
-  }
-
-  /* Mechanism diagram */
-  .mech-diagram {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    padding: 1rem;
-    font-family: var(--mono);
-    font-size: 0.65rem;
-    line-height: 1.7;
-    color: var(--text);
-    white-space: pre-wrap;
-    margin: 0.5rem 0;
-  }
-  .mech-diagram .accent { color: var(--accent); }
-  .mech-diagram .danger { color: var(--danger); }
-  .mech-diagram .ok { color: var(--accent3); }
-  .mech-diagram .gold { color: var(--accent4); }
-
-  /* CLI block */
-  .cli {
-    background: #04070d;
-    border-left: 3px solid var(--accent3);
-    padding: 0.7rem 1rem;
-    font-family: var(--mono);
-    font-size: 0.7rem;
-    color: var(--accent3);
-    margin: 0.4rem 0;
-    overflow-x: auto;
-  }
-
-  /* Concept checklist */
-  .check-item {
-    display: grid;
-    grid-template-columns: 24px 1fr;
-    gap: 0.6rem;
-    padding: 0.5rem 0;
-    border-bottom: 1px solid var(--border);
-    align-items: start;
-  }
-  .check-item:last-child { border-bottom: none; }
-  .check-icon {
-    color: var(--accent3);
-    font-weight: 700;
-    font-family: var(--mono);
-  }
-  .check-text {
-    font-size: 0.74rem;
-    line-height: 1.55;
-    color: var(--text);
-  }
-  .check-text strong { color: var(--accent); font-weight: 700; }
-
-  /* Resource list */
-  .res-item {
-    display: flex;
-    gap: 0.75rem;
-    padding: 0.5rem 0;
-    border-bottom: 1px dashed var(--border);
-    align-items: center;
-  }
-  .res-item:last-child { border-bottom: none; }
-  .res-tag {
-    font-family: var(--mono);
-    font-size: 0.55rem;
-    background: var(--border);
-    color: var(--accent);
-    padding: 0.2rem 0.5rem;
-    letter-spacing: 0.08em;
-    border-radius: 2px;
-    min-width: 70px;
-    text-align: center;
-  }
-  .res-tag.pcap { background: rgba(255,107,53,0.2); color: var(--accent2); }
-  .res-tag.docx { background: rgba(255,215,0,0.2); color: var(--accent4); }
-  .res-tag.html { background: rgba(0,212,255,0.2); color: var(--accent); }
-  .res-tag.md   { background: rgba(57,255,20,0.2); color: var(--accent3); }
-  .res-link a {
-    color: var(--text);
-    text-decoration: none;
-    font-size: 0.74rem;
-  }
-  .res-link a:hover { color: var(--accent); }
-  .res-desc {
-    font-family: var(--mono);
-    font-size: 0.6rem;
-    color: var(--muted);
-    margin-left: auto;
-  }
-
-  /* Footer */
-  .footer {
-    padding: 1.5rem 3rem;
-    border-top: 1px solid var(--border);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: var(--surface);
-    font-family: var(--mono);
-    font-size: 0.65rem;
-    color: var(--muted);
-  }
-  .footer-sig { color: var(--accent3); }
-
-  .live-dot {
-    display: inline-block;
-    width: 8px;
-    height: 8px;
-    background: var(--danger);
-    border-radius: 50%;
-    margin-right: 0.5rem;
-    animation: pulse 1.5s infinite;
-  }
-  @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.3; }
-  }
-
-  @media (max-width: 768px) {
-    .main { grid-template-columns: 1fr; }
-    .panel { border-right: none; }
-    .stat-bar { grid-template-columns: repeat(2, 1fr); }
-    .stat:nth-child(2n) { border-right: none; }
-    .framework-flow { grid-template-columns: 1fr; }
-    .frame-arrow { display: none; }
-    .header { flex-direction: column; gap: 1rem; padding: 1.5rem; }
-    .header-right { text-align: left; }
-  }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Libre Baskerville', Georgia, serif; background: #FFFFFF; color: #111111; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 48px 24px 72px; }
+.container { max-width: 760px; width: 100%; }
+.nyt-rule-top { border: none; border-top: 3px solid #111; margin-bottom: 6px; }
+.nyt-rule-thin { border: none; border-top: 1px solid #111; margin-bottom: 18px; }
+.nyt-logo { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.22em; color: #666; text-align: center; margin-bottom: 6px; }
+.byline { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.72rem; color: #666; margin-bottom: 14px; letter-spacing: 0.02em; }
+.byline strong { color: #111; font-weight: 700; }
+h1 { font-family: 'Libre Baskerville', Georgia, serif; font-size: 2.2rem; font-weight: 700; color: #111; line-height: 1.15; margin-bottom: 14px; }
+.subtitle { font-family: 'Libre Baskerville', Georgia, serif; font-size: 1rem; font-style: italic; color: #444; line-height: 1.8; margin-bottom: 20px; border-bottom: 1px solid #E2E2E2; padding-bottom: 28px; }
+.section-label { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.18em; color: #326891; margin: 32px 0 12px; padding-bottom: 6px; border-bottom: 2px solid #326891; display: block; }
+h2 { font-family: 'Libre Baskerville', Georgia, serif; font-size: 1.45rem; font-weight: 700; color: #111; margin: 0 0 12px; }
+h3 { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #326891; margin: 24px 0 10px; }
+p { font-size: 0.97rem; line-height: 1.85; color: #222; margin-bottom: 12px; }
+ul, ol { padding-left: 22px; margin-bottom: 14px; }
+li { font-size: 0.95rem; line-height: 1.8; color: #222; margin-bottom: 4px; }
+code { font-family: 'SF Mono', Consolas, monospace; font-size: 0.82rem; background: #F4F4F4; border: 1px solid #E2E2E2; padding: 1px 5px; border-radius: 3px; color: #326891; }
+pre { background: #F8F8F8; border: 1px solid #E2E2E2; border-radius: 4px; padding: 16px; overflow-x: auto; margin: 12px 0 18px; }
+pre code { background: none; border: none; padding: 0; color: #111; font-size: 0.83rem; line-height: 1.65; }
+table { width: 100%; border-collapse: collapse; margin: 12px 0 20px; font-size: 0.88rem; }
+th { background: #F4F4F4; font-family: 'Libre Franklin', Arial, sans-serif; font-weight: 700; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: #326891; padding: 8px 10px; border: 1px solid #E2E2E2; text-align: left; }
+td { padding: 8px 10px; border: 1px solid #E2E2E2; color: #222; vertical-align: top; }
+tr:nth-child(even) td { background: #FAFAFA; }
+.badge { display: inline-block; padding: 2px 8px; border-radius: 2px; font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; margin: 1px; }
+.done { background: #E8F5E9; color: #2E7D32; border: 1px solid #A5D6A7; }
+.fail { background: #FBE9E9; color: #C62828; border: 1px solid #EF9A9A; }
+.partial { background: #FFF3E0; color: #E65100; border: 1px solid #FFCC80; }
+.win { background: #E1F5FE; color: #0277BD; border: 1px solid #81D4FA; }
+.box { border-left: 3px solid #326891; background: #F0F7FF; padding: 12px 16px; margin: 14px 0; border-radius: 0 4px 4px 0; }
+.box p { margin: 0; font-size: 0.92rem; }
+.box.warn { border-left-color: #F57F17; background: #FFFBF0; }
+.box.ok { border-left-color: #2E7D32; background: #F1F8F1; }
+.divider { border: none; border-top: 1px solid #E2E2E2; margin: 32px 0; }
+.toc { background: #F8F8F8; border: 1px solid #E2E2E2; border-radius: 4px; padding: 18px 22px; margin-bottom: 36px; }
+.toc-title { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.15em; color: #666; margin-bottom: 10px; }
+.toc a { display: block; font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.85rem; color: #326891; text-decoration: none; padding: 4px 0; border-bottom: 1px dotted #E2E2E2; }
+.toc a:hover { color: #111; }
+.footer { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.72rem; color: #999; text-align: center; margin-top: 48px; padding-top: 16px; border-top: 1px solid #E2E2E2; }
+a { color: #326891; }
+a:hover { color: #111; }
+.res-block { margin: 14px 0 22px; }
+.res-cat { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: #666; margin: 18px 0 6px; }
+.res-list { list-style: none; padding: 0; }
+.res-list li { display: block; padding: 12px 16px; border: 1px solid #E2E2E2; border-radius: 4px; margin-bottom: 8px; background: #FAFAFA; transition: all 0.15s; }
+.res-list li:hover { background: #F0F7FF; border-color: #326891; }
+.res-list a { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.95rem; font-weight: 600; color: #326891; text-decoration: none; }
+.res-list a:hover { text-decoration: underline; color: #111; }
+.res-list .res-meta { display: block; font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.78rem; color: #555; margin-top: 4px; font-weight: 400; line-height: 1.6; }
+.res-list .res-tag { display: inline-block; font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; padding: 2px 7px; border-radius: 2px; margin-right: 8px; vertical-align: middle; }
+.res-tag.pcap { background: #FFF3E0; color: #E65100; border: 1px solid #FFCC80; }
+.res-tag.pcap-good { background: #E8F5E9; color: #2E7D32; border: 1px solid #A5D6A7; }
+.res-tag.pcap-validation { background: #C8E6C9; color: #1B5E20; border: 1px solid #66BB6A; }
+.res-tag.tech { background: #E3F2FD; color: #1565C0; border: 1px solid #90CAF9; }
+.res-tag.docx { background: #FFF8E1; color: #F57F17; border: 1px solid #FFE082; }
+.res-tag.md { background: #F3E5F5; color: #6A1B9A; border: 1px solid #CE93D8; }
+.res-tag.html { background: #ECEFF1; color: #455A64; border: 1px solid #B0BEC5; }
+.stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 20px 0 30px; }
+.stat-card { border: 1px solid #E2E2E2; border-radius: 4px; padding: 12px 14px; }
+.stat-num { font-family: 'Libre Baskerville', Georgia, serif; font-size: 1.5rem; font-weight: 700; color: #111; }
+.stat-label { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.7rem; color: #666; text-transform: uppercase; letter-spacing: 0.08em; margin-top: 2px; }
+.stat-num.win { color: #2E7D32; }
+.stat-num.fail { color: #C62828; }
+.stat-num.warn { color: #E65100; }
+.framework { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 14px 0 20px; }
+.f-step { border: 1px solid #326891; border-radius: 4px; padding: 12px; background: #F0F7FF; }
+.f-step .f-num { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.6rem; font-weight: 700; color: #326891; letter-spacing: 0.1em; text-transform: uppercase; }
+.f-step .f-title { font-family: 'Libre Baskerville', Georgia, serif; font-size: 1rem; font-weight: 700; color: #111; margin: 4px 0 6px; }
+.f-step .f-detail { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.78rem; color: #444; line-height: 1.55; }
+@media (max-width: 700px) {
+  .framework { grid-template-columns: 1fr; }
+  .stats { grid-template-columns: 1fr 1fr; }
+}
 </style>
 </head>
 <body>
+<div class="container">
 
-<!-- HEADER -->
-<div class="header">
-  <div class="header-left">
-    <h1>EOD Blueprint</h1>
-    <div class="subtitle">DHCP &amp; WPA2 Key-State Forensics — Applied EAPOL</div>
-  </div>
-  <div class="header-right">
-    <div class="date">MAY 07 2026</div>
-    <div>Session: DHCP MacBook Incident</div>
-    <div>Lab: Horizon Custom Fabrication / SW1-EXOS</div>
-  </div>
-</div>
+  <hr class="nyt-rule-top">
+  <p class="nyt-logo">E2E Network Deployment &mdash; Lab Journal</p>
+  <hr class="nyt-rule-thin">
+  <p class="byline">By <strong>Khursheed Khan</strong> &nbsp;&bull;&nbsp; May 7, 2026 &nbsp;&bull;&nbsp; DHCP Forensics Session</p>
 
-<!-- STAT BAR -->
-<div class="stat-bar">
-  <div class="stat">
-    <div class="stat-label">Pcaps Analyzed</div>
-    <div class="stat-value">4</div>
-  </div>
-  <div class="stat">
-    <div class="stat-label">MacBook MACs Seen</div>
-    <div class="stat-value warn">4</div>
-  </div>
-  <div class="stat">
-    <div class="stat-label">Hypotheses Tested</div>
-    <div class="stat-value">4</div>
-  </div>
-  <div class="stat">
-    <div class="stat-label">Eliminated</div>
-    <div class="stat-value danger">3</div>
-  </div>
-  <div class="stat">
-    <div class="stat-label">Final Answer</div>
-    <div class="stat-value ok">(b)</div>
-  </div>
-  <div class="stat">
-    <div class="stat-label">DORA Time (post-fix)</div>
-    <div class="stat-value gold">1.1s</div>
-  </div>
-</div>
+  <h1>DHCP &amp; WPA2 Key-State Forensics: Diagnosing the May 6 Lab Failure</h1>
+  <p class="subtitle">A Socratic walk-through ruling out four hypotheses to land on a single root cause &mdash; backed by ground-truth proof from a post-recovery pcap. The same MAC that failed seven DHCP Discovers in silence on May 6 completes a clean DORA in under one second on May 7. Only one variable changed.</p>
 
-<!-- MAIN GRID -->
-<div class="main">
+  <div class="stats">
+    <div class="stat-card"><div class="stat-num">4</div><div class="stat-label">Pcaps Analyzed</div></div>
+    <div class="stat-card"><div class="stat-num warn">4</div><div class="stat-label">MacBook MACs</div></div>
+    <div class="stat-card"><div class="stat-num">5</div><div class="stat-label">Hypotheses Tested</div></div>
+    <div class="stat-card"><div class="stat-num fail">4</div><div class="stat-label">Eliminated</div></div>
+    <div class="stat-card"><div class="stat-num win">(b)</div><div class="stat-label">Final Answer</div></div>
+    <div class="stat-card"><div class="stat-num">9</div><div class="stat-label">Concepts Mastered</div></div>
+  </div>
 
-  <!-- PANEL 01 — DIAGNOSTIC FRAMEWORK (full-width, the meta-lesson) -->
-  <div class="panel full-width">
-    <div class="panel-header">
-      <span class="panel-num">01</span>
-      <span class="panel-title" style="color: var(--accent4)">Diagnostic Framework — The Meta-Pattern</span>
+  <div class="toc">
+    <div class="toc-title">Contents</div>
+    <a href="#framework">1. Diagnostic Framework — Symptom &rarr; Hypothesis &rarr; Test &rarr; Validation</a>
+    <a href="#timeline">2. Symptom Timeline (May 6 incident)</a>
+    <a href="#macs">3. Four MacBook MACs — Apple Per-SSID Privacy</a>
+    <a href="#hypotheses">4. Hypothesis Arena — 5 Tested, 1 Wins</a>
+    <a href="#elimination">5. AP3000 Internal-Tables — 4-Option Elimination</a>
+    <a href="#tk-gtk">6. The Plot Twist — Why iPhone Failed Too (TK vs GTK)</a>
+    <a href="#validation">7. Ground-Truth Validation — Same MAC, Before/After</a>
+    <a href="#diagnostic">8. XIQ AP3000 Diagnostic Procedure (Next Time, Before Reboot)</a>
+    <a href="#concepts">9. Concepts Mastered</a>
+    <a href="#resources">10. Linked Resources &amp; References</a>
+    <a href="#next">11. Next Steps</a>
+  </div>
+
+  <span class="section-label">Method</span>
+  <h2 id="framework">Diagnostic Framework</h2>
+  <p>Every troubleshooting walk follows this four-step loop. Skipping any step degrades to "guessing" or "tool-chasing." Today's incident was solved by running this loop five times — once per hypothesis tested.</p>
+  <div class="framework">
+    <div class="f-step">
+      <div class="f-num">Step 1</div>
+      <div class="f-title">Symptoms</div>
+      <div class="f-detail">What is observable? Capture <em>every</em> symptom — even contradictions. Contradictions are clues, not noise.</div>
     </div>
-    <div class="panel-body">
-      <p style="font-size: 0.78rem; color: var(--muted); margin-bottom: 1rem; line-height: 1.55;">
-        Every troubleshooting walk follows this loop. Skipping any step degrades to "guessing" or "tool-chasing." Today's DHCP
-        incident was solved by running this loop three times — once for each rejected hypothesis, then a fourth time for the
-        winner.
-      </p>
-      <div class="framework-flow">
-        <div class="frame-step active">
-          <div class="step-num">STEP 1</div>
-          <div class="step-title">SYMPTOMS</div>
-          <div class="step-detail">
-            What is observable?<br>
-            (Pcap, logs, "AP not responding", reboot fixed it.) Capture EVERY symptom, even ones that
-            seem contradictory — the contradictions are clues.
-          </div>
-          <div class="frame-arrow">→</div>
-        </div>
-        <div class="frame-step active">
-          <div class="step-num">STEP 2</div>
-          <div class="step-title">HYPOTHESIS</div>
-          <div class="step-detail">
-            What single mechanism explains EVERY symptom?<br>
-            If a hypothesis only explains some symptoms, it's incomplete. Force it to fit ALL data —
-            or move on.
-          </div>
-          <div class="frame-arrow">→</div>
-        </div>
-        <div class="frame-step active">
-          <div class="step-num">STEP 3</div>
-          <div class="step-title">TEST</div>
-          <div class="step-detail">
-            What's the most diagnostic question?<br>
-            Pcaps, CLI dumps, counter diffs, reproduce-the-failure tests. Pick the test that
-            <em style="color: var(--accent)">distinguishes</em> between competing hypotheses.
-          </div>
-          <div class="frame-arrow">→</div>
-        </div>
-        <div class="frame-step active">
-          <div class="step-num">STEP 4</div>
-          <div class="step-title">VALIDATION</div>
-          <div class="step-detail">
-            Did the data confirm or break the hypothesis?<br>
-            Scripts · Debugs · Pcaps · Counter snapshots · Repro. If validation fails → loop back to
-            Step 2 with a refined hypothesis.
-          </div>
-        </div>
-      </div>
-      <p style="font-size: 0.7rem; color: var(--muted); margin-top: 1rem; font-style: italic;">
-        "Tools to collect data don't replace understanding. The framework is what turns data into diagnosis."
-      </p>
+    <div class="f-step">
+      <div class="f-num">Step 2</div>
+      <div class="f-title">Hypothesis</div>
+      <div class="f-detail">What single mechanism explains <em>all</em> symptoms? If a hypothesis only explains some, it's incomplete.</div>
+    </div>
+    <div class="f-step">
+      <div class="f-num">Step 3</div>
+      <div class="f-title">Test</div>
+      <div class="f-detail">Pick the test that <em>distinguishes</em> between competing hypotheses. Pcaps, CLI dumps, counter diffs.</div>
+    </div>
+    <div class="f-step">
+      <div class="f-num">Step 4</div>
+      <div class="f-title">Validation</div>
+      <div class="f-detail">Did the data confirm or break the hypothesis? Scripts &middot; Debugs &middot; Pcaps &middot; Counter snapshots &middot; Repro.</div>
     </div>
   </div>
+  <div class="box"><p>"Tools to collect data don't replace understanding. The framework is what turns data into diagnosis."</p></div>
 
-  <!-- PANEL 02 — Symptom Timeline -->
-  <div class="panel">
-    <div class="panel-header">
-      <span class="panel-num">02</span>
-      <span class="panel-title" style="color: var(--accent2)"><span class="live-dot"></span>Symptom Timeline (May 6)</span>
-    </div>
-    <div class="panel-body">
-      <div class="timeline-item">
-        <div class="timeline-time">T0</div>
-        <div class="timeline-event">iPhone working fine on Wi-Fi Corp + Guest. Lease 10.20.0.101 active. Baseline good.</div>
-      </div>
-      <div class="timeline-item">
-        <div class="timeline-time">T1</div>
-        <div class="timeline-event">User turns on MacBook Wi-Fi (MacBook also wired on Port 5).</div>
-      </div>
-      <div class="timeline-item">
-        <div class="timeline-time">T2</div>
-        <div class="timeline-event">iPhone DHCP <span class="accent" style="color:var(--danger)">breaks</span>. MacBook also can't get DHCP on either SSID.</div>
-      </div>
-      <div class="timeline-item">
-        <div class="timeline-time">T3</div>
-        <div class="timeline-event">Pcap from MacBook en0: <span style="color:var(--accent2)">7 DHCP DISCOVERs</span> over ~50s. <strong style="color:var(--danger)">ZERO server replies.</strong> APIPA self-assigned.</div>
-      </div>
-      <div class="timeline-item">
-        <div class="timeline-time">T4</div>
-        <div class="timeline-event">Reboot APs + MacBook → all working. Root cause unknown at time of fix. Reboot consumed the evidence.</div>
-      </div>
-      <p style="font-size: 0.68rem; color: var(--muted); margin-top: 0.8rem; font-family: var(--mono);">
-        ⚠ Critical clue: <strong>"MacBook joins → iPhone breaks"</strong> means the failure is shared infrastructure, not client-side.
-      </p>
-    </div>
-  </div>
+  <hr class="divider">
 
-  <!-- PANEL 03 — Four MacBook MACs -->
-  <div class="panel">
-    <div class="panel-header">
-      <span class="panel-num">03</span>
-      <span class="panel-title" style="color: var(--accent3)">Apple Per-SSID Privacy MAC — 4 MACs, 1 Device</span>
-    </div>
-    <div class="panel-body">
-      <table class="data">
-        <thead>
-          <tr><th>Interface</th><th>MAC</th><th>UAA / LAA</th></tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>Wired (Port 5, VLAN 10)</td>
-            <td><code>80:69:1a:dd:0f:c3</code></td>
-            <td class="verdict-pass">UAA — burned-in</td>
-          </tr>
-          <tr>
-            <td>Wi-Fi Corp (VLAN 20, May 6 BAD)</td>
-            <td><code>e2:68:dc:4d:37:3c</code></td>
-            <td class="verdict-warn">LAA — privacy</td>
-          </tr>
-          <tr>
-            <td>Wi-Fi Guest (VLAN 30, May 6 BAD)</td>
-            <td><code>4e:60:81:bb:23:18</code></td>
-            <td class="verdict-warn">LAA — privacy</td>
-          </tr>
-          <tr>
-            <td>Wi-Fi Corp (May 7 post-reboot)</td>
-            <td><code>84:2f:57:94:bd:cf</code></td>
-            <td class="verdict-pass">UAA — hardware</td>
-          </tr>
-        </tbody>
-      </table>
-      <p style="font-size: 0.7rem; color: var(--muted); margin-top: 0.8rem;">
-        Apple privacy MAC randomizes <strong>per SSID per device</strong>. Same machine = different MAC on every SSID.
-        <strong>This destroys Alex/NotebookLLM's "MAC flap" hypothesis</strong> — wired and wireless never share a MAC.
-      </p>
-      <p style="font-size: 0.66rem; color: var(--muted); margin-top: 0.5rem;">
-        iPhone Corp baseline MAC: <code>62:75:85:f6:4e:3e</code> (LAA, lease 10.20.0.101).
-      </p>
-    </div>
-  </div>
+  <span class="section-label">The Incident</span>
+  <h2 id="timeline">Symptom Timeline (May 6)</h2>
+  <table>
+    <thead><tr><th width="60">T</th><th>Event</th></tr></thead>
+    <tbody>
+      <tr><td><code>T0</code></td><td>iPhone working fine on Wi-Fi Corp + Guest. Lease 10.20.0.101 active. Baseline good.</td></tr>
+      <tr><td><code>T1</code></td><td>User turns on MacBook Wi-Fi (MacBook also wired on Port 5).</td></tr>
+      <tr><td><code>T2</code></td><td><strong>iPhone DHCP breaks.</strong> MacBook also can't get DHCP on either SSID.</td></tr>
+      <tr><td><code>T3</code></td><td>Pcap from MacBook <code>en0</code>: <strong>7 DHCP DISCOVERs</strong> over ~50 s, <strong>0 server replies</strong>. APIPA self-assigned.</td></tr>
+      <tr><td><code>T4</code></td><td>Reboot APs + MacBook &rarr; all working. Reboot consumed the evidence.</td></tr>
+    </tbody>
+  </table>
+  <div class="box warn"><p><strong>Critical clue:</strong> <em>"MacBook joins &rarr; iPhone breaks"</em> means the failure lives in shared infrastructure (the AP), not in the client.</p></div>
 
-  <!-- PANEL 04 — Hypothesis Arena -->
-  <div class="panel full-width">
-    <div class="panel-header">
-      <span class="panel-num">04</span>
-      <span class="panel-title" style="color: var(--accent)">Hypothesis Arena — 4 Tested, 1 Wins</span>
-    </div>
-    <div class="panel-body">
+  <h3>Lab topology (May 6)</h3>
+  <pre><code>QF Modem (192.168.0.1)
+    │
+    └── SW1 EXOS (192.168.0.28)
+        ├── Port 1  → QF Modem uplink
+        ├── Port 3  → AP1 (AP3000) — VLAN 20 + 30 tagged, VLAN 1 untagged
+        ├── Port 5  → MacBook wired (10.10.0.100, VLAN 10)
+        └── Port 10 → SW2/AP2 (UNPLUGGED during incident)
 
-      <div class="hypothesis-card rejected">
-        <div class="hyp-name">H1 — Alex/NotebookLLM: "MAC Flap between Port 5 and Port 3"</div>
-        <div class="hyp-verdict rejected">✗ REJECTED — premise is factually wrong</div>
-        <div class="hyp-detail">
-          Claim: same MAC appears on both wired (Port 5) and wireless (via AP, Port 3) → SW1 FDB locks → DHCP listener stalls.<br>
-          <strong>Test:</strong> Look up the MacBook's actual MACs. Wired = <code>80:69:1a</code> (UAA, Apple OUI). Wi-Fi Corp = <code>e2:68:dc</code> (LAA, privacy). Wi-Fi Guest = <code>4e:60:81</code> (LAA, privacy).<br>
-          <strong>Validation:</strong> Three different MACs, no overlap. Nothing flaps. All three of Alex's Socratic Qs collapse with this premise.
-        </div>
-      </div>
+VLAN 10 — Wired Corporate (10.10.0.0/24)   gateway 10.10.0.1
+VLAN 20 — Wi-Fi Corporate (10.20.0.0/24)   gateway 10.20.0.1
+VLAN 30 — Wi-Fi Guest    (10.30.0.0/24)   gateway 10.30.0.1
+SW1 is the DHCP server for all three VLANs.</code></pre>
 
-      <div class="hypothesis-card partial">
-        <div class="hyp-name">H2 — Alex Q1: "Wrong VLAN landing (192.168.1.1 modem leak)"</div>
-        <div class="hyp-verdict partial">⚠ PARTIAL — fits one pcap, not the other</div>
-        <div class="hyp-detail">
-          Claim: MacBook traffic landing on Default VLAN, modem responds with 192.168.1.1.<br>
-          <strong>Test:</strong> Compare both bad pcaps for non-MacBook traffic.<br>
-          <strong>Validation:</strong> v4 (Guest) shows one IGMP from 192.168.1.1 ✓. <strong>v5 (Corporate) is completely silent — zero non-MacBook traffic.</strong> Theory only explains 50% of failure.
-        </div>
-      </div>
+  <hr class="divider">
 
-      <div class="hypothesis-card rejected">
-        <div class="hyp-name">H3 — Bridge MAC FDB at AP3000</div>
-        <div class="hyp-verdict rejected">✗ REJECTED — bridges FLOOD, don't drop</div>
-        <div class="hyp-detail">
-          Claim: AP's internal Linux software bridge has bad/stale FDB entry for MacBook MAC → frame dropped.<br>
-          <strong>Test:</strong> What does a Linux bridge do with unknown unicast destination MAC?<br>
-          <strong>Validation:</strong> <code>brctl</code>-style bridges <em>flood</em> unknowns to all ports. So a missing FDB entry would cause frames to be flooded to wired Ethernet → SW1 Port 3 would still receive and learn the MAC. SW1 didn't learn the MAC ⇒ frames died <em>upstream</em> of bridge FDB lookup.
-        </div>
-      </div>
+  <span class="section-label">Apple Privacy MAC</span>
+  <h2 id="macs">Four MacBook MACs &mdash; Same Device</h2>
+  <p>Apple's <em>Private Wi-Fi Address</em> randomizes the wireless MAC <strong>per SSID per device</strong>. Same machine = different MAC on every SSID. This single fact destroys Alex/NotebookLLM's "MAC flap" hypothesis before it begins — wired and wireless interfaces never share a MAC.</p>
+  <table>
+    <thead><tr><th>Interface</th><th>MAC</th><th>Type</th></tr></thead>
+    <tbody>
+      <tr><td>Wired (Port 5, VLAN 10)</td><td><code>80:69:1a:dd:0f:c3</code></td><td><span class="badge done">UAA — burned-in</span></td></tr>
+      <tr><td>Wi-Fi Corp (May 6 BAD)</td><td><code>e2:68:dc:4d:37:3c</code></td><td><span class="badge partial">LAA — privacy</span></td></tr>
+      <tr><td>Wi-Fi Guest (May 6 BAD)</td><td><code>4e:60:81:bb:23:18</code></td><td><span class="badge partial">LAA — privacy</span></td></tr>
+      <tr><td>Wi-Fi Corp (May 7 post-reboot)</td><td><code>84:2f:57:94:bd:cf</code></td><td><span class="badge done">UAA — hardware</span></td></tr>
+    </tbody>
+  </table>
+  <p>iPhone Corp baseline MAC (working): <code>62:75:85:f6:4e:3e</code> (LAA, lease 10.20.0.101).</p>
 
-      <div class="hypothesis-card rejected">
-        <div class="hyp-name">H4 — Per-client TX queue / buffer</div>
-        <div class="hyp-verdict rejected">✗ REJECTED — downstream-only, can't explain bidirectional loss</div>
-        <div class="hyp-detail">
-          Claim: AP's per-client TX queue (powersave hold, A-MPDU buffer) wedged for MacBook → frames not delivered.<br>
-          <strong>Test:</strong> What direction is TX queue? Does symptom span both?<br>
-          <strong>Validation:</strong> TX queue is AP→client (downstream). But SW1 FDB never saw upstream DISCOVERs either. Queue alone can't break upstream. Also, queue wedges typically affect all clients on the radio, not one MAC. Reboot would fix once but recur if cause persists — user saw single recovery.
-        </div>
-      </div>
+  <hr class="divider">
 
-      <div class="hypothesis-card win">
-        <div class="hyp-name">H5 — WPA2 Key State (TK + GTK) at AP3000</div>
-        <div class="hyp-verdict win">✓ WINS — explains every fact, including iPhone breaking</div>
-        <div class="hyp-detail">
-          Claim: 4-way EAPOL handshake wedged → bad TK install for MacBook (silent decrypt failure both directions). Then GTK rotation triggered by MacBook's deauth → Group Key Handshake to iPhone wedges → iPhone deaf to broadcasts.<br>
-          <strong>Test:</strong> Does this explain BOTH MacBook silence AND iPhone failure AND silent nature AND reboot fix?<br>
-          <strong>Validation:</strong> ✓ Bidirectional (TK encrypts both ways). ✓ MAC-specific (each client has unique PTK). ✓ Silent (encrypted-frame-discard has no client-visible error). ✓ Reboot = full re-handshake. ✓ GTK extension explains all-clients failure when one client's handshake fails. <strong>Tie-in to May 4 EOD Concepts #4 (KEK vs TK) and #5 (GTK Impact).</strong>
-        </div>
-      </div>
+  <span class="section-label">Hypothesis Arena</span>
+  <h2 id="hypotheses">Five Hypotheses Tested, One Wins</h2>
 
-    </div>
-  </div>
+  <h3>H1 — Alex/NotebookLLM: "MAC Flap between Port 5 and Port 3" &nbsp;<span class="badge fail">REJECTED</span></h3>
+  <p><strong>Claim:</strong> Same MAC appears on both wired (Port 5) and wireless (via AP, Port 3); SW1 FDB locks; DHCP listener stalls.</p>
+  <p><strong>Test:</strong> Look up the MacBook's actual MACs.</p>
+  <p><strong>Validation:</strong> Three different MACs on the same device — wired UAA, plus a unique LAA per SSID. Nothing flaps. All three of Alex's downstream Socratic questions collapse with this premise.</p>
 
-  <!-- PANEL 05 — 4-table elimination -->
-  <div class="panel">
-    <div class="panel-header">
-      <span class="panel-num">05</span>
-      <span class="panel-title" style="color: var(--accent2)">AP3000 Internal Tables — 4-Option Elimination</span>
-    </div>
-    <div class="panel-body">
-      <table class="data">
-        <thead>
-          <tr><th>#</th><th>Table</th><th>Direction</th><th>Silent?</th><th>Verdict</th></tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>(a)</td>
-            <td>WLAN client state</td>
-            <td>Both</td>
-            <td>Sometimes</td>
-            <td class="verdict-warn">Runner-up</td>
-          </tr>
-          <tr style="background: rgba(57,255,20,0.06);">
-            <td><strong>(b)</strong></td>
-            <td><strong>WPA2 key state (TK + GTK)</strong></td>
-            <td><strong>Both</strong></td>
-            <td><strong>Yes</strong></td>
-            <td class="verdict-pass">✓ WINS</td>
-          </tr>
-          <tr>
-            <td>(c)</td>
-            <td>Bridge MAC FDB</td>
-            <td>Forwarding</td>
-            <td>NO — floods</td>
-            <td class="verdict-fail">✗ Eliminated</td>
-          </tr>
-          <tr>
-            <td>(d)</td>
-            <td>Per-client TX queue</td>
-            <td>Downstream only</td>
-            <td>Sometimes</td>
-            <td class="verdict-fail">✗ Eliminated</td>
-          </tr>
-        </tbody>
-      </table>
-      <p style="font-size: 0.66rem; color: var(--muted); margin-top: 0.8rem; line-height: 1.55;">
-        <strong style="color:var(--accent3)">Why (b) wins:</strong> Bidirectional, per-client OR all-clients (TK vs GTK), silent by design,
-        clearable by re-handshake. Only option that survives every elimination test simultaneously.
-      </p>
-    </div>
-  </div>
+  <h3>H2 — Alex Q1: "Wrong VLAN landing — modem leak via 192.168.1.1" &nbsp;<span class="badge partial">PARTIAL</span></h3>
+  <p><strong>Claim:</strong> MacBook traffic landed on Default VLAN; modem responded with 192.168.1.1.</p>
+  <p><strong>Test:</strong> Compare both bad pcaps for non-MacBook traffic.</p>
+  <p><strong>Validation:</strong> v4 (Guest) shows one IGMP from 192.168.1.1 ✓. <strong>v5 (Corporate) is completely silent — zero non-MacBook traffic.</strong> Theory only explains 50% of the failure.</p>
 
-  <!-- PANEL 06 — TK vs GTK plot twist -->
-  <div class="panel">
-    <div class="panel-header">
-      <span class="panel-num">06</span>
-      <span class="panel-title" style="color: var(--accent4)">Plot Twist — Why iPhone Also Failed (GTK rotation)</span>
-    </div>
-    <div class="panel-body">
-      <p style="font-size: 0.7rem; color: var(--muted); margin-bottom: 0.8rem; line-height: 1.55;">
-        Single-client TK theory cannot explain why iPhone broke. Resolution: 802.11 has TWO keys per client session.
-      </p>
-      <table class="data">
-        <thead>
-          <tr><th>Key</th><th>Scope</th><th>Encrypts</th></tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>TK (Temporal)</td>
-            <td>Per-client unicast</td>
-            <td>AP ↔ this-one-client</td>
-          </tr>
-          <tr style="background: rgba(255,215,0,0.06);">
-            <td><strong>GTK (Group)</strong></td>
-            <td><strong>Per-BSSID broadcast</strong></td>
-            <td><strong>ALL multicast/broadcast frames</strong></td>
-          </tr>
-        </tbody>
-      </table>
-      <div class="mech-diagram" style="margin-top: 1rem;">T0  iPhone has GTK_v1, working
+  <h3>H3 — Bridge MAC FDB at AP3000 &nbsp;<span class="badge fail">REJECTED</span></h3>
+  <p><strong>Claim:</strong> AP's internal Linux software bridge has a bad/stale FDB entry for the MacBook MAC; frame dropped.</p>
+  <p><strong>Test:</strong> What does a Linux bridge do with unknown unicast destinations?</p>
+  <p><strong>Validation:</strong> Bridges <em>flood</em> unknowns to all ports — they don't drop. So a missing FDB entry would still result in SW1 Port 3 receiving the frame. SW1 didn't, so frames died <em>upstream</em> of the bridge FDB lookup — at the decryption layer.</p>
+
+  <h3>H4 — Per-client TX queue / buffer &nbsp;<span class="badge fail">REJECTED</span></h3>
+  <p><strong>Claim:</strong> AP's per-client TX queue (powersave hold, A-MPDU buffer) wedged for MacBook.</p>
+  <p><strong>Test:</strong> What direction is the TX queue? Does the symptom span both directions?</p>
+  <p><strong>Validation:</strong> TX queue is AP&rarr;client (downstream-only). But SW1's FDB never saw upstream DISCOVERs either &mdash; a downstream-only fault cannot break upstream. Queue wedges typically affect all clients on the radio, not one MAC.</p>
+
+  <h3>H5 — WPA2 Key State (TK + GTK) at AP3000 &nbsp;<span class="badge win">WINS</span></h3>
+  <p><strong>Claim:</strong> 4-way EAPOL handshake wedged &rarr; bad TK install for MacBook (silent decrypt failure both directions). GTK rotation triggered by MacBook's deauth &rarr; Group Key Handshake to iPhone wedges &rarr; iPhone deaf to broadcasts.</p>
+  <p><strong>Test:</strong> Does this explain MacBook silence AND iPhone failure AND silent nature AND reboot fix?</p>
+  <p><strong>Validation:</strong> ✓ Bidirectional (TK encrypts both ways). ✓ MAC-specific (each client has unique PTK). ✓ Silent (encrypted-frame-discard has no client-visible error). ✓ Reboot = full re-handshake. ✓ GTK extension explains all-clients failure when one client's handshake fails. <strong>Tie-in to May 4 EOD Concepts #4 (KEK vs TK) and #5 (GTK Impact).</strong></p>
+
+  <hr class="divider">
+
+  <span class="section-label">AP-Internal Tables</span>
+  <h2 id="elimination">4-Option Elimination Matrix</h2>
+  <p>The AP3000's software bridge has multiple in-memory tables. Frames pass through them in sequence. We tested each:</p>
+  <table>
+    <thead><tr><th>#</th><th>Table</th><th>Direction</th><th>Silent?</th><th>Verdict</th></tr></thead>
+    <tbody>
+      <tr><td>(a)</td><td>WLAN client state machine</td><td>Both</td><td>Sometimes (logs assoc events)</td><td><span class="badge partial">Runner-up</span></td></tr>
+      <tr style="background:#E8F5E9;"><td><strong>(b)</strong></td><td><strong>WPA2 key state (TK + GTK)</strong></td><td><strong>Both</strong></td><td><strong>Yes</strong></td><td><span class="badge done">✓ WINS</span></td></tr>
+      <tr><td>(c)</td><td>Bridge MAC FDB</td><td>Forwarding only</td><td>NO — floods</td><td><span class="badge fail">Eliminated</span></td></tr>
+      <tr><td>(d)</td><td>Per-client TX queue</td><td>Downstream only</td><td>Sometimes</td><td><span class="badge fail">Eliminated</span></td></tr>
+    </tbody>
+  </table>
+  <div class="box ok"><p><strong>Why (b) wins:</strong> Bidirectional, per-client OR all-clients (TK vs GTK), silent by design, clearable by re-handshake. Only option that survives every elimination test simultaneously.</p></div>
+
+  <hr class="divider">
+
+  <span class="section-label">Plot Twist</span>
+  <h2 id="tk-gtk">Why iPhone Failed Too &mdash; GTK Rotation</h2>
+  <p>Single-client TK theory cannot explain why iPhone broke. Resolution: 802.11 has <strong>two</strong> keys per client session.</p>
+  <table>
+    <thead><tr><th>Key</th><th>Scope</th><th>Encrypts</th></tr></thead>
+    <tbody>
+      <tr><td>TK (Temporal)</td><td>Per-client unicast</td><td>AP &harr; this-one-client</td></tr>
+      <tr style="background:#FFF8E1;"><td><strong>GTK (Group)</strong></td><td><strong>Per-BSSID broadcast</strong></td><td><strong>ALL multicast/broadcast frames</strong></td></tr>
+    </tbody>
+  </table>
+  <h3>The likely sequence that broke iPhone</h3>
+  <pre><code>T0  iPhone has GTK_v1, working
 T1  MacBook 4-way handshake wedges/times out
 T2  AP deauths MacBook (handshake never completed)
-T3  AP rotates GTK → <span class="gold">GTK_v2</span> (security: prevent failed
+T3  AP rotates GTK → GTK_v2 (security: prevent failed
     client from decrypting future broadcasts)
 T4  AP runs Group Key Handshake to push GTK_v2 to iPhone
     M1: AP sends GTK_v2 (encrypted with iPhone's KEK)
     M2: iPhone ACK back to AP
 T5  M1 or M2 wedges (lost, retried, replay counter desync)
-T6  AP commits to GTK_v2; iPhone still on <span class="danger">GTK_v1</span>
+T6  AP commits to GTK_v2; iPhone still on GTK_v1
 T7  DHCP OFFER (broadcast) → AP encrypts with GTK_v2 →
-    iPhone decrypts with GTK_v1 → MIC fail → <span class="danger">silent discard</span>
-T8  iPhone lease expires → can't renew → DISCOVER → broken</div>
-      <p style="font-size: 0.66rem; color: var(--muted); margin-top: 0.7rem;">
-        <strong>Reboot fixes:</strong> AP wipes ALL key state. Every client re-runs full 4-way handshake. Fresh GTK distributed cleanly.
-      </p>
-    </div>
-  </div>
+    iPhone decrypts with GTK_v1 → MIC fail → silent discard
+T8  iPhone lease expires → can't renew → DISCOVER → broken</code></pre>
+  <div class="box ok"><p><strong>Reboot fixes it</strong> because the AP wipes <em>all</em> key state. Every client re-runs full 4-way handshake. Fresh GTK is distributed cleanly to everyone.</p></div>
 
-  <!-- PANEL 07 — XIQ AP Diagnostic Procedure -->
-  <div class="panel full-width">
-    <div class="panel-header">
-      <span class="panel-num">07</span>
-      <span class="panel-title" style="color: var(--accent3)">XIQ AP3000 Diagnostic Procedure — Capture BEFORE Reboot</span>
-    </div>
-    <div class="panel-body">
-      <p style="font-size: 0.74rem; color: var(--muted); margin-bottom: 0.8rem; line-height: 1.55;">
-        Run via XIQ → Device 360 → Tools → SSH/CLI Session. Procedure: capture, wait 30s, capture again, diff. Save .pcap. THEN reboot.
-        Compare counters/state after reboot to confirm clean re-handshake.
-      </p>
-      <table class="data">
-        <thead>
-          <tr><th>#</th><th>Command</th><th>What it shows</th><th>Smoking gun looks like</th></tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>1</td>
-            <td><code>show client</code></td>
-            <td>Associated clients + state machine</td>
-            <td>MacBook listed but stuck at <code style="color:var(--danger)">4WAY-PENDING</code></td>
-          </tr>
-          <tr>
-            <td>2</td>
-            <td><code>show client mac &lt;MAC&gt;</code></td>
-            <td>Per-client deep dive</td>
-            <td><code style="color:var(--danger)">TK Installed: NO</code> or PTK install failed</td>
-          </tr>
-          <tr style="background: rgba(57,255,20,0.06);">
-            <td><strong>3</strong></td>
-            <td><code><strong>show counters wireless</strong></code></td>
-            <td>Decrypt errors / MIC failures</td>
-            <td class="verdict-pass"><strong>Spiking decrypt-error counter — THE confirmation</strong></td>
-          </tr>
-          <tr>
-            <td>4</td>
-            <td><code>show interface wifi0 statistics</code></td>
-            <td>Per-radio RX OK / errors / decrypt failures</td>
-            <td>Decrypt failures &gt; 0 with no plaintext output</td>
-          </tr>
-          <tr>
-            <td>5</td>
-            <td>AP packet capture, filter <code>wlan.addr == &lt;MAC&gt;</code></td>
-            <td>Raw 802.11 + decryption result</td>
-            <td><code>Protected Frame=1</code> arrives but undecodable payload</td>
-          </tr>
-        </tbody>
-      </table>
-      <div class="cli" style="margin-top: 1rem;"># Live diff procedure (next time the issue recurs):
+  <hr class="divider">
+
+  <span class="section-label">Step 4 — Validation</span>
+  <h2 id="validation">Ground-Truth Validation: Same MAC, Different Outcome</h2>
+  <p>The <code>pcap_May7_en0_validation.pcapng</code> capture (taken post-recovery) shows the same Guest LAA MAC <code>4e:60:81:bb:23:18</code> that captured 7 unanswered DISCOVERs on May 6 now <strong>completes a full DORA in under 1 second</strong>. Same SSID, same AP, same SW1, same DHCP server, same MAC — only AP key state changed.</p>
+  <table>
+    <thead><tr><th>Field</th><th>May 6 BAD (pre-reboot)</th><th>May 7 GOOD (post-reboot)</th></tr></thead>
+    <tbody>
+      <tr><td>Source pcap</td><td><a href="data/may7-dhcp/pcap_May6_v4_guest.pcapng" download><code>pcap_May6_v4_guest.pcapng</code></a></td><td><a href="data/may7-dhcp/pcap_May7_en0_validation.pcapng" download><code>pcap_May7_en0_validation.pcapng</code></a></td></tr>
+      <tr><td>Wi-Fi MAC (Guest SSID)</td><td><code>4e:60:81:bb:23:18</code></td><td><code>4e:60:81:bb:23:18</code> ← <strong>identical</strong></td></tr>
+      <tr><td>SSID / VLAN</td><td>Guest_Wireless / 30</td><td>Guest_Wireless / 30 — identical</td></tr>
+      <tr><td>DHCP server (SW1)</td><td><code>d8:e0:16:37:6c:00</code></td><td><code>d8:e0:16:37:6c:00</code> — identical</td></tr>
+      <tr><td>DISCOVERs sent</td><td>7 over 50 s</td><td>1</td></tr>
+      <tr><td>OFFER received</td><td><span class="badge fail">0 — silent</span></td><td><span class="badge done">YES — frame 109 → 10.30.0.x</span></td></tr>
+      <tr><td>DORA completion</td><td><span class="badge fail">Never</span></td><td><span class="badge done">~1 second</span></td></tr>
+    </tbody>
+  </table>
+  <div class="box ok"><p><strong>Diagnostic verdict.</strong> Bidirectional silent failure for one specific Wi-Fi MAC, cleared by re-handshake, with no other variables changed = WPA2 TK install state (option b). <strong>Confirmed by ground-truth comparison, not just elimination logic.</strong> This is what Step 4 of the framework looks like in practice.</p></div>
+
+  <hr class="divider">
+
+  <span class="section-label">Future-Proof Procedure</span>
+  <h2 id="diagnostic">XIQ AP3000 Diagnostic Procedure (Capture <em>Before</em> Reboot)</h2>
+  <p>Run via XIQ &rarr; Device 360 &rarr; Tools &rarr; SSH/CLI Session. Capture, wait 30 s, capture again, diff. Save the .pcap. <em>Then</em> reboot.</p>
+  <table>
+    <thead><tr><th width="40">#</th><th>Command</th><th>Smoking gun looks like</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td><code>show client</code></td><td>MacBook listed but stuck at <code>4WAY-PENDING</code></td></tr>
+      <tr><td>2</td><td><code>show client mac &lt;MAC&gt;</code></td><td><code>TK Installed: NO</code> or PTK install failed</td></tr>
+      <tr style="background:#E8F5E9;"><td><strong>3</strong></td><td><code><strong>show counters wireless</strong></code></td><td><strong>Spiking decrypt-error counter — THE confirmation</strong></td></tr>
+      <tr><td>4</td><td><code>show interface wifi0 statistics</code></td><td>Decrypt failures &gt; 0 with no plaintext output</td></tr>
+      <tr><td>5</td><td>AP packet capture, filter <code>wlan.addr == &lt;MAC&gt;</code></td><td><code>Protected Frame=1</code> arrives but undecodable payload</td></tr>
+    </tbody>
+  </table>
+  <pre><code># Live diff procedure (next time the issue recurs):
 ap-cli show counters wireless &gt; counters_t0.txt
 sleep 30
 ap-cli show counters wireless &gt; counters_t30.txt
 diff counters_t0.txt counters_t30.txt | grep -i "decrypt\|mic"
-# Spiking deltas = (b) confirmed in real-time</div>
-    </div>
-  </div>
+# Spiking deltas = (b) confirmed in real-time</code></pre>
 
-  <!-- PANEL 7B — Ground-Truth Validation (same MAC, before/after) -->
-  <div class="panel full-width" style="background:rgba(57,255,20,0.04);">
-    <div class="panel-header" style="background:rgba(57,255,20,0.08);">
-      <span class="panel-num">07b</span>
-      <span class="panel-title" style="color: var(--accent3)">✓ Ground-Truth Validation — Same MAC, Different Outcome</span>
-    </div>
-    <div class="panel-body">
-      <p style="font-size: 0.78rem; color: var(--muted); margin-bottom: 1rem; line-height: 1.55;">
-        The Step-4 validation in our Symptom→Hypothesis→Test→Validation framework. The same MacBook Wi-Fi MAC
-        <code style="color:var(--accent4)">4e:60:81:bb:23:18</code> that captured 7 unanswered DISCOVERs on May 6 (Guest SSID)
-        now <strong style="color:var(--accent3)">completes a full DORA in under 1 second</strong> after reboot — same SSID, same AP,
-        same SW1, same DHCP server, same MAC. <strong>Only the AP's WPA2 key state changed.</strong>
-      </p>
+  <hr class="divider">
 
-      <table class="data">
-        <thead>
-          <tr><th>Field</th><th>May 6 BAD (pre-reboot)</th><th>May 7 GOOD (post-reboot)</th></tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>Source pcap</td>
-            <td><code>pcap_May6_v4_guest.pcapng</code></td>
-            <td><code>pcap_May7_en0_validation.pcapng</code></td>
-          </tr>
-          <tr>
-            <td>MacBook Wi-Fi MAC (Guest SSID)</td>
-            <td><code>4e:60:81:bb:23:18</code></td>
-            <td class="verdict-pass"><code>4e:60:81:bb:23:18</code> ← <strong>identical</strong></td>
-          </tr>
-          <tr>
-            <td>SSID / VLAN</td>
-            <td>Guest_Wireless / 30</td>
-            <td>Guest_Wireless / 30 — <strong>identical</strong></td>
-          </tr>
-          <tr>
-            <td>DHCP server</td>
-            <td>SW1 (<code>d8:e0:16:37:6c:00</code>)</td>
-            <td>SW1 (<code>d8:e0:16:37:6c:00</code>) — <strong>identical</strong></td>
-          </tr>
-          <tr>
-            <td>DISCOVERs sent</td>
-            <td>7 over 50s</td>
-            <td>1</td>
-          </tr>
-          <tr>
-            <td>OFFER received</td>
-            <td class="verdict-fail">0 — silent</td>
-            <td class="verdict-pass">YES — frame 109 from SW1 → 10.30.0.x</td>
-          </tr>
-          <tr>
-            <td>DORA completion</td>
-            <td class="verdict-fail">Never</td>
-            <td class="verdict-pass">~1 second</td>
-          </tr>
-          <tr>
-            <td>What changed between captures?</td>
-            <td colspan="2" style="text-align:center; color:var(--accent3); font-weight:700;">
-              ONLY the AP's per-client WPA2 key state (cleared by reboot, refreshed via fresh 4-way handshake).
-              Topology, MAC, SSID, server, encryption protocol — all identical.
-            </td>
-          </tr>
-        </tbody>
-      </table>
+  <span class="section-label">Outcomes</span>
+  <h2 id="concepts">Concepts Mastered (9)</h2>
+  <ol>
+    <li><strong>Apple per-SSID privacy MAC</strong> — same device shows different LAA MAC per SSID; can revert to UAA after long disconnect or setting change.</li>
+    <li><strong>Linux software bridges flood unknowns</strong> — unknown unicast destinations are flooded, not dropped. Bridge FDB cannot be the cause of silent loss.</li>
+    <li><strong>TX queue is downstream-only</strong> — per-client TX buffers govern AP&rarr;client. Cannot explain client&rarr;AP&rarr;wire loss.</li>
+    <li><strong>TK = unicast, per-client</strong> — bad TK install = one client deaf in BOTH directions (encryption symmetric).</li>
+    <li><strong>GTK = broadcast, per-BSSID</strong> — bad GTK = ALL clients deaf to broadcasts. DHCP OFFER (broadcast) is the most common casualty.</li>
+    <li><strong>Encryption mismatch is silent</strong> — failed MIC discards happen at hardware crypto layer; no client-visible error, no log by default.</li>
+    <li><strong>Reboot consumes evidence</strong> — capture AP-side diagnostics BEFORE rebooting. Reboot is a reset, not a diagnosis.</li>
+    <li><strong>GTK rotation on disassoc</strong> — AP rotates group key when any client leaves; group key handshake to remaining clients can wedge silently.</li>
+    <li><strong>Symptom &rarr; Hypothesis &rarr; Test &rarr; Validation framework</strong> — every bug-hunt loops this 4-step pattern. Skipping it = guess and tool-chase.</li>
+  </ol>
 
-      <p style="font-size: 0.7rem; color: var(--muted); margin-top: 0.8rem; line-height: 1.55;">
-        <strong style="color:var(--accent3)">Diagnostic verdict:</strong> The bidirectional silent failure for one specific Wi-Fi MAC,
-        cleared by re-handshake, with no other variables changed = <strong>WPA2 TK install state (option b)</strong>. Confirmed by ground-truth
-        comparison rather than just elimination logic. This is what Step 4 of the framework looks like in practice.
-      </p>
-    </div>
-  </div>
+  <hr class="divider">
 
-  <!-- PANEL 08 — Concepts Mastered -->
-  <div class="panel">
-    <div class="panel-header">
-      <span class="panel-num">08</span>
-      <span class="panel-title" style="color: var(--accent3)">Concepts Mastered Today (9)</span>
-    </div>
-    <div class="panel-body">
-      <div class="check-item">
-        <div class="check-icon">✓</div>
-        <div class="check-text"><strong>Apple per-SSID privacy MAC</strong> — same device shows different LAA MAC per SSID; can revert to UAA after long disconnect or setting change.</div>
-      </div>
-      <div class="check-item">
-        <div class="check-icon">✓</div>
-        <div class="check-text"><strong>Linux software bridges flood unknowns</strong> — unknown unicast destinations are flooded, not dropped. Bridge FDB cannot be the cause of silent loss.</div>
-      </div>
-      <div class="check-item">
-        <div class="check-icon">✓</div>
-        <div class="check-text"><strong>TX queue is downstream-only</strong> — per-client TX buffers govern AP→client. Cannot explain client→AP→wire loss.</div>
-      </div>
-      <div class="check-item">
-        <div class="check-icon">✓</div>
-        <div class="check-text"><strong>TK = unicast, per-client</strong> — bad TK install = one client deaf in BOTH directions (encryption symmetric).</div>
-      </div>
-      <div class="check-item">
-        <div class="check-icon">✓</div>
-        <div class="check-text"><strong>GTK = broadcast, per-BSSID</strong> — bad GTK = ALL clients deaf to broadcasts. DHCP OFFER (broadcast) is the most common casualty.</div>
-      </div>
-      <div class="check-item">
-        <div class="check-icon">✓</div>
-        <div class="check-text"><strong>Encryption mismatch is silent</strong> — failed MIC discards happen at hardware crypto layer; no client-visible error, no log by default.</div>
-      </div>
-      <div class="check-item">
-        <div class="check-icon">✓</div>
-        <div class="check-text"><strong>Reboot consumes evidence</strong> — capture AP-side diagnostics BEFORE rebooting. Reboot is a reset, not a diagnosis.</div>
-      </div>
-      <div class="check-item">
-        <div class="check-icon">✓</div>
-        <div class="check-text"><strong>GTK rotation on disassoc</strong> — AP rotates group key when any client leaves; group key handshake to remaining clients can wedge silently.</div>
-      </div>
-      <div class="check-item">
-        <div class="check-icon">✓</div>
-        <div class="check-text"><strong>Symptom→Hypothesis→Test→Validation framework</strong> — every bug-hunt loops this 4-step pattern. Skip it = guess and tool-chase.</div>
-      </div>
-    </div>
-  </div>
+  <span class="section-label">Source of Truth</span>
+  <h2 id="resources">Linked Resources &mdash; Click to Open</h2>
+  <p>All files below are committed to the repository at <code>docs/data/may7-dhcp/</code> and live at the shown paths. <strong>Click any title to open or download the file directly.</strong></p>
 
-  <!-- PANEL 09 — Linked Resources -->
-  <div class="panel">
-    <div class="panel-header">
-      <span class="panel-num">09</span>
-      <span class="panel-title" style="color: var(--accent)">Linked Resources — Source of Truth</span>
-    </div>
-    <div class="panel-body">
+  <div class="res-block">
+    <div class="res-cat">Pcaps — May 6 BAD captures</div>
+    <ul class="res-list">
+      <li>
+        <span class="res-tag pcap">PCAP &middot; BAD</span>
+        <a href="data/may7-dhcp/pcap_May6_v4_guest.pcapng" download>pcap_May6_v4_guest.pcapng</a>
+        <span class="res-meta">25 KB &middot; MacBook on Guest SSID &middot; 7 DISCOVERs sent &middot; 0 server replies &middot; MAC <code>4e:60:81:bb:23:18</code></span>
+      </li>
+      <li>
+        <span class="res-tag pcap">PCAP &middot; BAD</span>
+        <a href="data/may7-dhcp/pcap_May6_v5_corporate.pcapng" download>pcap_May6_v5_corporate.pcapng</a>
+        <span class="res-meta">22 KB &middot; MacBook on Corporate SSID &middot; 7 DISCOVERs &middot; completely silent &middot; MAC <code>e2:68:dc:4d:37:3c</code></span>
+      </li>
+    </ul>
 
-      <div style="font-family: var(--mono); font-size: 0.6rem; color: var(--muted); margin-bottom: 0.6rem; letter-spacing: 0.08em; text-transform: uppercase;">Pcaps (May 6 BAD + May 7 GOOD)</div>
-      <div class="res-item">
-        <span class="res-tag pcap">PCAP</span>
-        <span class="res-link"><a href="data/may7-dhcp/pcap_May6_v4_guest.pcapng">pcap_May6_v4_guest.pcapng</a></span>
-        <span class="res-desc">25 KB · Guest SSID · 7 DISCOVERs · 0 replies</span>
-      </div>
-      <div class="res-item">
-        <span class="res-tag pcap">PCAP</span>
-        <span class="res-link"><a href="data/may7-dhcp/pcap_May6_v5_corporate.pcapng">pcap_May6_v5_corporate.pcapng</a></span>
-        <span class="res-desc">22 KB · Corp SSID · silent</span>
-      </div>
-      <div class="res-item">
-        <span class="res-tag pcap">PCAP</span>
-        <span class="res-link"><a href="data/may7-dhcp/pcap_May7_10-40am_good.pcapng">pcap_May7_10-40am_good.pcapng</a></span>
-        <span class="res-desc">86 KB · post-reboot · DORA in 1.1s</span>
-      </div>
-      <div class="res-item" style="background:rgba(57,255,20,0.06);">
-        <span class="res-tag" style="background:rgba(57,255,20,0.3);color:var(--accent3);">VALIDATION</span>
-        <span class="res-link"><a href="data/may7-dhcp/pcap_May7_en0_validation.pcapng"><strong>pcap_May7_en0_validation.pcapng</strong></a></span>
-        <span class="res-desc">117 KB · 18 DHCP frames · <strong>SAME LAA MAC 4e:60:81:bb:23:18 now succeeds</strong> · ground-truth proof of (b)</span>
-      </div>
+    <div class="res-cat">Pcaps — May 7 GOOD captures</div>
+    <ul class="res-list">
+      <li>
+        <span class="res-tag pcap-good">PCAP &middot; GOOD</span>
+        <a href="data/may7-dhcp/pcap_May7_10-40am_good.pcapng" download>pcap_May7_10-40am_good.pcapng</a>
+        <span class="res-meta">86 KB &middot; post-reboot &middot; DORA in 1.1 s &middot; MacBook MAC reverted to UAA <code>84:2f:57:94:bd:cf</code></span>
+      </li>
+      <li>
+        <span class="res-tag pcap-validation">PCAP &middot; VALIDATION</span>
+        <a href="data/may7-dhcp/pcap_May7_en0_validation.pcapng" download><strong>pcap_May7_en0_validation.pcapng</strong></a>
+        <span class="res-meta">117 KB &middot; 18 DHCP frames &middot; <strong>same Guest MAC <code>4e:60:81:bb:23:18</code> now succeeds</strong> &mdash; ground-truth proof of (b)</span>
+      </li>
+    </ul>
 
-      <div style="font-family: var(--mono); font-size: 0.6rem; color: var(--muted); margin: 1rem 0 0.6rem; letter-spacing: 0.08em; text-transform: uppercase;">Tech-Support Dumps (May 7 — captured post-incident)</div>
-      <div class="res-item">
-        <span class="res-tag" style="background:rgba(57,255,20,0.2);color:var(--accent3);">SW1 TXT</span>
-        <span class="res-link"><a href="data/may7-dhcp/tech_support_SW1_EXOS_May7_2026.txt">tech_support_SW1_EXOS_May7_2026.txt</a></span>
-        <span class="res-desc">1.07 MB · EXOS show tech-support · 5320-16P · 10:08:06 EDT</span>
-      </div>
-      <div class="res-item">
-        <span class="res-tag" style="background:rgba(57,255,20,0.2);color:var(--accent3);">AP1 TXT</span>
-        <span class="res-link"><a href="data/may7-dhcp/tech_support_AP1_May7_2026.txt">tech_support_AP1_May7_2026.txt</a></span>
-        <span class="res-desc">444 KB · AP3000 show tech · debug + radio logs · 08:28:59 EDT</span>
-      </div>
+    <div class="res-cat">Tech-Support Dumps (May 7, post-incident)</div>
+    <ul class="res-list">
+      <li>
+        <span class="res-tag tech">SW1 &middot; TXT</span>
+        <a href="data/may7-dhcp/tech_support_SW1_EXOS_May7_2026.txt" target="_blank">tech_support_SW1_EXOS_May7_2026.txt</a>
+        <span class="res-meta">1.07 MB &middot; EXOS <code>show tech-support</code> &middot; 5320-16P &middot; captured 10:08:06 EDT &middot; VLANs, DHCP server, FDB, ARP, log</span>
+      </li>
+      <li>
+        <span class="res-tag tech">AP1 &middot; TXT</span>
+        <a href="data/may7-dhcp/tech_support_AP1_May7_2026.txt" target="_blank">tech_support_AP1_May7_2026.txt</a>
+        <span class="res-meta">444 KB &middot; AP3000 <code>show tech</code> &middot; debug + radio + wipsd logs &middot; captured 08:28:59 EDT</span>
+      </li>
+    </ul>
 
-      <div style="font-family: var(--mono); font-size: 0.6rem; color: var(--muted); margin: 1rem 0 0.6rem; letter-spacing: 0.08em; text-transform: uppercase;">Prior Dialogue (May 6)</div>
-      <div class="res-item">
+    <div class="res-cat">Prior Dialogue (May 6 Claude session)</div>
+    <ul class="res-list">
+      <li>
         <span class="res-tag docx">DOCX</span>
-        <span class="res-link"><a href="data/may7-dhcp/DHCP_Socratic_Dialogue_May6_2026.docx">DHCP_Socratic_Dialogue_May6_2026.docx</a></span>
-        <span class="res-desc">256 KB · full Claude transcript</span>
-      </div>
+        <a href="data/may7-dhcp/DHCP_Socratic_Dialogue_May6_2026.docx" download>DHCP_Socratic_Dialogue_May6_2026.docx</a>
+        <span class="res-meta">256 KB &middot; full Claude transcript &mdash; the May 6 Socratic exchange that established Apple per-SSID MAC</span>
+      </li>
+    </ul>
 
-      <div style="font-family: var(--mono); font-size: 0.6rem; color: var(--muted); margin: 1rem 0 0.6rem; letter-spacing: 0.08em; text-transform: uppercase;">Today's Session Log</div>
-      <div class="res-item">
+    <div class="res-cat">Today's Session Log</div>
+    <ul class="res-list">
+      <li>
         <span class="res-tag md">MD</span>
-        <span class="res-link"><a href="session_log_20260507.md">session_log_20260507.md</a></span>
-        <span class="res-desc">Full Socratic walk + setup + concepts</span>
-      </div>
+        <a href="session_log_20260507.md">session_log_20260507.md</a>
+        <span class="res-meta">Full Socratic walk &mdash; setup, timeline, hypothesis arena, 4-table elimination, mechanism, concepts, status</span>
+      </li>
+    </ul>
 
-      <div style="font-family: var(--mono); font-size: 0.6rem; color: var(--muted); margin: 1rem 0 0.6rem; letter-spacing: 0.08em; text-transform: uppercase;">Related EODs</div>
-      <div class="res-item">
+    <div class="res-cat">Related EODs</div>
+    <ul class="res-list">
+      <li>
         <span class="res-tag html">HTML</span>
-        <span class="res-link"><a href="session_summary_20260504.html">session_summary_20260504.html</a></span>
-        <span class="res-desc">May 4 · EAPOL theory (the prequel)</span>
-      </div>
-      <div class="res-item">
+        <a href="session_summary_20260504.html">session_summary_20260504.html</a>
+        <span class="res-meta">May 4 &mdash; <strong>EAPOL &amp; Packet Forensics</strong> (the prequel: TK/GTK theory deep dive that today's incident applies)</span>
+      </li>
+      <li>
         <span class="res-tag html">HTML</span>
-        <span class="res-link"><a href="session_summary_20260430.html">session_summary_20260430.html</a></span>
-        <span class="res-desc">Apr 30 · VOSS boot + XIQ DNS</span>
-      </div>
-
-    </div>
+        <a href="session_summary_20260430.html">session_summary_20260430.html</a>
+        <span class="res-meta">April 30 &mdash; VOSS boot + XIQ DNS issue + fresh-start plan</span>
+      </li>
+    </ul>
   </div>
 
-  <!-- PANEL 10 — Next Steps -->
-  <div class="panel full-width">
-    <div class="panel-header">
-      <span class="panel-num">10</span>
-      <span class="panel-title" style="color: var(--accent2)">Next Steps — Workstreams Pending</span>
-    </div>
-    <div class="panel-body" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+  <hr class="divider">
 
-      <div>
-        <div style="font-family: var(--mono); font-size: 0.6rem; color: var(--muted); margin-bottom: 0.6rem; letter-spacing: 0.08em; text-transform: uppercase;">Wireless Playbook (recurrent)</div>
-        <div class="check-item">
-          <div class="check-icon" style="color:var(--accent2)">▸</div>
-          <div class="check-text">Add <strong>WPA2 key-state diagnostic</strong> to standard Wi-Fi troubleshooting playbook (before blaming DHCP/VLAN).</div>
-        </div>
-        <div class="check-item">
-          <div class="check-icon" style="color:var(--accent2)">▸</div>
-          <div class="check-text">Document XIQ "AP debug session" workflow with the 5 commands from Panel 07 — make it a reusable runbook.</div>
-        </div>
-        <div class="check-item">
-          <div class="check-icon" style="color:var(--accent2)">▸</div>
-          <div class="check-text">Run a <strong>controlled repro</strong> in lab: cause GTK desync deliberately and verify the decrypt-error counter spikes — turn theory into proof.</div>
-        </div>
-      </div>
+  <span class="section-label">Forward</span>
+  <h2 id="next">Next Steps</h2>
+  <h3>Wireless playbook (recurrent)</h3>
+  <ul>
+    <li>Add <strong>WPA2 key-state diagnostic</strong> to standard Wi-Fi troubleshooting playbook (before blaming DHCP/VLAN).</li>
+    <li>Document XIQ "AP debug session" workflow with the 5 commands above as a reusable runbook.</li>
+    <li>Run a <strong>controlled repro</strong> in lab: cause GTK desync deliberately and verify the decrypt-error counter spikes &mdash; turn theory into proof.</li>
+  </ul>
+  <h3>EXOS &rarr; VOSS migration (today's next workstream)</h3>
+  <ul>
+    <li>Outline <strong>EXOS&rarr;VOSS 4-principle cheatsheet</strong> for SW2 (KhKLab-SW-01).</li>
+    <li>Walk through each principle to <strong>configure SW2 (Corp_New VLAN 70 + Guest_New VLAN 80)</strong> via IPE&rarr;RDU DC.</li>
+    <li>Port plan: <code>1/1=IPE</code>, <code>1/3=AP2</code>, <code>1/5=MacBook</code>. User to share current EXOS configs as input.</li>
+    <li>Wi-Fi Digital Twin Sprint 1 Day 1 (L1 DPM models + L2 Link Budget + L3 Airtime) &mdash; deferred to next session.</li>
+  </ul>
 
-      <div>
-        <div style="font-family: var(--mono); font-size: 0.6rem; color: var(--muted); margin-bottom: 0.6rem; letter-spacing: 0.08em; text-transform: uppercase;">EXOS → VOSS migration (today's next item)</div>
-        <div class="check-item">
-          <div class="check-icon" style="color:var(--accent2)">▸</div>
-          <div class="check-text">Outline <strong>EXOS→VOSS 4-principle cheatsheet</strong> for SW2.</div>
-        </div>
-        <div class="check-item">
-          <div class="check-icon" style="color:var(--accent2)">▸</div>
-          <div class="check-text">Walk through each principle to <strong>configure SW2 (Corp_New VLAN 70 + Guest_New VLAN 80)</strong> via IPE→RDU DC.</div>
-        </div>
-        <div class="check-item">
-          <div class="check-icon" style="color:var(--accent2)">▸</div>
-          <div class="check-text">Port plan: <strong>1/1=IPE, 1/3=AP2, 1/5=MacBook</strong>. User to share current EXOS config as input.</div>
-        </div>
-        <div class="check-item">
-          <div class="check-icon" style="color:var(--accent2)">▸</div>
-          <div class="check-text">WiFi DT Sprint 1 Day 1 (L1 DPM models + L2 LinkBudget + L3 Airtime) — deferred to next session.</div>
-        </div>
-      </div>
+  <hr class="divider">
 
-    </div>
-  </div>
-
+  <p class="footer">
+    Lab: Horizon Custom Fabrication &mdash; SW1 EXOS &middot; AP1 AP3000 &middot; MacBook + iPhone clients &nbsp;&middot;&nbsp;
+    Generated May 7, 2026 &mdash; <em>Khursheed &times; Claude, Socratic Diagnosis Complete</em>
+  </p>
 </div>
-
-<!-- FOOTER -->
-<div class="footer">
-  <div>EOD Blueprint — May 07 2026 &nbsp;|&nbsp; DHCP Incident Forensics &nbsp;|&nbsp; SW1=EXOS / AP1=AP3000 / MacBook+iPhone clients</div>
-  <div class="footer-sig">Khursheed × Claude — Socratic Diagnosis Complete ✓</div>
-</div>
-
 </body>
 </html>
