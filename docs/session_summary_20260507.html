@@ -444,7 +444,7 @@
 <div class="stat-bar">
   <div class="stat">
     <div class="stat-label">Pcaps Analyzed</div>
-    <div class="stat-value">3</div>
+    <div class="stat-value">4</div>
   </div>
   <div class="stat">
     <div class="stat-label">MacBook MACs Seen</div>
@@ -820,6 +820,78 @@ diff counters_t0.txt counters_t30.txt | grep -i "decrypt\|mic"
     </div>
   </div>
 
+  <!-- PANEL 7B — Ground-Truth Validation (same MAC, before/after) -->
+  <div class="panel full-width" style="background:rgba(57,255,20,0.04);">
+    <div class="panel-header" style="background:rgba(57,255,20,0.08);">
+      <span class="panel-num">07b</span>
+      <span class="panel-title" style="color: var(--accent3)">✓ Ground-Truth Validation — Same MAC, Different Outcome</span>
+    </div>
+    <div class="panel-body">
+      <p style="font-size: 0.78rem; color: var(--muted); margin-bottom: 1rem; line-height: 1.55;">
+        The Step-4 validation in our Symptom→Hypothesis→Test→Validation framework. The same MacBook Wi-Fi MAC
+        <code style="color:var(--accent4)">4e:60:81:bb:23:18</code> that captured 7 unanswered DISCOVERs on May 6 (Guest SSID)
+        now <strong style="color:var(--accent3)">completes a full DORA in under 1 second</strong> after reboot — same SSID, same AP,
+        same SW1, same DHCP server, same MAC. <strong>Only the AP's WPA2 key state changed.</strong>
+      </p>
+
+      <table class="data">
+        <thead>
+          <tr><th>Field</th><th>May 6 BAD (pre-reboot)</th><th>May 7 GOOD (post-reboot)</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Source pcap</td>
+            <td><code>pcap_May6_v4_guest.pcapng</code></td>
+            <td><code>pcap_May7_en0_validation.pcapng</code></td>
+          </tr>
+          <tr>
+            <td>MacBook Wi-Fi MAC (Guest SSID)</td>
+            <td><code>4e:60:81:bb:23:18</code></td>
+            <td class="verdict-pass"><code>4e:60:81:bb:23:18</code> ← <strong>identical</strong></td>
+          </tr>
+          <tr>
+            <td>SSID / VLAN</td>
+            <td>Guest_Wireless / 30</td>
+            <td>Guest_Wireless / 30 — <strong>identical</strong></td>
+          </tr>
+          <tr>
+            <td>DHCP server</td>
+            <td>SW1 (<code>d8:e0:16:37:6c:00</code>)</td>
+            <td>SW1 (<code>d8:e0:16:37:6c:00</code>) — <strong>identical</strong></td>
+          </tr>
+          <tr>
+            <td>DISCOVERs sent</td>
+            <td>7 over 50s</td>
+            <td>1</td>
+          </tr>
+          <tr>
+            <td>OFFER received</td>
+            <td class="verdict-fail">0 — silent</td>
+            <td class="verdict-pass">YES — frame 109 from SW1 → 10.30.0.x</td>
+          </tr>
+          <tr>
+            <td>DORA completion</td>
+            <td class="verdict-fail">Never</td>
+            <td class="verdict-pass">~1 second</td>
+          </tr>
+          <tr>
+            <td>What changed between captures?</td>
+            <td colspan="2" style="text-align:center; color:var(--accent3); font-weight:700;">
+              ONLY the AP's per-client WPA2 key state (cleared by reboot, refreshed via fresh 4-way handshake).
+              Topology, MAC, SSID, server, encryption protocol — all identical.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p style="font-size: 0.7rem; color: var(--muted); margin-top: 0.8rem; line-height: 1.55;">
+        <strong style="color:var(--accent3)">Diagnostic verdict:</strong> The bidirectional silent failure for one specific Wi-Fi MAC,
+        cleared by re-handshake, with no other variables changed = <strong>WPA2 TK install state (option b)</strong>. Confirmed by ground-truth
+        comparison rather than just elimination logic. This is what Step 4 of the framework looks like in practice.
+      </p>
+    </div>
+  </div>
+
   <!-- PANEL 08 — Concepts Mastered -->
   <div class="panel">
     <div class="panel-header">
@@ -889,6 +961,11 @@ diff counters_t0.txt counters_t30.txt | grep -i "decrypt\|mic"
         <span class="res-tag pcap">PCAP</span>
         <span class="res-link"><a href="data/may7-dhcp/pcap_May7_10-40am_good.pcapng">pcap_May7_10-40am_good.pcapng</a></span>
         <span class="res-desc">86 KB · post-reboot · DORA in 1.1s</span>
+      </div>
+      <div class="res-item" style="background:rgba(57,255,20,0.06);">
+        <span class="res-tag" style="background:rgba(57,255,20,0.3);color:var(--accent3);">VALIDATION</span>
+        <span class="res-link"><a href="data/may7-dhcp/pcap_May7_en0_validation.pcapng"><strong>pcap_May7_en0_validation.pcapng</strong></a></span>
+        <span class="res-desc">117 KB · 18 DHCP frames · <strong>SAME LAA MAC 4e:60:81:bb:23:18 now succeeds</strong> · ground-truth proof of (b)</span>
       </div>
 
       <div style="font-family: var(--mono); font-size: 0.6rem; color: var(--muted); margin: 1rem 0 0.6rem; letter-spacing: 0.08em; text-transform: uppercase;">Tech-Support Dumps (May 7 — captured post-incident)</div>
