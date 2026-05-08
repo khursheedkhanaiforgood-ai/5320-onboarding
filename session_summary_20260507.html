@@ -112,6 +112,7 @@ a:hover { color: #111; }
     <a href="#tk-gtk">6. The Plot Twist — Why iPhone Failed Too (TK vs GTK)</a>
     <a href="#validation">7. Ground-Truth Validation — Same MAC, Before/After</a>
     <a href="#diagnostic">8. DHCP / Wi-Fi Triage Runbook (5 stages, capture before reboot)</a>
+    <a href="#lenses">8b. Operational Lens Framework — Design / Configure / Optimize / Troubleshoot (AP / EXOS / VOSS)</a>
     <a href="#concepts">9. Concepts Mastered</a>
     <a href="#resources">10. Linked Resources &amp; References</a>
     <a href="#next">11. Next Steps</a>
@@ -388,6 +389,95 @@ show log                                  # filter for DHCP / DHCPDISCOVER</code
     <li><strong>Network Policy &rarr; SSID &rarr; Security</strong> &mdash; verify encryption matches what client expects (WPA2 vs WPA3, PSK length).</li>
     <li><strong>Tools &rarr; Capture</strong> &mdash; start a wireless capture on the AP itself, download .pcap.</li>
   </ul>
+
+  <hr class="divider">
+
+  <!-- 8b. OPERATIONAL LENS FRAMEWORK -->
+  <span class="section-label">Cross-Platform Lens</span>
+  <h2 id="lenses">Operational Lens Framework &mdash; Design &middot; Configure &middot; Optimize &middot; Troubleshoot</h2>
+  <p>Every AP / switch CLI menu has thousands of commands. Memorizing the menu is a losing game. Memorizing <strong>four lenses</strong> isn't. Each lens names the question you're answering at that moment; the lens then narrows the command set automatically. The same four lenses apply to <strong>AP3000 (IQ Engine OS)</strong>, <strong>EXOS SwitchEngine</strong>, and <strong>VOSS FabricEngine</strong> &mdash; the platforms differ, the lens does not.</p>
+
+  <table>
+    <thead><tr><th width="120">Lens</th><th>Question you're answering</th><th>When to use</th></tr></thead>
+    <tbody>
+      <tr><td>🎨 <strong>DESIGN</strong></td><td>What does the environment <em>require</em>?</td><td>Before any deployment: capacity, RF, topology, redundancy</td></tr>
+      <tr><td>🔧 <strong>CONFIGURE</strong></td><td>What services do users / devices need?</td><td>Initial bring-up: VLANs, SSIDs, security, DHCP, QoS</td></tr>
+      <tr><td>📈 <strong>OPTIMIZE</strong></td><td>Where is the system suboptimal?</td><td>Steady-state tuning: airtime, port utilization, FDB pressure, IS-IS convergence</td></tr>
+      <tr><td>🩺 <strong>TROUBLESHOOT</strong></td><td>What broke, where, and how do I prove it?</td><td>Active failure: silent decrypt, DHCP, FDB miss, FA assignment</td></tr>
+    </tbody>
+  </table>
+
+  <h3>AP3000 (IQ Engine OS) &mdash; per lens</h3>
+  <table>
+    <thead><tr><th>Lens</th><th>Entry-point commands</th></tr></thead>
+    <tbody>
+      <tr><td>🎨 Design</td><td><code>show radio profile</code> &middot; <code>show acsp</code> &middot; <code>show ai-rrm</code> &middot; <code>show interface &lt;wifix&gt; channel / dfs / sdr / _spectral</code> &middot; <code>show lldp</code></td></tr>
+      <tr><td>🔧 Configure</td><td><code>show config running</code> &middot; <code>show ssid</code> &middot; <code>show auth</code> &middot; <code>show user-profile-policy</code> &middot; <code>show qos *</code> &middot; <code>show mac-object / os-object / domain-object</code></td></tr>
+      <tr><td>📈 Optimize</td><td><code>show station &lt;mac&gt;</code> &middot; <code>show qos counter user</code> &middot; <code>show roaming cache</code> &middot; <code>show 11k / 11v</code> &middot; <code>show ssid &lt;name&gt; multicast</code></td></tr>
+      <tr><td>🩺 Troubleshoot</td><td><code>_debug auth</code> &middot; <code>_kdebug wifi-driver &lt;wifix&gt; msglevel wsec</code> &middot; <code>filter &lt;n&gt; l3 / l2 error decrypt</code> &middot; <code>capture interface</code> &middot; <code>_debug dhcpd / dhclient</code></td></tr>
+    </tbody>
+  </table>
+
+  <h3>EXOS SwitchEngine 33.x &mdash; per lens</h3>
+  <table>
+    <thead><tr><th>Lens</th><th>Entry-point commands</th></tr></thead>
+    <tbody>
+      <tr><td>🎨 Design</td><td><code>show switch</code> &middot; <code>show vlan</code> &middot; <code>show stpd</code> &middot; <code>show iproute</code> &middot; <code>show capacity-planning</code> &middot; <code>show power</code> &middot; <code>show ports info detail</code></td></tr>
+      <tr><td>🔧 Configure</td><td><code>show configuration</code> &middot; <code>configure vlan &lt;name&gt; add ports</code> &middot; <code>enable ipforwarding vlan</code> (Karl Rule) &middot; <code>configure vlan dhcp-address-range</code> &middot; <code>enable dhcp ports &lt;list&gt; vlan</code></td></tr>
+      <tr><td>📈 Optimize</td><td><code>show ports utilization</code> &middot; <code>show ports rxerrors / txerrors</code> &middot; <code>show fdb stats</code> &middot; <code>show iparp</code> &middot; <code>show cpu-monitoring</code> &middot; <code>show log filter</code></td></tr>
+      <tr><td>🩺 Troubleshoot</td><td><code>show fdb port &lt;n&gt;</code> &middot; <code>show iparp vlan</code> &middot; <code>show stpd s0 ports</code> &middot; <code>show dhcp-server &lt;vlan&gt; leases</code> &middot; <code>configure mirroring add port</code> &middot; <code>show port transceiver detail</code></td></tr>
+    </tbody>
+  </table>
+
+  <h3>VOSS FabricEngine 9.3.x &mdash; per lens</h3>
+  <table>
+    <thead><tr><th>Lens</th><th>Entry-point commands (fabric flavor)</th></tr></thead>
+    <tbody>
+      <tr><td>🎨 Design</td><td><code>show isis</code> &middot; <code>show isis spbm</code> &middot; <code>show isis adjacencies</code> &middot; <code>show isis lsdb</code> &middot; <code>show vlan i-sid</code> &middot; <code>show platform port</code></td></tr>
+      <tr><td>🔧 Configure</td><td><code>router isis</code> + <code>spbm 1 nick-name 0.00.0X</code> &middot; <code>vlan create &lt;n&gt; type port-mstprstp 0</code> + <code>vlan i-sid &lt;n&gt; &lt;100n&gt;</code> &middot; <code>auto-sense enable</code> + <code>fa enable</code> &middot; <code>ip dhcp-server subnet</code></td></tr>
+      <tr><td>📈 Optimize</td><td><code>show isis statistics</code> &middot; <code>show isis adjacencies detail</code> &middot; <code>show port-statistics</code> &middot; <code>show ip route protocol isis</code> &middot; <code>show iqagent connection</code></td></tr>
+      <tr><td>🩺 Troubleshoot</td><td><code>show fa assignment</code> &middot; <code>show fa elements</code> &middot; <code>show isis spbm i-sid all</code> &middot; <code>show isis spbm unicast-fib</code> &middot; <code>show vlan members</code> &middot; <code>show ip arp vrf GlobalRouter</code> &middot; <code>show log file tail</code></td></tr>
+    </tbody>
+  </table>
+
+  <h3>The single most useful AP3000 trick &mdash; <code>frame_filter</code> for DHCP</h3>
+  <p>The AP3000 has a built-in capture system that takes <strong>numbered filters</strong> (similar to ACL syntax). For tomorrow-Khursheed: this is how you scope a capture to JUST the DHCP exchange in 60 seconds, no laptop sniffer required.</p>
+  <pre><code># DHCP filters (UDP/17, ports 67/68 — DORA across both directions)
+filter 1 l3 protocol 17 src-port 68 dst-port 67    # DISCOVER / REQUEST  (client → server)
+filter 2 l3 protocol 17 src-port 67 dst-port 68    # OFFER / ACK         (server → client)
+
+# Decrypt-failure filter (THE smoking-gun filter for the May 6 incident)
+filter 3 l2 error decrypt
+filter 4 l2 error mic
+
+# Run a 60-second capture, applying filters 1 OR 2:
+capture interface wifi0 duration 60 filter or 1
+show capture interface wifi0
+capture save interface wifi0 dhcp_capture.pcap</code></pre>
+
+  <h3>The single most useful <code>kdebug</code> key &mdash; <code>wsec</code></h3>
+  <p>Inside the (very long) <code>_kdebug wifi-driver msglevel</code> enum, the <code>wsec</code> and <code>wsec_dump</code> keys turn on key-installation tracing at the wireless driver level. Translation: <strong>this is the kernel-level equivalent of the EAPOL forensics we did manually with Wireshark on May 4.</strong> If TK or GTK install fails, this is where it shows up.</p>
+  <pre><code>_kdebug wifi-driver wifi0 msglevel wsec
+_kdebug wifi-driver wifi0 msglevel wsec_dump
+
+# WHEN DONE — ALWAYS:
+_debug stop
+_debug show         # confirm nothing is left running</code></pre>
+  <div class="box warn"><p><strong>Operational guardrail:</strong> Don't leave <code>_kdebug</code> running. Debug streams to console eat CPU and can OOM the AP under load. Always run <code>_debug stop</code> at the end of any session.</p></div>
+
+  <h3>Cross-platform mapping to the diagnostic framework</h3>
+  <p>The Symptom &rarr; Hypothesis &rarr; Test &rarr; Validation framework (<a href="#framework">Section 1</a>) runs across all three platforms. Each step has a natural lens:</p>
+  <table>
+    <thead><tr><th>Framework step</th><th>Lens</th><th>Where the answer lives</th></tr></thead>
+    <tbody>
+      <tr><td>Symptom</td><td>🩺 Troubleshoot</td><td>Client capture (en0) + AP <code>show station</code> + EXOS <code>show fdb port</code></td></tr>
+      <tr><td>Hypothesis</td><td>(mental work)</td><td>4-table elimination + 4-principle (EXOS&rarr;VOSS) framing</td></tr>
+      <tr><td>Test</td><td>🩺 Troubleshoot</td><td>AP <code>_kdebug wifi-driver msglevel wsec</code> + <code>capture interface</code> + EXOS mirror to Wireshark</td></tr>
+      <tr><td>Validation</td><td>📈 Optimize</td><td>Counter diff t0 vs t30 (AP <code>show counters wireless</code>, EXOS <code>show ports utilization</code>, VOSS <code>show port-statistics</code>)</td></tr>
+    </tbody>
+  </table>
+
+  <div class="box ok"><p><strong>The takeaway:</strong> the lens isn't a memorization tool &mdash; it's a router for your attention. Tomorrow, before reaching for any command, ask yourself: <em>"which lens am I in?"</em> The platform name is incidental.</p></div>
 
   <hr class="divider">
 
