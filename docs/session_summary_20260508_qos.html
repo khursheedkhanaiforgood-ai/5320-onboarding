@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>5320 Lab Journal — QoS Egress Validation, May 8 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Libre+Franklin:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Libre Baskerville', Georgia, serif; background: #FFFFFF; color: #111111; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 48px 24px 72px; }
+.container { max-width: 760px; width: 100%; }
+.nyt-rule-top { border: none; border-top: 3px solid #111; margin-bottom: 6px; }
+.nyt-rule-thin { border: none; border-top: 1px solid #111; margin-bottom: 18px; }
+.nyt-logo { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.22em; color: #666; text-align: center; margin-bottom: 6px; }
+.byline { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.72rem; color: #666; margin-bottom: 14px; letter-spacing: 0.02em; }
+.byline strong { color: #111; font-weight: 700; }
+h1 { font-family: 'Libre Baskerville', Georgia, serif; font-size: 2.2rem; font-weight: 700; color: #111; line-height: 1.15; margin-bottom: 14px; }
+.subtitle { font-family: 'Libre Baskerville', Georgia, serif; font-size: 1rem; font-style: italic; color: #444; line-height: 1.8; margin-bottom: 20px; border-bottom: 1px solid #E2E2E2; padding-bottom: 28px; }
+.section-label { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.18em; color: #6b21a8; margin: 32px 0 12px; padding-bottom: 6px; border-bottom: 2px solid #6b21a8; display: block; }
+h2 { font-family: 'Libre Baskerville', Georgia, serif; font-size: 1.45rem; font-weight: 700; color: #111; margin: 0 0 12px; }
+h3 { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #6b21a8; margin: 24px 0 10px; }
+p { font-size: 0.97rem; line-height: 1.85; color: #222; margin-bottom: 12px; }
+ul, ol { padding-left: 22px; margin-bottom: 14px; }
+li { font-size: 0.95rem; line-height: 1.8; color: #222; margin-bottom: 4px; }
+code { font-family: 'SF Mono', Consolas, monospace; font-size: 0.82rem; background: #F4F4F4; border: 1px solid #E2E2E2; padding: 1px 5px; border-radius: 3px; color: #6b21a8; }
+pre { background: #F8F8F8; border: 1px solid #E2E2E2; border-radius: 4px; padding: 16px; overflow-x: auto; margin: 12px 0 18px; }
+pre code { background: none; border: none; padding: 0; color: #111; font-size: 0.83rem; line-height: 1.65; }
+table { width: 100%; border-collapse: collapse; margin: 12px 0 20px; font-size: 0.88rem; }
+th { background: #F4F4F4; font-family: 'Libre Franklin', Arial, sans-serif; font-weight: 700; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: #6b21a8; padding: 8px 10px; border: 1px solid #E2E2E2; text-align: left; }
+td { padding: 8px 10px; border: 1px solid #E2E2E2; color: #222; vertical-align: top; }
+tr:nth-child(even) td { background: #FAFAFA; }
+.badge { display: inline-block; padding: 2px 8px; border-radius: 2px; font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; margin: 1px; }
+.done { background: #E8F5E9; color: #2E7D32; border: 1px solid #A5D6A7; }
+.fail { background: #FBE9E9; color: #C62828; border: 1px solid #EF9A9A; }
+.partial { background: #FFF3E0; color: #E65100; border: 1px solid #FFCC80; }
+.win { background: #E1F5FE; color: #0277BD; border: 1px solid #81D4FA; }
+.box { border-left: 3px solid #6b21a8; background: #faf5ff; padding: 12px 16px; margin: 14px 0; border-radius: 0 4px 4px 0; }
+.box p { margin: 0; font-size: 0.92rem; }
+.box.warn { border-left-color: #F57F17; background: #FFFBF0; }
+.box.ok { border-left-color: #2E7D32; background: #F1F8F1; }
+.box.fail { border-left-color: #C62828; background: #FCEEEE; }
+.divider { border: none; border-top: 1px solid #E2E2E2; margin: 32px 0; }
+.toc { background: #F8F8F8; border: 1px solid #E2E2E2; border-radius: 4px; padding: 18px 22px; margin-bottom: 36px; }
+.toc-title { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.15em; color: #666; margin-bottom: 10px; }
+.toc a { display: block; font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.85rem; color: #6b21a8; text-decoration: none; padding: 4px 0; border-bottom: 1px dotted #E2E2E2; }
+.toc a:hover { color: #111; }
+.footer { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.72rem; color: #999; text-align: center; margin-top: 48px; padding-top: 16px; border-top: 1px solid #E2E2E2; }
+a { color: #6b21a8; }
+a:hover { color: #111; }
+.res-block { margin: 14px 0 22px; }
+.res-cat { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: #666; margin: 18px 0 6px; }
+.res-list { list-style: none; padding: 0; }
+.res-list li { display: block; padding: 12px 16px; border: 1px solid #E2E2E2; border-radius: 4px; margin-bottom: 8px; background: #FAFAFA; }
+.res-list li:hover { background: #faf5ff; border-color: #6b21a8; }
+.res-list a { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.95rem; font-weight: 600; color: #6b21a8; text-decoration: none; }
+.res-list a:hover { text-decoration: underline; color: #111; }
+.res-list .res-meta { display: block; font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.78rem; color: #555; margin-top: 4px; font-weight: 400; line-height: 1.6; }
+.res-list .res-tag { display: inline-block; font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; padding: 2px 7px; border-radius: 2px; margin-right: 8px; vertical-align: middle; }
+.res-tag.pcap { background: #FFF3E0; color: #E65100; border: 1px solid #FFCC80; }
+.res-tag.txt { background: #E3F2FD; color: #1565C0; border: 1px solid #90CAF9; }
+.res-tag.md { background: #F3E5F5; color: #6A1B9A; border: 1px solid #CE93D8; }
+.res-tag.html { background: #ECEFF1; color: #455A64; border: 1px solid #B0BEC5; }
+.stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 20px 0 30px; }
+.stat-card { border: 1px solid #E2E2E2; border-radius: 4px; padding: 12px 14px; }
+.stat-num { font-family: 'Libre Baskerville', Georgia, serif; font-size: 1.5rem; font-weight: 700; color: #111; }
+.stat-label { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.7rem; color: #666; text-transform: uppercase; letter-spacing: 0.08em; margin-top: 2px; }
+.stat-num.win { color: #2E7D32; }
+.stat-num.fail { color: #C62828; }
+.stat-num.warn { color: #E65100; }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <hr class="nyt-rule-top">
+  <p class="nyt-logo">E2E Network Deployment &mdash; Lab Journal</p>
+  <hr class="nyt-rule-thin">
+  <p class="byline">By <strong>Khursheed Khan</strong> &nbsp;&bull;&nbsp; May 8, 2026 &nbsp;&bull;&nbsp; QoS Egress Validation Session</p>
+
+  <h1>QoS Egress Validation: A Three-Layer Architecture Bug Confirmed</h1>
+  <p class="subtitle">Mission: validate the boss's claim that "all traffic goes to best-effort despite XIQ priority policy." Result: bug fully confirmed and decomposed into three independent layers, two of which are architectural. The Apr&nbsp;21 lab work mapped VLANs to queues correctly, but downstream YouTube traffic still lands in QP1 because the EXOS VLAN-to-qosprofile mapping is ingress-side only and the L3-routed return path keeps its WAN-side queue assignment.</p>
+
+  <div class="stats">
+    <div class="stat-card"><div class="stat-num">3</div><div class="stat-label">Layers Examined</div></div>
+    <div class="stat-card"><div class="stat-num win">1</div><div class="stat-label">Fixed In Lab</div></div>
+    <div class="stat-card"><div class="stat-num fail">2</div><div class="stat-label">Architectural</div></div>
+    <div class="stat-card"><div class="stat-num">99.85%</div><div class="stat-label">Corp DSCP=0</div></div>
+    <div class="stat-card"><div class="stat-num">99.96%</div><div class="stat-label">Guest DSCP=0</div></div>
+    <div class="stat-card"><div class="stat-num warn">0 / 47K</div><div class="stat-label">Corp in QP6 / QP1</div></div>
+  </div>
+
+  <div class="toc">
+    <div class="toc-title">Contents</div>
+    <a href="#goal">1. Goal &mdash; Validate the QoS Bug</a>
+    <a href="#chain">2. The Classification Chain</a>
+    <a href="#finding1">3. Finding #1 &mdash; SW1 Queue Weights All Equal (FIXED)</a>
+    <a href="#finding2">4. Finding #2 &mdash; VLAN qosprofile is Ingress-Only (architectural)</a>
+    <a href="#finding3">5. Finding #3 &mdash; DSCP Marking Absent End-to-End (data-plane)</a>
+    <a href="#smoking-gun">6. The Smoking Gun &mdash; qosmonitor Output</a>
+    <a href="#pcap-evidence">7. Pcap Evidence &mdash; Corp vs Guest DSCP Comparison</a>
+    <a href="#fix-path">8. Fix Path Forward &mdash; ACL-Based Classification</a>
+    <a href="#xiq-disconnect">9. The XIQ Disconnect &mdash; UX Gap</a>
+    <a href="#resources">10. Linked Resources</a>
+    <a href="#next">11. Next Steps</a>
+  </div>
+
+  <span class="section-label">The Mission</span>
+  <h2 id="goal">Validate the QoS Bug Claim</h2>
+  <p>Boss observation:</p>
+  <div class="box"><p>"In Network Policy when QoS is enabled for particular traffic (Corp higher than Guest), apparently the tagging of the AP&rarr;EXOS traffic on the egress is missing the specific tags or priority assigned by XIQ. All traffic goes to best effort in the egress."</p></div>
+  <p>Apr&nbsp;21 lab work configured: VLAN&nbsp;20 (Corp) &rarr; QP6, VLAN&nbsp;30 (Guest) &rarr; QP1, with XIQ User Profile scheduling weights of 100 (Corp) and 10 (Guest). Test goal: prove or disprove that priority is enforced end-to-end.</p>
+
+  <hr class="divider">
+
+  <span class="section-label">The Stack</span>
+  <h2 id="chain">The Classification Chain &mdash; What Has to Work</h2>
+  <p>For end-to-end Corp&nbsp;&gt;&nbsp;Guest priority, every layer must do its job:</p>
+  <table>
+    <thead><tr><th>Layer</th><th>Function</th><th>Configured?</th></tr></thead>
+    <tbody>
+      <tr><td>1. AP marks frames on egress (PCP/DSCP)</td><td>Wireless &rarr; wire</td><td><span class="badge fail">No (XIQ User Profile QoS marker not set)</span></td></tr>
+      <tr><td>2. SW1 reads markings on Port 3 ingress</td><td>802.1p / DSCP examination</td><td><span class="badge done">Yes (802.1p enabled by default)</span></td></tr>
+      <tr><td>3. SW1 maps to queue</td><td>VLAN qosprofile, ACL, etc.</td><td><span class="badge done">Yes (VLAN&nbsp;20&rarr;QP6, VLAN&nbsp;30&rarr;QP1)</span></td></tr>
+      <tr><td>4. SW1 schedules between queues</td><td>WRR / Strict-Priority weights</td><td><span class="badge fail">All weights = 1 (no differentiation)</span></td></tr>
+    </tbody>
+  </table>
+  <p>Three independent failure modes were uncovered along this chain.</p>
+
+  <hr class="divider">
+
+  <span class="section-label">Finding #1 &mdash; FIXED</span>
+  <h2 id="finding1">SW1 QoS Profile Weights Were All Equal (Weight = 1)</h2>
+  <p>Initial state on SW1, system-wide:</p>
+  <pre><code>show qosprofile
+
+QP1    Weight = 1
+QP6    Weight = 1
+QP8    Weight = 1</code></pre>
+  <p>Even with VLAN&nbsp;20 mapped to QP6 and VLAN&nbsp;30 mapped to QP1, the queue scheduler treats them <strong>equally under load</strong> because both have weight 1. This means even when traffic IS in different queues, no actual priority differentiation happens.</p>
+
+  <h3>The Apr&nbsp;21 lab work mapped VLANs to queues but never differentiated queue weights from default.</h3>
+  <p>Fixed via:</p>
+  <pre><code>configure qosprofile QP6 maxbuffer 100 weight 10
+save configuration</code></pre>
+  <p>After fix:</p>
+  <pre><code>QP1    Weight =  1
+QP6    Weight = 10    ← changed
+QP8    Weight =  1</code></pre>
+  <p>QP6 now has 10&times; the scheduling weight of QP1 under load.</p>
+  <div class="box ok"><p><strong>Status:</strong> Fixed in lab. Saved to running config.</p></div>
+
+  <hr class="divider">
+
+  <span class="section-label">Finding #2 &mdash; ARCHITECTURAL</span>
+  <h2 id="finding2">EXOS VLAN qosprofile is Ingress-Side Only</h2>
+  <p>The most consequential finding. The EXOS command:</p>
+  <pre><code>configure vlan VLAN_20_Corporate_Wireless qosprofile QP6</code></pre>
+  <p>...classifies traffic based on the <strong>ingress VLAN tag</strong>. It does NOT apply at egress when traffic is L3-routed INTO the VLAN from another port.</p>
+
+  <table>
+    <thead><tr><th>Direction</th><th>Path</th><th>Result</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Upstream</strong> (client &rarr; Internet)</td><td>Port 3 ingress (VLAN 20 tag) &rarr; classified to QP6 &rarr; routed via SVI &rarr; egress Port 1 in QP6</td><td><span class="badge done">QP6 Tx counter incrementing on Port 1</span></td></tr>
+      <tr><td><strong>Downstream</strong> (Internet &rarr; client)</td><td>Port 1 ingress (untagged from QF Modem, PCP=0) &rarr; classified to QP1 &rarr; L3-routed to VLAN 20 &rarr; egress Port 3 stays in QP1</td><td><span class="badge fail">QP6 Tx counter on Port 3 = 0</span></td></tr>
+    </tbody>
+  </table>
+
+  <p>This direction-asymmetry is the crux of the bug. Most user-facing traffic (YouTube, web browsing, video streaming) is dominated by downstream traffic. The VLAN qosprofile mapping handles only the upstream half. Downstream return traffic keeps its WAN-side queue assignment all the way through to the AP-facing egress port.</p>
+  <div class="box warn"><p><strong>Architectural limitation:</strong> EXOS documentation does not surface this directional behavior. Users reasonably expect <code>configure vlan X qosprofile QPn</code> to enforce queue assignment for all VLAN-X traffic regardless of direction. It does not.</p></div>
+
+  <hr class="divider">
+
+  <span class="section-label">Finding #3 &mdash; DATA-PLANE</span>
+  <h2 id="finding3">DSCP Marking Absent End-to-End</h2>
+  <p>To work around Finding #2, one fallback is to enable DSCP-based classification at Port 1 ingress. But this requires inbound traffic to carry DSCP markings.</p>
+  <p>Pcap analysis of Corp and Guest YouTube traffic:</p>
+  <table>
+    <thead><tr><th>Source pcap</th><th>Frames</th><th>DSCP=0 (BE)</th><th>Non-zero DSCP</th></tr></thead>
+    <tbody>
+      <tr><td>Corp (work MBP en0)</td><td>193,496</td><td><strong>99.85%</strong></td><td>198 frames @ DSCP=46 (Apple system protocols, NOT YouTube)</td></tr>
+      <tr><td>Guest (personal MBP en0)</td><td>135,211</td><td><strong>99.96%</strong></td><td>6 frames @ DSCP=40, 4 @ DSCP=56 (system protocols)</td></tr>
+    </tbody>
+  </table>
+  <p><strong>YouTube/CDN traffic carries DSCP=0 from origin.</strong> The QF Modem doesn't preserve or add DSCP either. So even if SW1 enables <code>diffserv examination</code> on Port 1, there is no DSCP value to differentiate on. This rules out DSCP-based classification as a workaround.</p>
+  <p>The AP3000 doesn't add DSCP either &mdash; the XIQ User Profile QoS Marker setting (Class of Service / DSCP) was never configured during the Apr&nbsp;21 lab work.</p>
+
+  <hr class="divider">
+
+  <span class="section-label">The Evidence</span>
+  <h2 id="smoking-gun">Smoking Gun &mdash; qosmonitor Output</h2>
+  <p>Three snapshots of <code>show ports qosmonitor all</code> across the test:</p>
+
+  <h3>T0 (15:16:24) &mdash; before any fixes</h3>
+  <pre><code>Port 3 (AP1):
+  Xmts   QP1=139,543   QP6=    0   QP8=  276
+Port 1 (QF Modem):
+  Xmts   QP1=4,578,385 QP6=    0   QP8=369,709</code></pre>
+
+  <h3>T1 (15:21:36) &mdash; after weight fix on QP6</h3>
+  <pre><code>Port 3 (AP1):
+  Xmts   QP1=263,195   QP6=    0   QP8=  472         ← Port 3 STILL ZERO QP6
+Port 1 (QF Modem):
+  Xmts   QP1=4,617,214 QP6=1,746   QP8=370,536       ← QP6 starting to fill UPSTREAM only</code></pre>
+
+  <h3>T2 (15:27:49) &mdash; after disable dot1p examination on Port 3</h3>
+  <pre><code>Port 3 (AP1):
+  Xmts   QP1= 47,395   QP6=    0   QP8=   68         ← STILL ZERO QP6 ON PORT 3
+Port 1 (QF Modem):
+  Xmts   QP1=4,880,756 QP6=7,807   QP8=371,263       ← QP6 incrementing UPSTREAM</code></pre>
+
+  <div class="box"><p><strong>The pattern:</strong> Upstream traffic from clients gets classified to QP6 via VLAN qosprofile mapping (visible on Port 1 egress). Downstream traffic to clients stays in QP1 regardless of fixes (visible on Port 3 egress). This is the proof of Finding #2.</p></div>
+
+  <hr class="divider">
+
+  <span class="section-label">Pcaps</span>
+  <h2 id="pcap-evidence">Corp vs Guest Pcap Comparison</h2>
+  <p>Two parallel captures of the same test &mdash; YouTube on Corp client (work MacBook) and YouTube on Guest client (personal MacBook), simultaneously, captured from each client's en0 interface.</p>
+
+  <h3>Top-level traffic profile</h3>
+  <table>
+    <thead><tr><th></th><th>Corp pcap</th><th>Guest pcap</th></tr></thead>
+    <tbody>
+      <tr><td>Source</td><td>Work MBP en0</td><td>Personal MBP en0</td></tr>
+      <tr><td>Duration</td><td>1199.9 seconds (20 min)</td><td>480.5 seconds (8 min)</td></tr>
+      <tr><td>Frames</td><td>193,496</td><td>135,211</td></tr>
+      <tr><td>Bytes</td><td>176,638,705</td><td>131,181,471</td></tr>
+      <tr><td>DSCP=0 (best-effort)</td><td><strong>99.85%</strong></td><td><strong>99.96%</strong></td></tr>
+      <tr><td>YouTube TLS/QUIC frames</td><td>~28,000 frames @ DSCP=0</td><td>~133,000 frames (UDP/QUIC) @ DSCP=0</td></tr>
+    </tbody>
+  </table>
+  <p>The conclusion is unambiguous: YouTube traffic is uniformly DSCP=0 in both directions for both VLANs, regardless of XIQ "priority" configuration. The DSCP-based path is empty.</p>
+
+  <hr class="divider">
+
+  <span class="section-label">Fix Path</span>
+  <h2 id="fix-path">ACL-Based Classification on Port 1 Ingress</h2>
+  <p>The remaining viable fix for the downstream side: explicit ACL-based classification at WAN ingress. Match by destination subnet, force into QP6 before the frame enters SW1's switch fabric.</p>
+
+  <pre><code># Conceptual EXOS access-list policy (requires policy file editor)
+edit policy "Corp_Priority"
+# Inside the vi-style editor:
+entry Corp_DL_to_QP6 {
+  if match all {
+    destination-address 10.20.0.0/24 ;
+  }
+  then {
+    qosprofile QP6 ;
+  }
+}
+# Save with Esc :wq
+
+configure access-list "Corp_Priority" ports 1 ingress
+save configuration</code></pre>
+
+  <p>This forces all traffic destined to the Corp subnet (10.20.0.0/24) into QP6 at WAN ingress, BEFORE it routes through. The queue assignment then sticks all the way through to Port 3 egress.</p>
+
+  <div class="box warn"><p>Ungainly but correct. The cleaner architectural answer would be either:<br>(a) EXOS extending VLAN qosprofile to apply at egress as well (firmware change), or<br>(b) AP3000 marking inbound traffic with DSCP before forwarding (XIQ feature support unclear), or<br>(c) Upstream routers/CDNs marking traffic that survives ISPs (out of scope for lab).</p></div>
+
+  <hr class="divider">
+
+  <span class="section-label">UX Gap</span>
+  <h2 id="xiq-disconnect">The XIQ Disconnect</h2>
+  <p>XIQ's Network Policy User Profile has a "Scheduling Weight" field (set to 100 for Corp, 10 for Guest in this lab). This sounds like a global priority knob, but it isn't &mdash; it controls only AP-side WMM airtime scheduling. There is no automatic translation to switch-side queue weights or marker policy.</p>
+  <p>A user setting "Corp scheduling weight 100" reasonably expects end-to-end priority enforcement. Three additional configurations are required, none of which the UI surfaces:</p>
+  <ol>
+    <li><strong>User Profile QoS Marker</strong> &mdash; Class of Service (PCP) and DSCP must be explicitly set so the AP marks frames on the wire. (Not configured in this lab.)</li>
+    <li><strong>Switch Template QoS Profiles</strong> &mdash; queue weights must be differentiated. (Not configured in this lab.)</li>
+    <li><strong>WAN-side ACL classification</strong> if downstream traffic is the dominant load. (Not configured in this lab.)</li>
+  </ol>
+  <p>For the GTAC ticket, this UX gap is itself a meaningful finding to surface to Extreme R&amp;D.</p>
+
+  <hr class="divider">
+
+  <span class="section-label">Source of Truth</span>
+  <h2 id="resources">Linked Resources</h2>
+
+  <div class="res-block">
+    <div class="res-cat">Pcaps (trimmed to first 50K frames each, ~50MB to fit GitHub)</div>
+    <ul class="res-list">
+      <li>
+        <span class="res-tag pcap">PCAP &middot; CORP</span>
+        <a href="data/may8-qos/corp_workmbp_en0_first50k.pcapng" download>corp_workmbp_en0_first50k.pcapng</a>
+        <span class="res-meta">~50 MB &middot; Work MBP en0 capture during Corp YouTube test &middot; 99.85% DSCP=0</span>
+      </li>
+      <li>
+        <span class="res-tag pcap">PCAP &middot; GUEST</span>
+        <a href="data/may8-qos/guest_personalmbp_en0_first50k.pcapng" download>guest_personalmbp_en0_first50k.pcapng</a>
+        <span class="res-meta">~46 MB &middot; Personal MBP en0 capture during Guest YouTube test &middot; 99.96% DSCP=0</span>
+      </li>
+    </ul>
+
+    <div class="res-cat">SW1 evidence (qosmonitor and config)</div>
+    <ul class="res-list">
+      <li>
+        <span class="res-tag txt">TXT</span>
+        <a href="data/may8-qos/sw1_qosmonitor_evidence.txt">sw1_qosmonitor_evidence.txt</a>
+        <span class="res-meta">All qosmonitor snapshots (T0/T1/T2), config excerpts, before/after fix outputs &mdash; the smoking gun</span>
+      </li>
+    </ul>
+
+    <div class="res-cat">Verbatim Dialogue (for GTAC / R&amp;D)</div>
+    <ul class="res-list">
+      <li style="background:#faf5ff;border-color:#6b21a8;">
+        <span class="res-tag" style="background:#e9d5ff;color:#581c87;border:1px solid #6b21a8;">MD &middot; ESCALATION</span>
+        <a href="data/may8-qos/dialogue_qos_validation_May8_2026.md"><strong>dialogue_qos_validation_May8_2026.md</strong></a>
+        <span class="res-meta">Full conversation that produced this analysis. <strong>For sharing with Extreme GTAC and R&amp;D engineers.</strong></span>
+      </li>
+    </ul>
+
+    <div class="res-cat">Related EOD (DHCP work)</div>
+    <ul class="res-list">
+      <li>
+        <span class="res-tag html">HTML</span>
+        <a href="session_summary_20260508.html">session_summary_20260508.html</a>
+        <span class="res-meta">Earlier today &mdash; DHCP MacBook incident, Hypothesis B confirmed via repro</span>
+      </li>
+    </ul>
+  </div>
+
+  <hr class="divider">
+
+  <span class="section-label">Forward</span>
+  <h2 id="next">Next Steps</h2>
+  <ol>
+    <li><strong>Apply ACL-based classification on Port 1 ingress</strong> (Option C path B) to fix the downstream gap. Match destination 10.20.0.0/24 &rarr; QP6, save, re-test.</li>
+    <li><strong>Configure XIQ User Profile QoS markers</strong> (CoS=5 for Corp, 0 for Guest) so the AP also marks upstream traffic. Belt-and-suspenders coverage.</li>
+    <li><strong>Run dual-stream load test</strong> (Corp + Guest YouTube simultaneously, saturate bandwidth) to validate Corp wins under contention.</li>
+    <li><strong>Submit GTAC ticket</strong> with this EOD + verbatim dialogue + pcaps. Three findings to surface, especially the architectural ingress-only behavior.</li>
+    <li><strong>Monday workstream:</strong> EXOS &rarr; VOSS migration on SW2 (parked from Friday).</li>
+  </ol>
+
+  <hr class="divider">
+
+  <p class="footer">
+    Lab: Horizon Custom Fabrication &mdash; SW1 EXOS &middot; AP1 AP3000 &middot; Multi-VLAN QoS test &nbsp;&middot;&nbsp;
+    May 8, 2026 PM &mdash; <em>Khursheed &times; Claude, QoS Bug Decomposed Into Three Layers</em>
+  </p>
+</div>
+</body>
+</html>

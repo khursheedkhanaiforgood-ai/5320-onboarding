@@ -1,0 +1,161 @@
+SW1 EXOS QoS Diagnostic Evidence — 2026-05-08
+=============================================
+
+Lab: Horizon Custom Fabrication
+SW1: 5320-16P-2MXT-2X-SwitchEngine
+Test conditions: Corp YouTube on iPhone (10.20.0.100) + Guest YouTube on Personal MBP (10.30.0.101)
+Port 3 = AP1 uplink, Port 1 = QF Modem uplink, Port 5 = Wired client, Port 10 = mirror dest
+
+==============================================================================
+1. INITIAL QoS PROFILE STATE — all weights equal (BUG #1)
+==============================================================================
+
+show qosprofile
+
+    QP1    Weight =   1     Max Buffer Percent = 100
+    QP6    Weight =   1     Max Buffer Percent = 100
+    QP8    Weight =   1     Max Buffer Percent = 100
+
+==============================================================================
+2. PORT 3 DETAILS — VLAN-to-queue mapping configured, but 802.1p exam enabled
+==============================================================================
+
+show port 3 information detail (relevant excerpt)
+
+VLAN cfg:
+   Default (untagged), Tag 1
+   VLAN_20_Corporate_Wireless (tagged 20)
+   VLAN_30_Guest_Wireless (tagged 30)
+
+QoS Profile:                   None configured     ← no per-port profile
+Ingress IPTOS Examination:     Disabled            ← DSCP NOT examined
+Ingress 802.1p Examination:    Enabled             ← PCP IS examined (overrides VLAN qosprofile)
+Ingress 802.1p Priority:       0
+Egress 802.1p Replacement:     Disabled
+Egress IPTOS Replacement:      Disabled
+
+QOS Profile Settings:
+   QP1  MinBw=0%  MaxBw=100%  MaxBuf=100%  Weight=1
+   QP6  MinBw=0%  MaxBw=100%  MaxBuf=100%  Weight=1
+   QP8  MinBw=0%  MaxBw=100%  MaxBuf=100%  Weight=1
+
+==============================================================================
+3. RUNNING CONFIG — VLAN-to-qosprofile mapping IS configured
+==============================================================================
+
+(extracted from May 7 tech-support dump)
+
+configure vlan "VLAN_10_Corporate_Wired" qosprofile QP6
+configure vlan "VLAN_20_Corporate_Wireless" qosprofile QP6
+configure vlan "VLAN_30_Guest_Wireless" qosprofile QP1
+configure qosprofile QP6 maxbuffer 100 weight 1
+configure qosprofile QP6 minbw 0 maxbw 100 ports 1
+... (per-port for ports 1-20)
+
+==============================================================================
+4. SMOKING GUN — qosmonitor T0 (15:16:24, BEFORE any fixes)
+==============================================================================
+
+show ports qosmonitor all
+
+Port 3 (AP1 uplink):
+  Xmts   QP1=139,543   QP6=0   QP8=276
+  Cong   all 0
+
+Port 1 (QF Modem uplink):
+  Xmts   QP1=4,578,385   QP6=0   QP8=369,709
+  Cong   all 0
+
+Port 5 (Wired client):
+  Xmts   QP1=158,759   QP6=0   QP8=1,267
+
+==============================================================================
+5. AFTER FIX #1 — Set QP6 weight = 10 (queue scheduler differentiation)
+==============================================================================
+
+configure qosprofile QP6 maxbuffer 100 weight 10
+save configuration
+
+show qosprofile (after fix)
+    QP1    Weight =  1     Max Buffer Percent = 100
+    QP6    Weight = 10     Max Buffer Percent = 100   ← changed
+    QP8    Weight =  1     Max Buffer Percent = 100
+
+==============================================================================
+6. AFTER FIX #1 — qosmonitor T1 (15:21:36) — STILL all in QP1
+==============================================================================
+
+show ports qosmonitor all
+
+Port 3 (AP1 uplink):
+  Xmts   QP1=263,195   QP6=0   QP8=472
+  Cong   all 0
+
+Port 1 (QF Modem uplink):
+  Xmts   QP1=4,617,214   QP6=1,746   QP8=370,536   ← QP6 starting to fill UPSTREAM only
+
+==============================================================================
+7. AFTER FIX #2 — disable dot1p examination ports 3
+==============================================================================
+
+disable dot1p examination ports 3
+save configuration
+
+EXOS Warning issued:
+  "The intended usage of this command is when another QoS traffic
+   grouping (e.g. diffserv examination, port QoS, vlan QoS, ACL QoS) is
+   configured."
+
+==============================================================================
+8. AFTER FIX #2 — qosmonitor T2 (15:27:49) — STILL all in QP1 on Port 3
+==============================================================================
+
+show ports qosmonitor all
+
+Port 3 (AP1 uplink):
+  Xmts   QP1=47,395   QP6=0   QP8=68         ← STILL ZERO IN QP6 EVEN AFTER DOT1P EXAM DISABLED
+  Cong   all 0
+
+Port 1 (QF Modem uplink):
+  Xmts   QP1=4,880,756   QP6=7,807   QP8=371,263   ← QP6 incrementing on UPSTREAM only
+
+==============================================================================
+DIAGNOSIS — three-layer architecture issue
+==============================================================================
+
+FINDING #1 (FIXED): SW1 QoS profile weights all = 1 system-wide. No queue
+scheduling differentiation even when traffic IS in different queues.
+Resolution: configure qosprofile QP6 weight 10. Verified in show qosprofile.
+
+FINDING #2 (architectural): EXOS VLAN qosprofile is INGRESS-side only.
+- Upstream (client→Internet): VLAN 20 ingress on Port 3 → classified to QP6 → egress on Port 1 in QP6
+  Evidence: Port 1 QP6 count = 7,807 packets (incrementing)
+- Downstream (Internet→client): Untagged ingress on Port 1 → classified to QP1 (PCP=0) → routed to VLAN 20 → egress on Port 3 STAYS in QP1
+  Evidence: Port 3 QP6 count = 0 packets (consistently)
+
+FINDING #3 (data plane): YouTube/CDN traffic carries DSCP=0 from origin.
+QF Modem doesn't add DSCP. So even if SW1 enabled diffserv examination on
+Port 1 ingress, there's no DSCP value to differentiate on.
+- Corp pcap (work MBP en0): 99.85% DSCP=0
+- Guest pcap (personal MBP en0): 99.96% DSCP=0
+
+CONCLUSION: For end-to-end Corp > Guest priority for downstream traffic,
+ACL-based classification on Port 1 ingress is required. The VLAN
+qosprofile mapping handles upstream correctly but cannot handle the
+downstream return path because:
+  - L3-routed traffic into a VLAN doesn't pick up that VLAN's qosprofile
+    at egress
+  - No DSCP marking arrives from upstream to use for diffserv classification
+  - 802.1p PCP from upstream is 0 (modem doesn't mark)
+
+==============================================================================
+TIMESTAMPS
+==============================================================================
+14:25 EDT — work MBP en0 capture began (Corp YouTube test)
+14:39 EDT — capture ended (storage full)
+15:16 EDT — qosmonitor T0
+15:18 EDT — applied weight fix to QP6
+15:21 EDT — qosmonitor T1 (post fix #1)
+15:23 EDT — disabled dot1p examination
+15:27 EDT — qosmonitor T2 (post fix #2)
+16:28 EDT — Guest pcap captured (personal MBP en0)
