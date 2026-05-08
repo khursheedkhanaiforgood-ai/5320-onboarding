@@ -111,7 +111,7 @@ a:hover { color: #111; }
     <a href="#elimination">5. AP3000 Internal-Tables — 4-Option Elimination</a>
     <a href="#tk-gtk">6. The Plot Twist — Why iPhone Failed Too (TK vs GTK)</a>
     <a href="#validation">7. Ground-Truth Validation — Same MAC, Before/After</a>
-    <a href="#diagnostic">8. XIQ AP3000 Diagnostic Procedure (Next Time, Before Reboot)</a>
+    <a href="#diagnostic">8. DHCP / Wi-Fi Triage Runbook (5 stages, capture before reboot)</a>
     <a href="#concepts">9. Concepts Mastered</a>
     <a href="#resources">10. Linked Resources &amp; References</a>
     <a href="#next">11. Next Steps</a>
@@ -286,24 +286,108 @@ T8  iPhone lease expires → can't renew → DISCOVER → broken</code></pre>
   <hr class="divider">
 
   <span class="section-label">Future-Proof Procedure</span>
-  <h2 id="diagnostic">XIQ AP3000 Diagnostic Procedure (Capture <em>Before</em> Reboot)</h2>
-  <p>Run via XIQ &rarr; Device 360 &rarr; Tools &rarr; SSH/CLI Session. Capture, wait 30 s, capture again, diff. Save the .pcap. <em>Then</em> reboot.</p>
+  <h2 id="diagnostic">DHCP / Wi-Fi Triage Runbook &mdash; Capture <em>Before</em> Reboot</h2>
+  <p>Five stages across all three layers (Client &rarr; AP / XIQ &rarr; EXOS). Run them in order. Reboot is often the fix &mdash; but it's also the evidence eraser. <strong>Capture first, reboot last.</strong></p>
+
+  <div class="box warn"><p><strong>Do NOT do these things first:</strong> reboot anything before grabbing AP <code>show client</code> + <code>show counters wireless</code>; blame DHCP server config before confirming frames reach SW1's FDB; trust client-side error messages (macOS/iOS says "Connection failed" for a dozen different root causes).</p></div>
+
+  <h3>Stage 1 &mdash; Confirm the client is sending DISCOVERs</h3>
+  <p>Capture from the client itself (the only place you see what the client thinks it's sending).</p>
+  <ul>
+    <li>macOS: Wireless Diagnostics &rarr; Capture (Option-click Wi-Fi icon) on <code>en0</code></li>
+    <li>iOS: tether through MacBook, capture on tethered interface</li>
+    <li>Wireshark filter: <code>bootp || dhcp</code></li>
+  </ul>
   <table>
-    <thead><tr><th width="40">#</th><th>Command</th><th>Smoking gun looks like</th></tr></thead>
+    <thead><tr><th>What you see</th><th>Diagnosis</th></tr></thead>
     <tbody>
-      <tr><td>1</td><td><code>show client</code></td><td>MacBook listed but stuck at <code>4WAY-PENDING</code></td></tr>
-      <tr><td>2</td><td><code>show client mac &lt;MAC&gt;</code></td><td><code>TK Installed: NO</code> or PTK install failed</td></tr>
-      <tr style="background:#E8F5E9;"><td><strong>3</strong></td><td><code><strong>show counters wireless</strong></code></td><td><strong>Spiking decrypt-error counter — THE confirmation</strong></td></tr>
-      <tr><td>4</td><td><code>show interface wifi0 statistics</code></td><td>Decrypt failures &gt; 0 with no plaintext output</td></tr>
-      <tr><td>5</td><td>AP packet capture, filter <code>wlan.addr == &lt;MAC&gt;</code></td><td><code>Protected Frame=1</code> arrives but undecodable payload</td></tr>
+      <tr><td>No DISCOVERs at all</td><td>Client-side issue (Wi-Fi adapter, OS supplicant, or never associated). Skip to Stage 2.</td></tr>
+      <tr><td>DISCOVERs out, no OFFERs</td><td>Bidirectional path broken AP&harr;server. Continue.</td></tr>
+      <tr><td>DISCOVER &rarr; OFFER, no ACK</td><td>One-way works, other broken. Likely intermittent encryption or unicast-vs-broadcast asymmetry.</td></tr>
     </tbody>
   </table>
-  <pre><code># Live diff procedure (next time the issue recurs):
+
+  <h3>Stage 2 &mdash; Did the AP see the client and complete the 4-way handshake?</h3>
+  <p>XIQ &rarr; Device 360 &rarr; AP &rarr; Client List, OR via AP CLI:</p>
+  <pre><code>show client                          # all associated clients with state
+show client mac &lt;client-mac&gt;         # per-client deep dive (TK Installed: yes/no)</code></pre>
+  <table>
+    <thead><tr><th>Client state</th><th>Diagnosis</th></tr></thead>
+    <tbody>
+      <tr><td>Not listed</td><td>Client never associated. Check SSID broadcast, RF coverage, supplicant config.</td></tr>
+      <tr><td><code>4WAY-PENDING</code></td><td><strong>Smoking gun for option (b) WPA2 key state.</strong> EAPOL handshake started but never finished. TK never installed.</td></tr>
+      <tr><td><code>Authenticated / Data-OK</code></td><td>Client looks fully up. Move to Stage 3.</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Stage 3 &mdash; Are the client's frames reaching SW1?</h3>
+  <p>EXOS (SW1) &mdash; check FDB &amp; ARP for the client's VLAN:</p>
+  <pre><code>show fdb vlan VLAN_20_Corporate_Wireless     # learned MACs on this VLAN
+show fdb port 3                              # learned MACs on AP-facing port
+show iparp vlan VLAN_20_Corporate_Wireless   # ARP table for this VLAN</code></pre>
+  <table>
+    <thead><tr><th>What you see</th><th>Diagnosis</th></tr></thead>
+    <tbody>
+      <tr><td>Client MAC in FDB on Port 3</td><td>Frames are reaching SW1. Skip to Stage 4.</td></tr>
+      <tr style="background:#FBE9E9;"><td><strong>Client MAC NOT in FDB</strong></td><td><strong>Frames dying between AP-radio-RX and AP-wired-TX</strong> &mdash; this is the May 6 fingerprint. Check decrypt counters at the AP next.</td></tr>
+      <tr><td>Client MAC on Port 3 but NOT in ARP</td><td>L2 reaches SW1 but L3 broken. Check VLAN ipforwarding flag and gateway SVI.</td></tr>
+    </tbody>
+  </table>
+
+  <p><strong>The smoking-gun decrypt-counter diff (THE confirmation for option b):</strong></p>
+  <pre><code>show counters wireless                # or `show wlan-statistics` per platform
+show interface wifi0 statistics       # per-radio RX OK / errors / decrypt failures</code></pre>
+  <pre><code># Live diff procedure — next time the issue recurs:
 ap-cli show counters wireless &gt; counters_t0.txt
 sleep 30
 ap-cli show counters wireless &gt; counters_t30.txt
 diff counters_t0.txt counters_t30.txt | grep -i "decrypt\|mic"
-# Spiking deltas = (b) confirmed in real-time</code></pre>
+# Spiking deltas in 30 s = (b) confirmed in real-time</code></pre>
+  <div class="box ok"><p>A spiking decrypt-error / MIC-failure counter for the affected radio = WPA2 key-state wedge confirmed. Counter unchanged = look elsewhere.</p></div>
+
+  <h3>Stage 4 &mdash; Did the DHCP server see the request and have an address to give?</h3>
+  <p>EXOS (SW1) &mdash; DHCP server state:</p>
+  <pre><code>show dhcp-server                          # all VLANs, pools, leases, port bindings
+show dhcp-server VLAN_20_Corporate_Wireless leases
+show vlan VLAN_20_Corporate_Wireless      # ipforwarding flag, port membership
+show log                                  # filter for DHCP / DHCPDISCOVER</code></pre>
+  <ul>
+    <li><strong>Pool not exhausted</strong> &mdash; assigned vs range count. If full, expand or reduce <code>dhcp-lease-timer</code>.</li>
+    <li><strong>DHCP enabled on AP-facing port</strong> &mdash; <code>Ports DHCP Enabled: 3,10</code>. If port 3 missing, requests are silently ignored.</li>
+    <li><strong>Karl Rule:</strong> <code>enable ipforwarding vlan X</code> &mdash; without it, clients get IPs but no internet.</li>
+    <li><strong>No stale lease for this MAC</strong> &mdash; old lease at X.X.X.100 with same MAC? Server may unicast OFFER to an IP the client hasn't claimed yet.</li>
+  </ul>
+
+  <h3>Stage 5 &mdash; Are OFFERs reaching the client (downstream encryption)?</h3>
+  <p>Most people miss this half because they only capture upstream from the client. To check downstream you need an <strong>AP packet capture</strong>: XIQ &rarr; Device 360 &rarr; Tools &rarr; Capture, filter <code>wlan.addr == &lt;client-mac&gt;</code>.</p>
+  <table>
+    <thead><tr><th>What you see in AP capture</th><th>Diagnosis</th></tr></thead>
+    <tbody>
+      <tr><td>OFFER sent by AP, <code>Protected Frame=1</code></td><td>AP forwarded it. If client sees nothing &rarr; <strong>GTK desync</strong> (broadcast OFFER encrypted with GTK_v2, client still on GTK_v1).</td></tr>
+      <tr><td>No OFFER ever sent</td><td>Frame never reached AP downstream queue. Stage 4 issue, not Stage 5.</td></tr>
+      <tr><td>OFFER as <code>Protected Frame=0</code></td><td>Encryption-mismatch config error (not key wedge).</td></tr>
+    </tbody>
+  </table>
+  <div class="box ok"><p><strong>GTK desync field test:</strong> force the client to disconnect &amp; re-associate (toggle Wi-Fi off/on). If DHCP succeeds on re-assoc but failed before &rarr; GTK was the wedge. Per-BSSID; gets refreshed on every new association.</p></div>
+
+  <h3>Quick-reference: the four smoking-gun indicators</h3>
+  <table>
+    <thead><tr><th>Indicator</th><th>Where to find</th><th>Means</th></tr></thead>
+    <tbody>
+      <tr><td>Client state stuck at <code>4WAY-PENDING</code></td><td>XIQ Device 360 &rarr; Client list, or AP <code>show client</code></td><td>TK never installed &rarr; option (b)</td></tr>
+      <tr style="background:#E8F5E9;"><td><strong>Decrypt-error counter spiking on AP radio</strong></td><td>AP <code>show counters wireless</code> diff over 30 s</td><td><strong>THE confirmation for (b)</strong></td></tr>
+      <tr><td>Client MAC absent from SW1 <code>show fdb port 3</code></td><td>EXOS</td><td>Frames dying upstream of SW1 (at AP) &mdash; corroborates (b)</td></tr>
+      <tr><td>OFFERs visible in AP capture but not in client capture</td><td>XIQ AP capture vs client en0 capture</td><td>GTK desync &mdash; broadcast OFFER encrypted with mismatched key</td></tr>
+    </tbody>
+  </table>
+
+  <h3>XIQ web-UI shortcuts (when CLI feels heavy)</h3>
+  <ul>
+    <li><strong>Device 360 &rarr; Client tab</strong> &mdash; see clients without SSH'ing in.</li>
+    <li><strong>Live Log Stream</strong> per-device &mdash; filter by client MAC, see association events in real time.</li>
+    <li><strong>Network Policy &rarr; SSID &rarr; Security</strong> &mdash; verify encryption matches what client expects (WPA2 vs WPA3, PSK length).</li>
+    <li><strong>Tools &rarr; Capture</strong> &mdash; start a wireless capture on the AP itself, download .pcap.</li>
+  </ul>
 
   <hr class="divider">
 
