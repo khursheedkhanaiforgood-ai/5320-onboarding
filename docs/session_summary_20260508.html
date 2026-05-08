@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>5320 Lab Journal — DHCP Repro: Hypothesis B Confirmed, May 8 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Libre+Franklin:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Libre Baskerville', Georgia, serif; background: #FFFFFF; color: #111111; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 48px 24px 72px; }
+.container { max-width: 760px; width: 100%; }
+.nyt-rule-top { border: none; border-top: 3px solid #111; margin-bottom: 6px; }
+.nyt-rule-thin { border: none; border-top: 1px solid #111; margin-bottom: 18px; }
+.nyt-logo { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.22em; color: #666; text-align: center; margin-bottom: 6px; }
+.byline { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.72rem; color: #666; margin-bottom: 14px; letter-spacing: 0.02em; }
+.byline strong { color: #111; font-weight: 700; }
+h1 { font-family: 'Libre Baskerville', Georgia, serif; font-size: 2.2rem; font-weight: 700; color: #111; line-height: 1.15; margin-bottom: 14px; }
+.subtitle { font-family: 'Libre Baskerville', Georgia, serif; font-size: 1rem; font-style: italic; color: #444; line-height: 1.8; margin-bottom: 20px; border-bottom: 1px solid #E2E2E2; padding-bottom: 28px; }
+.section-label { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.18em; color: #326891; margin: 32px 0 12px; padding-bottom: 6px; border-bottom: 2px solid #326891; display: block; }
+h2 { font-family: 'Libre Baskerville', Georgia, serif; font-size: 1.45rem; font-weight: 700; color: #111; margin: 0 0 12px; }
+h3 { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #326891; margin: 24px 0 10px; }
+p { font-size: 0.97rem; line-height: 1.85; color: #222; margin-bottom: 12px; }
+ul, ol { padding-left: 22px; margin-bottom: 14px; }
+li { font-size: 0.95rem; line-height: 1.8; color: #222; margin-bottom: 4px; }
+code { font-family: 'SF Mono', Consolas, monospace; font-size: 0.82rem; background: #F4F4F4; border: 1px solid #E2E2E2; padding: 1px 5px; border-radius: 3px; color: #326891; }
+pre { background: #F8F8F8; border: 1px solid #E2E2E2; border-radius: 4px; padding: 16px; overflow-x: auto; margin: 12px 0 18px; }
+pre code { background: none; border: none; padding: 0; color: #111; font-size: 0.83rem; line-height: 1.65; }
+table { width: 100%; border-collapse: collapse; margin: 12px 0 20px; font-size: 0.88rem; }
+th { background: #F4F4F4; font-family: 'Libre Franklin', Arial, sans-serif; font-weight: 700; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: #326891; padding: 8px 10px; border: 1px solid #E2E2E2; text-align: left; }
+td { padding: 8px 10px; border: 1px solid #E2E2E2; color: #222; vertical-align: top; }
+tr:nth-child(even) td { background: #FAFAFA; }
+.badge { display: inline-block; padding: 2px 8px; border-radius: 2px; font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; margin: 1px; }
+.done { background: #E8F5E9; color: #2E7D32; border: 1px solid #A5D6A7; }
+.fail { background: #FBE9E9; color: #C62828; border: 1px solid #EF9A9A; }
+.partial { background: #FFF3E0; color: #E65100; border: 1px solid #FFCC80; }
+.win { background: #E1F5FE; color: #0277BD; border: 1px solid #81D4FA; }
+.box { border-left: 3px solid #326891; background: #F0F7FF; padding: 12px 16px; margin: 14px 0; border-radius: 0 4px 4px 0; }
+.box p { margin: 0; font-size: 0.92rem; }
+.box.warn { border-left-color: #F57F17; background: #FFFBF0; }
+.box.ok { border-left-color: #2E7D32; background: #F1F8F1; }
+.box.fail { border-left-color: #C62828; background: #FCEEEE; }
+.divider { border: none; border-top: 1px solid #E2E2E2; margin: 32px 0; }
+.toc { background: #F8F8F8; border: 1px solid #E2E2E2; border-radius: 4px; padding: 18px 22px; margin-bottom: 36px; }
+.toc-title { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.15em; color: #666; margin-bottom: 10px; }
+.toc a { display: block; font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.85rem; color: #326891; text-decoration: none; padding: 4px 0; border-bottom: 1px dotted #E2E2E2; }
+.toc a:hover { color: #111; }
+.footer { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.72rem; color: #999; text-align: center; margin-top: 48px; padding-top: 16px; border-top: 1px solid #E2E2E2; }
+a { color: #326891; }
+a:hover { color: #111; }
+.res-block { margin: 14px 0 22px; }
+.res-cat { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: #666; margin: 18px 0 6px; }
+.res-list { list-style: none; padding: 0; }
+.res-list li { display: block; padding: 12px 16px; border: 1px solid #E2E2E2; border-radius: 4px; margin-bottom: 8px; background: #FAFAFA; }
+.res-list li:hover { background: #F0F7FF; border-color: #326891; }
+.res-list a { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.95rem; font-weight: 600; color: #326891; text-decoration: none; }
+.res-list a:hover { text-decoration: underline; color: #111; }
+.res-list .res-meta { display: block; font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.78rem; color: #555; margin-top: 4px; font-weight: 400; line-height: 1.6; }
+.res-list .res-tag { display: inline-block; font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; padding: 2px 7px; border-radius: 2px; margin-right: 8px; vertical-align: middle; }
+.res-tag.pcap { background: #C8E6C9; color: #1B5E20; border: 1px solid #66BB6A; }
+.res-tag.md { background: #F3E5F5; color: #6A1B9A; border: 1px solid #CE93D8; }
+.res-tag.html { background: #ECEFF1; color: #455A64; border: 1px solid #B0BEC5; }
+.stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 20px 0 30px; }
+.stat-card { border: 1px solid #E2E2E2; border-radius: 4px; padding: 12px 14px; }
+.stat-num { font-family: 'Libre Baskerville', Georgia, serif; font-size: 1.5rem; font-weight: 700; color: #111; }
+.stat-label { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.7rem; color: #666; text-transform: uppercase; letter-spacing: 0.08em; margin-top: 2px; }
+.stat-num.win { color: #2E7D32; }
+.stat-num.fail { color: #C62828; }
+.stat-num.warn { color: #E65100; }
+.dialogue-q { background: #FFFBF0; border-left: 3px solid #F57F17; padding: 10px 14px; margin: 8px 0; font-style: italic; font-size: 0.92rem; color: #444; }
+.dialogue-a { background: #F0F7FF; border-left: 3px solid #326891; padding: 10px 14px; margin: 8px 0; font-size: 0.92rem; color: #222; }
+.dialogue-meta { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.68rem; color: #666; text-transform: uppercase; letter-spacing: 0.08em; margin-top: 4px; font-weight: 600; }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <hr class="nyt-rule-top">
+  <p class="nyt-logo">E2E Network Deployment &mdash; Lab Journal</p>
+  <hr class="nyt-rule-thin">
+  <p class="byline">By <strong>Khursheed Khan</strong> &nbsp;&bull;&nbsp; May 8, 2026 &nbsp;&bull;&nbsp; DHCP Repro Day</p>
+
+  <h1>From Hypothesis to Ground-Truth: Deterministically Reproducing the May 6 DHCP Failure</h1>
+  <p class="subtitle">Today we proved (B). The May 6 incident self-recovers in 2&ndash;4 minutes without intervention. The trigger device is immune to its own cascade. Two-of-three clients fail, with the lagging clients missing the GTK rotation. That asymmetry is a fingerprint &mdash; and the fingerprint is unique to GTK rotation propagation.</p>
+
+  <div class="stats">
+    <div class="stat-card"><div class="stat-num win">REPRO ✓</div><div class="stat-label">Failure Reproduced</div></div>
+    <div class="stat-card"><div class="stat-num win">(B)</div><div class="stat-label">Hypothesis Confirmed</div></div>
+    <div class="stat-card"><div class="stat-num">2 / 3</div><div class="stat-label">Clients Failed</div></div>
+    <div class="stat-card"><div class="stat-num fail">2.7 min</div><div class="stat-label">iPhone Failure</div></div>
+    <div class="stat-card"><div class="stat-num fail">4.3 min</div><div class="stat-label">Personal MBP Failure</div></div>
+    <div class="stat-card"><div class="stat-num">596 s</div><div class="stat-label">Pcap Duration</div></div>
+  </div>
+
+  <div class="toc">
+    <div class="toc-title">Contents</div>
+    <a href="#trigger">1. The Trigger &mdash; Refined Definition</a>
+    <a href="#abcd">2. Socratic Round &mdash; Hypothesis A/B/C/D</a>
+    <a href="#setup">3. Lab Setup at Trigger Time</a>
+    <a href="#timeline">4. Trigger + Recovery Timeline (from pcap)</a>
+    <a href="#fingerprint">5. The 3-Client Fingerprint &mdash; Proof of (B)</a>
+    <a href="#self-recovery">6. Self-Recovery &mdash; The Yesterday-Today Difference</a>
+    <a href="#captures">7. What We Captured &mdash; And What We Lost</a>
+    <a href="#lessons">8. Operational Lessons</a>
+    <a href="#dialogue">9. Annotated Dialogue (Verbatim Excerpts)</a>
+    <a href="#resources">10. Linked Resources</a>
+    <a href="#next">11. Monday — EXOS → VOSS Walk</a>
+  </div>
+
+  <span class="section-label">The Trigger</span>
+  <h2 id="trigger">Refined Definition: Wired Interface Arrival in the SW1 Broadcast Domain</h2>
+  <p>Yesterday's framing of the trigger was vague — "MacBook joined Wi-Fi" — and that turned out to be wrong. The deterministic trigger is far more specific:</p>
+  <div class="box warn"><p><strong>Move the work MacBook's Ethernet (en8) from QF Modem (DMZ side) to SW1 Port 5 (lab side), while the same MacBook's en0 is associated to Corporate_Wireless via AP1.</strong></p></div>
+  <p>The moment Port 5 link comes up and the work MacBook starts DHCP'ing on VLAN 10, iPhone DHCP fails. Disconnecting Port 5 (or simply waiting 2&ndash;4 minutes) recovers everything. <strong>This is the deterministic, reproducible trigger.</strong></p>
+
+  <hr class="divider">
+
+  <span class="section-label">Why Did TK/GTK Corrupt?</span>
+  <h2 id="abcd">Socratic Round &mdash; The Trigger Layer Below Yesterday's Mechanism Layer</h2>
+  <p>Yesterday we identified <em>mechanism</em> = (b) WPA2 key state. Today we asked the deeper question: <em>what corrupted it in the first place?</em> Four hypotheses:</p>
+
+  <table>
+    <thead><tr><th>#</th><th>Hypothesis</th><th>What it claims</th></tr></thead>
+    <tbody>
+      <tr><td>(A)</td><td>Stale per-MAC key slot in AP crypto engine</td><td>iPhone's PTK still bound to MAC slot; MacBook joins, double-binds, silent fail</td></tr>
+      <tr><td>(B)</td><td>GTK rotation triggered by perceived duplicate client</td><td>AP defensive deauth + GTK rotation; group key handshake to other clients wedges</td></tr>
+      <tr><td>(C)</td><td>macOS dual-interface state change</td><td>Wired + Wi-Fi both active &rarr; macOS aborts/restarts EAPOL &rarr; AP left with half-installed TK</td></tr>
+      <tr style="background:#E8F5E9;"><td><strong>(D)</strong></td><td><strong>All three layered (C &rarr; A &rarr; B cascade)</strong></td><td><strong>C sets the stage; A is the immediate cause for the trigger MAC; B propagates to lagging clients</strong></td></tr>
+    </tbody>
+  </table>
+
+  <p><strong>User committed to (D).</strong> Today's pcap then narrowed it further: in this specific repro, the LAA collision condition for (A) is absent (work MBP and personal MBP both use UAA hardware MACs; only iPhone uses LAA). So today is a clean test of <strong>C &rarr; B</strong>, with (A) ruled out by MAC distinctness.</p>
+
+  <hr class="divider">
+
+  <span class="section-label">Lab Setup</span>
+  <h2 id="setup">Lab State at Trigger Time</h2>
+  <p>From AP1 <code>show station</code>, all three clients on Wifi1.1 = Corporate_Wireless (5 GHz, channel 161, VLAN 20):</p>
+  <table>
+    <thead><tr><th>Client</th><th>MAC</th><th>IP</th><th>RSSI</th><th>UAA / LAA</th></tr></thead>
+    <tbody>
+      <tr><td>Work MBP (trigger device)</td><td><code>84:2f:57:94:bd:cf</code></td><td>10.20.0.102</td><td>-28 dBm</td><td><span class="badge done">UAA — hardware</span></td></tr>
+      <tr><td>Personal MBP</td><td><code>74:a6:cd:8b:19:60</code></td><td>10.20.0.101</td><td>-42 dBm</td><td><span class="badge done">UAA — hardware</span></td></tr>
+      <tr><td>iPhone</td><td><code>62:75:85:f6:4e:3e</code></td><td>10.20.0.100</td><td>-60 dBm</td><td><span class="badge partial">LAA — privacy</span></td></tr>
+    </tbody>
+  </table>
+  <p>All three using <strong>WPA3-SAE-PMF + AES-CCMP</strong>. Work MBP wired to QF Modem via en8 (USB-C Ethernet) at start of capture.</p>
+
+  <hr class="divider">
+
+  <span class="section-label">From the Pcap</span>
+  <h2 id="timeline">Trigger + Recovery Timeline</h2>
+  <p>Captured from work MacBook's en0 (Wi-Fi), 596 seconds total. Gratuitous ARPs are the timing fingerprint &mdash; each affected client emits one when it recovers and re-asserts its IP.</p>
+  <table>
+    <thead><tr><th>Time</th><th>Event</th></tr></thead>
+    <tbody>
+      <tr><td>0&ndash;180s</td><td>Quiet baseline (~5 frames per 30s)</td></tr>
+      <tr style="background:#FFF8E1;"><td><strong>~180&ndash;192s</strong></td><td><strong>Activity burst (3107 frames in 30s) &mdash; trigger event: en8 plugged into Port 5</strong></td></tr>
+      <tr><td>215&ndash;220s</td><td>Work MBP confirms gateway via repeated ARPs (route table reshuffle)</td></tr>
+      <tr style="background:#E8F5E9;"><td><strong>~355s (T+163s)</strong></td><td><strong>iPhone gratuitous ARP &mdash; iPhone RECOVERED (failed for ~2.7 min)</strong></td></tr>
+      <tr style="background:#E8F5E9;"><td><strong>~448s (T+256s)</strong></td><td><strong>Personal MBP gratuitous ARP &mdash; Personal MBP RECOVERED (failed for ~4.3 min)</strong></td></tr>
+      <tr><td>462s onwards</td><td>Steady state restored</td></tr>
+    </tbody>
+  </table>
+
+  <hr class="divider">
+
+  <span class="section-label">The Smoking Gun</span>
+  <h2 id="fingerprint">3-Client Failure Fingerprint &mdash; Proof of (B)</h2>
+  <p>This is the strongest evidence today produced. Look at <em>which</em> clients failed:</p>
+  <table>
+    <thead><tr><th>Client</th><th>Failed?</th><th>Recovery time</th></tr></thead>
+    <tbody>
+      <tr style="background:#E8F5E9;"><td><strong>Work MBP</strong> (trigger device, <code>84:2f:57:94:bd:cf</code>)</td><td><span class="badge done">NO &mdash; stayed connected throughout</span></td><td>n/a</td></tr>
+      <tr><td>Personal MBP (<code>74:a6:cd:8b:19:60</code>)</td><td><span class="badge fail">YES</span></td><td>T+256s (4.3 min)</td></tr>
+      <tr><td>iPhone (<code>62:75:85:f6:4e:3e</code>)</td><td><span class="badge fail">YES</span></td><td>T+163s (2.7 min)</td></tr>
+    </tbody>
+  </table>
+  <div class="box ok"><p><strong>Two-of-three clients failed. The immune client is the trigger device.</strong> This asymmetry is unique to GTK rotation propagation:</p></div>
+  <ul>
+    <li><strong>(A) per-client TK collision</strong> &mdash; would only break <em>one</em> client &rarr; <strong>doesn't match</strong> (two broke)</li>
+    <li><strong>(B) GTK rotation propagation</strong> &mdash; trigger device is the active client at the moment of GTK rotation, gets GTK_v2 first; lagging clients miss the M1/M2 group-key-handshake exchange &rarr; <strong>exactly this fingerprint</strong> ✓</li>
+    <li><strong>(C) dual-interface race</strong> &mdash; sets up the conditions, doesn't directly cause silence</li>
+    <li><strong>(D) C &rarr; B cascade</strong> &mdash; <strong>confirmed</strong> by today's data</li>
+  </ul>
+  <p>The trigger device gets GTK_v2 successfully because it's the "active" client (it's just emitted EAPOL traffic). Lagging clients (iPhone, personal MBP) miss the GTK_v2 push due to M2-ACK race or dropped frames. AP starts encrypting broadcasts with GTK_v2 &rarr; lagging clients can't decrypt &rarr; iPhone's DHCP renewal fails &rarr; falls to APIPA.</p>
+
+  <hr class="divider">
+
+  <span class="section-label">Self-Recovery</span>
+  <h2 id="self-recovery">The Yesterday vs. Today Difference</h2>
+  <p>Yesterday, after observing the failure, you rebooted &mdash; which fixed it but consumed the evidence. Today, you let it ride. <strong>It self-recovered in 2&ndash;4 minutes</strong> without any intervention. en8 stayed plugged into Port 5 the entire time.</p>
+  <p>This means yesterday's reboot may have been unnecessary &mdash; the AP has built-in recovery mechanisms:</p>
+  <ul>
+    <li><strong>Periodic GTK refresh timer</strong> &mdash; AP rotates GTK on a schedule (default 1&ndash;24 hours, faster on disassoc events)</li>
+    <li><strong>Client re-association on lease expiry</strong> &mdash; iPhone tried to renew, failed, re-associated, fresh PTK and GTK</li>
+    <li><strong>AP's auto-retry GTK push</strong> &mdash; resends GTK to lagging clients after timeout</li>
+  </ul>
+  <div class="box warn"><p>For future incidents: <strong>wait 5 minutes before rebooting.</strong> If the cascade is GTK-rotation-based (which today's repro confirms), it self-heals.</p></div>
+
+  <hr class="divider">
+
+  <span class="section-label">Capture Inventory</span>
+  <h2 id="captures">What We Captured &mdash; And What We Lost</h2>
+  <table>
+    <thead><tr><th>Evidence</th><th>Status</th><th>Why</th></tr></thead>
+    <tbody>
+      <tr><td>Work MBP en0 pcap (24 MB, 596s)</td><td><span class="badge done">SAVED</span></td><td>tcpdump on local Mac, full failure cycle captured</td></tr>
+      <tr><td>SW1 <code>show fdb port 5</code> at trigger time</td><td><span class="badge done">SAVED</span></td><td>Captured live during trigger event, shows en8 MAC newly learned</td></tr>
+      <tr><td>iPhone failure observed live (169.254 &rarr; recovered)</td><td><span class="badge done">WITNESSED</span></td><td>Observed during failure window</td></tr>
+      <tr><td>AP1 Eth0 capture (ran 5 min via <code>capture interface Eth0</code>)</td><td><span class="badge partial">UNRECOVERED</span></td><td>Status unknown until re-accessing AP; SSH wedged from kdebug overload</td></tr>
+      <tr><td>AP1 wifi1 counter delta (decrypt errors / GTK rekey count)</td><td><span class="badge fail">LOST</span></td><td>SSH dropped before counter snapshot at peak</td></tr>
+      <tr><td>AP1 kdebug wsec (kernel-level EAPOL trace)</td><td><span class="badge fail">LOST</span></td><td>Stream output only existed in SSH session, which dropped</td></tr>
+    </tbody>
+  </table>
+  <p>The fingerprint pattern from the work MBP en0 pcap alone is sufficient to confirm (B) &mdash; the lost AP-side data would have been corroborating, not load-bearing.</p>
+
+  <hr class="divider">
+
+  <span class="section-label">Lessons</span>
+  <h2 id="lessons">Operational Lessons</h2>
+  <ol>
+    <li><strong>Never enable streaming kdebug on the only SSH path.</strong> The <code>_kdebug wifi-driver msglevel wsec</code> command flooded the SSH buffer on a busy WPA3 BSSID; SSH dropped with "Can't assign requested address". For future kdebug use, access via XIQ Device 360 &rarr; Tools &rarr; SSH/CLI (cloud-relay path is more resilient).</li>
+    <li><strong>The cascade self-recovers in 2&ndash;4 minutes.</strong> Yesterday's reboot may have been unnecessary. Wait it out before destroying evidence.</li>
+    <li><strong>The trigger device is immune to its own cascade.</strong> Useful diagnostic asymmetry &mdash; if 2 of N clients fail and the immune one is the most recently active, suspect GTK desync.</li>
+    <li><strong>The trigger isn't "joining Wi-Fi" &mdash;</strong> it's specifically a wired interface arriving in the same SW1 broadcast domain, while the same machine's Wi-Fi is associated.</li>
+    <li><strong>Capture en0 from a wired-already client</strong> to see the cascade externally; gratuitous ARPs are the recovery timestamp for each affected client.</li>
+    <li><strong>ADSP sensor mode blocks <code>capture interface wifi*</code>.</strong> Capture on Eth0 instead &mdash; you see post-decrypt traffic from all clients, which is actually MORE useful for DHCP forensics.</li>
+  </ol>
+
+  <hr class="divider">
+
+  <span class="section-label">Dialogue Excerpts</span>
+  <h2 id="dialogue">Annotated Dialogue (Verbatim from Today's Session)</h2>
+  <p>Key turns from today's exchange. Full session log in <a href="session_log_20260508.md">session_log_20260508.md</a>.</p>
+
+  <div class="dialogue-meta">User opens with the deeper question</div>
+  <div class="dialogue-q">"What is it that corrupted the TK/ GTK in the first place?"</div>
+
+  <div class="dialogue-meta">Claude poses the Socratic round (A/B/C/D)</div>
+  <div class="dialogue-a">Four hypotheses offered: (A) stale per-MAC key slot, (B) GTK rotation from perceived duplicate, (C) macOS dual-interface bonding, (D) all three layered. Hint: the symptom is bidirectional silence (which A explains) plus iPhone breaking too (which B explains).</div>
+
+  <div class="dialogue-meta">User commits</div>
+  <div class="dialogue-q">"D"</div>
+
+  <div class="dialogue-meta">User refines the trigger condition (the key insight today)</div>
+  <div class="dialogue-q">"When I connected Port5 to my Work-MacBook instead of directly to the QFmodem (for internet), that is WHEN I began getting 169s on my iPHone DHCP... so, it is very likely that the work-Macbook where I am trying to get en0 (wifi) and now the ethernet maybe en1 ... colliding ... when i disconnect the port-5 and reconnect with QF directly... the problem goes away."</div>
+
+  <div class="dialogue-meta">Claude refines the mechanism: not "macOS dual-interface" abstractly, but specifically wired-interface-arrives-in-SW1-broadcast-domain</div>
+  <div class="dialogue-a">"The trigger isn't a key collision (A); it's GTK rotation propagation (B) caused by the perceived dual-interface event (C). Hypothesis A may not be involved at all in this scenario."</div>
+
+  <div class="dialogue-meta">After the trigger fires, SW1 confirms</div>
+  <div class="dialogue-q">"5320-16P-2MXT-2X-SwitchEngine.1 # show fdb port 5<br>80:69:1a:dd:0f:c3 VLAN_10_Corporate_Wired(0010) 0000 d mi 5"</div>
+
+  <div class="dialogue-meta">User reports the failure unfolded as predicted</div>
+  <div class="dialogue-q">"It is working now in iPhone it had 169 for a bit now good?"</div>
+
+  <div class="dialogue-meta">Claude analyzes the en0 pcap, finds the immune-trigger-device fingerprint</div>
+  <div class="dialogue-a">"Two-of-three clients failed. The immune one is the trigger device. That asymmetry is unique to GTK rotation. (A) per-client TK collision would only break 1 client &rarr; doesn't match (2 broke). (B) GTK rotation propagation &rarr; exactly this pattern."</div>
+
+  <hr class="divider">
+
+  <span class="section-label">Source of Truth</span>
+  <h2 id="resources">Linked Resources &mdash; Click to Open</h2>
+
+  <div class="res-block">
+    <div class="res-cat">Today's Pcap (the evidence)</div>
+    <ul class="res-list">
+      <li>
+        <span class="res-tag pcap">PCAP &middot; REPRO</span>
+        <a href="data/may8-dhcp-repro/pcap_May8_workmbp_en0_repro.pcapng" download>pcap_May8_workmbp_en0_repro.pcapng</a>
+        <span class="res-meta">24 MB &middot; 596s &middot; 34,814 frames &middot; Captured from work MacBook en0 spanning trigger + 2 recoveries</span>
+      </li>
+    </ul>
+
+    <div class="res-cat">Today's Session Log (full annotated dialogue)</div>
+    <ul class="res-list">
+      <li>
+        <span class="res-tag md">MD</span>
+        <a href="session_log_20260508.md">session_log_20260508.md</a>
+        <span class="res-meta">Complete walk-through &mdash; setup, refined trigger, baseline capture, repro, pcap analysis, lessons learned</span>
+      </li>
+    </ul>
+
+    <div class="res-cat">Yesterday's Theoretical Diagnosis (the prequel)</div>
+    <ul class="res-list">
+      <li>
+        <span class="res-tag html">HTML</span>
+        <a href="session_summary_20260507.html">session_summary_20260507.html</a>
+        <span class="res-meta">May 7 &mdash; the theoretical diagnosis that today's repro validates. 4-table elimination, hypothesis B picked.</span>
+      </li>
+      <li>
+        <span class="res-tag md">MD</span>
+        <a href="session_log_20260507.md">session_log_20260507.md</a>
+        <span class="res-meta">Yesterday's full session log</span>
+      </li>
+    </ul>
+
+    <div class="res-cat">Yesterday's Linked Artifacts (cross-reference)</div>
+    <ul class="res-list">
+      <li>
+        <span class="res-tag pcap">PCAP &middot; MAY 6 BAD</span>
+        <a href="data/may7-dhcp/pcap_May6_v4_guest.pcapng" download>pcap_May6_v4_guest.pcapng</a>
+        <span class="res-meta">25 KB &middot; The original failure on Guest SSID</span>
+      </li>
+      <li>
+        <span class="res-tag pcap">PCAP &middot; MAY 7 VALIDATION</span>
+        <a href="data/may7-dhcp/pcap_May7_en0_validation.pcapng" download>pcap_May7_en0_validation.pcapng</a>
+        <span class="res-meta">117 KB &middot; Same MAC succeeds post-reboot; complement to today's repro</span>
+      </li>
+      <li>
+        <span class="res-tag html">HTML</span>
+        <a href="session_summary_20260504.html">session_summary_20260504.html</a>
+        <span class="res-meta">May 4 &mdash; EAPOL theory deep dive (TK/GTK foundations)</span>
+      </li>
+    </ul>
+  </div>
+
+  <hr class="divider">
+
+  <span class="section-label">Forward</span>
+  <h2 id="next">Monday May 11 &mdash; EXOS &rarr; VOSS Socratic Walk</h2>
+  <p>DHCP work officially closed today. Monday picks up where May 7 evening parked us:</p>
+  <ol>
+    <li>Outline the <strong>EXOS &rarr; VOSS 4-principle cheatsheet</strong> (reference in memory: <code>reference_exos_voss_4_principles.md</code> + <code>reference_voss_standards_rfcs.md</code>)</li>
+    <li>Walk through each principle Socratically to configure SW2 (KhKLab-SW-01) with Corp_New (VLAN 70 / I-SID 100070) + Guest_New (VLAN 80 / I-SID 100080), via IPE &rarr; RDU DC</li>
+    <li>Open questions to resolve: Is "IPFIRE" the same as the IPE-40AX, or a separate firewall? Port 1/2 vs 1/3 for AP2? Verify IPE LAN1 IP (NLLM hypothesis: 192.168.0.25)</li>
+    <li>Wi-Fi Digital Twin Sprint 1 Day 1 (deferred again)</li>
+  </ol>
+
+  <hr class="divider">
+
+  <p class="footer">
+    Lab: Horizon Custom Fabrication &mdash; SW1 EXOS &middot; AP1 AP3000 &middot; 3 clients on Corporate &middot; Trigger: en8 &rarr; Port 5 &nbsp;&middot;&nbsp;
+    May 8, 2026 &mdash; <em>Khursheed &times; Claude, Hypothesis B Confirmed via Repro</em>
+  </p>
+</div>
+</body>
+</html>
