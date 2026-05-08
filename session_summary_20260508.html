@@ -104,8 +104,9 @@ a:hover { color: #111; }
     <a href="#captures">7. What We Captured &mdash; And What We Lost</a>
     <a href="#lessons">8. Operational Lessons</a>
     <a href="#dialogue">9. Annotated Dialogue (Verbatim Excerpts)</a>
-    <a href="#resources">10. Linked Resources</a>
-    <a href="#next">11. Monday — EXOS → VOSS Walk</a>
+    <a href="#mitigations">10. Mitigations &mdash; Limiting Offline Duration</a>
+    <a href="#resources">11. Linked Resources</a>
+    <a href="#next">12. Monday — EXOS → VOSS Walk</a>
   </div>
 
   <span class="section-label">The Trigger</span>
@@ -261,6 +262,88 @@ a:hover { color: #111; }
 
   <hr class="divider">
 
+  <span class="section-label">Mitigations</span>
+  <h2 id="mitigations">Limiting Offline Duration &mdash; Layered Levers</h2>
+  <p>The 2&ndash;4 minute window isn't fixed; it's a function of specific timers and behaviors that can be tuned. Failure duration scales <em>inversely</em> with client activity &mdash; the most idle client (Personal MBP, 98 frames) failed longest at 4.3 min; heavy active client (Work MBP, 20,248 frames) never failed.</p>
+
+  <h3>Why the offline window is 2&ndash;4 min</h3>
+  <p>Lagging clients recover when ANY of these fire:</p>
+  <table>
+    <thead><tr><th>Recovery path</th><th>Default timing</th></tr></thead>
+    <tbody>
+      <tr><td>AP retries Group Key Handshake (M1) to lagging client</td><td>~60s retry interval, bounded retries</td></tr>
+      <tr><td>AP rotates GTK on its periodic schedule</td><td>1&ndash;24 hours default</td></tr>
+      <tr><td>Client DHCP lease expires &rarr; renewal fails &rarr; re-association</td><td>lease/2 timing</td></tr>
+      <tr><td>Client roams or naturally re-associates</td><td>variable</td></tr>
+      <tr><td>Client app activity triggers re-keying</td><td>variable</td></tr>
+    </tbody>
+  </table>
+
+  <h3 style="color:#2E7D32">Highest leverage &mdash; AP-side timers (XIQ)</h3>
+  <table>
+    <thead><tr><th>Setting</th><th>Default</th><th>Suggested</th><th>Effect</th></tr></thead>
+    <tbody>
+      <tr style="background:#E8F5E9;"><td><strong>Group Key Update Interval</strong></td><td>≥1 hour</td><td><strong>5&ndash;15 min</strong></td><td>More frequent re-syncs, bounded miss window</td></tr>
+      <tr><td>EAPOL retransmit timer (M1 retry)</td><td>~1s × 4</td><td>0.5s × 6</td><td>Faster GTK push to lagging clients</td></tr>
+      <tr><td>Group Key Handshake retry</td><td>60s+</td><td>30s</td><td>Faster re-attempt when ACK missed</td></tr>
+      <tr style="background:#E8F5E9;"><td><strong>802.11r Fast Transition + PMK caching</strong></td><td>varies</td><td><strong>enable</strong></td><td>Re-association &lt;100ms instead of full 4-way handshake</td></tr>
+    </tbody>
+  </table>
+  <p style="font-size:0.85rem"><strong>XIQ path:</strong> Network Policies &rarr; [your policy] &rarr; Wireless Networks &rarr; Corporate_Wireless &rarr; Security tab &rarr; Advanced</p>
+
+  <h3 style="color:#E65100">Medium leverage &mdash; DHCP behavior</h3>
+  <ul>
+    <li><strong>Increase DHCP lease time on SW1</strong> (default 7200s) &rarr; <strong>86400s (24h)</strong>. Clients don't try to renew during the failure window. Wider buffer against transient GTK loss.</li>
+    <li>Configure <strong>DHCP unicast flag</strong> in AP if supported. AP unicasts OFFER/ACK back to client TK instead of broadcast GTK. Bypasses the GTK rotation problem entirely for DHCP.</li>
+  </ul>
+
+  <h3 style="color:#E65100">Medium leverage &mdash; proactive client recovery</h3>
+  <p>When you see the failure: toggle Wi-Fi off &rarr; on on the affected client. Forces a fresh 4-way handshake &rarr; fresh PTK + GTK_v2 &rarr; instant recovery (~10s).</p>
+  <pre><code># macOS auto-recovery script (watch for APIPA, bounce Wi-Fi)
+ip=$(ipconfig getifaddr en0)
+case "$ip" in
+  169.254.*) networksetup -setairportpower en0 off; sleep 2; \
+             networksetup -setairportpower en0 on ;;
+esac</code></pre>
+
+  <h3 style="color:#999">Lower leverage but worth knowing</h3>
+  <ul>
+    <li>Static IPs on iPhone / Personal MBP (bypasses DHCP entirely)</li>
+    <li>Separate SSID for "stable" vs "lab" clients (different BSSID = different GTK = no cascade between groups)</li>
+    <li>Different AP for different client groups (separate fault domain)</li>
+  </ul>
+
+  <h3 style="color:#C62828">Avoid the trigger entirely</h3>
+  <ul>
+    <li><strong>Don't plug wired client into same SW1 fabric</strong> while same client's Wi-Fi is associated</li>
+    <li>Disable Wi-Fi BEFORE plugging Ethernet</li>
+    <li>Use a different switch entirely for the wired path</li>
+  </ul>
+
+  <div class="box"><p><strong>Ranked recommendation for this lab:</strong></p></div>
+  <table>
+    <thead><tr><th>#</th><th>Action</th><th>Effort</th><th>Expected reduction</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>DHCP lease 7200s &rarr; 86400s on SW1</td><td><span class="badge done">Low (1 cmd)</span></td><td>Significant</td></tr>
+      <tr><td>2</td><td>Enable 802.11r FT + PMK caching in XIQ</td><td><span class="badge done">Low (toggle)</span></td><td>Re-assoc &lt;100ms</td></tr>
+      <tr><td>3</td><td>Reduce Group Key Update Interval to 5 min</td><td><span class="badge done">Low (toggle)</span></td><td>Bounds miss window</td></tr>
+      <tr><td>4</td><td>Recovery script watching APIPA</td><td><span class="badge partial">Medium</span></td><td>Sub-10s</td></tr>
+      <tr><td>5</td><td>Procedural: Wi-Fi off &rarr; plug en8 &rarr; Wi-Fi on</td><td><span class="badge done">None</span></td><td>Eliminates trigger</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Open questions for GTAC / R&amp;D</h3>
+  <div class="box warn">
+    <p>The behavior is consistent with a known class of issues in WPA3 Group Key Handshake retry mechanisms. Worth investigating with Extreme support / R&amp;D:</p>
+  </div>
+  <ol>
+    <li>Is this a known issue in current AP3000 firmware?</li>
+    <li>Expected behavior of Group Key Handshake retry when M2 ACK is missed from a lagging client?</li>
+    <li>Are the configurable knobs (Group Key Update Interval, EAPOL retransmit timer, 802.11r) the right levers, or is there a firmware fix?</li>
+  </ol>
+
+  <hr class="divider">
+
   <span class="section-label">Source of Truth</span>
   <h2 id="resources">Linked Resources &mdash; Click to Open</h2>
 
@@ -285,6 +368,11 @@ a:hover { color: #111; }
 
     <div class="res-cat">Today's Full Dialogue (verbatim transcripts)</div>
     <ul class="res-list">
+      <li style="background:#E8F5E9;border-color:#2E7D32;">
+        <span class="res-tag" style="background:#A5D6A7;color:#1B5E20;border:1px solid #2E7D32;">MD &middot; ESCALATION</span>
+        <a href="data/may8-dhcp-repro/dialogue_pcap_analysis_mitigations_May8_2026.md"><strong>dialogue_pcap_analysis_mitigations_May8_2026.md</strong></a>
+        <span class="res-meta">Verbatim Q&amp;A on the pcap analysis + GTK mitigation levers. <strong>For sharing with Extreme GTAC and R&amp;D engineers.</strong> Unedited &mdash; the conversation that produced today's mitigation framework.</span>
+      </li>
       <li>
         <span class="res-tag" style="background:#FFE0B2;color:#E65100;border:1px solid #FFB74D;">DOCX</span>
         <a href="data/may8-dhcp-repro/ClaudeAI_SessionDetails_May8_1209PST.docx" download><strong>ClaudeAI_SessionDetails_May8_1209PST.docx</strong></a>
