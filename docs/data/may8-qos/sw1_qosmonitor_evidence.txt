@@ -159,3 +159,148 @@ TIMESTAMPS
 15:23 EDT — disabled dot1p examination
 15:27 EDT — qosmonitor T2 (post fix #2)
 16:28 EDT — Guest pcap captured (personal MBP en0)
+
+==============================================================================
+9. CONTENTION TEST T3 (16:15:23) — first dual-stream test, no rate limit
+==============================================================================
+
+show ports qosmonitor all (after fix #1+#2+ACL)
+
+Port 3 (AP1):
+  Xmts   QP1=364,943   QP6=261,345   QP8=93
+  Cong   all 0
+
+Speed test results:
+  Corp (iPhone):           80 Mbps DL
+  Guest (Personal MBP):    70 Mbps DL
+  Total demand:           150 Mbps (well under link capacity ~600 Mbps)
+  Verdict: link not saturated. Both clients got what they wanted.
+           QoS not yet stressed. Corp+Guest ratio reflects per-client
+           Wi-Fi capability, not priority.
+
+==============================================================================
+10. CONTENTION TEST T4 (16:22:56) — Cloudflare speedtest, no rate limit
+==============================================================================
+
+Port 3 (AP1):
+  Xmts   QP1=494,351   QP6=350,993   QP8=94
+  Cong   all 0
+
+Speed test results (Cloudflare):
+  Corp  (iPhone):       62 Mbps DL / 118 Mbps UL
+  Guest (Personal MBP): 116 Mbps DL / 145 Mbps UL
+  Verdict: Guest ACTUALLY HIGHER than Corp.
+           Reason: link still not saturated (178 Mbps total << ~600 Mbps capacity).
+           iPhone is naturally a slower Wi-Fi client (smaller antennas, fewer
+           spatial streams) — this PHYSICAL bottleneck overshadows any QoS
+           benefit when the wired link isn't actually congested.
+
+==============================================================================
+11. *** FORCED CONTENTION TEST T5 (16:29:13) ***
+    — Port 3 egress rate-limited to 50 Mbps to force real bottleneck
+==============================================================================
+
+configure ports 3 rate-limit egress 50 mbps
+show ports 3 information detail | grep "Egress"
+  Egress Port Rate:       50000 Kbps    ← cap applied
+
+clear counters ports 3
+[both clients run Cloudflare speedtest simultaneously]
+
+show ports qosmonitor all (DURING saturation):
+
+Port 3 (AP1):
+  Xmts   QP1=994,379    QP6=569,775    QP8=330
+  Cong   QP1=1,003     QP6=0         ← *** SMOKING GUN ***
+                                      Guest queue dropping packets
+                                      Corp queue ZERO drops
+
+Port 1 (QF Modem uplink):
+  Xmts   QP1=7,887,533  QP6=732,920   QP8=380,199
+
+Speed test results UNDER CONTENTION:
+  Corp  (iPhone):       42 Mbps DL / 80  Mbps UL
+  Guest (Personal MBP): 32 Mbps DL / 108 Mbps UL
+  Combined DL:          74 Mbps (cap is 50 Mbps egress on Port 3)
+
+==============================================================================
+12. INTERPRETATION OF T5 — PRIORITY VALIDATED
+==============================================================================
+
+Smoking gun #1: Drop asymmetry
+  - QP1 (Guest) congestion drops:  1,003 packets
+  - QP6 (Corp)  congestion drops:      0 packets
+  Under saturation, scheduler preserves Corp queue and drops Guest queue.
+  This is classic priority queueing behavior.
+
+Smoking gun #2: Throughput preservation asymmetry
+  Without rate limit (no contention):
+    Corp:  62 Mbps,  Guest: 116 Mbps
+  With rate limit (forced contention):
+    Corp:  42 Mbps,  Guest:  32 Mbps
+  Delta:
+    Corp:  −20 Mbps  (loss of 32%)
+    Guest: −84 Mbps  (loss of 72%)
+  Under contention, Guest was throttled disproportionately. Corp was
+  preserved. Priority scheduling is enforced.
+
+Note on ratio not being exactly 10:1:
+  EXOS's WRR scheduler uses deficit-counter weighted round-robin.
+  The 10:1 weight ratio influences long-term average but isn't a hard cap.
+  Plus TCP backoff and buffer dynamics smooth the differentiation.
+  Directional outcome is unambiguous: Corp preserved, Guest sacrificed.
+
+==============================================================================
+13. CLEANUP — remove the rate limit
+==============================================================================
+
+configure ports 3 rate-limit egress no-limit
+save configuration
+
+Verify:
+  Egress Port Rate:       No-limit
+
+==============================================================================
+14. END-TO-END VERDICT — QoS now functioning
+==============================================================================
+
+Layer                                          Status
+---------------------------------------------- -----------
+SW1 queue weight differentiation               ✓ FIXED (QP6=10, QP1=1)
+SW1 VLAN→queue mapping (Apr 21 work)           ✓ Already present
+SW1 Port 1 ACL ingress classification          ✓ ADDED (Corp_Priority)
+SW1 802.1p examination on Port 3               (disabled — not strictly needed
+                                                with ACL in place but stayed
+                                                disabled)
+AP3000 XIQ User Profile QoS Marker             ✗ NOT configured (still TODO)
+                                               (less critical now since SW1
+                                                ACL handles classification)
+
+Result under saturation:
+  - Corp packets prioritized in QP6 with weight 10
+  - Guest packets de-prioritized in QP1 with weight 1
+  - Drop preferentially in Guest queue under congestion
+  - Throughput preferentially preserved for Corp under congestion
+
+This validates the fix end-to-end for downstream traffic. The Apr 21
+lab QoS configuration was incomplete; today's session added the missing
+queue weight differentiation + ACL-based downstream classification to
+make priority enforcement actually work.
+
+==============================================================================
+EVIDENCE TIMESTAMP LOG
+==============================================================================
+14:25 EDT — Corp pcap capture began
+14:39 EDT — Corp capture ended (storage)
+15:16 EDT — qosmonitor T0 (BEFORE any fixes)
+15:18 EDT — applied fix #1: configure qosprofile QP6 weight 10
+15:21 EDT — qosmonitor T1 (after fix #1)
+15:23 EDT — applied fix #2: disable dot1p examination ports 3
+15:27 EDT — qosmonitor T2 (after fix #2 — still all in QP1 on Port 3)
+15:55 EDT — created Corp_Priority policy via edit policy
+15:58 EDT — applied: configure access-list Corp_Priority ports 1 ingress
+16:09 EDT — qosmonitor T3 (after ACL — Corp now in QP6 — first proof of mechanism)
+16:15 EDT — qosmonitor T4 (Cloudflare test, no rate limit, link not saturated)
+16:22 EDT — qosmonitor T5 reading
+16:25 EDT — applied rate limit: configure ports 3 rate-limit egress 50 mbps
+16:29 EDT — qosmonitor T5 (UNDER CONTENTION — drop asymmetry confirmed)
