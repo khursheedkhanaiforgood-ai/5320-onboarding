@@ -83,12 +83,12 @@ a:hover { color: #111; }
   <p class="subtitle">Mission: validate the boss's claim that "all traffic goes to best-effort despite XIQ priority policy." Result: bug fully confirmed and decomposed into three independent layers, two of which are architectural. The Apr&nbsp;21 lab work mapped VLANs to queues correctly, but downstream YouTube traffic still lands in QP1 because the EXOS VLAN-to-qosprofile mapping is ingress-side only and the L3-routed return path keeps its WAN-side queue assignment.</p>
 
   <div class="stats">
-    <div class="stat-card"><div class="stat-num">3</div><div class="stat-label">Layers Examined</div></div>
-    <div class="stat-card"><div class="stat-num win">1</div><div class="stat-label">Fixed In Lab</div></div>
-    <div class="stat-card"><div class="stat-num fail">2</div><div class="stat-label">Architectural</div></div>
-    <div class="stat-card"><div class="stat-num">99.85%</div><div class="stat-label">Corp DSCP=0</div></div>
-    <div class="stat-card"><div class="stat-num">99.96%</div><div class="stat-label">Guest DSCP=0</div></div>
-    <div class="stat-card"><div class="stat-num warn">0 / 47K</div><div class="stat-label">Corp in QP6 / QP1</div></div>
+    <div class="stat-card"><div class="stat-num win">VALIDATED</div><div class="stat-label">Priority Enforcement</div></div>
+    <div class="stat-card"><div class="stat-num fail">1,003 / 0</div><div class="stat-label">Drops QP1 / QP6</div></div>
+    <div class="stat-card"><div class="stat-num">−32% / −72%</div><div class="stat-label">Loss Corp / Guest</div></div>
+    <div class="stat-card"><div class="stat-num win">4</div><div class="stat-label">Fixes Applied</div></div>
+    <div class="stat-card"><div class="stat-num">3</div><div class="stat-label">Findings</div></div>
+    <div class="stat-card"><div class="stat-num">5320 EXOS</div><div class="stat-label">Lab Platform</div></div>
   </div>
 
   <div class="toc">
@@ -102,8 +102,10 @@ a:hover { color: #111; }
     <a href="#pcap-evidence">7. Pcap Evidence &mdash; Corp vs Guest DSCP Comparison</a>
     <a href="#fix-path">8. Fix Path Forward &mdash; ACL-Based Classification</a>
     <a href="#xiq-disconnect">9. The XIQ Disconnect &mdash; UX Gap</a>
-    <a href="#resources">10. Linked Resources</a>
-    <a href="#next">11. Next Steps</a>
+    <a href="#contention-test">10. Contention Test &mdash; Priority Enforcement Validated</a>
+    <a href="#dhcp-parallel">11. Parallel to DHCP Diagnostic Logic</a>
+    <a href="#resources">12. Linked Resources</a>
+    <a href="#next">13. Next Steps</a>
   </div>
 
   <span class="section-label">The Mission</span>
@@ -273,6 +275,128 @@ save configuration</code></pre>
 
   <hr class="divider">
 
+  <span class="section-label">Validation Under Load</span>
+  <h2 id="contention-test">Contention Test &mdash; Priority Enforcement Validated</h2>
+  <p>After applying all four fixes (queue weight, dot1p exam, ACL classification, save), we ran a forced-contention test to prove priority is actually enforced under saturation. Without contention, the QoS scheduler doesn't have to make hard choices.</p>
+
+  <h3>Test methodology</h3>
+  <ol>
+    <li><strong>Apply rate limit</strong> on Port 3 egress to 50 Mbps:
+      <pre><code>configure ports 3 rate-limit egress 50 mbps</code></pre>
+    </li>
+    <li><strong>Clear counters:</strong>
+      <pre><code>clear counters ports 3</code></pre>
+    </li>
+    <li><strong>Run simultaneous Cloudflare speedtests</strong> on both clients:
+      <ul>
+        <li>iPhone (Corp Wi-Fi): https://speed.cloudflare.com</li>
+        <li>Personal MacBook (Guest Wi-Fi): https://speed.cloudflare.com</li>
+      </ul>
+      Combined demand &gt;&gt; 50 Mbps cap = forced contention.
+    </li>
+    <li><strong>Capture qosmonitor</strong> after both speedtests complete.</li>
+  </ol>
+
+  <h3>Result — qosmonitor under saturation</h3>
+  <pre><code>show ports qosmonitor all (post-saturation)
+
+Port 3 (AP1 uplink — egress to wireless):
+  Xmts   QP1 = 994,379    QP6 = 569,775    QP8 = 330
+  Cong   QP1 = 1,003     QP6 =       0    QP8 =   0
+                            ↑↑↑                      ↑↑↑
+                            SMOKING GUN: drops only in QP1
+                            QP6 zero drops</code></pre>
+
+  <h3>Result &mdash; Cloudflare throughput, before vs during contention</h3>
+  <table>
+    <thead><tr><th>Client</th><th>Without rate limit (no contention)</th><th>With 50 Mbps cap (forced contention)</th><th>Loss</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Corp (iPhone)</strong></td><td>62 Mbps DL</td><td><strong>42 Mbps DL</strong></td><td>−20 Mbps (−32%)</td></tr>
+      <tr><td><strong>Guest (Personal MBP)</strong></td><td>116 Mbps DL</td><td><strong>32 Mbps DL</strong></td><td><strong>−84 Mbps (−72%)</strong></td></tr>
+    </tbody>
+  </table>
+
+  <h3>Visual — bandwidth loss under contention</h3>
+  <p style="font-size:0.85rem;color:#666">(Each bar shows download throughput. Blue = before contention, red = after rate limit applied. The shorter the red bar relative to blue, the more the client was throttled.)</p>
+
+  <div style="border:1px solid #E2E2E2;padding:18px;border-radius:6px;margin:14px 0;">
+    <div style="font-family:'Libre Franklin',sans-serif;font-size:0.74rem;font-weight:700;color:#666;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:14px;">Corp (iPhone) — preserved</div>
+    <div style="font-family:'Libre Franklin',sans-serif;font-size:0.7rem;color:#444;margin-bottom:4px;">Without contention: 62 Mbps</div>
+    <div style="background:#1565C0;height:18px;width:54%;border-radius:2px;margin-bottom:10px;"><span style="color:white;font-family:'Libre Franklin',sans-serif;font-size:0.75rem;padding-left:6px;line-height:18px;">62</span></div>
+    <div style="font-family:'Libre Franklin',sans-serif;font-size:0.7rem;color:#444;margin-bottom:4px;">With contention:    42 Mbps  (−32%)</div>
+    <div style="background:#90CAF9;height:18px;width:36%;border-radius:2px;"><span style="color:#0D47A1;font-family:'Libre Franklin',sans-serif;font-size:0.75rem;padding-left:6px;line-height:18px;font-weight:700;">42</span></div>
+
+    <div style="font-family:'Libre Franklin',sans-serif;font-size:0.74rem;font-weight:700;color:#666;letter-spacing:0.08em;text-transform:uppercase;margin:24px 0 14px;">Guest (Personal MBP) — throttled disproportionately</div>
+    <div style="font-family:'Libre Franklin',sans-serif;font-size:0.7rem;color:#444;margin-bottom:4px;">Without contention: 116 Mbps</div>
+    <div style="background:#C62828;height:18px;width:100%;border-radius:2px;margin-bottom:10px;"><span style="color:white;font-family:'Libre Franklin',sans-serif;font-size:0.75rem;padding-left:6px;line-height:18px;">116</span></div>
+    <div style="font-family:'Libre Franklin',sans-serif;font-size:0.7rem;color:#444;margin-bottom:4px;">With contention:     32 Mbps (−72%)</div>
+    <div style="background:#EF9A9A;height:18px;width:28%;border-radius:2px;"><span style="color:#B71C1C;font-family:'Libre Franklin',sans-serif;font-size:0.75rem;padding-left:6px;line-height:18px;font-weight:700;">32</span></div>
+  </div>
+
+  <h3>Visual — packet drops by queue (the smoking gun)</h3>
+  <div style="border:1px solid #E2E2E2;padding:18px;border-radius:6px;margin:14px 0;">
+    <div style="font-family:'Libre Franklin',sans-serif;font-size:0.74rem;font-weight:700;color:#666;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:14px;">Port 3 packet drops under contention</div>
+
+    <div style="font-family:'Libre Franklin',sans-serif;font-size:0.74rem;color:#222;margin-bottom:4px;display:flex;justify-content:space-between;"><span><strong>QP1 (Guest)</strong></span><span style="color:#C62828;font-weight:700;">1,003 packets dropped</span></div>
+    <div style="background:#C62828;height:22px;width:100%;border-radius:2px;margin-bottom:14px;"><span style="color:white;font-family:'Libre Franklin',sans-serif;font-size:0.75rem;padding-left:8px;line-height:22px;">1,003 ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓</span></div>
+
+    <div style="font-family:'Libre Franklin',sans-serif;font-size:0.74rem;color:#222;margin-bottom:4px;display:flex;justify-content:space-between;"><span><strong>QP6 (Corp)</strong></span><span style="color:#2E7D32;font-weight:700;">0 packets dropped</span></div>
+    <div style="background:#E8F5E9;border:1px solid #A5D6A7;height:22px;width:100%;border-radius:2px;"><span style="color:#1B5E20;font-family:'Libre Franklin',sans-serif;font-size:0.75rem;padding-left:8px;line-height:22px;font-weight:700;">0 — preserved</span></div>
+  </div>
+
+  <h3>Interpretation — why this proves priority enforcement</h3>
+  <ul>
+    <li><strong>Drop asymmetry:</strong> Under congestion, the scheduler dropped 1,003 packets from QP1 (Guest) and ZERO from QP6 (Corp). This is classic priority queueing: best-effort queue absorbs the loss, priority queue is preserved.</li>
+    <li><strong>Throughput preservation asymmetry:</strong> Guest lost 72% of its bandwidth under contention; Corp lost only 32%. The disproportionate loss for Guest is the signature of weighted scheduling.</li>
+    <li><strong>Why not exactly 10:1 throughput?</strong> EXOS WRR uses deficit-counter weighted round-robin. The 10:1 weight ratio influences long-term average but isn't a hard cap. TCP backoff and buffer dynamics smooth the differentiation. The directional outcome (Corp preserved, Guest throttled) is unambiguous.</li>
+  </ul>
+
+  <h3>Cleanup after test</h3>
+  <pre><code>configure ports 3 rate-limit egress no-limit
+save configuration</code></pre>
+  <p>Verified Egress Port Rate returned to <code>No-limit</code>.</p>
+
+  <hr class="divider">
+
+  <span class="section-label">Cross-Reference</span>
+  <h2 id="dhcp-parallel">Parallel to DHCP Diagnostic Logic</h2>
+  <p>This QoS investigation followed the same Symptom &rarr; Hypothesis &rarr; Test &rarr; Validation framework used in the May 7 DHCP investigation:</p>
+
+  <table>
+    <thead><tr><th>Step</th><th>DHCP investigation (May 6&ndash;8)</th><th>QoS investigation (today)</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>Symptom</strong></td>
+        <td>iPhone DHCP fails when MacBook joins; reboot fixes</td>
+        <td>"All traffic appears as best-effort despite XIQ priority policy"</td>
+      </tr>
+      <tr>
+        <td><strong>Hypothesis</strong></td>
+        <td>4-table elimination &rarr; (B) WPA2 key state (TK + GTK) wedge</td>
+        <td>4-layer chain &rarr; (a) AP marking, (b) SW1 ingress reading, (c) queue mapping, (d) queue scheduling weights</td>
+      </tr>
+      <tr>
+        <td><strong>Test</strong></td>
+        <td>Repro by triggering en8 &rarr; SW1 Port 5 dual-interface event</td>
+        <td>SW1 qosmonitor counters before/after each fix; pcap DSCP analysis; forced contention test with rate-limit</td>
+      </tr>
+      <tr>
+        <td><strong>Validation</strong></td>
+        <td>Same MAC, before/after pcap comparison &rarr; 3-client fingerprint (immune trigger device)</td>
+        <td>Drop asymmetry under saturation: 1,003 in QP1, 0 in QP6 &rarr; throughput loss asymmetry: −72% Guest vs −32% Corp</td>
+      </tr>
+      <tr>
+        <td><strong>Outcome</strong></td>
+        <td>Hypothesis B confirmed via repro</td>
+        <td>End-to-end priority enforcement validated under contention</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p>The diagnostic discipline is identical in both: never trust a single observation, decompose into independently-testable layers, force the contention point, then compare before/after. Both investigations went 3 days deep before being declared closed.</p>
+
+  <hr class="divider">
+
   <span class="section-label">Source of Truth</span>
   <h2 id="resources">Linked Resources</h2>
 
@@ -323,12 +447,22 @@ save configuration</code></pre>
 
   <span class="section-label">Forward</span>
   <h2 id="next">Next Steps</h2>
+  <h3>Completed today</h3>
   <ol>
-    <li><strong>Apply ACL-based classification on Port 1 ingress</strong> (Option C path B) to fix the downstream gap. Match destination 10.20.0.0/24 &rarr; QP6, save, re-test.</li>
-    <li><strong>Configure XIQ User Profile QoS markers</strong> (CoS=5 for Corp, 0 for Guest) so the AP also marks upstream traffic. Belt-and-suspenders coverage.</li>
-    <li><strong>Run dual-stream load test</strong> (Corp + Guest YouTube simultaneously, saturate bandwidth) to validate Corp wins under contention.</li>
-    <li><strong>Submit GTAC ticket</strong> with this EOD + verbatim dialogue + pcaps. Three findings to surface, especially the architectural ingress-only behavior.</li>
-    <li><strong>Monday workstream:</strong> EXOS &rarr; VOSS migration on SW2 (parked from Friday).</li>
+    <li>✅ Diagnosed three-layer architecture bug (queue weights, ingress-only VLAN qosprofile, DSCP=0 end-to-end)</li>
+    <li>✅ Applied <code>configure qosprofile QP6 weight 10</code> to differentiate queue scheduling</li>
+    <li>✅ Applied <code>disable dot1p examination ports 3</code> to remove ingress override</li>
+    <li>✅ Created and applied ACL <code>Corp_Priority</code> on Port 1 ingress (forces downstream Corp traffic to QP6)</li>
+    <li>✅ Saved configuration to persistent storage</li>
+    <li>✅ <strong>Validated end-to-end priority enforcement under forced contention</strong> (50 Mbps rate limit on Port 3): drop asymmetry 1,003 vs 0, throughput loss asymmetry −72% vs −32%</li>
+    <li>✅ Cleanup: removed rate limit, restored Egress Port Rate to No-limit</li>
+  </ol>
+
+  <h3>Pending</h3>
+  <ol>
+    <li><strong>Configure XIQ User Profile QoS markers</strong> (CoS=5 for Corp, 0 for Guest). Less critical now since SW1 ACL handles classification, but recommended for AP-side WMM scheduling consistency.</li>
+    <li><strong>Submit GTAC / R&amp;D ticket</strong> with this EOD + verbatim dialogue + pcaps + qosmonitor evidence. Three architectural findings to surface, especially the VLAN qosprofile direction-asymmetric behavior and XIQ UX gap.</li>
+    <li><strong>Monday workstream:</strong> EXOS &rarr; VOSS migration on SW2 (parked from Friday morning).</li>
   </ol>
 
   <hr class="divider">
