@@ -63,14 +63,25 @@ h1 { font-family: 'Libre Baskerville', Georgia, serif; font-size: 1.7rem; color:
 .tag.tls    { background: #1e3a2f; color: #6ee7b7; }
 
 /* Controls */
-.controls { display: flex; gap: 12px; align-items: center; margin-bottom: 28px; }
+.controls { display: flex; gap: 12px; align-items: center; margin-bottom: 28px; flex-wrap: wrap; }
 .btn { font-family: 'Libre Franklin', sans-serif; font-size: 0.82rem; font-weight: 700; padding: 10px 24px; border-radius: 4px; border: none; cursor: pointer; transition: background 0.2s; }
 .btn-prev { background: #2d3748; color: #94a3b8; }
 .btn-prev:hover { background: #374151; color: #e2e8f0; }
 .btn-next { background: #3b82f6; color: #fff; }
 .btn-next:hover { background: #2563eb; }
+.btn-play { background: #065f46; color: #6ee7b7; }
+.btn-play:hover { background: #047857; }
+.btn-play.playing { background: #7c3aed; color: #e9d5ff; }
+.btn-play.playing:hover { background: #6d28d9; }
 .btn:disabled { opacity: 0.3; cursor: not-allowed; }
+.speed-select { font-family: 'IBM Plex Mono', monospace; font-size: 0.72rem; background: #1e2330; color: #94a3b8; border: 1px solid #2d3748; border-radius: 4px; padding: 8px 10px; cursor: pointer; }
+.speed-select:focus { outline: none; border-color: #3b82f6; }
+.playing-dot { display: inline-block; color: #a78bfa; margin-right: 4px; animation: pulse 0.8s infinite; }
+@keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.2; } }
 .progress { font-family: 'IBM Plex Mono', monospace; font-size: 0.72rem; color: #475569; margin-left: auto; }
+
+/* Copyright */
+.copyright { text-align: center; font-size: 0.72rem; color: #334155; margin-top: 36px; padding-top: 16px; border-top: 1px solid #1e2330; }
 
 /* Glossary */
 .glossary { margin-top: 8px; }
@@ -158,9 +169,15 @@ h1 { font-family: 'Libre Baskerville', Georgia, serif; font-size: 1.7rem; color:
 
 <!-- CONTROLS -->
 <div class="controls">
-  <button class="btn btn-prev" id="btn-prev" onclick="go(-1)" disabled>&#8592; Back</button>
-  <button class="btn btn-next" id="btn-next" onclick="go(1)">Next &#8594;</button>
+  <button class="btn btn-prev" id="btn-prev" onclick="manualGo(-1)" disabled>&#8592; Back</button>
+  <button class="btn btn-next" id="btn-next" onclick="manualGo(1)">Next &#8594;</button>
   <button class="btn btn-prev" onclick="reset()" style="margin-left:8px">&#8635; Restart</button>
+  <button class="btn btn-play" id="btn-play" onclick="togglePlay()">&#9654; Play</button>
+  <select class="speed-select" id="speed-select" title="Playback speed">
+    <option value="2000">Slow (2s)</option>
+    <option value="1200" selected>Normal (1.2s)</option>
+    <option value="500">Fast (0.5s)</option>
+  </select>
   <span class="progress" id="progress-label">0 / 17</span>
 </div>
 
@@ -339,6 +356,36 @@ const STEPS = [
 ];
 
 let current = -1;
+let playInterval = null;
+let isPlaying = false;
+
+function manualGo(dir) {
+  if (isPlaying) stopPlay();
+  go(dir);
+}
+
+function togglePlay() {
+  if (isPlaying) { stopPlay(); return; }
+  if (current >= STEPS.length - 1) reset();
+  isPlaying = true;
+  const btn = document.getElementById('btn-play');
+  btn.className = 'btn btn-play playing';
+  btn.innerHTML = '<span class="playing-dot">&#9679;</span> Pause';
+  const delay = parseInt(document.getElementById('speed-select').value, 10);
+  playInterval = setInterval(() => {
+    if (current >= STEPS.length - 1) { stopPlay(); return; }
+    go(1);
+  }, delay);
+}
+
+function stopPlay() {
+  isPlaying = false;
+  clearInterval(playInterval);
+  playInterval = null;
+  const btn = document.getElementById('btn-play');
+  btn.className = 'btn btn-play';
+  btn.innerHTML = '&#9654; Play';
+}
 
 function renderMessages(col, msgs) {
   const el = document.getElementById('msgs-' + col);
@@ -359,7 +406,11 @@ function go(dir) {
 }
 
 function reset() {
+  if (isPlaying) stopPlay();
   current = -1;
+  history.sup = [];
+  history.ap  = [];
+  history.nps = [];
   document.getElementById('msgs-sup').innerHTML = '';
   document.getElementById('msgs-ap').innerHTML = '';
   document.getElementById('msgs-nps').innerHTML = '';
@@ -452,6 +503,10 @@ function render() {
       <p><code>PMK = MSK[:256]</code> (unique per session)<br><br>MSK generated from TLS + MSCHAPv2 material. Never travels OTA. Even with a captured handshake, no offline attack is possible. Each client gets its own PMK — GTK rotation still applies but PTK is per-client.</p>
     </div>
   </div>
+</div>
+
+<div class="copyright">
+  &copy; 2026 Khursheed Khan &bull; KhKLab / FishBowl Lab &bull; All rights reserved &bull; Educational use only
 </div>
 
 </body>
