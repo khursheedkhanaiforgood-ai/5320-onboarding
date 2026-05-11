@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>5320 Lab Journal — EXOS→VOSS 4 Principles + 802.1X Learning Arc, May 11 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Libre+Franklin:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Libre Baskerville', Georgia, serif; background: #FFFFFF; color: #111111; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 48px 24px 72px; }
+.container { max-width: 760px; width: 100%; }
+.nyt-rule-top { border: none; border-top: 3px solid #111; margin-bottom: 6px; }
+.nyt-rule-thin { border: none; border-top: 1px solid #111; margin-bottom: 18px; }
+.nyt-logo { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.22em; color: #666; text-align: center; margin-bottom: 6px; }
+.byline { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.72rem; color: #666; margin-bottom: 14px; letter-spacing: 0.02em; }
+.byline strong { color: #111; font-weight: 700; }
+h1 { font-family: 'Libre Baskerville', Georgia, serif; font-size: 2.2rem; font-weight: 700; color: #111; line-height: 1.15; margin-bottom: 14px; }
+.subtitle { font-family: 'Libre Baskerville', Georgia, serif; font-size: 1rem; font-style: italic; color: #444; line-height: 1.8; margin-bottom: 20px; border-bottom: 1px solid #E2E2E2; padding-bottom: 28px; }
+.section-label { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.18em; color: #326891; margin: 32px 0 12px; padding-bottom: 6px; border-bottom: 2px solid #326891; display: block; }
+h2 { font-family: 'Libre Baskerville', Georgia, serif; font-size: 1.45rem; font-weight: 700; color: #111; margin: 0 0 12px; }
+h3 { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #326891; margin: 24px 0 10px; }
+h4 { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.8rem; font-weight: 700; color: #111; margin: 18px 0 8px; }
+p { font-size: 0.97rem; line-height: 1.85; color: #222; margin-bottom: 12px; }
+ul, ol { padding-left: 22px; margin-bottom: 14px; }
+li { font-size: 0.95rem; line-height: 1.8; color: #222; margin-bottom: 4px; }
+code { font-family: 'SF Mono', Consolas, monospace; font-size: 0.82rem; background: #F4F4F4; border: 1px solid #E2E2E2; padding: 1px 5px; border-radius: 3px; color: #326891; }
+pre { background: #F8F8F8; border: 1px solid #E2E2E2; border-radius: 4px; padding: 16px; overflow-x: auto; margin: 12px 0 18px; }
+pre code { background: none; border: none; padding: 0; color: #111; font-size: 0.83rem; line-height: 1.65; }
+table { width: 100%; border-collapse: collapse; margin: 12px 0 20px; font-size: 0.88rem; }
+th { background: #F4F4F4; font-family: 'Libre Franklin', Arial, sans-serif; font-weight: 700; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: #326891; padding: 8px 10px; border: 1px solid #E2E2E2; text-align: left; }
+td { padding: 8px 10px; border: 1px solid #E2E2E2; color: #222; vertical-align: top; }
+tr:nth-child(even) td { background: #FAFAFA; }
+.badge { display: inline-block; padding: 2px 8px; border-radius: 2px; font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; margin: 1px; }
+.done { background: #E8F5E9; color: #2E7D32; border: 1px solid #A5D6A7; }
+.todo { background: #FFF3E0; color: #E65100; border: 1px solid #FFCC80; }
+.sprint { background: #E3F2FD; color: #1565C0; border: 1px solid #90CAF9; }
+.inprogress { background: #F3E5F5; color: #6A1B9A; border: 1px solid #CE93D8; }
+.box { border-left: 3px solid #326891; background: #F0F7FF; padding: 12px 16px; margin: 14px 0; border-radius: 0 4px 4px 0; }
+.box p { margin: 0; font-size: 0.92rem; }
+.box.warn { border-left-color: #F57F17; background: #FFFBF0; }
+.box.ok { border-left-color: #2E7D32; background: #F1F8F1; }
+.box.correct { border-left-color: #C62828; background: #FCEEEE; }
+.divider { border: none; border-top: 1px solid #E2E2E2; margin: 32px 0; }
+.toc { background: #F8F8F8; border: 1px solid #E2E2E2; border-radius: 4px; padding: 18px 22px; margin-bottom: 36px; }
+.toc-title { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.15em; color: #666; margin-bottom: 10px; }
+.toc a { display: block; font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.85rem; color: #326891; text-decoration: none; padding: 4px 0; border-bottom: 1px dotted #E2E2E2; }
+.toc a:last-child { border-bottom: none; }
+.toc a:hover { color: #111; }
+.footer { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.72rem; color: #999; text-align: center; margin-top: 48px; padding-top: 16px; border-top: 1px solid #E2E2E2; }
+a { color: #326891; }
+a:hover { color: #111; }
+.principle-block { border: 1px solid #E2E2E2; border-radius: 6px; padding: 20px 24px; margin: 18px 0; }
+.principle-brain { border-left: 5px solid #1565C0; background: #F0F7FF; }
+.principle-muscle { border-left: 5px solid #2E7D32; background: #F1F8F1; }
+.principle-service { border-left: 5px solid #6A1B9A; background: #F9F2FF; }
+.principle-edge { border-left: 5px solid #E65100; background: #FFF8F0; }
+.principle-label { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.18em; margin-bottom: 4px; }
+.brain-label { color: #1565C0; }
+.muscle-label { color: #2E7D32; }
+.service-label { color: #6A1B9A; }
+.edge-label { color: #E65100; }
+.principle-title { font-family: 'Libre Baskerville', Georgia, serif; font-size: 1.15rem; font-weight: 700; color: #111; margin-bottom: 10px; }
+.mnemonic { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.82rem; font-style: italic; color: #555; margin-bottom: 12px; }
+.sprint-card { border: 1px solid #90CAF9; border-radius: 6px; padding: 14px 18px; margin: 10px 0; background: #E3F2FD; }
+.sprint-card h4 { color: #1565C0; margin-top: 0; }
+.sprint-card .sprint-week { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #1565C0; margin-bottom: 6px; }
+.stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 20px 0 30px; }
+.stat-card { border: 1px solid #E2E2E2; border-radius: 4px; padding: 12px 14px; }
+.stat-num { font-family: 'Libre Baskerville', Georgia, serif; font-size: 1.5rem; font-weight: 700; color: #111; }
+.stat-label { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.7rem; color: #666; text-transform: uppercase; letter-spacing: 0.08em; margin-top: 2px; }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <hr class="nyt-rule-top">
+  <p class="nyt-logo">E2E Network Deployment &mdash; Lab Journal</p>
+  <hr class="nyt-rule-thin">
+
+  <p class="byline">
+    <strong>May 11, 2026</strong> &nbsp;&bull;&nbsp; 2:20 pm &ndash; 4:20 pm Pacific &nbsp;&bull;&nbsp;
+    SW2-IPE-RDU/FishBowl &nbsp;&bull;&nbsp; KhKLab
+  </p>
+
+  <h1>EXOS &rarr; VOSS: Four Principles Mapped to a Live Switch Config</h1>
+  <p class="subtitle">
+    From a 350-line running-config, the four structural pillars of VOSS Fabric Engine emerge cleanly:
+    Brain (IS-IS), Muscle (SPB), Service (I-SID), and Edge (Auto-Sense/FA).
+    Each line of config has exactly one home. Today we found them all — and set the stage for 802.1X.
+  </p>
+
+  <div class="toc">
+    <p class="toc-title">In This Session</p>
+    <a href="#principles">1. EXOS&rarr;VOSS — The Four Principles</a>
+    <a href="#brain">2. Brain — IS-IS (Control Plane)</a>
+    <a href="#muscle">3. Muscle — SPB (Forwarding Plane)</a>
+    <a href="#service">4. Service — I-SID (Logical Services)</a>
+    <a href="#edge">5. Edge — Auto-Sense / Fabric Attach</a>
+    <a href="#corrections">6. Conceptual Corrections</a>
+    <a href="#dot1x">7. 802.1X Learning Arc (In Progress)</a>
+    <a href="#sprints">8. Sprint Backlog</a>
+  </div>
+
+  <div class="stats">
+    <div class="stat-card"><div class="stat-num">4</div><div class="stat-label">Principles mapped</div></div>
+    <div class="stat-card"><div class="stat-num">5</div><div class="stat-label">VLANs / I-SIDs live</div></div>
+    <div class="stat-card"><div class="stat-num">20</div><div class="stat-label">Auto-Sense ports</div></div>
+    <div class="stat-card"><div class="stat-num">3</div><div class="stat-label">Sprints queued</div></div>
+  </div>
+
+  <!-- SECTION 1 -->
+  <span class="section-label" id="principles">EXOS &rarr; VOSS — The Four Principles</span>
+  <h2>One Config, Four Structural Pillars</h2>
+  <p>
+    Every line in a VOSS running-config belongs to one of four layers. Understanding which line lives
+    where is the mental model that replaces EXOS port-VLAN thinking. The SW2 config (KhKLab-SW-01,
+    FabricEngine 9.3.2.0) was used as the working example throughout this session.
+  </p>
+  <div class="box">
+    <p><strong>The analogy that holds:</strong> IS-IS builds the map. SPB drives the roads. I-SID is the postal code on every frame. Auto-Sense/FA is the on-ramp that assigns new arrivals to the right postal code automatically.</p>
+  </div>
+
+  <!-- SECTION 2 — BRAIN -->
+  <span class="section-label" id="brain">Principle 1</span>
+  <div class="principle-block principle-brain">
+    <p class="principle-label brain-label">Brain</p>
+    <p class="principle-title">IS-IS &mdash; The Control Plane</p>
+    <p class="mnemonic">"IS-IS builds the map. Every switch knows every other switch."</p>
+    <p>
+      IS-IS is the routing protocol that runs <em>over</em> the SPB fabric. It learns who is connected
+      to whom, builds a topology database, and tells SPB exactly which path to use. Without IS-IS,
+      SPB is blind.
+    </p>
+    <p>The identity lines — the two most important in the entire config:</p>
+    <pre><code>router isis
+  sys-name "KhKLab-SW-01"
+  ip-source-address 10.159.4.1   &larr; SW2's permanent fabric identity (Loopback 1)
+  is-type l1                      &larr; single-area SPB (Level 1 only)
+router isis enable</code></pre>
+    <p>
+      <code>ip-source-address 10.159.4.1</code> is SW2's unique identifier in the fabric — equivalent
+      to a Router ID in OSPF. Every other switch knows SW2 by this address. It must be reachable and stable.
+    </p>
+    <pre><code>spbm 1 nick-name 0.00.02   &larr; 12-bit SPB label for this node in the topology</code></pre>
+    <p>Redistribution — how IS-IS tells the fabric about SW2's local subnets:</p>
+    <pre><code>router isis
+  redistribute direct          &larr; advertise VLAN SVIs (153, 154, 155, 156) into SPB
+  redistribute direct enable
+exit
+isis apply redistribute direct  &larr; applies immediately (no reload needed)</code></pre>
+    <p>
+      This is why other switches in the fabric can route to <code>10.153.4.0/24</code>,
+      <code>10.154.4.0/24</code>, etc. — IS-IS floods those prefixes across the backbone.
+    </p>
+  </div>
+
+  <!-- SECTION 3 — MUSCLE -->
+  <span class="section-label" id="muscle">Principle 2</span>
+  <div class="principle-block principle-muscle">
+    <p class="principle-label muscle-label">Muscle</p>
+    <p class="principle-title">SPB &mdash; The Forwarding Plane</p>
+    <p class="mnemonic">"IS-IS says where. SPB actually moves the frame."</p>
+    <p>
+      SPB (Shortest Path Bridging, IEEE 802.1aq) takes the topology map from IS-IS and does the
+      actual frame forwarding using <strong>MAC-in-MAC encapsulation</strong> across B-VLANs.
+      The original customer frame is wrapped inside an outer B-VLAN header for backbone transport.
+    </p>
+    <pre><code>spbm
+spbm ethertype 0x8100          &larr; outer VLAN tag ethertype for B-VLAN encapsulation
+
+router isis
+  spbm 1 nick-name 0.00.02
+  spbm 1 multicast enable       &larr; enables SPB multicast (DHCP broadcasts cross the fabric)
+  spbm 1 ip enable              &larr; enables IP routing over SPB backbone</code></pre>
+    <p>
+      <strong>B-VLANs 4051 and 4052</strong> are auto-created on boot — you will see them in
+      <code>show vlan members</code>. These are the backbone VLANs SPB uses for its two redundant
+      trees. You never configure them manually; never assign data ports to them.
+    </p>
+    <div class="box ok">
+      <p><strong>Key distinction from EXOS:</strong> In EXOS, VLANs ARE the transport. In VOSS, VLANs are customer-edge labels. SPB/B-VLAN is the actual backbone transport — invisible to the customer.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 4 — SERVICE -->
+  <span class="section-label" id="service">Principle 3</span>
+  <div class="principle-block principle-service">
+    <p class="principle-label service-label">Service</p>
+    <p class="principle-title">I-SID &mdash; The Logical Service Identifier</p>
+    <p class="mnemonic">"VLAN = local color. I-SID = global postal code in the fabric."</p>
+    <p>
+      An I-SID (Instance Service Identifier) is a 24-bit label that binds a local VLAN to a
+      globally unique service within the SPB backbone. When a frame arrives on VLAN 153, SPB
+      wraps it with I-SID 144153 so any switch in the fabric knows exactly which service
+      this frame belongs to.
+    </p>
+
+    <h4>Service Map — SW2 KhKLab</h4>
+    <table>
+      <tr>
+        <th>VLAN</th><th>I-SID</th><th>I-SID Name</th><th>Subnet</th><th>Purpose</th>
+      </tr>
+      <tr><td>153</td><td>144153</td><td>BOBKit-4-AP-Management-isid</td><td>10.153.4.0/24</td><td>AP Management (AP2)</td></tr>
+      <tr><td>154</td><td>144154</td><td>BOBKit-4-WirelessUser-isid</td><td>10.154.4.0/24</td><td>802.1X Wireless Users</td></tr>
+      <tr><td>155</td><td>144155</td><td>BOBKit-4-Camera-isid</td><td>10.155.4.0/24</td><td>IP Cameras</td></tr>
+      <tr><td>156</td><td>144156</td><td>BOBKit-4-Data-isid</td><td>10.156.4.0/24</td><td>Wired Data</td></tr>
+      <tr><td>4048</td><td>15999999</td><td>Onboarding I-SID</td><td>&mdash;</td><td>Unknown / unauthenticated devices</td></tr>
+    </table>
+
+    <p>The config lines that bind VLAN to I-SID (Service layer):</p>
+    <pre><code>vlan create 153 name "AP-Management-isid" type port-mstprstp 0
+vlan i-sid 153 144153                        &larr; THE binding line
+interface Vlan 153
+  ip address 10.153.4.1 255.255.255.0        &larr; L3 gateway for this service
+  ip spb-multicast enable                    &larr; multicast within this service
+  ip dhcp-relay</code></pre>
+
+    <p>
+      The <code>BOBKit-4-</code> prefix in I-SID names is the fingerprint of a
+      <strong>XIQ SiteEngine BOB workflow</strong> — your boss used a Built-in Orchestration
+      Blueprint to push this config, not manual CLI entry.
+    </p>
+
+    <h4>DHCP Architecture</h4>
+    <p>
+      SW2 is the authoritative DHCP server for all four subnets. The server is bound to the
+      management CLIP (<code>10.158.4.1</code>). Relay paths go from each VLAN SVI &rarr; CLIP
+      on the same switch — a standard VOSS self-relay pattern.
+    </p>
+    <pre><code>ip dhcp-relay fwd-path 10.153.4.1 10.158.4.1 enable mode bootp_dhcp
+ip dhcp-relay fwd-path 10.154.4.1 10.158.4.1 enable mode bootp_dhcp
+
+ip dhcp-server subnet 10.153.4.0/24
+  pool 10.153.4.2 10.153.4.250
+  router 10.153.4.1
+  lease-time 86400                           &larr; 24h — matches May 8 GTK mitigation finding
+ip dhcp-server enable</code></pre>
+  </div>
+
+  <!-- SECTION 5 — EDGE -->
+  <span class="section-label" id="edge">Principle 4</span>
+  <div class="principle-block principle-edge">
+    <p class="principle-label edge-label">Edge</p>
+    <p class="principle-title">Auto-Sense / Fabric Attach &mdash; The On-Ramp</p>
+    <p class="mnemonic">"Plug it in. The switch finds its own I-SID."</p>
+    <p>
+      Auto-Sense replaces manual VLAN-per-port assignment. Every port on SW2 is Auto-Sense enabled.
+      When a device plugs in, the switch reads its <strong>LLDP Fabric Attach TLV</strong> to
+      determine device type, then automatically assigns the matching I-SID.
+    </p>
+    <div class="box warn">
+      <p><strong>Important:</strong> Discovery is LLDP-based — NOT MAC-based. The AP announces "I am a WAP-Type1" via an LLDP FA TLV. SW2 reads that TLV. Devices without FA TLVs fall to proxy-no-auth or the onboarding I-SID.</p>
+    </div>
+    <pre><code>&lt;!-- All 20 ports --&gt;
+interface GigabitEthernet 1/1
+  auto-sense enable
+  no shutdown
+  poe fast-poe-enable        &larr; ports 1/1-1/16 are PoE (AP2 powered here)
+  poe perpetual-poe-enable
+
+&lt;!-- The decision rules --&gt;
+auto-sense fa wap-type1 i-sid 144153      &larr; AP announces WAP-Type1 &rarr; AP-Mgmt I-SID
+auto-sense fa camera i-sid 144155         &larr; camera FA TLV &rarr; Camera I-SID
+auto-sense fa proxy-no-auth i-sid 144156  &larr; non-FA proxy &rarr; Data I-SID
+auto-sense data i-sid 144156              &larr; data device &rarr; Data I-SID
+auto-sense onboarding i-sid 15999999      &larr; unknown device &rarr; Onboarding I-SID</code></pre>
+
+    <p>
+      <strong>AP2 flow:</strong> AP2 plugs into any PoE port &rarr; sends LLDP FA TLV "WAP-Type1"
+      &rarr; SW2 auto-assigns I-SID 144153 (AP-Management) &rarr; AP2 gets DHCP from
+      <code>10.153.4.0/24</code> &rarr; XIQ reaches AP2 for management.
+    </p>
+
+    <h4>The 802.1X Clue Hidden in the Banner</h4>
+    <pre><code>banner motd "to disable NAC in the event of internet outage or NAC is unreachable"
+banner motd "no eapol enable"</code></pre>
+    <p>
+      The banner is a dead giveaway: <code>eapol enable</code> is planned on this switch.
+      When your boss activates it, every Auto-Sense port will require 802.1X authentication
+      before assigning a service I-SID. The banner is the emergency override for staff
+      if the NPS server goes unreachable.
+    </p>
+    <p>
+      Until NPS says Access-Accept &rarr; device stays in I-SID 15999999 (Onboarding).
+      After Access-Accept &rarr; device moves to I-SID 144154 (WirelessUser, VLAN 154).
+    </p>
+  </div>
+
+  <!-- SECTION 6 — CORRECTIONS -->
+  <span class="section-label" id="corrections">Conceptual Corrections</span>
+  <h2>Getting the Labels Right</h2>
+  <p>Three instincts surfaced today that needed calibration:</p>
+
+  <div class="box correct">
+    <p><strong>Swap to fix:</strong> "IS-IS is service" &rarr; <strong>IS-IS is Brain (control plane)</strong>. I-SID is the Service. IS-IS and SPB work as a pair — IS-IS builds the topology map, SPB drives the forwarding. I-SID is a separate, third layer entirely.</p>
+  </div>
+
+  <div class="box correct">
+    <p><strong>FA discovery is LLDP-based, not MAC-based.</strong> Auto-Sense reads the LLDP Fabric Attach TLV the device announces. The MAC address is irrelevant for I-SID assignment. A device with no FA TLV (and no 802.1X) lands on the onboarding I-SID regardless of its MAC.</p>
+  </div>
+
+  <div class="box ok">
+    <p><strong>Correct instinct confirmed:</strong> 802.1X packets must be authenticated by NPS before being tagged into the service I-SID. The controlled/uncontrolled port concept — the port stays in onboarding until the RADIUS Access-Accept arrives. After that, SPB moves the client into I-SID 144154.</p>
+  </div>
+
+  <table>
+    <tr><th>Principle</th><th>Your Label</th><th>Correct</th><th>One-Line Memory Hook</th></tr>
+    <tr><td>IS-IS</td><td>service (incorrect)</td><td><strong>Brain</strong></td><td>IS-IS sees the topology — it's the GPS mapping app</td></tr>
+    <tr><td>SPB</td><td>topology (correct)</td><td><strong>Muscle</strong></td><td>SPB moves the frames — it's the actual roads</td></tr>
+    <tr><td>I-SID</td><td>(not named)</td><td><strong>Service</strong></td><td>I-SID is the postal code on every fabric frame</td></tr>
+    <tr><td>Auto-Sense/FA</td><td>discovery (correct)</td><td><strong>Edge</strong></td><td>LLDP FA TLV &rarr; device type &rarr; I-SID assignment</td></tr>
+  </table>
+
+  <!-- SECTION 7 — 802.1X -->
+  <span class="section-label" id="dot1x">802.1X &mdash; Full Learning Arc</span>
+  <h2>802.1X &mdash; <span class="badge done">Complete</span></h2>
+
+  <p>
+    Goal: understand the full 802.1X flow well enough to run packet captures at the right points
+    and trace supplicant &rarr; authenticator &rarr; NPS end-to-end during tomorrow's lab deployment.
+  </p>
+
+  <div class="box">
+    <p><strong>Lab context:</strong> AP2 on VLAN 153 / I-SID 144153 is the authenticator. VLAN 154 / I-SID 144154 (10.154.4.0/24) is the post-auth user VLAN. NPS server configured by boss. SW2 VLAN/I-SID bindings already live — no switch config changes needed.</p>
+  </div>
+
+  <h3>The Three Actors</h3>
+  <table>
+    <tr><th>Actor</th><th>Device</th><th>Role</th><th>Protocol</th></tr>
+    <tr><td><strong>Supplicant</strong></td><td>MacBook / client</td><td>Wants network access</td><td>EAPOL (over 802.11 air)</td></tr>
+    <tr><td><strong>Authenticator</strong></td><td>AP2</td><td>Proxies EAP — does NOT validate credentials</td><td>EAPOL inbound, RADIUS outbound</td></tr>
+    <tr><td><strong>Auth Server</strong></td><td>NPS (RADIUS)</td><td>Sole validator — checks AD, assigns VLAN, delivers MSK</td><td>RADIUS UDP 1812</td></tr>
+  </table>
+
+  <p>AP2 has two logical ports per client:</p>
+  <ul>
+    <li><strong>Uncontrolled port</strong> — always open. Only EAPOL frames pass. Nothing else.</li>
+    <li><strong>Controlled port</strong> — locked until NPS Access-Accept. Then data flows on VLAN_154.</li>
+  </ul>
+
+  <h3>Full PEAP-MSCHAPv2 Frame Sequence (verbatim from session dialogue)</h3>
+  <pre><code>MacBook (Supplicant)        AP2 (Authenticator)         NPS (RADIUS)
+       |                           |                          |
+       |── EAPOL-Start ──────────>|                          |
+       |<─ EAP-Request/Identity ──|                          |
+       |── EAP-Response/Identity ─|  ← USERNAME IN PLAINTEXT |
+       |   (last visible frame)   |── RADIUS Access-Request─>|
+       |                          |                          | checks AD
+       |                          |<─ Access-Challenge ──────| (TLS ServerHello)
+       |<─ EAP-Request/PEAP ──────|                          |
+       |── EAP-Response ─────────>|── RADIUS Access-Request─>|
+       |   [TLS ClientHello]      |   [TLS ClientHello]      |
+       |                          |                          |
+       |   ══ PEAP TLS TUNNEL OPEN — all below is encrypted ══
+       |                          |                          |
+       |── MSCHAPv2-Response ────>|── RADIUS Access-Request─>|
+       |   (NT-hash inside tunnel)|                          | validates vs AD
+       |                          |<─ RADIUS Access-Accept ──|
+       |                          |   + MSK (key material)   |
+       |                          |   + Attr 81 = "154"      | ← VLAN assignment
+       |<─ EAP-Success ───────────|                          |
+       |                          |                          |
+       |<══ 4-WAY HANDSHAKE ══════|  (PMK derived from MSK)  |
+       |   M1: AP → Client  ANonce                           |
+       |   M2: Client → AP  SNonce + MIC                     |
+       |   M3: AP → Client  GTK (encrypted) + MIC            |
+       |   M4: Client → AP  ACK                              |
+       |                          |                          |
+       |══ Data traffic on VLAN_154, DHCP 10.154.4.x ═══════>|</code></pre>
+
+  <div class="box warn">
+    <p><strong>Key detail:</strong> The username travels in plaintext in EAP-Response/Identity — visible to any OTA capture. The password never leaves the client in plaintext. MSCHAPv2 uses NT-hash challenge-response inside the PEAP TLS tunnel.</p>
+  </div>
+
+  <h3>How NPS Knows Which VLAN to Assign</h3>
+  <p>
+    The VLAN is a <strong>policy decision</strong>, not a credential outcome. It is configured in the
+    NPS Network Policy as a RADIUS attribute returned on Access-Accept:
+  </p>
+  <table>
+    <tr><th>RADIUS Attribute</th><th>Value</th><th>Meaning</th></tr>
+    <tr><td>Attr 64 — Tunnel-Type</td><td>13 (VLAN)</td><td>Encapsulation type</td></tr>
+    <tr><td>Attr 65 — Tunnel-Medium-Type</td><td>6 (802)</td><td>Medium type</td></tr>
+    <tr><td>Attr 81 — Tunnel-Private-Group-ID</td><td>"154"</td><td>VLAN number AP2 uses to tag the client</td></tr>
+  </table>
+  <p>
+    NPS matches the request against a <strong>Network Policy</strong> (conditions: AD group membership,
+    SSID name). The matched policy specifies these attributes. Different AD groups can map to
+    different VLANs — same RADIUS server, different policies.
+  </p>
+
+  <h3>MSK Generation — What Goes In</h3>
+  <table>
+    <tr><th>Phase</th><th>What Happens</th><th>Output</th></tr>
+    <tr>
+      <td>PEAP outer (TLS)</td>
+      <td>Client and NPS negotiate TLS tunnel. NPS presents certificate. Client verifies.</td>
+      <td>TLS master secret + session randoms</td>
+    </tr>
+    <tr>
+      <td>MSCHAPv2 inner (inside tunnel)</td>
+      <td>NPS sends challenge. Client responds with NT-Hash(password) + challenge. NPS validates against AD.</td>
+      <td>MSCHAPv2 session key material</td>
+    </tr>
+    <tr>
+      <td>MSK derivation</td>
+      <td>PRF(TLS master secret + MSCHAPv2 key material + randoms). Both sides compute independently.</td>
+      <td><strong>MSK (512 bits, unique per session)</strong></td>
+    </tr>
+  </table>
+  <p>
+    NPS sends MSK to AP2 inside RADIUS Access-Accept via <code>MS-MPPE-Recv-Key</code> /
+    <code>MS-MPPE-Send-Key</code> attributes — over the wired RADIUS path, never over the air.
+    The client computes the identical MSK locally. AP2 never sees the password.
+  </p>
+
+  <h3>PMK — The Critical Difference Between Personal and Enterprise</h3>
+  <table>
+    <tr><th></th><th>WPA-Personal</th><th>WPA-Enterprise (802.1X)</th></tr>
+    <tr><td><strong>PMK source</strong></td><td>PBKDF2(passphrase + SSID) — fixed</td><td>First 256 bits of MSK — unique per session</td></tr>
+    <tr><td><strong>PMK scope</strong></td><td>Same for ALL clients, ALL sessions</td><td>Unique per client, per session</td></tr>
+    <tr><td><strong>Offline attack</strong></td><td>Capture M1+M2 → crack passphrase → derive PTK</td><td>MSK never on air — no offline attack possible</td></tr>
+    <tr><td><strong>May 8 relevance</strong></td><td>GTK rotation broke iPhones (shared PMK)</td><td>Each client has unique PMK — GTK rotation still applies but PTK is per-session</td></tr>
+  </table>
+
+  <h3>The 4-Way Handshake — Identical in Both Modes</h3>
+  <pre><code>PMK (from MSK first 256 bits — Enterprise; from PSK — Personal)
+    ↓
+PTK = PRF-512(PMK + ANonce + SNonce + AP_MAC + STA_MAC)
+    ↓
+  KCK (128 bits) — key confirmation key  (signs the MIC in M2/M3/M4)
+  KEK (128 bits) — key encryption key    (wraps GTK in M3)
+  TK  (128 bits) — temporal key          (encrypts all data frames)</code></pre>
+  <p>
+    The handshake is structurally identical whether PMK came from a passphrase or from NPS.
+    This is why the May 8 GTK rotation findings apply directly to 802.1X deployments.
+  </p>
+
+  <h3>Capture Checklist for Tomorrow</h3>
+  <table>
+    <tr><th>#</th><th>Where</th><th>Tool</th><th>What Confirms Auth Success</th></tr>
+    <tr>
+      <td>1</td>
+      <td>OTA — en0</td>
+      <td>Wireless Diagnostics sniffer (monitor mode)</td>
+      <td>Username plaintext in EAP-Response/Identity → EAP-Success → M1/M2/M3/M4 EAPOL Key frames</td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>OTA — en0</td>
+      <td>Wireshark on en0</td>
+      <td>DHCP OFFER from <code>10.154.4.1</code>, client assigned <code>10.154.4.x</code></td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td>NPS server</td>
+      <td>Event Viewer → Security log</td>
+      <td>Event <strong>6272</strong> = access granted &nbsp;|&nbsp; Event <strong>6273</strong> = access denied</td>
+    </tr>
+    <tr>
+      <td>4</td>
+      <td>SW2 CLI</td>
+      <td><code>show fdb vlan 154</code></td>
+      <td>Client MAC appears on port 3 after auth</td>
+    </tr>
+    <tr>
+      <td>4b</td>
+      <td>SW2 CLI</td>
+      <td><code>show vlan members port 1/3</code></td>
+      <td>VLAN 154 dynamically added alongside VLAN 153 (FA element update from AP2)</td>
+    </tr>
+  </table>
+
+  <div class="box ok">
+    <p><strong>Smoking-gun frame to find:</strong> RADIUS Access-Accept containing Attribute 81 = "154". That single frame is the moment VLAN_154 is assigned. Everything before it is negotiation. Everything after it is the 4-way handshake you already know.</p>
+  </div>
+
+  <h3>Governing Standards &amp; RFCs</h3>
+  <table>
+    <tr><th>Standard</th><th>Governs</th><th>Link</th></tr>
+    <tr>
+      <td>IEEE 802.1X-2020</td>
+      <td>Port-Based Network Access Control — the master 802.1X standard</td>
+      <td><a href="https://standards.ieee.org/ieee/802.1X/7345/" target="_blank">standards.ieee.org</a></td>
+    </tr>
+    <tr>
+      <td>RFC 3748</td>
+      <td>Extensible Authentication Protocol (EAP) — base framework</td>
+      <td><a href="https://www.rfc-editor.org/rfc/rfc3748" target="_blank">rfc-editor.org/rfc/rfc3748</a></td>
+    </tr>
+    <tr>
+      <td>RFC 5247</td>
+      <td>EAP Key Management Framework — MSK &rarr; PMK derivation</td>
+      <td><a href="https://www.rfc-editor.org/rfc/rfc5247" target="_blank">rfc-editor.org/rfc/rfc5247</a></td>
+    </tr>
+    <tr>
+      <td>RFC 5216</td>
+      <td>EAP-TLS — TLS-based EAP method (PEAP outer tunnel)</td>
+      <td><a href="https://www.rfc-editor.org/rfc/rfc5216" target="_blank">rfc-editor.org/rfc/rfc5216</a></td>
+    </tr>
+    <tr>
+      <td>RFC 2759</td>
+      <td>Microsoft PPP CHAP Extensions v2 (MSCHAPv2 — inner auth)</td>
+      <td><a href="https://www.rfc-editor.org/rfc/rfc2759" target="_blank">rfc-editor.org/rfc/rfc2759</a></td>
+    </tr>
+    <tr>
+      <td>RFC 2865</td>
+      <td>RADIUS — base protocol (Access-Request / Challenge / Accept / Reject)</td>
+      <td><a href="https://www.rfc-editor.org/rfc/rfc2865" target="_blank">rfc-editor.org/rfc/rfc2865</a></td>
+    </tr>
+    <tr>
+      <td>RFC 2548</td>
+      <td>Microsoft Vendor-Specific RADIUS Attributes (MS-MPPE-Recv/Send-Key)</td>
+      <td><a href="https://www.rfc-editor.org/rfc/rfc2548" target="_blank">rfc-editor.org/rfc/rfc2548</a></td>
+    </tr>
+    <tr>
+      <td>IEEE 802.11i / WPA2</td>
+      <td>RSN — 4-way handshake, PTK/GTK derivation, CCMP</td>
+      <td><a href="https://standards.ieee.org/ieee/802.11i/3127/" target="_blank">standards.ieee.org</a></td>
+    </tr>
+  </table>
+
+  <hr class="divider">
+
+  <!-- SECTION 8 — SPRINTS -->
+  <span class="section-label" id="sprints">Sprint Backlog</span>
+  <h2>Queued Work</h2>
+
+  <div class="sprint-card">
+    <p class="sprint-week">Sprint &mdash; Week of May 18, 2026</p>
+    <h4>QoS ACL Fix &mdash; feature/qos-egress-validation</h4>
+    <p>
+      Three findings from May 8 QoS validation: (1) queue weights all=1 is FIXED,
+      (2) VLAN qosprofile is ingress-only by architecture, (3) DSCP=0 end-to-end.
+      Remaining work: ACL fix to enforce correct DSCP markings.
+      Branch <code>feature/qos-egress-validation</code> is stable and ready.
+    </p>
+  </div>
+
+  <div class="sprint-card">
+    <p class="sprint-week">Sprint &mdash; Week of May 18, 2026</p>
+    <h4>AP1_Data Download &mdash; QoS / DHCP Captures</h4>
+    <p>
+      Pull raw AP3000 (AP1) data files from the QoS egress validation and DHCP incident
+      captures (May 6&ndash;8). Files to collect: decrypt-error counters snapshot,
+      kdebug wsec logs, pcap files (dhcp_baseline_good.pcap + failure captures).
+      Store locally before AP1 is rebooted or reconfigured.
+    </p>
+  </div>
+
+  <div class="sprint-card">
+    <p class="sprint-week">Sprint &mdash; Week of June 1, 2026</p>
+    <h4>WiFi Digital Twin &mdash; Sprint 1 Day 1</h4>
+    <p>
+      Plan is ready and approved. Coding not started. Day 1 scope: DPM data models,
+      Link Budget Engine, Airtime Calculator. 17 modules in 6 batches total.
+      Two-branch strategy: <code>feature/wifi6-baseline</code> (MCS 0&ndash;11)
+      + <code>feature/wifi7-complete</code> (MCS 0&ndash;13, MLO, 320 MHz).
+    </p>
+  </div>
+
+  <hr class="divider">
+
+  <!-- SW2 CONFIG -->
+  <span class="section-label" id="sw2config">SW2 Running Config &mdash; May 11 2026</span>
+  <h2>KhKLab-SW-01 &mdash; Full Running Config</h2>
+  <p>
+    FabricEngine 9.3.2.0 &bull; 5320-16P-2MXT-2X &bull; Captured via console
+    <code>screen</code> + <code>Ctrl+A H</code> logging &bull; May 11 2026 17:45 EDT
+  </p>
+  <details style="margin:14px 0 20px">
+    <summary style="font-family:'Libre Franklin',Arial,sans-serif;font-size:0.82rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#326891;cursor:pointer;padding:10px 14px;background:#F0F7FF;border:1px solid #BDD9F2;border-radius:4px">
+      Click to expand full running-config (350 lines)
+    </summary>
+    <pre style="margin-top:8px;max-height:600px;overflow-y:auto"><code># Mon May 11 17:45:17 2026 EDT
+# box type             : 5320-16P-2MXT-2X-FabricEngine
+# software version     : 9.3.2.0
+# cli mode             : ECLI
+
+config terminal
+
+# BOOT
+boot config flags ftpd
+boot config flags sshd
+boot config flags telnetd
+
+# SPBM
+spbm
+spbm ethertype 0x8100
+
+# CLI
+cli timeout 65535
+prompt "KhKLab-SW-01"
+banner motd " *** READ ME *** "
+banner motd "to disable NAC in the event of internet outage or NAC is unreachable issue commands"
+banner motd "enable"
+banner motd "config t"
+banner motd "no eapol enable"
+password hash sha2
+
+# CLOCK
+clock time-zone America New_York
+
+# SYSTEM
+ip domain-name "RDUFishbowl.local"
+ip name-server primary 10.152.0.11
+syslog host 1 address 10.152.0.110
+syslog host 1 enable
+
+# ISIS SPBM
+router isis
+spbm 1 nick-name 0.00.02
+spbm 1 multicast enable
+spbm 1 ip enable
+exit
+
+# AUTO-SENSE GLOBAL
+auto-sense wait-interval 42
+auto-sense auto-mlt enable
+
+# VLAN CONFIGURATION
+vlan members remove 1 1/1-1/20 portmember
+
+vlan create 153 name "AP-Management-isid" type port-mstprstp 0
+vlan i-sid 153 144153
+interface Vlan 153
+  ip address 10.153.4.1 255.255.255.0 2
+  ip spb-multicast enable
+  ip igmp upnp-filter
+  ip dhcp-relay
+exit
+
+vlan create 154 name "WirelessUser-isid" type port-mstprstp 0
+vlan i-sid 154 144154
+interface Vlan 154
+  ip address 10.154.4.1 255.255.255.0 3
+  ip spb-multicast enable
+  ip igmp upnp-filter
+  ip dhcp-relay
+exit
+
+vlan create 155 name "Camera-isid" type port-mstprstp 0
+vlan i-sid 155 144155
+interface Vlan 155
+  ip address 10.155.4.1 255.255.255.0 4
+  ip spb-multicast enable
+  ip igmp upnp-filter
+  ip dhcp-relay
+exit
+
+vlan create 156 name "Data-isid" type port-mstprstp 0
+vlan i-sid 156 144156
+interface Vlan 156
+  ip address 10.156.4.1 255.255.255.0 5
+  ip spb-multicast enable
+  ip igmp upnp-filter
+  ip dhcp-relay
+exit
+
+vlan create 4048 name "onboarding-vlan" type pvlan-mstprstp 0 secondary 4049
+vlan i-sid 4048 15999999
+
+# MANAGEMENT CLIP
+mgmt clip vrf GlobalRouter
+ip address 10.158.4.1/32
+enable
+exit
+
+# LOOPBACK (IS-IS source)
+interface loopback 1
+ip address 1 10.159.4.1/255.255.255.255
+exit
+
+# DHCP RELAY
+ip dhcp-relay fwd-path 10.153.4.1 10.158.4.1
+ip dhcp-relay fwd-path 10.153.4.1 10.158.4.1 enable
+ip dhcp-relay fwd-path 10.153.4.1 10.158.4.1 mode bootp_dhcp
+ip dhcp-relay fwd-path 10.154.4.1 10.158.4.1
+ip dhcp-relay fwd-path 10.154.4.1 10.158.4.1 enable
+ip dhcp-relay fwd-path 10.154.4.1 10.158.4.1 mode bootp_dhcp
+ip dhcp-relay fwd-path 10.155.4.1 10.158.4.1
+ip dhcp-relay fwd-path 10.155.4.1 10.158.4.1 enable
+ip dhcp-relay fwd-path 10.155.4.1 10.158.4.1 mode bootp_dhcp
+ip dhcp-relay fwd-path 10.156.4.1 10.158.4.1
+ip dhcp-relay fwd-path 10.156.4.1 10.158.4.1 enable
+ip dhcp-relay fwd-path 10.156.4.1 10.158.4.1 mode bootp_dhcp
+
+# DHCP SERVER
+ip dhcp-server subnet 10.153.4.0/24
+  pool 10.153.4.2 10.153.4.250
+  router 10.153.4.1
+  lease-time 86400
+exit
+ip dhcp-server subnet 10.154.4.0/24
+  pool 10.154.4.2 10.154.4.250
+  router 10.154.4.1
+  lease-time 86400
+exit
+ip dhcp-server subnet 10.155.4.0/24
+  pool 10.155.4.2 10.155.4.250
+  router 10.155.4.1
+  lease-time 86400
+exit
+ip dhcp-server subnet 10.156.4.0/24
+  pool 10.156.4.2 10.156.4.250
+  router 10.156.4.1
+  lease-time 86400
+exit
+ip dhcp-server authoritative
+ip dhcp-server domain-name plmsa.local
+ip dhcp-server ntp-servers 10.152.0.11
+ip dhcp-server domain-name-servers 10.152.0.11
+ip dhcp-server ha-role primary
+ip dhcp-server enable
+
+# ISIS (identity + redistribution)
+router isis
+  sys-name "KhKLab-SW-01"
+  ip-source-address 10.159.4.1
+  is-type l1
+exit
+router isis enable
+
+router isis
+  redistribute direct
+  redistribute direct enable
+exit
+
+# SLPP
+slpp enable
+slpp vid 153
+slpp vid 154
+slpp vid 155
+slpp vid 156
+
+# QOS
+qos queue-profile 1 member add 1/1-1/20
+
+# I-SID NAMES
+i-sid name 144153 "BOBKit-4-AP-Management-isid"
+i-sid name 144154 "BOBKit-4-WirelessUser-isid"
+i-sid name 144155 "BOBKit-4-Camera-isid"
+i-sid name 144156 "BOBKit-4-Data-isid"
+i-sid name 15999999 "Onboarding I-SID"
+
+# AUTO-SENSE MAPPINGS (EDGE / FA rules)
+auto-sense fa proxy-no-auth i-sid 144156
+auto-sense fa camera i-sid 144155
+auto-sense fa wap-type1 i-sid 144153
+auto-sense data i-sid 144156
+auto-sense onboarding i-sid 15999999
+
+# PORTS (all 20 ports — 1/1-1/16 PoE)
+interface GigabitEthernet 1/1
+  auto-sense enable
+  no shutdown
+  poe fast-poe-enable
+  poe perpetual-poe-enable
+exit
+# ... ports 1/2 through 1/18 identical ...
+interface GigabitEthernet 1/19
+  no auto-negotiate
+  auto-sense enable
+  no shutdown
+exit
+interface GigabitEthernet 1/20
+  no auto-negotiate
+  auto-sense enable
+  no shutdown
+exit
+
+isis apply redistribute direct
+
+end</code></pre>
+  </details>
+
+  <hr class="divider">
+
+  <!-- PREVIOUS SESSIONS -->
+  <span class="section-label">Previous Sessions</span>
+  <ul>
+    <li><a href="session_summary_20260508.html">May 8 &mdash; DHCP Repro: Hypothesis B Confirmed (GTK Rotation, 3-Client Fingerprint)</a></li>
+    <li><a href="session_summary_20260508_qos.html">May 8 &mdash; QoS Egress Validation</a></li>
+    <li><a href="session_summary_20260507.html">May 7 &mdash; DHCP Incident Diagnosis + Triage Runbook</a></li>
+  </ul>
+
+  <div class="footer">
+    KhKLab &mdash; E2E Network Deployment Lab Journal &mdash; May 11, 2026<br>
+    SW2: KhKLab-SW-01 &bull; FabricEngine 9.3.2.0 &bull; 5320-16P-2MXT-2X
+  </div>
+
+</div>
+</body>
+</html>
