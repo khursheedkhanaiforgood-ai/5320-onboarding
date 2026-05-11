@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>802.1X / EAPOL / 4-Way Handshake Simulator</title>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Libre+Franklin:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Libre Franklin', Arial, sans-serif; background: #0f1117; color: #e2e8f0; min-height: 100vh; padding: 32px 20px 60px; }
+h1 { font-family: 'Libre Baskerville', Georgia, serif; font-size: 1.7rem; color: #f8fafc; margin-bottom: 6px; }
+.subtitle { font-size: 0.82rem; color: #94a3b8; margin-bottom: 28px; }
+
+/* Stage */
+.stage { display: grid; grid-template-columns: 1fr 60px 1fr 60px 1fr; gap: 0; margin-bottom: 20px; min-height: 420px; }
+.actor { background: #1e2330; border: 1px solid #2d3748; border-radius: 8px; padding: 16px 14px; display: flex; flex-direction: column; align-items: center; }
+.actor-icon { font-size: 2rem; margin-bottom: 6px; }
+.actor-name { font-family: 'Libre Franklin', sans-serif; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: #94a3b8; margin-bottom: 4px; }
+.actor-device { font-family: 'IBM Plex Mono', monospace; font-size: 0.78rem; color: #60a5fa; margin-bottom: 14px; }
+.actor-port { font-size: 0.72rem; color: #475569; margin-top: auto; padding-top: 12px; border-top: 1px solid #2d3748; width: 100%; text-align: center; line-height: 1.6; }
+.actor-port span { display: block; }
+.port-open { color: #34d399; }
+.port-locked { color: #f87171; }
+
+/* Channel columns */
+.channel { display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 0 4px; position: relative; }
+.channel-label { font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #475569; margin-bottom: 8px; transform: rotate(-90deg); white-space: nowrap; }
+
+/* Messages in actor boxes */
+.msg-list { width: 100%; display: flex; flex-direction: column; gap: 6px; flex: 1; }
+.msg { padding: 7px 10px; border-radius: 4px; font-size: 0.75rem; font-family: 'IBM Plex Mono', monospace; opacity: 0.2; transition: opacity 0.3s, background 0.3s; border: 1px solid transparent; }
+.msg.active   { opacity: 1; border-color: currentColor; }
+.msg.done     { opacity: 0.55; }
+.msg.eapol    { background: #1e3a5f; color: #93c5fd; }
+.msg.radius   { background: #3b1f0a; color: #fdba74; }
+.msg.key      { background: #1a1a3e; color: #c4b5fd; }
+.msg.data     { background: #052e16; color: #6ee7b7; }
+.msg.tls      { background: #1e3a2f; color: #6ee7b7; }
+.msg-dir      { font-size: 0.68rem; color: #64748b; margin-top: 3px; font-family: 'Libre Franklin', sans-serif; }
+
+/* Arrow area */
+.arrow-area { display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 420px; }
+.arrow { font-size: 1.6rem; opacity: 0; transition: opacity 0.3s; }
+.arrow.active { opacity: 1; }
+.arrow.eapol  { color: #60a5fa; }
+.arrow.radius { color: #fb923c; }
+.arrow.key    { color: #a78bfa; }
+.arrow.data   { color: #34d399; }
+.arrow.tls    { color: #34d399; }
+
+/* Explanation panel */
+.explain { background: #1e2330; border: 1px solid #2d3748; border-radius: 8px; padding: 20px 24px; margin-bottom: 18px; min-height: 160px; }
+.explain-step { font-family: 'IBM Plex Mono', monospace; font-size: 0.68rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: #475569; margin-bottom: 4px; }
+.explain-title { font-family: 'Libre Baskerville', Georgia, serif; font-size: 1.2rem; color: #f8fafc; margin-bottom: 10px; }
+.explain-body  { font-size: 0.88rem; line-height: 1.75; color: #cbd5e1; }
+.explain-body strong { color: #f8fafc; }
+.explain-body code { font-family: 'IBM Plex Mono', monospace; font-size: 0.8rem; background: #0f1117; padding: 1px 5px; border-radius: 3px; }
+.tag { display: inline-block; padding: 2px 8px; border-radius: 3px; font-family: 'Libre Franklin', sans-serif; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; margin-right: 6px; }
+.tag.eapol  { background: #1e3a5f; color: #93c5fd; }
+.tag.radius { background: #3b1f0a; color: #fdba74; }
+.tag.key    { background: #1a1a3e; color: #c4b5fd; }
+.tag.data   { background: #052e16; color: #6ee7b7; }
+.tag.tls    { background: #1e3a2f; color: #6ee7b7; }
+
+/* Controls */
+.controls { display: flex; gap: 12px; align-items: center; margin-bottom: 28px; }
+.btn { font-family: 'Libre Franklin', sans-serif; font-size: 0.82rem; font-weight: 700; padding: 10px 24px; border-radius: 4px; border: none; cursor: pointer; transition: background 0.2s; }
+.btn-prev { background: #2d3748; color: #94a3b8; }
+.btn-prev:hover { background: #374151; color: #e2e8f0; }
+.btn-next { background: #3b82f6; color: #fff; }
+.btn-next:hover { background: #2563eb; }
+.btn:disabled { opacity: 0.3; cursor: not-allowed; }
+.progress { font-family: 'IBM Plex Mono', monospace; font-size: 0.72rem; color: #475569; margin-left: auto; }
+
+/* Glossary */
+.glossary { margin-top: 8px; }
+.glossary h2 { font-family: 'Libre Baskerville', Georgia, serif; font-size: 1.1rem; color: #f8fafc; margin-bottom: 14px; border-bottom: 1px solid #2d3748; padding-bottom: 8px; }
+.glossary-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 10px; }
+.gl-item { background: #1e2330; border: 1px solid #2d3748; border-radius: 6px; padding: 12px 14px; }
+.gl-abbr { font-family: 'IBM Plex Mono', monospace; font-size: 0.85rem; font-weight: 600; color: #60a5fa; margin-bottom: 3px; }
+.gl-full { font-size: 0.72rem; color: #94a3b8; margin-bottom: 5px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; }
+.gl-plain { font-size: 0.82rem; color: #cbd5e1; line-height: 1.6; }
+
+/* PMK compare */
+.compare { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 24px; }
+.compare-card { background: #1e2330; border-radius: 6px; padding: 16px 18px; border: 1px solid #2d3748; }
+.compare-card h3 { font-family: 'Libre Baskerville', Georgia, serif; font-size: 0.95rem; margin-bottom: 10px; }
+.compare-card.personal h3 { color: #f87171; }
+.compare-card.enterprise h3 { color: #34d399; }
+.compare-card p { font-size: 0.82rem; color: #94a3b8; line-height: 1.7; }
+.compare-card code { font-family: 'IBM Plex Mono', monospace; font-size: 0.78rem; background: #0f1117; padding: 1px 5px; border-radius: 3px; color: #e2e8f0; }
+</style>
+</head>
+<body>
+
+<h1>802.1X / EAPOL / 4-Way — Step-Through Simulator</h1>
+<p class="subtitle">KhKLab &bull; FishBowl Lab &bull; PEAP-MSCHAPv2 + WPA2-Enterprise &bull; May 2026</p>
+
+<!-- STAGE -->
+<div class="stage">
+
+  <!-- SUPPLICANT -->
+  <div class="actor" id="col-sup">
+    <div class="actor-icon">💻</div>
+    <div class="actor-name">Supplicant</div>
+    <div class="actor-device">MacBook / Client</div>
+    <div class="msg-list" id="msgs-sup"></div>
+    <div class="actor-port" id="port-sup">
+      <span>Uncontrolled port</span>
+      <span id="sup-port-state" class="port-locked">● EAPOL only</span>
+    </div>
+  </div>
+
+  <!-- ARROW 1 -->
+  <div class="arrow-area">
+    <div class="arrow eapol" id="arrow1" style="transform:rotate(90deg)">⇅</div>
+    <div style="font-size:0.55rem;color:#334155;margin-top:4px;text-align:center">802.11<br>OTA</div>
+  </div>
+
+  <!-- AUTHENTICATOR -->
+  <div class="actor" id="col-ap">
+    <div class="actor-icon">📡</div>
+    <div class="actor-name">Authenticator</div>
+    <div class="actor-device">AP2 (FishBowl)</div>
+    <div class="msg-list" id="msgs-ap"></div>
+    <div class="actor-port" id="port-ap">
+      <span>Proxies EAP only</span>
+      <span id="ap-port-state" class="port-locked">● No credentials checked here</span>
+    </div>
+  </div>
+
+  <!-- ARROW 2 -->
+  <div class="arrow-area">
+    <div class="arrow radius" id="arrow2" style="transform:rotate(90deg)">⇅</div>
+    <div style="font-size:0.55rem;color:#334155;margin-top:4px;text-align:center">RADIUS<br>UDP 1812</div>
+  </div>
+
+  <!-- AUTH SERVER -->
+  <div class="actor" id="col-nps">
+    <div class="actor-icon">🖥️</div>
+    <div class="actor-name">Auth Server</div>
+    <div class="actor-device">NPS (RADIUS)</div>
+    <div class="msg-list" id="msgs-nps"></div>
+    <div class="actor-port" id="port-nps">
+      <span>Checks AD</span>
+      <span id="nps-port-state" class="port-locked">● Waiting</span>
+    </div>
+  </div>
+
+</div>
+
+<!-- EXPLANATION -->
+<div class="explain">
+  <div class="explain-step" id="exp-step">Step 0 of 17</div>
+  <div class="explain-title" id="exp-title">Ready to begin</div>
+  <div class="explain-body" id="exp-body">Click <strong>Next</strong> to walk through the full 802.1X + 4-Way Handshake flow. Each step decodes the acronym and shows what is actually happening between the three actors.</div>
+</div>
+
+<!-- CONTROLS -->
+<div class="controls">
+  <button class="btn btn-prev" id="btn-prev" onclick="go(-1)" disabled>&#8592; Back</button>
+  <button class="btn btn-next" id="btn-next" onclick="go(1)">Next &#8594;</button>
+  <button class="btn btn-prev" onclick="reset()" style="margin-left:8px">&#8635; Restart</button>
+  <span class="progress" id="progress-label">0 / 17</span>
+</div>
+
+<script>
+const STEPS = [
+  {
+    title: "802.11 Association — Open, No Auth Yet",
+    tag: "eapol",
+    body: `<strong>What happens:</strong> MacBook finds the SSID and sends a standard 802.11 Association Request. The AP accepts it — but the <strong>controlled port is still locked</strong>. Only EAPOL frames can pass through. No data, no DHCP, nothing else yet.<br><br><strong>Key point:</strong> Association ≠ Authentication. The Wi-Fi link is up, but the network is not.`,
+    sup: { text: "802.11 Association Request →", type: "eapol" },
+    ap:  { text: "← Association Response (accepted)", type: "eapol" },
+    nps: null,
+    arrow1: true, arrow2: false,
+    supPort: false, apPort: false, npsState: "● Waiting"
+  },
+  {
+    title: "EAP-Request / Identity",
+    tag: "eapol",
+    body: `<strong>EAPOL</strong> = <em>EAP Over LAN</em>. It's just a thin wrapper that carries EAP messages over the 802.11 wireless link.<br><br><strong>EAP</strong> = <em>Extensible Authentication Protocol</em>. Not a specific auth method — it's the conversation <em>format</em>. Think of it as the envelope; the actual auth (PEAP, TLS, MSCHAPv2) is the letter inside.<br><br>AP sends: <code>EAP-Request / Identity</code> — "Hey, who are you?"`,
+    sup: { text: "← EAP-Request / Identity", type: "eapol" },
+    ap:  { text: "EAP-Request / Identity →", type: "eapol" },
+    nps: null,
+    arrow1: true, arrow2: false,
+    supPort: false, apPort: false, npsState: "● Waiting"
+  },
+  {
+    title: "EAP-Response / Identity — Username in PLAINTEXT",
+    tag: "eapol",
+    body: `Client responds with its <strong>username</strong> — <code>khursheed@RDUFishbowl.local</code>.<br><br>⚠️ <strong>This frame is in plaintext.</strong> Anyone capturing OTA can read the username at this step. The password is never exposed here — only the identity.<br><br>This is the <strong>last readable frame</strong> before the PEAP tunnel encrypts everything. Watch for it in Wireshark tomorrow.`,
+    sup: { text: "EAP-Response / Identity →\n  username: khursheed@domain (PLAINTEXT)", type: "eapol" },
+    ap:  { text: "← EAP-Response / Identity", type: "eapol" },
+    nps: null,
+    arrow1: true, arrow2: false,
+    supPort: false, apPort: false, npsState: "● Waiting"
+  },
+  {
+    title: "RADIUS Access-Request — AP forwards to NPS",
+    tag: "radius",
+    body: `<strong>RADIUS</strong> = <em>Remote Authentication Dial-In User Service</em> (RFC 2865). The protocol AP uses to talk to NPS over <strong>UDP port 1812</strong> on the wired network.<br><br>AP wraps the EAP identity message in a RADIUS <code>Access-Request</code> packet and sends it to NPS. The client has no direct connection to NPS — AP is the <strong>proxy</strong>.<br><br><strong>NPS</strong> = <em>Network Policy Server</em> — Microsoft's RADIUS server. Validates users against Active Directory.`,
+    sup: null,
+    ap:  { text: "RADIUS Access-Request →\n  (EAP identity inside)", type: "radius" },
+    nps: { text: "← Access-Request received", type: "radius" },
+    arrow1: false, arrow2: true,
+    supPort: false, apPort: false, npsState: "● Processing"
+  },
+  {
+    title: "RADIUS Access-Challenge — PEAP TLS Tunnel Begins",
+    tag: "tls",
+    body: `NPS responds with <code>Access-Challenge</code> containing a TLS ServerHello — the start of the <strong>PEAP tunnel</strong>.<br><br><strong>PEAP</strong> = <em>Protected EAP</em>. It wraps the real auth exchange in a TLS tunnel, just like HTTPS. This protects the password from being seen OTA.<br><br>The tunnel is between <strong>MacBook ↔ NPS</strong> — AP just passes the bytes through without reading them. This takes 3–5 round trips to complete.`,
+    sup: { text: "← EAP-Request/PEAP\n  [TLS ServerHello — tunnel starts]", type: "tls" },
+    ap:  { text: "← Access-Challenge (TLS ServerHello)\n  ── passes through to client →", type: "tls" },
+    nps: { text: "Access-Challenge sent\n  (TLS ServerHello)", type: "tls" },
+    arrow1: true, arrow2: true,
+    supPort: false, apPort: false, npsState: "● TLS handshake"
+  },
+  {
+    title: "PEAP TLS Tunnel — Building (3–5 Round Trips)",
+    tag: "tls",
+    body: `Client and NPS negotiate the TLS session — just like your browser connecting to HTTPS. NPS presents a <strong>server certificate</strong>; client verifies it.<br><br>Once complete, all traffic between MacBook and NPS is encrypted inside this tunnel. AP cannot read it. You cannot read it in OTA capture.<br><br><strong>Output of this phase:</strong> a TLS master secret shared only between MacBook and NPS. This will be used later to derive the MSK.`,
+    sup: { text: "TLS ClientHello / Certificate / Finished\n  [PEAP tunnel building...]", type: "tls" },
+    ap:  { text: "← passing TLS bytes through →\n  (AP cannot read this)", type: "tls" },
+    nps: { text: "TLS handshake complete\n  ✓ Tunnel established", type: "tls" },
+    arrow1: true, arrow2: true,
+    supPort: false, apPort: false, npsState: "● Tunnel open"
+  },
+  {
+    title: "MSCHAPv2 — Password Verification Inside the Tunnel",
+    tag: "tls",
+    body: `Inside the encrypted PEAP tunnel, <strong>MSCHAPv2</strong> (<em>Microsoft Challenge Handshake Authentication Protocol v2</em>) runs.<br><br>How it works:<br>1. NPS sends a random <strong>Challenge</strong> value<br>2. Client computes: <code>NT-Hash(password) + Challenge → Response</code><br>3. NPS checks the Response against the NT-Hash stored in Active Directory<br><br>The plaintext password <strong>never</strong> leaves the client. NPS only sees the hashed response — and only inside the encrypted tunnel.`,
+    sup: { text: "MSCHAPv2-Response\n  [NT-Hash(password)+Challenge]\n  inside PEAP tunnel — encrypted", type: "tls" },
+    ap:  { text: "← passing encrypted bytes →\n  (cannot see inside)", type: "tls" },
+    nps: { text: "MSCHAPv2 Challenge sent\n  ← Response received\n  Checking AD...", type: "tls" },
+    arrow1: true, arrow2: true,
+    supPort: false, apPort: false, npsState: "● Checking AD"
+  },
+  {
+    title: "RADIUS Access-Accept — MSK + VLAN Assignment",
+    tag: "radius",
+    body: `NPS validates the credentials ✓ and sends <code>Access-Accept</code> to AP with two critical payloads:<br><br><strong>1. MSK</strong> (<em>Master Session Key</em>) — 512-bit key derived from the TLS session + MSCHAPv2 material. Delivered to AP in RADIUS attributes <code>MS-MPPE-Recv-Key</code> / <code>MS-MPPE-Send-Key</code>. <strong>Never travels over the air.</strong><br><br><strong>2. VLAN assignment</strong> — RADIUS Attr 81 = <code>"154"</code>. This is the policy decision: which VLAN the client lands on. The client doesn't get to ask for this — NPS decides based on AD group membership.`,
+    sup: null,
+    ap:  { text: "← RADIUS Access-Accept\n  + MSK (key material)\n  + Attr 81 = '154' (VLAN)", type: "radius" },
+    nps: { text: "Access-Accept sent ✓\n  MSK + VLAN=154 included", type: "radius" },
+    arrow1: false, arrow2: true,
+    supPort: false, apPort: false, npsState: "✓ Auth granted"
+  },
+  {
+    title: "EAP-Success — Client Notified",
+    tag: "eapol",
+    body: `AP sends <code>EAP-Success</code> to the client over the air. This is the <strong>visible OTA signal</strong> that authentication succeeded.<br><br>Meanwhile, the client has independently computed the same MSK (it has all the same TLS + MSCHAPv2 material). Both AP and client now share the MSK <strong>without it ever crossing the air.</strong><br><br>Next step: derive PMK from MSK and start the 4-Way Handshake.`,
+    sup: { text: "← EAP-Success ✓", type: "eapol" },
+    ap:  { text: "EAP-Success →", type: "eapol" },
+    nps: { text: "✓ Done", type: "radius" },
+    arrow1: true, arrow2: false,
+    supPort: false, apPort: false, npsState: "✓ Done"
+  },
+  {
+    title: "PMK Derived from MSK",
+    tag: "key",
+    body: `<strong>PMK</strong> = <em>Pairwise Master Key</em> — the root key for this session's encryption.<br><br><code>PMK = first 256 bits of MSK</code><br><br>Both AP and client compute this independently and silently. No exchange needed — they already share the MSK.<br><br><strong>Compare with WPA-Personal:</strong><br>• WPA-Personal: PMK = PBKDF2(passphrase + SSID) — same for everyone, forever<br>• WPA-Enterprise: PMK = from MSK — unique per client, per session, cannot be precomputed<br><br>The 4-Way Handshake is now starting. You know this part from May 8.`,
+    sup: { text: "PMK = MSK[:256]\n  (computed locally)", type: "key" },
+    ap:  { text: "PMK = MSK[:256]\n  (computed locally)", type: "key" },
+    nps: null,
+    arrow1: false, arrow2: false,
+    supPort: false, apPort: false, npsState: "✓ Done"
+  },
+  {
+    title: "4-Way Handshake — M1: ANonce",
+    tag: "key",
+    body: `The <strong>4-Way Handshake</strong> derives the actual encryption key from the PMK. Same as WPA-Personal — only the PMK source was different.<br><br><strong>M1:</strong> AP → Client: <code>ANonce</code> (<em>AP Nonce</em>) — a random 32-byte value generated fresh for this session.<br><br>Client now has: PMK + ANonce + its own SNonce (which it generates now) + both MAC addresses → enough to compute the PTK.`,
+    sup: { text: "← M1: ANonce received\n  (AP random value)\n  → computing PTK now...", type: "key" },
+    ap:  { text: "M1: ANonce →\n  (fresh random for this session)", type: "key" },
+    nps: null,
+    arrow1: true, arrow2: false,
+    supPort: false, apPort: false, npsState: "✓ Done"
+  },
+  {
+    title: "4-Way Handshake — M2: SNonce + MIC",
+    tag: "key",
+    body: `<strong>M2:</strong> Client → AP: <code>SNonce</code> + <code>MIC</code><br><br><strong>SNonce</strong> = <em>Station Nonce</em> — client's random 32-byte value.<br><br><strong>MIC</strong> = <em>Message Integrity Code</em> — a cryptographic signature computed with the KCK (part of PTK). If MIC is valid, AP knows the client has the correct PMK — <strong>this is the proof of identity without exchanging the key itself.</strong><br><br><code>PTK = PRF-512(PMK + ANonce + SNonce + AP_MAC + STA_MAC)</code><br>↓<br>KCK (128 bits) — signs MICs<br>KEK (128 bits) — encrypts GTK<br>TK (128 bits) — encrypts your data`,
+    sup: { text: "M2: SNonce + MIC →\n  (proves client has correct PMK)", type: "key" },
+    ap:  { text: "← M2 received\n  ✓ MIC valid = client has PMK\n  Computing PTK...", type: "key" },
+    nps: null,
+    arrow1: true, arrow2: false,
+    supPort: false, apPort: false, npsState: "✓ Done"
+  },
+  {
+    title: "4-Way Handshake — M3: GTK Delivery",
+    tag: "key",
+    body: `<strong>M3:</strong> AP → Client: <code>GTK</code> encrypted with <code>KEK</code> + <code>MIC</code><br><br><strong>GTK</strong> = <em>Group Temporal Key</em> — encrypts <strong>broadcast and multicast</strong> frames (DHCP offers, ARP, etc.). Shared by all clients on the SSID.<br><br>You know GTK well from May 8 — when GTK rotated mid-session, clients that missed the new GTK went deaf to broadcasts (no DHCP renewals).<br><br>AP also installs TK at this point and is ready to encrypt unicast data.`,
+    sup: { text: "← M3: GTK (encrypted with KEK)\n  + MIC\n  (installing TK + GTK...)", type: "key" },
+    ap:  { text: "M3: GTK →\n  (AP installs TK)", type: "key" },
+    nps: null,
+    arrow1: true, arrow2: false,
+    supPort: false, apPort: true, npsState: "✓ Done"
+  },
+  {
+    title: "4-Way Handshake — M4: ACK",
+    tag: "key",
+    body: `<strong>M4:</strong> Client → AP: ACK + MIC — confirming GTK received and TK installed.<br><br>Both sides now have:<br>• <strong>TK</strong> — unique per client, encrypts unicast frames (CCMP/AES)<br>• <strong>GTK</strong> — shared, encrypts broadcasts<br><br>The <strong>controlled port is now OPEN</strong>. Data can flow. Client is placed on <strong>VLAN 154</strong> (per RADIUS Attr 81 from step 8).`,
+    sup: { text: "M4: ACK + MIC →\n  ✓ TK + GTK installed\n  Controlled port OPEN", type: "key" },
+    ap:  { text: "← M4 received ✓\n  Port unlocked → VLAN 154", type: "key" },
+    nps: null,
+    arrow1: true, arrow2: false,
+    supPort: true, apPort: true, npsState: "✓ Done"
+  },
+  {
+    title: "DHCP — Client Gets IP on VLAN 154",
+    tag: "data",
+    body: `Client sends DHCP Discover — now broadcast traffic is encrypted with GTK and the switch accepts it on VLAN 154 (I-SID 144154).<br><br>SW2's DHCP server answers from the <code>10.154.4.0/24</code> pool:<br>• Server: <code>10.154.4.1</code> (SW2 VLAN 154 SVI)<br>• Client gets: <code>10.154.4.x</code><br><br><strong>This is your network-layer confirmation signal tomorrow.</strong> If you see a DHCP OFFER from <code>10.154.4.1</code>, everything worked end-to-end.`,
+    sup: { text: "DHCP Discover →\n  ← OFFER from 10.154.4.1\n  ✓ IP: 10.154.4.x assigned", type: "data" },
+    ap:  { text: "← DHCP frames tagged VLAN 154\n  forwarded to SW2", type: "data" },
+    nps: null,
+    arrow1: true, arrow2: false,
+    supPort: true, apPort: true, npsState: "✓ Done"
+  },
+  {
+    title: "SW2 State — What You See on the Switch",
+    tag: "data",
+    body: `On SW2 CLI, two things change after successful auth:<br><br><code>show fdb vlan 154</code><br>→ Client MAC appears on port 1/3 (AP2 uplink)<br><br><code>show vlan members port 1/3</code><br>→ VLAN 154 dynamically added alongside VLAN 153 (FA element update from AP2)<br><br>VLAN 153 stays on the port for AP management (untagged/native — do not touch).<br>VLAN 154 is added dynamically when the first 802.1X client authenticates.`,
+    sup: { text: "✓ Encrypted data on VLAN 154\n  10.154.4.x → internet", type: "data" },
+    ap:  { text: "Port 1/3 now carries:\n  VLAN 153 (untagged/mgmt)\n  VLAN 154 (tagged/users)", type: "data" },
+    nps: { text: "✓ Session active\n  Event 6272 in\n  Windows Event Viewer", type: "data" },
+    arrow1: true, arrow2: false,
+    supPort: true, apPort: true, npsState: "✓ Session logged"
+  },
+  {
+    title: "Complete ✓ — Full Flow Done",
+    tag: "data",
+    body: `<strong>The complete flow:</strong><br><br>Association → EAPOL identity → RADIUS proxy to NPS → PEAP TLS tunnel → MSCHAPv2 (password hash, never OTA) → Access-Accept + MSK + VLAN 154 → EAP-Success → PMK from MSK → 4-Way Handshake (ANonce/SNonce/MIC/GTK) → TK installed → controlled port open → DHCP on 10.154.4.x<br><br><strong>Tomorrow's smoking gun:</strong> RADIUS Access-Accept with Attr 81 = "154" + the M1/M2/M3/M4 sequence. If you see those, everything worked.`,
+    sup: { text: "✅ Authenticated\n  IP: 10.154.4.x\n  Encrypted with TK (CCMP/AES)", type: "data" },
+    ap:  { text: "✅ Port authenticated\n  VLAN 153 + 154 active\n  RADIUS accounting started", type: "data" },
+    nps: { text: "✅ Event 6272 logged\n  User: khursheed@domain\n  Policy: WirelessUsers→V154", type: "data" },
+    arrow1: true, arrow2: true,
+    supPort: true, apPort: true, npsState: "✅ Active session"
+  }
+];
+
+let current = -1;
+
+function renderMessages(col, msgs) {
+  const el = document.getElementById('msgs-' + col);
+  el.innerHTML = '';
+  msgs.forEach((m, i) => {
+    const div = document.createElement('div');
+    div.className = 'msg ' + m.type + (i === msgs.length - 1 ? ' active' : ' done');
+    div.innerHTML = m.text.replace(/\n/g, '<br>');
+    el.appendChild(div);
+  });
+}
+
+function go(dir) {
+  current += dir;
+  if (current < 0) current = 0;
+  if (current >= STEPS.length) current = STEPS.length - 1;
+  render();
+}
+
+function reset() {
+  current = -1;
+  document.getElementById('msgs-sup').innerHTML = '';
+  document.getElementById('msgs-ap').innerHTML = '';
+  document.getElementById('msgs-nps').innerHTML = '';
+  document.getElementById('exp-step').textContent = 'Step 0 of ' + STEPS.length;
+  document.getElementById('exp-title').textContent = 'Ready to begin';
+  document.getElementById('exp-body').innerHTML = 'Click <strong>Next</strong> to walk through the full 802.1X + 4-Way Handshake flow.';
+  document.getElementById('arrow1').className = 'arrow eapol';
+  document.getElementById('arrow2').className = 'arrow radius';
+  document.getElementById('sup-port-state').textContent = '● EAPOL only';
+  document.getElementById('sup-port-state').className = 'port-locked';
+  document.getElementById('ap-port-state').textContent = '● No credentials checked here';
+  document.getElementById('ap-port-state').className = 'port-locked';
+  document.getElementById('nps-port-state').textContent = '● Waiting';
+  document.getElementById('nps-port-state').className = 'port-locked';
+  document.getElementById('btn-prev').disabled = true;
+  document.getElementById('btn-next').disabled = false;
+  document.getElementById('progress-label').textContent = '0 / ' + STEPS.length;
+}
+
+// Track per-column message history
+const history = { sup: [], ap: [], nps: [] };
+
+function render() {
+  const s = STEPS[current];
+
+  // Accumulate messages
+  if (s.sup) history.sup.push(s.sup);
+  if (s.ap)  history.ap.push(s.ap);
+  if (s.nps) history.nps.push(s.nps);
+
+  renderMessages('sup', history.sup);
+  renderMessages('ap',  history.ap);
+  renderMessages('nps', history.nps);
+
+  // Arrows
+  document.getElementById('arrow1').className = 'arrow ' + s.tag + (s.arrow1 ? ' active' : '');
+  document.getElementById('arrow2').className = 'arrow ' + s.tag + (s.arrow2 ? ' active' : '');
+
+  // Explanation
+  document.getElementById('exp-step').textContent = 'Step ' + (current + 1) + ' of ' + STEPS.length;
+  document.getElementById('exp-title').innerHTML = '<span class="tag ' + s.tag + '">' + s.tag.toUpperCase() + '</span> ' + s.title;
+  document.getElementById('exp-body').innerHTML = s.body;
+
+  // Ports
+  const supOpen = s.supPort;
+  const apOpen  = s.apPort;
+  document.getElementById('sup-port-state').textContent = supOpen ? '✅ Controlled port OPEN' : '● EAPOL only';
+  document.getElementById('sup-port-state').className   = supOpen ? 'port-open' : 'port-locked';
+  document.getElementById('ap-port-state').textContent  = apOpen ? '✅ VLAN 154 active' : '● No credentials checked here';
+  document.getElementById('ap-port-state').className    = apOpen ? 'port-open' : 'port-locked';
+  document.getElementById('nps-port-state').textContent = s.npsState;
+  document.getElementById('nps-port-state').className   = s.npsState.startsWith('✓') || s.npsState.startsWith('✅') ? 'port-open' : 'port-locked';
+
+  // Buttons
+  document.getElementById('btn-prev').disabled = current <= 0;
+  document.getElementById('btn-next').disabled = current >= STEPS.length - 1;
+  document.getElementById('progress-label').textContent = (current + 1) + ' / ' + STEPS.length;
+}
+</script>
+
+<!-- GLOSSARY -->
+<div class="glossary">
+  <h2>Acronym Decoder</h2>
+  <div class="glossary-grid">
+    <div class="gl-item"><div class="gl-abbr">EAPOL</div><div class="gl-full">EAP Over LAN</div><div class="gl-plain">Thin wrapper that carries EAP messages over Ethernet/Wi-Fi. The envelope.</div></div>
+    <div class="gl-item"><div class="gl-abbr">EAP</div><div class="gl-full">Extensible Authentication Protocol</div><div class="gl-plain">The conversation format for auth. Not a method itself — PEAP/TLS/MSCHAPv2 plug into it.</div></div>
+    <div class="gl-item"><div class="gl-abbr">PEAP</div><div class="gl-full">Protected EAP</div><div class="gl-plain">Wraps EAP inside a TLS tunnel. Like HTTPS for auth. Hides the password exchange from OTA capture.</div></div>
+    <div class="gl-item"><div class="gl-abbr">MSCHAPv2</div><div class="gl-full">Microsoft CHAPv2</div><div class="gl-plain">Password verification inside the PEAP tunnel. Challenge-response using NT-Hash — password never in plaintext.</div></div>
+    <div class="gl-item"><div class="gl-abbr">RADIUS</div><div class="gl-full">Remote Auth Dial-In User Service</div><div class="gl-plain">Protocol AP uses to talk to NPS. UDP port 1812. AP is the proxy — client has no direct NPS connection.</div></div>
+    <div class="gl-item"><div class="gl-abbr">NPS</div><div class="gl-full">Network Policy Server</div><div class="gl-plain">Microsoft's RADIUS server. Validates users against AD. Assigns VLAN via Network Policy rules.</div></div>
+    <div class="gl-item"><div class="gl-abbr">MSK</div><div class="gl-full">Master Session Key</div><div class="gl-plain">512-bit key generated by NPS from TLS + MSCHAPv2 material. Sent to AP via RADIUS. Never travels OTA.</div></div>
+    <div class="gl-item"><div class="gl-abbr">PMK</div><div class="gl-full">Pairwise Master Key</div><div class="gl-plain">Root key for 4-way handshake. = first 256 bits of MSK (Enterprise) or PBKDF2(passphrase) (Personal).</div></div>
+    <div class="gl-item"><div class="gl-abbr">PTK</div><div class="gl-full">Pairwise Transient Key</div><div class="gl-plain">Session key derived from PMK + nonces + MACs. Split into KCK + KEK + TK.</div></div>
+    <div class="gl-item"><div class="gl-abbr">TK</div><div class="gl-full">Temporal Key</div><div class="gl-plain">The actual encryption key for unicast data frames (CCMP/AES). Unique per client per session.</div></div>
+    <div class="gl-item"><div class="gl-abbr">GTK</div><div class="gl-full">Group Temporal Key</div><div class="gl-plain">Encrypts broadcast/multicast frames. Shared by all clients. Rotation = May 8 incident cause.</div></div>
+    <div class="gl-item"><div class="gl-abbr">ANonce / SNonce</div><div class="gl-full">AP Nonce / Station Nonce</div><div class="gl-plain">Fresh random values generated each session. Combined with PMK + MACs to derive PTK. Nonce = "number used once".</div></div>
+    <div class="gl-item"><div class="gl-abbr">MIC</div><div class="gl-full">Message Integrity Code</div><div class="gl-plain">Cryptographic signature on handshake messages. Computed with KCK. Proves you hold the correct PMK.</div></div>
+    <div class="gl-item"><div class="gl-abbr">KCK / KEK</div><div class="gl-full">Key Confirmation Key / Key Encryption Key</div><div class="gl-plain">KCK signs the MIC in M2/M3/M4. KEK encrypts the GTK inside M3.</div></div>
+  </div>
+
+  <!-- PMK COMPARE -->
+  <h2 style="margin-top:28px">PMK Source — Personal vs Enterprise</h2>
+  <div class="compare">
+    <div class="compare-card personal">
+      <h3>WPA-Personal (PSK)</h3>
+      <p><code>PMK = PBKDF2(passphrase + SSID, 4096, 256)</code><br><br>Same PMK for <strong>every client, every session</strong>. Capture M1+M2 OTA → run dictionary attack → derive PTK → decrypt all traffic. May 8 GTK rotation affected all clients because PMK is shared.</p>
+    </div>
+    <div class="compare-card enterprise">
+      <h3>WPA-Enterprise (802.1X)</h3>
+      <p><code>PMK = MSK[:256]</code> (unique per session)<br><br>MSK generated from TLS + MSCHAPv2 material. Never travels OTA. Even with a captured handshake, no offline attack is possible. Each client gets its own PMK — GTK rotation still applies but PTK is per-client.</p>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
