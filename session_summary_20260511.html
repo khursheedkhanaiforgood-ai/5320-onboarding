@@ -326,6 +326,16 @@ banner motd "no eapol enable"</code></pre>
     <p><strong>Lab context:</strong> AP2 on VLAN 153 / I-SID 144153 is the authenticator. VLAN 154 / I-SID 144154 (10.154.4.0/24) is the post-auth user VLAN. NPS server configured by boss. SW2 VLAN/I-SID bindings already live — no switch config changes needed.</p>
   </div>
 
+  <div class="box warn">
+    <p><strong>&#9888; VLAN 153 — do not touch (confirmed by lab owner).</strong> AP management is configured for <em>untagged</em> (native) traffic. AP2 sends management frames untagged; SW2 Auto-Sense receives them and maps internally to I-SID 144153. Already working. Only VLAN 154 is configured in XIQ tomorrow.</p>
+  </div>
+
+  <table>
+    <tr><th>VLAN</th><th>Traffic from AP2</th><th>SW2 handling</th><th>Tomorrow</th></tr>
+    <tr><td><strong>153</strong> — AP Management</td><td>Untagged (native)</td><td>Auto-Sense &rarr; I-SID 144153</td><td><strong style="color:#C62828">Leave alone</strong></td></tr>
+    <tr><td><strong>154</strong> — Wireless Users</td><td>Tagged (RADIUS Attr 81 = "154")</td><td>Maps to I-SID 144154</td><td><strong style="color:#2E7D32">Configure in XIQ</strong></td></tr>
+  </table>
+
   <h3>The Three Actors</h3>
   <table>
     <tr><th>Actor</th><th>Device</th><th>Role</th><th>Protocol</th></tr>
