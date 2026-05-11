@@ -99,8 +99,10 @@ a:hover { color: #111; }
     <a href="#service">4. Service — I-SID (Logical Services)</a>
     <a href="#edge">5. Edge — Auto-Sense / Fabric Attach</a>
     <a href="#corrections">6. Conceptual Corrections</a>
-    <a href="#dot1x">7. 802.1X Learning Arc (In Progress)</a>
+    <a href="#dot1x">7. 802.1X Learning Arc</a>
     <a href="#sprints">8. Sprint Backlog</a>
+    <a href="#simulators">9. Simulators — Three-Part Series</a>
+    <a href="#sw2config">10. SW2 Running Config</a>
   </div>
 
   <div class="stats">
@@ -569,6 +571,40 @@ PTK = PRF-512(PMK + ANonce + SNonce + AP_MAC + STA_MAC)
       Two-branch strategy: <code>feature/wifi6-baseline</code> (MCS 0&ndash;11)
       + <code>feature/wifi7-complete</code> (MCS 0&ndash;13, MLO, 320 MHz).
     </p>
+  </div>
+
+  <hr class="divider">
+
+  <!-- SIMULATORS -->
+  <span class="section-label" id="simulators">Simulators &mdash; Three-Part Series</span>
+  <h2>Interactive Learning Simulators</h2>
+  <p>Three simulators cover the full wireless security stack from WPA-Personal through WPA-Enterprise with RADIUS. Use them in order — each builds on the previous.</p>
+  <table>
+    <tr><th>#</th><th>Simulator</th><th>Covers</th><th>RADIUS?</th><th>Link</th></tr>
+    <tr>
+      <td>1</td>
+      <td><strong>WPA Authentication Simulator</strong></td>
+      <td>4-Way Handshake (WPA-Personal/PSK). PMK from passphrase. ANonce/SNonce/PTK/GTK. M1–M4.</td>
+      <td>No</td>
+      <td><a href="https://claude.ai/public/artifacts/89fa9685-e7ae-49c0-91d7-b2940c5b7694" target="_blank">Open &nearr;</a></td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td><strong>802.11be End-to-End Simulator</strong></td>
+      <td>Full client connection: Discovery &rarr; Association &rarr; EAP &rarr; 4-Way Handshake &rarr; Data Plane. KPI dashboard (RSSI/SNR/MCS). AP5060U vs MacBook M4.</td>
+      <td>EAP only</td>
+      <td><a href="https://claude.ai/public/artifacts/29fe810e-8702-448c-b772-a851c611b952" target="_blank">Open &nearr;</a></td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td><strong>802.1X / RADIUS Simulator</strong></td>
+      <td>Full RADIUS/NPS flow: EAPOL identity &rarr; RADIUS proxy &rarr; PEAP TLS tunnel &rarr; MSCHAPv2 &rarr; Access-Accept + MSK + VLAN attr &rarr; PMK derivation &rarr; 4-Way Handshake &rarr; DHCP on VLAN 154. 17 steps. Acronym decoder (14 terms).</td>
+      <td><strong>Yes — full NPS flow</strong></td>
+      <td><a href="dot1x_simulator.html" target="_blank">Open &nearr;</a></td>
+    </tr>
+  </table>
+  <div class="box">
+    <p><strong>How to use the series:</strong> Simulator 1 locks in the 4-Way Handshake with WPA-Personal PMK. Simulator 2 shows it in the context of a real 802.11be connection. Simulator 3 adds the RADIUS/NPS layer — showing how PMK source changes from passphrase to MSK, while the 4-Way Handshake stays identical.</p>
   </div>
 
   <hr class="divider">
