@@ -3,443 +3,418 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>EOD Blueprint — May 12 2026 — PPSK Guest Onboarding Sprint</title>
-<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Libre+Franklin:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<title>5320 Lab Journal — PPSK Guest Onboarding Sprint, May 12 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Libre+Franklin:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: 'Libre Franklin', Arial, sans-serif; background: #0f1117; color: #e2e8f0; min-height: 100vh; }
-
-/* NAV */
-nav { position: sticky; top: 0; background: #0f1117; border-bottom: 1px solid #1e2330; z-index: 100; padding: 0 32px; display: flex; gap: 0; overflow-x: auto; }
-nav a { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #475569; text-decoration: none; padding: 14px 16px; white-space: nowrap; border-bottom: 2px solid transparent; transition: color 0.2s, border-color 0.2s; }
-nav a:hover { color: #94a3b8; border-bottom-color: #3b82f6; }
-
-/* HERO */
-.hero { background: linear-gradient(135deg, #0f1117 0%, #111827 40%, #0d2115 100%); padding: 60px 32px 48px; border-bottom: 1px solid #1e2330; }
-.hero-date { font-family: 'IBM Plex Mono', monospace; font-size: 0.72rem; color: #475569; margin-bottom: 10px; }
-.hero h1 { font-family: 'Libre Baskerville', Georgia, serif; font-size: 2rem; color: #f8fafc; line-height: 1.25; margin-bottom: 14px; }
-.hero-tags { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
-.htag { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; padding: 3px 10px; border-radius: 3px; }
-.htag.ppsk   { background: #052e16; color: #6ee7b7; }
-.htag.xiq    { background: #0c3344; color: #67e8f9; }
-.htag.radsec { background: #3b1f0a; color: #fdba74; }
-.htag.sim    { background: #1a1a3e; color: #c4b5fd; }
-.htag.phase4 { background: #1e3a5f; color: #93c5fd; }
-.hero-sub { font-size: 0.88rem; color: #64748b; line-height: 1.75; max-width: 700px; }
-
-/* MAIN CONTENT */
-main { max-width: 960px; margin: 0 auto; padding: 48px 32px 80px; }
-section { margin-bottom: 52px; }
-section h2 { font-family: 'Libre Baskerville', Georgia, serif; font-size: 1.25rem; color: #f8fafc; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid #1e2330; display: flex; align-items: center; gap: 12px; }
-section h2 .sec-num { font-family: 'IBM Plex Mono', monospace; font-size: 0.72rem; color: #334155; }
-
-/* CARDS */
-.card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
-.card { background: #1e2330; border: 1px solid #2d3748; border-radius: 8px; padding: 18px 20px; }
-.card h3 { font-family: 'Libre Baskerville', Georgia, serif; font-size: 0.95rem; color: #f8fafc; margin-bottom: 8px; }
-.card p { font-size: 0.82rem; color: #94a3b8; line-height: 1.7; }
-.card .card-tag { font-family: 'IBM Plex Mono', monospace; font-size: 0.62rem; color: #475569; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px; }
-
-/* KV table */
-.kv { width: 100%; border-collapse: collapse; font-size: 0.84rem; margin-bottom: 18px; }
-.kv tr:not(:last-child) td { border-bottom: 1px solid #1e2330; }
-.kv td { padding: 10px 14px; vertical-align: top; line-height: 1.65; }
-.kv td:first-child { font-family: 'IBM Plex Mono', monospace; font-size: 0.78rem; color: #5eead4; white-space: nowrap; width: 200px; }
-.kv td:last-child { color: #cbd5e1; }
-.kv td code { font-family: 'IBM Plex Mono', monospace; font-size: 0.78rem; background: #0f1117; padding: 1px 5px; border-radius: 3px; }
-
-/* Steps list */
-.steps { list-style: none; counter-reset: step; }
-.steps li { counter-increment: step; display: flex; gap: 14px; padding: 12px 0; border-bottom: 1px solid #1e2330; font-size: 0.85rem; color: #cbd5e1; line-height: 1.7; }
-.steps li::before { content: counter(step, decimal-leading-zero); font-family: 'IBM Plex Mono', monospace; font-size: 0.72rem; color: #334155; padding-top: 3px; flex-shrink: 0; width: 28px; }
-.steps li strong { color: #f8fafc; }
-.steps li code { font-family: 'IBM Plex Mono', monospace; font-size: 0.78rem; background: #0f1117; padding: 1px 5px; border-radius: 3px; }
-
-/* Code block */
-pre.code { background: #0a0d14; border: 1px solid #1e2330; border-radius: 6px; padding: 16px 18px; font-family: 'IBM Plex Mono', monospace; font-size: 0.76rem; color: #64748b; line-height: 1.75; overflow-x: auto; margin-bottom: 14px; white-space: pre; }
-pre.code .k { color: #5eead4; }
-pre.code .v { color: #e2e8f0; }
-pre.code .c { color: #334155; }
-pre.code .h { color: #fdba74; }
-
-/* Tag inline */
-.tag-inline { display: inline-block; padding: 2px 8px; border-radius: 3px; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; }
-.tag-inline.done { background: #052e16; color: #6ee7b7; }
-.tag-inline.pending { background: #3b1f0a; color: #fdba74; }
-.tag-inline.future { background: #1e3a5f; color: #93c5fd; }
-.tag-inline.new { background: #1a1a3e; color: #c4b5fd; }
-
-/* Phase table */
-.phase-table { width: 100%; border-collapse: collapse; font-size: 0.83rem; }
-.phase-table th { font-family: 'Libre Franklin', sans-serif; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #475569; padding: 8px 14px; text-align: left; border-bottom: 1px solid #2d3748; }
-.phase-table td { padding: 10px 14px; vertical-align: top; border-bottom: 1px solid #1e2330; color: #cbd5e1; line-height: 1.65; }
-.phase-table td:first-child { font-family: 'IBM Plex Mono', monospace; font-size: 0.78rem; color: #60a5fa; white-space: nowrap; }
-.phase-table tr:last-child td { border-bottom: none; }
-
-/* Callout box */
-.callout { background: #1a1f2e; border-left: 3px solid #5eead4; border-radius: 0 6px 6px 0; padding: 14px 18px; margin-bottom: 18px; font-size: 0.85rem; color: #94a3b8; line-height: 1.75; }
-.callout strong { color: #f8fafc; }
-.callout code { font-family: 'IBM Plex Mono', monospace; font-size: 0.78rem; background: #0f1117; padding: 1px 5px; border-radius: 3px; }
-
-/* Collapse */
-details { margin-bottom: 14px; }
-summary { cursor: pointer; font-family: 'IBM Plex Mono', monospace; font-size: 0.75rem; color: #475569; padding: 10px 0; list-style: none; }
-summary:hover { color: #94a3b8; }
-summary::before { content: "▶ "; }
-details[open] summary::before { content: "▼ "; }
-
-/* URL list */
-.url-list { list-style: none; }
-.url-list li { padding: 8px 0; border-bottom: 1px solid #1e2330; display: flex; gap: 14px; align-items: baseline; font-size: 0.83rem; }
-.url-list li a { color: #60a5fa; text-decoration: none; font-family: 'IBM Plex Mono', monospace; font-size: 0.78rem; }
-.url-list li a:hover { color: #93c5fd; text-decoration: underline; }
-.url-list li .url-desc { color: #64748b; font-size: 0.79rem; }
-
-/* Footer */
-footer { background: #0a0d14; border-top: 1px solid #1e2330; padding: 24px 32px; text-align: center; font-size: 0.72rem; color: #334155; }
+body { font-family: 'Libre Baskerville', Georgia, serif; background: #FFFFFF; color: #111111; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 48px 24px 72px; }
+.container { max-width: 760px; width: 100%; }
+.nyt-rule-top { border: none; border-top: 3px solid #111; margin-bottom: 6px; }
+.nyt-rule-thin { border: none; border-top: 1px solid #111; margin-bottom: 18px; }
+.nyt-logo { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.22em; color: #666; text-align: center; margin-bottom: 6px; }
+.byline { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.72rem; color: #666; margin-bottom: 14px; letter-spacing: 0.02em; }
+.byline strong { color: #111; font-weight: 700; }
+h1 { font-family: 'Libre Baskerville', Georgia, serif; font-size: 2.2rem; font-weight: 700; color: #111; line-height: 1.15; margin-bottom: 14px; }
+.subtitle { font-family: 'Libre Baskerville', Georgia, serif; font-size: 1rem; font-style: italic; color: #444; line-height: 1.8; margin-bottom: 20px; border-bottom: 1px solid #E2E2E2; padding-bottom: 28px; }
+.section-label { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.18em; color: #326891; margin: 40px 0 12px; padding-bottom: 6px; border-bottom: 2px solid #326891; display: block; }
+h2 { font-family: 'Libre Baskerville', Georgia, serif; font-size: 1.45rem; font-weight: 700; color: #111; margin: 0 0 14px; }
+h3 { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #326891; margin: 24px 0 10px; }
+h4 { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.8rem; font-weight: 700; color: #111; margin: 18px 0 8px; }
+p { font-size: 0.97rem; line-height: 1.85; color: #222; margin-bottom: 12px; }
+ul, ol { padding-left: 22px; margin-bottom: 14px; }
+li { font-size: 0.95rem; line-height: 1.8; color: #222; margin-bottom: 4px; }
+code { font-family: 'SF Mono', Consolas, monospace; font-size: 0.82rem; background: #F4F4F4; border: 1px solid #E2E2E2; padding: 1px 5px; border-radius: 3px; color: #326891; }
+pre { background: #F8F8F8; border: 1px solid #E2E2E2; border-radius: 4px; padding: 16px; overflow-x: auto; margin: 12px 0 18px; }
+pre code { background: none; border: none; padding: 0; color: #111; font-size: 0.83rem; line-height: 1.65; }
+table { width: 100%; border-collapse: collapse; margin: 12px 0 20px; font-size: 0.88rem; }
+th { background: #F4F4F4; font-family: 'Libre Franklin', Arial, sans-serif; font-weight: 700; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: #326891; padding: 8px 10px; border: 1px solid #E2E2E2; text-align: left; }
+td { padding: 8px 10px; border: 1px solid #E2E2E2; color: #222; vertical-align: top; }
+tr:nth-child(even) td { background: #FAFAFA; }
+.badge { display: inline-block; padding: 2px 8px; border-radius: 2px; font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; margin: 1px; }
+.done { background: #E8F5E9; color: #2E7D32; border: 1px solid #A5D6A7; }
+.todo { background: #FFF3E0; color: #E65100; border: 1px solid #FFCC80; }
+.sprint { background: #E3F2FD; color: #1565C0; border: 1px solid #90CAF9; }
+.inprogress { background: #F3E5F5; color: #6A1B9A; border: 1px solid #CE93D8; }
+.box { border-left: 3px solid #326891; background: #F0F7FF; padding: 12px 16px; margin: 14px 0; border-radius: 0 4px 4px 0; }
+.box p { margin: 0; font-size: 0.92rem; }
+.box.warn { border-left-color: #F57F17; background: #FFFBF0; }
+.box.ok { border-left-color: #2E7D32; background: #F1F8F1; }
+.box.correct { border-left-color: #C62828; background: #FCEEEE; }
+.divider { border: none; border-top: 1px solid #E2E2E2; margin: 32px 0; }
+.toc { background: #F8F8F8; border: 1px solid #E2E2E2; border-radius: 4px; padding: 18px 22px; margin-bottom: 36px; }
+.toc-title { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.15em; color: #666; margin-bottom: 10px; }
+.toc a { display: block; font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.85rem; color: #326891; text-decoration: none; padding: 4px 0; border-bottom: 1px dotted #E2E2E2; }
+.toc a:last-child { border-bottom: none; }
+.toc a:hover { color: #111; }
+.footer { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.72rem; color: #999; text-align: center; margin-top: 48px; padding-top: 16px; border-top: 1px solid #E2E2E2; }
+a { color: #326891; }
+a:hover { color: #111; }
+.stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 20px 0 30px; }
+.stat-card { border: 1px solid #E2E2E2; border-radius: 4px; padding: 12px 14px; text-align: center; }
+.stat-num { font-family: 'Libre Baskerville', Georgia, serif; font-size: 1.5rem; font-weight: 700; color: #111; }
+.stat-label { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.7rem; color: #666; text-transform: uppercase; letter-spacing: 0.08em; margin-top: 2px; }
+.kv-pair { display: flex; gap: 14px; padding: 10px 0; border-bottom: 1px solid #E2E2E2; font-size: 0.92rem; line-height: 1.7; }
+.kv-pair:last-child { border-bottom: none; }
+.kv-key { font-family: 'SF Mono', Consolas, monospace; font-size: 0.8rem; color: #326891; flex: 0 0 180px; padding-top: 2px; }
+.kv-val { color: #222; flex: 1; }
+.ref-group { margin-bottom: 24px; }
+.ref-group-label { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.15em; color: #999; margin-bottom: 8px; border-bottom: 1px solid #E2E2E2; padding-bottom: 4px; }
+.ref-item { padding: 7px 0; border-bottom: 1px dotted #E2E2E2; font-size: 0.88rem; line-height: 1.7; }
+.ref-item:last-child { border-bottom: none; }
+.ref-item a { font-weight: 700; }
+.ref-desc { color: #555; font-size: 0.85rem; }
+.step-item { padding: 10px 0; border-bottom: 1px solid #E2E2E2; font-size: 0.93rem; line-height: 1.75; }
+.step-item:last-child { border-bottom: none; }
+.step-label { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #666; display: inline-block; margin-bottom: 4px; }
+.pending-group { margin-bottom: 28px; }
+.pending-group-label { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: #326891; margin-bottom: 10px; }
 </style>
 </head>
 <body>
+<div class="container">
 
-<nav>
-  <a href="#sprint">Sprint</a>
-  <a href="#ppsk-arch">PPSK Arch</a>
-  <a href="#socratic">Socratic</a>
-  <a href="#simulator">Simulator</a>
-  <a href="#phase4a">Phase 4a</a>
-  <a href="#lab">Lab State</a>
-  <a href="#pending">Pending</a>
-  <a href="#arch-refs">RFC Index</a>
-  <a href="#urls">URLs</a>
-</nav>
+  <hr class="nyt-rule-top">
+  <p class="nyt-logo">E2E Network Deployment &mdash; Lab Journal</p>
+  <hr class="nyt-rule-thin">
 
-<div class="hero">
-  <div class="hero-date">KhKLab &bull; May 12 2026 &bull; EOD Blueprint</div>
-  <h1>PPSK Guest Onboarding Sprint</h1>
-  <div class="hero-tags">
-    <span class="htag ppsk">PPSK Cloud</span>
-    <span class="htag xiq">XIQ MyLab</span>
-    <span class="htag radsec">RadSec RFC 6614</span>
-    <span class="htag sim">3-Scene Simulator</span>
-    <span class="htag phase4">Phase 4a Vision</span>
-  </div>
-  <p class="hero-sub">802.1X / NPS deferred. Sprint pivoted to Guest Onboarding via PPSK on AP1/SW1/EXOS (Phase 1). Full Socratic session derived PPSK architecture from first principles. 24-step 3-scene simulator built. Phase 4a XIQ Wizard concept defined.</p>
-</div>
+  <p class="byline">Tuesday, May 12, 2026 &bull; KhKLab &bull; <strong>PPSK Guest Onboarding Sprint — Phase 1</strong></p>
 
-<main>
+  <h1>How a Guest Gets On Your Network: PPSK from First Principles</h1>
 
-<!-- SPRINT PIVOT -->
-<section id="sprint">
-  <h2><span class="sec-num">01</span> Sprint Pivot + Lab Topology</h2>
-  <div class="callout">
-    <strong>Decision:</strong> 802.1X / NPS deployment deferred to a later sprint (NPS config not ready). This week's focus: Guest Onboarding with PPSK on the AP1/SW1/EXOS/QF-Modem path (PATH A — has internet). VOSS side (Phase 2) follows next.
-  </div>
-  <table class="kv">
-    <tr><td>PATH A — has internet</td><td>AP1 → SW1 (EXOS 33.5.2b118, 192.168.0.28) → QF-Modem (192.168.0.1) → Internet ✅<br>Managed by: <strong>MyLab_XIQ</strong></td></tr>
-    <tr><td>PATH B — no direct internet</td><td>AP2 → SW2 (VOSS FE 9.3.2.0) → IPE Port 1/1 (SD-WAN) → RDU/FishBowl DC<br>SW2 managed by: <strong>FishBowl_XIQ</strong> (switch/fabric only)</td></tr>
-    <tr><td>Critical clarification</td><td>AP2 managed by <strong>MyLab_XIQ</strong> (has internet) — NOT FishBowl_XIQ. SW2 internet path and AP2 management path are independent. AP2 full Cloud PPSK works ✅</td></tr>
-    <tr><td>Phase 1 (this week)</td><td>AP1 / SW1 / EXOS — prove PPSK concept cleanly. No VOSS required. Document, screenshot, FAQ.</td></tr>
-    <tr><td>Phase 2 (next week)</td><td>Replicate on AP2 / SW2 / VOSS. VLAN 80 "Guest_New" / I-SID 100080 already on SW2.</td></tr>
-  </table>
-  <div class="card-grid">
-    <div class="card">
-      <div class="card-tag">Lab asset</div>
-      <h3>SW1 (EXOS)</h3>
-      <p>5320-16P-2MXT-2X · EXOS 33.5.2b118 · 192.168.0.28 · admin/Extreme01!! · internet via QF-Modem · MyLab_XIQ</p>
-    </div>
-    <div class="card">
-      <div class="card-tag">Lab asset</div>
-      <h3>AP1 (AP3000)</h3>
-      <p>Connected to SW1 · MyLab_XIQ · internet ✅ · Cloud PPSK with email delivery ✅ · SSID KhKLab-Guest</p>
-    </div>
-    <div class="card">
-      <div class="card-tag">Lab asset — Phase 2</div>
-      <h3>AP2 + SW2 (VOSS)</h3>
-      <p>AP2 → MyLab_XIQ (internet ✅). SW2 → FishBowl_XIQ (fabric only). VLAN 80 I-SID 100080 provisioned on SW2.</p>
-    </div>
-  </div>
-</section>
+  <p class="subtitle">802.1X and NPS were deferred — NPS not ready, complexity not warranted for the guest use case. The sprint pivoted hard to Private Pre-Shared Key, and the pivot proved more architecturally rich than expected. Rather than following the Rieben IT-operator guide page by page, the session derived PPSK's cryptographic skeleton from scratch: five actors, PMK via PBKDF2, the RadSec per-auth call, the CAPWAP boundary, the MAC randomization trap, and why XIQ's config layer is deterministic once the intent is resolved. The deliverable was a 3-scene, 24-step interactive simulator, built and deployed to GitHub Pages by end of session. Phase 4a — an intent-based XIQ Wizard — was defined as the horizon.</p>
 
-<!-- PPSK ARCHITECTURE -->
-<section id="ppsk-arch">
-  <h2><span class="sec-num">02</span> PPSK Architecture — First Principles</h2>
-  <div class="callout">
-    The Rieben guide (v6, 95pp) is IT-operator-driven, not engineering-first. No RFC citations. Today's Socratic session derived the full PPSK architecture from cryptographic and protocol first principles.
+  <div class="toc">
+    <p class="toc-title">In This Session</p>
+    <a href="#sprint-pivot">Sprint Pivot — 802.1X deferred, PPSK selected</a>
+    <a href="#ppsk-arch">PPSK Architecture — first-principles derivation</a>
+    <a href="#socratic">Socratic Session — key exchanges and corrections</a>
+    <a href="#simulator">PPSK Simulator — 3 scenes, 24 steps, built today</a>
+    <a href="#phase4a">Phase 4a — XIQ Guest Onboarding Wizard vision</a>
+    <a href="#lab-state">Lab State — SW1 VLAN 100 pending, XIQ objects in progress</a>
+    <a href="#references">RFC Reference Index — 11 standards, live links</a>
+    <a href="#pending">Pending — Sprint backlog</a>
   </div>
 
-  <h3 style="font-family:'Libre Baskerville',serif;font-size:1rem;color:#f8fafc;margin-bottom:12px">Five Actors</h3>
-  <table class="kv" style="margin-bottom:24px">
-    <tr><td>Admin 👨‍💻</td><td>Creates SSID, User Groups, User Profiles, Assignment Rules in XIQ. Creates PPSK users + triggers email delivery.</td></tr>
-    <tr><td>XIQ ☁️</td><td>Policy engine + Cloud PPSK database + SMTP relay + RadSec server. Pre-computes PMK at provisioning time. Returns PMK+VLAN at runtime.</td></tr>
-    <tr><td>AP1 📡</td><td>RadSec proxy — initiates per-auth call to XIQ after receiving M2. Enforces firewall policy (L2–L7) at AP. Tags guest frames VLAN 80.</td></tr>
-    <tr><td>SW1 🔀</td><td>EXOS switch. VLAN 80 <code>10.80.0.1/24</code>. DHCP server for guest pool. Tagged trunk port to AP1. QF-Modem uplink.</td></tr>
-    <tr><td>Guest 💻</td><td>Receives PPSK via email. Types passphrase into standard Wi-Fi dialog. Never sees RADIUS, RadSec, or VLAN selection.</td></tr>
+  <div class="stats">
+    <div class="stat-card"><div class="stat-num">3</div><div class="stat-label">Scenes</div></div>
+    <div class="stat-card"><div class="stat-num">24</div><div class="stat-label">Sim Steps</div></div>
+    <div class="stat-card"><div class="stat-num">11</div><div class="stat-label">RFCs/Standards</div></div>
+    <div class="stat-card"><div class="stat-num">1</div><div class="stat-label">Simulator Built</div></div>
+  </div>
+
+  <!-- SPRINT PIVOT -->
+  <span class="section-label" id="sprint-pivot">Sprint Pivot</span>
+  <h2>802.1X Deferred. The Week is PPSK.</h2>
+
+  <div class="box warn">
+    <p><strong>Decision:</strong> 802.1X / NPS deferred to a later sprint. NPS configuration was not ready, and the PPSK path is cleaner for the guest isolation requirement. This week: Guest Onboarding on the AP1/SW1/EXOS/QF-Modem path (PATH A — has internet). VOSS side follows next week.</p>
+  </div>
+
+  <p>The lab has two separate internet paths. The PPSK sprint runs on PATH A exclusively. PATH B (VOSS/IPE/FishBowl) is Phase 2.</p>
+
+  <table>
+    <thead><tr><th>Path</th><th>Devices</th><th>Internet</th><th>XIQ Instance</th></tr></thead>
+    <tbody>
+      <tr><td><strong>PATH A</strong></td><td>AP1 → SW1 (EXOS 33.5.2b118, 192.168.0.28) → QF-Modem (192.168.0.1)</td><td>✅ Yes</td><td>MyLab_XIQ</td></tr>
+      <tr><td><strong>PATH B</strong></td><td>AP2 → SW2 (VOSS FE 9.3.2.0) → IPE Port 1/1 (SD-WAN) → RDU/FishBowl DC</td><td>❌ No direct</td><td>SW2: FishBowl_XIQ</td></tr>
+    </tbody>
   </table>
 
-  <h3 style="font-family:'Libre Baskerville',serif;font-size:1rem;color:#f8fafc;margin-bottom:12px">PMK Derivation</h3>
-  <pre class="code"><span class="c"># IEEE 802.11i §8.5.1.3 + RFC 2898 (PKCS#5)</span>
-<span class="k">PMK</span> = <span class="h">PBKDF2</span>(<span class="k">PRF</span>=HMAC-SHA1, <span class="k">Password</span>=PPSK, <span class="k">Salt</span>=SSID_name, <span class="k">c</span>=4096, <span class="k">dkLen</span>=32)
+  <div class="box">
+    <p><strong>Critical clarification:</strong> AP2 is managed by <strong>MyLab_XIQ</strong> (has internet, full Cloud PPSK capable) — not FishBowl_XIQ. The FishBowl instance manages SW2 fabric/switch config only. AP management path and switch management path are independent.</p>
+  </div>
 
-<span class="c"># Same derivation performed TWICE:</span>
-<span class="c">#   1. XIQ at provisioning → stores PMK in Cloud DB</span>
-<span class="c">#   2. Guest device at runtime (M1 received) → computes PMK locally</span>
-<span class="c"># The PPSK never crosses the air. MIC in M2 is the only proof of possession.</span></pre>
+  <!-- PPSK ARCHITECTURE -->
+  <span class="section-label" id="ppsk-arch">PPSK Architecture</span>
+  <h2>Five Actors, One Cryptographic Chain</h2>
 
-  <h3 style="font-family:'Libre Baskerville',serif;font-size:1rem;color:#f8fafc;margin-bottom:12px">Cloud PPSK vs Local PPSK</h3>
-  <table class="phase-table">
+  <p>The session derived the full architecture from first principles, not from the Rieben guide's IT-operator walkthrough. The Rieben guide (v6, 95pp) is valuable as a step-by-step IT reference but contains no RFC citations and does not explain <em>why</em> each object exists.</p>
+
+  <h3>The Five Actors</h3>
+  <div class="kv-pair"><span class="kv-key">Admin 👨‍💻</span><span class="kv-val">Creates SSID, User Groups, User Profiles, Assignment Rules in XIQ. Creates PPSK users and triggers email/SMS delivery.</span></div>
+  <div class="kv-pair"><span class="kv-key">XIQ ☁️</span><span class="kv-val">Policy engine + Cloud PPSK database + SMTP relay + RadSec server. Pre-computes PMK at provisioning time. Returns PMK + VLAN at runtime via RadSec Access-Accept.</span></div>
+  <div class="kv-pair"><span class="kv-key">AP1 📡</span><span class="kv-val">RadSec proxy — initiates per-auth call to XIQ after M2. Enforces firewall policy (L2–L7). Tags guest frames VLAN 100.</span></div>
+  <div class="kv-pair"><span class="kv-key">SW1 🔀</span><span class="kv-val">EXOS switch. VLAN 100 / 10.100.0.1/24. DHCP server for guest pool. Tagged trunk port to AP1. QF-Modem uplink to internet.</span></div>
+  <div class="kv-pair" style="border-bottom:none"><span class="kv-key">Guest 💻</span><span class="kv-val">Receives PPSK via email. Types passphrase into standard Wi-Fi dialog. Never sees RADIUS, RadSec, or VLAN selection.</span></div>
+
+  <h3>PMK Derivation (the cryptographic core)</h3>
+  <p>The same function runs twice — once at XIQ when the user is provisioned, once on the guest device the moment it receives the ANonce (M1). The PPSK never crosses the air. The only proof of possession sent over-the-air is the MIC in M2.</p>
+  <pre><code>PMK = PBKDF2(PRF=HMAC-SHA1, Password=PPSK, Salt=SSID_name, c=4096, dkLen=32)
+          ↑ IEEE 802.11i §8.5.1.3 + RFC 2898 (PKCS#5)
+
+Runs at XIQ provisioning → PMK stored in Cloud DB
+Runs on UE at runtime (after M1) → PMK computed locally
+PTK = PRF(PMK ‖ ANonce ‖ SNonce ‖ AP_MAC ‖ STA_MAC)
+KCK → signs M2 MIC   KEK → encrypts GTK in M3   TK → encrypts data</code></pre>
+
+  <h3>The 4-Way Handshake in Cloud PPSK Mode</h3>
+  <p>The critical difference from standard WPA2: the AP does not have the PMK locally. After receiving M2 with the MIC, the AP is stuck and must call XIQ before it can verify or proceed.</p>
+  <ol>
+    <li>UE associates. AP port: <strong>LOCKED</strong>.</li>
+    <li>AP sends M1 (ANonce). UE computes PMK + PTK locally. Sends M2 (SNonce + MIC).</li>
+    <li>AP receives M2 but cannot verify MIC — no PMK stored locally.</li>
+    <li>AP calls XIQ via <strong>RadSec</strong> (RFC 6614, TCP 2083). Access-Request: User-Name = client MAC.</li>
+    <li>XIQ returns Access-Accept: PMK (MS-MPPE-Recv-Key, RFC 2548) + VLAN 100 (Attr 81, RFC 2868) + firewall policy.</li>
+    <li>AP verifies M2 MIC ✅. Sends M3 (GTK encrypted). Receives M4 ACK.</li>
+    <li>AP port: <strong>OPEN</strong>. Frames tagged VLAN 100. Guest device gets DHCP from SW1 VLAN 100 pool.</li>
+  </ol>
+
+  <h3>XIQ Object Hierarchy</h3>
+  <pre><code>SSID "KhKLab-Guest"  (Security: PPSK · WPA2/AES only — NOT WPA3/SAE · Cloud DB)
+  └── User Group "Guest-24h"  (Cloud · 24h from first_login · 10-char alphanum)
+        └── User "John Smith"  (john@company.com · PPSK: xK9mP2qR7n)
+  └── User Profile "Guest-VLAN-100"  (VLAN 100 · Firewall: Guest-Internet-Only)
+  └── Assignment Rule: Guest-24h → Guest-VLAN-100  (priority 1)</code></pre>
+
+  <div class="box warn">
+    <p><strong>Key trap (Rieben guide p.42):</strong> User Group must be created <em>inside</em> the SSID configuration for email delivery to work. User Groups created as standalone objects (outside the SSID) have email suppressed by XIQ. This is not documented clearly in the UI.</p>
+  </div>
+
+  <h3>Cloud PPSK vs Local PPSK</h3>
+  <table>
     <thead><tr><th>Attribute</th><th>Cloud PPSK</th><th>Local PPSK</th></tr></thead>
     <tbody>
-      <tr><td>Validation</td><td>RadSec to XIQ at runtime</td><td>AP validates locally (User DB pushed via CAPWAP)</td></tr>
+      <tr><td>Validation</td><td>RadSec to XIQ at runtime</td><td>AP validates locally — User DB pushed via CAPWAP</td></tr>
       <tr><td>Capacity</td><td>100,000 users / UG · 32 UGs / SSID</td><td>1,000 users / UG · 10,000 total</td></tr>
-      <tr><td>Email delivery</td><td>✅ Full SMTP via XIQ relay</td><td>Limited (requires on-prem PPSK server config)</td></tr>
-      <tr><td>WAN outage</td><td>❌ Auth fails if RadSec unavailable</td><td>✅ Survives WAN loss — AP validates locally</td></tr>
-      <tr><td>Inactivity timeout</td><td>Not supported</td><td>✅ Supported</td></tr>
-      <tr><td>PCG classification</td><td>Not supported</td><td>✅ Per-user classification</td></tr>
+      <tr><td>Email delivery</td><td>✅ Full SMTP via XIQ relay</td><td>Limited</td></tr>
+      <tr><td>WAN outage</td><td>❌ Auth fails if RadSec unavailable</td><td>✅ Survives WAN loss</td></tr>
       <tr><td>Lab choice</td><td colspan="2">Cloud PPSK — MyLab_XIQ has internet, full feature set desired</td></tr>
     </tbody>
   </table>
 
-  <h3 style="font-family:'Libre Baskerville',serif;font-size:1rem;color:#f8fafc;margin:20px 0 12px">XIQ Object Hierarchy</h3>
-  <pre class="code"><span class="k">SSID</span> "KhKLab-Guest"  (Security: PPSK · WPA2/AES · Cloud DB)
-  └── <span class="k">User Group</span> "Guest-24h"  (Cloud · 24h from first_login · 10-char alphanum)
-        └── <span class="k">User</span> "John Smith"  (john@company.com · PPSK xK9mP2qR7n)
-  └── <span class="k">User Profile</span> "Guest-VLAN-80"  (VLAN 80 · Firewall: Guest-Internet-Access-Only)
-  └── <span class="k">Assignment Rule</span>: Guest-24h → Guest-VLAN-80  (priority 1)</pre>
+  <h3>MAC Randomization — Why Binding Breaks Guest Auth</h3>
+  <div class="kv-pair"><span class="kv-key">iOS 14+ / Android 10+</span><span class="kv-val">Randomize MAC per SSID. MAC can change on reconnect in stable mode.</span></div>
+  <div class="kv-pair"><span class="kv-key">MAC binding for guests</span><span class="kv-val"><strong>Wrong approach.</strong> When the MAC randomizes, the bound MAC no longer matches → the device appears as a new unknown device → loses binding on every reconnect.</span></div>
+  <div class="kv-pair" style="border-bottom:none"><span class="kv-key">Correct approach</span><span class="kv-val">No MAC binding for guests. PPSK validation is passphrase/PMK-based — MAC is irrelevant to auth. MAC binding only for IoT/managed devices with fixed hardware MACs.</span></div>
 
-  <div class="callout" style="border-color:#fdba74">
-    <strong>Key trap (Rieben guide p.42):</strong> User Group must be created <em>inside</em> the SSID configuration for email delivery to work. User Groups created as standalone objects (outside SSID) have email suppressed by XIQ.
+  <!-- SOCRATIC SESSION -->
+  <span class="section-label" id="socratic">Socratic Session</span>
+  <h2>Key Exchanges and Corrections</h2>
+
+  <div class="step-item">
+    <span class="step-label">Q: Five actors in PPSK?</span><br>
+    <p style="margin:4px 0 0">User derived: UE/user, AP, XIQ, RADIUS-type server where PPSKs stored, admin. Confirmed correct. Addition: SMTP relay as a XIQ sub-service, not a separate actor.</p>
   </div>
 
-  <h3 style="font-family:'Libre Baskerville',serif;font-size:1rem;color:#f8fafc;margin:20px 0 12px">MAC Randomization — The Guest Decision</h3>
-  <table class="kv">
-    <tr><td>iOS 14+ / Android 10+</td><td>Randomize MAC per SSID. MAC changes on reconnect in some modes.</td></tr>
-    <tr><td>MAC binding for guests</td><td><strong>WRONG</strong> — makes it worse. Bound MAC changes → every reconnect appears as a new unknown device → loses the binding.</td></tr>
-    <tr><td>Correct approach</td><td>No MAC binding for guests. MAC binding only for IoT/managed devices with fixed hardware MACs.</td></tr>
-    <tr><td>PPSK advantage</td><td>PPSK validation is by passphrase/PMK — not MAC. Each user's unique key is the identity. MAC randomization is irrelevant to PPSK auth.</td></tr>
-  </table>
-</section>
-
-<!-- SOCRATIC SESSION -->
-<section id="socratic">
-  <h2><span class="sec-num">03</span> Socratic Session Log — Key Exchanges</h2>
-  <ul class="steps">
-    <li><strong>Q: Five actors in PPSK?</strong><br>User derived: UE/user, AP, XIQ, RADIUS-type server where PPSKs stored, admin. Confirmed correct. Added: SMTP relay as XIQ sub-service.</li>
-    <li><strong>Q: PMK derivation — what does XIQ send to AP?</strong><br>User derived: "PPSK needs to be from a secure server. AP creates PMK from private key for user stored in DB. XIQ sends back whatever is required to create the PMK at the AP — a function of the user's shared key."<br>Correction refined: XIQ pre-computes PMK = PBKDF2(PPSK ‖ SSID). Sends PMK (not PPSK) to AP via RadSec Access-Accept (MS-MPPE-Recv-Key). Same attribute format as 802.1X.</li>
-    <li><strong>Q: What does RadSec return? "UserGroup?"</strong><br>User guessed "UserGroup" as return payload. Corrected: User Group is the admin container. RadSec returns User Profile (VLAN + Firewall policy) — same as RADIUS Attr 81 in 802.1X (Attr 81 = "154" from May 11). Today: Attr 81 = "80".</li>
-    <li><strong>Q: Control plane vs data plane timeline?</strong><br>User framed: "Control sets up the E2E pipe and data flows." Confirmed with refinement: provisioning (control) is Scene 1–2. Runtime auth (hybrid control/data setup) is Scene 3 up to M4. Encrypted data is Scene 3 Step 13.</li>
-    <li><strong>Q: Cloud PPSK WAN risk? MAC binding solution?</strong><br>User identified: "PPSK on cloud has a risk like what we saw in DHCP/triage on May 8." Confirmed: RadSec dependency = WAN dependency. Suggested MAC binding for cloud. Corrected: MAC binding breaks for iOS/Android randomized MACs. Solution: no MAC binding for guests; MAC binding only for IoT.</li>
-    <li><strong>Q: Step-by-step runtime 12-step walkthrough</strong><br>User wrote entire 12-step flow independently. Key corrections: (1) M9/M10 — M3 = GTK delivery, M4 = ACK (not PMK delivery). (2) UE already had PMK since Step 4 (computed locally). (3) "Opens SSID, gets key, logs in and then the work in the backend starts" — confirmed but reversed: provisioning + key delivery happen BEFORE guest arrives. Scene 3 is runtime.</li>
-  </ul>
-</section>
-
-<!-- SIMULATOR -->
-<section id="simulator">
-  <h2><span class="sec-num">04</span> PPSK Simulator — Phase 1 Built</h2>
-  <div class="callout">
-    File: <code>ppsk_simulator.html</code> · 3 scenes · 24 steps · Play/Pause · Speed selector · Frame detail panel · 11-RFC reference table
+  <div class="step-item">
+    <span class="step-label">Q: PMK derivation — what does XIQ send to AP?</span><br>
+    <p style="margin:4px 0 4px">User: <em>"PPSK needs to be from a secure server. AP creates PMK from private key for user stored in DB. XIQ sends back whatever is required to create the PMK at the AP — a function of the user's shared key."</em></p>
+    <div class="box correct" style="margin:0"><p><strong>Correction:</strong> XIQ pre-computes PMK = PBKDF2(PPSK, SSID) and sends the PMK itself (not the PPSK) to the AP via RadSec Access-Accept using the MS-MPPE-Recv-Key attribute (RFC 2548). The PPSK never leaves XIQ. Same attribute format used in 802.1X MSK delivery.</p></div>
   </div>
-  <table class="phase-table">
+
+  <div class="step-item">
+    <span class="step-label">Q: What does RadSec return? "UserGroup?"</span><br>
+    <p style="margin:4px 0 4px">User: "The RadSec returns the UserGroup." Partially correct intuition about containers, wrong payload.</p>
+    <div class="box correct" style="margin:0"><p><strong>Correction:</strong> User Group is an admin provisioning container, not a runtime return value. RadSec returns the User Profile (VLAN + firewall policy). VLAN delivered via Tunnel-Private-Group-ID, Attr 81 (RFC 2868). Same mechanism as 802.1X VLAN assignment — Attr 81 = "154" on May 11, today = "100".</p></div>
+  </div>
+
+  <div class="step-item">
+    <span class="step-label">Q: Control plane vs data plane timeline?</span><br>
+    <p style="margin:4px 0 0">User: <em>"Control sets up the E2E pipe and data flows."</em> Confirmed with refinement: Scenes 1–2 (provisioning) are control-plane-only. Scene 3 up to M4 ACK is the hybrid control/data setup phase. Encrypted data begins at Scene 3 Step 13.</p>
+  </div>
+
+  <div class="step-item">
+    <span class="step-label">Q: Cloud PPSK WAN risk — MAC binding as solution?</span><br>
+    <p style="margin:4px 0 4px">User identified the WAN dependency risk from the May 8 DHCP incident and proposed MAC binding as a mitigation.</p>
+    <div class="box correct" style="margin:0"><p><strong>Correction:</strong> MAC binding makes the problem worse for guests with randomized MACs. The correct mitigation for Cloud PPSK WAN dependency is: Local PPSK fallback (not MAC binding), or accept that guest auth fails during WAN loss (acceptable for guests, unacceptable for employees). MAC binding is appropriate only for IoT with fixed hardware addresses.</p></div>
+  </div>
+
+  <div class="step-item">
+    <span class="step-label">Q: Full 12-step runtime walkthrough (written by user independently)</span><br>
+    <p style="margin:4px 0 4px">User wrote the entire 12-step flow from memory. Three corrections applied:</p>
+    <ol style="margin:4px 0 0;font-size:0.93rem">
+      <li>M3 = GTK delivery from AP, M4 = ACK from UE — not PMK delivery (PMK was already computed at Step 4).</li>
+      <li>UE computes PMK locally at M1 receipt — it does not wait for the RadSec round trip.</li>
+      <li>Provisioning (Scenes 1–2) happens before the guest ever arrives. The guest's Scene 3 runtime auth reuses that pre-computed PMK.</li>
+    </ol>
+  </div>
+
+  <!-- SIMULATOR -->
+  <span class="section-label" id="simulator">PPSK Simulator</span>
+  <h2>Three Scenes, Twenty-Four Steps — Built and Live</h2>
+
+  <p>The simulator follows the same visual language as the 802.1X simulator from May 11: three-column grid, protocol color codes, frame detail panel below the explanation, clickable step tracker on the right. All 11 RFC/IEEE references are live-linked.</p>
+
+  <table>
     <thead><tr><th>Scene</th><th>Steps</th><th>Actors</th><th>Protocols</th></tr></thead>
     <tbody>
-      <tr><td>Scene 1 — Provisioning</td><td>7</td><td>Admin ↔ XIQ ↔ AP1+SW1</td><td>REST API · CAPWAP (RFC 5415) · 802.11 Beacon · EXOS CLI</td></tr>
-      <tr><td>Scene 2 — Key Delivery</td><td>4</td><td>Admin ↔ XIQ ↔ Guest</td><td>REST API · PBKDF2 (RFC 2898) · SMTP</td></tr>
-      <tr><td>Scene 3 — Runtime Auth</td><td>13</td><td>UE ↔ AP1 ↔ XIQ</td><td>802.11 · 4-Way Handshake · RadSec (RFC 6614) · RADIUS (RFC 2865) · DHCP (RFC 2131)</td></tr>
+      <tr><td><strong>Scene 1 — Provisioning</strong></td><td>7</td><td>Admin ↔ XIQ ↔ AP1+SW1</td><td>REST API · CAPWAP (RFC 5415) · 802.11 Beacon · EXOS CLI</td></tr>
+      <tr><td><strong>Scene 2 — Key Delivery</strong></td><td>4</td><td>Admin ↔ XIQ ↔ Guest</td><td>REST API · PBKDF2 (RFC 2898) · SMTP</td></tr>
+      <tr><td><strong>Scene 3 — Runtime Auth</strong></td><td>13</td><td>UE ↔ AP1 ↔ XIQ</td><td>802.11 · 4-Way Handshake · RadSec (RFC 6614) · RADIUS (RFC 2865) · DHCP (RFC 2131)</td></tr>
     </tbody>
   </table>
-  <h3 style="font-family:'Libre Baskerville',serif;font-size:1rem;color:#f8fafc;margin:20px 0 12px">Design Decisions</h3>
-  <ul class="steps">
-    <li><strong>Same 3-column grid</strong> as 802.1X simulator (<code>1fr 60px 1fr 60px 1fr</code>). Consistent visual language across all 4 simulators.</li>
-    <li><strong>SW1 sub-indicator</strong> below AP1 column in Scene 3 (not a 4th column). Activates green when VLAN 80 tagged after M4 ACK.</li>
-    <li><strong>Frame detail panel</strong> (monospace, below explanation) — shows actual packet bytes / XIQ API payloads for each step. Engineering-grade, not just IT narrative.</li>
-    <li><strong>Protocol color codes</strong> differentiate: REST/API (cyan), CAPWAP (teal), SMTP (yellow), EAPOL (blue), RadSec (orange), KEY (purple), DATA (green).</li>
-    <li><strong>IoT mode toggle</strong> deferred to tomorrow's sprint (Phase 2 / Node.js wrapper).</li>
-  </ul>
-  <h3 style="font-family:'Libre Baskerville',serif;font-size:1rem;color:#f8fafc;margin:20px 0 12px">Phase Roadmap</h3>
-  <table class="phase-table">
-    <thead><tr><th>Phase</th><th>Timeline</th><th>Description</th><th>Status</th></tr></thead>
-    <tbody>
-      <tr><td>Phase 1 — HTML</td><td>Today</td><td>Pure HTML simulator · 3 scenes · 24 steps · RFC panel</td><td><span class="tag-inline done">DONE ✅</span></td></tr>
-      <tr><td>Phase 2 — Node.js</td><td>Tomorrow</td><td>Express wrapper · REST API layer · Docker</td><td><span class="tag-inline pending">Tomorrow</span></td></tr>
-      <tr><td>Phase 3 — Railway</td><td>Tomorrow</td><td>Deploy Node.js app to Railway · public URL</td><td><span class="tag-inline pending">Tomorrow</span></td></tr>
-      <tr><td>Phase 4 — NVIDIA/SW-Defined</td><td>2 weeks — manager approval needed</td><td>Deploy Digital Twin platform on NVIDIA stack · containerized inference · GPU-accelerated RF simulation</td><td><span class="tag-inline future">Pending approval</span></td></tr>
-      <tr><td>Phase 4a — XIQ Wizard</td><td>Same sprint as Phase 4</td><td>Intent → NLP parse → XIQ object creation → API deployment. RAG backend. See §5.</td><td><span class="tag-inline future">Pending approval</span></td></tr>
-    </tbody>
-  </table>
-</section>
 
-<!-- PHASE 4a -->
-<section id="phase4a">
-  <h2><span class="sec-num">05</span> Phase 4a — XIQ Guest Onboarding Wizard (Vision)</h2>
-  <div class="callout">
-    User intent (paraphrased): <em>"I want to deploy a guest network at five locations with 100 users max at each location, keep them isolated from all other networks, deliver through policies that govern the five locations independently. Tell me what parameters you need, then take me through the XIQ creation flow and a digital-twin-like flow."</em>
+  <h3>Design Decisions</h3>
+  <ul>
+    <li><strong>Same 3-column grid</strong> as 802.1X simulator (<code>1fr 60px 1fr 60px 1fr</code>). Consistent visual language across all four simulators.</li>
+    <li><strong>SW1 sub-indicator</strong> below the AP1 column in Scene 3 — not a 4th column. Activates green when VLAN 100 is tagged after M4 ACK.</li>
+    <li><strong>Frame detail panel</strong> (monospace) shows actual packet bytes and XIQ API payloads per step. Engineering-grade annotations alongside the IT narrative.</li>
+    <li><strong>Step tracker panel</strong> — all 24 steps visible at once with ✓/▶/· status icons, clickable to jump to any step. Replay history reconstructed by re-running prior steps.</li>
+    <li><strong>Protocol color codes:</strong> REST/API (cyan) · CAPWAP (teal) · SMTP (yellow) · EAPOL (blue) · RadSec (orange) · KEY (purple) · DATA (green).</li>
+    <li>IoT mode toggle deferred to Phase 2 / Node.js wrapper (tomorrow).</li>
+  </ul>
+
+  <h3>Simulator Phase Roadmap</h3>
+  <table>
+    <thead><tr><th>Phase</th><th>Timeline</th><th>Description</th></tr></thead>
+    <tbody>
+      <tr><td>Phase 1 — HTML <span class="badge done">Done ✅</span></td><td>Today</td><td>Pure HTML simulator · 3 scenes · 24 steps · step tracker · RFC panel · live links</td></tr>
+      <tr><td>Phase 2 — Node.js <span class="badge todo">Tomorrow</span></td><td>May 13</td><td>Express wrapper · REST API layer · Docker · IoT mode toggle</td></tr>
+      <tr><td>Phase 3 — Railway <span class="badge todo">Tomorrow</span></td><td>May 13</td><td>Deploy Node.js app to Railway · public URL</td></tr>
+      <tr><td>Phase 4 — NVIDIA/SW-Defined <span class="badge" style="background:#E3F2FD;color:#1565C0;border:1px solid #90CAF9">Approval needed</span></td><td>2-week sprint</td><td>Digital Twin platform on NVIDIA stack · GPU-accelerated RF simulation</td></tr>
+      <tr><td>Phase 4a — XIQ Wizard <span class="badge" style="background:#E3F2FD;color:#1565C0;border:1px solid #90CAF9">Approval needed</span></td><td>Same sprint</td><td>Intent → NLP → XIQ API + RAG backend. See below.</td></tr>
+    </tbody>
+  </table>
+
+  <!-- PHASE 4a -->
+  <span class="section-label" id="phase4a">Phase 4a — Vision</span>
+  <h2>An Intent-Based XIQ Wizard</h2>
+
+  <p>The user articulated the Phase 4a vision: <em>"I want to deploy a guest network at five locations with 100 users max at each location, keep them isolated from all other networks, deliver through policies that govern the five locations independently. Tell me what parameters you need, then take me through the XIQ creation flow and a digital-twin-like flow."</em></p>
+
+  <h3>The Key Architectural Insight</h3>
+
+  <div class="kv-pair"><span class="kv-key">XIQ config layer</span><span class="kv-val"><strong>100% deterministic.</strong> Given a fully resolved intent, the XIQ object creation sequence has no ambiguity. Five locations → five identical SSID+UG+UP+Rule+NetworkPolicy blocks. No confidence scoring needed here.</span></div>
+  <div class="kv-pair"><span class="kv-key">NLP/parsing layer</span><span class="kv-val"><strong>Confidence calculator lives here.</strong> English is ambiguous. "100 users max" might mean concurrent users vs total provisioned users. "Isolated" might mean VLAN-only or VLAN + firewall + no local subnet routing. The confidence score quantifies parsing uncertainty before the intent reaches the deterministic config engine.</span></div>
+  <div class="kv-pair"><span class="kv-key">Analogy</span><span class="kv-val">Same architecture as the CISCO EN CLI Mapping Agent (Sprint 14) — but maps intent → XIQ API calls instead of CLI commands. The confidence calculator is the parsing tool, not the output validator.</span></div>
+  <div class="kv-pair" style="border-bottom:none"><span class="kv-key">RAG backend</span><span class="kv-val">All XIQ API docs + EN switch docs + PPSK Guide v6 + RFCs (6614, 2898, 5415, 2865, 2868) in one vector store. Wizard queries RAG before generating API calls to resolve exact endpoint/payload.</span></div>
+
+  <h3>Example Intent → XIQ Objects</h3>
+  <pre><code># User input:
+"Deploy a guest network at 5 locations, 100 users max each, isolated from production."
+
+# NLP parsing layer → structured intent:
+intent.locations         = 5
+intent.users_per_loc     = 100        (confidence: 0.95 — concurrent vs provisioned ambiguous)
+intent.isolation         = VLAN+FW    (confidence: 1.0)
+intent.per_location_policy = true     (confidence: 1.0)
+
+# XIQ config layer → deterministic, for each location i in [1..5]:
+  Network Policy   = "Guest-Location-{i}"
+  SSID             = "Guest-{i}"  (PPSK · WPA2/AES · Cloud)
+  User Group       = "Guests-L{i}" (Cloud · 100-user cap · 24h first_login)
+  User Profile     = "Guest-L{i}-VLAN-{100+i}" (isolation VLAN + Guest-Internet-Only FW)
+  Assignment Rule  = Guests-L{i} → Guest-L{i}-VLAN-{100+i}
+  Network Policy Assignment → Location-{i} AP group</code></pre>
+
+  <!-- LAB STATE -->
+  <span class="section-label" id="lab-state">Lab State</span>
+  <h2>End of May 12 — What's Confirmed vs Pending</h2>
+
+  <table>
+    <thead><tr><th>Asset</th><th>State</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td>SW1 VLAN 100</td><td><span class="badge todo">Pending EXOS CLI</span></td><td>CAPWAP push does not reach SW1. Requires <code>create vlan Guest_100 tag 100</code> + DHCP config, or XIQ IQAgent push if SW1 is onboarded to MyLab_XIQ (<code>show iqagent</code> to check).</td></tr>
+      <tr><td>XIQ PPSK objects</td><td><span class="badge todo">In progress</span></td><td>SSID "KhKLab-Guest" · User Group "Guest-24h" (inside SSID) · User Profile "Guest-VLAN-100" · Assignment Rule · Test user email delivery triggered ✅</td></tr>
+      <tr><td>AP1 (AP3000)</td><td><span class="badge done">In MyLab_XIQ ✅</span></td><td>SW1/EXOS path · internet ✅ · CAPWAP pushed ✅</td></tr>
+      <tr><td>SW2 VLAN 80</td><td><span class="badge done">Pre-provisioned ✅</span></td><td>VLAN 80 "Guest_New" I-SID 100080 already on SW2 from earlier sprint. Ready for Phase 2.</td></tr>
+      <tr><td>802.1X / NPS</td><td><span class="badge" style="background:#F3E5F5;color:#6A1B9A;border:1px solid #CE93D8">Deferred</span></td><td>NPS config pending. No timeline set.</td></tr>
+    </tbody>
+  </table>
+
+  <h3>SW1 VLAN 100 EXOS CLI (when IQAgent not available)</h3>
+  <pre><code>create vlan Guest_100 tag 100
+configure vlan Guest_100 ipaddress 10.100.0.1 255.255.255.0
+enable ipforwarding vlan Guest_100
+configure vlan Guest_100 add port &lt;ap1-port&gt; tagged
+configure vlan Guest_100 dhcp-address-range 10.100.0.10-10.100.0.254
+configure vlan Guest_100 dhcp-options default-gateway 10.100.0.1
+configure vlan Guest_100 dhcp-options dns-server primary 8.8.8.8
+configure vlan Guest_100 dhcp-lease-timer 86400
+enable dhcp ports &lt;ap1-port&gt; vlan Guest_100</code></pre>
+
+  <!-- RFC REFERENCE INDEX -->
+  <span class="section-label" id="references">RFC Reference Index</span>
+  <h2>Eleven Standards Behind PPSK</h2>
+
+  <p>Every RFC and IEEE standard that was grounded in today's session, with the specific role each plays in the PPSK flow. These are the primary sources; the Rieben guide is the IT-operator derivative.</p>
+
+  <div class="ref-group">
+    <p class="ref-group-label">PPSK Core — Key Derivation</p>
+    <div class="ref-item"><a href="https://www.rfc-editor.org/rfc/rfc2898" target="_blank">RFC 2898 / PKCS#5</a> — PBKDF2<br><span class="ref-desc">PMK = PBKDF2(HMAC-SHA1, PPSK, SSID_name, 4096, 32 bytes). Same derivation at XIQ provisioning and UE runtime. Salt = SSID name per 802.11i §8.5.1.3.</span></div>
+    <div class="ref-item"><a href="https://standards.ieee.org/ieee/802.11i/2361/" target="_blank">IEEE 802.11i (2004)</a> — RSN / 4-Way Handshake<br><span class="ref-desc">PTK key hierarchy: KCK (sign MICs) + KEK (encrypt GTK) + TK (encrypt data). PMK derivation basis. Absorbed into 802.11-2020.</span></div>
+    <div class="ref-item"><a href="https://standards.ieee.org/ieee/802.11/7028/" target="_blank">IEEE 802.11-2020</a> — Full Wi-Fi standard<br><span class="ref-desc">Association frames, RSN Information Element, 4-Way Handshake §12.7.6, CCMP/AES §12.5.3, Beacon frame structure.</span></div>
   </div>
 
-  <h3 style="font-family:'Libre Baskerville',serif;font-size:1rem;color:#f8fafc;margin-bottom:12px">Architecture Insight (confirmed May 12)</h3>
-  <table class="kv">
-    <tr><td>XIQ flow deterministic?</td><td><strong>Yes — 100%.</strong> Given a fully understood intent, the XIQ object creation sequence is deterministic. No ambiguity in the config layer. The wizard does not need a confidence "heat map" for the output — only for the input parsing.</td></tr>
-    <tr><td>Where confidence calculator lives</td><td>At the <strong>NLP/parsing layer</strong> — interpreting ambiguous English into structured intent parameters. "Five locations" is unambiguous. "100 users max" might mean concurrent users vs total provisioned users — that's where confidence scoring helps before passing to the config engine.</td></tr>
-    <tr><td>Analogy</td><td>Same as CISCO EN CLI Mapping Agent (Sprint 14) — but maps intent → XIQ API calls instead of EXOS CLI. Confidence calculator = parsing tool to deconstruct English before deterministic config generation.</td></tr>
-    <tr><td>RAG backend</td><td>All XIQ API docs + EN switch docs + PPSK guide v6 + RFCs (6614, 2898, 5415, 2865, 2868) → single vector store. Wizard queries RAG to answer "what objects do I need to create for this intent?" before generating API calls.</td></tr>
-  </table>
+  <div class="ref-group">
+    <p class="ref-group-label">PPSK Runtime — RadSec + RADIUS</p>
+    <div class="ref-item"><a href="https://www.rfc-editor.org/rfc/rfc6614" target="_blank">RFC 6614</a> — RadSec: RADIUS over TLS<br><span class="ref-desc">TCP 2083. AP1 per-auth call to XIQ after M2. Returns PMK + VLAN + FW policy. TLS tunnel pre-established via CAPWAP. Replaces UDP RADIUS with encrypted transport.</span></div>
+    <div class="ref-item"><a href="https://www.rfc-editor.org/rfc/rfc2865" target="_blank">RFC 2865</a> — RADIUS<br><span class="ref-desc">Access-Request (User-Name = client MAC, Attr 1) / Access-Accept payload. Same framing inside RadSec TLS tunnel. Attr 80 = Message-Authenticator.</span></div>
+    <div class="ref-item"><a href="https://www.rfc-editor.org/rfc/rfc2548" target="_blank">RFC 2548</a> — MS-MPPE-Recv-Key (Vendor 311, Type 17)<br><span class="ref-desc">Carries the PMK from XIQ → AP in Access-Accept. Identical payload to 802.1X NPS MSK delivery. PPSK reuses this RADIUS attribute entirely.</span></div>
+    <div class="ref-item"><a href="https://www.rfc-editor.org/rfc/rfc2868" target="_blank">RFC 2868</a> — Tunnel-Private-Group-ID (Attr 81)<br><span class="ref-desc">VLAN assignment in Access-Accept. Attr 81 = "154" on May 11 (802.1X), "100" today (PPSK). AP reads this and applies VLAN tag to guest frames.</span></div>
+  </div>
 
-  <h3 style="font-family:'Libre Baskerville',serif;font-size:1rem;color:#f8fafc;margin:20px 0 12px">Example Intent → XIQ Object Flow</h3>
-  <pre class="code"><span class="c"># User types:</span>
-<span class="h">"Deploy a guest network at 5 locations, 100 users max each,
- isolated from production, policies per-location."</span>
+  <div class="ref-group">
+    <p class="ref-group-label">Provisioning — CAPWAP</p>
+    <div class="ref-item"><a href="https://www.rfc-editor.org/rfc/rfc5415" target="_blank">RFC 5415</a> — CAPWAP<br><span class="ref-desc">AP ↔ XIQ management tunnel. UDP 5246 (control) / 5247 (data). Carries SSID config, User Group definitions, RadSec TLS certificate to AP. Always-on — not a per-auth channel. <strong>CAPWAP push does NOT reach SW1.</strong></span></div>
+  </div>
 
-<span class="c"># NLP parsing layer extracts parameters:</span>
-<span class="k">intent.locations</span>    = 5
-<span class="k">intent.users_per_loc</span>= 100
-<span class="k">intent.isolation</span>    = "VLAN + firewall"
-<span class="k">intent.per_location_policy</span> = true
-<span class="k">confidence</span> = {locations:1.0, users:0.95, isolation:1.0}
+  <div class="ref-group">
+    <p class="ref-group-label">Network Layer</p>
+    <div class="ref-item"><a href="https://standards.ieee.org/ieee/802.1Q/6844/" target="_blank">IEEE 802.1Q</a> — VLAN tagging<br><span class="ref-desc">4-byte tag in Ethernet header. AP1 adds VLAN 100 tag after M4 ACK. SW1 EXOS forwards on tagged port toward QF-Modem internet path.</span></div>
+    <div class="ref-item"><a href="https://standards.ieee.org/ieee/802.1X/7345/" target="_blank">IEEE 802.1X</a> — Port-based access control<br><span class="ref-desc">Controlled port model: LOCKED until auth, OPEN after M4 ACK. PPSK uses the same port-lock mechanism without EAP — only the 4-Way Handshake.</span></div>
+    <div class="ref-item"><a href="https://www.rfc-editor.org/rfc/rfc2131" target="_blank">RFC 2131</a> — DHCP<br><span class="ref-desc">Discover → Offer → Request → ACK. DHCP OFFER from SW1 VLAN 100 SVI (10.100.0.1) is the smoking-gun for full E2E confirmation. Lease = 86400s (24h), matching PPSK first_login timer.</span></div>
+  </div>
 
-<span class="c"># XIQ Wizard generates (deterministic once parsed):</span>
-<span class="c"># For each location i in [1..5]:</span>
-<span class="k">  Network Policy</span>   = "Guest-Location-{i}"
-<span class="k">  SSID</span>             = "Guest-{i}"  (PPSK · WPA2/AES · Cloud)
-<span class="k">  User Group</span>       = "Guests-L{i}" (Cloud · 100-user cap)
-<span class="k">  User Profile</span>     = "Guest-L{i}-VLAN-{80+i}" (isolation VLAN)
-<span class="k">  Firewall</span>         = "Guest-Internet-Only-L{i}"
-<span class="k">  Assignment Rule</span>  = Guests-L{i} → Guest-L{i}-VLAN-{80+i}
-<span class="k">  Network Policy Assignment</span> = Location-{i} AP group</pre>
+  <!-- PENDING -->
+  <span class="section-label" id="pending">Pending</span>
+  <h2>Sprint Backlog</h2>
 
-  <h3 style="font-family:'Libre Baskerville',serif;font-size:1rem;color:#f8fafc;margin:20px 0 12px">RAG Corpus Plan</h3>
-  <ul class="steps">
-    <li><strong>XIQ REST API documentation</strong> — all endpoints for SSID, User Groups, User Profiles, Assignment Rules, Network Policies</li>
-    <li><strong>PPSK Guide v6</strong> (Rieben, 95pp) — ingested as T1 reference, supplemented with RFC annotations</li>
-    <li><strong>EN switch CLI references</strong> — EXOS 33.x + VOSS FE 9.3.x (already in memory as reference files)</li>
-    <li><strong>RFCs</strong> — 6614 (RadSec), 2898 (PBKDF2), 5415 (CAPWAP), 2865 (RADIUS), 2868 (VLAN attrs), 2131 (DHCP), 802.11-2020, 802.11i, 802.1Q, 802.1X</li>
-    <li><strong>ExtremeGuest Essentials docs</strong> — for Phase 2/3 GuestEssentials + CWP option</li>
-  </ul>
-</section>
+  <div class="pending-group">
+    <p class="pending-group-label">Tomorrow — May 13</p>
+    <ul>
+      <li>Check <code>show iqagent</code> on SW1 — if connected to MyLab_XIQ, push VLAN 100 via XIQ; else run EXOS CLI above</li>
+      <li>Build PPSK SSID in XIQ: Network Policy → Wireless Networks → Add → PPSK</li>
+      <li>Create User Group "Guest-24h" <em>inside</em> the SSID config (not standalone) — email delivery requires this</li>
+      <li>Create User Profile "Guest-VLAN-100" (VLAN 100 + Guest-Internet-Access-Only firewall policy)</li>
+      <li>Create test user → receive email → connect → verify VLAN 100 assignment on SW1</li>
+      <li>Verification: <code>ping 10.100.0.1</code> from guest → DENY (firewall); internet → PERMIT</li>
+      <li>Phase 2/3: Node.js Express wrapper → Docker → Railway deployment of simulator</li>
+      <li>IoT mode toggle for simulator</li>
+    </ul>
+  </div>
 
-<!-- LAB STATE -->
-<section id="lab">
-  <h2><span class="sec-num">06</span> Lab State — End of May 12</h2>
-  <table class="kv">
-    <tr><td>SW1 VLAN 80</td><td>Pending confirmation — EXOS CLI needed: <code>create vlan Guest_80 tag 80</code>, DHCP pool 10.80.0.10–254, GW 10.80.0.1, DNS 8.8.8.8, lease 86400s</td></tr>
-    <tr><td>XIQ objects</td><td>To be created in lab next session: SSID KhKLab-Guest · User Group Guest-24h · User Profile Guest-VLAN-80 · Assignment Rule · Test user → email</td></tr>
-    <tr><td>AP1</td><td>Already in MyLab_XIQ · SW1/EXOS path · internet ✅</td></tr>
-    <tr><td>SW2 VLAN 80</td><td>VLAN 80 "Guest_New" I-SID 100080 already provisioned (from earlier sprint). Ready for Phase 2.</td></tr>
-    <tr><td>802.1X / NPS</td><td>Deferred — NPS config pending boss. No timeline yet.</td></tr>
-  </table>
-</section>
+  <div class="pending-group">
+    <p class="pending-group-label">Week 2 — Phase 2 (VOSS Side)</p>
+    <ul>
+      <li>Replicate PPSK guest onboarding on AP2/SW2/VOSS/FishBowl_XIQ</li>
+      <li>Align FishBowl_XIQ policy + FA VLAN tagging on SW2</li>
+      <li>GuestEssentials + CWP option (open SSID → captive portal redirect flow)</li>
+      <li>Employee Sponsorship flow — dual SSID, Rieben guide pp.76–89</li>
+    </ul>
+  </div>
 
-<!-- PENDING -->
-<section id="pending">
-  <h2><span class="sec-num">07</span> Pending + Sprint Backlog</h2>
+  <div class="pending-group">
+    <p class="pending-group-label">2-Week Sprint — Manager Approval Required</p>
+    <ul>
+      <li>Phase 4: NVIDIA/software-defined platform — Digital Twin deployment on GPU stack</li>
+      <li>Phase 4a: XIQ Guest Onboarding Wizard — NLP intent parser + deterministic XIQ API generator + RAG backend (all EN docs + PPSK Guide v6 + RFCs)</li>
+    </ul>
+  </div>
 
-  <p style="font-family:'IBM Plex Mono',monospace;font-size:0.72rem;color:#475569;margin-bottom:10px;text-transform:uppercase;letter-spacing:0.1em">Tomorrow (May 13)</p>
-  <ul class="steps">
-    <li>Confirm SW1 VLAN 80 number + subnet + DHCP via EXOS CLI</li>
-    <li>Build PPSK SSID in XIQ: Network Policy → Wireless Networks → Add → PPSK</li>
-    <li>Create User Group Guest-24h (inside SSID, not standalone — email delivery requires this)</li>
-    <li>Create User Profile Guest-VLAN-80 (VLAN 80, Guest-Internet-Access-Only firewall)</li>
-    <li>Create test PPSK user → receive email → connect → verify VLAN isolation on SW1</li>
-    <li>Test: <code>ping 10.x.x.x</code> from guest should fail (firewall DENY). Internet should work.</li>
-    <li>Phase 2/3: Node.js Express wrapper → Docker → Railway deployment of simulator</li>
-    <li>IoT toggle mode for simulator</li>
-  </ul>
+  <div class="pending-group">
+    <p class="pending-group-label">Week of May 18</p>
+    <ul>
+      <li>QoS ACL fix — branch <code>feature/qos-egress-validation</code> — DSCP marking ACL, VLAN qosprofile ingress-only finding</li>
+      <li>AP1 data pull — AP3000 pcaps + kdebug wsec logs from May 6–8 before next reboot</li>
+    </ul>
+  </div>
 
-  <p style="font-family:'IBM Plex Mono',monospace;font-size:0.72rem;color:#475569;margin:20px 0 10px;text-transform:uppercase;letter-spacing:0.1em">Week 2 — Phase 2 (VOSS side)</p>
-  <ul class="steps">
-    <li>Replicate PPSK guest onboarding on AP2/SW2/VOSS/FishBowl_XIQ</li>
-    <li>Align FishBowl_XIQ policy + FA VLAN tagging on SW2</li>
-    <li>GuestEssentials + CWP option (open → redirect flow)</li>
-    <li>Employee Sponsorship flow (dual SSID, p76–89 of Rieben guide)</li>
-  </ul>
+  <hr class="divider">
+  <div style="font-size:0.88rem;color:#333;line-height:1.8">
+    <strong>Files from this session:</strong><br>
+    <a href="ppsk_simulator.html">ppsk_simulator.html</a> — PPSK 3-scene 24-step simulator (Phase 1) &bull;
+    <a href="dot1x_simulator.html">dot1x_simulator.html</a> — 802.1X / RADIUS / NPS simulator (May 11) &bull;
+    <a href="session_summary_20260511.html">session_summary_20260511.html</a> — May 11 EXOS→VOSS + 802.1X arc &bull;
+    <a href="index-nyt.html">index-nyt.html</a> — Lab landing page<br><br>
+    <strong>Primary reference (not on GitHub):</strong> /Users/khukhan/Downloads/Private-PreShared-Key-PPSK-Guide_v6 2 1.pdf — Mike Rieben, SA, Extreme Networks, v6 Jul 8 2022, 95pp<br>
+    <strong>SW1 lab access:</strong> 192.168.0.28 — EXOS · admin / Extreme01!!
+  </div>
 
-  <p style="font-family:'IBM Plex Mono',monospace;font-size:0.72rem;color:#475569;margin:20px 0 10px;text-transform:uppercase;letter-spacing:0.1em">2-Week Sprint — Manager Approval Required</p>
-  <ul class="steps">
-    <li>Phase 4: NVIDIA/software-defined platform deployment of Digital Twin</li>
-    <li>Phase 4a: XIQ Guest Onboarding Wizard — NLP intent parser + deterministic XIQ API generator + RAG backend (all EN + PPSK + RFC docs)</li>
-  </ul>
+  <p class="footer">&copy; 2026 KhKLab. All rights reserved. &bull; May 12 2026 &bull; PPSK Guest Onboarding Sprint Phase 1</p>
 
-  <p style="font-family:'IBM Plex Mono',monospace;font-size:0.72rem;color:#475569;margin:20px 0 10px;text-transform:uppercase;letter-spacing:0.1em">Week of May 18</p>
-  <ul class="steps">
-    <li>QoS ACL fix (branch <code>feature/qos-egress-validation</code>) — DSCP marking ACL</li>
-    <li>AP1_Data download — pull AP3000 pcaps + kdebug wsec logs from May 6–8 before reboot</li>
-  </ul>
-</section>
-
-<!-- ARCHITECTURE REFERENCES -->
-<section id="arch-refs">
-  <h2><span class="sec-num">08</span> Architecture Reference Index</h2>
-  <p style="font-size:0.83rem;color:#64748b;line-height:1.75;margin-bottom:20px">All protocols, standards, and design concepts from today's Socratic session. Live links to primary sources. Saved to persistent memory for future sessions.</p>
-
-  <p style="font-family:'IBM Plex Mono',monospace;font-size:0.72rem;color:#5eead4;margin-bottom:10px;text-transform:uppercase;letter-spacing:0.1em">PPSK Core — Key Derivation</p>
-  <ul class="url-list">
-    <li><a href="https://www.rfc-editor.org/rfc/rfc2898" target="_blank">RFC 2898 / PKCS#5</a><span class="url-desc"> — PBKDF2: PMK = PBKDF2(HMAC-SHA1, PPSK, SSID_name, 4096, 256-bit). Same derivation at XIQ (provisioning) and UE (runtime). Salt = SSID name per 802.11i §8.5.1.3.</span></li>
-    <li><a href="https://standards.ieee.org/ieee/802.11i/2361/" target="_blank">IEEE 802.11i (2004)</a><span class="url-desc"> — RSN framework, 4-Way Handshake key hierarchy: PTK = KCK (sign MICs) + KEK (encrypt GTK) + TK (encrypt data). PMK derivation basis. Now in 802.11-2020.</span></li>
-    <li><a href="https://standards.ieee.org/ieee/802.11/7028/" target="_blank">IEEE 802.11-2020</a><span class="url-desc"> — Full Wi-Fi standard: Association frames, RSN IE, 4-Way Handshake §12.7.6, CCMP/AES §12.5.3, Beacon frame structure.</span></li>
-  </ul>
-
-  <p style="font-family:'IBM Plex Mono',monospace;font-size:0.72rem;color:#fdba74;margin:18px 0 10px;text-transform:uppercase;letter-spacing:0.1em">PPSK Runtime — RadSec + RADIUS</p>
-  <ul class="url-list">
-    <li><a href="https://www.rfc-editor.org/rfc/rfc6614" target="_blank">RFC 6614</a><span class="url-desc"> — RadSec: RADIUS over TLS, TCP 2083. AP1 per-auth call to XIQ. Returns PMK + VLAN + FW policy. Replaces UDP RADIUS with encrypted TCP. TLS tunnel pre-established via CAPWAP.</span></li>
-    <li><a href="https://www.rfc-editor.org/rfc/rfc2865" target="_blank">RFC 2865</a><span class="url-desc"> — RADIUS: Access-Request / Access-Accept. Attr 1 (User-Name = client MAC), Attr 80 (Message-Authenticator). Same framing inside RadSec TLS tunnel.</span></li>
-    <li><a href="https://www.rfc-editor.org/rfc/rfc2548" target="_blank">RFC 2548</a><span class="url-desc"> — MS-MPPE-Recv-Key (Vendor 311, Type 17): carries PMK from XIQ → AP in Access-Accept. Identical payload to 802.1X NPS MSK delivery. PPSK reuses this RADIUS attribute.</span></li>
-    <li><a href="https://www.rfc-editor.org/rfc/rfc2868" target="_blank">RFC 2868</a><span class="url-desc"> — Tunnel-Private-Group-ID (Attr 81) = VLAN ID. Same mechanism as 802.1X VLAN assignment (NPS Attr 81 = "154" on May 11, today = "100"). AP reads this from Access-Accept and applies VLAN tag.</span></li>
-  </ul>
-
-  <p style="font-family:'IBM Plex Mono',monospace;font-size:0.72rem;color:#5eead4;margin:18px 0 10px;text-transform:uppercase;letter-spacing:0.1em">PPSK Provisioning — CAPWAP</p>
-  <ul class="url-list">
-    <li><a href="https://www.rfc-editor.org/rfc/rfc5415" target="_blank">RFC 5415</a><span class="url-desc"> — CAPWAP: AP↔XIQ management tunnel, UDP 5246 (control) / 5247 (data). Carries SSID config, User Group definitions, RadSec TLS certificate to AP. Always-on — not a per-auth channel. XIQ CAPWAP push does NOT reach SW1.</span></li>
-    <li><span style="color:#64748b;font-family:'IBM Plex Mono',monospace;font-size:0.78rem">XIQ IQAgent (EXOS)</span><span class="url-desc"> — Separate path for switch management. If SW1 has IQAgent and is onboarded to MyLab_XIQ, XIQ can push VLAN config. If not onboarded, EXOS CLI required (<code>create vlan Guest_100 tag 100</code>).</span></li>
-  </ul>
-
-  <p style="font-family:'IBM Plex Mono',monospace;font-size:0.72rem;color:#6ee7b7;margin:18px 0 10px;text-transform:uppercase;letter-spacing:0.1em">Network Layer</p>
-  <ul class="url-list">
-    <li><a href="https://standards.ieee.org/ieee/802.1Q/6844/" target="_blank">IEEE 802.1Q</a><span class="url-desc"> — VLAN tagging: 4-byte tag in Ethernet header. AP1 adds VLAN 100 tag after M4 ACK. SW1 EXOS forwards on tagged port. Firewall enforced at AP before tag is applied.</span></li>
-    <li><a href="https://standards.ieee.org/ieee/802.1X/7345/" target="_blank">IEEE 802.1X</a><span class="url-desc"> — Port-based access control: controlled port locked until auth. PPSK uses the same model — port LOCKED after Assoc, OPEN after M4 ACK. No EAP exchange (only 4-Way Handshake).</span></li>
-    <li><a href="https://www.rfc-editor.org/rfc/rfc2131" target="_blank">RFC 2131</a><span class="url-desc"> — DHCP: Discover → Offer → Request → ACK. Smoking-gun: DHCP OFFER from SW1 VLAN 100 SVI = full E2E confirmed. Lease 86400s = 24h, matches PPSK expiry.</span></li>
-  </ul>
-
-  <p style="font-family:'IBM Plex Mono',monospace;font-size:0.72rem;color:#c4b5fd;margin:18px 0 10px;text-transform:uppercase;letter-spacing:0.1em">XIQ Object Model (Design)</p>
-  <ul class="url-list">
-    <li><a href="https://documentation.extremenetworks.com/XIQ/user_guide/GUID-B538DDF7-4845-4259-B87E-6EE60B3133AC.shtml" target="_blank">XIQ Configure PPSK SSID (doc)</a><span class="url-desc"> — Official XIQ User Guide: Private Pre-Shared Key SSID configuration.</span></li>
-    <li><span style="color:#64748b;font-family:'IBM Plex Mono',monospace;font-size:0.78rem">XIQ Object Hierarchy</span><span class="url-desc"> — SSID → User Group (container, Cloud/Local, 24h timer) → User (PPSK per person) → User Profile (VLAN + Firewall) → Assignment Rule. UG must be inside SSID for email delivery.</span></li>
-    <li><span style="color:#64748b;font-family:'IBM Plex Mono',monospace;font-size:0.78rem">PPSK Constraints</span><span class="url-desc"> — WPA2/AES only (not WPA3/SAE). XIQ-native APs only. Cloud: 100k users/UG, 32 UGs/SSID. Local: 1k users/UG, 10k total. TCP 2083 must be open outbound for RadSec.</span></li>
-  </ul>
-
-  <p style="font-family:'IBM Plex Mono',monospace;font-size:0.72rem;color:#67e8f9;margin:18px 0 10px;text-transform:uppercase;letter-spacing:0.1em">Phase 4a — XIQ Wizard Architecture</p>
-  <ul class="url-list">
-    <li><span style="color:#64748b;font-family:'IBM Plex Mono',monospace;font-size:0.78rem">Intent Layer</span><span class="url-desc"> — NLP parser deconstructs English intent. Confidence calculator at this layer only. Example: "5 locations, 100 users each, isolated" → {locations:5, users:100, isolation:VLAN+FW}.</span></li>
-    <li><span style="color:#64748b;font-family:'IBM Plex Mono',monospace;font-size:0.78rem">Config Layer</span><span class="url-desc"> — Deterministic: once intent fully resolved, XIQ API call sequence is 100% deterministic. No confidence scoring needed here. 5 locations → 5×{SSID+UG+UP+Rule+NetworkPolicy}.</span></li>
-    <li><span style="color:#64748b;font-family:'IBM Plex Mono',monospace;font-size:0.78rem">RAG Backend</span><span class="url-desc"> — Vector store: XIQ API docs + PPSK Guide v6 (Rieben) + EXOS/VOSS CLI refs + all RFCs above + ExtremeGuest Essentials docs. Query before each API call to resolve exact endpoint/payload.</span></li>
-  </ul>
-</section>
-
-<!-- URLS -->
-<section id="urls">
-  <h2><span class="sec-num">09</span> URLs + Files + Credentials</h2>
-  <ul class="url-list">
-    <li><a href="ppsk_simulator.html">ppsk_simulator.html</a><span class="url-desc"> — PPSK 3-scene 24-step simulator (Phase 1, built today)</span></li>
-    <li><a href="session_summary_20260512.html">session_summary_20260512.html</a><span class="url-desc"> — this EOD</span></li>
-    <li><a href="dot1x_simulator.html">dot1x_simulator.html</a><span class="url-desc"> — 802.1X / RADIUS / NPS simulator (May 11)</span></li>
-    <li><a href="session_summary_20260511.html">session_summary_20260511.html</a><span class="url-desc"> — May 11 EXOS→VOSS + 802.1X arc</span></li>
-    <li><a href="index-nyt.html">index-nyt.html</a><span class="url-desc"> — lab landing page (updated: May 12 EOD card + Sim 4 PPSK)</span></li>
-  </ul>
-
-  <p style="font-family:'IBM Plex Mono',monospace;font-size:0.72rem;color:#475569;margin:20px 0 10px;text-transform:uppercase;letter-spacing:0.1em">Primary Reference (NOT on GitHub)</p>
-  <ul class="url-list">
-    <li><span style="color:#64748b;font-family:'IBM Plex Mono',monospace;font-size:0.78rem">/Users/khukhan/Downloads/Private-PreShared-Key-PPSK-Guide_v6 2 1.pdf</span><span class="url-desc"> — Mike Rieben, SA, Extreme Networks, v6 Jul 8 2022, 95pp. Internal EN SA guide.</span></li>
-  </ul>
-
-  <p style="font-family:'IBM Plex Mono',monospace;font-size:0.72rem;color:#475569;margin:20px 0 10px;text-transform:uppercase;letter-spacing:0.1em">SW1 Lab Access</p>
-  <ul class="url-list">
-    <li><span style="color:#64748b;font-family:'IBM Plex Mono',monospace;font-size:0.78rem">192.168.0.28</span><span class="url-desc"> — SW1 EXOS · admin / Extreme01!!</span></li>
-  </ul>
-</section>
-
-</main>
-
-<footer>
-  KhKLab EOD Blueprint &bull; May 12 2026 &bull; PPSK Guest Onboarding Sprint<br>
-  AP1 / SW1 / EXOS / MyLab_XIQ &bull; Cloud PPSK Phase 1<br>
-  &copy; 2026 KhKLab. All rights reserved.
-</footer>
-
+</div>
 </body>
 </html>
