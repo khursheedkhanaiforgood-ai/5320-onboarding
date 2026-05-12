@@ -92,7 +92,7 @@ a:hover { color: #111; }
     <a href="#socratic">Socratic Session — key exchanges and corrections</a>
     <a href="#simulator">PPSK Simulator — 3 scenes, 24 steps, built today</a>
     <a href="#phase4a">Phase 4a — XIQ Guest Onboarding Wizard vision</a>
-    <a href="#lab-state">Lab State — SW1 VLAN 100 pending, XIQ objects in progress</a>
+    <a href="#lab-state">Lab State — SW1 VLAN 100 done ✓, XIQ Guest_VLAN_100 confirmed</a>
     <a href="#references">RFC Reference Index — 11 standards, live links</a>
     <a href="#rieben">Rieben Guide — page map, XIQ steps, SW1 CLI + console commands</a>
     <a href="#pending">Pending — Sprint backlog</a>
@@ -307,24 +307,29 @@ intent.per_location_policy = true     (confidence: 1.0)
   <table>
     <thead><tr><th>Asset</th><th>State</th><th>Notes</th></tr></thead>
     <tbody>
-      <tr><td>SW1 VLAN 100</td><td><span class="badge todo">Pending EXOS CLI</span></td><td>CAPWAP push does not reach SW1. Requires <code>create vlan Guest_100 tag 100</code> + DHCP config, or XIQ IQAgent push if SW1 is onboarded to MyLab_XIQ (<code>show iqagent</code> to check).</td></tr>
-      <tr><td>XIQ PPSK objects</td><td><span class="badge todo">In progress</span></td><td>SSID "KhKLab-Guest" · User Group "Guest-24h" (inside SSID) · User Profile "Guest-VLAN-100" · Assignment Rule · Test user email delivery triggered ✅</td></tr>
-      <tr><td>AP1 (AP3000)</td><td><span class="badge done">In MyLab_XIQ ✅</span></td><td>SW1/EXOS path · internet ✅ · CAPWAP pushed ✅</td></tr>
-      <tr><td>SW2 VLAN 80</td><td><span class="badge done">Pre-provisioned ✅</span></td><td>VLAN 80 "Guest_New" I-SID 100080 already on SW2 from earlier sprint. Ready for Phase 2.</td></tr>
+      <tr><td>SW1 VLAN 100</td><td><span class="badge done">Done ✅</span></td><td>Confirmed via SSH. <code>create vlan Guest_100 tag 100</code> · SVI 10.100.0.1/24 · IP forwarding ON · Port 3 tagged (LLDP: AH-556680 = AP1) · DHCP active: 10.100.0.10 – 10.100.0.254 · GW 10.100.0.1 · DNS 8.8.8.8/1.1.1.1 · lease 86400s. QF-Modem static route 10.100.0.0/255.255.255.0 → 192.168.0.28 already present.</td></tr>
+      <tr><td>XIQ — SSID <code>PPSK_Demo</code></td><td><span class="badge done">Done ✅</span></td><td>Policy: <strong>AP_April21_KarlLab</strong> · Auth: Private PSK · VLAN 100 · CWP: OFF · User Groups: PPSK_Demo (Cloud, 1 user) + PPSK_Local (Local, 2 users) · Default UP: Guest_VLAN_100 · Assignment Rule: Contractor-3-days → Guest-VLAN-100.</td></tr>
+      <tr><td>XIQ — User Profile <code>Guest_VLAN_100</code></td><td><span class="badge done">Done ✅</span></td><td>VLAN 100 · Firewall: ON · Default direction: <strong>Deny</strong> · Rules: PERMIT (DHCP, DNS, internet) · DENY 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16. RFC1918 isolation confirmed from screenshots.</td></tr>
+      <tr><td>AP1 (AP3000)</td><td><span class="badge done">In MyLab_XIQ ✅</span></td><td>SW1/EXOS path · internet ✅ · CAPWAP pushed ✅ · <code>AP_April21_KarlLab</code> policy assigned.</td></tr>
+      <tr><td>SW2 / VOSS side</td><td><span class="badge" style="background:#F3E5F5;color:#6A1B9A;border:1px solid #CE93D8">Phase 2 later</span></td><td>FishBowl_XIQ · no direct internet. Guest VLAN on VOSS path deferred to next sprint.</td></tr>
       <tr><td>802.1X / NPS</td><td><span class="badge" style="background:#F3E5F5;color:#6A1B9A;border:1px solid #CE93D8">Deferred</span></td><td>NPS config pending. No timeline set.</td></tr>
     </tbody>
   </table>
 
-  <h3>SW1 VLAN 100 EXOS CLI (when IQAgent not available)</h3>
+  <h3>SW1 VLAN 100 EXOS CLI — Applied May 12 (Port 3 = AP1)</h3>
+  <div class="box ok"><p>SW1 is fully configured. Commands below are the <strong>as-run</strong> record. Port 3 confirmed via <code>show lldp neighbors</code> (AH-556680 = AP1). DHCP range uses space-padded dash separator — EXOS syntax quirk.</p></div>
   <pre><code>create vlan Guest_100 tag 100
 configure vlan Guest_100 ipaddress 10.100.0.1 255.255.255.0
 enable ipforwarding vlan Guest_100
-configure vlan Guest_100 add port &lt;ap1-port&gt; tagged
+configure vlan Guest_100 add port 3 tagged
 configure vlan Guest_100 dhcp-address-range 10.100.0.10 - 10.100.0.254
 configure vlan Guest_100 dhcp-options default-gateway 10.100.0.1
 configure vlan Guest_100 dhcp-options dns-server primary 8.8.8.8
+configure vlan Guest_100 dhcp-options dns-server secondary 1.1.1.1
 configure vlan Guest_100 dhcp-lease-timer 86400
-enable dhcp ports &lt;ap1-port&gt; vlan Guest_100</code></pre>
+enable dhcp ports 3 vlan Guest_100
+save config</code></pre>
+  <p>QF-Modem static route <code>10.100.0.0/255.255.255.0 → 192.168.0.28</code> was already present in the routing table — no change needed.</p>
 
   <!-- RFC REFERENCE INDEX -->
   <span class="section-label" id="references">RFC Reference Index</span>
@@ -453,16 +458,33 @@ kill &lt;PID&gt;                                   # release the port</code></pr
   <h2>Sprint Backlog</h2>
 
   <div class="pending-group">
-    <p class="pending-group-label">Tomorrow — May 13</p>
+    <p class="pending-group-label">Next — Phase 1 Test (ready now)</p>
+    <div class="box ok" style="margin-bottom:10px"><p>SW1 is fully configured. XIQ objects are in place. The only remaining step is creating one test PPSK user and running the E2E connect test.</p></div>
     <ul>
-      <li>Check <code>show iqagent</code> on SW1 — if connected to MyLab_XIQ, push VLAN 100 via XIQ; else run EXOS CLI above</li>
-      <li>Build PPSK SSID in XIQ: Network Policy → Wireless Networks → Add → PPSK</li>
-      <li>Create User Group "Guest-24h" <em>inside</em> the SSID config (not standalone) — email delivery requires this</li>
-      <li>Create User Profile "Guest-VLAN-100" (VLAN 100 + Guest-Internet-Access-Only firewall policy)</li>
-      <li>Create test user → receive email → connect → verify VLAN 100 assignment on SW1</li>
-      <li>Verification: <code>ping 10.100.0.1</code> from guest → DENY (firewall); internet → PERMIT</li>
-      <li>Phase 2/3: Node.js Express wrapper → Docker → Railway deployment of simulator</li>
-      <li>IoT mode toggle for simulator</li>
+      <li><strong>XIQ → Configure → Users → Users → (+)</strong> · User Group: <code>PPSK_Demo</code> · generate PPSK (10-char) · enter email + mobile → SAVE → user receives PPSK by email/SMS</li>
+      <li>On test device: connect to SSID <code>PPSK_Demo</code> → enter the PPSK from email</li>
+      <li>Verify IP: <code>ifconfig</code> → should show <code>10.100.0.x</code> (DHCP from SW1)</li>
+      <li>Verify internet: browser or <code>ping 8.8.8.8</code> → should succeed</li>
+      <li>Verify isolation: <code>ping 192.168.0.28</code> (SW1 mgmt) → should be <strong>blocked</strong> by RFC1918 DENY rule</li>
+      <li>On SW1: <code>show dhcp-server vlan Guest_100</code> → confirm lease issued for guest MAC</li>
+    </ul>
+  </div>
+
+  <div class="pending-group">
+    <p class="pending-group-label">After Phase 1 Passes — Phase 2 (XIQ Policy Push)</p>
+    <ul>
+      <li>Wipe manual SW1 config: <code>delete vlan Guest_100</code> + <code>save config</code></li>
+      <li>XIQ → <code>AP_April21_KarlLab</code> → Step 3 (Switching/Routing) → Switch Template → add VLAN 100 + port 3 tagged</li>
+      <li>Supplemental CLI in Step 3: paste SVI + DHCP commands (IQAgent pushes to SW1, no SSH)</li>
+      <li>Assign SW1 to policy → Deploy → re-verify same E2E result</li>
+    </ul>
+  </div>
+
+  <div class="pending-group">
+    <p class="pending-group-label">Tomorrow May 13 — Agent Architecture (Socratic)</p>
+    <ul>
+      <li>Derive agent boundaries from first principles: NLP/parsing agent, XIQ AP API agent, XIQ Switch API agent, DHCP API agent</li>
+      <li>Phase 2/3: Node.js Express wrapper → Docker → Railway deployment of ppsk_simulator.html (simple wrapper, separate from Phase 4a)</li>
     </ul>
   </div>
 
