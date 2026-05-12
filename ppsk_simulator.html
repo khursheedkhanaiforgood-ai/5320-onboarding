@@ -118,6 +118,33 @@ h1 { font-family: 'Libre Baskerville', Georgia, serif; font-size: 1.7rem; color:
 @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.2; } }
 .progress { font-family: 'IBM Plex Mono', monospace; font-size: 0.72rem; color: #475569; margin-left: auto; }
 
+/* Step Map */
+.step-map { background: #0a0d14; border: 1px solid #1e2330; border-radius: 6px; padding: 12px 16px; margin-bottom: 16px; }
+.step-map-header { font-family: 'IBM Plex Mono', monospace; font-size: 0.62rem; color: #334155; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; }
+.step-map-header span { color: #475569; }
+.step-map-cols { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 2px; }
+.step-row { display: flex; align-items: baseline; gap: 8px; padding: 5px 8px; border-radius: 4px; cursor: pointer; transition: background 0.15s, opacity 0.2s; font-size: 0.77rem; border-left: 2px solid transparent; }
+.step-row:hover { background: #1a1f2e; }
+.step-row.sr-active { background: #1e2330; border-left-color: #60a5fa; }
+.step-row.sr-done { opacity: 0.45; }
+.step-row.sr-pending { opacity: 0.25; }
+.sr-status { font-family: 'IBM Plex Mono', monospace; font-size: 0.7rem; width: 14px; flex-shrink: 0; text-align: center; }
+.sr-done-icon { color: #34d399; }
+.sr-active-icon { color: #60a5fa; }
+.sr-pending-icon { color: #334155; }
+.sr-num { font-family: 'IBM Plex Mono', monospace; font-size: 0.63rem; color: #334155; width: 20px; flex-shrink: 0; }
+.sr-title { color: #94a3b8; line-height: 1.35; }
+.step-row.sr-active .sr-title { color: #f8fafc; font-weight: 600; }
+.sr-dot { display: inline-block; width: 5px; height: 5px; border-radius: 50%; margin-right: 5px; vertical-align: middle; flex-shrink: 0; }
+.sr-dot.api    { background: #67e8f9; }
+.sr-dot.capwap { background: #5eead4; }
+.sr-dot.smtp   { background: #fde68a; }
+.sr-dot.eapol  { background: #93c5fd; }
+.sr-dot.radsec { background: #fdba74; }
+.sr-dot.key    { background: #c4b5fd; }
+.sr-dot.data   { background: #6ee7b7; }
+.sr-dot.info   { background: #64748b; }
+
 /* RFC table */
 .rfc-section { margin-top: 32px; }
 .rfc-section h2 { font-family: 'Libre Baskerville', Georgia, serif; font-size: 1.1rem; color: #f8fafc; margin-bottom: 14px; border-bottom: 1px solid #2d3748; padding-bottom: 8px; }
@@ -234,6 +261,12 @@ h1 { font-family: 'Libre Baskerville', Georgia, serif; font-size: 1.7rem; color:
 <div class="frame-panel" id="frame-panel">
   <div class="frame-label">Frame / Payload Detail</div>
   <div class="frame-content" id="frame-content"></div>
+</div>
+
+<!-- STEP MAP -->
+<div class="step-map" id="step-map">
+  <div class="step-map-header">Step Roadmap <span id="step-map-label">Scene 1 · 7 Steps</span></div>
+  <div class="step-map-cols" id="step-map-cols"></div>
 </div>
 
 <!-- CONTROLS -->
@@ -1033,6 +1066,7 @@ function resetScene() {
   document.getElementById('btn-prev').disabled = true;
   document.getElementById('btn-next').disabled = false;
   document.getElementById('progress-label').textContent = '0 / ' + sc.total;
+  renderStepMap();
 }
 
 function render() {
@@ -1093,10 +1127,65 @@ function render() {
   document.getElementById('btn-prev').disabled = current <= 0;
   document.getElementById('btn-next').disabled = current >= sc.steps.length - 1;
   document.getElementById('progress-label').textContent = (current + 1) + ' / ' + sc.total;
+
+  renderStepMap();
+}
+
+/* =====================================================================
+   Step Map
+===================================================================== */
+function renderStepMap() {
+  const sc = SCENES[activeScene];
+  document.getElementById('step-map-label').textContent =
+    'Scene ' + activeScene + ' · ' + sc.total + ' Steps';
+  const cols = document.getElementById('step-map-cols');
+  cols.innerHTML = '';
+  sc.steps.forEach((s, i) => {
+    const row = document.createElement('div');
+    let cls = 'step-row ';
+    let statusIcon = '', statusCls = '';
+    if (current === -1 || i > current) {
+      cls += 'sr-pending';
+      statusIcon = '·';
+      statusCls = 'sr-pending-icon';
+    } else if (i < current) {
+      cls += 'sr-done';
+      statusIcon = '✓';
+      statusCls = 'sr-done-icon';
+    } else {
+      cls += 'sr-active';
+      statusIcon = '▶';
+      statusCls = 'sr-active-icon';
+    }
+    row.className = cls;
+    row.onclick = () => jumpTo(i);
+    row.innerHTML =
+      '<span class="sr-status ' + statusCls + '">' + statusIcon + '</span>' +
+      '<span class="sr-num">' + String(i + 1).padStart(2, '0') + '</span>' +
+      '<span class="sr-title"><span class="sr-dot ' + s.tag + '"></span>' + s.title + '</span>';
+    cols.appendChild(row);
+  });
+}
+
+function jumpTo(i) {
+  if (isPlaying) stopPlay();
+  const sc = SCENES[activeScene];
+  // Reset history and replay up to step i
+  current = -1;
+  histA = []; histB = []; histC = [];
+  for (let j = 0; j <= i; j++) {
+    current = j;
+    const step = sc.steps[j];
+    if (step.a) histA.push(step.a);
+    if (step.b) histB.push(step.b);
+    if (step.c) histC.push(step.c);
+  }
+  render();
 }
 
 // Initialize
 applySceneActors(1);
+renderStepMap();
 </script>
 
 <!-- RFC REFERENCE PANEL -->
@@ -1104,57 +1193,57 @@ applySceneActors(1);
   <h2>Protocol &amp; RFC Reference</h2>
   <div class="rfc-grid">
     <div class="rfc-item">
-      <div class="rfc-id">IEEE 802.11-2020</div>
+      <div class="rfc-id"><a href="https://standards.ieee.org/ieee/802.11/7028/" target="_blank" style="color:#60a5fa;text-decoration:none">IEEE 802.11-2020 ↗</a></div>
       <div class="rfc-name">Wi-Fi MAC + PHY Standard</div>
       <div class="rfc-desc">Defines Association, Authentication, Beacon frames, RSN IE, 4-Way Handshake (§12.7.6), CCMP/AES encryption (§12.5.3). All PPSK Wi-Fi framing.</div>
     </div>
     <div class="rfc-item">
-      <div class="rfc-id">IEEE 802.11i (2004)</div>
+      <div class="rfc-id"><a href="https://standards.ieee.org/ieee/802.11i/2361/" target="_blank" style="color:#60a5fa;text-decoration:none">IEEE 802.11i (2004) ↗</a></div>
       <div class="rfc-name">RSN — WPA2 Security Amendment</div>
       <div class="rfc-desc">Defines the Robust Security Network (RSN) framework: PMK derivation, 4-Way Handshake key hierarchy (PTK = KCK+KEK+TK), GTK distribution. Now folded into 802.11-2020.</div>
     </div>
     <div class="rfc-item">
-      <div class="rfc-id">RFC 2898 / PKCS#5</div>
+      <div class="rfc-id"><a href="https://www.rfc-editor.org/rfc/rfc2898" target="_blank" style="color:#60a5fa;text-decoration:none">RFC 2898 / PKCS#5 ↗</a></div>
       <div class="rfc-name">PBKDF2 — Password-Based Key Derivation</div>
       <div class="rfc-desc">PPSK PMK derivation: PMK = PBKDF2(HMAC-SHA1, passphrase, SSID, 4096, 256-bit). Salt = SSID name per 802.11i §8.5.1.3. Identical derivation at XIQ (provisioning) and UE (runtime).</div>
     </div>
     <div class="rfc-item">
-      <div class="rfc-id">RFC 5415</div>
+      <div class="rfc-id"><a href="https://www.rfc-editor.org/rfc/rfc5415" target="_blank" style="color:#60a5fa;text-decoration:none">RFC 5415 ↗</a></div>
       <div class="rfc-name">CAPWAP — Control and Provisioning of Wireless APs</div>
       <div class="rfc-desc">AP ↔ XIQ management tunnel. UDP 5246 (control), 5247 (data). Carries SSID config, User Group definitions, RadSec certificate push. Always running — not per-auth.</div>
     </div>
     <div class="rfc-item">
-      <div class="rfc-id">RFC 6614</div>
+      <div class="rfc-id"><a href="https://www.rfc-editor.org/rfc/rfc6614" target="_blank" style="color:#60a5fa;text-decoration:none">RFC 6614 ↗</a></div>
       <div class="rfc-name">RadSec — RADIUS over TLS</div>
       <div class="rfc-desc">AP1 calls XIQ per-auth on TCP 2083. RADIUS framing inside a TLS tunnel. Returns PMK + VLAN + firewall profile. This is the PPSK runtime validation channel — replaces UDP RADIUS with encrypted TCP.</div>
     </div>
     <div class="rfc-item">
-      <div class="rfc-id">RFC 2865</div>
+      <div class="rfc-id"><a href="https://www.rfc-editor.org/rfc/rfc2865" target="_blank" style="color:#60a5fa;text-decoration:none">RFC 2865 ↗</a></div>
       <div class="rfc-name">RADIUS — Remote Auth Dial-In User Service</div>
       <div class="rfc-desc">Access-Request / Access-Accept payload structure. Attr 1 (User-Name), Attr 79 (EAP-Message), Attr 80 (Message-Authenticator). Same framing inside RadSec TLS tunnel.</div>
     </div>
     <div class="rfc-item">
-      <div class="rfc-id">RFC 2548</div>
+      <div class="rfc-id"><a href="https://www.rfc-editor.org/rfc/rfc2548" target="_blank" style="color:#60a5fa;text-decoration:none">RFC 2548 ↗</a></div>
       <div class="rfc-name">Microsoft Vendor-Specific RADIUS Attributes</div>
       <div class="rfc-desc">MS-MPPE-Recv-Key (Attr 26, Vendor 311, Type 17) — carries PMK from XIQ to AP in Access-Accept. Same attribute format used in 802.1X/NPS to deliver MSK. PPSK reuses this payload.</div>
     </div>
     <div class="rfc-item">
-      <div class="rfc-id">RFC 2868</div>
+      <div class="rfc-id"><a href="https://www.rfc-editor.org/rfc/rfc2868" target="_blank" style="color:#60a5fa;text-decoration:none">RFC 2868 ↗</a></div>
       <div class="rfc-name">RADIUS Tunnel Attributes</div>
       <div class="rfc-desc">Tunnel-Type (Attr 64) = VLAN(13), Tunnel-Medium-Type (Attr 65) = IEEE 802(6), Tunnel-Private-Group-ID (Attr 81) = "80". Same as 802.1X VLAN assignment. AP1 reads these from Access-Accept.</div>
     </div>
     <div class="rfc-item">
-      <div class="rfc-id">RFC 2131</div>
+      <div class="rfc-id"><a href="https://www.rfc-editor.org/rfc/rfc2131" target="_blank" style="color:#60a5fa;text-decoration:none">RFC 2131 ↗</a></div>
       <div class="rfc-name">DHCP — Dynamic Host Configuration Protocol</div>
-      <div class="rfc-desc">4-message exchange: Discover → Offer → Request → ACK. Client gets 10.80.0.x from SW1 VLAN 80 pool. Lease = 86400s (24h — matches PPSK key validity). Smoking-gun confirmation of E2E success.</div>
+      <div class="rfc-desc">4-message exchange: Discover → Offer → Request → ACK. Client gets 10.80.0.x from SW1 VLAN pool. Lease = 86400s (24h — matches PPSK key validity). Smoking-gun confirmation of E2E success.</div>
     </div>
     <div class="rfc-item">
-      <div class="rfc-id">IEEE 802.1Q</div>
+      <div class="rfc-id"><a href="https://standards.ieee.org/ieee/802.1Q/6844/" target="_blank" style="color:#60a5fa;text-decoration:none">IEEE 802.1Q ↗</a></div>
       <div class="rfc-name">VLAN Tagging Standard</div>
-      <div class="rfc-desc">4-byte VLAN tag in Ethernet frame header. AP1 adds VLAN 80 tag to all guest frames after M4 ACK. SW1 EXOS forwards on VLAN 80 trunk port. Firewall applied before tag is added.</div>
+      <div class="rfc-desc">4-byte VLAN tag in Ethernet frame header. AP1 adds VLAN tag to all guest frames after M4 ACK. SW1 EXOS forwards on tagged trunk port. Firewall applied before tag is added.</div>
     </div>
     <div class="rfc-item">
-      <div class="rfc-id">IEEE 802.1X</div>
+      <div class="rfc-id"><a href="https://standards.ieee.org/ieee/802.1X/7345/" target="_blank" style="color:#60a5fa;text-decoration:none">IEEE 802.1X ↗</a></div>
       <div class="rfc-name">Port-Based Network Access Control</div>
       <div class="rfc-desc">Controlled port model: port locked until auth complete. PPSK uses the same model — EAPOL 4-Way Handshake, port open after M4 ACK, VLAN from Access-Accept Attr 81. No EAP exchange needed.</div>
     </div>

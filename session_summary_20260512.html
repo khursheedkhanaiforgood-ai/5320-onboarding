@@ -109,6 +109,7 @@ footer { background: #0a0d14; border-top: 1px solid #1e2330; padding: 24px 32px;
   <a href="#phase4a">Phase 4a</a>
   <a href="#lab">Lab State</a>
   <a href="#pending">Pending</a>
+  <a href="#arch-refs">RFC Index</a>
   <a href="#urls">URLs</a>
 </nav>
 
@@ -362,9 +363,57 @@ footer { background: #0a0d14; border-top: 1px solid #1e2330; padding: 24px 32px;
   </ul>
 </section>
 
+<!-- ARCHITECTURE REFERENCES -->
+<section id="arch-refs">
+  <h2><span class="sec-num">08</span> Architecture Reference Index</h2>
+  <p style="font-size:0.83rem;color:#64748b;line-height:1.75;margin-bottom:20px">All protocols, standards, and design concepts from today's Socratic session. Live links to primary sources. Saved to persistent memory for future sessions.</p>
+
+  <p style="font-family:'IBM Plex Mono',monospace;font-size:0.72rem;color:#5eead4;margin-bottom:10px;text-transform:uppercase;letter-spacing:0.1em">PPSK Core — Key Derivation</p>
+  <ul class="url-list">
+    <li><a href="https://www.rfc-editor.org/rfc/rfc2898" target="_blank">RFC 2898 / PKCS#5</a><span class="url-desc"> — PBKDF2: PMK = PBKDF2(HMAC-SHA1, PPSK, SSID_name, 4096, 256-bit). Same derivation at XIQ (provisioning) and UE (runtime). Salt = SSID name per 802.11i §8.5.1.3.</span></li>
+    <li><a href="https://standards.ieee.org/ieee/802.11i/2361/" target="_blank">IEEE 802.11i (2004)</a><span class="url-desc"> — RSN framework, 4-Way Handshake key hierarchy: PTK = KCK (sign MICs) + KEK (encrypt GTK) + TK (encrypt data). PMK derivation basis. Now in 802.11-2020.</span></li>
+    <li><a href="https://standards.ieee.org/ieee/802.11/7028/" target="_blank">IEEE 802.11-2020</a><span class="url-desc"> — Full Wi-Fi standard: Association frames, RSN IE, 4-Way Handshake §12.7.6, CCMP/AES §12.5.3, Beacon frame structure.</span></li>
+  </ul>
+
+  <p style="font-family:'IBM Plex Mono',monospace;font-size:0.72rem;color:#fdba74;margin:18px 0 10px;text-transform:uppercase;letter-spacing:0.1em">PPSK Runtime — RadSec + RADIUS</p>
+  <ul class="url-list">
+    <li><a href="https://www.rfc-editor.org/rfc/rfc6614" target="_blank">RFC 6614</a><span class="url-desc"> — RadSec: RADIUS over TLS, TCP 2083. AP1 per-auth call to XIQ. Returns PMK + VLAN + FW policy. Replaces UDP RADIUS with encrypted TCP. TLS tunnel pre-established via CAPWAP.</span></li>
+    <li><a href="https://www.rfc-editor.org/rfc/rfc2865" target="_blank">RFC 2865</a><span class="url-desc"> — RADIUS: Access-Request / Access-Accept. Attr 1 (User-Name = client MAC), Attr 80 (Message-Authenticator). Same framing inside RadSec TLS tunnel.</span></li>
+    <li><a href="https://www.rfc-editor.org/rfc/rfc2548" target="_blank">RFC 2548</a><span class="url-desc"> — MS-MPPE-Recv-Key (Vendor 311, Type 17): carries PMK from XIQ → AP in Access-Accept. Identical payload to 802.1X NPS MSK delivery. PPSK reuses this RADIUS attribute.</span></li>
+    <li><a href="https://www.rfc-editor.org/rfc/rfc2868" target="_blank">RFC 2868</a><span class="url-desc"> — Tunnel-Private-Group-ID (Attr 81) = VLAN ID. Same mechanism as 802.1X VLAN assignment (NPS Attr 81 = "154" on May 11, today = "100"). AP reads this from Access-Accept and applies VLAN tag.</span></li>
+  </ul>
+
+  <p style="font-family:'IBM Plex Mono',monospace;font-size:0.72rem;color:#5eead4;margin:18px 0 10px;text-transform:uppercase;letter-spacing:0.1em">PPSK Provisioning — CAPWAP</p>
+  <ul class="url-list">
+    <li><a href="https://www.rfc-editor.org/rfc/rfc5415" target="_blank">RFC 5415</a><span class="url-desc"> — CAPWAP: AP↔XIQ management tunnel, UDP 5246 (control) / 5247 (data). Carries SSID config, User Group definitions, RadSec TLS certificate to AP. Always-on — not a per-auth channel. XIQ CAPWAP push does NOT reach SW1.</span></li>
+    <li><span style="color:#64748b;font-family:'IBM Plex Mono',monospace;font-size:0.78rem">XIQ IQAgent (EXOS)</span><span class="url-desc"> — Separate path for switch management. If SW1 has IQAgent and is onboarded to MyLab_XIQ, XIQ can push VLAN config. If not onboarded, EXOS CLI required (<code>create vlan Guest_100 tag 100</code>).</span></li>
+  </ul>
+
+  <p style="font-family:'IBM Plex Mono',monospace;font-size:0.72rem;color:#6ee7b7;margin:18px 0 10px;text-transform:uppercase;letter-spacing:0.1em">Network Layer</p>
+  <ul class="url-list">
+    <li><a href="https://standards.ieee.org/ieee/802.1Q/6844/" target="_blank">IEEE 802.1Q</a><span class="url-desc"> — VLAN tagging: 4-byte tag in Ethernet header. AP1 adds VLAN 100 tag after M4 ACK. SW1 EXOS forwards on tagged port. Firewall enforced at AP before tag is applied.</span></li>
+    <li><a href="https://standards.ieee.org/ieee/802.1X/7345/" target="_blank">IEEE 802.1X</a><span class="url-desc"> — Port-based access control: controlled port locked until auth. PPSK uses the same model — port LOCKED after Assoc, OPEN after M4 ACK. No EAP exchange (only 4-Way Handshake).</span></li>
+    <li><a href="https://www.rfc-editor.org/rfc/rfc2131" target="_blank">RFC 2131</a><span class="url-desc"> — DHCP: Discover → Offer → Request → ACK. Smoking-gun: DHCP OFFER from SW1 VLAN 100 SVI = full E2E confirmed. Lease 86400s = 24h, matches PPSK expiry.</span></li>
+  </ul>
+
+  <p style="font-family:'IBM Plex Mono',monospace;font-size:0.72rem;color:#c4b5fd;margin:18px 0 10px;text-transform:uppercase;letter-spacing:0.1em">XIQ Object Model (Design)</p>
+  <ul class="url-list">
+    <li><a href="https://documentation.extremenetworks.com/XIQ/user_guide/GUID-B538DDF7-4845-4259-B87E-6EE60B3133AC.shtml" target="_blank">XIQ Configure PPSK SSID (doc)</a><span class="url-desc"> — Official XIQ User Guide: Private Pre-Shared Key SSID configuration.</span></li>
+    <li><span style="color:#64748b;font-family:'IBM Plex Mono',monospace;font-size:0.78rem">XIQ Object Hierarchy</span><span class="url-desc"> — SSID → User Group (container, Cloud/Local, 24h timer) → User (PPSK per person) → User Profile (VLAN + Firewall) → Assignment Rule. UG must be inside SSID for email delivery.</span></li>
+    <li><span style="color:#64748b;font-family:'IBM Plex Mono',monospace;font-size:0.78rem">PPSK Constraints</span><span class="url-desc"> — WPA2/AES only (not WPA3/SAE). XIQ-native APs only. Cloud: 100k users/UG, 32 UGs/SSID. Local: 1k users/UG, 10k total. TCP 2083 must be open outbound for RadSec.</span></li>
+  </ul>
+
+  <p style="font-family:'IBM Plex Mono',monospace;font-size:0.72rem;color:#67e8f9;margin:18px 0 10px;text-transform:uppercase;letter-spacing:0.1em">Phase 4a — XIQ Wizard Architecture</p>
+  <ul class="url-list">
+    <li><span style="color:#64748b;font-family:'IBM Plex Mono',monospace;font-size:0.78rem">Intent Layer</span><span class="url-desc"> — NLP parser deconstructs English intent. Confidence calculator at this layer only. Example: "5 locations, 100 users each, isolated" → {locations:5, users:100, isolation:VLAN+FW}.</span></li>
+    <li><span style="color:#64748b;font-family:'IBM Plex Mono',monospace;font-size:0.78rem">Config Layer</span><span class="url-desc"> — Deterministic: once intent fully resolved, XIQ API call sequence is 100% deterministic. No confidence scoring needed here. 5 locations → 5×{SSID+UG+UP+Rule+NetworkPolicy}.</span></li>
+    <li><span style="color:#64748b;font-family:'IBM Plex Mono',monospace;font-size:0.78rem">RAG Backend</span><span class="url-desc"> — Vector store: XIQ API docs + PPSK Guide v6 (Rieben) + EXOS/VOSS CLI refs + all RFCs above + ExtremeGuest Essentials docs. Query before each API call to resolve exact endpoint/payload.</span></li>
+  </ul>
+</section>
+
 <!-- URLS -->
 <section id="urls">
-  <h2><span class="sec-num">08</span> URLs + Files + Credentials</h2>
+  <h2><span class="sec-num">09</span> URLs + Files + Credentials</h2>
   <ul class="url-list">
     <li><a href="ppsk_simulator.html">ppsk_simulator.html</a><span class="url-desc"> — PPSK 3-scene 24-step simulator (Phase 1, built today)</span></li>
     <li><a href="session_summary_20260512.html">session_summary_20260512.html</a><span class="url-desc"> — this EOD</span></li>
