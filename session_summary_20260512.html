@@ -95,6 +95,7 @@ a:hover { color: #111; }
     <a href="#lab-state">Lab State — SW1 VLAN 100 done ✓, XIQ Guest_VLAN_100 confirmed</a>
     <a href="#references">RFC Reference Index — 11 standards, live links</a>
     <a href="#rieben">Rieben Guide — page map, XIQ steps, SW1 CLI + console commands</a>
+    <a href="#troubleshooting">Phase 1 Troubleshooting — what broke and what was learned</a>
     <a href="#pending">Pending — Sprint backlog</a>
   </div>
 
@@ -453,20 +454,81 @@ pkill screen                                  # nuclear — kill all screen sess
 lsof /dev/cu.usbserial-A9XH7AI0             # find the PID
 kill &lt;PID&gt;                                   # release the port</code></pre>
 
+  <!-- TROUBLESHOOTING -->
+  <span class="section-label" id="troubleshooting">Phase 1 Troubleshooting</span>
+  <h2>What Broke, What Was Learned</h2>
+
+  <p>Phase 1 test ran into five distinct obstacles after SW1 and XIQ were confirmed configured. Each one was diagnosed and either resolved or isolated. One root cause remains open for tomorrow.</p>
+
+  <h3>Issue 1 — PPSK_Demo SSID Not Visible on MacBooks</h3>
+  <div class="box correct"><p><strong>Root cause:</strong> macOS Ventura/Sonoma/Sequoia deliberately hides WPA2-only SSIDs from the scan list. Apple deprecated WPA2-only in Ventura and enforcement strengthened in Sonoma. iPhone is more permissive — it shows all WPA2 networks without filtering.</p></div>
+  <p><strong>Fix (tomorrow):</strong> In XIQ → PPSK_Demo SSID → Security → change to <strong>WPA2/WPA3 Personal (transition mode)</strong>. Broadcasts both AKMs simultaneously. MacBooks use WPA3, older devices use WPA2.</p>
+
+  <h3>Issue 2 — Join Button Grayed Out (iPhone + Mac)</h3>
+  <div class="box correct"><p><strong>Root cause:</strong> PPSK copied from email contained invisible characters / formatting artifacts. iOS and macOS password validators silently reject invalid-length or malformed passphrases — Join button stays grayed out without any error message.</p></div>
+  <p><strong>Fix:</strong> Type PPSK manually character by character. Do not paste from email or SMS. MacBook PPSK join was eventually resolved; connection to PPSK_Demo confirmed.</p>
+
+  <h3>Issue 3 — XIQ (EP1) Cloud Outage</h3>
+  <div class="box warn"><p><strong>Root cause:</strong> Extreme Platform One portal had a temporary outage mid-session. Effect: deploys blocked, Corp/Guest SSIDs showed "no internet" (AP failed-closed on User Profile enforcement), PPSK RadSec calls affected. Resolved ~30 min later — no action needed on lab side.</p></div>
+  <p>Corp/Guest internet restored automatically once EP1 came back. All three DHCP pools confirmed active: VLAN 20 (2 leases), VLAN 30 (1 lease), VLAN 100 (1 lease).</p>
+
+  <h3>Issue 4 — Firewall Rule Order: RFC1918 Isolation Broken</h3>
+  <div class="box correct"><p><strong>Root cause:</strong> <code>PERMIT Any→Any→Any</code> was Rule 1 in <code>Guest_VLAN_100</code> firewall. First-match semantics mean all traffic was permitted before the DENY RFC1918 rules ever fired. Guests could reach corporate subnets.</p></div>
+  <table>
+    <thead><tr><th>Before (wrong)</th><th>After (correct)</th></tr></thead>
+    <tbody>
+      <tr><td>1. PERMIT Any → Any → Any</td><td>1. DENY Any → 10.0.0.0/8 → Any</td></tr>
+      <tr><td>2. PERMIT Any → Any → DHCP</td><td>2. DENY Any → 172.16.0.0/12 → Any</td></tr>
+      <tr><td>3. PERMIT Any → Any → DNS</td><td>3. DENY Any → 192.168.0.0/16 → Any</td></tr>
+      <tr><td>4. DENY Any → 10.0.0.0/8</td><td>4. PERMIT Any → Any → Any</td></tr>
+      <tr><td>5. DENY Any → 172.16.0.0/12</td><td>5. PERMIT Any → Any → DHCP</td></tr>
+      <tr><td>6. DENY Any → 192.168.0.0/16</td><td>6. PERMIT Any → Any → DNS</td></tr>
+    </tbody>
+  </table>
+  <p>Fixed and deployed. <strong>Security gap closed.</strong> Rule reorder was critical — DENY RFC1918 must precede catch-all PERMIT in any guest isolation policy.</p>
+
+  <h3>Issue 5 — No Internet After Firewall Fix <span class="badge todo">Open ⚠</span></h3>
+  <div class="box warn"><p><strong>Status:</strong> Unresolved. Even after firewall reorder and redeploy, <code>ping 8.8.8.8</code> times out from both MacBook and iPhone on PPSK_Demo. Routing chain fully validated — SW1 can ping 8.8.8.8 and ping 8.8.8.8 from 10.100.0.1 (0% loss). QF-Modem NATs VLAN 100 traffic confirmed. DHCP lease confirmed (10.100.0.10). Gateway reachable (ping 10.100.0.1 works). Block is at the AP policy layer.</p></div>
+
+  <h4>Validated (not the problem):</h4>
+  <ul>
+    <li>SW1 routing: <code>ping vr VR-Default 8.8.8.8</code> → 0% loss ✅</li>
+    <li>VLAN 100 source: <code>ping vr VR-Default 8.8.8.8 from 10.100.0.1</code> → 0% loss ✅</li>
+    <li>QF-Modem static route 10.100.0.0/24 → 192.168.0.28 ✅</li>
+    <li>DHCP lease: 10.100.0.10 assigned ✅</li>
+    <li>Default gateway: 10.100.0.1 confirmed on MacBook ✅</li>
+  </ul>
+
+  <h4>Suspected root cause — CWP still active:</h4>
+  <div class="box"><p>If <strong>Captive Web Portal (CWP) is still ON</strong> on PPSK_Demo, the AP blocks all non-HTTP traffic (including ICMP) until the user completes the portal flow. DHCP works, gateway ping works, but 8.8.8.8 is silently dropped — exactly the observed symptom.</p></div>
+  <p><strong>First check tomorrow:</strong></p>
+  <pre><code>XIQ → Network Policies → AP_April21_KarlLab → PPSK_Demo → Edit
+  → CWP toggle → must be OFF
+  → Save → Deploy → reconnect device → ping 8.8.8.8</code></pre>
+
+  <p><strong>If CWP is already OFF:</strong> run traceroute to isolate the exact hop where traffic dies:</p>
+  <pre><code># MacBook
+traceroute 8.8.8.8
+
+# Expected if routing works:
+#   1. 10.100.0.1  (SW1 VLAN 100 SVI)
+#   2. 192.168.0.1 (QF-Modem)
+#   3. ...internet hops...</code></pre>
+
   <!-- PENDING -->
   <span class="section-label" id="pending">Pending</span>
   <h2>Sprint Backlog</h2>
 
   <div class="pending-group">
-    <p class="pending-group-label">Next — Phase 1 Test (ready now)</p>
-    <div class="box ok" style="margin-bottom:10px"><p>SW1 is fully configured. XIQ objects are in place. The only remaining step is creating one test PPSK user and running the E2E connect test.</p></div>
+    <p class="pending-group-label">Tomorrow Morning — Resolve Phase 1 Internet Block</p>
+    <div class="box warn" style="margin-bottom:10px"><p>DHCP ✅ · Gateway ✅ · SW1 routing ✅ · QF-Modem NAT ✅ · Internet ❌ — block is at AP policy layer. CWP suspected.</p></div>
     <ul>
-      <li><strong>XIQ → Configure → Users → Users → (+)</strong> · User Group: <code>PPSK_Demo</code> · generate PPSK (10-char) · enter email + mobile → SAVE → user receives PPSK by email/SMS</li>
-      <li>On test device: connect to SSID <code>PPSK_Demo</code> → enter the PPSK from email</li>
-      <li>Verify IP: <code>ifconfig</code> → should show <code>10.100.0.x</code> (DHCP from SW1)</li>
-      <li>Verify internet: browser or <code>ping 8.8.8.8</code> → should succeed</li>
-      <li>Verify isolation: <code>ping 192.168.0.28</code> (SW1 mgmt) → should be <strong>blocked</strong> by RFC1918 DENY rule</li>
-      <li>On SW1: <code>show dhcp-server vlan Guest_100</code> → confirm lease issued for guest MAC</li>
+      <li><strong>Step 1:</strong> XIQ → <code>AP_April21_KarlLab</code> → <code>PPSK_Demo</code> → Edit → confirm CWP is <strong>OFF</strong> → Save → Deploy</li>
+      <li><strong>Step 2:</strong> Reconnect device to PPSK_Demo → <code>ping 8.8.8.8</code></li>
+      <li><strong>Step 3:</strong> If still failing → <code>traceroute 8.8.8.8</code> on MacBook → identify which hop drops</li>
+      <li><strong>Step 4:</strong> If CWP was already OFF → add WPA2/WPA3 transition mode so MacBooks see SSID without needing manual join</li>
+      <li><strong>Step 5:</strong> Once internet works → verify isolation: <code>ping 192.168.0.28</code> → should be blocked (RFC1918 DENY)</li>
+      <li><strong>Step 6:</strong> <code>show dhcp-server vlan Guest_100</code> on SW1 → confirm lease, then Phase 1 complete ✅</li>
     </ul>
   </div>
 
