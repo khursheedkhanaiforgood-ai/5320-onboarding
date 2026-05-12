@@ -1,0 +1,1171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PPSK Guest Onboarding Simulator — XIQ / KhKLab</title>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Libre+Franklin:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Libre Franklin', Arial, sans-serif; background: #0f1117; color: #e2e8f0; min-height: 100vh; padding: 32px 20px 60px; }
+h1 { font-family: 'Libre Baskerville', Georgia, serif; font-size: 1.7rem; color: #f8fafc; margin-bottom: 6px; }
+.subtitle { font-size: 0.82rem; color: #94a3b8; margin-bottom: 24px; }
+
+/* Scene Tabs */
+.scene-tabs { display: flex; gap: 4px; margin-bottom: 20px; flex-wrap: wrap; }
+.scene-tab { font-family: 'Libre Franklin', sans-serif; font-size: 0.78rem; font-weight: 700; padding: 10px 20px; border-radius: 4px 4px 0 0; border: 1px solid #2d3748; border-bottom: none; cursor: pointer; transition: background 0.2s, color 0.2s; background: #1a1f2e; color: #64748b; }
+.scene-tab:hover { background: #242938; color: #94a3b8; }
+.scene-tab.active { background: #1e2330; color: #f8fafc; border-color: #3d4758; }
+.scene-tab .tab-num { font-family: 'IBM Plex Mono', monospace; font-size: 0.65rem; color: #475569; display: block; margin-bottom: 2px; }
+.scene-tab.active .tab-num { color: #94a3b8; }
+.scene-panel { background: #1a1f2e; border: 1px solid #2d3748; border-radius: 0 4px 4px 4px; padding: 20px; margin-bottom: 18px; display: none; }
+.scene-panel.active { display: block; }
+.scene-description { font-size: 0.82rem; color: #64748b; margin-bottom: 0; }
+.scene-description strong { color: #94a3b8; }
+
+/* Stage */
+.stage { display: grid; grid-template-columns: 1fr 60px 1fr 60px 1fr; gap: 0; margin-bottom: 20px; min-height: 380px; }
+.actor { background: #1e2330; border: 1px solid #2d3748; border-radius: 8px; padding: 16px 14px; display: flex; flex-direction: column; align-items: center; }
+.actor-icon { font-size: 2rem; margin-bottom: 6px; }
+.actor-name { font-family: 'Libre Franklin', sans-serif; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: #94a3b8; margin-bottom: 4px; }
+.actor-device { font-family: 'IBM Plex Mono', monospace; font-size: 0.78rem; color: #60a5fa; margin-bottom: 14px; }
+.actor-port { font-size: 0.72rem; color: #475569; margin-top: auto; padding-top: 12px; border-top: 1px solid #2d3748; width: 100%; text-align: center; line-height: 1.6; }
+.actor-port span { display: block; }
+.port-open { color: #34d399; }
+.port-locked { color: #f87171; }
+.port-waiting { color: #fbbf24; }
+
+/* SW1 sub-indicator (Scene 3 only) */
+.sw1-sub { margin-top: 10px; padding: 8px 10px; background: #151b28; border: 1px solid #2d3748; border-radius: 6px; width: 100%; text-align: center; }
+.sw1-sub-label { font-family: 'IBM Plex Mono', monospace; font-size: 0.62rem; color: #475569; text-transform: uppercase; letter-spacing: 0.08em; }
+.sw1-sub-state { font-size: 0.72rem; margin-top: 2px; }
+.sw1-inactive { color: #475569; }
+.sw1-active { color: #34d399; }
+
+/* Channel columns */
+.channel { display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 0 4px; }
+.channel-label { font-size: 0.58rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #334155; transform: rotate(-90deg); white-space: nowrap; }
+
+/* Messages */
+.msg-list { width: 100%; display: flex; flex-direction: column; gap: 6px; flex: 1; }
+.msg { padding: 7px 10px; border-radius: 4px; font-size: 0.74rem; font-family: 'IBM Plex Mono', monospace; opacity: 0.2; transition: opacity 0.3s, background 0.3s; border: 1px solid transparent; }
+.msg.active   { opacity: 1; border-color: currentColor; }
+.msg.done     { opacity: 0.5; }
+.msg.api      { background: #0c3344; color: #67e8f9; }
+.msg.capwap   { background: #0d3d38; color: #5eead4; }
+.msg.smtp     { background: #3d2e0a; color: #fde68a; }
+.msg.eapol    { background: #1e3a5f; color: #93c5fd; }
+.msg.radsec   { background: #3b1f0a; color: #fdba74; }
+.msg.key      { background: #1a1a3e; color: #c4b5fd; }
+.msg.data     { background: #052e16; color: #6ee7b7; }
+.msg.info     { background: #1e2330; color: #94a3b8; }
+.msg-dir { font-size: 0.66rem; color: #64748b; margin-top: 3px; font-family: 'Libre Franklin', sans-serif; }
+
+/* Arrow */
+.arrow-area { display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 380px; }
+.arrow { font-size: 1.6rem; opacity: 0; transition: opacity 0.3s; }
+.arrow.active { opacity: 1; }
+.arrow.api    { color: #67e8f9; }
+.arrow.capwap { color: #5eead4; }
+.arrow.smtp   { color: #fde68a; }
+.arrow.eapol  { color: #93c5fd; }
+.arrow.radsec { color: #fdba74; }
+.arrow.key    { color: #c4b5fd; }
+.arrow.data   { color: #6ee7b7; }
+.arrow.info   { color: #64748b; }
+
+/* Explanation panel */
+.explain { background: #1e2330; border: 1px solid #2d3748; border-radius: 8px; padding: 20px 24px; margin-bottom: 12px; min-height: 140px; }
+.explain-step { font-family: 'IBM Plex Mono', monospace; font-size: 0.68rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: #475569; margin-bottom: 4px; }
+.explain-title { font-family: 'Libre Baskerville', Georgia, serif; font-size: 1.15rem; color: #f8fafc; margin-bottom: 10px; }
+.explain-body  { font-size: 0.87rem; line-height: 1.78; color: #cbd5e1; }
+.explain-body strong { color: #f8fafc; }
+.explain-body code { font-family: 'IBM Plex Mono', monospace; font-size: 0.8rem; background: #0f1117; padding: 1px 5px; border-radius: 3px; }
+.tag { display: inline-block; padding: 2px 8px; border-radius: 3px; font-family: 'Libre Franklin', sans-serif; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; margin-right: 6px; }
+.tag.api    { background: #0c3344; color: #67e8f9; }
+.tag.capwap { background: #0d3d38; color: #5eead4; }
+.tag.smtp   { background: #3d2e0a; color: #fde68a; }
+.tag.eapol  { background: #1e3a5f; color: #93c5fd; }
+.tag.radsec { background: #3b1f0a; color: #fdba74; }
+.tag.key    { background: #1a1a3e; color: #c4b5fd; }
+.tag.data   { background: #052e16; color: #6ee7b7; }
+.tag.info   { background: #1e2330; color: #94a3b8; border: 1px solid #334155; }
+
+/* Frame panel */
+.frame-panel { background: #0a0d14; border: 1px solid #1e2330; border-radius: 6px; padding: 14px 16px; margin-bottom: 18px; min-height: 80px; display: none; }
+.frame-panel.visible { display: block; }
+.frame-label { font-family: 'Libre Franklin', sans-serif; font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #334155; margin-bottom: 8px; }
+.frame-content { font-family: 'IBM Plex Mono', monospace; font-size: 0.75rem; color: #64748b; line-height: 1.7; white-space: pre; }
+.frame-content .field-name  { color: #5eead4; }
+.frame-content .field-value { color: #e2e8f0; }
+.frame-content .field-note  { color: #475569; }
+.frame-content .field-hi    { color: #fdba74; }
+
+/* Controls */
+.controls { display: flex; gap: 12px; align-items: center; margin-bottom: 28px; flex-wrap: wrap; }
+.btn { font-family: 'Libre Franklin', sans-serif; font-size: 0.82rem; font-weight: 700; padding: 10px 24px; border-radius: 4px; border: none; cursor: pointer; transition: background 0.2s; }
+.btn-prev { background: #2d3748; color: #94a3b8; }
+.btn-prev:hover { background: #374151; color: #e2e8f0; }
+.btn-next { background: #3b82f6; color: #fff; }
+.btn-next:hover { background: #2563eb; }
+.btn-play { background: #065f46; color: #6ee7b7; }
+.btn-play:hover { background: #047857; }
+.btn-play.playing { background: #7c3aed; color: #e9d5ff; }
+.btn-play.playing:hover { background: #6d28d9; }
+.btn:disabled { opacity: 0.3; cursor: not-allowed; }
+.speed-select { font-family: 'IBM Plex Mono', monospace; font-size: 0.72rem; background: #1e2330; color: #94a3b8; border: 1px solid #2d3748; border-radius: 4px; padding: 8px 10px; cursor: pointer; }
+.playing-dot { display: inline-block; color: #a78bfa; margin-right: 4px; animation: pulse 0.8s infinite; }
+@keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.2; } }
+.progress { font-family: 'IBM Plex Mono', monospace; font-size: 0.72rem; color: #475569; margin-left: auto; }
+
+/* RFC table */
+.rfc-section { margin-top: 32px; }
+.rfc-section h2 { font-family: 'Libre Baskerville', Georgia, serif; font-size: 1.1rem; color: #f8fafc; margin-bottom: 14px; border-bottom: 1px solid #2d3748; padding-bottom: 8px; }
+.rfc-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(310px, 1fr)); gap: 10px; }
+.rfc-item { background: #1e2330; border: 1px solid #2d3748; border-radius: 6px; padding: 12px 14px; }
+.rfc-id   { font-family: 'IBM Plex Mono', monospace; font-size: 0.85rem; font-weight: 600; color: #60a5fa; margin-bottom: 3px; }
+.rfc-name { font-size: 0.72rem; color: #94a3b8; margin-bottom: 5px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; }
+.rfc-desc { font-size: 0.82rem; color: #cbd5e1; line-height: 1.6; }
+
+/* Phase badge */
+.phase-badge { display: inline-block; font-family: 'IBM Plex Mono', monospace; font-size: 0.62rem; padding: 2px 8px; border-radius: 10px; margin-left: 8px; background: #1a1a3e; color: #c4b5fd; border: 1px solid #2d3748; vertical-align: middle; }
+
+/* Copyright */
+.copyright { text-align: center; font-size: 0.72rem; color: #334155; margin-top: 36px; padding-top: 16px; border-top: 1px solid #1e2330; }
+</style>
+</head>
+<body>
+
+<h1>PPSK Guest Onboarding Simulator <span class="phase-badge">Phase 1 — HTML</span></h1>
+<p class="subtitle">KhKLab &bull; MyLab_XIQ &bull; AP1 / SW1 (EXOS) &bull; WPA2/AES &bull; Cloud PPSK &bull; May 2026</p>
+
+<!-- SCENE TABS -->
+<div class="scene-tabs">
+  <div class="scene-tab active" id="tab-s1" onclick="switchScene(1)">
+    <span class="tab-num">SCENE 1 — 7 STEPS</span>
+    Provisioning
+  </div>
+  <div class="scene-tab" id="tab-s2" onclick="switchScene(2)">
+    <span class="tab-num">SCENE 2 — 4 STEPS</span>
+    Key Delivery
+  </div>
+  <div class="scene-tab" id="tab-s3" onclick="switchScene(3)">
+    <span class="tab-num">SCENE 3 — 13 STEPS</span>
+    Runtime Auth
+  </div>
+</div>
+
+<!-- SCENE 1 PANEL -->
+<div class="scene-panel active" id="panel-s1">
+  <p class="scene-description"><strong>Admin → XIQ → AP1/SW1</strong> &nbsp;|&nbsp; Build the PPSK SSID, User Groups, User Profiles, Assignment Rules, push config to AP via CAPWAP, confirm SSID beacon and VLAN on SW1.</p>
+</div>
+<!-- SCENE 2 PANEL -->
+<div class="scene-panel" id="panel-s2">
+  <p class="scene-description"><strong>Admin → XIQ → SMTP → Guest</strong> &nbsp;|&nbsp; Create a PPSK user, XIQ generates the key and computes the PMK, sends email to guest, guest holds the key ready to connect.</p>
+</div>
+<!-- SCENE 3 PANEL -->
+<div class="scene-panel" id="panel-s3">
+  <p class="scene-description"><strong>UE ↔ AP1 ↔ XIQ Cloud (RadSec)</strong> &nbsp;|&nbsp; Guest joins SSID with PPSK. AP1 cannot verify the key alone — it calls XIQ via RadSec. XIQ returns PMK + VLAN policy. 4-Way Handshake completes. Port opens on VLAN 80.</p>
+</div>
+
+<!-- STAGE -->
+<div class="stage" id="stage">
+  <!-- COL A -->
+  <div class="actor" id="col-a">
+    <div class="actor-icon" id="icon-a">👨‍💻</div>
+    <div class="actor-name" id="name-a">Admin</div>
+    <div class="actor-device" id="device-a">XIQ Portal</div>
+    <div class="msg-list" id="msgs-a"></div>
+    <div class="actor-port" id="port-a">
+      <span id="a-port-label">Operator</span>
+      <span id="a-port-state" class="port-waiting">● Configuring</span>
+    </div>
+  </div>
+
+  <!-- ARROW 1 -->
+  <div class="arrow-area">
+    <div class="arrow api" id="arrow1" style="transform:rotate(90deg)">⇅</div>
+    <div style="font-size:0.54rem;color:#334155;margin-top:4px;text-align:center" id="arrow1-label">REST<br>API</div>
+  </div>
+
+  <!-- COL B (middle) -->
+  <div class="actor" id="col-b">
+    <div class="actor-icon" id="icon-b">☁️</div>
+    <div class="actor-name" id="name-b">XIQ Cloud</div>
+    <div class="actor-device" id="device-b">MyLab_XIQ</div>
+    <div class="msg-list" id="msgs-b"></div>
+    <div class="actor-port" id="port-b">
+      <span id="b-port-label">Policy engine</span>
+      <span id="b-port-state" class="port-waiting">● Idle</span>
+    </div>
+  </div>
+
+  <!-- ARROW 2 -->
+  <div class="arrow-area">
+    <div class="arrow capwap" id="arrow2" style="transform:rotate(90deg)">⇅</div>
+    <div style="font-size:0.54rem;color:#334155;margin-top:4px;text-align:center" id="arrow2-label">CAPWAP<br>UDP 5246</div>
+  </div>
+
+  <!-- COL C -->
+  <div class="actor" id="col-c">
+    <div class="actor-icon" id="icon-c">📡</div>
+    <div class="actor-name" id="name-c">AP1 + SW1</div>
+    <div class="actor-device" id="device-c">AP3000 / EXOS</div>
+    <div class="msg-list" id="msgs-c"></div>
+    <div class="actor-port" id="port-c">
+      <span id="c-port-label">SSID status</span>
+      <span id="c-port-state" class="port-locked">● Not broadcasting</span>
+    </div>
+    <div class="sw1-sub" id="sw1-sub" style="display:none">
+      <div class="sw1-sub-label">SW1 EXOS — Port 3</div>
+      <div class="sw1-sub-state sw1-inactive" id="sw1-state">● VLAN 80 unconfirmed</div>
+    </div>
+  </div>
+</div>
+
+<!-- EXPLANATION -->
+<div class="explain">
+  <div class="explain-step" id="exp-step">Scene 1 · Step 0 of 7</div>
+  <div class="explain-title" id="exp-title">Ready to begin</div>
+  <div class="explain-body" id="exp-body">Click <strong>Next</strong> to walk through the PPSK provisioning flow. Scene 1 covers the XIQ admin configuration: SSID, User Groups, User Profiles, Assignment Rules, and CAPWAP config push to AP1.</div>
+</div>
+
+<!-- FRAME PANEL -->
+<div class="frame-panel" id="frame-panel">
+  <div class="frame-label">Frame / Payload Detail</div>
+  <div class="frame-content" id="frame-content"></div>
+</div>
+
+<!-- CONTROLS -->
+<div class="controls">
+  <button class="btn btn-prev" id="btn-prev" onclick="manualGo(-1)" disabled>&#8592; Back</button>
+  <button class="btn btn-next" id="btn-next" onclick="manualGo(1)">Next &#8594;</button>
+  <button class="btn btn-prev" onclick="resetScene()" style="margin-left:8px">&#8635; Restart</button>
+  <button class="btn btn-play" id="btn-play" onclick="togglePlay()">&#9654; Play</button>
+  <select class="speed-select" id="speed-select" title="Playback speed">
+    <option value="2000">Slow (2s)</option>
+    <option value="1400" selected>Normal (1.4s)</option>
+    <option value="600">Fast (0.6s)</option>
+  </select>
+  <span class="progress" id="progress-label">0 / 7</span>
+</div>
+
+<script>
+/* =====================================================================
+   SCENES DATA
+   Each step: { title, tag, body, frame, a, b, c, arrow1, arrow2,
+                aState, bState, cState, sw1Active }
+   a/b/c: { text, type } | null
+   ===================================================================== */
+
+const SCENES = {
+
+  /* ─────────────────────────────────────────────────────────────────
+     SCENE 1 — Provisioning (7 steps)
+     Admin 👨‍💻 | REST API | XIQ ☁️ | CAPWAP | AP1+SW1 📡
+  ───────────────────────────────────────────────────────────────── */
+  1: {
+    label: "Scene 1 · Step",
+    total: 7,
+    actors: {
+      a: { icon: "👨‍💻", name: "Admin", device: "XIQ Portal", portLabel: "Operator" },
+      b: { icon: "☁️",  name: "XIQ Cloud", device: "MyLab_XIQ", portLabel: "Policy engine" },
+      c: { icon: "📡",  name: "AP1 + SW1", device: "AP3000 / EXOS", portLabel: "SSID status" }
+    },
+    arrow1Label: "REST\nAPI",
+    arrow2Label: "CAPWAP\nUDP 5246",
+    arrow1Class: "api",
+    arrow2Class: "capwap",
+    showSW1: false,
+    steps: [
+      {
+        title: "Create PPSK SSID in XIQ",
+        tag: "api",
+        body: `Admin opens XIQ → <strong>Configure → Network Policies → Wireless Networks → Add</strong>.<br><br>Security mode: <strong>Private Pre-Shared Key (PPSK)</strong>. This tells XIQ this SSID will carry per-user unique passphrases — not a single shared PSK. WPA2/AES is the only valid cipher. WPA3/SAE is <em>not</em> supported with PPSK (PTK derivation path differs).<br><br>SSID name: <code>KhKLab-Guest</code>. Broadcasting enabled. The SSID object is now an empty container waiting for User Groups.`,
+        frame: `POST /xapi/v1/configuration/networkpolicies
+Content-Type: application/json
+
+{
+  "ssid"          : "KhKLab-Guest",
+  "security_type" : "PPSK",
+  "encryption"    : "WPA2-AES",
+  "broadcast_ssid": true,
+  "key_type"      : "cloud_ppsk"       ← per-user, validated via RadSec
+}
+
+Response 201 Created
+{ "ssid_id": "ssid-7a3b9f", ... }`,
+        a: { text: "POST /xapi/v1/ssid\n  KhKLab-Guest · PPSK · WPA2/AES", type: "api" },
+        b: { text: "← SSID object created\n  ssid-id: ssid-7a3b9f\n  Awaiting User Groups", type: "api" },
+        c: null,
+        arrow1: true, arrow2: false,
+        aState: "● Building objects", bState: "● SSID created", cState: "● Not broadcasting"
+      },
+      {
+        title: "Create User Group — Guest-24h (Cloud PPSK)",
+        tag: "api",
+        body: `A <strong>User Group</strong> is the PPSK container — it holds all users who share the same policy template. Up to 100,000 users per group (Cloud DB), 32 groups per SSID.<br><br>Key settings:<br>• Storage: <strong>Cloud DB</strong> (RadSec validates at runtime; full email delivery enabled)<br>• PPSK format: 10-char alphanumeric (entropy: ~52 bits — brute-force resistant)<br>• Validity: <strong>Valid For Time Period — 24 hours after first login</strong>. Guest connects at 2pm → key expires 2pm next day regardless of activity.<br><br>The User Group is attached to the SSID. Guests in this group will land on the User Profile assigned to it.`,
+        frame: `POST /xapi/v1/usergroups
+{
+  "name"          : "Guest-24h",
+  "ssid_id"       : "ssid-7a3b9f",
+  "db_type"       : "CLOUD",             ← RadSec auth at runtime
+  "ppsk_format"   : "ALPHANUMERIC",
+  "ppsk_length"   : 10,
+  "validity_type" : "FIRST_LOGIN",
+  "valid_duration": 86400                ← 24 × 3600 seconds
+}
+
+Response 201 Created  { "ug_id": "ug-guest24h" }`,
+        a: { text: "POST /xapi/v1/usergroups\n  Guest-24h · Cloud · 24h timer", type: "api" },
+        b: { text: "← User Group created\n  ug-id: ug-guest24h\n  Cloud DB · 100k capacity", type: "api" },
+        c: null,
+        arrow1: true, arrow2: false,
+        aState: "● Building objects", bState: "● UG ready", cState: "● Not broadcasting"
+      },
+      {
+        title: "Create User Profile — Guest-VLAN-80",
+        tag: "api",
+        body: `A <strong>User Profile</strong> is the policy bundle: VLAN + Firewall + QoS. This is what XIQ sends back to the AP inside the RadSec Access-Accept — equivalent to RADIUS Attr 81 (Tunnel-Private-Group-ID) in 802.1X.<br><br>VLAN 80 = "Guest_New" (I-SID 100080 on SW2 VOSS side; on SW1 EXOS side: <code>create vlan Guest_80 tag 80</code>).<br><br><strong>Firewall rule: Guest-Internet-Access-Only</strong><br>— PERMIT any → 0.0.0.0/0 (internet)<br>— DENY any → 10.0.0.0/8 (blocks internal corp subnets)<br>— DENY any → 172.16.0.0/12<br>— DENY any → 192.168.0.0/16<br><br>This firewall runs <strong>at the AP</strong> itself (L2–L7 inspection), not at the switch.`,
+        frame: `POST /xapi/v1/userprofiles
+{
+  "name"    : "Guest-VLAN-80",
+  "vlan_id" : 80,
+  "firewall": {
+    "name" : "Guest-Internet-Access-Only",
+    "rules": [
+      { "action":"PERMIT", "dst":"0.0.0.0/0"     },
+      { "action":"DENY",   "dst":"10.0.0.0/8"    },
+      { "action":"DENY",   "dst":"172.16.0.0/12" },
+      { "action":"DENY",   "dst":"192.168.0.0/16"}
+    ]
+  }
+}`,
+        a: { text: "POST /xapi/v1/userprofiles\n  Guest-VLAN-80\n  VLAN 80 · Guest-Internet-Only", type: "api" },
+        b: { text: "← User Profile created\n  up-id: up-guestvlan80\n  FW rules attached", type: "api" },
+        c: null,
+        arrow1: true, arrow2: false,
+        aState: "● Building objects", bState: "● Profile ready", cState: "● Not broadcasting"
+      },
+      {
+        title: "Create Assignment Rule — Guest-24h → Guest-VLAN-80",
+        tag: "api",
+        body: `An <strong>Assignment Rule</strong> maps User Group → User Profile. When a guest in the Guest-24h group authenticates, XIQ automatically returns the Guest-VLAN-80 profile (VLAN 80 + firewall) in the RadSec Access-Accept.<br><br>This is the policy binding. Without this rule, XIQ cannot tell the AP which VLAN to assign to a validated guest.<br><br>Order matters: XIQ evaluates rules top-down. If a guest could be in multiple groups (not our case today), the first matching rule wins.`,
+        frame: `POST /xapi/v1/assignmentrules
+{
+  "ssid_id"    : "ssid-7a3b9f",
+  "ug_id"      : "ug-guest24h",
+  "up_id"      : "up-guestvlan80",
+  "priority"   : 1
+}
+
+Binding confirmed:
+  Guest-24h user authenticates
+    → XIQ returns VLAN=80, FW=Guest-Internet-Access-Only
+    → AP1 tags frames on VLAN 80 + enforces firewall`,
+        a: { text: "POST /xapi/v1/assignmentrules\n  Guest-24h → Guest-VLAN-80\n  Priority 1", type: "api" },
+        b: { text: "← Rule binding confirmed\n  UG ug-guest24h\n  → UP up-guestvlan80", type: "api" },
+        c: null,
+        arrow1: true, arrow2: false,
+        aState: "● Objects complete", bState: "● Policy bound", cState: "● Not broadcasting"
+      },
+      {
+        title: "XIQ → AP1: CAPWAP Config Push",
+        tag: "capwap",
+        body: `<strong>CAPWAP</strong> (<em>Control And Provisioning of Wireless Access Points</em>, RFC 5415) is the management tunnel between XIQ and every managed AP. It runs over <strong>UDP 5246</strong> (control) and UDP 5247 (data tunnel, optional).<br><br>When admin clicks <strong>Deploy</strong> (or update is auto-pushed), XIQ sends a CAPWAP Config Response to AP1 containing:<br>• SSID configuration (name, security, WPA2/AES)<br>• User Group definitions + PPSK validation mode (Cloud)<br>• RadSec proxy certificate (TLS cert for TCP 2083)<br>• Assignment rules<br><br>The AP <strong>does not store individual PPSK passphrases</strong> in Cloud mode — only the RadSec endpoint and certificate. Validation happens live at runtime.`,
+        frame: `CAPWAP Control · UDP 5246
+  Msg Type  : Config-Response (17)
+  AP        : AP1 (192.168.0.x)
+  XIQ       : cloud.extremecloudiq.com
+
+  Payload:
+  [SSID]      KhKLab-Guest · PPSK · WPA2-AES
+  [UG]        Guest-24h · Cloud · 24h-first-login
+  [RadSec]    radsec.extremecloudiq.com:2083
+  [TLS Cert]  -----BEGIN CERTIFICATE----- ...
+  [FW Policy] Guest-Internet-Access-Only
+
+  AP replies: Config-ACK (18)`,
+        a: null,
+        b: { text: "CAPWAP Config-Response →\n  SSID + UGs + RadSec cert\n  → AP1", type: "capwap" },
+        c: { text: "← Config-ACK received\n  RadSec cert installed\n  SSID ready to broadcast", type: "capwap" },
+        arrow1: false, arrow2: true,
+        aState: "● Deploy triggered", bState: "● Pushing config", cState: "● Config received"
+      },
+      {
+        title: "AP1 Broadcasts SSID — 802.11 Beacon",
+        tag: "info",
+        body: `AP1 activates the new SSID and begins broadcasting <strong>802.11 Beacon frames</strong> every <strong>102.4 ms</strong> (100 TUs = 100 × 1024 µs).<br><br>The Beacon carries the <strong>RSN IE</strong> (<em>Robust Security Network Information Element</em>), which tells nearby clients:<br>• Auth suite: PSK (0x02) — PPSK looks like regular WPA2-Personal from the outside<br>• Pairwise cipher: CCMP/AES (0x04)<br>• Group cipher: CCMP/AES<br><br>Clients cannot distinguish PPSK from standard PSK by looking at the Beacon alone. They will only discover the difference when they enter a per-user passphrase and the AP validates it against the cloud.`,
+        frame: `IEEE 802.11 Beacon Frame
+  BSSID     : aa:bb:cc:11:22:33
+  SSID      : "KhKLab-Guest"
+  Interval  : 100 TU (102.4 ms)
+  Capabilities: ESS · Privacy ✓
+
+  RSN IE (tag 48):
+    Version           : 1
+    Group cipher      : CCMP (AES) 00-0F-AC:04
+    Pairwise cipher   : CCMP (AES) 00-0F-AC:04
+    AKM suite         : PSK       00-0F-AC:02  ← looks like WPA2-Personal
+    RSN Capabilities  : 0x0000`,
+        a: null,
+        b: null,
+        c: { text: "📡 Beacon → OTA\n  SSID: KhKLab-Guest\n  RSN: WPA2/CCMP · every 102ms", type: "info" },
+        arrow1: false, arrow2: false,
+        aState: "● Done", bState: "● Monitoring", cState: "● Broadcasting ✓"
+      },
+      {
+        title: "SW1 VLAN 80 — EXOS Config",
+        tag: "capwap",
+        body: `VLAN 80 must exist on SW1 so AP1 can tag guest traffic onto it. In <strong>Phase 1</strong> (EXOS), XIQ cannot push VLAN creation to the switch — the EXOS VLAN must be configured by CLI or ZTP.<br><br>EXOS CLI sequence:<br><code>create vlan Guest_80 tag 80</code><br><code>configure vlan Guest_80 ipaddress 10.80.0.1/24</code><br><code>enable dhcp ports &lt;ap1-port&gt; vlan Guest_80</code><br><code>configure vlan Guest_80 add port &lt;ap1-port&gt; tagged</code><br><br>DHCP scope on SW1 for VLAN 80: <code>10.80.0.10–10.80.0.254</code>, GW <code>10.80.0.1</code>, DNS <code>8.8.8.8</code>, lease 86400s (24h — matches key expiry).<br><br><strong>Open design question:</strong> Why should the customer need switch CLI? Phase 4a — the XIQ Wizard — will push this via ExtremeCloud switch management. Today it's manual.`,
+        frame: `# EXOS CLI — SW1 (192.168.0.28)
+create vlan Guest_80 tag 80
+configure vlan Guest_80 ipaddress 10.80.0.1 255.255.255.0
+enable ipforwarding vlan Guest_80
+configure vlan Guest_80 add port <ap1-port> tagged
+
+# DHCP server on SW1
+configure vlan Guest_80 dhcp-address-range 10.80.0.10-10.80.0.254
+configure vlan Guest_80 dhcp-options default-gateway 10.80.0.1
+configure vlan Guest_80 dhcp-options dns-server primary 8.8.8.8
+configure vlan Guest_80 dhcp-lease-timer 86400
+enable dhcp ports <ap1-port> vlan Guest_80`,
+        a: { text: "EXOS CLI (manual)\n  create vlan Guest_80 tag 80\n  DHCP scope 10.80.0.x", type: "capwap" },
+        b: null,
+        c: { text: "← SW1 VLAN 80 confirmed\n  10.80.0.1/24 ✓\n  DHCP pool active ✓", type: "capwap" },
+        arrow1: true, arrow2: false,
+        aState: "● CLI complete", bState: "● Monitoring", cState: "✅ SSID + VLAN ready"
+      }
+    ]
+  },
+
+  /* ─────────────────────────────────────────────────────────────────
+     SCENE 2 — Key Delivery (4 steps)
+     Admin 👨‍💻 | XIQ Portal | XIQ ☁️ | SMTP | Guest 💻
+  ───────────────────────────────────────────────────────────────── */
+  2: {
+    label: "Scene 2 · Step",
+    total: 4,
+    actors: {
+      a: { icon: "👨‍💻", name: "Admin", device: "XIQ Portal", portLabel: "Operator" },
+      b: { icon: "☁️",  name: "XIQ Cloud", device: "MyLab_XIQ · SMTP relay", portLabel: "Key generator" },
+      c: { icon: "💻",  name: "Guest", device: "john@company.com", portLabel: "Inbox" }
+    },
+    arrow1Label: "XIQ\nPortal",
+    arrow2Label: "SMTP\nTCP 587",
+    arrow1Class: "api",
+    arrow2Class: "smtp",
+    showSW1: false,
+    steps: [
+      {
+        title: "Admin Creates PPSK User",
+        tag: "api",
+        body: `Admin opens XIQ → <strong>Manage → Users → Add</strong>. Fills in:<br>• Name: <code>John Smith</code><br>• Email: <code>john@company.com</code><br>• Group: <code>Guest-24h</code><br><br>Note: the User Group must be created <strong>inside</strong> the SSID configuration (not as a standalone object) for email delivery to work. User Groups created <em>outside</em> the SSID — as global objects — have email delivery suppressed by XIQ. This is a known configuration trap in the Rieben guide (p. 42).<br><br>Admin does not type a password or passphrase. XIQ will auto-generate it.`,
+        frame: `POST /xapi/v1/ppsk_users
+{
+  "name"    : "John Smith",
+  "email"   : "john@company.com",
+  "ug_id"   : "ug-guest24h",
+  "org"     : "Guest Visitor"
+}
+
+Response 201 Created
+{ "user_id": "usr-0042", "status": "PENDING_KEY" }`,
+        a: { text: "POST /xapi/v1/ppsk_users\n  John Smith · john@company.com\n  Group: Guest-24h", type: "api" },
+        b: { text: "← User record created\n  user-id: usr-0042\n  Generating PPSK...", type: "api" },
+        c: null,
+        arrow1: true, arrow2: false,
+        aState: "● Creating user", bState: "● Generating key", cState: "● Inbox empty"
+      },
+      {
+        title: "XIQ Generates PPSK and Computes PMK",
+        tag: "key",
+        body: `XIQ uses a <strong>cryptographically secure random number generator</strong> to produce a 10-character alphanumeric passphrase. Example: <code>xK9mP2qR7n</code> (~52 bits entropy).<br><br>XIQ then immediately computes the <strong>PMK</strong>:<br><code>PMK = PBKDF2(HMAC-SHA1, PPSK, SSID_name, 4096, 256-bit)</code><br><br>Breaking this down:<br>• Salt = SSID name (not a random salt — defined by 802.11i)<br>• Iterations = 4096 (PKCS#5 / RFC 2898 minimum)<br>• Output = 256 bits = PMK<br><br><strong>XIQ stores the PMK, not the raw PPSK.</strong> When the AP sends a RadSec request at runtime, XIQ returns the pre-computed PMK. The raw passphrase is only ever stored for email delivery — after that it could be discarded.`,
+        frame: `# PPSK Key Generation (RFC 2898 / PKCS#5)
+PPSK = "xK9mP2qR7n"        (CSPRNG, 10-char alphanum)
+
+PMK = PBKDF2(
+  PRF      = HMAC-SHA1,
+  Password = "xK9mP2qR7n",  ← the passphrase
+  Salt     = "KhKLab-Guest", ← SSID name (IEEE 802.11i §8.5.1.3)
+  c        = 4096,            ← iterations
+  dkLen    = 32              ← 256-bit output
+)
+→ PMK = a3f7c1...b29e4d (32 bytes / 256 bits)
+
+XIQ stores: { user_id, ug_id, PMK }
+Raw PPSK sent once via email then discarded from runtime path`,
+        a: null,
+        b: { text: "PPSK generated: xK9mP2qR7n\nPMK = PBKDF2(PPSK ‖ SSID)\n  → stored in Cloud DB", type: "key" },
+        c: null,
+        arrow1: false, arrow2: false,
+        aState: "● Waiting", bState: "● PMK computed ✓", cState: "● Inbox empty"
+      },
+      {
+        title: "XIQ Sends PPSK via Email (SMTP)",
+        tag: "smtp",
+        body: `XIQ triggers its internal <strong>SMTP relay</strong> (TCP 587, STARTTLS) to send the guest access email to <code>john@company.com</code>.<br><br>The email includes:<br>• SSID name: <code>KhKLab-Guest</code><br>• Passphrase: <code>xK9mP2qR7n</code><br>• Validity: 24 hours from first connection<br>• Instructions for iOS / Android / Windows<br><br><strong>This is why email delivery requires Cloud DB and the User Group created inside the SSID.</strong> Local DB PPSK can also email — but only if the PPSK Server (on-prem) has SMTP configured. Cloud path is the simpler choice for most deployments.<br><br>Guest receives the email on their phone or laptop before they arrive at the site.`,
+        frame: `SMTP STARTTLS · TCP 587
+FROM: noreply@extremecloudiq.com
+TO  : john@company.com
+SUBJ: Your Wi-Fi Access — KhKLab-Guest
+
+--- email body ---
+Welcome, John Smith!
+
+Network : KhKLab-Guest
+Password: xK9mP2qR7n
+Valid for: 24 hours from first connection
+
+Instructions:
+  iOS   — Settings > Wi-Fi > KhKLab-Guest
+  Android — Settings > Network > Wi-Fi
+  Windows — Network tray > KhKLab-Guest
+
+DO NOT share this password. It is unique to you.
+---`,
+        a: null,
+        b: { text: "SMTP → john@company.com\n  SSID: KhKLab-Guest\n  Key: xK9mP2qR7n · 24h", type: "smtp" },
+        c: { text: "← Email received ✓\n  SSID + Key saved\n  Waiting to arrive at site", type: "smtp" },
+        arrow1: false, arrow2: true,
+        aState: "● Done", bState: "● Email sent", cState: "● Key in hand"
+      },
+      {
+        title: "Guest Holds Key — Time Passes Before Connecting",
+        tag: "info",
+        body: `This step represents the gap between <strong>provisioning</strong> and <strong>runtime</strong>. The guest has the key but is not yet on-site.<br><br>Important: <strong>the 24-hour timer starts at first login, not at key creation.</strong> John could receive the email today and connect next week — the key is still valid until he first connects.<br><br>Meanwhile, AP1 is broadcasting the SSID and SW1 VLAN 80 is live. XIQ Cloud has the PMK stored against John's user_id. Nothing more to configure — the system is waiting for Scene 3: John arrives, opens Wi-Fi settings, and types the passphrase.`,
+        frame: `--- Status at end of Scene 2 ---
+
+XIQ Cloud DB:
+  user_id  : usr-0042
+  name     : John Smith
+  ug       : Guest-24h
+  PMK      : a3f7c1...b29e4d  (pre-computed)
+  valid_for: 24h (not started — first_login trigger)
+  status   : PENDING_FIRST_LOGIN
+
+AP1:
+  SSID     : KhKLab-Guest  → broadcasting ✓
+  RadSec   : radsec.extremecloudiq.com:2083  → ready
+
+SW1 EXOS:
+  VLAN 80  : 10.80.0.1/24 → active ✓
+  DHCP     : 10.80.0.10-254  → ready ✓`,
+        a: null,
+        b: { text: "PMK held in Cloud DB\n  Timer: NOT STARTED\n  Waiting for first_login", type: "info" },
+        c: { text: "Key ready in pocket\n  Arriving on site...\n  → See Scene 3", type: "info" },
+        arrow1: false, arrow2: false,
+        aState: "● Done", bState: "● Waiting for guest", cState: "● Key in pocket"
+      }
+    ]
+  },
+
+  /* ─────────────────────────────────────────────────────────────────
+     SCENE 3 — Runtime Auth (13 steps)
+     UE 💻 | 802.11 | AP1+SW1 📡 | RadSec | XIQ ☁️
+  ───────────────────────────────────────────────────────────────── */
+  3: {
+    label: "Scene 3 · Step",
+    total: 13,
+    actors: {
+      a: { icon: "💻", name: "UE / Guest", device: "John's MacBook", portLabel: "802.11 port" },
+      b: { icon: "📡", name: "AP1", device: "AP3000 · RadSec proxy", portLabel: "AP port" },
+      c: { icon: "☁️", name: "XIQ Cloud", device: "MyLab_XIQ · RadSec server", portLabel: "Auth server" }
+    },
+    arrow1Label: "802.11\nOTA",
+    arrow2Label: "RadSec\nTCP 2083",
+    arrow1Class: "eapol",
+    arrow2Class: "radsec",
+    showSW1: true,
+    steps: [
+      {
+        title: "802.11 Auth Request + Association Request",
+        tag: "eapol",
+        body: `Guest selects <code>KhKLab-Guest</code> from Wi-Fi list and types the passphrase <code>xK9mP2qR7n</code>.<br><br>The Mac immediately sends two frames:<br>1. <strong>Authentication Request</strong> (open system — no credentials here, just "I want to talk")<br>2. <strong>Association Request</strong> — includes the <strong>RSN IE</strong> (<em>Robust Security Network Information Element</em>), declaring the cipher suites the client supports (CCMP/AES, PSK AKM).<br><br>The port is still <strong>locked</strong>. No data can flow until after the 4-Way Handshake.`,
+        frame: `IEEE 802.11 Auth Request
+  Auth Algorithm : Open System (0)
+  Seq            : 1
+  Status         : 0 (success — just a formality)
+
+IEEE 802.11 Association Request
+  SSID           : "KhKLab-Guest"
+  Supported rates: 6,9,12,18,24,36,48,54 Mbps
+  HT Capabilities: MCS 0-31
+  RSN IE (tag 48):
+    Pairwise     : CCMP (AES)
+    AKM          : PSK 00-0F-AC:02  ← PPSK looks like PSK here
+    Capabilities : Pre-Auth capable`,
+        a: { text: "802.11 Auth Req →\n  + Assoc Req (RSN IE)\n  PPSK typed by user", type: "eapol" },
+        b: { text: "← Auth Req received\n  ← Assoc Req received\n  Processing...", type: "eapol" },
+        c: null,
+        arrow1: true, arrow2: false,
+        aState: "● Locked — auth pending", bState: "● Assoc processing", cState: "● Waiting",
+        sw1Active: false
+      },
+      {
+        title: "Association Response — AID Assigned, Port Locked",
+        tag: "eapol",
+        body: `AP1 sends <strong>Auth Response</strong> (success) + <strong>Association Response</strong> assigning an <strong>AID</strong> (<em>Association ID</em>).<br><br>The port is still locked — <strong>only EAPOL frames can pass</strong>. No data, no DHCP, no pings. This is the same controlled-port model as 802.1X.<br><br>AP1 now knows the client's PPSK (it was embedded in the EAPOL-Key M2 MIC later). But at this exact moment, AP1 has <strong>no PMK</strong> — it cannot verify anything yet. The WPA2-PSK handshake is about to start.`,
+        frame: `IEEE 802.11 Auth Response
+  Auth Algorithm : Open System (0)
+  Seq            : 2
+  Status         : 0 (success)
+
+IEEE 802.11 Association Response
+  Status         : 0 (success)
+  AID            : 1
+  Supported rates: negotiated
+  RSN IE         : confirmed CCMP/AES
+
+  Controlled port: LOCKED
+  Allowed frames : EAPOL only`,
+        a: { text: "← Auth Response (✓)\n  ← Assoc Response\n  AID=1 · Port LOCKED", type: "eapol" },
+        b: { text: "Auth+Assoc sent ✓\n  Client AID=1\n  Port locked — EAPOL only", type: "eapol" },
+        c: null,
+        arrow1: true, arrow2: false,
+        aState: "● Locked — EAPOL only", bState: "● 4-Way starting", cState: "● Waiting",
+        sw1Active: false
+      },
+      {
+        title: "M1 — AP1 Sends ANonce",
+        tag: "key",
+        body: `AP1 sends <strong>M1</strong> of the 4-Way Handshake: an <strong>ANonce</strong> (<em>AP Nonce</em>) — a fresh, cryptographically random 256-bit value.<br><br>The guest's device now has: PMK (computed from the PPSK it has) + ANonce + its own SNonce (generated now) + both MAC addresses → <strong>enough to compute the PTK</strong> right now.<br><br>But AP1 has <strong>no PMK</strong>. It cannot verify M2. This is the problem unique to Cloud PPSK: AP1 doesn't know the guest's PPSK in advance. Solution: RadSec call to XIQ after M2.`,
+        frame: `EAPOL-Key (M1)
+  Descriptor Type : RSN (2)
+  Key Info        : 0x008A
+    Key Type      : Pairwise (bit 3)
+    Key ACK       : 1 (AP sends)
+  Key Length      : 16 (AES-128)
+  Replay Counter  : 1
+  ANonce          : 7f3a9c...d84e1b  ← 256-bit random
+                    (fresh for this session — never reused)
+  MIC             : 0000...0000      ← not set in M1`,
+        a: { text: "← M1: ANonce received\n  Computing PMK locally:\n  PBKDF2(xK9mP2qR7n ‖ SSID)", type: "key" },
+        b: { text: "M1: ANonce →\n  (AP has no PMK yet\n   waiting for M2 to call XIQ)", type: "key" },
+        c: null,
+        arrow1: true, arrow2: false,
+        aState: "● Computing PMK + PTK", bState: "● Waiting for M2", cState: "● Waiting",
+        sw1Active: false
+      },
+      {
+        title: "UE Computes PMK and PTK Locally",
+        tag: "key",
+        body: `The guest's device performs the <strong>same PBKDF2 derivation</strong> that XIQ did at provisioning time:<br><code>PMK = PBKDF2(HMAC-SHA1, "xK9mP2qR7n", "KhKLab-Guest", 4096, 256-bit)</code><br><br>Then immediately computes the <strong>PTK</strong>:<br><code>PTK = PRF-512(PMK ‖ "Pairwise key expansion" ‖ min(AP_MAC,STA_MAC) ‖ max(AP_MAC,STA_MAC) ‖ min(ANonce,SNonce) ‖ max(ANonce,SNonce))</code><br><br>PTK splits into:<br>• <strong>KCK</strong> (128 bits) — signs MICs in M2/M3/M4<br>• <strong>KEK</strong> (128 bits) — encrypts GTK in M3<br>• <strong>TK</strong>  (128 bits) — encrypts all unicast data<br><br>This computation happens silently on the device. No frames exchanged.`,
+        frame: `# UE-internal computation (no OTA frames)
+
+PMK = PBKDF2(
+  PRF  = HMAC-SHA1,
+  Pass = "xK9mP2qR7n",
+  Salt = "KhKLab-Guest",
+  c    = 4096, dkLen = 32
+) = a3f7c1...b29e4d  ← same result as XIQ computed
+
+PTK = PRF-512(
+  PMK ‖ "Pairwise key expansion" ‖
+  AP_MAC ‖ STA_MAC ‖ ANonce ‖ SNonce
+)
+
+PTK → split:
+  KCK = PTK[0:16]    ← signs M2 MIC
+  KEK = PTK[16:32]   ← decrypts GTK in M3
+  TK  = PTK[32:48]   ← encrypts data (CCMP/AES)`,
+        a: { text: "PMK = PBKDF2(PPSK ‖ SSID)\nPTK = PRF-512(PMK ‖ nonces)\n  KCK + KEK + TK derived ✓", type: "key" },
+        b: null,
+        c: null,
+        arrow1: false, arrow2: false,
+        aState: "● PMK+PTK ready", bState: "● Waiting for M2", cState: "● Waiting",
+        sw1Active: false
+      },
+      {
+        title: "M2 — SNonce + MIC (Proves PPSK)",
+        tag: "key",
+        body: `UE sends <strong>M2</strong>: its <strong>SNonce</strong> (<em>Station Nonce</em>) + a <strong>MIC</strong> signed with KCK.<br><br>The MIC is the proof: "I computed a PTK from the correct PPSK." But AP1 <strong>cannot verify this MIC</strong> — it has no PMK and therefore no KCK.<br><br>This is the PPSK/Cloud divergence point from standard WPA2-PSK. In a normal PSK deployment, every AP has the passphrase baked in, so it can derive PMK and verify M2 locally. In Cloud PPSK: AP1 must <strong>ask XIQ</strong> to validate.`,
+        frame: `EAPOL-Key (M2)
+  Descriptor Type : RSN (2)
+  Key Info        : 0x010A
+    Key Type      : Pairwise (bit 3)
+    Key MIC       : 1
+  Replay Counter  : 1
+  SNonce          : 2b8f4a...c93d07  ← 256-bit random
+  MIC             : 5c9e2f...a17b34  ← signed with KCK
+                    (AP1 cannot verify — no PMK yet)
+  RSN IE          : {AKM:PSK, Cipher:CCMP}
+
+  AP1 state: STUCK — cannot verify MIC without PMK
+  → RadSec call to XIQ required`,
+        a: { text: "M2: SNonce + MIC →\n  (proves I have correct PMK\n   via KCK signature)", type: "key" },
+        b: { text: "← M2 received\n  ⚠ Cannot verify MIC\n  No PMK stored → RadSec call!", type: "key" },
+        c: null,
+        arrow1: true, arrow2: false,
+        aState: "● Waiting for M3", bState: "● Calling XIQ via RadSec", cState: "● Waiting",
+        sw1Active: false
+      },
+      {
+        title: "AP1 Stuck — RadSec Access-Request to XIQ",
+        tag: "radsec",
+        body: `AP1 cannot proceed without the PMK. It opens a <strong>RadSec</strong> (<em>RADIUS over TLS</em>, RFC 6614) connection to XIQ and sends a <strong>RADIUS Access-Request</strong>.<br><br>RadSec = RADIUS framing over a TLS tunnel on <strong>TCP 2083</strong>. The TLS tunnel was already established during CAPWAP provisioning (Scene 1, Step 5). The per-auth call is the inner RADIUS packet.<br><br>Attributes sent:<br>• User-Name = client MAC address (PPSK has no EAP identity frame — MAC is the only identifier)<br>• Calling-Station-Id = client MAC<br>• Called-Station-Id = BSSID:SSID string<br>• Message-Authenticator (HMAC-MD5 integrity)<br>• Vendor-Specific: SNonce + ANonce embedded for PMK derivation verification`,
+        frame: `RadSec — RADIUS/TLS TCP 2083
+  TLS tunnel: AP1 → radsec.extremecloudiq.com
+
+  RADIUS Access-Request
+    Code          : 1 (Access-Request)
+    Identifier    : 42
+    Authenticator : 9f3c...1a7b (random)
+
+    Attr 1  User-Name        : "aa:bb:cc:dd:ee:ff" (client MAC)
+    Attr 31 Calling-Station-Id : "aa:bb:cc:dd:ee:ff"
+    Attr 30 Called-Station-Id  : "ap1-bssid:KhKLab-Guest"
+    Attr 79 EAP-Message      : [EAPOL-Key M2 material]
+    Attr 80 Message-Auth     : HMAC-MD5(shared-secret)`,
+        a: null,
+        b: { text: "RadSec → XIQ:2083\n  Access-Request\n  User-Name: aa:bb:cc:dd:ee:ff", type: "radsec" },
+        c: { text: "← Access-Request received\n  Looking up MAC in UG DB...", type: "radsec" },
+        arrow1: false, arrow2: true,
+        aState: "● Waiting (port locked)", bState: "● Waiting for PMK", cState: "● Processing",
+        sw1Active: false
+      },
+      {
+        title: "XIQ Returns PMK + Policy — Access-Accept",
+        tag: "radsec",
+        body: `XIQ looks up the MAC → finds user John Smith in the <code>Guest-24h</code> User Group → retrieves the pre-computed PMK → applies the Assignment Rule → returns <strong>RADIUS Access-Accept</strong> with:<br><br><strong>1. PMK</strong> — delivered in MS-MPPE-Recv-Key (RFC 2548) — the same payload format as 802.1X Enterprise<br><strong>2. VLAN assignment</strong> — Tunnel-Private-Group-ID = "80" (RFC 2868, Attr 81)<br><strong>3. Firewall profile</strong> — Filter-Id = "Guest-Internet-Access-Only" (Attr 11)<br><br>This is exactly equivalent to the NPS Access-Accept in 802.1X (Attr 81 = "154" from May 11). Same payload format, same AP behavior — just different auth path.`,
+        frame: `RADIUS Access-Accept (RadSec response)
+  Code          : 2 (Access-Accept)
+  Identifier    : 42
+
+  Attr 26 Vendor-Specific (MS, 311):
+    MS-MPPE-Recv-Key : a3f7c1...b29e4d  ← PMK (256 bits)
+
+  Attr 64  Tunnel-Type        : VLAN (13)
+  Attr 65  Tunnel-Medium-Type : IEEE 802 (6)
+  Attr 81  Tunnel-Private-Group-ID : "80"    ← VLAN 80!
+  Attr 11  Filter-Id          : "Guest-Internet-Access-Only"
+
+  Equivalent to 802.1X Access-Accept with Attr 81="154"
+  Same AP behavior — VLAN tag + firewall from this response`,
+        a: null,
+        b: { text: "← Access-Accept ✓\n  PMK received\n  VLAN=80 · FW=Guest-Internet", type: "radsec" },
+        c: { text: "Access-Accept sent ✓\n  PMK + VLAN=80\n  24h timer STARTED", type: "radsec" },
+        arrow1: false, arrow2: true,
+        aState: "● Waiting (port locked)", bState: "● PMK in hand — verifying M2", cState: "✅ Auth granted",
+        sw1Active: false
+      },
+      {
+        title: "AP1 Verifies M2 MIC — Computes PTK",
+        tag: "key",
+        body: `AP1 now has the PMK from XIQ. It recomputes the PTK using the same inputs it got from M1/M2:<br><code>PTK = PRF-512(PMK ‖ ANonce ‖ SNonce ‖ AP_MAC ‖ STA_MAC)</code><br><br>It derives KCK and <strong>re-verifies the MIC from M2</strong>. If it matches → the client holds the correct PPSK. Auth confirmed.<br><br>This step is the heart of PPSK security: the passphrase itself never crosses the air in any form. The only OTA signal is the MIC in M2, which is a one-way cryptographic commitment that can only be forged if you know the PMK.`,
+        frame: `# AP1-internal (no OTA frame)
+
+PTK = PRF-512(
+  PMK     = a3f7c1...b29e4d,  ← from XIQ
+  ANonce  = 7f3a9c...d84e1b,  ← AP1 generated in M1
+  SNonce  = 2b8f4a...c93d07,  ← received in M2
+  AP_MAC  = aa:bb:cc:11:22:33,
+  STA_MAC = aa:bb:cc:dd:ee:ff
+)
+
+KCK = PTK[0:16]
+Recompute M2-MIC = HMAC-SHA1(KCK, M2-frame)
+Compare: computed_MIC == received_MIC
+Result: ✓ MATCH → client has correct PPSK`,
+        a: null,
+        b: { text: "PTK computed\n  M2 MIC verified ✓\n  Client auth confirmed", type: "key" },
+        c: null,
+        arrow1: false, arrow2: false,
+        aState: "● Waiting for M3", bState: "● Sending M3", cState: "✅ Done",
+        sw1Active: false
+      },
+      {
+        title: "M3 — GTK Delivery (Encrypted with KEK)",
+        tag: "key",
+        body: `AP1 sends <strong>M3</strong>: the <strong>GTK</strong> (<em>Group Temporal Key</em>) encrypted with KEK, plus a MIC.<br><br>GTK encrypts <strong>broadcast and multicast frames</strong> — DHCP Offers, ARP replies, mDNS. Without GTK, the client would be deaf to all broadcast traffic even after port open.<br><br>You saw this exact failure in the <strong>May 8 incident</strong>: iOS clients that missed the GTK rotation event lost DHCP renewal ability because they couldn't decrypt broadcast DHCP Offers encrypted with the new GTK.<br><br>AP1 also installs TK now — ready for unicast encryption.`,
+        frame: `EAPOL-Key (M3)
+  Key Info        : 0x13CA
+    Key Type      : Pairwise
+    Install       : 1  ← install TK now
+    Key ACK       : 1
+    Key MIC       : 1
+    Secure        : 1
+    Encrypted Key Data : 1
+  Replay Counter  : 2
+  ANonce          : 7f3a9c...d84e1b
+  MIC             : e4a71b...3c9f28  ← signed with KCK
+  Key Data (encrypted with KEK):
+    GTK           : f2b39c...5a18e7  ← group temporal key
+    GTK KDE       : BSSID + GTK index`,
+        a: { text: "← M3: GTK (enc with KEK)\n  Installing TK + GTK...", type: "key" },
+        b: { text: "M3: GTK →\n  TK installed\n  Waiting for M4 ACK", type: "key" },
+        c: null,
+        arrow1: true, arrow2: false,
+        aState: "● Installing TK + GTK", bState: "● Waiting for M4", cState: "✅ Done",
+        sw1Active: false
+      },
+      {
+        title: "M4 — ACK, Keys Installed, Port OPEN",
+        tag: "key",
+        body: `Client sends <strong>M4</strong>: ACK + MIC confirming TK and GTK are installed.<br><br>Both sides now share:<br>• <strong>TK</strong> — unique per client session — encrypts all unicast data (CCMP/AES-128-CCM)<br>• <strong>GTK</strong> — shared per BSSID — encrypts broadcasts<br><br>The <strong>controlled port is now OPEN</strong>. AP1 applies the VLAN 80 tag and the Guest-Internet-Access-Only firewall. SW1 begins forwarding tagged frames on VLAN 80.`,
+        frame: `EAPOL-Key (M4)
+  Key Info        : 0x030A
+    Key Type      : Pairwise
+    Key MIC       : 1
+    Secure        : 1
+  Replay Counter  : 2
+  MIC             : 9c4e3f...b12a09  ← confirms GTK received
+
+AP1 state change:
+  Controlled port : OPEN ✅
+  VLAN tag        : 80 applied to all client frames
+  Firewall        : Guest-Internet-Access-Only active
+  TK              : installed (CCMP encryption active)
+  GTK             : installed (broadcasts decryptable)`,
+        a: { text: "M4: ACK + MIC →\n  TK + GTK installed ✓\n  Controlled port OPEN!", type: "key" },
+        b: { text: "← M4 received ✓\n  Port OPEN → VLAN 80\n  FW: Guest-Internet-Only", type: "key" },
+        c: null,
+        arrow1: true, arrow2: false,
+        aState: "✅ Port OPEN — VLAN 80", bState: "✅ VLAN 80 · FW active", cState: "✅ Session live",
+        sw1Active: true
+      },
+      {
+        title: "DHCP — Client Gets IP on VLAN 80",
+        tag: "data",
+        body: `Client sends DHCP Discover — now broadcast, encrypted with GTK, tagged VLAN 80. SW1 forwards the frame to the DHCP server on the VLAN 80 SVI (10.80.0.1).<br><br>DHCP sequence:<br>1. <strong>Discover</strong> — broadcast from client (src MAC, dest FF:FF:FF:FF:FF:FF)<br>2. <strong>Offer</strong> — SW1 replies with 10.80.0.x offer, lease 86400s<br>3. <strong>Request</strong> — client accepts the offer<br>4. <strong>ACK</strong> — SW1 confirms, IP assigned<br><br>Client now has: <code>10.80.0.x</code>, GW <code>10.80.0.1</code>, DNS <code>8.8.8.8</code>, lease 86400s.<br><br><strong>Smoking gun:</strong> DHCP OFFER from 10.80.0.1 = full E2E confirmation.`,
+        frame: `DHCP Discover (broadcast · encrypted GTK · VLAN 80)
+  src MAC: aa:bb:cc:dd:ee:ff  DST: FF:FF:FF:FF:FF:FF
+
+DHCP Offer (SW1 → client · VLAN 80)
+  Your IP    : 10.80.0.101
+  Server IP  : 10.80.0.1
+  GW         : 10.80.0.1
+  DNS        : 8.8.8.8
+  Lease      : 86400 sec (24h — matches PPSK validity)
+
+DHCP Request  (client → broadcast, accepts offer)
+DHCP ACK      (SW1 → client, confirms 10.80.0.101)
+
+show vlan Guest_80 on SW1:
+  SVI         : 10.80.0.1/24
+  Tagged port : <ap1-port>
+  DHCP leases : 1 active (10.80.0.101 → aa:bb:cc:dd:ee:ff)`,
+        a: { text: "DHCP Discover →\n  ← OFFER 10.80.0.101\n  ← ACK · lease 86400s ✓", type: "data" },
+        b: { text: "← DHCP frames tagged VLAN 80\n  → SW1 handles DHCP\n  ← IP confirmed 10.80.0.101", type: "data" },
+        c: null,
+        arrow1: true, arrow2: false,
+        aState: "✅ IP: 10.80.0.101", bState: "✅ VLAN 80 forwarding", cState: "✅ Session tracked",
+        sw1Active: true
+      },
+      {
+        title: "Encrypted Data + Firewall Policy Enforced",
+        tag: "data",
+        body: `All unicast data is now encrypted with <strong>TK (CCMP/AES-128-CCM)</strong>. Broadcasts use GTK.<br><br>The <strong>Guest-Internet-Access-Only</strong> firewall rule is enforced at AP1 (L2–L7):<br>• Internet (0.0.0.0/0) → <strong>PERMIT</strong> — guest can browse, stream, etc.<br>• 10.0.0.0/8 → <strong>DENY</strong> — cannot reach corp systems on SW1 or beyond<br>• 172.16.0.0/12 → DENY<br>• 192.168.0.0/16 → DENY<br><br>Internet path: Client → AP1 → SW1 VLAN 80 → QF-Modem → Internet ✅<br><br><strong>24-hour timer started</strong> in XIQ the moment John's MAC first authenticated (Access-Accept Step 7). Key auto-expires in 24h — no admin action needed.`,
+        frame: `Unicast frames: CCMP/AES encrypted with TK
+Broadcast frames: CCMP/AES encrypted with GTK
+
+Firewall evaluation at AP1 (Guest-Internet-Access-Only):
+  src: 10.80.0.101  dst: 8.8.8.8    → PERMIT ✓ (internet)
+  src: 10.80.0.101  dst: 1.1.1.1    → PERMIT ✓ (internet)
+  src: 10.80.0.101  dst: 10.x.x.x  → DENY   ✗ (RFC1918)
+  src: 10.80.0.101  dst: 192.168.x  → DENY   ✗ (RFC1918)
+
+Path: Client → AP1 → SW1 (VLAN 80) → QF-Modem → Internet
+
+XIQ timer: 24h from first login (Started at M7 Access-Accept)
+  Remaining : 23h 59m ...`,
+        a: { text: "✅ Data encrypted (TK)\n  Internet: PERMIT ✓\n  Corp 10.x.x.x: DENY ✗", type: "data" },
+        b: { text: "✅ VLAN 80 forwarding\n  QF-Modem → Internet\n  FW enforced at AP1", type: "data" },
+        c: { text: "✅ Session active\n  Timer: 24h started\n  Auto-expire tomorrow", type: "data" },
+        arrow1: true, arrow2: true,
+        aState: "✅ Online · 10.80.0.101", bState: "✅ Guest isolated on VLAN 80", cState: "✅ Session · 24h timer",
+        sw1Active: true
+      },
+      {
+        title: "Complete ✓ — Full PPSK Flow",
+        tag: "data",
+        body: `<strong>The complete PPSK flow:</strong><br><br><em>Scene 1 (Provisioning):</em> SSID + UG + UP + Assignment Rule created in XIQ → CAPWAP push to AP1 → RadSec cert installed → SSID broadcasts → SW1 VLAN 80 confirmed<br><br><em>Scene 2 (Key Delivery):</em> Admin creates user → XIQ generates PPSK + PMK via PBKDF2 → SMTP email to guest → 24h timer pending first_login<br><br><em>Scene 3 (Runtime Auth):</em> Assoc → M1 ANonce → PTK computed locally → M2 SNonce+MIC → AP stuck (no PMK) → RadSec Access-Request → XIQ returns PMK+VLAN80+FW → M2 verified → M3 GTK → M4 ACK → Port OPEN VLAN 80 → DHCP 10.80.0.x → Encrypted internet traffic<br><br><strong>Key difference from 802.1X:</strong> No EAP exchange. The passphrase itself is the proof — delivered via PBKDF2/PMK, validated by RadSec. Guest never sees RADIUS; AP is the only RadSec participant.`,
+        frame: `--- Summary ---
+Total steps  : 24 (7 + 4 + 13)
+Auth latency : ~200-400 ms (RadSec round-trip + DHCP)
+OTA exposure : Zero passphrase leakage
+              MIC in M2 only cryptographic commitment OTA
+
+Protocols used:
+  REST API   : XIQ object creation
+  CAPWAP     : AP1 config push (RFC 5415)
+  RadSec     : PMK retrieval at runtime (RFC 6614)
+  RADIUS     : Access-Request/Accept payload (RFC 2865)
+  PBKDF2     : PMK derivation (RFC 2898/PKCS#5)
+  IEEE 802.11: Association + 4-Way Handshake
+  DHCP       : IP assignment (RFC 2131)
+  IEEE 802.1Q: VLAN 80 tagging`,
+        a: { text: "✅ Guest online\n  10.80.0.101 · VLAN 80\n  Internet access · Corp DENY", type: "data" },
+        b: { text: "✅ VLAN 80 · FW active\n  SW1 DHCP lease\n  EXOS port tagged", type: "data" },
+        c: { text: "✅ Session active\n  PMK + policy served\n  24h auto-expire", type: "data" },
+        arrow1: true, arrow2: true,
+        aState: "✅ Authenticated + isolated", bState: "✅ Guest isolated", cState: "✅ Session · 24h",
+        sw1Active: true
+      }
+    ]
+  }
+};
+
+/* =====================================================================
+   State
+===================================================================== */
+let activeScene = 1;
+let current = -1;
+let histA = [], histB = [], histC = [];
+let playInterval = null, isPlaying = false;
+
+/* =====================================================================
+   Scene switching
+===================================================================== */
+function switchScene(n) {
+  if (isPlaying) stopPlay();
+  activeScene = n;
+  [1,2,3].forEach(i => {
+    document.getElementById('tab-s' + i).classList.toggle('active', i === n);
+    document.getElementById('panel-s' + i).classList.toggle('active', i === n);
+  });
+  applySceneActors(n);
+  resetScene();
+}
+
+function applySceneActors(n) {
+  const sc = SCENES[n];
+  // Actor A
+  document.getElementById('icon-a').textContent    = sc.actors.a.icon;
+  document.getElementById('name-a').textContent    = sc.actors.a.name;
+  document.getElementById('device-a').textContent  = sc.actors.a.device;
+  document.getElementById('a-port-label').textContent = sc.actors.a.portLabel;
+  // Actor B (middle)
+  document.getElementById('icon-b').textContent    = sc.actors.b.icon;
+  document.getElementById('name-b').textContent    = sc.actors.b.name;
+  document.getElementById('device-b').textContent  = sc.actors.b.device;
+  document.getElementById('b-port-label').textContent = sc.actors.b.portLabel;
+  // Actor C
+  document.getElementById('icon-c').textContent    = sc.actors.c.icon;
+  document.getElementById('name-c').textContent    = sc.actors.c.name;
+  document.getElementById('device-c').textContent  = sc.actors.c.device;
+  document.getElementById('c-port-label').textContent = sc.actors.c.portLabel;
+  // Arrow labels
+  document.getElementById('arrow1-label').innerHTML = sc.arrow1Label.replace('\n','<br>');
+  document.getElementById('arrow2-label').innerHTML = sc.arrow2Label.replace('\n','<br>');
+  // Arrow default color classes
+  document.getElementById('arrow1').className = 'arrow ' + sc.arrow1Class;
+  document.getElementById('arrow2').className = 'arrow ' + sc.arrow2Class;
+  // SW1 sub-indicator
+  document.getElementById('sw1-sub').style.display = sc.showSW1 ? 'block' : 'none';
+}
+
+/* =====================================================================
+   Playback
+===================================================================== */
+function manualGo(dir) {
+  if (isPlaying) stopPlay();
+  go(dir);
+}
+
+function togglePlay() {
+  if (isPlaying) { stopPlay(); return; }
+  const sc = SCENES[activeScene];
+  if (current >= sc.steps.length - 1) resetScene();
+  isPlaying = true;
+  const btn = document.getElementById('btn-play');
+  btn.className = 'btn btn-play playing';
+  btn.innerHTML = '<span class="playing-dot">&#9679;</span> Pause';
+  const delay = parseInt(document.getElementById('speed-select').value, 10);
+  playInterval = setInterval(() => {
+    if (current >= SCENES[activeScene].steps.length - 1) { stopPlay(); return; }
+    go(1);
+  }, delay);
+}
+
+function stopPlay() {
+  isPlaying = false;
+  clearInterval(playInterval);
+  playInterval = null;
+  const btn = document.getElementById('btn-play');
+  btn.className = 'btn btn-play';
+  btn.innerHTML = '&#9654; Play';
+}
+
+function renderMessages(col, msgs) {
+  const el = document.getElementById('msgs-' + col);
+  el.innerHTML = '';
+  msgs.forEach((m, i) => {
+    const div = document.createElement('div');
+    div.className = 'msg ' + m.type + (i === msgs.length - 1 ? ' active' : ' done');
+    div.innerHTML = m.text.replace(/\n/g, '<br>');
+    el.appendChild(div);
+  });
+}
+
+function go(dir) {
+  const sc = SCENES[activeScene];
+  current += dir;
+  if (current < 0) current = 0;
+  if (current >= sc.steps.length) current = sc.steps.length - 1;
+  render();
+}
+
+function resetScene() {
+  if (isPlaying) stopPlay();
+  current = -1;
+  histA = []; histB = []; histC = [];
+  const sc = SCENES[activeScene];
+  ['a','b','c'].forEach(col => {
+    document.getElementById('msgs-' + col).innerHTML = '';
+  });
+  document.getElementById('exp-step').textContent = sc.label + ' 0 of ' + sc.total;
+  document.getElementById('exp-title').textContent = 'Ready to begin';
+  document.getElementById('exp-body').innerHTML = 'Click <strong>Next</strong> to step through.';
+  document.getElementById('frame-panel').classList.remove('visible');
+  document.getElementById('arrow1').className = 'arrow ' + sc.arrow1Class;
+  document.getElementById('arrow2').className = 'arrow ' + sc.arrow2Class;
+  document.getElementById('a-port-state').textContent = '● Ready';
+  document.getElementById('a-port-state').className = 'port-waiting';
+  document.getElementById('b-port-state').textContent = '● Idle';
+  document.getElementById('b-port-state').className = 'port-waiting';
+  document.getElementById('c-port-state').textContent = '● Waiting';
+  document.getElementById('c-port-state').className = 'port-locked';
+  if (sc.showSW1) {
+    document.getElementById('sw1-state').textContent = '● VLAN 80 unconfirmed';
+    document.getElementById('sw1-state').className = 'sw1-sub-state sw1-inactive';
+  }
+  document.getElementById('btn-prev').disabled = true;
+  document.getElementById('btn-next').disabled = false;
+  document.getElementById('progress-label').textContent = '0 / ' + sc.total;
+}
+
+function render() {
+  const sc = SCENES[activeScene];
+  const s = sc.steps[current];
+
+  if (s.a) histA.push(s.a);
+  if (s.b) histB.push(s.b);
+  if (s.c) histC.push(s.c);
+
+  renderMessages('a', histA);
+  renderMessages('b', histB);
+  renderMessages('c', histC);
+
+  // Arrows
+  document.getElementById('arrow1').className = 'arrow ' + s.tag + (s.arrow1 ? ' active' : '');
+  document.getElementById('arrow2').className = 'arrow ' + s.tag + (s.arrow2 ? ' active' : '');
+
+  // Explanation
+  document.getElementById('exp-step').textContent = sc.label + ' ' + (current + 1) + ' of ' + sc.total;
+  document.getElementById('exp-title').innerHTML = '<span class="tag ' + s.tag + '">' + s.tag.toUpperCase() + '</span> ' + s.title;
+  document.getElementById('exp-body').innerHTML = s.body;
+
+  // Frame panel
+  const fp = document.getElementById('frame-panel');
+  const fc = document.getElementById('frame-content');
+  if (s.frame) {
+    fc.textContent = s.frame;
+    fp.classList.add('visible');
+  } else {
+    fp.classList.remove('visible');
+  }
+
+  // Port states
+  const setPortState = (col, text) => {
+    const el = document.getElementById(col + '-port-state');
+    el.textContent = text;
+    el.className = (text.startsWith('✅') || text.startsWith('✓')) ? 'port-open' :
+                   (text.startsWith('●')) ? 'port-waiting' : 'port-locked';
+  };
+  setPortState('a', s.aState);
+  setPortState('b', s.bState);
+  setPortState('c', s.cState);
+
+  // SW1 sub indicator
+  if (sc.showSW1) {
+    const sw1 = document.getElementById('sw1-state');
+    if (s.sw1Active) {
+      sw1.textContent = '✅ VLAN 80 · Port tagged';
+      sw1.className = 'sw1-sub-state sw1-active';
+    } else {
+      sw1.textContent = '● VLAN 80 unconfirmed';
+      sw1.className = 'sw1-sub-state sw1-inactive';
+    }
+  }
+
+  // Buttons
+  document.getElementById('btn-prev').disabled = current <= 0;
+  document.getElementById('btn-next').disabled = current >= sc.steps.length - 1;
+  document.getElementById('progress-label').textContent = (current + 1) + ' / ' + sc.total;
+}
+
+// Initialize
+applySceneActors(1);
+</script>
+
+<!-- RFC REFERENCE PANEL -->
+<div class="rfc-section">
+  <h2>Protocol &amp; RFC Reference</h2>
+  <div class="rfc-grid">
+    <div class="rfc-item">
+      <div class="rfc-id">IEEE 802.11-2020</div>
+      <div class="rfc-name">Wi-Fi MAC + PHY Standard</div>
+      <div class="rfc-desc">Defines Association, Authentication, Beacon frames, RSN IE, 4-Way Handshake (§12.7.6), CCMP/AES encryption (§12.5.3). All PPSK Wi-Fi framing.</div>
+    </div>
+    <div class="rfc-item">
+      <div class="rfc-id">IEEE 802.11i (2004)</div>
+      <div class="rfc-name">RSN — WPA2 Security Amendment</div>
+      <div class="rfc-desc">Defines the Robust Security Network (RSN) framework: PMK derivation, 4-Way Handshake key hierarchy (PTK = KCK+KEK+TK), GTK distribution. Now folded into 802.11-2020.</div>
+    </div>
+    <div class="rfc-item">
+      <div class="rfc-id">RFC 2898 / PKCS#5</div>
+      <div class="rfc-name">PBKDF2 — Password-Based Key Derivation</div>
+      <div class="rfc-desc">PPSK PMK derivation: PMK = PBKDF2(HMAC-SHA1, passphrase, SSID, 4096, 256-bit). Salt = SSID name per 802.11i §8.5.1.3. Identical derivation at XIQ (provisioning) and UE (runtime).</div>
+    </div>
+    <div class="rfc-item">
+      <div class="rfc-id">RFC 5415</div>
+      <div class="rfc-name">CAPWAP — Control and Provisioning of Wireless APs</div>
+      <div class="rfc-desc">AP ↔ XIQ management tunnel. UDP 5246 (control), 5247 (data). Carries SSID config, User Group definitions, RadSec certificate push. Always running — not per-auth.</div>
+    </div>
+    <div class="rfc-item">
+      <div class="rfc-id">RFC 6614</div>
+      <div class="rfc-name">RadSec — RADIUS over TLS</div>
+      <div class="rfc-desc">AP1 calls XIQ per-auth on TCP 2083. RADIUS framing inside a TLS tunnel. Returns PMK + VLAN + firewall profile. This is the PPSK runtime validation channel — replaces UDP RADIUS with encrypted TCP.</div>
+    </div>
+    <div class="rfc-item">
+      <div class="rfc-id">RFC 2865</div>
+      <div class="rfc-name">RADIUS — Remote Auth Dial-In User Service</div>
+      <div class="rfc-desc">Access-Request / Access-Accept payload structure. Attr 1 (User-Name), Attr 79 (EAP-Message), Attr 80 (Message-Authenticator). Same framing inside RadSec TLS tunnel.</div>
+    </div>
+    <div class="rfc-item">
+      <div class="rfc-id">RFC 2548</div>
+      <div class="rfc-name">Microsoft Vendor-Specific RADIUS Attributes</div>
+      <div class="rfc-desc">MS-MPPE-Recv-Key (Attr 26, Vendor 311, Type 17) — carries PMK from XIQ to AP in Access-Accept. Same attribute format used in 802.1X/NPS to deliver MSK. PPSK reuses this payload.</div>
+    </div>
+    <div class="rfc-item">
+      <div class="rfc-id">RFC 2868</div>
+      <div class="rfc-name">RADIUS Tunnel Attributes</div>
+      <div class="rfc-desc">Tunnel-Type (Attr 64) = VLAN(13), Tunnel-Medium-Type (Attr 65) = IEEE 802(6), Tunnel-Private-Group-ID (Attr 81) = "80". Same as 802.1X VLAN assignment. AP1 reads these from Access-Accept.</div>
+    </div>
+    <div class="rfc-item">
+      <div class="rfc-id">RFC 2131</div>
+      <div class="rfc-name">DHCP — Dynamic Host Configuration Protocol</div>
+      <div class="rfc-desc">4-message exchange: Discover → Offer → Request → ACK. Client gets 10.80.0.x from SW1 VLAN 80 pool. Lease = 86400s (24h — matches PPSK key validity). Smoking-gun confirmation of E2E success.</div>
+    </div>
+    <div class="rfc-item">
+      <div class="rfc-id">IEEE 802.1Q</div>
+      <div class="rfc-name">VLAN Tagging Standard</div>
+      <div class="rfc-desc">4-byte VLAN tag in Ethernet frame header. AP1 adds VLAN 80 tag to all guest frames after M4 ACK. SW1 EXOS forwards on VLAN 80 trunk port. Firewall applied before tag is added.</div>
+    </div>
+    <div class="rfc-item">
+      <div class="rfc-id">IEEE 802.1X</div>
+      <div class="rfc-name">Port-Based Network Access Control</div>
+      <div class="rfc-desc">Controlled port model: port locked until auth complete. PPSK uses the same model — EAPOL 4-Way Handshake, port open after M4 ACK, VLAN from Access-Accept Attr 81. No EAP exchange needed.</div>
+    </div>
+  </div>
+</div>
+
+<div class="copyright">
+  KhKLab PPSK Guest Onboarding Simulator &bull; Phase 1 HTML &bull; May 2026<br>
+  Extreme Networks XIQ &bull; AP3000 &bull; EXOS SW1 &bull; WPA2/AES Cloud PPSK<br>
+  &copy; 2026 KhKLab. All rights reserved.
+</div>
+
+</body>
+</html>
