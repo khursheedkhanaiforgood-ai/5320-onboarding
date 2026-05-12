@@ -94,7 +94,7 @@ a:hover { color: #111; }
     <a href="#phase4a">Phase 4a — XIQ Guest Onboarding Wizard vision</a>
     <a href="#lab-state">Lab State — SW1 VLAN 100 pending, XIQ objects in progress</a>
     <a href="#references">RFC Reference Index — 11 standards, live links</a>
-    <a href="#rieben">Rieben Guide — page map, XIQ steps, SW1 CLI</a>
+    <a href="#rieben">Rieben Guide — page map, XIQ steps, SW1 CLI + console commands</a>
     <a href="#pending">Pending — Sprint backlog</a>
   </div>
 
@@ -418,6 +418,23 @@ save config</code></pre>
   <pre><code>show dhcp-server lease vlan Guest_100   # → should show 10.100.0.x lease for test device
 show fdb vlan Guest_100                  # → confirm guest MAC in VLAN 100 forwarding table
 show vlan Guest_100                      # → confirm port membership + IP forwarding enabled</code></pre>
+
+  <h3>SW1 Serial Console Access</h3>
+  <pre><code># Connect
+screen /dev/cu.usbserial-A9XH7AI0 115200
+
+# Inside screen:
+#   Detach (leave session running): Ctrl+A  D
+#   Kill current window:            Ctrl+A  K
+
+# If port is locked from a previous session:
+screen -ls                                    # list stuck sessions
+screen -X -S &lt;session_id&gt; quit              # kill specific session
+pkill screen                                  # nuclear — kill all screen sessions
+
+# If something else is holding the port:
+lsof /dev/cu.usbserial-A9XH7AI0             # find the PID
+kill &lt;PID&gt;                                   # release the port</code></pre>
 
   <!-- PENDING -->
   <span class="section-label" id="pending">Pending</span>
