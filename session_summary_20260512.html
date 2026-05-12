@@ -94,6 +94,7 @@ a:hover { color: #111; }
     <a href="#phase4a">Phase 4a — XIQ Guest Onboarding Wizard vision</a>
     <a href="#lab-state">Lab State — SW1 VLAN 100 pending, XIQ objects in progress</a>
     <a href="#references">RFC Reference Index — 11 standards, live links</a>
+    <a href="#rieben">Rieben Guide — page map, XIQ steps, SW1 CLI</a>
     <a href="#pending">Pending — Sprint backlog</a>
   </div>
 
@@ -169,7 +170,7 @@ KCK → signs M2 MIC   KEK → encrypts GTK in M3   TK → encrypts data</code><
   └── Assignment Rule: Guest-24h → Guest-VLAN-100  (priority 1)</code></pre>
 
   <div class="box warn">
-    <p><strong>Key trap (Rieben guide p.42):</strong> User Group must be created <em>inside</em> the SSID configuration for email delivery to work. User Groups created as standalone objects (outside the SSID) have email suppressed by XIQ. This is not documented clearly in the UI.</p>
+    <p><strong>Key trap (<a href="file:///Users/khukhan/Downloads/Private-PreShared-Key-PPSK-Guide_v6%202%201.pdf#page=20">Rieben guide p.20</a> — "Create User Groups Outside SSID Objects"):</strong> User Group must be created <em>inside</em> the SSID configuration for email delivery to work. Rieben ProTip verbatim: <em>"If you create User Groups outside of the SSID, those users will not deliver emails even if you choose the setting to send one."</em> This is the single most common PPSK misconfiguration.</p>
   </div>
 
   <h3>Cloud PPSK vs Local PPSK</h3>
@@ -357,6 +358,66 @@ enable dhcp ports &lt;ap1-port&gt; vlan Guest_100</code></pre>
     <div class="ref-item"><a href="https://standards.ieee.org/ieee/802.1X/7345/" target="_blank">IEEE 802.1X</a> — Port-based access control<br><span class="ref-desc">Controlled port model: LOCKED until auth, OPEN after M4 ACK. PPSK uses the same port-lock mechanism without EAP — only the 4-Way Handshake.</span></div>
     <div class="ref-item"><a href="https://www.rfc-editor.org/rfc/rfc2131" target="_blank">RFC 2131</a> — DHCP<br><span class="ref-desc">Discover → Offer → Request → ACK. DHCP OFFER from SW1 VLAN 100 SVI (10.100.0.1) is the smoking-gun for full E2E confirmation. Lease = 86400s (24h), matching PPSK first_login timer.</span></div>
   </div>
+
+  <!-- RIEBEN GUIDE -->
+  <span class="section-label" id="rieben">Rieben Guide — Page Map</span>
+  <h2>The IT-Operator Reference, Annotated by Page</h2>
+
+  <p>The Rieben PPSK Guide v6 (Mike Rieben, SA — Extreme Networks, Jul 8 2022, 95pp) is an internal EN document. Not on GitHub. Local path: <a href="file:///Users/khukhan/Downloads/Private-PreShared-Key-PPSK-Guide_v6%202%201.pdf"><code>/Users/khukhan/Downloads/Private-PreShared-Key-PPSK-Guide_v6 2 1.pdf</code></a></p>
+
+  <div class="box">
+    <p>The guide is IT-operator-driven — no RFC citations, no cryptographic derivation. It tells you what to click, not why each object exists. Today's session derived the <em>why</em> from first principles; the page map below anchors each Rieben step to what we built.</p>
+  </div>
+
+  <h3>Phase 1 Deployment Pages (what we are building now)</h3>
+  <table>
+    <thead><tr><th>Rieben Page</th><th>Topic</th><th>Our Action</th></tr></thead>
+    <tbody>
+      <tr><td><a href="file:///Users/khukhan/Downloads/Private-PreShared-Key-PPSK-Guide_v6%202%201.pdf#page=9">p.9</a></td><td>PPSK Enabled SSID Foundational Configuration</td><td>Configure > Network Policies > edit > Wireless Networks > (+) > Private Pre-Shared Key · Name: KhKLab-Guest · WPA2/AES</td></tr>
+      <tr><td><a href="file:///Users/khukhan/Downloads/Private-PreShared-Key-PPSK-Guide_v6%202%201.pdf#page=11">p.11</a></td><td>New User Group — Cloud (steps 15–25)</td><td>Create "Guest-24h" inside SSID · Cloud · 24h after First Login · SMS+Email · SAVE</td></tr>
+      <tr><td><a href="file:///Users/khukhan/Downloads/Private-PreShared-Key-PPSK-Guide_v6%202%201.pdf#page=13">p.13</a></td><td>User Profile creation — VLAN Object</td><td>Create "Guest-VLAN-100" · (+) new VLAN Object: VLAN ID 100 · Firewall Rules ON</td></tr>
+      <tr><td><a href="file:///Users/khukhan/Downloads/Private-PreShared-Key-PPSK-Guide_v6%202%201.pdf#page=14">p.14</a></td><td>Firewall — Guest-Internet-Access-Only ACL</td><td>Select "Guest-Internet-Access-Only" → ACL: PERMIT DHCP+DNS · DENY RFC1918 · PERMIT internet · SAVE USER PROFILE</td></tr>
+      <tr><td><a href="file:///Users/khukhan/Downloads/Private-PreShared-Key-PPSK-Guide_v6%202%201.pdf#page=15">p.15–16</a></td><td>Assignment Rule — UG → User Profile</td><td>Check "Apply a different user profile" · (+) add rule · choose User Group: Guest-24h · SAVE</td></tr>
+      <tr><td><a href="file:///Users/khukhan/Downloads/Private-PreShared-Key-PPSK-Guide_v6%202%201.pdf#page=17">p.17</a></td><td>Save SSID — Results view</td><td>SAVE button → Wireless Networks shows: KhKLab-Guest · Private PSK · Guest-VLAN-100</td></tr>
+      <tr><td><a href="file:///Users/khukhan/Downloads/Private-PreShared-Key-PPSK-Guide_v6%202%201.pdf#page=18">p.18</a></td><td>Account Expiration Details</td><td>24h after First Login · access key must be used within 7 days · no renew for guests</td></tr>
+      <tr><td><a href="file:///Users/khukhan/Downloads/Private-PreShared-Key-PPSK-Guide_v6%202%201.pdf#page=20">p.20</a></td><td><strong>Email trap — UG outside SSID</strong></td><td>ProTip: UG created outside SSID → email suppressed. UG MUST be inside SSID for delivery.</td></tr>
+      <tr><td><a href="file:///Users/khukhan/Downloads/Private-PreShared-Key-PPSK-Guide_v6%202%201.pdf#page=21">p.21</a></td><td>Create Single User (test)</td><td>Configure > Users > Users > (+) · choose Guest-24h UG · name + email + phone · GENERATE · SMS+Email · SAVE</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Future Sprint Pages (VOSS Phase 2 + Employee Sponsorship)</h3>
+  <table>
+    <thead><tr><th>Rieben Page</th><th>Topic</th><th>Sprint</th></tr></thead>
+    <tbody>
+      <tr><td><a href="file:///Users/khukhan/Downloads/Private-PreShared-Key-PPSK-Guide_v6%202%201.pdf#page=76">p.76–83</a></td><td>PPSK Guest Onboarding + Employee Sponsorship (Dual SSIDs)</td><td>Week 2</td></tr>
+      <tr><td><a href="file:///Users/khukhan/Downloads/Private-PreShared-Key-PPSK-Guide_v6%202%201.pdf#page=84">p.84–89</a></td><td>PPSK Guest Onboarding + Employee Sponsorship (Single SSID)</td><td>Week 2</td></tr>
+      <tr><td><a href="file:///Users/khukhan/Downloads/Private-PreShared-Key-PPSK-Guide_v6%202%201.pdf#page=91">p.91–93</a></td><td>CLI Testing &amp; Troubleshooting PPSK</td><td>Both sprints</td></tr>
+      <tr><td><a href="file:///Users/khukhan/Downloads/Private-PreShared-Key-PPSK-Guide_v6%202%201.pdf#page=48">p.48–66</a></td><td>Private Client Groups (PCGs) — hyper-segmentation</td><td>Phase 4a RAG reference</td></tr>
+    </tbody>
+  </table>
+
+  <h3>SW1 VLAN 100 — XIQ vs CLI</h3>
+  <p>XIQ (via IQAgent) can push the VLAN tag + port membership to SW1 if SW1 is onboarded to MyLab_XIQ. Check first:</p>
+  <pre><code>show iqagent          # → Connected to MyLab_XIQ? If yes, XIQ can push VLAN/port config
+show lldp neighbors   # → find which port AP1 is plugged into</code></pre>
+  <div class="box warn">
+    <p><strong>Even if IQAgent is connected:</strong> The VLAN SVI IP (10.100.0.1/24) and DHCP server config on EXOS always need CLI. XIQ switch management does not expose L3 interface + DHCP server commands for EXOS. XIQ for VLAN tag + port; EXOS CLI for SVI + DHCP.</p>
+  </div>
+  <pre><code>create vlan Guest_100 tag 100
+configure vlan Guest_100 ipaddress 10.100.0.1 255.255.255.0
+enable ipforwarding vlan Guest_100
+configure vlan Guest_100 add port &lt;ap1-port&gt; tagged
+configure vlan Guest_100 dhcp-address-range 10.100.0.10-10.100.0.254
+configure vlan Guest_100 dhcp-options default-gateway 10.100.0.1
+configure vlan Guest_100 dhcp-options dns-server primary 8.8.8.8
+configure vlan Guest_100 dhcp-lease-timer 86400
+enable dhcp ports &lt;ap1-port&gt; vlan Guest_100
+save config</code></pre>
+
+  <h3>Verification Commands (after connection)</h3>
+  <pre><code>show dhcp-server lease vlan Guest_100   # → should show 10.100.0.x lease for test device
+show fdb vlan Guest_100                  # → confirm guest MAC in VLAN 100 forwarding table
+show vlan Guest_100                      # → confirm port membership + IP forwarding enabled</code></pre>
 
   <!-- PENDING -->
   <span class="section-label" id="pending">Pending</span>
