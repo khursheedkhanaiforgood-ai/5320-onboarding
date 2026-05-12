@@ -419,8 +419,20 @@ save config</code></pre>
 show fdb vlan Guest_100                  # → confirm guest MAC in VLAN 100 forwarding table
 show vlan Guest_100                      # → confirm port membership + IP forwarding enabled</code></pre>
 
-  <h3>SW1 Serial Console Access</h3>
-  <pre><code># Connect
+  <h3>SW1 Access — SSH + Serial Console</h3>
+  <pre><code># SSH (preferred — paste multi-line commands freely)
+# macOS OpenSSH 8.8+ disabled ssh-rsa by default; EXOS only offers ssh-rsa
+ssh -o HostKeyAlgorithms=+ssh-rsa -o PubkeyAcceptedKeyTypes=+ssh-rsa admin@192.168.0.28
+
+# Permanent fix — add to ~/.ssh/config:
+# Host sw1
+#     HostName 192.168.0.28
+#     User admin
+#     HostKeyAlgorithms +ssh-rsa
+#     PubkeyAcceptedKeyTypes +ssh-rsa
+# Then: ssh sw1
+
+# Serial console (fallback)
 screen /dev/cu.usbserial-A9XH7AI0 115200
 
 # Inside screen:
