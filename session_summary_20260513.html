@@ -79,7 +79,7 @@ a:hover { color: #111; }
 
   <h1>Unicast Delivery Failure: Wired&rarr;Wireless Transit via AP1</h1>
 
-  <p class="subtitle">A four-hour Socratic hunt through routing tables, NAT sessions, firewall rules, and QF-Modem static routes &mdash; only to discover AP1 had been silently dropping every unicast frame from the wired side since the first policy change on May 12. DHCP worked. Clients had IPs. The switch had clean routes. And yet nothing reached the internet. The smoking gun was a single command on the MacBook: <code>arp -n</code>. Empty cache. AP1 was receiving unicast frames from SW1 on port 3 and failing to deliver them to wireless clients.</p>
+  <p class="subtitle">A four-hour Socratic hunt through routing tables, NAT sessions, firewall rules, and QF-Modem static routes &mdash; only to discover AP1 had been silently dropping every unicast frame from the wired side since the first policy change on May 12. DHCP worked. Clients had IPs. The switch had clean routes. And yet nothing reached the internet. The smoking gun was a single command on the MacBook: <code>arp -an</code>. Empty cache. AP1 was receiving unicast frames from SW1 on port 3 and failing to deliver them to wireless clients.</p>
 
   <div class="stats">
     <div class="stat-card"><div class="stat-num ok">3</div><div class="stat-label">VLANs Restored</div></div>
@@ -111,7 +111,7 @@ a:hover { color: #111; }
     <li><span class="ok">✅</span> <strong>Corporate_Wireless VLAN 20</strong> &mdash; internet confirmed</li>
     <li><span class="ok">✅</span> <strong>PPSK_Demo VLAN 100</strong> &mdash; internet confirmed (RadSec auth + VLAN assignment end-to-end)</li>
     <li><span class="ok">✅</span> <strong>Root cause identified and resolved</strong> &mdash; AP1 data plane corruption from multiple policy changes + manual resets; fixed by XIQ-triggered reboot</li>
-    <li><span class="ok">✅</span> <strong>Diagnostic chain codified</strong> &mdash; FDB &rarr; ARP &rarr; SW1 ping &rarr; client <code>arp -n</code> is now the definitive runbook for wired&rarr;wireless unicast failure</li>
+    <li><span class="ok">✅</span> <strong>Diagnostic chain codified</strong> &mdash; FDB &rarr; ARP &rarr; SW1 ping &rarr; client <code>arp -an</code> is now the definitive runbook for wired&rarr;wireless unicast failure</li>
     <li><span class="ok">✅</span> <strong>QF-Modem routing table audited</strong> &mdash; all 10.x.0.0/24 return routes confirmed (10.10, 10.20, 10.30, 10.40, 10.80, 10.100 via 192.168.0.28)</li>
     <li><span class="ok">✅</span> <strong>SW1 routing table confirmed clean</strong> &mdash; VR-Default has all direct routes in FIB, default route via 192.168.0.1 (BOOTP-learned, UP)</li>
   </ul>
@@ -220,9 +220,12 @@ show iparp vlan VLAN_30_Guest_Wireless
     </li>
 
     <li>
-      <div class="time">Phase 10 &mdash; Smoking Gun: MacBook <code>arp -n</code> is empty</div>
-      <pre><code>MacBook$ arp -n
-(no output)</code></pre>
+      <div class="time">Phase 10 &mdash; Smoking Gun: MacBook <code>arp -an</code> is empty</div>
+      <pre><code>MacBook$ arp -an
+# (no output — ARP cache completely empty, including no entry for default gateway 10.30.0.1)
+
+# Note: on macOS the correct command is arp -an (not arp -n).
+# arp -n alone requires a host argument and returns nothing without -a.</code></pre>
       <p>MacBook has <strong>no ARP entries at all</strong> &mdash; including no entry for its own default gateway (10.30.0.1). MacBook sent ARP broadcasts asking &ldquo;Who has 10.30.0.1?&rdquo; &rarr; SW1 received them (proved by FDB) &rarr; SW1 sent unicast ARP replies (to MacBook MAC, port 3, VLAN 30) &rarr; <strong>AP1 received those frames and dropped them.</strong></p>
       <div class="box alert">
         <div class="box-label">Root Cause Identified</div>
@@ -235,7 +238,7 @@ show iparp vlan VLAN_30_Guest_Wireless
       <p>XIQ &rarr; Monitor &rarr; Devices &rarr; AP1 &rarr; Utilities &rarr; Reboot. Waited 3&ndash;4 minutes for CAPWAP reconnect and full policy push.</p>
       <ul>
         <li>MacBook reconnected to Guest_Wireless</li>
-        <li><code>arp -n</code> showed 10.30.0.1 with SW1&rsquo;s MAC ✅</li>
+        <li><code>arp -an</code> showed 10.30.0.1 with SW1&rsquo;s MAC ✅</li>
         <li><code>ping 10.30.0.1</code> &rarr; responding ✅</li>
         <li><code>ping 8.8.8.8</code> &rarr; responding ✅</li>
         <li><span class="ok">Guest VLAN 30 internet confirmed ✅</span></li>
@@ -289,7 +292,7 @@ show iparp vlan VLAN_30_Guest_Wireless
       </tr>
       <tr>
         <td>AP1 data plane broken (wired&rarr;wireless unicast)</td>
-        <td>SW1 ping to clients = 100% loss despite valid ARP. MacBook <code>arp -n</code> = empty. AP1 receives unicast from SW1 but drops before wireless delivery.</td>
+        <td>SW1 ping to clients = 100% loss despite valid ARP. MacBook <code>arp -an</code> = empty. AP1 receives unicast from SW1 but drops before wireless delivery.</td>
         <td><span class="ok">Root Cause ✅</span></td>
       </tr>
     </tbody>
@@ -345,7 +348,7 @@ show iparp vlan VLAN_30_Guest_Wireless
       </tr>
       <tr>
         <td>4</td>
-        <td><code>arp -n</code> on MacBook</td>
+        <td><code>arp -an</code> on MacBook</td>
         <td><strong>Empty cache = smoking gun.</strong> MacBook&rsquo;s ARP requests reached SW1 (FDB proves it) but SW1&rsquo;s unicast ARP replies never arrived = AP1 dropping wired&rarr;wireless unicast.</td>
       </tr>
     </tbody>
@@ -364,8 +367,16 @@ show iparp vlan VLAN_30_Guest_Wireless
   <p>Wait 3&ndash;4 minutes. AP reconnects to XIQ via CAPWAP, receives a single coherent policy push, rebuilds data plane cleanly. All three VLANs restored immediately.</p>
 
   <h3>Verification Sequence After AP Reboot</h3>
-  <pre><code>MacBook$ arp -n
-# Should show: 10.30.0.1  at  &lt;SW1 MAC&gt;  on en0  ✅
+  <pre><code># 1. Flush stale ARP cache first
+sudo arp -a -d
+
+# 2. Force a fresh ARP request
+ping -c 1 10.30.0.1
+
+# 3. Check ARP cache — gateway MAC must appear
+MacBook$ arp -an
+# Expected: 10.30.0.1  at  &lt;SW1 MAC&gt;  on en0  ✅
+# If empty → AP still dropping wired→wireless unicast ❌
 
 MacBook$ ping 10.30.0.1          # gateway reachable ✅
 MacBook$ ping 8.8.8.8            # internet reachable ✅</code></pre>
@@ -374,7 +385,7 @@ MacBook$ ping 8.8.8.8            # internet reachable ✅</code></pre>
   <ul>
     <li>When multiple policy changes need to be made in XIQ (firewall, QoS, VLAN), batch them and do a single XIQ deploy + single XIQ-triggered AP reboot at the end.</li>
     <li>Do NOT use manual power cycles mid-policy-change-sequence &mdash; the AP comes back with partial state.</li>
-    <li>After any AP reboot, verify with <code>arp -n</code> on a client before declaring connectivity restored.</li>
+    <li>After any AP reboot, verify with <code>arp -an</code> on a client before declaring connectivity restored.</li>
   </ul>
 
   <!-- ─── LAB STATE ─── -->
@@ -403,7 +414,7 @@ MacBook$ ping 8.8.8.8            # internet reachable ✅</code></pre>
   <h3>2. XIQ-Triggered Reboot &gt; Power Cycle</h3>
   <p>A cold power cycle brings the AP back up with whatever state it can reconstruct. A XIQ-triggered reboot causes XIQ to push a fresh policy snapshot during the CAPWAP handshake. When the AP has accumulated partial/conflicting policy state, only the XIQ-triggered reboot rebuilds the data plane correctly.</p>
 
-  <h3>3. <code>arp -n</code> on the Client Is the Definitive Test</h3>
+  <h3>3. <code>arp -an</code> on the Client Is the Definitive Test</h3>
   <p>If the client&rsquo;s ARP cache is empty after attempting to ping the gateway, the AP is dropping wired&rarr;wireless unicast. This single command cuts through all the routing, NAT, and firewall noise and points directly at the AP data plane.</p>
 
   <h3>4. The <code>from</code> Option in EXOS Ping Is Not Client Simulation</h3>
@@ -441,12 +452,23 @@ ping vr VR-Default 8.8.8.8
 ping vr VR-Default 10.30.0.100
 ping vr VR-Default 10.30.0.100 from 192.168.0.28</code></pre>
 
-  <h3>Client (MacBook) Diagnostic Commands</h3>
-  <pre><code># Smoking gun for wired→wireless unicast failure
-arp -n
+  <h3>Client (MacBook) ARP Command Syntax</h3>
+  <pre><code>arp -a              # show full ARP cache (with hostname resolution)
+arp -an             # show full ARP cache, numeric only — USE THIS ← smoking gun
+arp -n 10.30.0.1   # lookup one specific IP, no hostname resolution
+arp 10.30.0.1      # lookup one specific IP (with resolution)
+arp -d 10.30.0.1   # delete one entry (flush stale entry)
+sudo arp -a -d      # delete ALL ARP entries (full flush)</code></pre>
 
-# Confirm gateway reachable
+  <h3>Client (MacBook) Diagnostic Sequence</h3>
+  <pre><code># Flush and force fresh ARP — cleanest test
+sudo arp -a -d
+ping -c 1 10.30.0.1
+arp -an             # gateway MAC present = AP unicast working ✅ / empty = broken ❌
+
+# Confirm gateway and internet reachable
 ping 10.30.0.1
+ping 8.8.8.8
 
 # Traceroute — shows hop 1 = SW1 SVI, subsequent hops reveal path
 traceroute 8.8.8.8
@@ -457,7 +479,7 @@ sudo tcpdump -i en0 icmp</code></pre>
   <h3>The Fix</h3>
   <pre><code># XIQ Web Portal
 Monitor → Devices → [AP1] → Utilities → Reboot
-# Wait 3-4 minutes, then verify with arp -n on client</code></pre>
+# Wait 3-4 minutes, then verify with arp -an on client</code></pre>
 
   <!-- ─── DEEP DIVE ─── -->
   <span class="section-label" id="deepdive">Deep Dive &mdash; Why the AP Broke and What the Reboot Fixed</span>
@@ -489,7 +511,7 @@ Monitor → Devices → [AP1] → Utilities → Reboot
       <tr><td><code>show fdb vlan Guest_30</code> &rarr; MacBook MAC on port 3</td><td>AP <span class="ok">IS</span> forwarding wireless&rarr;wired (upstream works)</td></tr>
       <tr><td><code>show iparp vlan Guest_30</code> &rarr; ARP entry for .101</td><td>Client&rsquo;s ARP REQUEST (broadcast) reached SW1</td></tr>
       <tr><td><code>ping 10.30.0.101</code> from SW1 &rarr; 100% loss</td><td>SW1&rsquo;s unicast ARP REPLY never reached the client</td></tr>
-      <tr><td><code>arp -n</code> on MacBook &rarr; <strong>empty</strong></td><td>Client never received the unicast reply &mdash; AP dropped it silently</td></tr>
+      <tr><td><code>arp -an</code> on MacBook &rarr; <strong>empty</strong></td><td>Client never received the unicast reply &mdash; AP dropped it silently</td></tr>
       <tr><td>DHCP worked</td><td>GTK path (broadcast) still functional</td></tr>
     </tbody>
   </table>
