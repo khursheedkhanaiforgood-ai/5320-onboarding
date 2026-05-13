@@ -3,327 +3,206 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Session Summary — May 13, 2026</title>
+<title>5320 Lab Journal — AP Data Plane Incident, May 13 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Libre+Franklin:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --ink: #1a1a1a;
-    --muted: #555;
-    --rule: #d4c9b8;
-    --bg: #faf8f4;
-    --accent: #b5271a;
-    --code-bg: #f0ede6;
-    --success: #1a6b2f;
-    --warn: #8a4f00;
-    --fail: #b5271a;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    font-family: 'Georgia', 'Times New Roman', serif;
-    background: var(--bg);
-    color: var(--ink);
-    font-size: 17px;
-    line-height: 1.75;
-  }
-  /* NAV */
-  nav {
-    position: sticky;
-    top: 0;
-    background: var(--bg);
-    border-bottom: 2px solid var(--ink);
-    z-index: 100;
-    padding: 8px 0;
-  }
-  nav ul {
-    list-style: none;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 4px 18px;
-    max-width: 900px;
-    margin: 0 auto;
-    padding: 0 20px;
-    font-family: 'Helvetica Neue', Arial, sans-serif;
-    font-size: 12px;
-    font-weight: 600;
-    letter-spacing: .05em;
-    text-transform: uppercase;
-  }
-  nav a { color: var(--ink); text-decoration: none; }
-  nav a:hover { color: var(--accent); }
-
-  /* LAYOUT */
-  .masthead {
-    max-width: 900px;
-    margin: 0 auto;
-    padding: 40px 20px 24px;
-    border-bottom: 3px double var(--ink);
-  }
-  .dateline {
-    font-family: 'Helvetica Neue', Arial, sans-serif;
-    font-size: 12px;
-    letter-spacing: .1em;
-    text-transform: uppercase;
-    color: var(--muted);
-    margin-bottom: 10px;
-  }
-  h1 {
-    font-size: 2.6rem;
-    line-height: 1.15;
-    font-weight: 700;
-    margin-bottom: 12px;
-  }
-  .deck {
-    font-size: 1.15rem;
-    color: var(--muted);
-    font-style: italic;
-    border-left: 3px solid var(--accent);
-    padding-left: 14px;
-    margin-top: 10px;
-  }
-  main {
-    max-width: 900px;
-    margin: 0 auto;
-    padding: 0 20px 60px;
-  }
-  section { padding: 36px 0; border-bottom: 1px solid var(--rule); }
-  section:last-child { border-bottom: none; }
-  h2 {
-    font-family: 'Helvetica Neue', Arial, sans-serif;
-    font-size: 0.75rem;
-    letter-spacing: .12em;
-    text-transform: uppercase;
-    color: var(--accent);
-    border-top: 2px solid var(--accent);
-    padding-top: 8px;
-    margin-bottom: 18px;
-  }
-  h3 {
-    font-size: 1.25rem;
-    font-weight: 700;
-    margin: 24px 0 8px;
-    line-height: 1.3;
-  }
-  p { margin-bottom: 14px; }
-  ul, ol { padding-left: 24px; margin-bottom: 14px; }
-  li { margin-bottom: 5px; }
-
-  /* CODE */
-  pre {
-    background: var(--code-bg);
-    border-left: 3px solid var(--ink);
-    padding: 14px 16px;
-    font-family: 'Menlo', 'Courier New', monospace;
-    font-size: 13px;
-    line-height: 1.55;
-    overflow-x: auto;
-    margin: 14px 0;
-    white-space: pre-wrap;
-    word-break: break-word;
-  }
-  code {
-    font-family: 'Menlo', 'Courier New', monospace;
-    font-size: 13px;
-    background: var(--code-bg);
-    padding: 1px 5px;
-    border-radius: 2px;
-  }
-
-  /* STATUS BADGES */
-  .ok  { color: var(--success); font-weight: 700; }
-  .bad { color: var(--fail);    font-weight: 700; }
-  .warn{ color: var(--warn);    font-weight: 700; }
-
-  /* TABLE */
-  table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 14px; }
-  th { background: var(--ink); color: var(--bg); padding: 8px 12px; text-align: left; font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 12px; letter-spacing: .05em; text-transform: uppercase; }
-  td { padding: 8px 12px; border-bottom: 1px solid var(--rule); vertical-align: top; }
-  tr:nth-child(even) td { background: var(--code-bg); }
-
-  /* CALLOUT BOX */
-  .callout {
-    background: var(--code-bg);
-    border: 1px solid var(--rule);
-    border-left: 4px solid var(--accent);
-    padding: 16px 18px;
-    margin: 18px 0;
-    font-size: 15px;
-  }
-  .callout .label {
-    font-family: 'Helvetica Neue', Arial, sans-serif;
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: .1em;
-    text-transform: uppercase;
-    color: var(--accent);
-    margin-bottom: 6px;
-  }
-
-  /* TIMELINE */
-  .timeline { list-style: none; padding: 0; position: relative; }
-  .timeline li {
-    padding-left: 28px;
-    position: relative;
-    margin-bottom: 18px;
-    border-left: 2px solid var(--rule);
-  }
-  .timeline li::before {
-    content: '';
-    position: absolute;
-    left: -6px;
-    top: 8px;
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    background: var(--accent);
-  }
-  .timeline .time {
-    font-family: 'Helvetica Neue', Arial, sans-serif;
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: .06em;
-    text-transform: uppercase;
-    color: var(--muted);
-    margin-bottom: 3px;
-  }
-
-  .footer {
-    font-family: 'Helvetica Neue', Arial, sans-serif;
-    font-size: 12px;
-    color: var(--muted);
-    text-align: center;
-    padding: 30px 20px;
-    border-top: 2px solid var(--ink);
-    max-width: 900px;
-    margin: 0 auto;
-  }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Libre Baskerville', Georgia, serif; background: #FFFFFF; color: #111111; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 48px 24px 72px; }
+.container { max-width: 760px; width: 100%; }
+.nyt-rule-top { border: none; border-top: 3px solid #111; margin-bottom: 6px; }
+.nyt-rule-thin { border: none; border-top: 1px solid #111; margin-bottom: 18px; }
+.nyt-logo { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.22em; color: #666; text-align: center; margin-bottom: 6px; }
+.byline { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.72rem; color: #666; margin-bottom: 14px; letter-spacing: 0.02em; }
+.byline strong { color: #111; font-weight: 700; }
+h1 { font-family: 'Libre Baskerville', Georgia, serif; font-size: 2.2rem; font-weight: 700; color: #111; line-height: 1.15; margin-bottom: 14px; }
+.subtitle { font-family: 'Libre Baskerville', Georgia, serif; font-size: 1rem; font-style: italic; color: #444; line-height: 1.8; margin-bottom: 20px; border-bottom: 1px solid #E2E2E2; padding-bottom: 28px; }
+.section-label { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.18em; color: #326891; margin: 40px 0 12px; padding-bottom: 6px; border-bottom: 2px solid #326891; display: block; }
+h2 { font-family: 'Libre Baskerville', Georgia, serif; font-size: 1.45rem; font-weight: 700; color: #111; margin: 0 0 14px; }
+h3 { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #326891; margin: 24px 0 10px; }
+h4 { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.8rem; font-weight: 700; color: #111; margin: 18px 0 8px; }
+p { font-size: 0.97rem; line-height: 1.85; color: #222; margin-bottom: 12px; }
+ul, ol { padding-left: 22px; margin-bottom: 14px; }
+li { font-size: 0.95rem; line-height: 1.8; color: #222; margin-bottom: 4px; }
+code { font-family: 'SF Mono', Consolas, monospace; font-size: 0.82rem; background: #F4F4F4; border: 1px solid #E2E2E2; padding: 1px 5px; border-radius: 3px; color: #326891; }
+pre { background: #F8F8F8; border: 1px solid #E2E2E2; border-radius: 4px; padding: 16px; overflow-x: auto; margin: 12px 0 18px; }
+pre code { background: none; border: none; padding: 0; color: #111; font-size: 0.83rem; line-height: 1.65; }
+table { width: 100%; border-collapse: collapse; margin: 12px 0 20px; font-size: 0.88rem; }
+th { background: #F4F4F4; font-family: 'Libre Franklin', Arial, sans-serif; font-weight: 700; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: #326891; padding: 8px 10px; border: 1px solid #E2E2E2; text-align: left; }
+td { padding: 8px 10px; border: 1px solid #E2E2E2; color: #222; vertical-align: top; }
+tr:nth-child(even) td { background: #FAFAFA; }
+.ok  { color: #2E7D32; font-weight: 700; }
+.bad { color: #C62828; font-weight: 700; }
+.warn { color: #E65100; font-weight: 700; }
+.box { border-left: 3px solid #326891; background: #F0F7FF; padding: 12px 16px; margin: 14px 0; border-radius: 0 4px 4px 0; }
+.box p { margin: 0; font-size: 0.92rem; }
+.box.warn { border-left-color: #F57F17; background: #FFFBF0; }
+.box.ok { border-left-color: #2E7D32; background: #F1F8F1; }
+.box.alert { border-left-color: #C62828; background: #FCEEEE; }
+.box-label { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: #326891; margin-bottom: 6px; }
+.box.warn .box-label { color: #E65100; }
+.box.ok .box-label { color: #2E7D32; }
+.box.alert .box-label { color: #C62828; }
+.divider { border: none; border-top: 1px solid #E2E2E2; margin: 32px 0; }
+/* TOC */
+.toc { background: #F8F8F8; border: 1px solid #E2E2E2; border-radius: 4px; padding: 18px 22px; margin-bottom: 36px; }
+.toc-title { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.15em; color: #666; margin-bottom: 10px; }
+.toc a { display: block; font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.85rem; color: #326891; text-decoration: none; padding: 4px 0; border-bottom: 1px dotted #E2E2E2; }
+.toc a:last-child { border-bottom: none; }
+.toc a:hover { color: #111; }
+/* Timeline */
+.timeline { list-style: none; padding: 0; }
+.timeline li { padding: 0 0 20px 26px; position: relative; border-left: 2px solid #E2E2E2; margin-left: 6px; }
+.timeline li:last-child { border-left-color: transparent; }
+.timeline li::before { content: ''; position: absolute; left: -7px; top: 6px; width: 12px; height: 12px; border-radius: 50%; background: #326891; border: 2px solid #fff; box-shadow: 0 0 0 2px #326891; }
+.timeline .time { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #326891; margin-bottom: 6px; }
+/* Stats */
+.stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 20px 0 30px; }
+.stat-card { border: 1px solid #E2E2E2; border-radius: 4px; padding: 12px 14px; text-align: center; }
+.stat-num { font-family: 'Libre Baskerville', Georgia, serif; font-size: 1.5rem; font-weight: 700; color: #111; }
+.stat-label { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.7rem; color: #666; text-transform: uppercase; letter-spacing: 0.08em; margin-top: 2px; }
+/* Footer */
+.footer { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.72rem; color: #999; text-align: center; margin-top: 48px; padding-top: 16px; border-top: 1px solid #E2E2E2; }
+a { color: #326891; }
+a:hover { color: #111; }
 </style>
 </head>
 <body>
+<div class="container">
 
-<nav>
-  <ul>
-    <li><a href="#accomplished">Accomplished</a></li>
-    <li><a href="#incident">Incident Log</a></li>
-    <li><a href="#falsetrails">False Trails</a></li>
-    <li><a href="#rootcause">Root Cause</a></li>
-    <li><a href="#diagnostic">Diagnostic Chain</a></li>
-    <li><a href="#fix">The Fix</a></li>
-    <li><a href="#lab">Lab State</a></li>
-    <li><a href="#lessons">Lessons</a></li>
-    <li><a href="#commands">Commands</a></li>
-    <li><a href="#deepdive">Deep Dive</a></li>
-    <li><a href="#pending">Pending</a></li>
-  </ul>
-</nav>
+  <hr class="nyt-rule-top">
+  <p class="nyt-logo">E2E Network Deployment &mdash; Lab Journal</p>
+  <hr class="nyt-rule-thin">
 
-<div class="masthead">
-  <div class="dateline">KhKLab · PPSK Guest Onboarding Sprint · May 13, 2026</div>
+  <p class="byline">Wednesday, May 13, 2026 &bull; KhKLab &bull; <strong>PPSK Guest Onboarding Sprint &mdash; AP Data Plane Incident</strong></p>
+
   <h1>The AP Was Lying the Whole Time</h1>
-  <div class="deck">A four-hour Socratic hunt through routing tables, NAT sessions, firewall rules, and QF-Modem static routes — only to discover AP1 had been silently dropping every unicast frame from the wired side since the first policy change on May 12.</div>
-</div>
 
-<main>
+  <p class="subtitle">A four-hour Socratic hunt through routing tables, NAT sessions, firewall rules, and QF-Modem static routes &mdash; only to discover AP1 had been silently dropping every unicast frame from the wired side since the first policy change on May 12. DHCP worked. Clients had IPs. The switch had clean routes. And yet nothing reached the internet. The smoking gun was a single command on the MacBook: <code>arp -n</code>. Empty cache. The AP was receiving unicast frames from SW1 and throwing them away.</p>
 
-<!-- ─── ACCOMPLISHED ─── -->
-<section id="accomplished">
-  <h2>Accomplished</h2>
+  <div class="stats">
+    <div class="stat-card"><div class="stat-num ok">3</div><div class="stat-label">VLANs Restored</div></div>
+    <div class="stat-card"><div class="stat-num" style="color:#326891">8</div><div class="stat-label">False Trails</div></div>
+    <div class="stat-card"><div class="stat-num" style="color:#E65100">4</div><div class="stat-label">Hours to Root Cause</div></div>
+    <div class="stat-card"><div class="stat-num ok">1</div><div class="stat-label">XIQ Reboot Fixed It</div></div>
+  </div>
+
+  <div class="toc">
+    <p class="toc-title">In This Session</p>
+    <a href="#accomplished">Accomplished &mdash; what was confirmed working by end of session</a>
+    <a href="#incident">Incident Log &mdash; chronological 11-phase timeline</a>
+    <a href="#falsetrails">False Trails &mdash; 8 hypotheses investigated and eliminated</a>
+    <a href="#rootcause">Root Cause &mdash; AP1 data plane corruption explained</a>
+    <a href="#diagnostic">Diagnostic Chain &mdash; 4-step runbook for wired&rarr;wireless failure</a>
+    <a href="#fix">The Fix &mdash; XIQ-triggered reboot, verification, prevention</a>
+    <a href="#lab">Lab State &mdash; all components, end of May 13</a>
+    <a href="#lessons">Lessons Learned &mdash; 6 principles from today</a>
+    <a href="#commands">Key Commands &mdash; SW1 diagnostic + client smoking-gun</a>
+    <a href="#deepdive">Deep Dive &mdash; PTK vs GTK, station table, why reboot differs from power cycle</a>
+    <a href="#pending">Pending &mdash; next session sprint backlog</a>
+  </div>
+
+  <!-- ─── ACCOMPLISHED ─── -->
+  <span class="section-label" id="accomplished">Accomplished</span>
+
   <ul>
-    <li><span class="ok">✅</span> <strong>Guest_Wireless VLAN 30</strong> — internet confirmed working (MacBook, iPhone)</li>
-    <li><span class="ok">✅</span> <strong>Corporate_Wireless VLAN 20</strong> — internet confirmed working</li>
-    <li><span class="ok">✅</span> <strong>PPSK_Demo VLAN 100</strong> — internet confirmed working (RadSec auth + VLAN assignment end-to-end)</li>
-    <li><span class="ok">✅</span> <strong>Root cause identified and resolved</strong> — AP1 data plane corruption from multiple policy changes + manual resets; fixed by XIQ-triggered reboot</li>
-    <li><span class="ok">✅</span> <strong>Diagnostic chain codified</strong> — FDB → ARP → SW1 ping → client <code>arp -n</code> is now the definitive runbook for wired→wireless unicast failure</li>
-    <li><span class="ok">✅</span> <strong>QF-Modem routing table audited</strong> — all 10.x.0.0/24 return routes confirmed present (10.10, 10.20, 10.30, 10.40, 10.80, 10.100 via 192.168.0.28)</li>
-    <li><span class="ok">✅</span> <strong>SW1 routing table confirmed clean</strong> — VR-Default has all direct routes in FIB, default route via 192.168.0.1 (BOOTP-learned, UP)</li>
+    <li><span class="ok">✅</span> <strong>Guest_Wireless VLAN 30</strong> &mdash; internet confirmed (MacBook + iPhone)</li>
+    <li><span class="ok">✅</span> <strong>Corporate_Wireless VLAN 20</strong> &mdash; internet confirmed</li>
+    <li><span class="ok">✅</span> <strong>PPSK_Demo VLAN 100</strong> &mdash; internet confirmed (RadSec auth + VLAN assignment end-to-end)</li>
+    <li><span class="ok">✅</span> <strong>Root cause identified and resolved</strong> &mdash; AP1 data plane corruption from multiple policy changes + manual resets; fixed by XIQ-triggered reboot</li>
+    <li><span class="ok">✅</span> <strong>Diagnostic chain codified</strong> &mdash; FDB &rarr; ARP &rarr; SW1 ping &rarr; client <code>arp -n</code> is now the definitive runbook for wired&rarr;wireless unicast failure</li>
+    <li><span class="ok">✅</span> <strong>QF-Modem routing table audited</strong> &mdash; all 10.x.0.0/24 return routes confirmed (10.10, 10.20, 10.30, 10.40, 10.80, 10.100 via 192.168.0.28)</li>
+    <li><span class="ok">✅</span> <strong>SW1 routing table confirmed clean</strong> &mdash; VR-Default has all direct routes in FIB, default route via 192.168.0.1 (BOOTP-learned, UP)</li>
   </ul>
-</section>
 
-<!-- ─── INCIDENT LOG ─── -->
-<section id="incident">
-  <h2>Incident Log — Chronological</h2>
+  <!-- ─── INCIDENT LOG ─── -->
+  <span class="section-label" id="incident">Incident Log &mdash; Chronological</span>
 
   <ul class="timeline">
 
     <li>
-      <div class="time">Session Start — Continuation from May 12</div>
-      <p>Carried over from last night: MacBook connected to PPSK_Demo (VLAN 100), IP 10.100.0.12. DHCP confirmed, RadSec confirmed, gateway reachable. <span class="bad">Open blocker: ping 8.8.8.8 times out from all wireless clients.</span> CWP confirmed OFF. Firewall rule order already corrected (DENY RFC1918 rules 1-3, PERMIT ANY rule 6). QoS removed by boss overnight.</p>
+      <div class="time">Session Start &mdash; Continuation from May 12</div>
+      <p>Carried over from last night: MacBook connected to PPSK_Demo (VLAN 100), IP 10.100.0.12. DHCP confirmed, RadSec confirmed, gateway reachable. <span class="bad">Open blocker: ping 8.8.8.8 times out from all wireless clients.</span> CWP confirmed OFF. Firewall rule order already corrected (DENY RFC1918 rules 1&ndash;3, PERMIT ANY rule 6). QoS removed by boss overnight.</p>
     </li>
 
     <li>
-      <div class="time">Phase 1 — PPSK client cannot ping 192.168.0.1</div>
-      <p>MacBook at 10.100.0.12. Client can ping own gateway (10.100.0.1 = SW1 SVI). Cannot ping 192.168.0.1 (QF-Modem). Cannot ping 8.8.8.8. Traceroute from MacBook: <strong>hop 1 = 10.100.0.1, nothing after.</strong></p>
-      <p>SW1 checks: <code>show iproute vr VR-Default</code> — routing table perfect. <code>ping vr VR-Default 8.8.8.8</code> — 0% loss. SW1 itself has full internet.</p>
+      <div class="time">Phase 1 &mdash; PPSK client cannot reach internet</div>
+      <p>MacBook at 10.100.0.12. Client can ping own gateway (10.100.0.1 = SW1 SVI). Cannot ping 192.168.0.1 (QF-Modem). Cannot ping 8.8.8.8. Traceroute from MacBook: hop 1 = 10.100.0.1, nothing after.</p>
+      <p>SW1 checks: <code>show iproute vr VR-Default</code> &mdash; routing table perfect. <code>ping vr VR-Default 8.8.8.8</code> &mdash; 0% loss. SW1 itself has full internet.</p>
     </li>
 
     <li>
-      <div class="time">Phase 2 — Corp/Guest also broken (critical pivot)</div>
+      <div class="time">Phase 2 &mdash; Corp/Guest also broken (critical pivot)</div>
       <p>User tested Corporate_Wireless (VLAN 20) and Guest_Wireless (VLAN 30). <span class="bad">Both also without internet.</span> These VLANs had nothing to do with PPSK changes. This eliminated AP1 PPSK-specific issues and pointed to a shared infrastructure problem.</p>
     </li>
 
     <li>
-      <div class="time">Phase 3 — SW1 routing exhaustively verified</div>
-      <pre>show iproute vr VR-Default
-→ Default Route 192.168.0.1 UG-D---um--f- ✅
-→ 10.20.0.0/24 U------um--f- ✅
-→ 10.30.0.0/24 U------um--f- ✅
-→ 10.100.0.0/24 U------um--f- ✅
-→ 192.168.0.0/24 U------um--f- ✅
+      <div class="time">Phase 3 &mdash; SW1 routing exhaustively verified</div>
+      <pre><code>show iproute vr VR-Default
+→ Default Route 192.168.0.1  UG-D---um--f-  ✅
+→ 10.20.0.0/24               U------um--f-  ✅
+→ 10.30.0.0/24               U------um--f-  ✅
+→ 10.100.0.0/24              U------um--f-  ✅
+→ 192.168.0.0/24             U------um--f-  ✅
 
 ping vr VR-Default 8.8.8.8              → 0% loss ✅
 ping vr VR-Default 8.8.8.8 from 10.20.0.1  → 0% loss ✅
-ping vr VR-Default 8.8.8.8 from 10.30.0.1  → 0% loss ✅</pre>
+ping vr VR-Default 8.8.8.8 from 10.30.0.1  → 0% loss ✅</code></pre>
       <p>SW1 can reach 8.8.8.8 from any VLAN SVI. Routing is not the problem.</p>
     </li>
 
     <li>
-      <div class="time">Phase 4 — QF-Modem static routes verified</div>
-      <p>User navigated to QF-Modem web UI (QuantumFiber Advanced Setup → Static Routing). Full table confirmed:</p>
+      <div class="time">Phase 4 &mdash; QF-Modem static routes verified</div>
+      <p>User navigated to QF-Modem web UI (QuantumFiber Advanced Setup &rarr; Static Routing). Full table confirmed:</p>
       <table>
-        <tr><th>Destination</th><th>Mask</th><th>Gateway</th></tr>
-        <tr><td>10.10.0.0</td><td>/24</td><td>192.168.0.28 (SW1)</td></tr>
-        <tr><td>10.20.0.0</td><td>/24</td><td>192.168.0.28 (SW1)</td></tr>
-        <tr><td>10.30.0.0</td><td>/24</td><td>192.168.0.28 (SW1)</td></tr>
-        <tr><td>10.40.0.0</td><td>/24</td><td>192.168.0.28 (SW1)</td></tr>
-        <tr><td>10.80.0.0</td><td>/24</td><td>192.168.0.28 (SW1)</td></tr>
-        <tr><td>10.100.0.0</td><td>/24</td><td>192.168.0.28 (SW1)</td></tr>
-        <tr><td>10.50/60/70/90.0.0</td><td>/24</td><td>192.168.0.11 (other device)</td></tr>
+        <thead><tr><th>Destination</th><th>Mask</th><th>Gateway</th></tr></thead>
+        <tbody>
+          <tr><td>10.10.0.0</td><td>/24</td><td>192.168.0.28 (SW1)</td></tr>
+          <tr><td>10.20.0.0</td><td>/24</td><td>192.168.0.28 (SW1)</td></tr>
+          <tr><td>10.30.0.0</td><td>/24</td><td>192.168.0.28 (SW1)</td></tr>
+          <tr><td>10.40.0.0</td><td>/24</td><td>192.168.0.28 (SW1)</td></tr>
+          <tr><td>10.80.0.0</td><td>/24</td><td>192.168.0.28 (SW1)</td></tr>
+          <tr><td>10.100.0.0</td><td>/24</td><td>192.168.0.28 (SW1)</td></tr>
+          <tr><td>10.50/60/70/90.0.0</td><td>/24</td><td>192.168.0.11 (other device)</td></tr>
+        </tbody>
       </table>
       <p>All return routes confirmed. QF-Modem is not the problem.</p>
     </li>
 
     <li>
-      <div class="time">Phase 5 — DHCP confirms clients have IPs</div>
-      <pre>show dhcp-server
-→ VLAN 20: 10.20.0.100 (Assigned, ~2h lease), 10.20.0.101 (Assigned)
-→ VLAN 30: 10.30.0.100, 10.30.0.101 (Assigned)
-→ VLAN 100: 10.100.0.10, .11, .12 (Assigned, 24h lease)</pre>
-      <p><strong>Key insight:</strong> DHCP works because it uses <strong>broadcast</strong> frames. Clients set the BROADCAST flag in DHCP DISCOVER, so DHCP OFFER/ACK are sent as broadcasts (ff:ff:ff:ff:ff:ff dst). No unicast delivery needed — this masked the real problem for hours.</p>
+      <div class="time">Phase 5 &mdash; DHCP confirms clients have IPs</div>
+      <pre><code>show dhcp-server
+→ VLAN 20:  10.20.0.100 (Assigned, ~2h lease), 10.20.0.101 (Assigned)
+→ VLAN 30:  10.30.0.100, 10.30.0.101 (Assigned)
+→ VLAN 100: 10.100.0.10, .11, .12 (Assigned, 24h lease)</code></pre>
+      <p><strong>Key insight:</strong> DHCP works because it uses <strong>broadcast</strong> frames. Clients set the BROADCAST flag in DHCP DISCOVER, so DHCP OFFER/ACK are sent as broadcasts (ff:ff:ff:ff:ff:ff dst). No unicast delivery needed &mdash; this masked the real problem for hours.</p>
     </li>
 
     <li>
-      <div class="time">Phase 6 — SW1 ping to clients: inconsistent</div>
-      <pre>ping vr VR-Default 10.20.0.101  → 1st attempt: 100% LOSS (Destination Host Unreachable)
-                                 → 2nd attempt: 0% loss, 115ms/58ms/21ms/4ms (ARP warming)
-ping vr VR-Default 10.30.0.101  → 0% loss, 88ms/48ms/4ms/49ms</pre>
-      <p>The inconsistency — 100% loss then 0% loss on the same IP — was a clue. SW1 could reach clients when the ARP was warm from recent client-initiated traffic, but failed when it had to ARP fresh. This suggested the wired→wireless path was flaky, not dead. Turned out to be a different story after the full reboot.</p>
+      <div class="time">Phase 6 &mdash; SW1 ping to clients: inconsistent</div>
+      <pre><code>ping vr VR-Default 10.20.0.101  → 1st attempt: 100% LOSS (Destination Host Unreachable)
+                                 → 2nd attempt: 0% loss, 115ms/58ms/21ms/4ms
+ping vr VR-Default 10.30.0.101  → 0% loss, 88ms/48ms/4ms/49ms</code></pre>
+      <p>The inconsistency &mdash; 100% loss then 0% loss on the same IP &mdash; suggested the wired&rarr;wireless path was flaky, not dead. Turned out to be a different story after the full reboot.</p>
     </li>
 
     <li>
-      <div class="time">Phase 7 — Full power cycle of all equipment</div>
-      <p>All devices powered off and back on in sequence: QF-Modem → SW1 → SW2 → IPE → APs → clients. Clean slate.</p>
-      <p><strong>After reboot:</strong> SW1 ping 8.8.8.8 = 0% loss ✅. Clients reconnected, got fresh DHCP leases on VLANs 20 and 30.</p>
+      <div class="time">Phase 7 &mdash; Full power cycle of all equipment</div>
+      <p>All devices powered off and back on: QF-Modem &rarr; SW1 &rarr; SW2 &rarr; IPE &rarr; APs &rarr; clients. Clean slate. After reboot: SW1 ping 8.8.8.8 = 0% loss ✅. Clients reconnected, got fresh DHCP leases on VLANs 20 and 30.</p>
     </li>
 
     <li>
-      <div class="time">Phase 8 — Post-reboot: SW1 CANNOT ping any client</div>
-      <pre>ping vr VR-Default 10.30.0.100           → 100% LOSS (Request timed out)
+      <div class="time">Phase 8 &mdash; Post-reboot: SW1 cannot ping any client</div>
+      <pre><code>ping vr VR-Default 10.30.0.100           → 100% LOSS (Request timed out)
 ping vr VR-Default 10.30.0.100 from 192.168.0.28 → 100% LOSS
-ping 10.30.0.100                         → 100% LOSS</pre>
-      <p>This was the clearest signal yet. SW1 just assigned those DHCP leases but cannot reach the clients at all — even with the `from 192.168.0.28` test that simulates the exact return path QF-Modem would use.</p>
+ping 10.30.0.100                         → 100% LOSS</code></pre>
+      <p>SW1 just assigned those DHCP leases but cannot reach the clients at all &mdash; even simulating the exact return path QF-Modem would use. Clearest signal yet.</p>
     </li>
 
     <li>
-      <div class="time">Phase 9 — FDB, VLAN, ARP data collected</div>
-      <pre>show fdb vlan VLAN_30_Guest_Wireless
+      <div class="time">Phase 9 &mdash; FDB, VLAN, ARP data collected</div>
+      <pre><code>show fdb vlan VLAN_30_Guest_Wireless
 → 74:a6:cd:8b:19:60  VLAN_30(0030)  port 3  ✅
 → de:8b:42:42:3d:88  VLAN_30(0030)  port 3  ✅
 
@@ -332,229 +211,218 @@ show vlan VLAN_30_Guest_Wireless
 
 show iparp vlan VLAN_30_Guest_Wireless
 → 10.30.0.100  →  de:8b:42:42:3d:88  port 3  (ARP conflict: should be iPhone)
-→ 10.30.0.101  →  de:8b:42:42:3d:88  port 3  ✅ (MacBook correct)</pre>
-
-      <div class="callout">
-        <div class="label">ARP Anomaly</div>
-        DHCP assigned 10.30.0.100 to iPhone (74:a6:cd:8b:19:60) but SW1's ARP table maps .100 → MacBook MAC (de:8b:42:42:3d:88). MacBook sent a gratuitous ARP claiming 10.30.0.100 from a cached previous-session lease. ARP conflict.
+→ 10.30.0.101  →  de:8b:42:42:3d:88  port 3  ✅ (MacBook correct)</code></pre>
+      <div class="box warn">
+        <div class="box-label">ARP Anomaly</div>
+        <p>DHCP assigned 10.30.0.100 to iPhone (74:a6:cd:8b:19:60) but SW1&rsquo;s ARP table maps .100 &rarr; MacBook MAC (de:8b:42:42:3d:88). MacBook sent a gratuitous ARP claiming 10.30.0.100 from a cached previous-session lease. ARP conflict &mdash; not root cause, but added confusion.</p>
       </div>
-      <p>FDB and ARP prove: wireless→wired traffic is working (MACs learned, gratuitous ARPs received). But SW1 still can't ping the clients.</p>
+      <p>FDB and ARP prove: wireless&rarr;wired traffic is working (MACs learned, gratuitous ARPs received). But SW1 still cannot ping the clients.</p>
     </li>
 
     <li>
-      <div class="time">Phase 10 — Smoking Gun: MacBook <code>arp -n</code> is empty</div>
-      <pre>MacBook$ arp -n
-(no output)</pre>
-      <p>MacBook has <strong>no ARP entries at all</strong>. Including no entry for its own default gateway (10.30.0.1). This means: MacBook sent ARP broadcasts asking "Who has 10.30.0.1?" → SW1 received them (proved by FDB) → SW1 sent ARP replies (unicast to MacBook MAC on port 3 VLAN 30) → <strong>AP1 received those frames and dropped them.</strong> The ARP reply never reached MacBook.</p>
-
-      <div class="callout">
-        <div class="label">Root Cause Identified</div>
-        AP1 is <strong>not delivering unicast frames from the wired side to wireless clients</strong>. It receives them on port 3 but silently drops them before wireless delivery. Broadcasts flow normally (DHCP works), but unicast wired→wireless is dead.
+      <div class="time">Phase 10 &mdash; Smoking Gun: MacBook <code>arp -n</code> is empty</div>
+      <pre><code>MacBook$ arp -n
+(no output)</code></pre>
+      <p>MacBook has <strong>no ARP entries at all</strong> &mdash; including no entry for its own default gateway (10.30.0.1). MacBook sent ARP broadcasts asking &ldquo;Who has 10.30.0.1?&rdquo; &rarr; SW1 received them (proved by FDB) &rarr; SW1 sent unicast ARP replies (to MacBook MAC, port 3, VLAN 30) &rarr; <strong>AP1 received those frames and dropped them.</strong></p>
+      <div class="box alert">
+        <div class="box-label">Root Cause Identified</div>
+        <p>AP1 is <strong>not delivering unicast frames from the wired side to wireless clients</strong>. It receives them on port 3 but silently drops them before wireless delivery. Broadcasts flow normally (DHCP works), but unicast wired&rarr;wireless is dead.</p>
       </div>
     </li>
 
     <li>
-      <div class="time">Phase 11 — Fix: XIQ-triggered AP Reboot</div>
-      <p>XIQ → Monitor → Devices → AP1 → Utilities → Reboot. Waited 3-4 minutes for CAPWAP reconnect and full policy push.</p>
-      <p>After reboot:</p>
+      <div class="time">Phase 11 &mdash; Fix: XIQ-Triggered AP Reboot</div>
+      <p>XIQ &rarr; Monitor &rarr; Devices &rarr; AP1 &rarr; Utilities &rarr; Reboot. Waited 3&ndash;4 minutes for CAPWAP reconnect and full policy push.</p>
       <ul>
         <li>MacBook reconnected to Guest_Wireless</li>
-        <li><code>arp -n</code> showed <code>10.30.0.1</code> with SW1's MAC ✅</li>
-        <li><code>ping 10.30.0.1</code> → responding ✅</li>
-        <li><code>ping 8.8.8.8</code> → responding ✅</li>
-        <li>Guest VLAN 30 internet confirmed ✅</li>
-        <li>Corporate VLAN 20 internet confirmed ✅</li>
-        <li>PPSK VLAN 100 internet confirmed ✅</li>
+        <li><code>arp -n</code> showed 10.30.0.1 with SW1&rsquo;s MAC ✅</li>
+        <li><code>ping 10.30.0.1</code> &rarr; responding ✅</li>
+        <li><code>ping 8.8.8.8</code> &rarr; responding ✅</li>
+        <li><span class="ok">Guest VLAN 30 internet confirmed ✅</span></li>
+        <li><span class="ok">Corporate VLAN 20 internet confirmed ✅</span></li>
+        <li><span class="ok">PPSK VLAN 100 internet confirmed ✅</span></li>
       </ul>
     </li>
 
   </ul>
-</section>
 
-<!-- ─── FALSE TRAILS ─── -->
-<section id="falsetrails">
-  <h2>False Trails Investigated</h2>
+  <!-- ─── FALSE TRAILS ─── -->
+  <span class="section-label" id="falsetrails">False Trails Investigated</span>
 
   <table>
-    <tr><th>Hypothesis</th><th>Test</th><th>Verdict</th></tr>
-    <tr>
-      <td>CWP blocking non-HTTP traffic</td>
-      <td>XIQ SSID config — CWP confirmed OFF</td>
-      <td><span class="warn">Eliminated</span></td>
-    </tr>
-    <tr>
-      <td>XIQ firewall rule order wrong (PERMIT ANY before DENY RFC1918)</td>
-      <td>Inspected PPSK_FIrewall.docx — PERMIT ANY was Rule 1. Fixed rule order: DENY RFC1918 rules 1-3, PERMIT ANY rule 6. Then removed firewall entirely.</td>
-      <td><span class="warn">Real bug, not root cause</span></td>
-    </tr>
-    <tr>
-      <td>QoS filter blocking 192.x traffic</td>
-      <td>Boss identified and removed QoS policy from AP. AP reset. Still no internet.</td>
-      <td><span class="warn">Eliminated</span></td>
-    </tr>
-    <tr>
-      <td>QF-Modem missing return routes for 10.x subnets</td>
-      <td>QF-Modem Static Routing page — all routes present (10.20, 10.30, 10.100 → 192.168.0.28)</td>
-      <td><span class="warn">Eliminated</span></td>
-    </tr>
-    <tr>
-      <td>SW1 routing table broken</td>
-      <td><code>show iproute vr VR-Default</code> — all routes in FIB, default route UP. <code>ping 8.8.8.8</code> = 0% loss.</td>
-      <td><span class="warn">Eliminated</span></td>
-    </tr>
-    <tr>
-      <td>IP forwarding not enabled on VLAN 30</td>
-      <td>show iproute shows <code>f</code> flag (in FIB) for VLAN 30. IPv4 Forwarding: Enabled in show vlan.</td>
-      <td><span class="warn">Eliminated</span></td>
-    </tr>
-    <tr>
-      <td>EXOS <code>ping from 10.30.0.1</code> proves end-to-end works</td>
-      <td><em>This test was misleading.</em> Source must be SW1's own IP — EXOS rejects client IPs ("Invalid from address supplied"). SW1 was only testing its own traffic, not client-forwarded traffic.</td>
-      <td><span class="bad">Red herring</span></td>
-    </tr>
-    <tr>
-      <td>AP1 data plane broken (wired→wireless unicast)</td>
-      <td>SW1 ping to clients = 100% loss despite valid ARP. MacBook <code>arp -n</code> = empty. AP1 receives unicast from SW1 but drops before wireless delivery.</td>
-      <td><span class="ok">Root Cause ✅</span></td>
-    </tr>
+    <thead><tr><th>Hypothesis</th><th>Test</th><th>Verdict</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>CWP blocking non-HTTP traffic</td>
+        <td>XIQ SSID config &mdash; CWP confirmed OFF</td>
+        <td><span class="warn">Eliminated</span></td>
+      </tr>
+      <tr>
+        <td>XIQ firewall rule order wrong (PERMIT ANY before DENY RFC1918)</td>
+        <td>Inspected PPSK_FIrewall.docx &mdash; PERMIT ANY was Rule 1. Fixed order: DENY RFC1918 rules 1&ndash;3, PERMIT ANY rule 6. Then removed firewall entirely.</td>
+        <td><span class="warn">Real bug, not root cause</span></td>
+      </tr>
+      <tr>
+        <td>QoS filter blocking 192.x traffic</td>
+        <td>Boss identified and removed QoS policy. AP reset. Still no internet.</td>
+        <td><span class="warn">Eliminated</span></td>
+      </tr>
+      <tr>
+        <td>QF-Modem missing return routes for 10.x subnets</td>
+        <td>QF-Modem Static Routing page &mdash; all routes present (10.20, 10.30, 10.100 &rarr; 192.168.0.28)</td>
+        <td><span class="warn">Eliminated</span></td>
+      </tr>
+      <tr>
+        <td>SW1 routing table broken</td>
+        <td><code>show iproute vr VR-Default</code> &mdash; all routes in FIB, default route UP. <code>ping 8.8.8.8</code> = 0% loss.</td>
+        <td><span class="warn">Eliminated</span></td>
+      </tr>
+      <tr>
+        <td>IP forwarding not enabled on VLAN 30</td>
+        <td><code>show iproute</code> shows <code>f</code> flag. IPv4 Forwarding: Enabled in <code>show vlan</code>.</td>
+        <td><span class="warn">Eliminated</span></td>
+      </tr>
+      <tr>
+        <td>EXOS <code>ping from 10.30.0.1</code> proves end-to-end works</td>
+        <td><em>This test was misleading.</em> Source must be SW1&rsquo;s own IP. EXOS rejects client IPs (&ldquo;Invalid from address supplied&rdquo;). SW1 was only testing its own traffic, not client-forwarded traffic.</td>
+        <td><span class="bad">Red herring</span></td>
+      </tr>
+      <tr>
+        <td>AP1 data plane broken (wired&rarr;wireless unicast)</td>
+        <td>SW1 ping to clients = 100% loss despite valid ARP. MacBook <code>arp -n</code> = empty. AP1 receives unicast from SW1 but drops before wireless delivery.</td>
+        <td><span class="ok">Root Cause ✅</span></td>
+      </tr>
+    </tbody>
   </table>
-</section>
 
-<!-- ─── ROOT CAUSE ─── -->
-<section id="rootcause">
-  <h2>Root Cause — Full Explanation</h2>
+  <!-- ─── ROOT CAUSE ─── -->
+  <span class="section-label" id="rootcause">Root Cause &mdash; Full Explanation</span>
 
   <h3>What Broke</h3>
-  <p>AP1 (IQ Engine OS) accumulated corrupted data plane state after a sequence of events on May 12-13:</p>
+  <p>AP1 (IQ Engine OS) accumulated corrupted data plane state after a sequence of events on May 12&ndash;13:</p>
   <ol>
     <li>XIQ firewall policy deployed to AP1 (wrong rule order)</li>
-    <li>Manual AP power cycles (×3–4 during debugging)</li>
+    <li>Manual AP power cycles (&times;3&ndash;4 during debugging)</li>
     <li>XIQ firewall policy removed/redeployed</li>
-    <li>QoS policy removed by boss → AP reset</li>
+    <li>QoS policy removed by boss &rarr; AP reset</li>
     <li>Additional XIQ policy deploys (PPSK, Corp, Guest user profiles modified)</li>
   </ol>
-  <p>After this sequence, AP1's data plane ended up in a state where it:</p>
+  <p>After this sequence, AP1&rsquo;s data plane ended up in a state where it:</p>
   <ul>
-    <li><span class="ok">✅</span> Broadcast frames wireless→wired: forwarded normally (DHCP, gratuitous ARPs)</li>
-    <li><span class="ok">✅</span> Broadcast frames wired→wireless: forwarded (DHCP offers as broadcasts)</li>
-    <li><span class="bad">❌</span> Unicast frames wired→wireless: silently dropped (ARP replies, ICMP, all data)</li>
+    <li><span class="ok">✅</span> Broadcast frames wireless&rarr;wired: forwarded normally (DHCP, gratuitous ARPs)</li>
+    <li><span class="ok">✅</span> Broadcast frames wired&rarr;wireless: forwarded (DHCP offers as broadcasts)</li>
+    <li><span class="bad">❌</span> Unicast frames wired&rarr;wireless: silently dropped (ARP replies, ICMP, all data)</li>
   </ul>
 
   <h3>Why DHCP Masked It</h3>
-  <p>iPhones and Macs set the BROADCAST flag in DHCP DISCOVER. This instructs the DHCP server to send OFFER and ACK as Ethernet broadcasts (dest MAC = ff:ff:ff:ff:ff:ff), not unicast. So DHCP completed successfully without unicast wired→wireless delivery. Clients got valid IPs, looked like everything was fine — until they tried to use the network.</p>
+  <p>iPhones and Macs set the BROADCAST flag in DHCP DISCOVER. This instructs the DHCP server to send OFFER and ACK as Ethernet broadcasts (dest MAC = ff:ff:ff:ff:ff:ff), not unicast. So DHCP completed successfully without unicast wired&rarr;wireless delivery. Clients got valid IPs, looked like everything was fine &mdash; until they tried to use the network.</p>
 
   <h3>Why Manual Resets Didn't Fix It</h3>
   <p>A power cycle alone causes the AP to reconnect to XIQ and re-download policy. But if the policy being pushed is in an inconsistent state (multiple partial deploys, mixed-version firewall/QoS objects), the AP rebuilds the same broken data plane. A XIQ-triggered reboot ensures XIQ pushes a single coherent policy snapshot to the AP at boot time, rebuilding the data plane cleanly.</p>
-</section>
 
-<!-- ─── DIAGNOSTIC CHAIN ─── -->
-<section id="diagnostic">
-  <h2>Diagnostic Chain — The Four-Step Runbook</h2>
+  <!-- ─── DIAGNOSTIC CHAIN ─── -->
+  <span class="section-label" id="diagnostic">Diagnostic Chain &mdash; The Four-Step Runbook</span>
 
-  <p>This is the definitive sequence for diagnosing "clients have DHCP but no internet" when SW1 routing is confirmed healthy:</p>
+  <p>The definitive sequence for diagnosing &ldquo;clients have DHCP but no internet&rdquo; when SW1 routing is confirmed healthy:</p>
 
   <table>
-    <tr><th>Step</th><th>Command</th><th>What It Proves</th></tr>
-    <tr>
-      <td>1</td>
-      <td><code>show fdb vlan &lt;vlan&gt;</code> on SW1</td>
-      <td>Client MACs learned on correct port? If yes → wireless→wired works. The AP IS forwarding broadcast frames to SW1.</td>
-    </tr>
-    <tr>
-      <td>2</td>
-      <td><code>show iparp vlan &lt;vlan&gt;</code> on SW1</td>
-      <td>ARP entries populated from client gratuitous ARPs? If yes → clients sent traffic post-DHCP. Still doesn't prove wired→wireless works.</td>
-    </tr>
-    <tr>
-      <td>3</td>
-      <td><code>ping vr VR-Default &lt;client_ip&gt;</code> on SW1</td>
-      <td>100% loss despite valid ARP = SW1 is sending unicast toward AP1 but frames not reaching client. AP data plane suspect.</td>
-    </tr>
-    <tr>
-      <td>4</td>
-      <td><code>arp -n</code> on MacBook</td>
-      <td><strong>Empty cache = smoking gun.</strong> MacBook's ARP requests reached SW1 (FDB proves it) but SW1's unicast ARP replies never arrived at MacBook = AP1 dropping wired→wireless unicast.</td>
-    </tr>
+    <thead><tr><th>Step</th><th>Command</th><th>What It Proves</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>1</td>
+        <td><code>show fdb vlan &lt;vlan&gt;</code> on SW1</td>
+        <td>Client MACs learned on correct port? If yes &rarr; wireless&rarr;wired works. The AP IS forwarding broadcast frames to SW1.</td>
+      </tr>
+      <tr>
+        <td>2</td>
+        <td><code>show iparp vlan &lt;vlan&gt;</code> on SW1</td>
+        <td>ARP entries populated from client gratuitous ARPs? If yes &rarr; clients sent traffic post-DHCP. Still does not prove wired&rarr;wireless works.</td>
+      </tr>
+      <tr>
+        <td>3</td>
+        <td><code>ping vr VR-Default &lt;client_ip&gt;</code> on SW1</td>
+        <td>100% loss despite valid ARP = SW1 is sending unicast toward AP1 but frames not reaching client. AP data plane suspect.</td>
+      </tr>
+      <tr>
+        <td>4</td>
+        <td><code>arp -n</code> on MacBook</td>
+        <td><strong>Empty cache = smoking gun.</strong> MacBook&rsquo;s ARP requests reached SW1 (FDB proves it) but SW1&rsquo;s unicast ARP replies never arrived = AP1 dropping wired&rarr;wireless unicast.</td>
+      </tr>
+    </tbody>
   </table>
 
-  <div class="callout">
-    <div class="label">Important EXOS Gotcha</div>
-    <code>ping vr VR-Default 8.8.8.8 from &lt;ip&gt;</code> — the <code>from</code> address MUST be one of SW1's own configured interface IPs. Using a client IP (e.g., 10.30.0.101) returns: <em>"Error: Invalid from address supplied, make sure it exists."</em> This means the "ping from SVI" test only proves SW1's own traffic flows — it does NOT simulate client-forwarded traffic end-to-end.
+  <div class="box warn">
+    <div class="box-label">Important EXOS Gotcha</div>
+    <p><code>ping vr VR-Default 8.8.8.8 from &lt;ip&gt;</code> &mdash; the <code>from</code> address MUST be one of SW1&rsquo;s own configured interface IPs. Using a client IP (e.g., 10.30.0.101) returns: <em>&ldquo;Error: Invalid from address supplied, make sure it exists.&rdquo;</em> This means the &ldquo;ping from SVI&rdquo; test only proves SW1&rsquo;s own traffic flows &mdash; it does NOT simulate client-forwarded traffic end-to-end.</p>
   </div>
-</section>
 
-<!-- ─── THE FIX ─── -->
-<section id="fix">
-  <h2>The Fix</h2>
+  <!-- ─── THE FIX ─── -->
+  <span class="section-label" id="fix">The Fix</span>
 
-  <h3>Immediate Fix — XIQ-Triggered AP Reboot</h3>
-  <p>In XIQ web portal: <strong>Monitor → Devices → [AP1] → Utilities → Reboot</strong></p>
-  <p>Wait 3-4 minutes. AP reconnects to XIQ via CAPWAP, receives a single coherent policy push, rebuilds data plane cleanly. All three VLANs restored immediately.</p>
+  <h3>Immediate Fix &mdash; XIQ-Triggered AP Reboot</h3>
+  <p>In XIQ web portal: <strong>Monitor &rarr; Devices &rarr; [AP1] &rarr; Utilities &rarr; Reboot</strong></p>
+  <p>Wait 3&ndash;4 minutes. AP reconnects to XIQ via CAPWAP, receives a single coherent policy push, rebuilds data plane cleanly. All three VLANs restored immediately.</p>
 
   <h3>Verification Sequence After AP Reboot</h3>
-  <pre>MacBook$ arp -n
+  <pre><code>MacBook$ arp -n
 # Should show: 10.30.0.1  at  &lt;SW1 MAC&gt;  on en0  ✅
 
 MacBook$ ping 10.30.0.1          # gateway reachable ✅
-MacBook$ ping 8.8.8.8            # internet reachable ✅</pre>
+MacBook$ ping 8.8.8.8            # internet reachable ✅</code></pre>
 
   <h3>Prevention Going Forward</h3>
   <ul>
     <li>When multiple policy changes need to be made in XIQ (firewall, QoS, VLAN), batch them and do a single XIQ deploy + single XIQ-triggered AP reboot at the end.</li>
-    <li>Do NOT use manual power cycles mid-policy-change-sequence — the AP comes back with partial state.</li>
+    <li>Do NOT use manual power cycles mid-policy-change-sequence &mdash; the AP comes back with partial state.</li>
     <li>After any AP reboot, verify with <code>arp -n</code> on a client before declaring connectivity restored.</li>
   </ul>
-</section>
 
-<!-- ─── LAB STATE ─── -->
-<section id="lab">
-  <h2>Lab State — End of May 13</h2>
+  <!-- ─── LAB STATE ─── -->
+  <span class="section-label" id="lab">Lab State &mdash; End of May 13</span>
 
   <table>
-    <tr><th>Component</th><th>State</th><th>Notes</th></tr>
-    <tr><td>SW1 (EXOS 192.168.0.28)</td><td><span class="ok">✅ Healthy</span></td><td>Routing, DHCP, IP forwarding all confirmed. VLANs 10/20/30/100 in FIB.</td></tr>
-    <tr><td>AP1 (AP3000)</td><td><span class="ok">✅ Healthy</span></td><td>XIQ-rebooted, clean policy pushed, all 3 SSIDs serving clients with internet.</td></tr>
-    <tr><td>QF-Modem (192.168.0.1)</td><td><span class="ok">✅ Healthy</span></td><td>All 10.x static routes present. WAN CONNECTED. NAT confirmed.</td></tr>
-    <tr><td>Guest_Wireless VLAN 30</td><td><span class="ok">✅ Internet</span></td><td>Enhanced Open (OWE), 10.30.0.0/24, gateway 10.30.0.1</td></tr>
-    <tr><td>Corporate_Wireless VLAN 20</td><td><span class="ok">✅ Internet</span></td><td>WPA2/WPA3, 10.20.0.0/24, gateway 10.20.0.1</td></tr>
-    <tr><td>PPSK_Demo VLAN 100</td><td><span class="ok">✅ Internet</span></td><td>Cloud PPSK, RadSec TCP 2083, 10.100.0.0/24, gateway 10.100.0.1, 24h DHCP lease</td></tr>
-    <tr><td>XIQ Firewall (Guest_VLAN_100 profile)</td><td><span class="warn">⚠️ Removed</span></td><td>Firewall removed during debugging. Needs to be re-added: DENY RFC1918 rules 1-3, PERMIT ANY rule 6. DO NOT put PERMIT ANY first.</td></tr>
-    <tr><td>PPSK_Demo macOS visibility</td><td><span class="warn">⚠️ Pending</span></td><td>WPA2-only SSID still hidden on macOS Ventura+. Needs WPA2/WPA3 transition mode in XIQ SSID config.</td></tr>
+    <thead><tr><th>Component</th><th>State</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td>SW1 (EXOS 192.168.0.28)</td><td><span class="ok">✅ Healthy</span></td><td>Routing, DHCP, IP forwarding all confirmed. VLANs 10/20/30/100 in FIB.</td></tr>
+      <tr><td>AP1 (AP3000)</td><td><span class="ok">✅ Healthy</span></td><td>XIQ-rebooted, clean policy pushed, all 3 SSIDs serving clients with internet.</td></tr>
+      <tr><td>QF-Modem (192.168.0.1)</td><td><span class="ok">✅ Healthy</span></td><td>All 10.x static routes present. WAN CONNECTED. NAT confirmed.</td></tr>
+      <tr><td>Guest_Wireless VLAN 30</td><td><span class="ok">✅ Internet</span></td><td>Enhanced Open (OWE), 10.30.0.0/24, gateway 10.30.0.1</td></tr>
+      <tr><td>Corporate_Wireless VLAN 20</td><td><span class="ok">✅ Internet</span></td><td>WPA2/WPA3, 10.20.0.0/24, gateway 10.20.0.1</td></tr>
+      <tr><td>PPSK_Demo VLAN 100</td><td><span class="ok">✅ Internet</span></td><td>Cloud PPSK, RadSec TCP 2083, 10.100.0.0/24, 24h DHCP lease</td></tr>
+      <tr><td>XIQ Firewall (Guest_VLAN_100 profile)</td><td><span class="warn">⚠️ Removed</span></td><td>Removed during debugging. Re-add: DENY RFC1918 rules 1&ndash;3, PERMIT ANY rule 6. Do NOT put PERMIT ANY first.</td></tr>
+      <tr><td>PPSK_Demo macOS visibility</td><td><span class="warn">⚠️ Pending</span></td><td>WPA2-only SSID hidden on macOS Ventura+. Needs WPA2/WPA3 transition mode in XIQ SSID config.</td></tr>
+    </tbody>
   </table>
-</section>
 
-<!-- ─── LESSONS ─── -->
-<section id="lessons">
-  <h2>Lessons Learned</h2>
+  <!-- ─── LESSONS ─── -->
+  <span class="section-label" id="lessons">Lessons Learned</span>
 
-  <h3>1. DHCP Working ≠ Data Plane Healthy</h3>
-  <p>DHCP uses broadcasts. Clients set the BROADCAST flag. The AP can have completely broken unicast delivery and DHCP will still work perfectly. Never use "clients have IPs" as proof that the AP data plane is healthy.</p>
+  <h3>1. DHCP Working &ne; Data Plane Healthy</h3>
+  <p>DHCP uses broadcasts. Clients set the BROADCAST flag. The AP can have completely broken unicast delivery and DHCP will still work perfectly. Never use &ldquo;clients have IPs&rdquo; as proof that the AP data plane is healthy.</p>
 
   <h3>2. XIQ-Triggered Reboot &gt; Power Cycle</h3>
   <p>A cold power cycle brings the AP back up with whatever state it can reconstruct. A XIQ-triggered reboot causes XIQ to push a fresh policy snapshot during the CAPWAP handshake. When the AP has accumulated partial/conflicting policy state, only the XIQ-triggered reboot rebuilds the data plane correctly.</p>
 
   <h3>3. <code>arp -n</code> on the Client Is the Definitive Test</h3>
-  <p>If the client's ARP cache is empty after attempting to ping the gateway, the AP is dropping wired→wireless unicast. This single command cuts through all the routing, NAT, and firewall noise and points directly at the AP data plane.</p>
+  <p>If the client&rsquo;s ARP cache is empty after attempting to ping the gateway, the AP is dropping wired&rarr;wireless unicast. This single command cuts through all the routing, NAT, and firewall noise and points directly at the AP data plane.</p>
 
   <h3>4. The <code>from</code> Option in EXOS Ping Is Not Client Simulation</h3>
-  <p><code>ping vr VR-Default 8.8.8.8 from 10.30.0.1</code> proves SW1's own traffic flows — not client-forwarded traffic. The source must be SW1's own interface IP. This test created a false confidence that the return path was working when it wasn't.</p>
+  <p><code>ping vr VR-Default 8.8.8.8 from 10.30.0.1</code> proves SW1&rsquo;s own traffic flows &mdash; not client-forwarded traffic. This test created false confidence that the return path was working when it wasn&rsquo;t.</p>
 
   <h3>5. ARP Conflicts After Reboot</h3>
-  <p>MacBooks cache their previous DHCP lease and send gratuitous ARPs on reconnection, potentially claiming an IP that the DHCP server re-assigned to a different device. After reboots in a lab, clear MAC/IP bindings in the DHCP server or wait for the ARP conflict to resolve before assuming ARP table data is canonical.</p>
+  <p>MacBooks cache their previous DHCP lease and send gratuitous ARPs on reconnection, potentially claiming an IP reassigned to a different device. After reboots in a lab, wait for the ARP conflict to resolve or clear DHCP bindings before treating the ARP table as canonical.</p>
 
   <h3>6. Socratic Diagnostic Method Works</h3>
-  <p>Rather than guessing and rebooting, the Socratic layered approach — confirm each hop individually before moving up the stack — isolated the problem precisely. The key was asking "what is the ONE difference between SW1 pinging 10.30.0.1 (works) vs SW1 pinging the client (fails)?" That question led directly to the AP.</p>
-</section>
+  <p>Rather than guessing and rebooting, the Socratic layered approach &mdash; confirm each hop individually before moving up the stack &mdash; isolated the problem precisely. The key question was: &ldquo;What is the ONE difference between SW1 pinging 10.30.0.1 (works) vs SW1 pinging the client (fails)?&rdquo; That question led directly to the AP.</p>
 
-<!-- ─── COMMANDS ─── -->
-<section id="commands">
-  <h2>Key Commands Used Today</h2>
+  <!-- ─── COMMANDS ─── -->
+  <span class="section-label" id="commands">Key Commands Used Today</span>
 
   <h3>SW1 (EXOS) Diagnostic Commands</h3>
-  <pre># Routing table — confirm all VLANs in FIB
+  <pre><code># Routing table — confirm all VLANs in FIB
 show iproute vr VR-Default
 
-# DHCP leases — confirms clients have IPs and which ports DHCP is on
+# DHCP leases — confirms clients have IPs and which ports DHCP is serving
 show dhcp-server
 
 # MAC forwarding table — which port learned each client MAC
@@ -571,10 +439,10 @@ ping vr VR-Default 8.8.8.8
 
 # SW1 to client — tests wired→wireless delivery (must use SW1 own IP as source)
 ping vr VR-Default 10.30.0.100
-ping vr VR-Default 10.30.0.100 from 192.168.0.28</pre>
+ping vr VR-Default 10.30.0.100 from 192.168.0.28</code></pre>
 
   <h3>Client (MacBook) Diagnostic Commands</h3>
-  <pre># Smoking gun for wired→wireless unicast failure
+  <pre><code># Smoking gun for wired→wireless unicast failure
 arp -n
 
 # Confirm gateway reachable
@@ -584,26 +452,24 @@ ping 10.30.0.1
 traceroute 8.8.8.8
 
 # Capture ICMP at wireless interface
-sudo tcpdump -i en0 icmp</pre>
+sudo tcpdump -i en0 icmp</code></pre>
 
   <h3>The Fix</h3>
-  <pre># XIQ Web Portal
+  <pre><code># XIQ Web Portal
 Monitor → Devices → [AP1] → Utilities → Reboot
-# Wait 3-4 minutes, then verify with arp -n on client</pre>
-</section>
+# Wait 3-4 minutes, then verify with arp -n on client</code></pre>
 
-<!-- ─── DEEP DIVE ─── -->
-<section id="deepdive">
-  <h2>Deep Dive — Why the AP Broke and What the Reboot Fixed</h2>
+  <!-- ─── DEEP DIVE ─── -->
+  <span class="section-label" id="deepdive">Deep Dive &mdash; Why the AP Broke and What the Reboot Fixed</span>
 
-  <div class="callout">
-    <div class="label">Question — Khursheed</div>
-    <p>I need to understand this clearly. I got DHCP, client devices assigned IP addresses. I could ping .1 for 20/30/100. My return path was good on QF-Modem. Removed QoS / Firewall restrictions from PPSK. But nothing worked. Now, I could not ping my .101 on 20/30 from .28. So, are we saying that AP1 could not forward traffic put on port 3 by SW1 to client devices? If so, why not? What really happened when the 'fresh policy was pushed' just in AP1 to solve this.</p>
+  <div class="box">
+    <div class="box-label">Question &mdash; Khursheed</div>
+    <p>I need to understand this clearly. I got DHCP, client devices assigned IP addresses. I could ping .1 for 20/30/100. My return path was good on QF-Modem. Removed QoS / Firewall restrictions from PPSK. But nothing worked. Now, I could not ping my .101 on 20/30 from .28. So, are we saying that AP1 could not forward traffic put on port 3 by SW1 to client devices? If so, why not? What really happened when the &lsquo;fresh policy was pushed&rsquo; just in AP1 to solve this.</p>
   </div>
 
-  <h3>What the AP actually does in the wired→wireless direction</h3>
+  <h3>What the AP Actually Does in the Wired&rarr;Wireless Direction</h3>
   <p>When SW1 wants to deliver a unicast frame to a wireless client, the path is:</p>
-  <pre>SW1 eth1/3  →  [tagged VLAN 30 unicast, dst MAC = client]  →  AP eth0
+  <pre><code>SW1 eth1/3  →  [tagged VLAN 30 unicast, dst MAC = client]  →  AP eth0
                                                                    ↓
                                              AP looks up dst MAC in station table
                                                                    ↓
@@ -611,44 +477,42 @@ Monitor → Devices → [AP1] → Utilities → Reboot
                                                                    ↓
                                              Encrypts frame with client's PTK
                                                                    ↓
-                                             Transmits over-the-air to client</pre>
+                                             Transmits over-the-air to client</code></pre>
 
-  <p><strong>Broadcast/multicast (DHCP, gratuitous ARPs)</strong> follow a different path — they use the <strong>GTK (Group Temporal Key)</strong>, one key shared across all clients on the BSS. GTK is stable, installed once, and does not depend on any specific client's association state.</p>
-  <p><strong>Unicast</strong> uses the <strong>PTK (Pairwise Temporal Key)</strong> — established per-client during the 4-Way Handshake, stored in a station table entry keyed by client MAC.</p>
+  <p><strong>Broadcast/multicast (DHCP, gratuitous ARPs)</strong> follow a different path &mdash; they use the <strong>GTK (Group Temporal Key)</strong>, one key shared across all clients on the BSS. GTK is stable, installed once, and does not depend on any specific client&rsquo;s association state.</p>
+  <p><strong>Unicast</strong> uses the <strong>PTK (Pairwise Temporal Key)</strong> &mdash; established per-client during the 4-Way Handshake, stored in a station table entry keyed by client MAC.</p>
 
-  <h3>Why your specific evidence proved exactly where the break was</h3>
+  <h3>Why Your Specific Evidence Proved Exactly Where the Break Was</h3>
   <table>
-    <thead>
-      <tr><th>Observation</th><th>What it proves</th></tr>
-    </thead>
+    <thead><tr><th>Observation</th><th>What It Proves</th></tr></thead>
     <tbody>
-      <tr><td><code>show fdb vlan Guest_30</code> → MacBook MAC on port 3</td><td>AP <span class="ok">IS</span> forwarding wireless→wired (upstream works)</td></tr>
-      <tr><td><code>show iparp vlan Guest_30</code> → ARP entry for .101</td><td>Client's ARP REQUEST (broadcast) reached SW1</td></tr>
-      <tr><td><code>ping 10.30.0.101</code> from SW1 → 100% loss</td><td>SW1's unicast ARP REPLY never reached the client</td></tr>
-      <tr><td><code>arp -n</code> on MacBook → <strong>empty</strong></td><td>Client never received the unicast reply — AP dropped it silently</td></tr>
+      <tr><td><code>show fdb vlan Guest_30</code> &rarr; MacBook MAC on port 3</td><td>AP <span class="ok">IS</span> forwarding wireless&rarr;wired (upstream works)</td></tr>
+      <tr><td><code>show iparp vlan Guest_30</code> &rarr; ARP entry for .101</td><td>Client&rsquo;s ARP REQUEST (broadcast) reached SW1</td></tr>
+      <tr><td><code>ping 10.30.0.101</code> from SW1 &rarr; 100% loss</td><td>SW1&rsquo;s unicast ARP REPLY never reached the client</td></tr>
+      <tr><td><code>arp -n</code> on MacBook &rarr; <strong>empty</strong></td><td>Client never received the unicast reply &mdash; AP dropped it silently</td></tr>
       <tr><td>DHCP worked</td><td>GTK path (broadcast) still functional</td></tr>
     </tbody>
   </table>
-  <p>The break is <strong>exactly at the AP's station table lookup</strong> in the wired→wireless unicast path. AP receives the frame from SW1, looks up the destination MAC, and either cannot find it or the PTK entry is invalid — so it drops the frame. No error, no log, just silence.</p>
+  <p>The break is <strong>exactly at the AP&rsquo;s station table lookup</strong> in the wired&rarr;wireless unicast path. AP receives the frame from SW1, looks up the destination MAC, and either cannot find it or the PTK entry is invalid &mdash; so it drops the frame silently.</p>
 
-  <h3>What caused the station table corruption</h3>
-  <p>Multiple XIQ policy changes while clients are associated — firewall add/remove, QoS add/remove — each cause XIQ to push a live CAPWAP config update. The AP applies the update while running, which forces a partial data-plane re-init: it tears down and rebuilds SSID security profiles, VLAN mappings, user profile enforcement.</p>
-  <p>If a client was mid-session during one of these partial rebuilds, the AP's association FSM can land in a state where:</p>
+  <h3>What Caused the Station Table Corruption</h3>
+  <p>Multiple XIQ policy changes while clients are associated &mdash; firewall add/remove, QoS add/remove &mdash; each cause XIQ to push a live CAPWAP config update. The AP applies the update while running, which forces a partial data-plane re-init: it tears down and rebuilds SSID security profiles, VLAN mappings, user profile enforcement.</p>
+  <p>If a client was mid-session during one of these partial rebuilds, the AP&rsquo;s association FSM can land in a state where:</p>
   <ul>
     <li>The station table entry <strong>exists</strong> (so the client believes it is associated, and upstream/broadcast frames still work)</li>
     <li>But the <strong>PTK is stale, null, or installed into the wrong hardware key slot</strong> in the crypto engine</li>
   </ul>
   <p>The AP then silently drops any unicast frame addressed to that client MAC, because encryption would fail with an invalid key.</p>
 
-  <h3>Why power cycling alone didn't fix it</h3>
-  <pre>AP reboots → reconnects CAPWAP → XIQ sees: "I know this AP, already provisioned"
+  <h3>Why Power Cycling Alone Didn't Fix It</h3>
+  <pre><code>AP reboots → reconnects CAPWAP → XIQ sees: "I know this AP, already provisioned"
            → pushes only delta updates from last known state
            → AP rebuilds data plane from the SAME corrupted policy basis
-           → station table re-corrupts as clients re-associate under the same broken config</pre>
-  <p>XIQ's "last known state" was itself the product of those sequential partial pushes — it was not clean.</p>
+           → station table re-corrupts as clients re-associate under the same broken config</code></pre>
+  <p>XIQ&rsquo;s &ldquo;last known state&rdquo; was itself the product of those sequential partial pushes &mdash; it was not clean.</p>
 
-  <h3>What the XIQ-triggered reboot actually did differently</h3>
-  <pre>XIQ: Reboot command → AP shuts down completely
+  <h3>What the XIQ-Triggered Reboot Actually Did Differently</h3>
+  <pre><code>XIQ: Reboot command → AP shuts down completely
 AP:  Comes back up cold — empty station table, empty crypto key tables, blank VLAN mappings
 AP:  Reconnects CAPWAP to XIQ
 XIQ: "This AP just rebooted via my command — send FULL policy, not delta"
@@ -660,36 +524,31 @@ XIQ: Pushes complete current config as a single coherent bundle:
        • Radio settings
 AP:  Initializes data plane from scratch against this clean config
 AP:  SSIDs come up → clients re-associate → fresh 4-Way Handshakes
-     → PTKs installed into clean crypto context → unicast delivery restored</pre>
-  <p>Clients then go through a complete new 4-Way Handshake, PTKs are installed correctly into a freshly initialized key table, and the station table entries are clean from the start. The wired→wireless unicast path works again because the PTK lookup succeeds.</p>
+     → PTKs installed into clean crypto context → unicast delivery restored</code></pre>
 
-  <div class="callout">
-    <div class="label">One-Sentence Summary</div>
-    <p>The AP's internal station table had valid entries (so association and broadcasts worked) but corrupted PTK key material (so unicast delivery failed silently) — accumulated across multiple live policy pushes; a XIQ-triggered reboot forced a full policy re-provisioning that rebuilt the data plane from a clean, coherent state.</p>
+  <div class="box ok">
+    <div class="box-label">One-Sentence Summary</div>
+    <p>The AP&rsquo;s internal station table had valid entries (so association and broadcasts worked) but corrupted PTK key material (so unicast delivery failed silently) &mdash; accumulated across multiple live policy pushes; a XIQ-triggered reboot forced a full policy re-provisioning that rebuilt the data plane from a clean, coherent state.</p>
   </div>
-</section>
 
-<!-- ─── PENDING ─── -->
-<section id="pending">
-  <h2>Pending — Next Session</h2>
+  <!-- ─── PENDING ─── -->
+  <span class="section-label" id="pending">Pending &mdash; Next Session</span>
 
   <ol>
-    <li><strong>Re-add XIQ firewall to Guest_VLAN_100 User Profile</strong> — it was removed during debugging. Correct order: DENY RFC1918 x3 first, PERMIT ANY last. Do not put PERMIT ANY first.</li>
-    <li><strong>Add WPA2/WPA3 transition mode to PPSK_Demo SSID</strong> — macOS Ventura/Sonoma/Sequoia hides WPA2-only SSIDs. Fix: XIQ → Network Policy → PPSK_Demo SSID → Security → WPA2/WPA3 Personal (transition mode).</li>
-    <li><strong>PPSK Provisioning Model 2</strong> — Two-SSID self-service: Open Guest_Register SSID → CWP → email → PPSK_Demo. No front desk needed.</li>
-    <li><strong>PPSK Provisioning Model 3</strong> — Group PPSK / QR code for conference/short-term access.</li>
-    <li><strong>Phase 2: XIQ Policy Push for SW1</strong> — Move VLAN 100 config from manual EXOS CLI to XIQ Step 3 Switch Template (production method, zero SSH).</li>
-    <li><strong>DHCP lease timer for VLANs 20/30</strong> — Currently default 7200s (2h). Consider increasing to 86400s (24h) to match VLAN 100 and reduce ARP churn.</li>
-    <li><strong>Index dedup</strong> — session_summary_20260422.html linked twice on all 3 index pages. Consolidate to one pointer.</li>
-    <li><strong>QoS ACL fix</strong> — feature/qos-egress-validation branch, week of May 18.</li>
+    <li><strong>Re-add XIQ firewall to Guest_VLAN_100 User Profile</strong> &mdash; removed during debugging. Correct order: DENY RFC1918 &times;3 first, PERMIT ANY last. Do not put PERMIT ANY first.</li>
+    <li><strong>Add WPA2/WPA3 transition mode to PPSK_Demo SSID</strong> &mdash; macOS Ventura/Sonoma/Sequoia hides WPA2-only SSIDs. Fix: XIQ &rarr; Network Policy &rarr; PPSK_Demo SSID &rarr; Security &rarr; WPA2/WPA3 Personal (transition mode).</li>
+    <li><strong>PPSK Provisioning Model 2</strong> &mdash; Two-SSID self-service: Open Guest_Register SSID &rarr; CWP &rarr; email &rarr; PPSK_Demo. No front desk needed.</li>
+    <li><strong>PPSK Provisioning Model 3</strong> &mdash; Group PPSK / QR code for conference/short-term access.</li>
+    <li><strong>Phase 2: XIQ Policy Push for SW1</strong> &mdash; Move VLAN 100 config from manual EXOS CLI to XIQ Step 3 Switch Template (production method, zero SSH).</li>
+    <li><strong>DHCP lease timer for VLANs 20/30</strong> &mdash; Currently default 7200s (2h). Consider increasing to 86400s (24h) to match VLAN 100 and reduce ARP churn.</li>
+    <li><strong>Index dedup</strong> &mdash; session_summary_20260422.html linked twice on all 3 index pages. Consolidate to one pointer.</li>
+    <li><strong>QoS ACL fix</strong> &mdash; feature/qos-egress-validation branch, week of May 18.</li>
   </ol>
-</section>
 
-</main>
+  <div class="footer">
+    KhKLab &bull; PPSK Guest Onboarding Sprint &bull; May 13, 2026 &bull; All three VLANs confirmed with internet ✅
+  </div>
 
-<div class="footer">
-  KhKLab · PPSK Guest Onboarding Sprint · May 13, 2026 · All three VLANs confirmed with internet ✅
 </div>
-
 </body>
 </html>
