@@ -210,6 +210,7 @@
     <li><a href="#lab">Lab State</a></li>
     <li><a href="#lessons">Lessons</a></li>
     <li><a href="#commands">Commands</a></li>
+    <li><a href="#deepdive">Deep Dive</a></li>
     <li><a href="#pending">Pending</a></li>
   </ul>
 </nav>
@@ -589,6 +590,83 @@ sudo tcpdump -i en0 icmp</pre>
   <pre># XIQ Web Portal
 Monitor → Devices → [AP1] → Utilities → Reboot
 # Wait 3-4 minutes, then verify with arp -n on client</pre>
+</section>
+
+<!-- ─── DEEP DIVE ─── -->
+<section id="deepdive">
+  <h2>Deep Dive — Why the AP Broke and What the Reboot Fixed</h2>
+
+  <div class="callout">
+    <div class="label">Question — Khursheed</div>
+    <p>I need to understand this clearly. I got DHCP, client devices assigned IP addresses. I could ping .1 for 20/30/100. My return path was good on QF-Modem. Removed QoS / Firewall restrictions from PPSK. But nothing worked. Now, I could not ping my .101 on 20/30 from .28. So, are we saying that AP1 could not forward traffic put on port 3 by SW1 to client devices? If so, why not? What really happened when the 'fresh policy was pushed' just in AP1 to solve this.</p>
+  </div>
+
+  <h3>What the AP actually does in the wired→wireless direction</h3>
+  <p>When SW1 wants to deliver a unicast frame to a wireless client, the path is:</p>
+  <pre>SW1 eth1/3  →  [tagged VLAN 30 unicast, dst MAC = client]  →  AP eth0
+                                                                   ↓
+                                             AP looks up dst MAC in station table
+                                                                   ↓
+                                             Retrieves PTK for that association
+                                                                   ↓
+                                             Encrypts frame with client's PTK
+                                                                   ↓
+                                             Transmits over-the-air to client</pre>
+
+  <p><strong>Broadcast/multicast (DHCP, gratuitous ARPs)</strong> follow a different path — they use the <strong>GTK (Group Temporal Key)</strong>, one key shared across all clients on the BSS. GTK is stable, installed once, and does not depend on any specific client's association state.</p>
+  <p><strong>Unicast</strong> uses the <strong>PTK (Pairwise Temporal Key)</strong> — established per-client during the 4-Way Handshake, stored in a station table entry keyed by client MAC.</p>
+
+  <h3>Why your specific evidence proved exactly where the break was</h3>
+  <table>
+    <thead>
+      <tr><th>Observation</th><th>What it proves</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><code>show fdb vlan Guest_30</code> → MacBook MAC on port 3</td><td>AP <span class="ok">IS</span> forwarding wireless→wired (upstream works)</td></tr>
+      <tr><td><code>show iparp vlan Guest_30</code> → ARP entry for .101</td><td>Client's ARP REQUEST (broadcast) reached SW1</td></tr>
+      <tr><td><code>ping 10.30.0.101</code> from SW1 → 100% loss</td><td>SW1's unicast ARP REPLY never reached the client</td></tr>
+      <tr><td><code>arp -n</code> on MacBook → <strong>empty</strong></td><td>Client never received the unicast reply — AP dropped it silently</td></tr>
+      <tr><td>DHCP worked</td><td>GTK path (broadcast) still functional</td></tr>
+    </tbody>
+  </table>
+  <p>The break is <strong>exactly at the AP's station table lookup</strong> in the wired→wireless unicast path. AP receives the frame from SW1, looks up the destination MAC, and either cannot find it or the PTK entry is invalid — so it drops the frame. No error, no log, just silence.</p>
+
+  <h3>What caused the station table corruption</h3>
+  <p>Multiple XIQ policy changes while clients are associated — firewall add/remove, QoS add/remove — each cause XIQ to push a live CAPWAP config update. The AP applies the update while running, which forces a partial data-plane re-init: it tears down and rebuilds SSID security profiles, VLAN mappings, user profile enforcement.</p>
+  <p>If a client was mid-session during one of these partial rebuilds, the AP's association FSM can land in a state where:</p>
+  <ul>
+    <li>The station table entry <strong>exists</strong> (so the client believes it is associated, and upstream/broadcast frames still work)</li>
+    <li>But the <strong>PTK is stale, null, or installed into the wrong hardware key slot</strong> in the crypto engine</li>
+  </ul>
+  <p>The AP then silently drops any unicast frame addressed to that client MAC, because encryption would fail with an invalid key.</p>
+
+  <h3>Why power cycling alone didn't fix it</h3>
+  <pre>AP reboots → reconnects CAPWAP → XIQ sees: "I know this AP, already provisioned"
+           → pushes only delta updates from last known state
+           → AP rebuilds data plane from the SAME corrupted policy basis
+           → station table re-corrupts as clients re-associate under the same broken config</pre>
+  <p>XIQ's "last known state" was itself the product of those sequential partial pushes — it was not clean.</p>
+
+  <h3>What the XIQ-triggered reboot actually did differently</h3>
+  <pre>XIQ: Reboot command → AP shuts down completely
+AP:  Comes back up cold — empty station table, empty crypto key tables, blank VLAN mappings
+AP:  Reconnects CAPWAP to XIQ
+XIQ: "This AP just rebooted via my command — send FULL policy, not delta"
+XIQ: Pushes complete current config as a single coherent bundle:
+       • SSID definitions
+       • VLAN→BSS mappings
+       • Security profiles (WPA2-AES, key management)
+       • User profiles (firewall, QoS)
+       • Radio settings
+AP:  Initializes data plane from scratch against this clean config
+AP:  SSIDs come up → clients re-associate → fresh 4-Way Handshakes
+     → PTKs installed into clean crypto context → unicast delivery restored</pre>
+  <p>Clients then go through a complete new 4-Way Handshake, PTKs are installed correctly into a freshly initialized key table, and the station table entries are clean from the start. The wired→wireless unicast path works again because the PTK lookup succeeds.</p>
+
+  <div class="callout">
+    <div class="label">One-Sentence Summary</div>
+    <p>The AP's internal station table had valid entries (so association and broadcasts worked) but corrupted PTK key material (so unicast delivery failed silently) — accumulated across multiple live policy pushes; a XIQ-triggered reboot forced a full policy re-provisioning that rebuilt the data plane from a clean, coherent state.</p>
+  </div>
 </section>
 
 <!-- ─── PENDING ─── -->
