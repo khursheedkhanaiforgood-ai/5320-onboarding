@@ -100,6 +100,8 @@ a:hover { color: #111; }
     <a href="#lessons">Lessons Learned &mdash; 6 principles from today</a>
     <a href="#commands">Key Commands &mdash; SW1 diagnostic + client smoking-gun</a>
     <a href="#deepdive">Deep Dive &mdash; PTK vs GTK, station table, why reboot differs from power cycle</a>
+    <a href="#firewall">Firewall Restored &mdash; Guest_VLAN_100, test results, open issue*</a>
+    <a href="#nextphase">Next Phase &mdash; CAPWAP deploy in KhKLab + boss VIQ</a>
     <a href="#pending">Pending &mdash; next session sprint backlog</a>
   </div>
 
@@ -553,17 +555,70 @@ AP:  SSIDs come up → clients re-associate → fresh 4-Way Handshakes
     <p>The AP&rsquo;s internal station table had valid entries (so association and broadcasts worked) but corrupted PTK key material (so unicast delivery failed silently) &mdash; accumulated across multiple live policy pushes; a XIQ-triggered reboot forced a full policy re-provisioning that rebuilt the data plane from a clean, coherent state.</p>
   </div>
 
+  <!-- ─── FIREWALL ─── -->
+  <span class="section-label" id="firewall">Firewall Restored &mdash; Guest_VLAN_100 User Profile</span>
+
+  <p>The <code>Guest-Internet-Access-Only</code> ACL was re-attached to the <code>Guest_VLAN_100</code> User Profile (it had been removed during the AP data plane debugging). Rieben guide steps 40&ndash;45: Security tab &rarr; Firewall ON &rarr; Select IP Firewall &rarr; Guest-Internet-Access-Only &rarr; Save User Profile &rarr; Deploy.</p>
+
+  <h3>Confirmed Rule Order</h3>
+  <table>
+    <thead><tr><th>Order</th><th>Source</th><th>Destination</th><th>Service</th><th>Action</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>Any</td><td>Any</td><td>DHCP-Server</td><td><span class="ok">PERMIT</span></td></tr>
+      <tr><td>2</td><td>Any</td><td>Any</td><td>DNS</td><td><span class="ok">PERMIT</span></td></tr>
+      <tr><td>3</td><td>Any</td><td>10.0.0.0/255.0.0.0</td><td>Any</td><td><span class="bad">DENY</span></td></tr>
+      <tr><td>4</td><td>Any</td><td>172.16.0.0/255.240.0.0</td><td>Any</td><td><span class="bad">DENY</span></td></tr>
+      <tr><td>5</td><td>Any</td><td>192.168.0.0/255.255.0.0</td><td>Any</td><td><span class="bad">DENY</span></td></tr>
+      <tr><td>6</td><td>Any</td><td>Any</td><td>Any</td><td><span class="ok">PERMIT</span></td></tr>
+    </tbody>
+  </table>
+
+  <h3>Test Results</h3>
+  <table>
+    <thead><tr><th>Test</th><th>Expected</th><th>Result</th></tr></thead>
+    <tbody>
+      <tr><td><code>ping 192.168.0.28</code> (SW1 mgmt)</td><td>BLOCKED — rule 5</td><td><span class="ok">✅ Unreachable</span></td></tr>
+      <tr><td><code>ping 8.8.8.8</code> (internet)</td><td>PERMITTED — rule 6</td><td><span class="ok">✅ Reachable</span></td></tr>
+      <tr><td><code>ping 10.100.0.1</code> (own gateway)</td><td>Gateway exemption</td><td><span class="ok">✅ Reachable (expected)</span></td></tr>
+      <tr><td><code>ping 10.20.0.1</code> (Corp gateway)</td><td>BLOCKED — rule 3 (/8)</td><td><span class="warn">⚠️ Reachable — open issue*</span></td></tr>
+      <tr><td><code>ping 10.30.0.1</code> (Guest gateway)</td><td>BLOCKED — rule 3 (/8)</td><td><span class="warn">⚠️ Reachable — open issue*</span></td></tr>
+    </tbody>
+  </table>
+
+  <div class="box warn">
+    <div class="box-label">Open Issue* &mdash; Parked</div>
+    <p>DENY 10.0.0.0/255.0.0.0 (confirmed /8 in XIQ UI) is not blocking 10.20.0.1 or 10.30.0.1. 192.168.0.0/16 blocks correctly. Likely an IQ Engine data plane quirk with broad masks on intra-lab 10.x destinations. Parked for a dedicated pass. <strong>Fix:</strong> add explicit DENY /24 rules for each lab subnet (10.10, 10.20, 10.30, 10.40, 10.80) above the existing /8 rule.</p>
+  </div>
+
+  <!-- ─── NEXT PHASE ─── -->
+  <span class="section-label" id="nextphase">Next Phase &mdash; CAPWAP Deployment with PPSK</span>
+
+  <p>Two parallel tasks assigned by boss for the next sprint:</p>
+
+  <h3>Task 1 &mdash; KhKLab (MyLab_XIQ)</h3>
+  <p>Deploy CAPWAP configuration for <code>PPSK_Demo</code> SSID in the own lab. This means moving from the current state (PPSK working, VLAN 100 confirmed, firewall partially verified) to a fully CAPWAP-managed AP policy pushed cleanly from XIQ.</p>
+
+  <h3>Task 2 &mdash; Boss&rsquo;s Lab / VIQ</h3>
+  <p>Granted access to boss&rsquo;s lab VIQ instance. Provision a new AP in that environment and deploy CAPWAP with PPSK. Full AP onboarding from scratch in a different XIQ org.</p>
+
+  <div class="box">
+    <div class="box-label">Starting Point for Next Session</div>
+    <p>KhKLab task first (own environment, lower risk). Then boss&rsquo;s VIQ (new org, new AP). Both use CAPWAP + PPSK as the target state. Details to be scoped at session start.</p>
+  </div>
+
   <!-- ─── PENDING ─── -->
   <span class="section-label" id="pending">Pending &mdash; Next Session</span>
 
   <ol>
-    <li><strong>Re-add XIQ firewall to Guest_VLAN_100 User Profile</strong> &mdash; removed during debugging. Correct order: DENY RFC1918 &times;3 first, PERMIT ANY last. Do not put PERMIT ANY first.</li>
+    <li><strong>CAPWAP deploy — KhKLab (MyLab_XIQ)</strong> &mdash; Deploy CAPWAP config for PPSK_Demo in own lab. Next session, Task 1.</li>
+    <li><strong>CAPWAP deploy — Boss&rsquo;s VIQ</strong> &mdash; Provision new AP in boss&rsquo;s lab VIQ instance with CAPWAP + PPSK. Next session, Task 2.</li>
+    <li><span class="warn">⚠️*</span> <strong>Firewall: DENY 10.x /8 not blocking 10.20/10.30 SVIs</strong> &mdash; Mask confirmed /8 in XIQ. Likely IQ Engine quirk. Fix: add explicit DENY /24 rules for 10.10, 10.20, 10.30, 10.40, 10.80 subnets above the existing /8 rule.</li>
     <li><strong>Add WPA2/WPA3 transition mode to PPSK_Demo SSID</strong> &mdash; macOS Ventura/Sonoma/Sequoia hides WPA2-only SSIDs. Fix: XIQ &rarr; Network Policy &rarr; PPSK_Demo SSID &rarr; Security &rarr; WPA2/WPA3 Personal (transition mode).</li>
-    <li><strong>PPSK Provisioning Model 2</strong> &mdash; Two-SSID self-service: Open Guest_Register SSID &rarr; CWP &rarr; email &rarr; PPSK_Demo. No front desk needed.</li>
+    <li><strong>PPSK Provisioning Model 2</strong> &mdash; Two-SSID self-service: Open Guest_Register SSID &rarr; CWP &rarr; email &rarr; PPSK_Demo.</li>
     <li><strong>PPSK Provisioning Model 3</strong> &mdash; Group PPSK / QR code for conference/short-term access.</li>
-    <li><strong>Phase 2: XIQ Policy Push for SW1</strong> &mdash; Move VLAN 100 config from manual EXOS CLI to XIQ Step 3 Switch Template (production method, zero SSH).</li>
-    <li><strong>DHCP lease timer for VLANs 20/30</strong> &mdash; Currently default 7200s (2h). Consider increasing to 86400s (24h) to match VLAN 100 and reduce ARP churn.</li>
-    <li><strong>Index dedup</strong> &mdash; session_summary_20260422.html linked twice on all 3 index pages. Consolidate to one pointer.</li>
+    <li><strong>Phase 2: XIQ Policy Push for SW1</strong> &mdash; Move VLAN 100 from manual EXOS CLI to XIQ Step 3 Switch Template.</li>
+    <li><strong>DHCP lease timer VLANs 20/30</strong> &mdash; Default 7200s (2h). Consider 86400s to match VLAN 100.</li>
+    <li><strong>Index dedup</strong> &mdash; session_summary_20260422.html linked twice on all 3 index pages.</li>
     <li><strong>QoS ACL fix</strong> &mdash; feature/qos-egress-validation branch, week of May 18.</li>
   </ol>
 
