@@ -813,13 +813,76 @@ VLAN10   →  Tag:   *3       ← port 3 tagged, active ✅</code></pre>
 
   <p>Default User Profile: VLAN10 (fallback if no rule matches). &ldquo;Apply a different user profile to various clients and user groups&rdquo; checkbox: ON. Saved and deployed to AP1 in Karl&rsquo;s VIQ.</p>
 
+  <!-- ─── PPSK VERIFICATION ─── -->
+  <span class="section-label" id="ppskverify">PPSK VLAN Split Verification &mdash; May 15</span>
+
+  <p>After deploying <strong>KB_School_AP_VLAN10_VLAN1</strong>, the split was confirmed live using SW1&rsquo;s FDB and ARP tables. One SSID (<code>KB_School_Broadcast</code>) &mdash; the passphrase determines which VLAN the client lands on.</p>
+
+  <h3>Verification Commands</h3>
+
+  <pre><code>show fdb ports 3          # which VLAN is each client MAC in?
+show iparp vlan VLAN10    # who has a 10.10.0.x address?
+show iparp vlan Default   # who has a 192.168.0.x address?</code></pre>
+
+  <h3>show fdb ports 3</h3>
+<pre><code>MAC                       VLAN Name( Tag)  Age  Flags   Port
+------------------------------------------------------------------
+00:e6:0e:55:66:80          Default(0001) 0037  d m      3   ← AP1 management ✅
+74:a6:cd:8b:19:60           VLAN10(0010) 0000  d mi     3   ← Students client
+76:f6:58:7c:18:00           VLAN10(0010) 0000  d mi     3   ← Students client</code></pre>
+
+  <p>AP1&rsquo;s own MAC (<code>00:E6:0E:55:66:80</code>) is on <strong>Default VLAN</strong> &mdash; confirming AP management traffic is untagged and reaching XIQ via QF-Modem. Both client MACs are on <strong>VLAN10</strong> &mdash; Students passphrase working correctly.</p>
+
+  <h3>show iparp vlan VLAN10</h3>
+<pre><code>VR            Destination      Mac                Age  VLAN    VID  Port
+VR-Default    10.10.0.10       76:f6:58:7c:18:00    6  VLAN10   10    3
+VR-Default    10.10.0.11       74:a6:cd:8b:19:60   15  VLAN10   10    3</code></pre>
+
+  <h3>show iparp vlan Default</h3>
+<pre><code>VR            Destination      Mac                Age  VLAN      VID  Port
+VR-Default    192.168.0.1      58:13:d3:9c:c1:ee   20  Default    1    1   ← QF-Modem GW
+VR-Default    192.168.0.10     74:a6:cd:8b:19:60   20  Default    1    1   ← MacBook (stale)
+VR-Default    192.168.0.4/6/7/9  ...               --  Default    1    1   ← other LAN hosts</code></pre>
+
+  <div class="box ok">
+    <p class="box-label">Forensic Detail &mdash; Dual ARP Entry (MAC 74:a6:cd:8b:19:60)</p>
+    <p>The MacBook (<code>74:a6:cd:8b:19:60</code>) appears in <em>both</em> ARP tables &mdash; proof that both passphrases were tested on the same device:</p>
+    <ul>
+      <li><strong>Default ARP → 192.168.0.10, age=20</strong> (near expiry) &mdash; leftover from Staff passphrase test</li>
+      <li><strong>VLAN10 ARP → 10.10.0.11</strong> &mdash; current active state after switching to Students passphrase</li>
+    </ul>
+    <p>FDB shows this MAC only under <strong>VLAN10</strong> &mdash; the current live association. ARP table retains both because ARP timeout is 20&nbsp;min. The Default entry will expire naturally; it does not indicate the MacBook is on two VLANs simultaneously.</p>
+  </div>
+
+  <h3>IQAgent Heartbeat &mdash; SW1 Connected to XIQ</h3>
+<pre><code>INFO[2026/05/15 17:04:07] proxy device-connector unknown POST
+  /device-connect/rest/v1/health-check/FJ012544G-00233</code></pre>
+  <p>Serial <code>FJ012544G-00233</code> = SW1. The <code>unknown</code> label is a proxy log level &mdash; not an error. This confirms SW1&rsquo;s IQAgent is alive and polling XIQ cloud on schedule.</p>
+
+  <h3>Supplemental CLI &mdash; <code>enable ipforwarding vlan Default</code> Warning</h3>
+  <p>This command was included in the working Supplemental CLI block, but it has the <strong>same idempotency problem</strong> as <code>enable dhcp ports 3 vlan VLAN10</code>. Running it a second time (re-deploy without factory reset) causes EXOS to return an error &rarr; XIQ hangs at 15%. Do <strong>not</strong> add it to the template permanently. Treat it as a mandatory manual post-factory-reset step in the same category as <code>enable ports all</code>.</p>
+
+  <table>
+    <tr><th>Command</th><th>In Supplemental CLI?</th><th>Reason</th></tr>
+    <tr><td><code>configure vlan VLAN10 dhcp-*</code></td><td>Pass 2 only, remove after</td><td>Not idempotent — errors if already set</td></tr>
+    <tr><td><code>enable dhcp ports 3 vlan VLAN10</code></td><td>Pass 2 only, remove after</td><td>Not idempotent — errors if already enabled</td></tr>
+    <tr><td><code>enable ipforwarding vlan Default</code></td><td class="warn">NO &mdash; manual step only</td><td>Same idempotency problem; XIQ won&rsquo;t push it anyway</td></tr>
+  </table>
+
+  <div class="box ok">
+    <p class="box-label">Split Confirmed ✅</p>
+    <p><strong>Staff passphrase &rarr; 192.168.0.x (VLAN1 Default, QF-Modem DHCP)</strong><br>
+    <strong>Students passphrase &rarr; 10.10.0.x (VLAN10, SW1 DHCP)</strong><br>
+    One SSID, two VLANs, correct AP port tagging, correct ipforwarding. KB_School_AP_VLAN10_VLAN1 fully operational.</p>
+  </div>
+
   <!-- ─── PENDING ─── -->
   <span class="section-label" id="pending">Pending &mdash; Next Session Backlog</span>
 
   <table>
     <tr><th>Priority</th><th>Item</th><th>Action</th></tr>
     <tr><td class="ok">HIGH</td><td>XIQ Template &mdash; Port 3 fix</td><td>Update <code>Khursheed_5320_For_Karl</code> switch template: Port 3 = Default native (untagged) + VLAN10 tagged. Make XIQ the authoritative source. Otherwise the next deploy will re-break port 3.</td></tr>
-    <tr><td class="ok">HIGH</td><td>Add ipforwarding to Supplemental CLI</td><td>Add <code>enable ipforwarding vlan Default</code> to the Supplemental CLI block so XIQ pushes it on every deploy. Eliminates the manual step.</td></tr>
+    <tr><td class="warn">MED</td><td>ipforwarding &mdash; post-factory-reset checklist</td><td><code>enable ipforwarding vlan Default</code> must NOT go in Supplemental CLI (same idempotency problem as enable dhcp). Keep as mandatory manual step after every factory reset. Add to a printed checklist.</td></tr>
     <tr><td class="warn">MED</td><td>VLAN100 sprint resume</td><td>Check XIQ lock cleared, redeploy, verify E2E VLAN100 PPSK internet.</td></tr>
     <tr><td class="warn">MED</td><td>Boss Karl&rsquo;s VIQ</td><td>Get AP details from boss, onboard via CAPWAP, deploy PPSK in his VIQ org.</td></tr>
     <tr><td class="warn">MED</td><td>WPA2/WPA3 Transition Mode</td><td>macOS Ventura+ grays out WPA2-only SSIDs. Add WPA2/WPA3 transition mode to <code>KB_School_Broadcast</code> in XIQ.</td></tr>
