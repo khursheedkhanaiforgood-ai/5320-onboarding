@@ -10,13 +10,13 @@
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: 'Libre Baskerville', Georgia, serif; background: #FFFFFF; color: #111111; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 48px 24px 72px; }
-.container { max-width: 900px; width: 100%; }
+.container { max-width: 960px; width: 100%; }
 .nyt-rule-top { border: none; border-top: 3px solid #111; margin-bottom: 6px; }
 .nyt-rule-thin { border: none; border-top: 1px solid #111; margin-bottom: 18px; }
 .nyt-logo { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.22em; color: #666; text-align: center; margin-bottom: 6px; }
 .byline { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.72rem; color: #666; margin-bottom: 14px; letter-spacing: 0.02em; }
 .byline strong { color: #111; }
-h1 { font-family: 'Libre Baskerville', Georgia, serif; font-size: 2.4rem; font-weight: 700; color: #111; line-height: 1.12; margin-bottom: 14px; }
+h1 { font-family: 'Libre Baskerville', Georgia, serif; font-size: 2.2rem; font-weight: 700; color: #111; line-height: 1.12; margin-bottom: 14px; }
 .subtitle { font-family: 'Libre Baskerville', Georgia, serif; font-size: 1rem; font-style: italic; color: #444; line-height: 1.85; margin-bottom: 20px; border-bottom: 1px solid #E2E2E2; padding-bottom: 28px; }
 .section-label { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.18em; color: #7c3aed; margin: 40px 0 12px; padding-bottom: 6px; border-bottom: 2px solid #7c3aed; display: block; }
 h2 { font-family: 'Libre Baskerville', Georgia, serif; font-size: 1.3rem; font-weight: 700; color: #111; margin: 0 0 10px; }
@@ -39,31 +39,47 @@ tr:nth-child(even) td { background: #FAFAFA; }
 .box p + p { margin-top: 8px; }
 .box.warn { border-left-color: #F57F17; background: #FFFBF0; }
 .box.deadline { border-left-color: #C62828; background: #FCEEEE; }
+.box.info { border-left-color: #0284c7; background: #F0F9FF; }
 .box-label { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: #7c3aed; margin-bottom: 6px; }
 .box.warn .box-label { color: #E65100; }
 .box.deadline .box-label { color: #C62828; }
+.box.info .box-label { color: #0284c7; }
 .divider { border: none; border-top: 1px solid #E2E2E2; margin: 36px 0; }
 /* Sprint cards */
-.sprint-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 20px 0 32px; }
-@media (max-width: 640px) { .sprint-grid { grid-template-columns: 1fr; } }
-.sprint-card { border: 1px solid #E2E2E2; border-radius: 6px; padding: 20px; }
+.sprint-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 18px; margin: 20px 0 28px; }
+@media (max-width: 700px) { .sprint-grid { grid-template-columns: 1fr; } }
+.sprint-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin: 20px 0 28px; }
+@media (max-width: 600px) { .sprint-grid-2 { grid-template-columns: 1fr; } }
+.sprint-card { border: 1px solid #E2E2E2; border-radius: 6px; padding: 18px 20px; }
 .sprint-card.active { border-color: #7c3aed; background: #FAFAFF; }
 .sprint-card.testing { border-color: #0891b2; background: #F0F9FF; }
 .sprint-card.done-card { border-color: #059669; background: #F0FFF4; }
 .sprint-week { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.14em; color: #999; margin-bottom: 6px; }
 .sprint-card.active .sprint-week { color: #7c3aed; }
 .sprint-card.testing .sprint-week { color: #0891b2; }
-.sprint-card h2 { font-size: 1rem; margin-bottom: 8px; }
-.sprint-card p { font-size: 0.83rem; color: #555; line-height: 1.65; margin: 0; }
+.sprint-card h2 { font-size: 0.98rem; margin-bottom: 8px; }
+.sprint-card p { font-size: 0.82rem; color: #555; line-height: 1.65; margin: 0; }
+.sprint-card p + p { margin-top: 6px; }
 .sprint-card .log-link { display: inline-block; margin-top: 12px; font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.75rem; color: #7c3aed; text-decoration: none; font-weight: 600; }
 .sprint-card.testing .log-link { color: #0891b2; }
-/* Feature table */
-.feature-status { display: inline-block; font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; padding: 2px 7px; border-radius: 10px; }
+/* Feature status badges */
+.feature-status { display: inline-block; font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; padding: 2px 7px; border-radius: 10px; white-space: nowrap; }
 .fs-done    { background: #D1FAE5; color: #065f46; }
 .fs-active  { background: #EDE9FE; color: #5B21B6; }
 .fs-pending { background: #F3F4F6; color: #6B7280; }
 .fs-gap     { background: #FEE2E2; color: #991B1B; }
+.fs-new     { background: #FEF3C7; color: #92400E; }
+/* Bin group rows */
+.bin-group-row td { background: #F4F0FF !important; font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: #5B21B6; padding: 7px 10px; }
+.bin-new td { background: #FFFBEB !important; }
+.bin-num { font-family: 'Libre Franklin', Arial, sans-serif; font-weight: 700; color: #7c3aed; font-size: 0.82rem; }
+/* TOC */
+.toc { background: #F8F8F8; border: 1px solid #E2E2E2; border-radius: 4px; padding: 16px 20px; margin: 28px 0 0; }
+.toc-title { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.15em; color: #666; margin-bottom: 10px; }
+.toc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2px 20px; font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.84rem; }
+.toc-grid a { color: #7c3aed; text-decoration: none; padding: 4px 0; border-bottom: 1px dotted #E2E2E2; display: block; }
 .footer { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.7rem; color: #999; text-align: center; line-height: 1.9; margin-top: 8px; }
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
 </style>
 </head>
 <body>
@@ -80,262 +96,423 @@ tr:nth-child(even) td { background: #FAFAFA; }
 
   <h1>From XIQ to Extreme Platform One: A Complete Practitioner&rsquo;s Transition Guide</h1>
 
-  <p class="subtitle">ExtremeCloud IQ (XIQ) GUI is being retired on July 1, 2026. Extreme Platform One (EP1) is its replacement &mdash; a next-generation portal with a redesigned navigation model, new terminology, and reorganised workflows. This guide documents every feature area exhaustively: where it lived in XIQ, where it lives in EP1, what changed, and what gaps exist. Built as a practitioner&rsquo;s reference for guiding clients through the transition.</p>
+  <p class="subtitle">ExtremeCloud IQ (XIQ) GUI is being retired on July 1, 2026. Extreme Platform One (EP1) is its replacement &mdash; a next-generation portal with a redesigned navigation model, new terminology, and reorganised workflows. This guide documents every feature area exhaustively across 31 thematic bins: where it lived in XIQ, where it lives in EP1, what changed, and what gaps exist. Backed by a Navigation Intelligence Engine that cross-validates documentation against live GUI state.</p>
 
   <div class="box deadline">
     <p class="box-label">Hard Deadline</p>
     <p><strong>July 1, 2026 &mdash; XIQ GUI removed.</strong> All clients must be operating in EP1 by this date. This guide must be client-ready before June 26 to allow one week of review buffer. 47 days from sprint start.</p>
   </div>
 
-  <!-- ─── SPRINT PLAN ─── -->
-  <span class="section-label" id="sprint">6-Week Sprint Plan</span>
-
-  <div class="sprint-grid">
-
-    <div class="sprint-card active">
-      <div class="sprint-week">Week 1 &nbsp;&bull;&nbsp; May 15&ndash;21 &nbsp;&bull;&nbsp; Active</div>
-      <h2>Device Management</h2>
-      <p>Onboarding new devices &middot; IQAgent &middot; Firmware updates &middot; Device templates &middot; Device groups &middot; Serial/MAC claim &middot; CAPWAP flow &middot; XIQ vs EP1 device dashboard</p>
-      <a href="#" class="log-link">Session log &rarr; (coming)</a>
+  <!-- ─── TOC ─── -->
+  <div class="toc">
+    <div class="toc-title">In This Document</div>
+    <div class="toc-grid">
+      <a href="#engine">Navigation Intelligence Engine — Build Sprints</a>
+      <a href="#sprint">6-Week Content Sprint Plan</a>
+      <a href="#bins">31 Thematic Bins</a>
+      <a href="#features">Feature Coverage Map</a>
+      <a href="#ep1">What Is Extreme Platform One?</a>
+      <a href="#logs">Session Logs</a>
+      <a href="#gaps">Gaps Register</a>
+      <a href="#dialogue">Architecture Design Dialogue Log</a>
     </div>
-
-    <div class="sprint-card">
-      <div class="sprint-week">Week 2 &nbsp;&bull;&nbsp; May 22&ndash;28</div>
-      <h2>Network Policies</h2>
-      <p>Switch policies &middot; Port types &middot; VLAN management &middot; Supplemental CLI &middot; Wireless policies &middot; SSIDs &middot; Radio profiles &middot; AP templates &middot; WLAN schedules</p>
-      <a href="#" class="log-link">Session log &rarr; (coming)</a>
-    </div>
-
-    <div class="sprint-card">
-      <div class="sprint-week">Week 3 &nbsp;&bull;&nbsp; May 29&ndash;Jun 4</div>
-      <h2>User Access &amp; Security</h2>
-      <p>PPSK &middot; PPSK user groups &middot; User profiles &middot; 802.1X / RADIUS &middot; CoA &middot; Captive Web Portal &middot; Guest management &middot; MAC auth &middot; Access policies</p>
-      <a href="#" class="log-link">Session log &rarr; (coming)</a>
-    </div>
-
-    <div class="sprint-card">
-      <div class="sprint-week">Week 4 &nbsp;&bull;&nbsp; Jun 5&ndash;11</div>
-      <h2>Monitoring, Alerts &amp; Reports</h2>
-      <p>Client 360 &middot; Device health &middot; Event log &middot; Alarms &middot; Network topology &middot; Rogue AP detection &middot; Built-in reports &middot; Dashboard widgets &middot; API &amp; webhooks</p>
-      <a href="#" class="log-link">Session log &rarr; (coming)</a>
-    </div>
-
-    <div class="sprint-card testing">
-      <div class="sprint-week">Week 5 &nbsp;&bull;&nbsp; Jun 12&ndash;18 &nbsp;&bull;&nbsp; Independent Testing</div>
-      <h2>Gap Validation &amp; Edge Cases</h2>
-      <p>Reproduce every workflow from XIQ entirely in EP1 without notes &middot; Identify undocumented gaps &middot; Flag any features not yet in EP1 &middot; Compile the &ldquo;watch-out&rdquo; list for clients</p>
-      <a href="#" class="log-link">Test log &rarr; (coming)</a>
-    </div>
-
-    <div class="sprint-card testing">
-      <div class="sprint-week">Week 6 &nbsp;&bull;&nbsp; Jun 19&ndash;25 &nbsp;&bull;&nbsp; Client Guide</div>
-      <h2>Client-Ready Documentation</h2>
-      <p>Consolidate all findings &middot; Build printable quick-reference card &middot; Write client transition checklist &middot; Final review &middot; Publish before Jun 26 &rarr; 5-day buffer before Jul 1 deadline</p>
-      <a href="#" class="log-link">Final guide &rarr; (coming)</a>
-    </div>
-
   </div>
 
-  <!-- ─── FEATURE MAP ─── -->
-  <span class="section-label" id="features">Feature Coverage Map</span>
+  <!-- ─── ENGINE BUILD SPRINTS ─── -->
+  <span class="section-label" id="engine">Navigation Intelligence Engine &mdash; Build Sprints</span>
 
-  <p>Status updated at the end of each session. <span class="feature-status fs-done">Done</span> = fully mapped with verified EP1 location. <span class="feature-status fs-active">In Progress</span> = current sprint. <span class="feature-status fs-pending">Pending</span> = not yet started. <span class="feature-status fs-gap">Gap</span> = feature missing or changed significantly in EP1.</p>
+  <p>Parallel to the 6-week content sprint, the <strong>XIQ&rarr;EP1 Navigation Intelligence Engine</strong> is built as a standalone application: a user types a XIQ workflow in plain English and receives the EP1 equivalent with a verified confidence score, the reasoning behind the mapping, and any known gaps.</p>
+
+  <div class="sprint-grid">
+    <div class="sprint-card active">
+      <div class="sprint-week">Sprint A &bull; 6 days &bull; May 19&ndash;26 &bull; Active Monday</div>
+      <h2>Backend + HTML Frontend</h2>
+      <p>Create GitHub repo <code>xiq-ep1-intelligence-engine</code> &rarr; Railway PostgreSQL &rarr; 5 SQL migrations &rarr; FastAPI scaffold &rarr; LangGraph 11-node skeleton &rarr; seed 31 bins + 12 bibliography entries &rarr; HTML/JS frontend &rarr; Railway deploy.</p>
+      <p>Target: <code>GET /health</code> returns <code>{"status":"ok","bins":31,"db":"connected"}</code></p>
+      <a href="xiq-ep1-design-dialogue.html#session-2" class="log-link">Architecture: Sessions 2&ndash;6 &rarr;</a>
+    </div>
+    <div class="sprint-card">
+      <div class="sprint-week">Sprint B &bull; 3 days &bull; After Sprint A</div>
+      <h2>React Frontend Migration</h2>
+      <p>Migrate the Sprint A HTML/JS frontend to React. Pedagogical sprint: one component at a time, each mapped directly to its HTML equivalent. Backend unchanged. Entry point for learning React through a real deployed app.</p>
+      <a href="xiq-ep1-design-dialogue.html#session-3" class="log-link">Architecture: Session 3 &rarr;</a>
+    </div>
+    <div class="sprint-card testing">
+      <div class="sprint-week">GUI Baseline &bull; 4 sessions &bull; Parallel &bull; feature/gui-baseline</div>
+      <h2>Playwright GUI Cataloger</h2>
+      <p>Browser automation logs into XIQ and EP1 separately, navigates every nav item, extracts all buttons / dropdown options / form fields / table headers, and takes full-page screenshots.</p>
+      <p>Output: <code>gui_baseline_xiq.json</code> + <code>gui_baseline_ep1.json</code> + diff report. Ground truth before any RAG runs.</p>
+      <a href="#" class="log-link testing">Branch: feature/gui-baseline (pending)</a>
+    </div>
+  </div>
+
+  <div class="box">
+    <p class="box-label">Engine Architecture &mdash; 11-Node LangGraph Graph</p>
+    <p>Intake &rarr; XIQ Navigator &rarr; EP1 Navigator &rarr; Confidence Agent &rarr; Context Engine &rarr; Gap Detector &rarr; Fallback Agent &rarr; XIQ Browser Agent &rarr; EP1 Browser Agent &rarr; Cross-Validation Agent &rarr; Response Synthesizer. Dual-stream validation (doc-based + live browser) runs in parallel until DB reaches 75% browser-verified coverage, then switches to RAG_VALIDATED mode. Confidence: &Sigma;(w&times;c)/&Sigma;(w) per match type (IDENTICAL / RESTRUCTURED / PARTIAL / GAP / EP1_ONLY).</p>
+    <p style="margin-top:8px"><a href="xiq-ep1-design-dialogue.html#adr" style="color:#7c3aed;font-weight:600">ADR-001 &ndash; ADR-015: Architecture Decision Framework &rarr;</a></p>
+  </div>
+
+  <!-- ─── 6-WEEK CONTENT SPRINT ─── -->
+  <span class="section-label" id="sprint">6-Week Content Sprint Plan</span>
+
+  <p>Each week maps one feature group exhaustively across all 31 bins — documenting where it lived in XIQ, where it lives in EP1, and flagging any gaps. Week 5&ndash;6 shift from documentation to validation and client delivery.</p>
+
+  <div class="sprint-grid-2">
+    <div class="sprint-card active">
+      <div class="sprint-week">Week 1 &bull; May 15&ndash;21 &bull; Active</div>
+      <h2>Device Management (Bins #1&ndash;5)</h2>
+      <p>Onboarding &middot; IQAgent &middot; CAPWAP &middot; ZTP &middot; Firmware updates &middot; Device templates &middot; Device groups &middot; Location hierarchy &middot; Serial/MAC claim flow &middot; XIQ vs EP1 device dashboard</p>
+      <a href="#" class="log-link">Session log &rarr; (coming)</a>
+    </div>
+    <div class="sprint-card">
+      <div class="sprint-week">Week 2 &bull; May 22&ndash;28</div>
+      <h2>Network Policies (Bins #6&ndash;15)</h2>
+      <p>Switch policy &middot; VLAN routing &middot; Port types &middot; Supplemental CLI &middot; QoS &middot; SSID config &middot; Radio profiles &middot; AP templates &middot; WLAN schedules &middot; RF / band steering</p>
+      <a href="#" class="log-link">Session log &rarr; (coming)</a>
+    </div>
+    <div class="sprint-card">
+      <div class="sprint-week">Week 3 &bull; May 29&ndash;Jun 4</div>
+      <h2>User Access &amp; Security (Bins #16&ndash;20)</h2>
+      <p>PPSK &middot; User groups &middot; 802.1X / RADIUS &middot; Captive Web Portal &middot; Guest management &middot; MAC auth &middot; Access policies &middot; CoA &middot; Certificates</p>
+      <a href="#" class="log-link">Session log &rarr; (coming)</a>
+    </div>
+    <div class="sprint-card">
+      <div class="sprint-week">Week 4 &bull; Jun 5&ndash;11</div>
+      <h2>Monitoring, Reports &amp; EP1-Native (Bins #21&ndash;31)</h2>
+      <p>Client 360 &middot; Device health &middot; Alarms &middot; Topology &middot; Reports &middot; Rogue AP &middot; Policy Push &middot; Admin &middot; Smart RF &middot; Troubleshooting &middot; EP1 AI Canvas &middot; Agent Manager &middot; MSP</p>
+      <a href="#" class="log-link">Session log &rarr; (coming)</a>
+    </div>
+    <div class="sprint-card testing">
+      <div class="sprint-week">Week 5 &bull; Jun 12&ndash;18 &bull; Independent Testing</div>
+      <h2>Gap Validation &amp; Edge Cases</h2>
+      <p>Reproduce every workflow from XIQ entirely in EP1 without notes &middot; Identify undocumented gaps &middot; Cross-validate against GUI Baseline JSON &middot; Compile client watch-out list</p>
+      <a href="#" class="log-link">Test log &rarr; (coming)</a>
+    </div>
+    <div class="sprint-card testing">
+      <div class="sprint-week">Week 6 &bull; Jun 19&ndash;25 &bull; Client Guide</div>
+      <h2>Client-Ready Documentation</h2>
+      <p>Consolidate all findings &middot; Build printable quick-reference card (top 15&ndash;20 workflows) &middot; Write transition checklist &middot; Final review &middot; Publish before Jun 26</p>
+      <a href="#" class="log-link">Final guide &rarr; (coming)</a>
+    </div>
+  </div>
+
+  <!-- ─── 31 THEMATIC BINS ─── -->
+  <span class="section-label" id="bins">31 Thematic Bins</span>
+
+  <p>Every feature of XIQ is assigned to one of 31 thematic bins. Bins #1&ndash;25 cover the original feature set. Bins #26&ndash;31 were added after an E2E KB_School workflow trace on May 15 revealed six areas missing from the initial 25 &mdash; most are either operational flows (Policy Push, Smart RF, Troubleshooting) or EP1-native capabilities with no XIQ equivalent (AI Canvas, Agent Manager, MSP).</p>
 
   <table>
     <tr>
+      <th>#</th>
+      <th>Bin Name</th>
+      <th>Group</th>
+      <th>XIQ Path (doc)</th>
+      <th>Status</th>
+    </tr>
+
+    <!-- GROUP A: DEVICE MANAGEMENT -->
+    <tr class="bin-group-row"><td colspan="5">Group A &mdash; Device Management</td></tr>
+    <tr>
+      <td class="bin-num">1</td>
+      <td><strong>Device Onboarding &amp; Serial/MAC Claim</strong></td>
+      <td>Device Mgmt</td>
+      <td>Devices &rarr; Add Device</td>
+      <td><span class="feature-status fs-active">Week 1</span></td>
+    </tr>
+    <tr>
+      <td class="bin-num">2</td>
+      <td><strong>IQAgent, CAPWAP &amp; ZTP</strong></td>
+      <td>Device Mgmt</td>
+      <td>Devices &rarr; device detail</td>
+      <td><span class="feature-status fs-active">Week 1</span></td>
+    </tr>
+    <tr>
+      <td class="bin-num">3</td>
+      <td><strong>Firmware Updates &amp; Schedules</strong></td>
+      <td>Device Mgmt</td>
+      <td>Devices &rarr; Update / Manage</td>
+      <td><span class="feature-status fs-active">Week 1</span></td>
+    </tr>
+    <tr>
+      <td class="bin-num">4</td>
+      <td><strong>Device Templates &amp; Config Profiles</strong></td>
+      <td>Device Mgmt</td>
+      <td>Configure &rarr; Templates</td>
+      <td><span class="feature-status fs-active">Week 1</span></td>
+    </tr>
+    <tr>
+      <td class="bin-num">5</td>
+      <td><strong>Device Groups, Locations &amp; Hierarchy</strong></td>
+      <td>Device Mgmt</td>
+      <td>Devices &rarr; Groups / Locations</td>
+      <td><span class="feature-status fs-active">Week 1</span></td>
+    </tr>
+
+    <!-- GROUP B: SWITCHING -->
+    <tr class="bin-group-row"><td colspan="5">Group B &mdash; Network Policies: Switching</td></tr>
+    <tr>
+      <td class="bin-num">6</td>
+      <td><strong>Switch Policy &amp; L3 Routing</strong></td>
+      <td>Switching</td>
+      <td>Configure &rarr; Network Policies</td>
+      <td><span class="feature-status fs-pending">Week 2</span></td>
+    </tr>
+    <tr>
+      <td class="bin-num">7</td>
+      <td><strong>VLAN Management</strong></td>
+      <td>Switching</td>
+      <td>Network Policies &rarr; VLANs</td>
+      <td><span class="feature-status fs-pending">Week 2</span></td>
+    </tr>
+    <tr>
+      <td class="bin-num">8</td>
+      <td><strong>Port Types &amp; Port Assignments</strong></td>
+      <td>Switching</td>
+      <td>Common Objects &rarr; Port Types</td>
+      <td><span class="feature-status fs-pending">Week 2</span></td>
+    </tr>
+    <tr>
+      <td class="bin-num">9</td>
+      <td><strong>Supplemental CLI</strong></td>
+      <td>Switching</td>
+      <td>Switch Policy &rarr; Supplemental CLI tab</td>
+      <td><span class="feature-status fs-pending">Week 2</span></td>
+    </tr>
+    <tr>
+      <td class="bin-num">10</td>
+      <td><strong>QoS &amp; Traffic Shaping</strong></td>
+      <td>Switching</td>
+      <td>Switch Policy &rarr; QoS</td>
+      <td><span class="feature-status fs-pending">Week 2</span></td>
+    </tr>
+
+    <!-- GROUP C: WIRELESS -->
+    <tr class="bin-group-row"><td colspan="5">Group C &mdash; Network Policies: Wireless</td></tr>
+    <tr>
+      <td class="bin-num">11</td>
+      <td><strong>SSID Configuration</strong></td>
+      <td>Wireless</td>
+      <td>Network Policies &rarr; Wireless</td>
+      <td><span class="feature-status fs-pending">Week 2</span></td>
+    </tr>
+    <tr>
+      <td class="bin-num">12</td>
+      <td><strong>Radio Profiles</strong></td>
+      <td>Wireless</td>
+      <td>Common Objects &rarr; Radio Profiles</td>
+      <td><span class="feature-status fs-pending">Week 2</span></td>
+    </tr>
+    <tr>
+      <td class="bin-num">13</td>
+      <td><strong>AP Templates &amp; AP Groups</strong></td>
+      <td>Wireless</td>
+      <td>Network Policies &rarr; AP Templates</td>
+      <td><span class="feature-status fs-pending">Week 2</span></td>
+    </tr>
+    <tr>
+      <td class="bin-num">14</td>
+      <td><strong>WLAN Schedules</strong></td>
+      <td>Wireless</td>
+      <td>Common Objects &rarr; Schedules</td>
+      <td><span class="feature-status fs-pending">Week 2</span></td>
+    </tr>
+    <tr>
+      <td class="bin-num">15</td>
+      <td><strong>RF Profiles &amp; Band Steering</strong></td>
+      <td>Wireless</td>
+      <td>Common Objects &rarr; RF</td>
+      <td><span class="feature-status fs-pending">Week 2</span></td>
+    </tr>
+
+    <!-- GROUP D: USER ACCESS -->
+    <tr class="bin-group-row"><td colspan="5">Group D &mdash; User Access &amp; Security</td></tr>
+    <tr>
+      <td class="bin-num">16</td>
+      <td><strong>PPSK &amp; User Groups</strong></td>
+      <td>User Access</td>
+      <td>User Management &rarr; User Groups</td>
+      <td><span class="feature-status fs-pending">Week 3</span></td>
+    </tr>
+    <tr>
+      <td class="bin-num">17</td>
+      <td><strong>802.1X / RADIUS &amp; User Profiles</strong></td>
+      <td>User Access</td>
+      <td>Common Objects &rarr; RADIUS</td>
+      <td><span class="feature-status fs-pending">Week 3</span></td>
+    </tr>
+    <tr>
+      <td class="bin-num">18</td>
+      <td><strong>Captive Web Portal (CWP)</strong></td>
+      <td>User Access</td>
+      <td>Common Objects &rarr; CWP</td>
+      <td><span class="feature-status fs-pending">Week 3</span></td>
+    </tr>
+    <tr>
+      <td class="bin-num">19</td>
+      <td><strong>Guest Management</strong></td>
+      <td>User Access</td>
+      <td>User Management &rarr; Guest</td>
+      <td><span class="feature-status fs-pending">Week 3</span></td>
+    </tr>
+    <tr>
+      <td class="bin-num">20</td>
+      <td><strong>MAC Authentication, Access Policies &amp; CoA</strong></td>
+      <td>User Access</td>
+      <td>Common Objects &rarr; Access Policies / MAC Auth</td>
+      <td><span class="feature-status fs-pending">Week 3</span></td>
+    </tr>
+
+    <!-- GROUP E: MONITORING -->
+    <tr class="bin-group-row"><td colspan="5">Group E &mdash; Monitoring &amp; Observability</td></tr>
+    <tr>
+      <td class="bin-num">21</td>
+      <td><strong>Client 360 &amp; Wireless Diagnostics</strong></td>
+      <td>Monitoring</td>
+      <td>Monitor &rarr; Clients</td>
+      <td><span class="feature-status fs-pending">Week 4</span></td>
+    </tr>
+    <tr>
+      <td class="bin-num">22</td>
+      <td><strong>Device Health Dashboard</strong></td>
+      <td>Monitoring</td>
+      <td>Monitor &rarr; Devices</td>
+      <td><span class="feature-status fs-pending">Week 4</span></td>
+    </tr>
+    <tr>
+      <td class="bin-num">23</td>
+      <td><strong>Alarms, Events &amp; Network Topology</strong></td>
+      <td>Monitoring</td>
+      <td>Monitor &rarr; Alarms / Events / Topology</td>
+      <td><span class="feature-status fs-pending">Week 4</span></td>
+    </tr>
+    <tr>
+      <td class="bin-num">24</td>
+      <td><strong>Rogue AP Detection</strong></td>
+      <td>Monitoring</td>
+      <td>Monitor &rarr; Rogue APs</td>
+      <td><span class="feature-status fs-pending">Week 4</span></td>
+    </tr>
+    <tr>
+      <td class="bin-num">25</td>
+      <td><strong>Reports &amp; Analytics</strong></td>
+      <td>Monitoring</td>
+      <td>Monitor &rarr; Reports</td>
+      <td><span class="feature-status fs-pending">Week 4</span></td>
+    </tr>
+
+    <!-- GROUP F: NEW — KB_School E2E Gap Discovery -->
+    <tr class="bin-group-row"><td colspan="5">Group F &mdash; Policy Operations &amp; Admin &nbsp;&#9733;&nbsp; Bins #26&ndash;28 added via KB_School E2E gap analysis (May 15)</td></tr>
+    <tr class="bin-new">
+      <td class="bin-num">26</td>
+      <td><strong>Policy Push &amp; Deploy Workflow</strong> <span class="feature-status fs-new">New</span></td>
+      <td>Policy Ops</td>
+      <td>Configure &rarr; Push Config / Deploy</td>
+      <td><span class="feature-status fs-pending">Week 4</span></td>
+    </tr>
+    <tr>
+      <td class="bin-num">27</td>
+      <td><strong>Admin &mdash; Users, Roles &amp; API Tokens</strong></td>
+      <td>Admin</td>
+      <td>Settings &rarr; Admin / API</td>
+      <td><span class="feature-status fs-pending">Week 4</span></td>
+    </tr>
+    <tr class="bin-new">
+      <td class="bin-num">28</td>
+      <td><strong>Smart RF / AirTime Fairness / RRM</strong> <span class="feature-status fs-new">New</span></td>
+      <td>Policy Ops</td>
+      <td>Monitor &rarr; Smart RF</td>
+      <td><span class="feature-status fs-pending">Week 4</span></td>
+    </tr>
+
+    <!-- GROUP G: EP1-NATIVE -->
+    <tr class="bin-group-row"><td colspan="5">Group G &mdash; EP1-Native Capabilities &nbsp;&#9733;&nbsp; No XIQ equivalent &nbsp;&bull;&nbsp; Bins #29&ndash;31 added via KB_School E2E gap analysis (May 15)</td></tr>
+    <tr class="bin-new">
+      <td class="bin-num">29</td>
+      <td><strong>Troubleshooting &amp; Diagnostics Tools</strong> <span class="feature-status fs-new">New</span></td>
+      <td>EP1-Native</td>
+      <td>Monitor &rarr; Tools / Diagnostics</td>
+      <td><span class="feature-status fs-pending">Week 4</span></td>
+    </tr>
+    <tr class="bin-new">
+      <td class="bin-num">30</td>
+      <td><strong>EP1 AI Canvas &amp; Natural Language Query</strong> <span class="feature-status fs-new">New</span></td>
+      <td>EP1-Native</td>
+      <td>EP1 only &mdash; no XIQ equivalent</td>
+      <td><span class="feature-status fs-pending">Week 4</span></td>
+    </tr>
+    <tr class="bin-new">
+      <td class="bin-num">31</td>
+      <td><strong>EP1 Agent Manager &amp; Automation</strong> <span class="feature-status fs-new">New</span></td>
+      <td>EP1-Native</td>
+      <td>EP1 only &mdash; no XIQ equivalent</td>
+      <td><span class="feature-status fs-pending">Week 4</span></td>
+    </tr>
+  </table>
+
+  <div class="box info">
+    <p class="box-label">How Bins #26&ndash;31 Were Found</p>
+    <p>On May 15, an E2E workflow trace was run for the KB_School scenario: creating a PPSK policy on EXOS, pushing it from XIQ, observing on EP1, then tuning. The trace revealed six operational steps that had no bin: the push/deploy action itself (#26), Smart RF calibration post-deploy (#28), the troubleshooting flow when a client doesn&rsquo;t land on the right VLAN (#29), and three EP1-native features (#30, #31, and MSP multi-tenancy which was folded into admin). These are now covered in Week 4.</p>
+  </div>
+
+  <!-- ─── FEATURE COVERAGE MAP ─── -->
+  <span class="section-label" id="features">Feature Coverage Map</span>
+
+  <p>Status updated at the end of each session. <span class="feature-status fs-done">Done</span> = fully mapped, EP1 location verified. <span class="feature-status fs-active">Active</span> = current sprint. <span class="feature-status fs-pending">Pending</span> = not yet started. <span class="feature-status fs-gap">Gap</span> = missing or significantly changed in EP1. <span class="feature-status fs-new">New</span> = not in original 25, added from KB_School E2E trace.</p>
+
+  <table>
+    <tr>
+      <th>#</th>
       <th>Feature Area</th>
       <th>XIQ Location</th>
       <th>EP1 Location</th>
       <th>Status</th>
       <th>Notes</th>
     </tr>
-    <!-- Device Management -->
-    <tr>
-      <td><strong>Device onboarding</strong></td>
-      <td>Devices &rarr; Add Device</td>
-      <td>&mdash;</td>
-      <td><span class="feature-status fs-active">Week 1</span></td>
-      <td></td>
-    </tr>
-    <tr>
-      <td><strong>IQAgent / CAPWAP</strong></td>
-      <td>Devices &rarr; device detail</td>
-      <td>&mdash;</td>
-      <td><span class="feature-status fs-active">Week 1</span></td>
-      <td></td>
-    </tr>
-    <tr>
-      <td><strong>Firmware update</strong></td>
-      <td>Devices &rarr; Update</td>
-      <td>&mdash;</td>
-      <td><span class="feature-status fs-active">Week 1</span></td>
-      <td></td>
-    </tr>
-    <tr>
-      <td><strong>Device templates</strong></td>
-      <td>Configure &rarr; Templates</td>
-      <td>&mdash;</td>
-      <td><span class="feature-status fs-active">Week 1</span></td>
-      <td></td>
-    </tr>
-    <tr>
-      <td><strong>Device groups / locations</strong></td>
-      <td>Devices &rarr; Groups</td>
-      <td>&mdash;</td>
-      <td><span class="feature-status fs-active">Week 1</span></td>
-      <td></td>
-    </tr>
-    <!-- Network Policies -->
-    <tr>
-      <td><strong>Switch policy (Switching/Routing)</strong></td>
-      <td>Configure &rarr; Network Policies</td>
-      <td>&mdash;</td>
-      <td><span class="feature-status fs-pending">Week 2</span></td>
-      <td></td>
-    </tr>
-    <tr>
-      <td><strong>VLAN management</strong></td>
-      <td>Configure &rarr; Network Policies &rarr; VLANs</td>
-      <td>&mdash;</td>
-      <td><span class="feature-status fs-pending">Week 2</span></td>
-      <td></td>
-    </tr>
-    <tr>
-      <td><strong>Port types</strong></td>
-      <td>Configure &rarr; Common Objects &rarr; Port Types</td>
-      <td>&mdash;</td>
-      <td><span class="feature-status fs-pending">Week 2</span></td>
-      <td></td>
-    </tr>
-    <tr>
-      <td><strong>Supplemental CLI</strong></td>
-      <td>Switch Policy &rarr; Supplemental CLI tab</td>
-      <td>&mdash;</td>
-      <td><span class="feature-status fs-pending">Week 2</span></td>
-      <td></td>
-    </tr>
-    <tr>
-      <td><strong>Wireless policy / SSID</strong></td>
-      <td>Configure &rarr; Network Policies &rarr; Wireless</td>
-      <td>&mdash;</td>
-      <td><span class="feature-status fs-pending">Week 2</span></td>
-      <td></td>
-    </tr>
-    <tr>
-      <td><strong>Radio profiles</strong></td>
-      <td>Configure &rarr; Common Objects &rarr; Radio Profiles</td>
-      <td>&mdash;</td>
-      <td><span class="feature-status fs-pending">Week 2</span></td>
-      <td></td>
-    </tr>
-    <tr>
-      <td><strong>AP templates</strong></td>
-      <td>Configure &rarr; Network Policies &rarr; AP Templates</td>
-      <td>&mdash;</td>
-      <td><span class="feature-status fs-pending">Week 2</span></td>
-      <td></td>
-    </tr>
-    <!-- User Access -->
-    <tr>
-      <td><strong>PPSK &mdash; user groups</strong></td>
-      <td>Configure &rarr; User Management &rarr; User Groups</td>
-      <td>&mdash;</td>
-      <td><span class="feature-status fs-pending">Week 3</span></td>
-      <td></td>
-    </tr>
-    <tr>
-      <td><strong>User profiles (VLAN assignment)</strong></td>
-      <td>Configure &rarr; Network Policies &rarr; User Access</td>
-      <td>&mdash;</td>
-      <td><span class="feature-status fs-pending">Week 3</span></td>
-      <td></td>
-    </tr>
-    <tr>
-      <td><strong>802.1X / RADIUS</strong></td>
-      <td>Configure &rarr; Common Objects &rarr; RADIUS</td>
-      <td>&mdash;</td>
-      <td><span class="feature-status fs-pending">Week 3</span></td>
-      <td></td>
-    </tr>
-    <tr>
-      <td><strong>Captive Web Portal</strong></td>
-      <td>Configure &rarr; Common Objects &rarr; CWP</td>
-      <td>&mdash;</td>
-      <td><span class="feature-status fs-pending">Week 3</span></td>
-      <td></td>
-    </tr>
-    <tr>
-      <td><strong>Guest management</strong></td>
-      <td>Configure &rarr; User Management &rarr; Guest</td>
-      <td>&mdash;</td>
-      <td><span class="feature-status fs-pending">Week 3</span></td>
-      <td></td>
-    </tr>
-    <!-- Monitoring -->
-    <tr>
-      <td><strong>Client 360</strong></td>
-      <td>Monitor &rarr; Clients</td>
-      <td>&mdash;</td>
-      <td><span class="feature-status fs-pending">Week 4</span></td>
-      <td></td>
-    </tr>
-    <tr>
-      <td><strong>Device health dashboard</strong></td>
-      <td>Monitor &rarr; Devices</td>
-      <td>&mdash;</td>
-      <td><span class="feature-status fs-pending">Week 4</span></td>
-      <td></td>
-    </tr>
-    <tr>
-      <td><strong>Event log</strong></td>
-      <td>Monitor &rarr; Events</td>
-      <td>&mdash;</td>
-      <td><span class="feature-status fs-pending">Week 4</span></td>
-      <td></td>
-    </tr>
-    <tr>
-      <td><strong>Alarms</strong></td>
-      <td>Monitor &rarr; Alarms</td>
-      <td>&mdash;</td>
-      <td><span class="feature-status fs-pending">Week 4</span></td>
-      <td></td>
-    </tr>
-    <tr>
-      <td><strong>Network topology</strong></td>
-      <td>Monitor &rarr; Topology</td>
-      <td>&mdash;</td>
-      <td><span class="feature-status fs-pending">Week 4</span></td>
-      <td></td>
-    </tr>
-    <tr>
-      <td><strong>Reports</strong></td>
-      <td>Monitor &rarr; Reports</td>
-      <td>&mdash;</td>
-      <td><span class="feature-status fs-pending">Week 4</span></td>
-      <td></td>
-    </tr>
-    <tr>
-      <td><strong>Rogue AP detection</strong></td>
-      <td>Monitor &rarr; Rogue APs</td>
-      <td>&mdash;</td>
-      <td><span class="feature-status fs-pending">Week 4</span></td>
-      <td></td>
-    </tr>
-    <!-- Admin -->
-    <tr>
-      <td><strong>Admin / user accounts</strong></td>
-      <td>Settings (gear icon)</td>
-      <td>&mdash;</td>
-      <td><span class="feature-status fs-pending">Week 4</span></td>
-      <td></td>
-    </tr>
-    <tr>
-      <td><strong>API tokens</strong></td>
-      <td>Settings &rarr; API</td>
-      <td>&mdash;</td>
-      <td><span class="feature-status fs-pending">Week 4</span></td>
-      <td></td>
-    </tr>
+
+    <tr class="bin-group-row"><td colspan="6">Group A &mdash; Device Management</td></tr>
+    <tr><td class="bin-num">1</td><td><strong>Device Onboarding &amp; Serial/MAC Claim</strong></td><td>Devices &rarr; Add Device</td><td>&mdash;</td><td><span class="feature-status fs-active">Week 1</span></td><td></td></tr>
+    <tr><td class="bin-num">2</td><td><strong>IQAgent, CAPWAP &amp; ZTP</strong></td><td>Devices &rarr; device detail</td><td>&mdash;</td><td><span class="feature-status fs-active">Week 1</span></td><td></td></tr>
+    <tr><td class="bin-num">3</td><td><strong>Firmware Updates &amp; Schedules</strong></td><td>Devices &rarr; Update / Manage</td><td>&mdash;</td><td><span class="feature-status fs-active">Week 1</span></td><td></td></tr>
+    <tr><td class="bin-num">4</td><td><strong>Device Templates &amp; Config Profiles</strong></td><td>Configure &rarr; Templates</td><td>&mdash;</td><td><span class="feature-status fs-active">Week 1</span></td><td></td></tr>
+    <tr><td class="bin-num">5</td><td><strong>Device Groups, Locations &amp; Hierarchy</strong></td><td>Devices &rarr; Groups / Locations</td><td>&mdash;</td><td><span class="feature-status fs-active">Week 1</span></td><td></td></tr>
+
+    <tr class="bin-group-row"><td colspan="6">Group B &mdash; Switching</td></tr>
+    <tr><td class="bin-num">6</td><td><strong>Switch Policy &amp; L3 Routing</strong></td><td>Configure &rarr; Network Policies</td><td>&mdash;</td><td><span class="feature-status fs-pending">Week 2</span></td><td></td></tr>
+    <tr><td class="bin-num">7</td><td><strong>VLAN Management</strong></td><td>Network Policies &rarr; VLANs</td><td>&mdash;</td><td><span class="feature-status fs-pending">Week 2</span></td><td></td></tr>
+    <tr><td class="bin-num">8</td><td><strong>Port Types &amp; Assignments</strong></td><td>Common Objects &rarr; Port Types</td><td>&mdash;</td><td><span class="feature-status fs-pending">Week 2</span></td><td></td></tr>
+    <tr><td class="bin-num">9</td><td><strong>Supplemental CLI</strong></td><td>Switch Policy &rarr; Supplemental CLI</td><td>&mdash;</td><td><span class="feature-status fs-pending">Week 2</span></td><td></td></tr>
+    <tr><td class="bin-num">10</td><td><strong>QoS &amp; Traffic Shaping</strong></td><td>Switch Policy &rarr; QoS</td><td>&mdash;</td><td><span class="feature-status fs-pending">Week 2</span></td><td></td></tr>
+
+    <tr class="bin-group-row"><td colspan="6">Group C &mdash; Wireless</td></tr>
+    <tr><td class="bin-num">11</td><td><strong>SSID Configuration</strong></td><td>Network Policies &rarr; Wireless</td><td>&mdash;</td><td><span class="feature-status fs-pending">Week 2</span></td><td></td></tr>
+    <tr><td class="bin-num">12</td><td><strong>Radio Profiles</strong></td><td>Common Objects &rarr; Radio Profiles</td><td>&mdash;</td><td><span class="feature-status fs-pending">Week 2</span></td><td></td></tr>
+    <tr><td class="bin-num">13</td><td><strong>AP Templates &amp; AP Groups</strong></td><td>Network Policies &rarr; AP Templates</td><td>&mdash;</td><td><span class="feature-status fs-pending">Week 2</span></td><td></td></tr>
+    <tr><td class="bin-num">14</td><td><strong>WLAN Schedules</strong></td><td>Common Objects &rarr; Schedules</td><td>&mdash;</td><td><span class="feature-status fs-pending">Week 2</span></td><td></td></tr>
+    <tr><td class="bin-num">15</td><td><strong>RF Profiles &amp; Band Steering</strong></td><td>Common Objects &rarr; RF</td><td>&mdash;</td><td><span class="feature-status fs-pending">Week 2</span></td><td></td></tr>
+
+    <tr class="bin-group-row"><td colspan="6">Group D &mdash; User Access &amp; Security</td></tr>
+    <tr><td class="bin-num">16</td><td><strong>PPSK &amp; User Groups</strong></td><td>User Management &rarr; User Groups</td><td>&mdash;</td><td><span class="feature-status fs-pending">Week 3</span></td><td></td></tr>
+    <tr><td class="bin-num">17</td><td><strong>802.1X / RADIUS &amp; User Profiles</strong></td><td>Common Objects &rarr; RADIUS</td><td>&mdash;</td><td><span class="feature-status fs-pending">Week 3</span></td><td></td></tr>
+    <tr><td class="bin-num">18</td><td><strong>Captive Web Portal (CWP)</strong></td><td>Common Objects &rarr; CWP</td><td>&mdash;</td><td><span class="feature-status fs-pending">Week 3</span></td><td></td></tr>
+    <tr><td class="bin-num">19</td><td><strong>Guest Management</strong></td><td>User Management &rarr; Guest</td><td>&mdash;</td><td><span class="feature-status fs-pending">Week 3</span></td><td></td></tr>
+    <tr><td class="bin-num">20</td><td><strong>MAC Auth, Access Policies &amp; CoA</strong></td><td>Common Objects &rarr; Access Policies</td><td>&mdash;</td><td><span class="feature-status fs-pending">Week 3</span></td><td></td></tr>
+
+    <tr class="bin-group-row"><td colspan="6">Group E &mdash; Monitoring &amp; Observability</td></tr>
+    <tr><td class="bin-num">21</td><td><strong>Client 360 &amp; Wireless Diagnostics</strong></td><td>Monitor &rarr; Clients</td><td>&mdash;</td><td><span class="feature-status fs-pending">Week 4</span></td><td></td></tr>
+    <tr><td class="bin-num">22</td><td><strong>Device Health Dashboard</strong></td><td>Monitor &rarr; Devices</td><td>&mdash;</td><td><span class="feature-status fs-pending">Week 4</span></td><td></td></tr>
+    <tr><td class="bin-num">23</td><td><strong>Alarms, Events &amp; Network Topology</strong></td><td>Monitor &rarr; Alarms / Events / Topology</td><td>&mdash;</td><td><span class="feature-status fs-pending">Week 4</span></td><td></td></tr>
+    <tr><td class="bin-num">24</td><td><strong>Rogue AP Detection</strong></td><td>Monitor &rarr; Rogue APs</td><td>&mdash;</td><td><span class="feature-status fs-pending">Week 4</span></td><td></td></tr>
+    <tr><td class="bin-num">25</td><td><strong>Reports &amp; Analytics</strong></td><td>Monitor &rarr; Reports</td><td>&mdash;</td><td><span class="feature-status fs-pending">Week 4</span></td><td></td></tr>
+
+    <tr class="bin-group-row"><td colspan="6">Group F &mdash; Policy Operations &amp; Admin &nbsp;&#9733;&nbsp; #26 &amp; #28 added May 15</td></tr>
+    <tr class="bin-new"><td class="bin-num">26</td><td><strong>Policy Push &amp; Deploy Workflow</strong> <span class="feature-status fs-new">New</span></td><td>Configure &rarr; Push Config</td><td>&mdash;</td><td><span class="feature-status fs-pending">Week 4</span></td><td>KB_School: the push step itself was missing from original bin set</td></tr>
+    <tr><td class="bin-num">27</td><td><strong>Admin &mdash; Users, Roles &amp; API Tokens</strong></td><td>Settings &rarr; Admin / API</td><td>&mdash;</td><td><span class="feature-status fs-pending">Week 4</span></td><td></td></tr>
+    <tr class="bin-new"><td class="bin-num">28</td><td><strong>Smart RF / AirTime Fairness / RRM</strong> <span class="feature-status fs-new">New</span></td><td>Monitor &rarr; Smart RF</td><td>&mdash;</td><td><span class="feature-status fs-pending">Week 4</span></td><td>KB_School: post-deploy calibration step not in original 25</td></tr>
+
+    <tr class="bin-group-row"><td colspan="6">Group G &mdash; EP1-Native Capabilities &nbsp;&#9733;&nbsp; #29&ndash;31 added May 15 &nbsp;&bull;&nbsp; No XIQ equivalent</td></tr>
+    <tr class="bin-new"><td class="bin-num">29</td><td><strong>Troubleshooting &amp; Diagnostics Tools</strong> <span class="feature-status fs-new">New</span></td><td>Monitor &rarr; Tools</td><td>EP1 &rarr; TBD</td><td><span class="feature-status fs-pending">Week 4</span></td><td>KB_School: "where do I see why the client is on the wrong VLAN?" had no XIQ answer</td></tr>
+    <tr class="bin-new"><td class="bin-num">30</td><td><strong>EP1 AI Canvas &amp; Natural Language Query</strong> <span class="feature-status fs-new">New</span></td><td>EP1 only</td><td>EP1 &rarr; AI Canvas</td><td><span class="feature-status fs-pending">Week 4</span></td><td>No XIQ equivalent. EP1-native feature; must be documented from scratch.</td></tr>
+    <tr class="bin-new"><td class="bin-num">31</td><td><strong>EP1 Agent Manager &amp; Automation</strong> <span class="feature-status fs-new">New</span></td><td>EP1 only</td><td>EP1 &rarr; Agent Manager</td><td><span class="feature-status fs-pending">Week 4</span></td><td>No XIQ equivalent. Automation engine built into EP1; critical for MSP use cases.</td></tr>
   </table>
 
   <!-- ─── WHAT IS EP1 ─── -->
@@ -347,7 +524,8 @@ tr:nth-child(even) td { background: #FAFAFA; }
     <tr><th>Dimension</th><th>XIQ (current)</th><th>EP1 (replacement)</th></tr>
     <tr><td><strong>Access</strong></td><td>extremecloudiq.com</td><td>Same login &rarr; 9-dot launcher &rarr; EP1 app</td></tr>
     <tr><td><strong>Navigation model</strong></td><td>Top tabs: Monitor / Configure / Devices</td><td>Left sidebar + module-based launcher</td></tr>
-    <tr><td><strong>Terminology</strong></td><td>Network Policies, Common Objects</td><td>Renamed &mdash; to be documented per week</td></tr>
+    <tr><td><strong>Terminology</strong></td><td>Network Policies, Common Objects</td><td>Renamed &mdash; documented per bin</td></tr>
+    <tr><td><strong>EP1-native features</strong></td><td>None</td><td>AI Canvas, Agent Manager, NL Query (Bins #29&ndash;31)</td></tr>
     <tr><td><strong>Deploy impact</strong></td><td>XIQ GUI removed July 1</td><td>EP1 is the only portal after July 1</td></tr>
     <tr><td><strong>API</strong></td><td>XIQ API (unchanged)</td><td>Same underlying API</td></tr>
     <tr><td><strong>When EP1 is down</strong></td><td>N/A</td><td>Deploys blocked, PPSK RadSec affected &mdash; check Extreme cloud status page</td></tr>
@@ -366,12 +544,12 @@ tr:nth-child(even) td { background: #FAFAFA; }
     <tr>
       <td>May 15</td>
       <td>Sprint start</td>
-      <td>Branch created &middot; Feature map scaffolded &middot; Goal defined</td>
+      <td>Branch created &middot; 31 bins defined &middot; Engine architecture designed (6 sessions) &middot; Sprint A/B/Baseline planned</td>
       <td><a href="session_summary_20260515.html" style="color:#7c3aed">May 15 EOD</a></td>
-      <td>XIQ GUI retirement Jul 1 confirmed. 6-week sprint plan locked.</td>
+      <td>XIQ GUI retirement Jul 1 confirmed. 25&rarr;31 bins via KB_School E2E gap trace. 15 ADRs locked.</td>
     </tr>
     <tr>
-      <td colspan="5" class="pending" style="font-style:italic;text-align:center">Week 1 sessions &mdash; logging begins May 16</td>
+      <td colspan="5" class="pending" style="font-style:italic;text-align:center">Week 1 sessions begin May 19 (Monday) alongside Sprint A Day 1</td>
     </tr>
   </table>
 
@@ -383,14 +561,14 @@ tr:nth-child(even) td { background: #FAFAFA; }
   <table>
     <tr><th>#</th><th>XIQ Feature</th><th>Gap Description</th><th>Workaround / Client Advice</th><th>Discovered</th></tr>
     <tr>
-      <td colspan="5" class="pending" style="font-style:italic;text-align:center">No gaps documented yet &mdash; updated as testing progresses</td>
+      <td colspan="5" class="pending" style="font-style:italic;text-align:center">No gaps documented yet &mdash; updated as Week 1 testing progresses</td>
     </tr>
   </table>
 
   <!-- ─── DESIGN DIALOGUE LOG ─── -->
   <span class="section-label" id="dialogue">Architecture Design Dialogue Log</span>
 
-  <p>Every decision, debate, and path chosen while building the XIQ&rarr;EP1 Navigation Intelligence Engine &mdash; preserved verbatim. Each row is a direct anchor link into the full dialogue record. This is the permanent architectural audit trail.</p>
+  <p>Every decision, debate, and path chosen while designing the Navigation Intelligence Engine &mdash; preserved verbatim. Each row links to the exact conversation anchor. This is the permanent architectural audit trail: anyone changing the architecture must read the session that established the decision being changed.</p>
 
   <table>
     <tr><th>#</th><th>Session</th><th>Date</th><th>Decisions Made</th><th>Verbatim Record</th></tr>
@@ -398,42 +576,42 @@ tr:nth-child(even) td { background: #FAFAFA; }
       <td>1</td>
       <td><strong>Brain Map &middot; Hypothesis &middot; Two-Agent RAG Scrape &middot; 25 Bins</strong></td>
       <td>May 15</td>
-      <td>Engine hypothesis defined. Two-agent RAG scrape run. 25 thematic bins confirmed. XIQ vs EP1 structural differences. Front-end direction set. Timeline correction: Jul 1 = new UI mandatory, Q4 = full retirement.</td>
+      <td>Engine hypothesis defined. Two-agent RAG scrape run (XIQ + EP1 bibliographies). 25 thematic bins confirmed. Front-end direction set. Timeline: Jul 1 = new UI mandatory.</td>
       <td><a href="xiq-ep1-design-dialogue.html#session-1" style="color:#7c3aed;font-weight:600">Session 1 &rarr;</a></td>
     </tr>
     <tr>
       <td>2</td>
-      <td><strong>Independence Decision &middot; Multi-Agent Architecture &middot; Graph DB &middot; Sprint Plan</strong></td>
+      <td><strong>Independence &middot; Multi-Agent Architecture &middot; Graph DB &middot; Sprint Plan</strong></td>
       <td>May 15</td>
-      <td>Option B confirmed. Fully independent from cisco-en-cli-agent. LangGraph + pgvector + PostgreSQL adjacency tables (→Neo4j Week 2). 8 sub-agents defined. Fallback 3-tier search ported. 5-day sprint plan. React deferred.</td>
+      <td>Option B: fully independent from cisco-en-cli-agent. LangGraph + pgvector + PostgreSQL adjacency tables (&rarr;Neo4j Week 2). 11 agents defined. Fallback 3-tier search ported. 5-day sprint plan. React deferred to Sprint B.</td>
       <td><a href="xiq-ep1-design-dialogue.html#session-2" style="color:#7c3aed;font-weight:600">Session 2 &rarr;</a></td>
     </tr>
     <tr>
       <td>3</td>
-      <td><strong>31 Bins (E2E Gap Analysis) &middot; Two Sprints &middot; Graph Education &middot; GitHub Structure</strong></td>
+      <td><strong>31 Bins via E2E Gap Analysis &middot; Sprint A+B &middot; Graph Education</strong></td>
       <td>May 15</td>
-      <td>KB_School E2E workflow traced. 6 missing bins identified (Policy Push, AI Canvas, Agent Manager, Smart RF, Troubleshooting, MSP). 25&rarr;31 bins. Sprint A (5d HTML) + Sprint B (3d React). GitHub repo confirmed independent.</td>
+      <td>KB_School E2E workflow traced. 6 missing bins found: Policy Push, Smart RF, Troubleshooting, EP1 AI Canvas, EP1 Agent Manager, MSP. 25&rarr;31 bins. Sprint A (6d HTML) + Sprint B (3d React). GitHub repo independent.</td>
       <td><a href="xiq-ep1-design-dialogue.html#session-3" style="color:#7c3aed;font-weight:600">Session 3 &rarr;</a></td>
     </tr>
     <tr>
       <td>4</td>
       <td><strong>Verbatim Dialogue Store &middot; xiq-ep1-design-dialogue.html Created</strong></td>
       <td>May 15</td>
-      <td>This linked-list reference created. All sessions 1&ndash;4 stored verbatim with anchors. Linked from both xiq-ep1-transition.html and session_summary_20260515.html.</td>
+      <td>This linked-list reference created. All sessions 1&ndash;4 stored verbatim with named anchors. Linked from both this page and May 15 EOD.</td>
       <td><a href="xiq-ep1-design-dialogue.html#session-4" style="color:#7c3aed;font-weight:600">Session 4 &rarr;</a></td>
     </tr>
     <tr>
       <td>5</td>
-      <td><strong>File Residency &middot; Browser Automation Validation Agents (Playwright)</strong></td>
+      <td><strong>File Residency &middot; Browser Validation Agents (Playwright)</strong></td>
       <td>May 15</td>
-      <td>File ownership decided: transition.html stays 5320, design-dialogue.html moves to engine repo on Day 1. Three new agents: XIQ Browser Agent + EP1 Browser Agent + Cross-Validation Agent (Playwright). Sprint A revised to 6 days.</td>
+      <td>File ownership: transition.html stays in 5320 repo; design-dialogue.html moves to engine repo on Day 1. Three validation agents added: XIQ Browser Agent + EP1 Browser Agent + Cross-Validation Agent. Sprint A revised to 6 days.</td>
       <td><a href="xiq-ep1-design-dialogue.html#session-5" style="color:#7c3aed;font-weight:600">Session 5 &rarr;</a></td>
     </tr>
     <tr>
       <td>6</td>
       <td><strong>Dual-Stream Validation &middot; 75% Phase Gate &middot; Self-Calibrating Architecture</strong></td>
       <td>May 15</td>
-      <td>Both streams run in parallel (doc-based + live browser) until DB is 75% browser-verified. At 75%: break out of debug/optimization guardrail, move to RAG_VALIDATED mode. Dual heat map: doc confidence vs verified confidence per bin. Self-calibrating: every divergence corrects the RAG corpus. Validation Orchestrator agent added.</td>
+      <td>Both streams (doc-based + live browser) run in parallel until DB is 75% browser-verified. At 75% gate: switch to RAG_VALIDATED mode. Dual heat map per bin (doc-confidence vs verified-confidence). Every browser divergence corrects the RAG corpus. Validation Orchestrator agent added (node 11).</td>
       <td><a href="xiq-ep1-design-dialogue.html#session-6" style="color:#7c3aed;font-weight:600">Session 6 &rarr;</a></td>
     </tr>
     <tr>
@@ -442,8 +620,8 @@ tr:nth-child(even) td { background: #FAFAFA; }
   </table>
 
   <div class="box">
-    <p class="box-label">Full Verbatim Record</p>
-    <p><a href="xiq-ep1-design-dialogue.html" style="color:#7c3aed;font-weight:600">xiq-ep1-design-dialogue.html</a> &mdash; standalone file with all sessions, sticky nav, named anchors, user messages preserved exactly as typed.</p>
+    <p class="box-label">Full Verbatim Record + ADR Framework</p>
+    <p><a href="xiq-ep1-design-dialogue.html" style="color:#7c3aed;font-weight:600">xiq-ep1-design-dialogue.html</a> &mdash; all 6 sessions verbatim, sticky nav, named anchors, user messages preserved exactly as typed. Includes <a href="xiq-ep1-design-dialogue.html#adr" style="color:#7c3aed;font-weight:600">ADR-001 &ndash; ADR-015</a>: what was decided, what was rejected, and the exact mind-map behind each decision.</p>
   </div>
 
   <!-- ─── CLIENT QUICK-REF ─── -->
@@ -453,11 +631,12 @@ tr:nth-child(even) td { background: #FAFAFA; }
 
   <div class="box">
     <p class="box-label">Coming Week 6 (Jun 19&ndash;25)</p>
-    <p>This section will contain a condensed table of the top 15&ndash;20 most-used client workflows with XIQ path &rarr; EP1 path &rarr; any watch-out. Formatted for printing as a laminated desk reference.</p>
+    <p>Condensed table of the top 15&ndash;20 most-used client workflows: XIQ path &rarr; EP1 path &rarr; any watch-out. Formatted for printing as a laminated desk reference. Includes a &ldquo;Day 1 in EP1&rdquo; orientation checklist.</p>
   </div>
 
   <hr class="divider">
   <p class="footer">KhKLab &bull; XIQ &rarr; EP1 Transition Guide &bull; Sprint: May 15 &ndash; July 1, 2026<br>
+  31 Thematic Bins &bull; Engine: Sprint A (May 19) + Sprint B + GUI Baseline (feature/gui-baseline)<br>
   Branch: <code>feature/xiq-ep1-transition</code> &bull; Repo: 5320-onboarding &bull; Linked from <a href="index-nyt.html" style="color:#7c3aed">5320 Lab landing</a><br>
   &copy; 2026 Khursheed Khan &bull; All rights reserved &bull; Educational use only</p>
 
