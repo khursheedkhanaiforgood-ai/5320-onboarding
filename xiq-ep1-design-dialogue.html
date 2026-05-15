@@ -66,6 +66,20 @@ tr:nth-child(even) td { background: #FAFAFA; }
 .badge-deferred { background: #FEF3C7; color: #92400E; }
 .badge-open { background: #EDE9FE; color: #5B21B6; }
 .footer { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.72rem; color: #888; line-height: 1.8; margin-top: 56px; padding-top: 16px; border-top: 1px solid #E2E2E2; }
+/* ADR Framework */
+.adr-intro { background: linear-gradient(135deg,#4c1d95 0%,#6d28d9 100%); border-radius: 8px; padding: 24px 28px; margin: 40px 0 32px; color: #fff; }
+.adr-intro h2 { font-family: 'Libre Baskerville', Georgia, serif; font-size: 1.35rem; color: #fff; margin-bottom: 10px; }
+.adr-intro p { font-size: 0.92rem; line-height: 1.75; color: #ddd6fe; margin: 0; }
+.adr-id { display: inline-block; font-family: 'SF Mono', Consolas, monospace; font-size: 0.68rem; font-weight: 700; background: #4c1d95; color: #e9d5ff; padding: 2px 7px; border-radius: 3px; white-space: nowrap; }
+.adr-table { width: 100%; border-collapse: collapse; margin: 0 0 20px; font-size: 0.85rem; }
+.adr-table th { background: #3b0764; color: #e9d5ff; font-family: 'Libre Franklin', Arial, sans-serif; font-weight: 700; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.1em; padding: 10px 12px; border: 1px solid #6d28d9; text-align: left; }
+.adr-table td { padding: 11px 12px; border: 1px solid #DDD6FE; vertical-align: top; line-height: 1.6; color: #222; }
+.adr-table tr:nth-child(even) td { background: #FDFCFF; }
+.adr-table .adr-decision { color: #3b0764; font-weight: 600; }
+.adr-table .adr-rejected { color: #6B7280; font-size: 0.82rem; font-style: italic; }
+.adr-table .adr-why { color: #374151; font-size: 0.87rem; }
+.adr-source a { color: #7c3aed; font-weight: 600; font-size: 0.82rem; text-decoration: none; white-space: nowrap; }
+.adr-source a:hover { text-decoration: underline; }
 </style>
 </head>
 <body>
@@ -73,10 +87,14 @@ tr:nth-child(even) td { background: #FAFAFA; }
 <nav class="sticky-nav">
   <span class="nav-brand">XIQ→EP1 Engine — Design Dialogue</span>
   <span class="nav-sep">|</span>
-  <a href="#session-1">Session 1 — Brain Map &amp; Hypothesis</a>
-  <a href="#session-2">Session 2 — Multi-Agent Architecture</a>
-  <a href="#session-3">Session 3 — 31 Bins &amp; Two Sprints</a>
-  <a href="#session-4">Session 4 — Verbatim Store</a>
+  <a href="#adr" style="background:rgba(255,255,255,0.18);color:#fff">▸ Decision Framework</a>
+  <span class="nav-sep">|</span>
+  <a href="#session-1">S1 — Brain Map</a>
+  <a href="#session-2">S2 — Architecture</a>
+  <a href="#session-3">S3 — 31 Bins</a>
+  <a href="#session-4">S4 — Verbatim</a>
+  <a href="#session-5">S5 — Browser Agents</a>
+  <a href="#session-6">S6 — Phase Gate</a>
   <a href="xiq-ep1-transition.html">← Sprint Log</a>
 </nav>
 
@@ -127,6 +145,167 @@ tr:nth-child(even) td { background: #FAFAFA; }
         <br><span class="toc-meta">May 15, 2026 · Both streams run in parallel below 75% DB coverage · Break to RAG_VALIDATED mode at 75% · Dual heat map (doc vs verified) · Self-calibrating loop</span>
       </li>
     </ol>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- ARCHITECTURE DECISION FRAMEWORK -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <span class="section-label" id="adr" style="margin-top:56px">Architecture Decision Framework — 15 Decisions · May 15 2026</span>
+
+  <div class="adr-intro">
+    <h2>Mind-Map to Machine — Why Every Choice Was Made</h2>
+    <p>This is the definitive reference for anyone reviewing, challenging, or extending this architecture. Each ADR records the decision, the rejected alternatives, and the exact reasoning — with a direct link to the verbatim dialogue session where it was debated. If you want to change anything, start here: understand what was decided and why before proposing a different path.</p>
+  </div>
+
+  <table class="adr-table">
+    <tr>
+      <th style="width:72px">ID</th>
+      <th style="width:160px">Decision Title</th>
+      <th>What Was Decided</th>
+      <th>Why</th>
+      <th>Rejected Alternatives</th>
+      <th style="width:80px">Source</th>
+    </tr>
+
+    <tr>
+      <td><span class="adr-id">ADR-001</span></td>
+      <td><strong>Engine Type</strong></td>
+      <td class="adr-decision">Build a Navigation Intelligence Engine — thematic bins, confidence scoring, context engine, dual heat map, bibliography</td>
+      <td class="adr-why">A spreadsheet can't answer "I know how to do X in XIQ — show me EP1." Intelligence is needed to handle renamed features, restructured nav, dependency chains, and gaps.</td>
+      <td class="adr-rejected">Static spreadsheet; manual HTML mapping table; documentation-only approach</td>
+      <td class="adr-source"><a href="#session-1">Session 1 →</a></td>
+    </tr>
+
+    <tr>
+      <td><span class="adr-id">ADR-002</span></td>
+      <td><strong>Design Template</strong></td>
+      <td class="adr-decision">Reuse Cisco→EXOS CLI agent architecture: confidence calculator Σ(wᵢ×cᵢ)/Σ(wᵢ), bin routing, 3-tier fallback, side-by-side UI — as proven patterns, not shared code</td>
+      <td class="adr-why">Cisco→EXOS agent took 14 sprints to mature. Every pattern there is battle-tested. Copying logic (not infrastructure) eliminates months of design risk.</td>
+      <td class="adr-rejected">Build from scratch; use LangChain defaults without bin routing; adopt a third-party chatbot template</td>
+      <td class="adr-source"><a href="#session-1">S1 →</a> <a href="#session-2">S2 →</a></td>
+    </tr>
+
+    <tr>
+      <td><span class="adr-id">ADR-003</span></td>
+      <td><strong>Infrastructure Independence</strong></td>
+      <td class="adr-decision">Fully independent: own GitHub repo, own Railway project, own PostgreSQL, own pgvector. Zero shared runtime with cisco-en-cli-agent.</td>
+      <td class="adr-why">This engine will have many eyes and contributors. Shared infrastructure means a change to the Cisco→EXOS agent could break the XIQ→EP1 engine. Also: different data models, different scale, different deployment cadence.</td>
+      <td class="adr-rejected">Shared Railway project; shared PostgreSQL DB with Cisco→EXOS; add XIQ→EP1 as a Streamlit page in existing app</td>
+      <td class="adr-source"><a href="#session-2">Session 2 →</a></td>
+    </tr>
+
+    <tr>
+      <td><span class="adr-id">ADR-004</span></td>
+      <td><strong>Backend Stack</strong></td>
+      <td class="adr-decision">FastAPI. Production-grade, API-first, fully testable, contributor-readable, Railway-deployable.</td>
+      <td class="adr-why">Streamlit is good for personal tools. This engine will have other teams testing and contributing. FastAPI exposes clean REST endpoints — other teams can hit the API, not just use the UI.</td>
+      <td class="adr-rejected">Streamlit (not production-ready for multi-contributor use); Flask (less modern, no async); Django (overkill for an API service)</td>
+      <td class="adr-source"><a href="#session-2">Session 2 →</a></td>
+    </tr>
+
+    <tr>
+      <td><span class="adr-id">ADR-005</span></td>
+      <td><strong>Frontend Stack</strong></td>
+      <td class="adr-decision">Sprint A: plain HTML/JS (GitHub Pages, no build pipeline). Sprint B: React migration (3 days, pedagogical — same API, same backend).</td>
+      <td class="adr-why">Contributors are network engineers, not frontend developers. Plain HTML = readable by anyone, no tooling required. React teaches component reuse (BinCard = XIQ template analogy) but adds friction. Running both lets the user experience the difference hands-on.</td>
+      <td class="adr-rejected">React-only from start (build pipeline friction for contributors); Vue (unfamiliar ecosystem); single-page-app framework (overkill)</td>
+      <td class="adr-source"><a href="#session-2">S2 →</a> <a href="#session-3">S3 →</a></td>
+    </tr>
+
+    <tr>
+      <td><span class="adr-id">ADR-006</span></td>
+      <td><strong>Three-Layer Data Architecture</strong></td>
+      <td class="adr-decision">pgvector for semantic search + adjacency tables (→Neo4j) for graph traversal + standard PostgreSQL for structured data. All in one Railway Postgres instance.</td>
+      <td class="adr-why">No single layer solves all three query types needed: "what feature is the user asking about?" (semantic), "what must I configure before PPSK?" (graph traversal), "how many bins are 75% verified?" (SQL aggregate). Each layer is best-in-class for its query type.</td>
+      <td class="adr-rejected">pgvector-only (can't do dependency chains); pure graph DB (loses semantic search); pure SQL (no efficient traversal); separate services for each (ops overhead on Day 1)</td>
+      <td class="adr-source"><a href="#session-2">Session 2 →</a></td>
+    </tr>
+
+    <tr>
+      <td><span class="adr-id">ADR-007</span></td>
+      <td><strong>Graph Implementation Path</strong></td>
+      <td class="adr-decision">Week 1: PostgreSQL adjacency tables designed graph-compatible from Day 1. Week 2+: migrate to Neo4j AuraDB free tier. Migration = data export + import, not schema redesign.</td>
+      <td class="adr-why">Neo4j adds a new service to provision on Day 1. Adjacency tables in PostgreSQL give graph semantics immediately with zero additional infrastructure. When traversal queries get complex (multi-hop dependencies), Neo4j's native Cypher pays off. Start simple, graduate when needed.</td>
+      <td class="adr-rejected">Neo4j AuraDB from Day 1 (Day 1 complexity budget too high); NetworkX in-memory only (not persistent); pure SQL recursive CTEs forever (unreadable at depth &gt;3 hops)</td>
+      <td class="adr-source"><a href="#session-2">Session 2 →</a></td>
+    </tr>
+
+    <tr>
+      <td><span class="adr-id">ADR-008</span></td>
+      <td><strong>Agent Orchestration</strong></td>
+      <td class="adr-decision">LangGraph StateGraph. Nodes = agents, edges = conditional routing. Supports cycles (retry loops), async execution, checkpointing.</td>
+      <td class="adr-why">The agent workflow has conditional branches (gap detected? → fallback; coverage ≥ 75%? → switch mode), retry loops (fallback tier escalation), and async side effects (heat map update, bibliography append). LangGraph handles all three natively; a custom state machine requires writing that infrastructure from scratch.</td>
+      <td class="adr-rejected">Custom Python state machine (more code, less robust); CrewAI (role-based, less routing control); AutoGen (heavier, Microsoft-opinionated); simple function chain (no conditional routing)</td>
+      <td class="adr-source"><a href="#session-2">Session 2 →</a></td>
+    </tr>
+
+    <tr>
+      <td><span class="adr-id">ADR-009</span></td>
+      <td><strong>Fallback Pattern</strong></td>
+      <td class="adr-decision">3-tier ported from Cisco→EXOS agent: Tier 1 bin-scoped DB + graph, Tier 2 full semantic search, Tier 3 web crawl → user prompt → write back to DB.</td>
+      <td class="adr-why">The Cisco→EXOS fallback was battle-tested across hundreds of queries. No-match cases are critical for a system mapping a product (EP1) whose docs may lag reality. User prompt → DB contribution loop means the system learns from every gap it encounters.</td>
+      <td class="adr-rejected">2-tier only (no web crawl, loses new discoveries); fail gracefully with "not found" (doesn't improve over time); ask user immediately (skips DB — wastes existing knowledge)</td>
+      <td class="adr-source"><a href="#session-2">Session 2 →</a></td>
+    </tr>
+
+    <tr>
+      <td><span class="adr-id">ADR-010</span></td>
+      <td><strong>31 Bins (expanded from 25)</strong></td>
+      <td class="adr-decision">Add 6 bins: #26 Policy Push/Deploy, #27 EP1 AI Canvas + NL Query, #28 EP1 Agent Manager, #29 Smart RF, #30 Troubleshooting + Diagnostics, #31 MSP + Multi-Tenancy.</td>
+      <td class="adr-why">E2E KB_School scenario traced (build → push → observe → tune → automate → troubleshoot). Original 25 bins had zero coverage for the critical PUSH phase and zero coverage for all EP1-specific AI/automation capabilities. A new user hitting these gaps would be lost.</td>
+      <td class="adr-rejected">Keep 25 (incomplete — new users fail at Push and Tune phases); collapse into existing bins (features buried, under-served in search and heat map)</td>
+      <td class="adr-source"><a href="#session-3">Session 3 →</a></td>
+    </tr>
+
+    <tr>
+      <td><span class="adr-id">ADR-011</span></td>
+      <td><strong>Browser Automation Validation</strong></td>
+      <td class="adr-decision">Playwright browser agents actually navigate XIQ and EP1 GUIs, screenshot each step, and verify that features exist at the stated nav path.</td>
+      <td class="adr-why">API validation confirms data exists but cannot validate GUI navigation paths. This engine's primary output IS a navigation path. A user who follows a wrong path has a worse experience than no answer at all. Ground truth requires navigating the actual GUI.</td>
+      <td class="adr-rejected">API-only validation (doesn't validate nav paths); manual testing only (not scalable for 31 bins × multiple features); trust docs without verification (EP1 docs may lag reality)</td>
+      <td class="adr-source"><a href="#session-5">Session 5 →</a></td>
+    </tr>
+
+    <tr>
+      <td><span class="adr-id">ADR-012</span></td>
+      <td><strong>Dual-Stream Validation</strong></td>
+      <td class="adr-decision">Both streams run in parallel: doc-based RAG/graph AND live Playwright browser validation. Every doc claim gets empirically tested. Divergences are written back to RAG corpus.</td>
+      <td class="adr-why">No one has exhaustively validated EP1 features before. We do not know if the docs are accurate. Running both streams means the system can be launched (doc stream provides immediate coverage) while simultaneously building ground truth (browser stream validates each claim). Neither stream is trusted exclusively at the start.</td>
+      <td class="adr-rejected">Doc-based only (docs may be wrong — EP1 is too new to trust blindly); browser-only (no searchable index, no RAG); sequential not parallel (too slow — 4-week window to July 1)</td>
+      <td class="adr-source"><a href="#session-6">Session 6 →</a></td>
+    </tr>
+
+    <tr>
+      <td><span class="adr-id">ADR-013</span></td>
+      <td><strong>75% Phase Gate</strong></td>
+      <td class="adr-decision">When db_coverage (COUNT browser-verified / COUNT all mappings) ≥ 0.75: switch from PARALLEL mode to RAG_VALIDATED mode. Browser agents become on-demand only.</td>
+      <td class="adr-why">Running both streams indefinitely is expensive and adds latency. At 75% empirical validation, the doc-based patterns have been corrected sufficiently to be trusted for the remaining 25%. The 75% threshold balances confidence (enough corrections accumulated) against timeline (must reach this before July 1). Calibrated conservatively — not 50% (too few corrections) and not 90% (diminishing returns).</td>
+      <td class="adr-rejected">50% threshold (too few corrections — docs still unreliable); 90% (too late — diminishing returns, browser validation of niche features is expensive); no phase gate (browser agents run indefinitely — high cost, high latency forever)</td>
+      <td class="adr-source"><a href="#session-6">Session 6 →</a></td>
+    </tr>
+
+    <tr>
+      <td><span class="adr-id">ADR-014</span></td>
+      <td><strong>Self-Calibrating Loop</strong></td>
+      <td class="adr-decision">When browser agent finds EP1 nav path differs from doc claim: the correction is written to the RAG corpus as a new indexed document. RAG re-indexes. Future doc-based predictions improve automatically.</td>
+      <td class="adr-why">A wrong doc claim is not just an error to flag — it is information. "EP1 moved this feature from path X to path Y" is a fact about EP1's naming convention that, once learned, improves predictions for all similar features. Without the corpus feedback loop, the same mistake would repeat across related features.</td>
+      <td class="adr-rejected">Ignore divergence and return browser-verified answer only (docs stay wrong, pattern never learned); flag for manual review only (doesn't auto-improve); delete incorrect doc entry (loses context about what changed)</td>
+      <td class="adr-source"><a href="#session-6">Session 6 →</a></td>
+    </tr>
+
+    <tr>
+      <td><span class="adr-id">ADR-015</span></td>
+      <td><strong>Dual Heat Map</strong></td>
+      <td class="adr-decision">Two confidence values per bin: doc-confidence (RAG/graph estimate) + verified-confidence (browser-validated). Both displayed side-by-side. Gap between them = active investigation zone.</td>
+      <td class="adr-why">A single composite score hides the most important signal: "is the doc estimate trustworthy for this bin?" Doc-green + verified-red is an alert — the docs say we have coverage but live testing disagrees. That gap is where EP1 has changed from what was documented. Single scores mask this; dual columns surface it immediately.</td>
+      <td class="adr-rejected">Single composite confidence (masks doc vs empirical divergence); separate pages for each view (hard to compare); text-only status column (not scannable across 31 bins)</td>
+      <td class="adr-source"><a href="#session-6">Session 6 →</a></td>
+    </tr>
+
+  </table>
+
+  <div style="background:#F5F3FF;border:1px solid #DDD6FE;border-radius:6px;padding:16px 20px;margin:0 0 48px;font-family:'Libre Franklin',Arial,sans-serif;font-size:0.85rem;line-height:1.7;color:#3b0764">
+    <strong>How to use this framework:</strong> If you are reviewing a decision, click the Source link to read the verbatim dialogue — the full context, alternatives debated, and exact wording used. If you are proposing a change, write an ADR-016 that references the decision it supersedes and explains what has changed in the context that makes a different choice correct now.
   </div>
 
   <!-- ═══════════════════════════════════════════════════════════ -->
