@@ -89,6 +89,7 @@ tr:nth-child(even) td { background: #FAFAFA; }
   <span class="nav-sep">|</span>
   <a href="#adr" style="background:rgba(255,255,255,0.18);color:#fff">▸ Decision Framework</a>
   <span class="nav-sep">|</span>
+  <a href="#session-0">S0 — Preamble</a>
   <a href="#session-1">S1 — Brain Map</a>
   <a href="#session-2">S2 — Architecture</a>
   <a href="#session-3">S3 — 31 Bins</a>
@@ -114,6 +115,11 @@ tr:nth-child(even) td { background: #FAFAFA; }
   <div class="toc">
     <div class="toc-title">Linked-List Index — All Design Sessions</div>
     <ol>
+      <li>
+        <a href="#session-0">Session 0 — Claude Code Initial Analysis: Reusable Architecture from Cisco→EXOS CLI Agent</a>
+        <span class="decision-badge badge-decided">Decided</span>
+        <br><span class="toc-meta">May 15, 2026 · Session ID 6edeb609 · Pre-dialogue Claude analysis · ✻ Brewed for 8m 24s</span>
+      </li>
       <li>
         <a href="#session-1">Session 1 — Brain Map, Hypothesis, Two-Agent RAG Scrape, 25 Bins</a>
         <span class="decision-badge badge-decided">Decided</span>
@@ -307,6 +313,93 @@ tr:nth-child(even) td { background: #FAFAFA; }
   <div style="background:#F5F3FF;border:1px solid #DDD6FE;border-radius:6px;padding:16px 20px;margin:0 0 48px;font-family:'Libre Franklin',Arial,sans-serif;font-size:0.85rem;line-height:1.7;color:#3b0764">
     <strong>How to use this framework:</strong> If you are reviewing a decision, click the Source link to read the verbatim dialogue — the full context, alternatives debated, and exact wording used. If you are proposing a change, write an ADR-016 that references the decision it supersedes and explains what has changed in the context that makes a different choice correct now.
   </div>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- SESSION 0 — CLAUDE CODE INITIAL ANALYSIS (PRE-DIALOGUE)  -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <hr class="session-divider">
+  <span class="section-label" id="session-0">Session 0 — Claude Code Initial Analysis: Reusable Architecture from Cisco→EXOS CLI Agent</span>
+  <h2>Pre-Dialogue Analysis — May 15, 2026</h2>
+  <p style="color:#888;font-family:'Libre Franklin',Arial,sans-serif;font-size:0.82rem;margin-bottom:24px">Source session: 6edeb609-0aad-4457-8d76-2accad2dd249 &nbsp;·&nbsp; Claude Code read memory files + 4 project pages before user spoke &nbsp;·&nbsp; <strong>✻ Brewed for 8m 24s</strong></p>
+
+  <div class="msg msg-claude">
+    <div class="msg-speaker">Claude Code (Sonnet 4.6) — Reads memory files, 4 project pages, then responds unprompted</div>
+    <p>Here is what exists in the Cisco→EXOS agent that maps directly onto the XIQ→EP1 engine — almost nothing needs to be built from scratch:</p>
+  </div>
+
+  <h3>1. Confidence Calculator (in intent_verify_agent.py)</h3>
+  <p>Score = Σ(wᵢ × cᵢ) / Σ(wᵢ) — current use: rates how well a Cisco command maps to an EXOS equivalent. <strong>Adaptation for XIQ→EP1:</strong></p>
+  <table>
+    <tr><th>Score</th><th>Meaning (current)</th><th>Meaning (adapted for XIQ→EP1)</th></tr>
+    <tr><td>0.90–1.0</td><td>Direct match</td><td>XIQ path = EP1 path, same location</td></tr>
+    <tr><td>0.70–0.89</td><td>Structural match</td><td>Renamed/restructured, same function</td></tr>
+    <tr><td>0.40–0.69</td><td>Partial match</td><td>Partially present, different flow</td></tr>
+    <tr><td>0.0–0.39</td><td>Gap / no match</td><td>EP1-only or XIQ-only</td></tr>
+  </table>
+  <p>The strictness modes (strict/balanced/lenient) map directly to how conservative the heat map coloring should be.</p>
+
+  <h3>2. Thematic Bins → 9 → 25 (Mapping)</h3>
+  <p>Current Cisco→EXOS bins: ONBOARD | SEC-ID | SYS-INFO | IF-PHYS | L2-SEG | FAB-SDN | L3-VIRT | DIAG-LOG | MGMT-OPS. These 9 map into the 25 XIQ→EP1 bins:</p>
+  <table>
+    <tr><th>Existing Bin</th><th>Absorbs XIQ→EP1 Bins</th></tr>
+    <tr><td>ONBOARD</td><td>#1 Device Onboarding, #22 Firmware</td></tr>
+    <tr><td>SEC-ID</td><td>#8 PPSK, #9 802.1X, #10 CWP/Guest, #19 Admin/RBAC</td></tr>
+    <tr><td>L2-SEG</td><td>#5 Switch Policies, #6 VLAN Mgmt</td></tr>
+    <tr><td>IF-PHYS</td><td>#2 Device Templates, #7 RF/Radio Profiles</td></tr>
+    <tr><td>DIAG-LOG</td><td>#13 Monitoring, #14 Client 360, #15 Alarms, #16 Reports, #23 Audit Logs</td></tr>
+    <tr><td>MGMT-OPS</td><td>#21 Licensing, #24 Backup/Restore</td></tr>
+    <tr><td>FAB-SDN</td><td>#25 ZTNA/TPME (EP1-only)</td></tr>
+    <tr><td>L3-VIRT</td><td>#11 Firewall, #12 User Profiles/VLAN Assignment</td></tr>
+    <tr><td>SYS-INFO</td><td>#20 API/Integrations</td></tr>
+  </table>
+  <p>The bin-routing logic and per-bin guardrails already exist — extend, not rebuild.</p>
+
+  <h3>3. Side-by-Side UI (XIQ | EP1)</h3>
+  <p>Current layout: Cisco command (left) | EXOS badge. Direct remap:</p>
+  <pre><code>[ XIQ Nav Path                      ]  [ EP1 Nav Path                        ]
+Monitor → Clients →                    Network → Clients →
+  Client 360 → [name]                    Client Details → [name]
+
+Match: RESTRUCTURED   Confidence: 0.74   XIQ Doc ↗   EP1 Doc ↗
+Same component, different column headers and data source.</code></pre>
+
+  <h3>4. DB Schema — Add One Table</h3>
+  <p>Current DB already has: <code>translations</code>, <code>bin_me_logs</code> (PostgreSQL + pgvector on Railway). Add:</p>
+  <pre><code>CREATE TABLE xiq_ep1_mappings (
+  id           SERIAL PRIMARY KEY,
+  bin_tag      TEXT,           -- matches existing bin enum
+  feature_name TEXT,
+  xiq_nav_path TEXT,
+  ep1_nav_path TEXT,
+  match_type   TEXT,           -- IDENTICAL | RESTRUCTURED | PARTIAL | GAP | EP1_ONLY
+  confidence   FLOAT,
+  xiq_doc_url  TEXT,
+  ep1_doc_url  TEXT,
+  notes        TEXT,
+  week_verified INT            -- sprint week number
+);
+-- Sits alongside existing tables — no migration of old data needed</code></pre>
+
+  <h3>5. Translation Quality Panel → Mapping Confidence Panel</h3>
+  <p>Current sidebar: strictness slider + component weight display. Adapted sidebar for XIQ→EP1:</p>
+  <ul>
+    <li>Match filter: ALL / IDENTICAL / RESTRUCTURED / PARTIAL / GAP / EP1_ONLY</li>
+    <li>Week filter: Week 1 / Week 2 … / All</li>
+    <li>Heat map toggle: show 5×6 grid overlay (31 bins)</li>
+    <li>Confidence threshold slider (same widget, same logic)</li>
+  </ul>
+
+  <h3>Build Decision — Option A vs Option B</h3>
+  <table>
+    <tr><th>Option</th><th>Description</th><th>Effort</th></tr>
+    <tr><td><strong>A — New module in existing app</strong></td><td>Add xiq_ep1 Streamlit page to cisco-en-cli-agent repo. One Railway deployment.</td><td>1–2 days scaffold</td></tr>
+    <tr><td><strong>B — Standalone new app</strong></td><td>New repo, new Railway project, new DB, new GitHub Pages frontend. Fully independent.</td><td>3–4 days to replicate proven stack</td></tr>
+  </table>
+  <p><strong>Option A is the right call.</strong> The confidence calculator, thematic bin components, and Railway/DB infra are already proven. The XIQ→EP1 engine becomes Page 2 of the same agent — same stack, new dataset, new column headers.</p>
+  <p style="font-family:'Libre Franklin',Arial,sans-serif;font-size:0.82rem;color:#888;margin-top:8px"><em>Ready to start the front-end design dialogue. Concrete question: embed as new module in existing Streamlit app (Option A), or standalone xiq-ep1-engine.html pure-HTML file (Option B)?</em></p>
+  <p style="font-family:'Libre Franklin',Arial,sans-serif;font-size:0.82rem;color:#7c3aed;margin-top:4px"><strong>✻ Brewed for 8m 24s</strong></p>
+
+  <p style="margin-top:24px;font-family:'Libre Franklin',Arial,sans-serif;font-size:0.82rem;color:#888">→ Continues in <a href="#session-1" style="color:#7c3aed">Session 1</a> — user's brain map changes the entire scope</p>
 
   <!-- ═══════════════════════════════════════════════════════════ -->
   <!-- SESSION 1 -->
@@ -567,12 +660,23 @@ CREATE TABLE bibliography (
 
   <h3>5-Day Sprint Plan (Session 2 version — later revised to 31 bins)</h3>
   <table>
-    <tr><th>Day</th><th>Bucket</th><th>Key Deliverables</th></tr>
-    <tr><td>1</td><td>Foundation</td><td>Repo + Railway + DB migrations + FastAPI skeleton + LangGraph skeleton</td></tr>
-    <tr><td>2</td><td>RAG + Corpus</td><td>Ingestion pipeline + bin seed + mapping seed + confidence calculator ported</td></tr>
-    <tr><td>3</td><td>Agent Build</td><td>Orchestrator + all sub-agents wired E2E</td></tr>
-    <tr><td>4</td><td>Fallback + API</td><td>3-tier fallback + bibliography + heat map + all FastAPI endpoints</td></tr>
-    <tr><td>5</td><td>Frontend + Deploy</td><td>HTML/JS wired to API + GitHub Pages + Railway deploy + E2E test + docs</td></tr>
+    <tr><th>Day</th><th>Bucket</th><th>Key Deliverables</th><th>Hours</th></tr>
+    <tr><td>1</td><td>Foundation</td><td>Repo + Railway + DB migrations + FastAPI skeleton + LangGraph skeleton wired but empty</td><td>6hr</td></tr>
+    <tr><td>2</td><td>RAG + Corpus</td><td>Ingestion pipeline + bin seed + mapping seed (from confirmed table) + confidence calculator ported</td><td>6hr</td></tr>
+    <tr><td>3</td><td>Agent Build</td><td>Lead orchestrator (LangGraph StateGraph) + Intake + XIQ/EP1 Navigator + Confidence + Gap Detector</td><td>6hr</td></tr>
+    <tr><td>4</td><td>Fallback + API</td><td>3-tier fallback + bibliography + heat map + all FastAPI endpoints (/search /bins /heatmap /confidence /session)</td><td>6hr</td></tr>
+    <tr><td>5</td><td>Frontend + Deploy</td><td>Static HTML/JS wired to API + GitHub Pages + Railway deploy + E2E test + CONTRIBUTING.md + architecture.md</td><td>6hr</td></tr>
+  </table>
+
+  <h3>Day 1 Hourly Breakdown (verbatim — most critical day)</h3>
+  <table>
+    <tr><th>Hour</th><th>Task</th></tr>
+    <tr><td><strong>0–1</strong></td><td>New GitHub repo <code>xiq-ep1-intelligence-engine</code> + project directory structure + <code>.env.example</code></td></tr>
+    <tr><td><strong>1–2</strong></td><td>Railway: new project, provision PostgreSQL, get connection string</td></tr>
+    <tr><td><strong>2–3</strong></td><td>DB migrations (<code>features</code>, <code>feature_edges</code>, <code>mappings</code>, <code>bibliography</code> tables) + pgvector extension enabled</td></tr>
+    <tr><td><strong>3–4</strong></td><td>FastAPI app scaffold (<code>main.py</code>, <code>routers/</code>, <code>agents/</code>, <code>rag/</code>) + <code>/health</code> endpoint live</td></tr>
+    <tr><td><strong>4–5</strong></td><td>LangGraph StateGraph skeleton — 6 nodes defined, no logic yet, wired in sequence</td></tr>
+    <tr><td><strong>5–6</strong></td><td>25-bin seed SQL + bibliography seed (all 12 confirmed docs from RAG scrape)</td></tr>
   </table>
 
   <h3>React Decision</h3>
@@ -646,22 +750,24 @@ CREATE TABLE bibliography (
 
   <div class="msg msg-claude">
     <div class="msg-speaker">Claude Code — Graph Education</div>
-    <p>A <strong>relational database</strong> stores rows and columns; relationships via JOINs. A <strong>graph database</strong> stores nodes (entities) and edges (relationships between them). The difference is what queries become <em>natural</em>:</p>
+    <p>A <strong>relational database</strong> stores rows and columns; relationships via foreign keys and JOINs. A <strong>graph database</strong> stores <em>nodes</em> (entities: a feature, a screen, a policy), <em>edges</em> (relationships: maps_to, requires, replaces, deprecated_by), and <em>properties</em> (attributes on both). The difference is what queries become <em>natural</em>:</p>
     <table>
-      <tr><th>Question</th><th>SQL</th><th>Graph (Cypher)</th></tr>
-      <tr><td>"Where is PPSK in EP1?"</td><td>Single SELECT</td><td>Single MATCH</td></tr>
-      <tr><td>"What must I configure before PPSK?"</td><td>Recursive CTE with 3-table JOIN</td><td>Multi-hop MATCH in one line</td></tr>
-      <tr><td>"Full workflow: AP policy push in EP1"</td><td>App-layer path reconstruction</td><td>Path traversal — native</td></tr>
+      <tr><th>Question</th><th>SQL (PostgreSQL)</th><th>Graph (Cypher — Neo4j)</th></tr>
+      <tr><td>"Where is PPSK in EP1?"</td><td><code>SELECT ep1_path FROM mappings WHERE feature='PPSK'</code></td><td><code>MATCH (x:XIQ {name:'PPSK'})-[:maps_to]-&gt;(e:EP1) RETURN e</code></td></tr>
+      <tr><td>"What must I configure before PPSK?"</td><td>Recursive CTE with 3-table JOIN — verbose, slow</td><td><code>MATCH (f)-[:requires*]-&gt;(p:XIQ {name:'PPSK'}) RETURN f</code> — one line</td></tr>
+      <tr><td>"What in EP1 has no XIQ equivalent?"</td><td>LEFT JOIN + NULL check across 3 tables</td><td><code>MATCH (e:EP1) WHERE NOT (e)&lt;-[:maps_to]-() RETURN e</code></td></tr>
+      <tr><td>"Full workflow: AP policy push in EP1"</td><td>App-layer path reconstruction (multiple queries + app code)</td><td>Path traversal — native in one MATCH expression</td></tr>
     </table>
-    <p>Graph wins on <strong>path-finding</strong> and <strong>dependency chain</strong> queries — exactly what this engine solves.</p>
-    <p><strong>Implementation path:</strong> Week 1 = PostgreSQL adjacency tables (no new service). Week 2+ = Neo4j AuraDB free tier (200K nodes / 400K edges — enough). Migration = data export + import. Schema designed graph-compatible from Day 1.</p>
+    <p>Graph wins on <strong>path-finding</strong> and <strong>dependency chain</strong> queries — exactly what this engine solves. Vector search (pgvector/RAG) finds similar text. Graph finds its prerequisites and consequence chains.</p>
+    <p><strong>Implementation path:</strong> Week 1 = PostgreSQL adjacency tables (no new service, graph-shaped schema). Week 2+ = Neo4j AuraDB free tier (200K nodes / 400K edges — enough for 31 bins × full feature set). Migration = data export + import. Schema designed graph-compatible from Day 1 — migration never requires redesign.</p>
   </div>
 
-  <h3>Two Sprint Plan (decided)</h3>
+  <h3>Two Sprint Plan (decided here — Sprint A later revised to 6 days in Session 5)</h3>
   <table>
     <tr><th>Sprint</th><th>Scope</th><th>Duration</th><th>Output</th></tr>
-    <tr><td><strong>Sprint A</strong></td><td>Full product — FastAPI + all agents + plain HTML/JS frontend + deploy</td><td>5 days × 6hr</td><td>Live app on GitHub Pages + Railway</td></tr>
+    <tr><td><strong>Sprint A</strong></td><td>Full product — FastAPI + all agents + plain HTML/JS frontend + deploy</td><td>5 days × 6hr <em>(revised to 6 days in Session 5 to add browser agents)</em></td><td>Live app on GitHub Pages + Railway</td></tr>
     <tr><td><strong>Sprint B</strong></td><td>Frontend-only — React migration, Sprint A backend unchanged</td><td>3 days × 6hr</td><td>React version live alongside Sprint A; side-by-side comparison</td></tr>
+    <tr><td><strong>GUI Baseline</strong></td><td>Playwright cataloger — all XIQ + EP1 pages, buttons, options exported to JSON</td><td>4 sessions (parallel)</td><td><code>gui_baseline_xiq.json</code> + <code>gui_baseline_ep1.json</code> + diff report</td></tr>
   </table>
 
   <p><strong>React explained (framed for Khursheed's background):</strong> React components = XIQ templates. A Network Policy template defines a pattern applied to many devices with different parameters. A React component defines a UI pattern rendered many times with different data (props). In plain HTML you copy 31 bin cards. In React you write 1 <code>BinCard</code> component and pass 31 data objects. Sprint B teaches this by doing the migration hands-on.</p>
@@ -889,8 +995,10 @@ elif db_coverage &gt;= 0.75:
 
   <hr class="divider">
   <p class="footer">
-    KhKLab &bull; XIQ→EP1 Navigation Intelligence Engine &bull; Architecture Design Dialogue<br>
-    Sessions: 4 &bull; Decisions recorded: 12 &bull; Bins confirmed: 31 &bull; Sprint plan: Sprint A (5 days) + Sprint B (3 days)<br>
+    KhKLab &bull; XIQ→EP1 Navigation Intelligence Engine &bull; Architecture Design Dialogue — Verbatim<br>
+    Sessions: 7 (Session 0 + Sessions 1–6) &bull; Decisions recorded: 15+ ADRs &bull; Bins confirmed: 31 (25 original + 6 from E2E gap analysis)<br>
+    Sprint plan: Sprint A (6 days, May 19–26) + Sprint B (3 days, React) + GUI Baseline (4 sessions, parallel)<br>
+    Source DOCX: <code>ClaudeAI_XIQ-EP1_Dialogue_May 15.docx</code> &bull; Session ID: 6edeb609-0aad-4457-8d76-2accad2dd249<br>
     Linked from: <a href="xiq-ep1-transition.html" style="color:#7c3aed">xiq-ep1-transition.html</a> &bull; <a href="session_summary_20260515.html" style="color:#7c3aed">session_summary_20260515.html</a><br>
     &copy; 2026 Khursheed Khan &bull; All rights reserved &bull; Educational use only
   </p>
