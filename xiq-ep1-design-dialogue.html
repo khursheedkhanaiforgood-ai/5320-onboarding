@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>XIQ→EP1 Intelligence Engine — Architecture Design Dialogue (Verbatim)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Libre+Franklin:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Libre Baskerville', Georgia, serif; background: #FFFFFF; color: #111111; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 0 0 72px; }
+.sticky-nav { position: sticky; top: 0; z-index: 100; background: #4c1d95; border-bottom: 2px solid #6d28d9; padding: 10px 24px; width: 100%; display: flex; align-items: center; gap: 24px; flex-wrap: wrap; }
+.sticky-nav .nav-brand { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.18em; color: #e9d5ff; white-space: nowrap; }
+.sticky-nav a { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.72rem; font-weight: 600; color: #ddd6fe; text-decoration: none; padding: 4px 10px; border-radius: 4px; transition: background 0.15s; white-space: nowrap; }
+.sticky-nav a:hover { background: rgba(255,255,255,0.15); color: #fff; }
+.sticky-nav .nav-sep { color: #6d28d9; font-size: 0.8rem; }
+.container { max-width: 900px; width: 100%; padding: 48px 24px 0; }
+.nyt-rule-top { border: none; border-top: 3px solid #111; margin-bottom: 6px; }
+.nyt-rule-thin { border: none; border-top: 1px solid #111; margin-bottom: 18px; }
+.nyt-logo { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.22em; color: #666; text-align: center; margin-bottom: 6px; }
+.byline { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.72rem; color: #666; margin-bottom: 14px; letter-spacing: 0.02em; }
+.byline strong { color: #111; }
+h1 { font-family: 'Libre Baskerville', Georgia, serif; font-size: 2.2rem; font-weight: 700; color: #111; line-height: 1.12; margin-bottom: 14px; }
+.subtitle { font-family: 'Libre Baskerville', Georgia, serif; font-size: 1rem; font-style: italic; color: #444; line-height: 1.85; margin-bottom: 20px; border-bottom: 1px solid #E2E2E2; padding-bottom: 28px; }
+.section-label { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.18em; color: #7c3aed; margin: 48px 0 14px; padding-bottom: 6px; border-bottom: 2px solid #7c3aed; display: block; }
+h2 { font-family: 'Libre Baskerville', Georgia, serif; font-size: 1.45rem; font-weight: 700; color: #111; margin: 0 0 14px; }
+h3 { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.82rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #7c3aed; margin: 28px 0 12px; }
+p { font-size: 0.97rem; line-height: 1.85; color: #222; margin-bottom: 12px; }
+ul, ol { padding-left: 22px; margin-bottom: 14px; }
+li { font-size: 0.95rem; line-height: 1.8; color: #222; margin-bottom: 4px; }
+code { font-family: 'SF Mono', Consolas, monospace; font-size: 0.82rem; background: #F4F4F4; border: 1px solid #E2E2E2; padding: 1px 5px; border-radius: 3px; color: #7c3aed; }
+pre { background: #F8F8F8; border: 1px solid #E2E2E2; border-radius: 4px; padding: 16px; overflow-x: auto; margin: 12px 0 18px; }
+pre code { background: none; border: none; padding: 0; color: #111; font-size: 0.82rem; line-height: 1.65; }
+pre.arch { background: #F5F3FF; border-color: #DDD6FE; }
+pre.arch code { color: #3b0764; }
+table { width: 100%; border-collapse: collapse; margin: 12px 0 20px; font-size: 0.87rem; }
+th { background: #F5F3FF; font-family: 'Libre Franklin', Arial, sans-serif; font-weight: 700; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em; color: #7c3aed; padding: 9px 10px; border: 1px solid #DDD6FE; text-align: left; }
+td { padding: 9px 10px; border: 1px solid #E2E2E2; color: #222; vertical-align: top; line-height: 1.6; }
+tr:nth-child(even) td { background: #FAFAFA; }
+.done   { color: #065f46; font-weight: 700; }
+.gap    { color: #C62828; font-weight: 700; }
+.warn   { color: #B45309; font-weight: 700; }
+.ep1only { color: #7c3aed; font-weight: 700; }
+.divider { border: none; border-top: 1px solid #E2E2E2; margin: 48px 0; }
+.session-divider { border: none; border-top: 3px solid #7c3aed; margin: 56px 0 0; }
+/* User / Claude dialogue bubbles */
+.msg { border-radius: 6px; padding: 16px 20px; margin: 16px 0; }
+.msg-user { background: #F5F3FF; border: 1px solid #C4B5FD; border-left: 4px solid #7c3aed; }
+.msg-claude { background: #FAFAFA; border: 1px solid #E2E2E2; border-left: 4px solid #374151; }
+.msg-speaker { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.64rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.14em; margin-bottom: 8px; }
+.msg-user .msg-speaker { color: #7c3aed; }
+.msg-claude .msg-speaker { color: #374151; }
+.msg p { margin-bottom: 8px; font-size: 0.93rem; line-height: 1.8; }
+.msg p:last-child { margin-bottom: 0; }
+/* TOC / linked list */
+.toc { border: 1px solid #DDD6FE; border-radius: 6px; padding: 24px 28px; background: #FDFCFF; margin: 28px 0 40px; }
+.toc-title { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.14em; color: #7c3aed; margin-bottom: 16px; }
+.toc ol { padding-left: 20px; margin: 0; }
+.toc li { margin-bottom: 10px; font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.88rem; line-height: 1.6; }
+.toc li a { color: #7c3aed; text-decoration: none; font-weight: 600; }
+.toc li a:hover { text-decoration: underline; }
+.toc li .toc-meta { color: #666; font-style: italic; font-size: 0.82rem; }
+.decision-badge { display: inline-block; font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.64rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; padding: 2px 8px; border-radius: 3px; margin-left: 6px; vertical-align: middle; }
+.badge-decided { background: #D1FAE5; color: #065f46; }
+.badge-deferred { background: #FEF3C7; color: #92400E; }
+.badge-open { background: #EDE9FE; color: #5B21B6; }
+.footer { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.72rem; color: #888; line-height: 1.8; margin-top: 56px; padding-top: 16px; border-top: 1px solid #E2E2E2; }
+</style>
+</head>
+<body>
+
+<nav class="sticky-nav">
+  <span class="nav-brand">XIQ→EP1 Engine — Design Dialogue</span>
+  <span class="nav-sep">|</span>
+  <a href="#session-1">Session 1 — Brain Map &amp; Hypothesis</a>
+  <a href="#session-2">Session 2 — Multi-Agent Architecture</a>
+  <a href="#session-3">Session 3 — 31 Bins &amp; Two Sprints</a>
+  <a href="#session-4">Session 4 — Verbatim Store</a>
+  <a href="xiq-ep1-transition.html">← Sprint Log</a>
+</nav>
+
+<div class="container">
+
+  <hr class="nyt-rule-top">
+  <p class="nyt-logo">KhKLab · Architecture Design Log · May 15 2026</p>
+  <hr class="nyt-rule-thin">
+
+  <div class="byline">By <strong>Khursheed Khan</strong> &bull; <strong>Claude Code</strong> (Sonnet 4.6) &bull; May 15, 2026 &bull; Session: XIQ→EP1 Intelligence Engine Design</div>
+
+  <h1>XIQ→EP1 Navigation Intelligence Engine<br>Architecture Design Dialogue — Verbatim</h1>
+
+  <p class="subtitle">Every decision, debate, and path chosen in building the XIQ→EP1 Navigation Intelligence Engine — preserved in sequence, verbatim, as a permanent architectural record. Each session links to the next. Future contributors read this to understand not just what was built, but why every choice was made.</p>
+
+  <!-- TABLE OF CONTENTS -->
+  <div class="toc">
+    <div class="toc-title">Linked-List Index — All Design Sessions</div>
+    <ol>
+      <li>
+        <a href="#session-1">Session 1 — Brain Map, Hypothesis, Two-Agent RAG Scrape, 25 Bins</a>
+        <span class="decision-badge badge-decided">Decided</span>
+        <br><span class="toc-meta">May 15, 2026 · Session ID 6edeb609 · Context: first architecture dialogue</span>
+      </li>
+      <li>
+        <a href="#session-2">Session 2 — Independence Decision, Multi-Agent AI Architecture, Graph DB, Sprint Plan</a>
+        <span class="decision-badge badge-decided">Decided</span>
+        <br><span class="toc-meta">May 15, 2026 · Same session, second design exchange · Option B confirmed, LangGraph + pgvector + graph DB chosen</span>
+      </li>
+      <li>
+        <a href="#session-3">Session 3 — 31 Bins (E2E Gap Analysis), Two Sprints (HTML + React), Graph Education</a>
+        <span class="decision-badge badge-decided">Decided</span>
+        <br><span class="toc-meta">May 15, 2026 · Sprint A (5 days HTML) + Sprint B (3 days React) · 25→31 bins · GitHub structure confirmed</span>
+      </li>
+      <li>
+        <a href="#session-4">Session 4 — Verbatim Dialogue Store Decision</a>
+        <span class="decision-badge badge-decided">Decided</span>
+        <br><span class="toc-meta">May 15, 2026 · This file created · Linked from xiq-ep1-transition.html and session_summary_20260515.html</span>
+      </li>
+      <li>
+        <a href="#session-5">Session 5 — File Residency · Browser Automation Validation Agents</a>
+        <span class="decision-badge badge-decided">Decided</span>
+        <br><span class="toc-meta">May 15, 2026 · Playwright agents: XIQ + EP1 + Cross-Validation · Sprint A → 6 days · xiq-ep1-design-dialogue.html moves to engine repo on Day 1</span>
+      </li>
+      <li>
+        <a href="#session-6">Session 6 — Dual-Stream Validation · 75% Phase Gate · Self-Calibrating Architecture</a>
+        <span class="decision-badge badge-decided">Decided</span>
+        <br><span class="toc-meta">May 15, 2026 · Both streams run in parallel below 75% DB coverage · Break to RAG_VALIDATED mode at 75% · Dual heat map (doc vs verified) · Self-calibrating loop</span>
+      </li>
+    </ol>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- SESSION 1 -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <hr class="session-divider">
+  <span class="section-label" id="session-1">Session 1 — Brain Map · Hypothesis · Two-Agent RAG Scrape · 25 Bins</span>
+  <h2>First Architecture Dialogue — May 15, 2026</h2>
+  <p style="color:#888;font-family:'Libre Franklin',Arial,sans-serif;font-size:0.82rem;margin-bottom:24px">Source session: 6edeb609-0aad-4457-8d76-2accad2dd249 &nbsp;·&nbsp; Context: prior to context compaction</p>
+
+  <h3>User's Brain Map (exact)</h3>
+
+  <div class="msg msg-user">
+    <div class="msg-speaker">Khursheed Khan</div>
+    <p>(1) Go through ALL buttons, understand what each does and why</p>
+    <p>(2) Deploy EXOS and AP policies as I have done to navigate</p>
+    <p>(3) Deploy same on EP1 steps (1) and (2)</p>
+    <p>(4) Scour the RAG-database of ALL the EN documents published to date on XIQ and on the new EP1 — user guide, release notes, solutions_architecture documents, deployment guides. Compile all in a linked-list bibliography. Two agents doing these two tasks in parallel.</p>
+    <p>Front-end: ALL CURRENT XIQ GUI items mapped to EP1 GUI. Template = Cisco→EXOS CLI mapping agent with 'thematic bins of data/functions' independent of XIQ or EP1. Then figuring out from the XIQ_database and the EP1_database — whether they match, how they match, the heat map etc.</p>
+    <p>Context engine: when the user asks a question, deploy an AP1 policy in EP1 — I know how to do it in XIQ but need to do it in EP1. Does this make sense, can we define the hypothesis further? PLS KEEP THIS DIALOGUE IN MEMORY VERBATIM...</p>
+  </div>
+
+  <h3>Hypothesis Defined</h3>
+
+  <div class="msg msg-claude">
+    <div class="msg-speaker">Claude Code (Sonnet 4.6)</div>
+    <p>Build a <strong>XIQ→EP1 Navigation Intelligence Engine</strong> modelled on the Cisco→EXOS CLI agent.</p>
+    <ul>
+      <li>Instead of CLI translation: <strong>GUI path translation</strong></li>
+      <li>Thematic bins of functions <strong>independent of either portal</strong></li>
+      <li>Each bin: XIQ nav path + EP1 nav path + match type + context steps</li>
+      <li>Context engine answers: "I know how to do X in XIQ — show me EP1"</li>
+      <li>Heat map shows coverage across all bins</li>
+    </ul>
+  </div>
+
+  <h3>Architecture Layers (initial definition)</h3>
+  <ol>
+    <li><strong>Two corpora</strong> — XIQ docs + EP1 docs (user guides, release notes, solution arch, deployment guides)</li>
+    <li><strong>Thematic bins</strong> — functional areas (confirmed from two-agent RAG scrape)</li>
+    <li><strong>Mapping layer</strong> — per bin: XIQ path ↔ EP1 path + gap register</li>
+    <li><strong>Context engine</strong> — "deploy KB_School AP1 policy" → surfaces XIQ steps + EP1 equivalent inline</li>
+    <li><strong>Heat map</strong> — visual coverage: green=matched, amber=restructured, red=missing/EP1-only</li>
+    <li><strong>Front-end</strong> — web UI, dialogue-based design; template = Cisco→EXOS CLI agent</li>
+  </ol>
+
+  <h3>Two-Agent RAG Scrape Results</h3>
+
+  <p><strong>Agent 1 — XIQ Documentation</strong></p>
+  <ul>
+    <li>Primary portal: <code>supportdocs.extremenetworks.com/support/documentation/extremecloud-iq/</code></li>
+    <li>Developer portal: <code>developer.extremecloudiq.com/documentation/</code></li>
+    <li>Latest user guide: v25.9.0 Classic (online) + v25.2.0 (PDF)</li>
+    <li>30 functional areas confirmed across 9 document categories</li>
+    <li>Key docs: User Guide v25.2.0, Release Notes v25.9.1, Switch Deployment Guide, Universal Switch Guide</li>
+    <li>Feature-specific guides: PPSK (GUID-E4BFDC21), SSID config, firewall, Client 360, LDAP, AirDefense, RF/Smart RF</li>
+    <li>GitHub: extremenetworks/ExtremeCloudIQ-APIs (400+ Postman requests), OpenAPI spec</li>
+  </ul>
+
+  <p><strong>Agent 2 — EP1 Documentation</strong></p>
+  <ul>
+    <li>Primary portal: <code>supportdocs.extremenetworks.com/support/documentation/ep1-latest-documentation/</code></li>
+    <li>EP1 has TWO modules: Networking (maps to XIQ) + Security/ZTNA (new, separate user guide)</li>
+    <li>Latest: EP1 Networking v25.9.0, EP1 Security v25.6.0</li>
+    <li>UI Transition FAQ (community PDF): ExtremeCloud IQ UI Transition - CustomerFAQ.pdf</li>
+    <li>Universal Switch Deployment Guide: EP1 v25.7.0; Licensing Guide: EP1 and XIQ 25.6.0 (combined)</li>
+    <li><strong class="gap">NO official XIQ→EP1 migration guide found</strong> — only the UI Transition FAQ</li>
+    <li>New-in-EP1: AI Canvas (NL dashboard), ZTNA, TPME (third-party mgmt), MSP multi-tenancy</li>
+  </ul>
+
+  <h3>Critical Timeline Correction</h3>
+  <table>
+    <tr><th>Date</th><th>Event</th><th>Impact</th></tr>
+    <tr><td><strong>July 1, 2026</strong></td><td>XIQ New UI becomes <strong>mandatory default</strong></td><td>Sprint target — clients must be on new UI. NOT full retirement.</td></tr>
+    <tr><td><strong>Q4 2026</strong></td><td>XIQ Classic UI fully retired</td><td>Complete cutover, no fallback</td></tr>
+    <tr><td>July 2025</td><td>New UI first available (optional)</td><td>~12 months co-existence window now closing</td></tr>
+  </table>
+
+  <h3>25 Thematic Bins (confirmed from both corpora)</h3>
+  <table>
+    <tr><th>#</th><th>Bin</th><th>Match Status</th></tr>
+    <tr><td>1</td><td>Device Onboarding</td><td><span class="done">Both — nav changed</span></td></tr>
+    <tr><td>2</td><td>Device Templates (AP/Switch/Router)</td><td><span class="done">Both</span></td></tr>
+    <tr><td>3</td><td>Network Policies</td><td><span class="done">Both — renamed/restructured</span></td></tr>
+    <tr><td>4</td><td>SSID / Wireless Networks</td><td><span class="done">Both</span></td></tr>
+    <tr><td>5</td><td>Switch Policies + Port Types</td><td><span class="done">Both</span></td></tr>
+    <tr><td>6</td><td>VLAN Management</td><td><span class="done">Both</span></td></tr>
+    <tr><td>7</td><td>RF / Radio Profiles</td><td><span class="done">Both</span></td></tr>
+    <tr><td>8</td><td>PPSK + User Groups</td><td><span class="done">Both</span></td></tr>
+    <tr><td>9</td><td>802.1X + RADIUS</td><td><span class="done">Both</span></td></tr>
+    <tr><td>10</td><td>Captive Web Portal / Guest</td><td><span class="done">Both</span></td></tr>
+    <tr><td>11</td><td>Firewall + Traffic Filters</td><td><span class="done">Both</span></td></tr>
+    <tr><td>12</td><td>User Profiles + VLAN Assignment</td><td><span class="done">Both</span></td></tr>
+    <tr><td>13</td><td>Monitoring / Dashboards</td><td><span class="done">Both + EP1 AI Canvas</span></td></tr>
+    <tr><td>14</td><td>Client 360 + Analytics</td><td><span class="done">Both</span></td></tr>
+    <tr><td>15</td><td>Alarms + Events</td><td><span class="done">Both</span></td></tr>
+    <tr><td>16</td><td>Reports</td><td><span class="done">Both</span></td></tr>
+    <tr><td>17</td><td>Rogue AP / AirDefense</td><td><span class="done">Both</span></td></tr>
+    <tr><td>18</td><td>Location / Planning / Topology</td><td><span class="done">Both</span></td></tr>
+    <tr><td>19</td><td>Admin Accounts + RBAC</td><td><span class="done">Both</span></td></tr>
+    <tr><td>20</td><td>API + Integrations</td><td><span class="done">Both (same API)</span></td></tr>
+    <tr><td>21</td><td>Licensing</td><td><span class="done">Both — structure changed</span></td></tr>
+    <tr><td>22</td><td>Firmware Updates</td><td><span class="done">Both</span></td></tr>
+    <tr><td>23</td><td>Audit Logs</td><td><span class="done">Both</span></td></tr>
+    <tr><td>24</td><td>Backup + Restore</td><td><span class="done">Both</span></td></tr>
+    <tr><td>25</td><td>ZTNA + Third-Party (TPME)</td><td><span class="ep1only">EP1-only</span></td></tr>
+  </table>
+
+  <h3>XIQ vs EP1 Key Structural Differences</h3>
+  <table>
+    <tr><th>Dimension</th><th>XIQ</th><th>EP1</th></tr>
+    <tr><td><strong>Module split</strong></td><td>One product</td><td>Networking + Security (ZTNA) — separate user guides</td></tr>
+    <tr><td><strong>AI</strong></td><td>Basic analytics</td><td>AI Canvas (NL query), Agent Manager, autonomous agents</td></tr>
+    <tr><td><strong>Third-party</strong></td><td>Extreme devices only</td><td>TPME — manages any vendor</td></tr>
+    <tr><td><strong>MSP</strong></td><td>Not optimized</td><td>Purpose-built multi-tenant, consumption billing</td></tr>
+    <tr><td><strong>Licensing</strong></td><td>Pilot / Advanced / Premium</td><td>Standard (=XIQ Pilot + EP1) / Advanced / Premium</td></tr>
+    <tr><td><strong>Official migration guide</strong></td><td>—</td><td><span class="gap">None</span> — UI Transition FAQ only</td></tr>
+  </table>
+
+  <h3>Front-End Design Direction (confirmed end of Session 1)</h3>
+  <ul>
+    <li>Template: Cisco→EXOS CLI agent (thematic bins, confidence/match scoring, side-by-side view)</li>
+    <li>Input: user selects a bin OR types a task ("configure PPSK")</li>
+    <li>Output: XIQ path (left) ↔ EP1 path (right) + match badge + steps + doc links</li>
+    <li>Heat map: 5×5 grid of all 25 (now 31) bins, colored by match status</li>
+    <li>Bibliography: linked list of all docs from both agents (live links)</li>
+    <li>Context engine query: "I want to [task in XIQ terms]" → returns EP1 equivalent workflow</li>
+  </ul>
+
+  <h3>Key Docs to Seed (confirmed)</h3>
+  <ul>
+    <li>XIQ User Guide v25.2.0 PDF</li>
+    <li>EP1 Networking User Guide v25.9.0</li>
+    <li>EP1 Security User Guide v25.6.0</li>
+    <li>XIQ UI Transition FAQ (community PDF)</li>
+    <li>EP1 Licensing Guide v25.6.0</li>
+    <li>EP1 Universal Switch Deployment Guide v25.7.0</li>
+  </ul>
+
+  <p style="margin-top:24px;font-family:'Libre Franklin',Arial,sans-serif;font-size:0.82rem;color:#888">→ Continues in <a href="#session-2" style="color:#7c3aed">Session 2</a></p>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- SESSION 2 -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <hr class="session-divider">
+  <span class="section-label" id="session-2">Session 2 — Independence Decision · Multi-Agent Architecture · Graph DB · Sprint Plan</span>
+  <h2>Architecture Deepened — May 15, 2026</h2>
+
+  <h3>User Requirement: Independent Infrastructure</h3>
+
+  <div class="msg msg-user">
+    <div class="msg-speaker">Khursheed Khan</div>
+    <p>I don't want to share the same database as the CISCO -- EN CLI. I want to build an independent database for the XIQ -- EP1 transition. I do want to minimize effort. But I want to keep these Railway deployments independent of each other. Is that possible? This XIQ -- EP1 will be a monumental effort and there will be MANY EYES on it, so the architecture, motivation, front-end, back-end, production-ready deployment for other teams to test as well... and contribute to, the RAG... all will be under the microscope.</p>
+  </div>
+
+  <div class="msg msg-user">
+    <div class="msg-speaker">Khursheed Khan (continued)</div>
+    <p>I want to build a multi-agent architecture where the lead agent choreographs from intake (from users) to delivery. While sub-agents do the leg-work. Clearly define the AI_Architecture. I was told a graph-database or something similar maybe useful, 'perhaps in addition to RAG' not sure? Also, I want to have an agent like we had in the CISCO -- EN CLI one where, if there is no match, no path from XIQ -- EP1 then it goes out to the internet and crawls for new data or asks the user for inputs etc. Do you have that architecture mapped here from the CISCO -- EN CLI one? ALSO, and this is very important, I want ALL of our dialogue as we are building the architecture, debating on choices and finally deciding on a path ahead to be linked list to this dialogue verbATIM. So, now, pls let me know if you got it and how we can update Option B? Then we come to your question about React because I don't understand it well enough.</p>
+  </div>
+
+  <h3>Decision: Option B Confirmed — Fully Independent</h3>
+
+  <div class="msg msg-claude">
+    <div class="msg-speaker">Claude Code (Sonnet 4.6) — Response</div>
+    <p>Yes — fully independent. Same patterns, zero shared infrastructure.</p>
+    <table>
+      <tr><th>Layer</th><th>Cisco→EXOS Agent</th><th>XIQ→EP1 Engine</th></tr>
+      <tr><td>GitHub repo</td><td><code>cisco-en-cli-agent</code></td><td><code>xiq-ep1-intelligence-engine</code> (new)</td></tr>
+      <tr><td>Railway project</td><td>existing</td><td>new Railway project</td></tr>
+      <tr><td>PostgreSQL</td><td>existing DB</td><td>new provisioned DB</td></tr>
+      <tr><td>pgvector</td><td>existing</td><td>new instance</td></tr>
+      <tr><td>Confidence calculator</td><td>source</td><td>ported as standalone module — no import dependency</td></tr>
+    </table>
+    <p>The Cisco→EXOS agent is never touched. Copy the logic, not the infrastructure.</p>
+  </div>
+
+  <h3>Graph Database Decision</h3>
+
+  <div class="msg msg-claude">
+    <div class="msg-speaker">Claude Code (Sonnet 4.6) — Graph Analysis</div>
+    <p>XIQ→EP1 is not a lookup table — it is a navigation graph. Features have dependency chains. Graph traversal answers "what is the full dependency chain to accomplish X in EP1" — vector search alone cannot.</p>
+    <p><strong>Three tools, three purposes:</strong></p>
+    <table>
+      <tr><th>Tool</th><th>What It Is</th><th>Used For</th></tr>
+      <tr><td><strong>LangGraph</strong></td><td>Python library — agent workflow IS a directed graph</td><td>Orchestrating 8 sub-agents. Control flow, NOT data storage.</td></tr>
+      <tr><td><strong>pgvector</strong></td><td>PostgreSQL extension — vector embeddings</td><td>Semantic search: "what feature is the user asking about?"</td></tr>
+      <tr><td><strong>Neo4j / graph DB</strong></td><td>Database — knowledge stored as nodes + edges</td><td>XIQ↔EP1 relationships, nav trees, dependency chains. Data storage.</td></tr>
+    </table>
+    <p><strong>Implementation path decided:</strong> Week 1 = PostgreSQL adjacency tables (graph-shaped schema, no new service). Week 2+ = migrate to Neo4j AuraDB free tier. Schema is graph-compatible from Day 1 — migration = data export + import, not schema redesign.</p>
+  </div>
+
+  <h3>Multi-Agent AI Architecture</h3>
+
+  <pre class="arch"><code>Lead Orchestrator (LangGraph StateGraph)
+  ├── Intake Agent           — parse intent, detect bin, route
+  ├── XIQ Navigator Agent    — lookup XIQ nav path in corpus + graph
+  ├── EP1 Navigator Agent    — lookup EP1 equivalent path in corpus + graph
+  ├── Confidence Agent       — Σ(wᵢ×cᵢ)/Σ(wᵢ): IDENTICAL/RESTRUCTURED/PARTIAL/GAP/EP1_ONLY
+  ├── Context Engine Agent   — "I know XIQ flow X → full EP1 workflow translation"
+  ├── Gap Detector           — confidence &lt; 0.40? → route to Fallback
+  ├── Fallback Agent (3-tier)
+  │     Tier 1: Bin-scoped DB + graph traversal
+  │     Tier 2: Full semantic search (pgvector, all 31 bins)
+  │     Tier 3: Web crawl → supportdocs.extremenetworks.com
+  │             → community.extremenetworks.com
+  │             → developer.extremecloudiq.com
+  │             → still no match: prompt user → write back to DB
+  ├── Response Synthesizer   — XIQ path | EP1 path | badge | doc links | dependency chain
+  ├── Heat Map Agent (async) — updates 31-bin coverage grid after each validated mapping
+  └── Bibliography Agent (async) — maintains linked-list of all sources</code></pre>
+
+  <h3>Fallback Agent — Ported from Cisco→EXOS Agent</h3>
+  <p>This is the same 3-tier search escalation that existed in <code>cisco-en-cli-agent</code>. In that agent: bin-scoped → full-DB → web crawl to Cisco/Extreme docs. Here the logic is identical, only the search targets change to EP1 doc portal. The contribution loop (user validates → writes back to DB) is new, but the escalation pattern is proven. Port, do not rebuild.</p>
+
+  <h3>DB Schema (graph-compatible from Day 1)</h3>
+
+  <pre><code>-- Feature nodes (graph vertices)
+CREATE TABLE features (
+  id           SERIAL PRIMARY KEY,
+  product      TEXT,           -- 'XIQ' | 'EP1'
+  bin_tag      TEXT,           -- one of 31 bins
+  feature_name TEXT,
+  nav_path     TEXT,
+  doc_url      TEXT,
+  embedding    vector(1536)    -- pgvector
+);
+
+-- Graph edges (relationships)
+CREATE TABLE feature_edges (
+  id         SERIAL PRIMARY KEY,
+  from_id    INT REFERENCES features(id),
+  to_id      INT REFERENCES features(id),
+  edge_type  TEXT   -- 'maps_to' | 'requires' | 'replaces' | 'gap' | 'ep1_only'
+);
+
+-- Confidence-scored mappings
+CREATE TABLE mappings (
+  id           SERIAL PRIMARY KEY,
+  xiq_id       INT REFERENCES features(id),
+  ep1_id       INT REFERENCES features(id),
+  match_type   TEXT,   -- IDENTICAL | RESTRUCTURED | PARTIAL | GAP | EP1_ONLY
+  confidence   FLOAT,
+  bin_tag      TEXT,
+  week_verified INT,
+  notes        TEXT,
+  verified_by  TEXT
+);
+
+-- Bibliography (linked-list of all sources)
+CREATE TABLE bibliography (
+  id          SERIAL PRIMARY KEY,
+  product     TEXT,
+  doc_title   TEXT,
+  doc_url     TEXT,
+  version     TEXT,
+  doc_type    TEXT,   -- 'user_guide' | 'release_notes' | 'solution_arch' | 'crawled'
+  ingested_at TIMESTAMPTZ DEFAULT now()
+);</code></pre>
+
+  <h3>5-Day Sprint Plan (Session 2 version — later revised to 31 bins)</h3>
+  <table>
+    <tr><th>Day</th><th>Bucket</th><th>Key Deliverables</th></tr>
+    <tr><td>1</td><td>Foundation</td><td>Repo + Railway + DB migrations + FastAPI skeleton + LangGraph skeleton</td></tr>
+    <tr><td>2</td><td>RAG + Corpus</td><td>Ingestion pipeline + bin seed + mapping seed + confidence calculator ported</td></tr>
+    <tr><td>3</td><td>Agent Build</td><td>Orchestrator + all sub-agents wired E2E</td></tr>
+    <tr><td>4</td><td>Fallback + API</td><td>3-tier fallback + bibliography + heat map + all FastAPI endpoints</td></tr>
+    <tr><td>5</td><td>Frontend + Deploy</td><td>HTML/JS wired to API + GitHub Pages + Railway deploy + E2E test + docs</td></tr>
+  </table>
+
+  <h3>React Decision</h3>
+
+  <div class="msg msg-user">
+    <div class="msg-speaker">Khursheed Khan</div>
+    <p>Then we come to your question about React because I don't understand it well enough.</p>
+  </div>
+
+  <div class="msg msg-claude">
+    <div class="msg-speaker">Claude Code — React Decision</div>
+    <p><strong>Decision: Plain HTML/JS for Sprint A.</strong> Reasons: no build pipeline, GitHub Pages compatible, contributors are network engineers not frontend developers, <code>fetch()</code> calls FastAPI in three lines. React deferred — would add tooling friction for no UI benefit at current complexity level.</p>
+    <p>React becomes worth it when the UI has dozens of interactive components with shared state. For a side-by-side nav translator with a heat map and a search bar: plain HTML/JS wins on simplicity and contributor accessibility.</p>
+  </div>
+
+  <p style="margin-top:24px;font-family:'Libre Franklin',Arial,sans-serif;font-size:0.82rem;color:#888">→ Continues in <a href="#session-3" style="color:#7c3aed">Session 3</a></p>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- SESSION 3 -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <hr class="session-divider">
+  <span class="section-label" id="session-3">Session 3 — 31 Bins · Two Sprints · Graph Education · GitHub Structure</span>
+  <h2>Gap Analysis &amp; Sprint Expansion — May 15, 2026</h2>
+
+  <div class="msg msg-user">
+    <div class="msg-speaker">Khursheed Khan</div>
+    <p>I want two sprints, one with plain HTML and one with React. Also, I need to learn about graph, engineering/architecture and implementation. Finally, these xiq-ep1 will reside independently on GitHub, but will be accessible from the 5320 landing page. I want you to consider the usage, user is new to EP1. He/she is building a policy to deploy KB_School. It involves both AP and EXOS config. After policy is created he/she will push. But then, the user will need to know where to go on EP1 to observe performance, 'tune or calibrate'. In essence, the E2E workflow for observability, configuration, automation, orchestration... the whole nine yards. Do you have these elements in the 25 bins? What are we missing?</p>
+  </div>
+
+  <h3>E2E Workflow Gap Analysis — KB_School Scenario</h3>
+  <p>User persona: new to EP1, builds KB_School AP + EXOS policy, pushes, observes, tunes, automates. Traced against all 25 bins.</p>
+
+  <table>
+    <tr><th>Phase</th><th>User Action</th><th>Current Bin</th><th>Covered?</th></tr>
+    <tr><td>Onboard</td><td>Add AP3000 + SW1 to EP1</td><td>#1 Device Onboarding</td><td><span class="done">✅</span></td></tr>
+    <tr><td>Assign</td><td>Site / location / topology</td><td>#18 Location/Planning</td><td><span class="done">✅</span></td></tr>
+    <tr><td>Build</td><td>Network Policy</td><td>#3 Network Policies</td><td><span class="done">✅</span></td></tr>
+    <tr><td>Build</td><td>SSID (KB_School_Broadcast)</td><td>#4 SSID/Wireless</td><td><span class="done">✅</span></td></tr>
+    <tr><td>Build</td><td>PPSK (Staff→VLAN1, Students→VLAN10)</td><td>#8 PPSK + User Groups</td><td><span class="done">✅</span></td></tr>
+    <tr><td>Build</td><td>User Profiles + VLAN steering</td><td>#12 User Profiles</td><td><span class="done">✅</span></td></tr>
+    <tr><td>Build</td><td>Switch port types (AP port, uplink)</td><td>#5 Switch Policies</td><td><span class="done">✅</span></td></tr>
+    <tr><td>Build</td><td>VLAN1 + VLAN10</td><td>#6 VLAN Mgmt</td><td><span class="done">✅</span></td></tr>
+    <tr><td>Build</td><td>Firewall / inter-VLAN block</td><td>#11 Firewall</td><td><span class="done">✅</span></td></tr>
+    <tr><td>Build</td><td>Radio profile (channel, power)</td><td>#7 RF/Radio</td><td><span class="warn">⚠️ partial</span></td></tr>
+    <tr><td><strong>PUSH</strong></td><td><strong>Delta deploy policy to AP + SW1</strong></td><td><span class="gap">NONE</span></td><td><span class="gap">❌ MISSING</span></td></tr>
+    <tr><td><strong>PUSH</strong></td><td><strong>Push history, rollback, reboot behavior</strong></td><td><span class="gap">NONE</span></td><td><span class="gap">❌ MISSING</span></td></tr>
+    <tr><td>Observe</td><td>Clients connected? AP broadcasting?</td><td>#14 Client 360</td><td><span class="done">✅</span></td></tr>
+    <tr><td>Observe</td><td>Alarms / push failures</td><td>#15 Alarms + Events</td><td><span class="done">✅</span></td></tr>
+    <tr><td>Observe</td><td>Dashboard / health overview</td><td>#13 Monitoring</td><td><span class="done">✅</span></td></tr>
+    <tr><td><strong>Observe</strong></td><td><strong>EP1 AI Canvas NL query ("clients RSSI &lt; -75")</strong></td><td>#13 (buried)</td><td><span class="gap">❌ UNDER-COVERED</span></td></tr>
+    <tr><td><strong>Tune</strong></td><td><strong>Smart RF — automated channel + power</strong></td><td>#7 (buried)</td><td><span class="gap">❌ UNDER-COVERED</span></td></tr>
+    <tr><td>Tune</td><td>QoS / traffic shaping per SSID</td><td>#11 partial</td><td><span class="warn">⚠️ weak</span></td></tr>
+    <tr><td><strong>Automate</strong></td><td><strong>EP1 Agent Manager — "if RSSI &lt; -80, bump power"</strong></td><td><span class="gap">NONE</span></td><td><span class="gap">❌ MISSING</span></td></tr>
+    <tr><td>Automate</td><td>API-driven policy push</td><td>#20 API</td><td><span class="done">✅ partial</span></td></tr>
+    <tr><td><strong>Troubleshoot</strong></td><td><strong>Packet capture, connectivity test, tech support dump</strong></td><td><span class="gap">NONE</span></td><td><span class="gap">❌ MISSING</span></td></tr>
+    <tr><td><strong>Multi-tenant</strong></td><td><strong>MSP managing multiple client orgs</strong></td><td>#25 (ZTNA-only, buried)</td><td><span class="gap">❌ BURIED</span></td></tr>
+  </table>
+
+  <h3>6 New Bins — 25 → 31</h3>
+  <table>
+    <tr><th>#</th><th>New Bin</th><th>Why It's Distinct</th></tr>
+    <tr><td><strong>26</strong></td><td><strong>Policy Push / Config Deploy</strong></td><td>Delta vs full push, push history, rollback, reboot-after-push. A complete workflow in XIQ that changed significantly in EP1. Not in any existing bin.</td></tr>
+    <tr><td><strong>27</strong></td><td><strong>EP1 AI Canvas + NL Query</strong></td><td>Paradigm shift — no XIQ equivalent. NL dashboard, anomaly detection, NL-triggered actions. Too important to stay buried in #13.</td></tr>
+    <tr><td><strong>28</strong></td><td><strong>EP1 Agent Manager + Autonomous Agents</strong></td><td>EP1-only. Define rule-based or NL-triggered autonomous agents. No XIQ equivalent at all.</td></tr>
+    <tr><td><strong>29</strong></td><td><strong>Smart RF + Radio Optimization</strong></td><td>Was buried in #7. Automated channel selection, coverage hole detection, Tx power tuning — full workflow, EP1 renamed it.</td></tr>
+    <tr><td><strong>30</strong></td><td><strong>Troubleshooting + Diagnostics</strong></td><td>Completely absent from all 25 bins. Packet capture, connectivity test tool, tech support dump, live client diagnostics, historical event correlation.</td></tr>
+    <tr><td><strong>31</strong></td><td><strong>MSP + Multi-Tenancy</strong></td><td>Separate from ZTNA (#25). Consultant managing multiple orgs, tenant switching, consumption billing view, org-level policy isolation.</td></tr>
+  </table>
+
+  <h3>Graph Education — Three-Layer Summary</h3>
+
+  <div class="msg msg-claude">
+    <div class="msg-speaker">Claude Code — Graph Education</div>
+    <p>A <strong>relational database</strong> stores rows and columns; relationships via JOINs. A <strong>graph database</strong> stores nodes (entities) and edges (relationships between them). The difference is what queries become <em>natural</em>:</p>
+    <table>
+      <tr><th>Question</th><th>SQL</th><th>Graph (Cypher)</th></tr>
+      <tr><td>"Where is PPSK in EP1?"</td><td>Single SELECT</td><td>Single MATCH</td></tr>
+      <tr><td>"What must I configure before PPSK?"</td><td>Recursive CTE with 3-table JOIN</td><td>Multi-hop MATCH in one line</td></tr>
+      <tr><td>"Full workflow: AP policy push in EP1"</td><td>App-layer path reconstruction</td><td>Path traversal — native</td></tr>
+    </table>
+    <p>Graph wins on <strong>path-finding</strong> and <strong>dependency chain</strong> queries — exactly what this engine solves.</p>
+    <p><strong>Implementation path:</strong> Week 1 = PostgreSQL adjacency tables (no new service). Week 2+ = Neo4j AuraDB free tier (200K nodes / 400K edges — enough). Migration = data export + import. Schema designed graph-compatible from Day 1.</p>
+  </div>
+
+  <h3>Two Sprint Plan (decided)</h3>
+  <table>
+    <tr><th>Sprint</th><th>Scope</th><th>Duration</th><th>Output</th></tr>
+    <tr><td><strong>Sprint A</strong></td><td>Full product — FastAPI + all agents + plain HTML/JS frontend + deploy</td><td>5 days × 6hr</td><td>Live app on GitHub Pages + Railway</td></tr>
+    <tr><td><strong>Sprint B</strong></td><td>Frontend-only — React migration, Sprint A backend unchanged</td><td>3 days × 6hr</td><td>React version live alongside Sprint A; side-by-side comparison</td></tr>
+  </table>
+
+  <p><strong>React explained (framed for Khursheed's background):</strong> React components = XIQ templates. A Network Policy template defines a pattern applied to many devices with different parameters. A React component defines a UI pattern rendered many times with different data (props). In plain HTML you copy 31 bin cards. In React you write 1 <code>BinCard</code> component and pass 31 data objects. Sprint B teaches this by doing the migration hands-on.</p>
+
+  <h3>GitHub + 5320 Integration (decided)</h3>
+  <ul>
+    <li>Repo: <code>khursheedkhanaiforgood-ai/xiq-ep1-intelligence-engine</code> (independent — never touches 5320-onboarding)</li>
+    <li>Frontend: GitHub Pages at <code>khursheedkhanaiforgood-ai.github.io/xiq-ep1-intelligence-engine/</code></li>
+    <li>Backend: own Railway project, own PostgreSQL</li>
+    <li>5320 landing page XIQ→EP1 banner: TWO links → "Launch Engine" (app) + "Sprint Log" (xiq-ep1-transition.html)</li>
+  </ul>
+
+  <p style="margin-top:24px;font-family:'Libre Franklin',Arial,sans-serif;font-size:0.82rem;color:#888">→ Continues in <a href="#session-4" style="color:#7c3aed">Session 4</a></p>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- SESSION 4 -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <hr class="session-divider">
+  <span class="section-label" id="session-4">Session 4 — Verbatim Dialogue Store Decision</span>
+  <h2>This File — May 15, 2026</h2>
+
+  <div class="msg msg-user">
+    <div class="msg-speaker">Khursheed Khan</div>
+    <p>Before then, I want to ensure ALL of our dialogue until now is stored verbatim in linked-list reference for the EOD HTML.</p>
+  </div>
+
+  <div class="msg msg-claude">
+    <div class="msg-speaker">Claude Code — Response</div>
+    <p><strong>Decision: Create <code>xiq-ep1-design-dialogue.html</code></strong> — this file. Standalone HTML with all sessions verbatim, named anchors per session, sticky nav. Linked from:</p>
+    <ul>
+      <li><code>xiq-ep1-transition.html</code> — new "Design Dialogue Log" section with the linked list (each session = one row in the table)</li>
+      <li><code>session_summary_20260515.html</code> — compact callout box with the 4 anchor links</li>
+    </ul>
+    <p>Each future architecture session adds a new numbered section here. The linked list in the transition page grows by one row. The memory file <code>project_xiq_ep1_architecture.md</code> is the machine-readable mirror; this file is the human-readable permanent record.</p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- SESSION 5 -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <hr class="session-divider">
+  <span class="section-label" id="session-5">Session 5 — File Residency · Browser Automation Validation Agents</span>
+  <h2>Validation Architecture &amp; File Ownership — May 15, 2026</h2>
+
+  <div class="msg msg-user">
+    <div class="msg-speaker">Khursheed Khan</div>
+    <p>This EOD HTML will be part of the 5320 onboarding BUT actually, we need to transition to the new xiq-ep1 space?</p>
+  </div>
+
+  <div class="msg msg-claude">
+    <div class="msg-speaker">Claude Code — File Residency Decision</div>
+    <table>
+      <tr><th>File</th><th>Decision</th><th>Why</th></tr>
+      <tr><td><code>xiq-ep1-transition.html</code></td><td><strong>Stays in 5320-onboarding forever</strong></td><td>Khursheed's personal sprint log — week-by-week learning record. Belongs with the 5320 lab journal.</td></tr>
+      <tr><td><code>xiq-ep1-design-dialogue.html</code> (this file)</td><td><strong>Lives in 5320 NOW; moves to <code>xiq-ep1-intelligence-engine/docs/</code> on Sprint A Day 1</strong></td><td>Architecture record for engine contributors. When the new repo is created, this file moves there and the 5320 transition page updates its link to the new GitHub Pages URL.</td></tr>
+    </table>
+    <p>5320 site = sprint observer (logs progress). Engine repo = the product (app + its docs).</p>
+  </div>
+
+  <div class="msg msg-user">
+    <div class="msg-speaker">Khursheed Khan</div>
+    <p>I also need to make sure that somehow 'an agent can actually open up an XIQ session and then execute the policy or flow' then do the same for EP1? Is this possible? Two additional agents, cross referencing what the lead agent in the XIQ-EP1 mapping recommends to verify if both the XIQ and the EP1 side hold? Meaning, open XIQ, test. Open EP1 test? Because we have 4-weeks hopefully until July 1st to debug/test validate and i want a way to automate this validation.</p>
+  </div>
+
+  <div class="msg msg-claude">
+    <div class="msg-speaker">Claude Code — Browser Automation Decision</div>
+    <p><strong>Yes — absolutely possible.</strong> Technology: <strong>Playwright (Python)</strong> — controls a real browser, can login to web apps, navigate, click, fill forms, take screenshots, read page content. Three new agents added:</p>
+
+    <pre class="arch"><code>XIQ Browser Agent (Playwright)
+  Input:  { feature, xiq_nav_path }
+  Action: login XIQ → navigate path → screenshot → confirm feature exists
+  Output: { verified, actual_path, screenshot_url, timestamp }
+
+EP1 Browser Agent (Playwright)
+  Input:  { feature, ep1_nav_path }
+  Action: login EP1 (9-dot launcher) → navigate → screenshot → confirm
+  Output: { verified, actual_path, screenshot_url, timestamp }
+
+Cross-Validation Agent
+  Input:  mapping from orchestrator + outputs from both browser agents
+  Action: compare XIQ result vs EP1 result
+          match confirmed → confidence = 1.0, verified_by = 'browser_agent', write DB
+          EP1 path wrong  → update nav_path in DB, flag for review
+          EP1 missing     → write GAP, trigger heat map update
+  Output: Validated mapping row</code></pre>
+
+    <p><strong>Why this is critical:</strong> Confidence score shifts from doc-based (estimated) to empirically validated. Heat map becomes a live audit trail. Over 4 weeks, all 31 bins get browser-validated — by July 1 every row says <code>verified_by='browser_agent'</code> or <code>gap=true</code>.</p>
+
+    <p><strong>Trigger modes:</strong></p>
+    <ul>
+      <li>On-demand — engine validates mapping before responding to a user query</li>
+      <li>Weekly batch — GitHub Actions cron (every Sunday), all mappings for that week's bins</li>
+      <li>On-push — contributor adds mapping to DB; browser agents verify before merge allowed</li>
+    </ul>
+
+    <p><strong>Credentials:</strong> XIQ + EP1 use the same login (extremecloudiq.com → 9-dot launcher). One credential pair covers both agents. Stored in Railway env vars, never in code. Handled on Sprint A Day 5.</p>
+
+    <p><strong>Sprint A revised to 6 days:</strong></p>
+    <table>
+      <tr><th>Day</th><th>Bucket</th></tr>
+      <tr><td>1</td><td>Foundation</td></tr>
+      <tr><td>2</td><td>RAG + Corpus</td></tr>
+      <tr><td>3</td><td>Agent Build (orchestrator + navigators + confidence + gap)</td></tr>
+      <tr><td>4</td><td>Fallback + API</td></tr>
+      <tr><td><strong>5</strong></td><td><strong>Browser Agents (Playwright + XIQ + EP1 + Cross-Validation + GitHub Actions cron)</strong></td></tr>
+      <tr><td><strong>6</strong></td><td><strong>Frontend + Deploy (HTML/JS + GitHub Pages + Railway + E2E)</strong></td></tr>
+    </table>
+  </div>
+
+  <p style="margin-top:24px;font-family:'Libre Franklin',Arial,sans-serif;font-size:0.82rem;color:#888">→ Continues in <a href="#session-6" style="color:#7c3aed">Session 6</a></p>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- SESSION 6 -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <hr class="session-divider">
+  <span class="section-label" id="session-6">Session 6 — Dual-Stream Validation · 75% Phase Gate · Self-Calibrating Architecture</span>
+  <h2>Parallel Validation Strategy Decided — May 15, 2026</h2>
+
+  <div class="msg msg-user">
+    <div class="msg-speaker">Khursheed Khan</div>
+    <p>I want both, the documentation based validation/heat map as well as the 'actual one run on the XIQ/EP1' platforms. The reason is, I don't know which one will ultimately work because NO_ONE has tested all of the EP1 features and done anything like this previously. So, let's run those in parallel until the DB is '75%' or so full by experiment/confidence on actual XIQ/EP1. We then break out of 'the debug/optimization' guardrail and move into fully the validated RAG/Graph space? If we are in sync, update EOD HTML with ALL of our dialogue for the design and push to Git.</p>
+  </div>
+
+  <div class="msg msg-claude">
+    <div class="msg-speaker">Claude Code — Dual-Stream + Phase Gate Architecture</div>
+    <p><strong>In sync. This is the right call.</strong> The core insight: because no one has validated EP1 exhaustively, you cannot trust the docs alone to be ground truth. Running both streams in parallel means every doc claim gets empirically tested — and every discrepancy between what the docs say and what the portal actually does becomes a NEW FINDING fed back into the RAG corpus. The system is self-calibrating.</p>
+  </div>
+
+  <h3>Two Parallel Validation Streams</h3>
+
+  <table>
+    <tr><th>Stream</th><th>Source</th><th>Method</th><th>Confidence Type</th><th>Speed</th></tr>
+    <tr>
+      <td><strong>Stream 1 — Doc-Based</strong></td>
+      <td>XIQ + EP1 published docs</td>
+      <td>pgvector semantic search + graph traversal</td>
+      <td>Estimated (doc-based)</td>
+      <td>Fast, always on, no credentials</td>
+    </tr>
+    <tr>
+      <td><strong>Stream 2 — Live Validated</strong></td>
+      <td>Actual XIQ + EP1 portals</td>
+      <td>Playwright browser automation</td>
+      <td>Empirical (ground truth)</td>
+      <td>Slower, requires credentials, may hit downtime</td>
+    </tr>
+  </table>
+
+  <h3>Phase Gate Logic — 75% Threshold</h3>
+
+  <pre class="arch"><code>-- Coverage metric (calculated live)
+db_coverage = COUNT(mappings WHERE verified_by='browser_agent') / COUNT(all mappings)
+
+if db_coverage &lt; 0.75:
+    run_mode = "PARALLEL"          ← debug / optimization guardrail
+    # Every query triggers BOTH streams
+    # Browser agent validates doc-based answer before returning to user
+    # Discrepancy → NEW FINDING → written to corpus + DB
+    # Heat map shows: doc-confidence (left) vs verified-confidence (right) side-by-side
+    # Self-calibrating: doc patterns improve as ground truth accumulates
+
+elif db_coverage &gt;= 0.75:
+    run_mode = "RAG_VALIDATED"     ← break out of guardrail
+    # Primary: RAG/Graph answers directly (docs are now trusted)
+    # Browser agents: spot-check only, on-demand or when confidence &lt; 0.6
+    # 75% verified → doc patterns are reliable enough for production use</code></pre>
+
+  <h3>What Happens When Streams Diverge</h3>
+
+  <table>
+    <tr><th>Scenario</th><th>Doc Stream Says</th><th>Browser Agent Finds</th><th>Action</th></tr>
+    <tr><td>Match</td><td>EP1 nav path X</td><td>Path X confirmed</td><td>confidence = 1.0, <code>verified_by='browser_agent'</code></td></tr>
+    <tr><td>Path renamed</td><td>EP1 nav path X</td><td>Actual path is Y</td><td>Update <code>nav_path</code> in DB, add to RAG corpus as correction</td></tr>
+    <tr><td>Feature missing</td><td>Feature exists in EP1</td><td>Feature not found</td><td>Write <code>GAP</code> to DB, red on heat map, add to gaps register</td></tr>
+    <tr><td>New EP1 feature</td><td>No doc coverage</td><td>Feature found (no XIQ equiv)</td><td>Write <code>EP1_ONLY</code> to DB, purple on heat map, add to bibliography</td></tr>
+  </table>
+
+  <h3>Updated Multi-Agent Architecture (final, Session 6)</h3>
+
+  <pre class="arch"><code>Lead Orchestrator (LangGraph StateGraph)
+  │
+  ├── Intake Agent              — parse intent, detect bin, route
+  │
+  ├── ─── STREAM 1: DOC-BASED ──────────────────────────────────
+  │   ├── XIQ Navigator Agent   — pgvector + graph: XIQ nav path
+  │   ├── EP1 Navigator Agent   — pgvector + graph: EP1 equiv path
+  │   └── Confidence Agent      — Σ(wᵢ×cᵢ)/Σ(wᵢ) — doc-based score
+  │
+  ├── ─── STREAM 2: LIVE BROWSER (active until 75%) ───────────
+  │   ├── XIQ Browser Agent     — Playwright: login, navigate, screenshot
+  │   ├── EP1 Browser Agent     — Playwright: login, navigate, screenshot
+  │   └── Cross-Validation Agent — compare streams, write divergences to DB
+  │
+  ├── Validation Orchestrator   — monitors coverage %, enforces phase gate
+  │     db_coverage &lt; 0.75 → PARALLEL mode (both streams)
+  │     db_coverage &gt;= 0.75 → RAG_VALIDATED mode (Stream 1 primary)
+  │
+  ├── Context Engine Agent      — "I know XIQ flow X → EP1 full workflow"
+  ├── Gap Detector              — confidence &lt; 0.40 → Fallback
+  ├── Fallback Agent (3-tier)   — bin-scope → full-DB → web crawl → ask user
+  ├── Response Synthesizer      — XIQ|EP1 side-by-side + badge + chain + docs
+  ├── Heat Map Agent (async)    — dual heat map: doc vs verified coverage
+  └── Bibliography Agent (async) — all sources including discovered EP1 paths</code></pre>
+
+  <h3>The Self-Calibration Loop</h3>
+  <ol>
+    <li>Doc stream generates mapping: "XIQ PPSK → EP1 path X, confidence 0.78"</li>
+    <li>Browser agent navigates to path X in EP1 — takes screenshot</li>
+    <li>If path X confirmed: doc confidence promoted to 1.0, written to DB</li>
+    <li>If path X wrong (real path is Y): doc corpus updated with correction, DB updated, RAG re-indexes</li>
+    <li>After ~30 corrections: RAG learns EP1's naming patterns and starts predicting correctly</li>
+    <li>Coverage meter climbs. At 75%: guardrail lifts. Docs now trustworthy.</li>
+  </ol>
+  <p>The system gets smarter with every divergence it finds. A wrong doc entry is not an error — it is a training signal.</p>
+
+  <h3>Heat Map Changes — Dual View</h3>
+  <p>The 31-bin heat map now has <strong>two columns per bin</strong>:</p>
+  <table>
+    <tr><th>Column</th><th>What It Shows</th><th>Source</th></tr>
+    <tr><td><strong>Doc confidence</strong></td><td>How well the docs map XIQ→EP1 for this bin</td><td>Stream 1 (RAG/graph)</td></tr>
+    <tr><td><strong>Verified confidence</strong></td><td>How much of this bin has been live-validated</td><td>Stream 2 (browser agents)</td></tr>
+  </table>
+  <p>When both columns are green: that bin is fully validated. When doc=green but verified=amber: docs look good but live testing is partial. When doc=green but verified=red: docs are wrong — active investigation needed.</p>
+
+  <p style="margin-top:24px;font-family:'Libre Franklin',Arial,sans-serif;font-size:0.82rem;color:#888">End of May 15 design dialogue &mdash; 6 sessions, 15+ decisions. Sprint A Day 1 begins on your signal.</p>
+
+  <hr class="divider">
+  <p class="footer">
+    KhKLab &bull; XIQ→EP1 Navigation Intelligence Engine &bull; Architecture Design Dialogue<br>
+    Sessions: 4 &bull; Decisions recorded: 12 &bull; Bins confirmed: 31 &bull; Sprint plan: Sprint A (5 days) + Sprint B (3 days)<br>
+    Linked from: <a href="xiq-ep1-transition.html" style="color:#7c3aed">xiq-ep1-transition.html</a> &bull; <a href="session_summary_20260515.html" style="color:#7c3aed">session_summary_20260515.html</a><br>
+    &copy; 2026 Khursheed Khan &bull; All rights reserved &bull; Educational use only
+  </p>
+
+</div>
+</body>
+</html>
