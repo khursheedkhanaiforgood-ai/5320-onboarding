@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>5320 Lab Journal — PPSK VLAN Split Verification, May 15 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Libre+Franklin:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Libre Baskerville', Georgia, serif; background: #FFFFFF; color: #111111; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 48px 24px 72px; }
+.container { max-width: 760px; width: 100%; }
+.nyt-rule-top { border: none; border-top: 3px solid #111; margin-bottom: 6px; }
+.nyt-rule-thin { border: none; border-top: 1px solid #111; margin-bottom: 18px; }
+.nyt-logo { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.22em; color: #666; text-align: center; margin-bottom: 6px; }
+.byline { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.72rem; color: #666; margin-bottom: 14px; letter-spacing: 0.02em; }
+.byline strong { color: #111; font-weight: 700; }
+h1 { font-family: 'Libre Baskerville', Georgia, serif; font-size: 2.2rem; font-weight: 700; color: #111; line-height: 1.15; margin-bottom: 14px; }
+.subtitle { font-family: 'Libre Baskerville', Georgia, serif; font-size: 1rem; font-style: italic; color: #444; line-height: 1.8; margin-bottom: 20px; border-bottom: 1px solid #E2E2E2; padding-bottom: 28px; }
+.section-label { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.18em; color: #065f46; margin: 40px 0 12px; padding-bottom: 6px; border-bottom: 2px solid #065f46; display: block; }
+h2 { font-family: 'Libre Baskerville', Georgia, serif; font-size: 1.45rem; font-weight: 700; color: #111; margin: 0 0 14px; }
+h3 { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #065f46; margin: 24px 0 10px; }
+p { font-size: 0.97rem; line-height: 1.85; color: #222; margin-bottom: 12px; }
+ul, ol { padding-left: 22px; margin-bottom: 14px; }
+li { font-size: 0.95rem; line-height: 1.8; color: #222; margin-bottom: 4px; }
+code { font-family: 'SF Mono', Consolas, monospace; font-size: 0.82rem; background: #F4F4F4; border: 1px solid #E2E2E2; padding: 1px 5px; border-radius: 3px; color: #065f46; }
+pre { background: #F8F8F8; border: 1px solid #E2E2E2; border-radius: 4px; padding: 16px; overflow-x: auto; margin: 12px 0 18px; }
+pre code { background: none; border: none; padding: 0; color: #111; font-size: 0.83rem; line-height: 1.65; }
+pre.terminal { background: #1A1A1A; border-color: #333; }
+pre.terminal code { color: #E8E8E8; }
+pre.terminal code .prompt { color: #6EE7B7; }
+pre.terminal code .ok { color: #6EE7B7; }
+pre.terminal code .bad { color: #FCA5A5; }
+pre.diagram { background: #F0FFF4; border-color: #A7F3D0; font-size: 0.78rem; }
+pre.diagram code { color: #064E3B; }
+table { width: 100%; border-collapse: collapse; margin: 12px 0 20px; font-size: 0.88rem; }
+th { background: #F4F4F4; font-family: 'Libre Franklin', Arial, sans-serif; font-weight: 700; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: #065f46; padding: 8px 10px; border: 1px solid #E2E2E2; text-align: left; }
+td { padding: 8px 10px; border: 1px solid #E2E2E2; color: #222; vertical-align: top; }
+tr:nth-child(even) td { background: #FAFAFA; }
+.ok  { color: #065f46; font-weight: 700; }
+.bad { color: #C62828; font-weight: 700; }
+.warn { color: #E65100; font-weight: 700; }
+.box { border-left: 3px solid #059669; background: #F0FFF4; padding: 12px 16px; margin: 14px 0; border-radius: 0 4px 4px 0; }
+.box p { margin: 0; font-size: 0.92rem; line-height: 1.75; }
+.box p + p { margin-top: 8px; }
+.box ul { margin: 6px 0 0; }
+.box.warn { border-left-color: #F57F17; background: #FFFBF0; }
+.box.info { border-left-color: #0284c7; background: #F0F9FF; }
+.box-label { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: #065f46; margin-bottom: 6px; }
+.box.warn .box-label { color: #E65100; }
+.box.info .box-label { color: #0284c7; }
+.divider { border: none; border-top: 1px solid #E2E2E2; margin: 32px 0; }
+.toc { background: #F8F8F8; border: 1px solid #E2E2E2; border-radius: 4px; padding: 18px 22px; margin-bottom: 36px; }
+.toc-title { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.15em; color: #666; margin-bottom: 10px; }
+.toc a { display: block; font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.85rem; color: #065f46; text-decoration: none; padding: 4px 0; border-bottom: 1px dotted #E2E2E2; }
+.toc a:last-child { border-bottom: none; }
+.footer { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.7rem; color: #999; text-align: center; line-height: 1.9; margin-top: 8px; }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <hr class="nyt-rule-top">
+  <div class="nyt-logo">KhKLab &nbsp;&bull;&nbsp; 5320 Lab Journal &nbsp;&bull;&nbsp; End-of-Day Report</div>
+  <hr class="nyt-rule-thin">
+
+  <div class="byline">
+    <strong>May 15, 2026</strong> &nbsp;&mdash;&nbsp; Session: PPSK VLAN Split Verification &nbsp;&mdash;&nbsp;
+    Continues from <a href="session_summary_20260514.html" style="color:#065f46">May 14 (KB_School sprint)</a>
+  </div>
+
+  <h1>FDB Doesn&rsquo;t Lie: How to Prove a Client Is on the Right VLAN</h1>
+
+  <p class="subtitle">The KB_School_AP_VLAN10_VLAN1 policy was deployed and confirmed live on May 15. Staff passphrase put the MacBook on 192.168.0.x; Students passphrase put two clients on 10.10.0.x. The verification method &mdash; <code>show fdb ports 3</code> followed by <code>show iparp</code> &mdash; and a forensic dual-ARP-entry observation are documented here as reusable technique.</p>
+
+  <div class="toc">
+    <div class="toc-title">In This Report</div>
+    <a href="#context">Context &mdash; What Changed Yesterday</a>
+    <a href="#result">Test Result &mdash; Split Confirmed</a>
+    <a href="#verification">Verification Workflow: FDB + ARP</a>
+    <a href="#forensic">Dual-MAC Forensic Observation</a>
+    <a href="#ipforward">New Lesson &mdash; ipforwarding and Supplemental CLI</a>
+    <a href="#iqagent">IQAgent Heartbeat Explained</a>
+    <a href="#pending">Pending</a>
+  </div>
+
+  <!-- ─── CONTEXT ─── -->
+  <span class="section-label" id="context">Context &mdash; What Changed Yesterday</span>
+
+  <p>On May 14 the policy was updated from a single VLAN10-for-all design to a split: <strong>Staff_PPSK &rarr; VLAN1</strong> (untagged, 192.168.0.x from QF-Modem) and <strong>Students_PPSK &rarr; VLAN10</strong> (tagged VID=10, 10.10.0.x from SW1 DHCP). No SW1 CLI changes were needed because port 3 was already configured correctly &mdash; Default native (untagged) + VLAN10 tagged. Full policy build is in the <a href="session_summary_20260514.html#vlan1split" style="color:#065f46">May 14 EOD</a>.</p>
+
+  <p>Today&rsquo;s session focused on <strong>verifying the split is actually working</strong> using switch-side commands, and on extracting the verification technique as a repeatable method.</p>
+
+  <!-- ─── RESULT ─── -->
+  <span class="section-label" id="result">Test Result &mdash; Split Confirmed</span>
+
+  <div class="box">
+    <p class="box-label">Both passphrases confirmed &#10003;</p>
+    <ul>
+      <li><strong>Staff passphrase &rarr; MacBook 192.168.0.10</strong> &mdash; VLAN1 (Default), lease from QF-Modem &#10003;</li>
+      <li><strong>Students passphrase &rarr; 10.10.0.10 + 10.10.0.11</strong> &mdash; VLAN10, lease from SW1 DHCP &#10003;</li>
+      <li><strong>AP1 MAC 00:E6:0E:55:66:80 &rarr; Default VLAN</strong> &mdash; AP management untagged, CAPWAP reachable &#10003;</li>
+    </ul>
+  </div>
+
+  <!-- ─── VERIFICATION ─── -->
+  <span class="section-label" id="verification">Verification Workflow: FDB + ARP</span>
+
+  <p>Two commands on SW1 are sufficient to prove a client landed on the correct VLAN. Run them immediately after the client associates and gets a DHCP lease.</p>
+
+  <h3>Step 1 &mdash; show fdb ports 3 (which VLAN is each MAC in right now?)</h3>
+
+<pre class="terminal"><code><span class="prompt">5320-16P-2MXT-2X-SwitchEngine.6 # show fdb ports 3</span>
+MAC                       VLAN Name( Tag)  Age  Flags   Port
+---------------------------------------------------------------------------
+00:e6:0e:55:66:80          Default(0001) 0037  d m      3   ← AP1 management ✅
+74:a6:cd:8b:19:60           VLAN10(0010) 0000  d mi     3   ← Students client ✅
+76:f6:58:7c:18:00           VLAN10(0010) 0000  d mi     3   ← Students client ✅</code></pre>
+
+  <p>The FDB is the authoritative live view. A client MAC under <code>Default(0001)</code> means untagged frames &mdash; VLAN1, Staff. Under <code>VLAN10(0010)</code> means tagged VID=10, Students. If the AP&rsquo;s own MAC appears under VLAN10 instead of Default, the AP&rsquo;s management path is broken (see May 14 Bug #1).</p>
+
+  <h3>Step 2 &mdash; show iparp vlan &lt;VLAN&gt; (confirm the IP)</h3>
+
+<pre class="terminal"><code><span class="prompt">5320-16P-2MXT-2X-SwitchEngine.7 # show iparp vlan VLAN10</span>
+VR-Default    10.10.0.10    76:f6:58:7c:18:00    6   VLAN10   10   3
+VR-Default    10.10.0.11    74:a6:cd:8b:19:60   15   VLAN10   10   3
+
+<span class="prompt">5320-16P-2MXT-2X-SwitchEngine.8 # show iparp vlan Default</span>
+VR-Default    192.168.0.1   58:13:d3:9c:c1:ee   20   Default   1   1   ← QF-Modem GW
+VR-Default    192.168.0.10  74:a6:cd:8b:19:60   20   Default   1   1   ← MacBook (stale)</code></pre>
+
+  <p>IPARP confirms which IP address each MAC holds and which DHCP server assigned it. Age shown in minutes; timeout = 20&nbsp;min. The <code>192.168.0.10</code> entry for the MacBook is stale &mdash; explained below.</p>
+
+  <!-- ─── FORENSIC ─── -->
+  <span class="section-label" id="forensic">Dual-MAC Forensic Observation</span>
+
+  <p>MAC <code>74:a6:cd:8b:19:60</code> (MacBook) appears in <em>both</em> ARP tables simultaneously. This is not a misconfiguration &mdash; it is the expected result when the same device is tested with two different passphrases in the same session:</p>
+
+<pre class="diagram"><code>1. MacBook joins with Staff passphrase
+   → VLAN1, gets 192.168.0.10 from QF-Modem
+   → Default ARP: 192.168.0.10 / 74:a6:cd:8b:19:60  (age timer starts, 20-min TTL)
+
+2. MacBook joins with Students passphrase
+   → VLAN10, gets 10.10.0.11 from SW1
+   → VLAN10 ARP: 10.10.0.11 / 74:a6:cd:8b:19:60  (new entry)
+   → Default ARP: 192.168.0.10 still present (age = 20, about to expire)
+   → FDB: MAC now listed only under VLAN10 (current active state)
+
+The Default ARP entry will evict itself when the 20-min timer fires.
+FDB always reflects NOW. ARP reflects up to 20 min of history.</code></pre>
+
+  <div class="box info">
+    <p class="box-label">Principle</p>
+    <p><strong>FDB = live state.</strong> Trust it when FDB and ARP disagree. A MAC in VLAN10 on FDB but still in Default ARP does not mean the client is dual-homed &mdash; it means the ARP entry is stale. The client is on VLAN10.</p>
+  </div>
+
+  <!-- ─── IPFORWARDING ─── -->
+  <span class="section-label" id="ipforward">New Lesson &mdash; ipforwarding and Supplemental CLI</span>
+
+  <p>The working Supplemental CLI block included <code>enable ipforwarding vlan Default</code> alongside the DHCP commands. This revealed a new risk:</p>
+
+  <div class="box warn">
+    <p class="box-label">Do Not Add to Supplemental CLI Template</p>
+    <p><code>enable ipforwarding vlan Default</code> is <strong>not idempotent</strong> on EXOS. Running it when ipforwarding is already enabled returns an error &mdash; causing the same XIQ 15% hang as <code>enable dhcp ports 3</code>. Treat it exactly like the DHCP commands: manual post-factory-reset step only, never in the permanent template.</p>
+  </div>
+
+  <table>
+    <tr><th>Command</th><th>In Template?</th><th>Why Not</th></tr>
+    <tr><td><code>configure vlan VLAN10 dhcp-*</code></td><td class="warn">Pass 2 only, remove after</td><td>Errors on re-run; XIQ hangs at 15%</td></tr>
+    <tr><td><code>enable dhcp ports 3 vlan VLAN10</code></td><td class="warn">Pass 2 only, remove after</td><td>Same &mdash; not idempotent</td></tr>
+    <tr><td><code>enable ipforwarding vlan Default</code></td><td class="bad">Never &mdash; manual step only</td><td>Same idempotency problem; XIQ won&rsquo;t push Default VLAN anyway</td></tr>
+  </table>
+
+  <p>Post-factory-reset checklist (run before first XIQ deploy):</p>
+  <ol>
+    <li><code>enable ports all</code></li>
+    <li><code>enable ipforwarding vlan Default</code></li>
+    <li><code>save config</code></li>
+  </ol>
+
+  <!-- ─── IQAGENT ─── -->
+  <span class="section-label" id="iqagent">IQAgent Heartbeat Explained</span>
+
+<pre class="terminal"><code>INFO[2026/05/15 17:04:07] proxy device-connector <span class="bad">unknown</span> POST
+  /device-connect/rest/v1/health-check/FJ012544G-00233</code></pre>
+
+  <p><code>FJ012544G-00233</code> is SW1&rsquo;s serial. The word <code>unknown</code> is a proxy routing log level (the handler is a catch-all), <strong>not an error</strong>. This line appears on a ~60-second cadence and confirms SW1&rsquo;s IQAgent is alive and checking in with XIQ cloud. If it stops appearing, XIQ connectivity is broken.</p>
+
+  <!-- ─── PENDING ─── -->
+  <span class="section-label" id="pending">Pending &mdash; Next Session</span>
+
+  <table>
+    <tr><th>Priority</th><th>Item</th><th>Notes</th></tr>
+    <tr><td class="ok">HIGH</td><td>XIQ Switch Template &mdash; Port 3</td><td>Update template so XIQ is authoritative: Port 3 = Default native (untagged) + VLAN10 tagged. Otherwise the next deploy will re-invert the tagging.</td></tr>
+    <tr><td class="warn">MED</td><td>Post-factory-reset checklist</td><td>Print and laminate: <code>enable ports all</code> + <code>enable ipforwarding vlan Default</code> + <code>save config</code> before any XIQ deploy.</td></tr>
+    <tr><td class="warn">MED</td><td>VLAN100 sprint</td><td>Resume <code>Khursheed_SW1_VLAN100</code> &mdash; check XIQ lock cleared, redeploy, E2E verify.</td></tr>
+    <tr><td class="warn">MED</td><td>WPA2/WPA3 Transition Mode</td><td>macOS Ventura+ grays out WPA2-only SSIDs. Add transition mode to KB_School_Broadcast in XIQ.</td></tr>
+    <tr><td class="warn">MED</td><td>MacBook auto-connect mystery</td><td>Joined without passphrase prompt. Forget network, reconnect manually &mdash; likely macOS keychain cached the PPSK.</td></tr>
+    <tr><td style="color:#888">LOW</td><td>QoS ACL fix</td><td>Branch <code>feature/qos-egress-validation</code>, week of May 18.</td></tr>
+  </table>
+
+  <hr class="divider">
+  <p class="footer">KhKLab &bull; 5320 Lab Journal &bull; May 15, 2026 &bull; Session: PPSK VLAN Split Verification<br>
+  Devices: SW1 (5320-16P, FJ012544G-00233) &bull; AP1 (AP3000, HA012519Y-10623)<br>
+  Policy: KB_School_AP_VLAN10_VLAN1 &bull; SSID: KB_School_Broadcast &bull; Staff &rarr; VLAN1 &bull; Students &rarr; VLAN10</p>
+
+</div>
+</body>
+</html>
