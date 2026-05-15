@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>5320 Lab Journal — KB_School Clean-Slate Sprint, May 14 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Libre+Franklin:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Libre Baskerville', Georgia, serif; background: #FFFFFF; color: #111111; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 48px 24px 72px; }
+.container { max-width: 760px; width: 100%; }
+.nyt-rule-top { border: none; border-top: 3px solid #111; margin-bottom: 6px; }
+.nyt-rule-thin { border: none; border-top: 1px solid #111; margin-bottom: 18px; }
+.nyt-logo { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.22em; color: #666; text-align: center; margin-bottom: 6px; }
+.byline { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.72rem; color: #666; margin-bottom: 14px; letter-spacing: 0.02em; }
+.byline strong { color: #111; font-weight: 700; }
+h1 { font-family: 'Libre Baskerville', Georgia, serif; font-size: 2.2rem; font-weight: 700; color: #111; line-height: 1.15; margin-bottom: 14px; }
+.subtitle { font-family: 'Libre Baskerville', Georgia, serif; font-size: 1rem; font-style: italic; color: #444; line-height: 1.8; margin-bottom: 20px; border-bottom: 1px solid #E2E2E2; padding-bottom: 28px; }
+.section-label { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.18em; color: #326891; margin: 40px 0 12px; padding-bottom: 6px; border-bottom: 2px solid #326891; display: block; }
+h2 { font-family: 'Libre Baskerville', Georgia, serif; font-size: 1.45rem; font-weight: 700; color: #111; margin: 0 0 14px; }
+h3 { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #326891; margin: 24px 0 10px; }
+h4 { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.8rem; font-weight: 700; color: #111; margin: 18px 0 8px; }
+p { font-size: 0.97rem; line-height: 1.85; color: #222; margin-bottom: 12px; }
+ul, ol { padding-left: 22px; margin-bottom: 14px; }
+li { font-size: 0.95rem; line-height: 1.8; color: #222; margin-bottom: 4px; }
+code { font-family: 'SF Mono', Consolas, monospace; font-size: 0.82rem; background: #F4F4F4; border: 1px solid #E2E2E2; padding: 1px 5px; border-radius: 3px; color: #326891; }
+pre { background: #F8F8F8; border: 1px solid #E2E2E2; border-radius: 4px; padding: 16px; overflow-x: auto; margin: 12px 0 18px; }
+pre code { background: none; border: none; padding: 0; color: #111; font-size: 0.83rem; line-height: 1.65; }
+pre.terminal { background: #1A1A1A; border-color: #333; }
+pre.terminal code { color: #E8E8E8; }
+pre.terminal code .prompt { color: #7EC8E3; }
+pre.terminal code .ok { color: #7EBF7E; font-weight: normal; }
+pre.terminal code .bad { color: #E07070; font-weight: normal; }
+pre.diagram { background: #F0F7FF; border-color: #B0D0E8; font-size: 0.78rem; }
+pre.diagram code { color: #1A3A5C; }
+table { width: 100%; border-collapse: collapse; margin: 12px 0 20px; font-size: 0.88rem; }
+th { background: #F4F4F4; font-family: 'Libre Franklin', Arial, sans-serif; font-weight: 700; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: #326891; padding: 8px 10px; border: 1px solid #E2E2E2; text-align: left; }
+td { padding: 8px 10px; border: 1px solid #E2E2E2; color: #222; vertical-align: top; }
+tr:nth-child(even) td { background: #FAFAFA; }
+.ok  { color: #2E7D32; font-weight: 700; }
+.bad { color: #C62828; font-weight: 700; }
+.warn { color: #E65100; font-weight: 700; }
+.box { border-left: 3px solid #326891; background: #F0F7FF; padding: 12px 16px; margin: 14px 0; border-radius: 0 4px 4px 0; }
+.box p { margin: 0; font-size: 0.92rem; line-height: 1.75; }
+.box p + p { margin-top: 8px; }
+.box.warn { border-left-color: #F57F17; background: #FFFBF0; }
+.box.ok { border-left-color: #2E7D32; background: #F1F8F1; }
+.box.alert { border-left-color: #C62828; background: #FCEEEE; }
+.box-label { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: #326891; margin-bottom: 6px; }
+.box.warn .box-label { color: #E65100; }
+.box.ok .box-label { color: #2E7D32; }
+.box.alert .box-label { color: #C62828; }
+.divider { border: none; border-top: 1px solid #E2E2E2; margin: 32px 0; }
+.toc { background: #F8F8F8; border: 1px solid #E2E2E2; border-radius: 4px; padding: 18px 22px; margin-bottom: 36px; }
+.toc-title { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.15em; color: #666; margin-bottom: 10px; }
+.toc a { display: block; font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.85rem; color: #326891; text-decoration: none; padding: 4px 0; border-bottom: 1px dotted #E2E2E2; }
+.toc a:last-child { border-bottom: none; }
+.toc a:hover { color: #111; }
+.timeline { list-style: none; padding: 0; }
+.timeline li { padding: 0 0 28px 26px; position: relative; border-left: 2px solid #E2E2E2; margin-left: 6px; }
+.timeline li:last-child { border-left-color: transparent; }
+.timeline li::before { content: ''; position: absolute; left: -7px; top: 6px; width: 12px; height: 12px; border-radius: 50%; background: #326891; border: 2px solid #fff; box-shadow: 0 0 0 2px #326891; }
+.timeline li.bad-step::before { background: #C62828; box-shadow: 0 0 0 2px #C62828; }
+.timeline li.ok-step::before { background: #2E7D32; box-shadow: 0 0 0 2px #2E7D32; }
+.timeline .time { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #326891; margin-bottom: 6px; }
+.timeline li.bad-step .time { color: #C62828; }
+.timeline li.ok-step .time { color: #2E7D32; }
+.stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 20px 0 30px; }
+.stat-card { border: 1px solid #E2E2E2; border-radius: 4px; padding: 12px 14px; text-align: center; }
+.stat-num { font-family: 'Libre Baskerville', Georgia, serif; font-size: 1.5rem; font-weight: 700; color: #111; }
+.stat-label { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.7rem; color: #666; text-transform: uppercase; letter-spacing: 0.08em; margin-top: 2px; }
+.step-num { display: inline-block; background: #326891; color: #fff; font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.7rem; font-weight: 700; width: 22px; height: 22px; border-radius: 50%; text-align: center; line-height: 22px; margin-right: 6px; flex-shrink: 0; }
+.footer { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.72rem; color: #999; text-align: center; margin-top: 48px; padding-top: 16px; border-top: 1px solid #E2E2E2; }
+a { color: #326891; }
+a:hover { color: #111; }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <hr class="nyt-rule-top">
+  <p class="nyt-logo">E2E Network Deployment &mdash; Lab Journal</p>
+  <hr class="nyt-rule-thin">
+
+  <p class="byline">Thursday, May 14, 2026 &bull; KhKLab &bull; <strong>KB_School Clean-Slate Sprint &mdash; Factory Reset &rarr; XIQ Policy Build &rarr; CAPWAP Fix &rarr; PPSK E2E</strong></p>
+
+  <h1>Two Factory Resets, Two Bugs, One Working School Network</h1>
+
+  <p class="subtitle">A complete rebuild from scratch: factory-reset both switch and AP, create two fresh XIQ policies, deploy, then troubleshoot two consecutive blockers &mdash; VLAN10 was configured as untagged on port 3 (which stranded the AP&rsquo;s management traffic on the wrong subnet), and IP forwarding was not enabled on the Default VLAN (which prevented SW1 from routing client traffic to the internet). Both fixed. iPhone and MacBook on PPSK internet by end of day.</p>
+
+  <div class="stats">
+    <div class="stat-card"><div class="stat-num ok">2</div><div class="stat-label">Factory Resets</div></div>
+    <div class="stat-card"><div class="stat-num" style="color:#326891">3</div><div class="stat-label">XIQ Policies Built</div></div>
+    <div class="stat-card"><div class="stat-num" style="color:#E65100">3</div><div class="stat-label">Bugs Diagnosed + Fixed</div></div>
+    <div class="stat-card"><div class="stat-num ok">2</div><div class="stat-label">VIQ Orgs Deployed</div></div>
+  </div>
+
+  <div class="toc">
+    <p class="toc-title">In This Session</p>
+    <a href="#accomplished">Accomplished &mdash; all confirmed outcomes</a>
+    <a href="#context">Sprint Context &mdash; why a clean slate, why KB_School</a>
+    <a href="#step1">Step 1 &mdash; SW1 Factory Reset</a>
+    <a href="#step2">Step 2 &mdash; XIQ Policy: KB_School_SW1 (Switch)</a>
+    <a href="#step3">Step 3 &mdash; XIQ Policy: KB_School_AP1_VLAN10 (Wireless)</a>
+    <a href="#step4">Step 4 &mdash; AP1 Factory Reset</a>
+    <a href="#step5">Step 5 &mdash; Deploy Policies to Both Devices</a>
+    <a href="#bug1">Bug 1 &mdash; AP1 Offline: VLAN Tagging Explained in Full</a>
+    <a href="#tagging">VLAN Tagging Deep Dive &mdash; what tagged vs untagged actually means</a>
+    <a href="#bug1fix">Bug 1 Fix &mdash; Three CLI Commands, LED Goes Green</a>
+    <a href="#bug2">Bug 2 &mdash; No Internet: IP Forwarding Explained</a>
+    <a href="#bug2fix">Bug 2 Fix &mdash; enable ipforwarding vlan Default</a>
+    <a href="#bug3">Bug 3 &mdash; XIQ Policy Stuck at 15% on Re-Deploy</a>
+    <a href="#porttype">XIQ Port Type Verified &mdash; show vlan detail confirms correct state</a>
+    <a href="#policies">Policy Reference &mdash; complete config tables</a>
+    <a href="#supplemental">Supplemental CLI &mdash; verified DHCP commands + re-deploy warning</a>
+    <a href="#labstate">Lab State &mdash; end of May 14, all components</a>
+    <a href="#commands">Key Commands Reference</a>
+    <a href="#lessons">Lessons Learned &mdash; 8 principles</a>
+    <a href="#pending">Pending &mdash; next session backlog</a>
+  </div>
+
+  <!-- ─── ACCOMPLISHED ─── -->
+  <span class="section-label" id="accomplished">Accomplished</span>
+
+  <ul>
+    <li><span class="ok">✅</span> <strong>SW1 factory reset</strong> &mdash; <code>unconfigure switch all</code>, wizard answered correctly (NO to disable ports), ports re-enabled</li>
+    <li><span class="ok">✅</span> <strong>KB_School_SW1 policy created + deployed</strong> &mdash; VLAN10 (tag 10), SVI 10.10.0.1/24, IPv4 Forwarding ON, port assignments correct</li>
+    <li><span class="ok">✅</span> <strong>DHCP pool live on VLAN10</strong> &mdash; 10.10.0.10&ndash;10.10.0.254, gateway 10.10.0.1, DNS 8.8.8.8/1.1.1.1, lease 24h via Supplemental CLI</li>
+    <li><span class="ok">✅</span> <strong>AP1 factory reset</strong> &mdash; triggered from XIQ Monitor &rarr; Devices &rarr; Reset Device to Default</li>
+    <li><span class="ok">✅</span> <strong>KB_School_AP1_VLAN10 policy created + deployed</strong> &mdash; SSID <code>KB_School_Broadcast</code>, PPSK/WPA2, Staff_PPSK + Students_PPSK, default User Profile VLAN10</li>
+    <li><span class="ok">✅</span> <strong>Bug 1 fixed &mdash; VLAN10 tagging</strong> &mdash; Default VLAN restored as native (untagged) on port 3; VLAN10 set to tagged; AP1 CAPWAP established, LED green</li>
+    <li><span class="ok">✅</span> <strong>Bug 2 fixed &mdash; IP forwarding</strong> &mdash; <code>enable ipforwarding vlan Default</code> applied and saved; internet restored</li>
+    <li><span class="ok">✅</span> <strong>PPSK E2E test PASSED</strong> &mdash; iPhone 10.10.0.10 + MacBook 10.10.0.11, both on internet via KB_School_Broadcast</li>
+    <li><span class="ok">✅</span> <strong>AP1 onboarded into Boss Karl&rsquo;s VIQ</strong> &mdash; factory reset, firmware updated (white LED), CAPWAP established, KB_School_Broadcast policy deployed</li>
+    <li><span class="ok">✅</span> <strong>Karl&rsquo;s VIQ E2E confirmed</strong> &mdash; iPhone 10.10.0.10 on internet via Karl&rsquo;s VIQ &rarr; AP1 &rarr; SW1 VLAN10 DHCP &rarr; QF-Modem</li>
+    <li><span class="ok">✅</span> <strong>All findings saved to persistent memory</strong></li>
+  </ul>
+
+  <!-- ─── CONTEXT ─── -->
+  <span class="section-label" id="context">Sprint Context</span>
+
+  <p>The previous day (May 13) was spent on <code>Khursheed_SW1_VLAN100</code> &mdash; an XIQ policy build that kept hitting a Supplemental CLI hang at 15%. The root issues: XIQ&rsquo;s <code>${vlan:}</code> variable resolves to the VLAN ID number (e.g. <code>100</code>) not the name, EXOS rejects it, and XIQ holds a config job lock that blocks template edits while a deploy is in-flight. That sprint was parked overnight.</p>
+
+  <p>Today&rsquo;s goal: build the KB_School network as a clean rehearsal for Karl&rsquo;s VIQ deployment. Two devices, two policies, one VLAN. Rule: XIQ is the authoritative config source. CLI is used only for verification and emergency fixes &mdash; not for initial provisioning.</p>
+
+  <div class="box ok">
+    <p class="box-label">Why Starting Clean Matters</p>
+    <p>Iterative patching hides architectural mistakes. A fresh build from scratch forces every configuration decision to be explicit &mdash; and that is how the VLAN tagging bug was discovered clearly rather than buried in layers of partial fixes.</p>
+  </div>
+
+  <!-- ─── STEP 1 ─── -->
+  <span class="section-label" id="step1">Step 1 &mdash; SW1 Factory Reset</span>
+
+  <p>SSH to SW1 (192.168.0.28). The factory reset command in EXOS SwitchEngine is:</p>
+
+<pre class="terminal"><code>unconfigure switch all</code></pre>
+
+  <p>The switch reboots automatically. On the way back up, EXOS runs a provisioning wizard. The critical question:</p>
+
+  <div class="box warn">
+    <p class="box-label">Wizard: Disable Unconfigured Ports?</p>
+    <p><strong>Always answer NO.</strong> If you answer YES, EXOS executes <code>disable ports all</code> and every port shuts down &mdash; including port 1 (uplink to QF-Modem) and port 3 (AP). IQAgent loses connectivity to XIQ. You then have to SSH in and run <code>enable ports all</code> before anything works. Save yourself the pain: always NO.</p>
+  </div>
+
+  <p>Immediately after the wizard, run:</p>
+
+<pre class="terminal"><code>enable ports all
+save config
+# Default login after factory reset: admin / (blank password)</code></pre>
+
+  <p>At this point SW1 is clean. Default VLAN has port 1&ndash;20 untagged, gets 192.168.0.x from QF-Modem DHCP, IQAgent connects to XIQ within a minute or two.</p>
+
+  <!-- ─── STEP 2 ─── -->
+  <span class="section-label" id="step2">Step 2 &mdash; XIQ Policy: KB_School_SW1 (Switch)</span>
+
+  <p>In XIQ &rarr; Configure &rarr; Network Policies &rarr; Add Network Policy:</p>
+
+  <h4>Policy settings</h4>
+  <table>
+    <tr><th>Field</th><th>Value</th><th>Why</th></tr>
+    <tr><td>Policy Name</td><td>KB_School_SW1</td><td>Identifies the school lab switch policy</td></tr>
+    <tr><td>Policy Type</td><td>Switching / Routing</td><td>This is an EXOS switch, not a wireless AP</td></tr>
+    <tr><td>Switch Template</td><td>Khursheed_5320_For_Karl (5320-16P-2MXT-2X)</td><td>Matches the physical switch model</td></tr>
+  </table>
+
+  <h4>VLAN Object</h4>
+  <table>
+    <tr><th>Field</th><th>Value</th><th>Why</th></tr>
+    <tr><td>VLAN Name</td><td>VLAN10</td><td>No underscores &mdash; XIQ drops them anyway (VLAN_10 becomes VLAN10 on the switch)</td></tr>
+    <tr><td>VLAN Tag / ID</td><td>10</td><td>802.1Q tag that will be stamped on frames belonging to this VLAN</td></tr>
+  </table>
+
+  <h4>Port Assignments</h4>
+  <table>
+    <tr><th>Port</th><th>Port Type / Mode</th><th>VLANs</th><th>Purpose</th></tr>
+    <tr><td>Port 1</td><td>Trunk</td><td>Default VLAN untagged (native)</td><td>Uplink to QF-Modem &mdash; carries management and internet traffic</td></tr>
+    <tr><td>Port 3</td><td>AP Port Type</td><td>Default untagged + VLAN10 tagged</td><td>AP management + user client traffic (see Bug 1 &mdash; XIQ got this wrong on first deploy)</td></tr>
+  </table>
+
+  <h4>Routing (SVI)</h4>
+  <table>
+    <tr><th>Field</th><th>Value</th><th>Why</th></tr>
+    <tr><td>Device</td><td>FJ012544G-00233 (192.168.0.28)</td><td>Assigns the SVI to this specific switch</td></tr>
+    <tr><td>VLAN</td><td>VLAN10</td><td>The routed interface for the client subnet</td></tr>
+    <tr><td>IP Address</td><td>10.10.0.1 / 255.255.255.0</td><td>SW1&rsquo;s gateway address for client devices</td></tr>
+    <tr><td>IPv4 Forwarding</td><td>ON</td><td>Allows SW1 to route between VLAN10 and Default VLAN (internet)</td></tr>
+  </table>
+
+  <h4>Supplemental CLI (DHCP)</h4>
+  <p>Added under Advanced Settings as <code>VLAN10_DHCP</code>. Deployed in a second pass after the base config was confirmed working (see deploy sequence in Step 5).</p>
+
+  <!-- ─── STEP 3 ─── -->
+  <span class="section-label" id="step3">Step 3 &mdash; XIQ Policy: KB_School_AP1_VLAN10 (Wireless)</span>
+
+  <p>In XIQ &rarr; Configure &rarr; Network Policies &rarr; Add Network Policy:</p>
+
+  <table>
+    <tr><th>Field</th><th>Value</th><th>Why</th></tr>
+    <tr><td>Policy Name</td><td>KB_School_AP1_VLAN10</td><td>Identifies the school lab AP policy</td></tr>
+    <tr><td>Policy Type</td><td>Wireless</td><td>This policy goes to the AP3000, not the switch</td></tr>
+    <tr><td>SSID Name</td><td>KB_School_Broadcast</td><td>What clients will see when scanning for Wi-Fi</td></tr>
+    <tr><td>Authentication</td><td>PPSK</td><td>Private Pre-Shared Key &mdash; each user group gets its own passphrase</td></tr>
+    <tr><td>Encryption</td><td>WPA2, CCMP (AES)</td><td>Standard WPA2 Personal encryption</td></tr>
+    <tr><td>User Group 1</td><td>Staff_PPSK (SERVICE / Cloud)</td><td>Staff members get a separate passphrase</td></tr>
+    <tr><td>User Group 2</td><td>Students_PPSK (SERVICE / Cloud)</td><td>Students get a different passphrase</td></tr>
+    <tr><td>Default User Profile</td><td>VLAN10</td><td>Both groups land on VLAN10 &mdash; SW1 DHCP assigns 10.10.0.x</td></tr>
+    <tr><td>AP Template</td><td>AP_3000-default-template</td><td>Matches the AP3000 hardware</td></tr>
+  </table>
+
+  <!-- ─── STEP 4 ─── -->
+  <span class="section-label" id="step4">Step 4 &mdash; AP1 Factory Reset</span>
+
+  <p>In XIQ &rarr; Monitor &rarr; Devices: locate AP1 (AH-556680, MAC 00:E6:0E:55:66:80). Select it &rarr; Actions &rarr; <strong>Reset Device to Default</strong>. XIQ pushes the reset command over the existing CAPWAP tunnel. AP reboots, comes back as a clean unmanaged device.</p>
+
+  <p>The AP then connects to XIQ using its factory-default CAPWAP discovery sequence:</p>
+  <ol>
+    <li>AP gets an IP via DHCP from QF-Modem (192.168.0.x) &mdash; it&rsquo;s on the Default VLAN at this point</li>
+    <li>AP queries DNS for <code>redirector.aerohive.com</code> to find the XIQ cloud endpoint</li>
+    <li>CAPWAP tunnel (UDP 5246/5247) establishes to XIQ</li>
+    <li>AP appears in XIQ Monitor &rarr; Devices as Connected / Unmanaged</li>
+  </ol>
+
+  <p>Once it appears: assign it to <code>KB_School_AP1_VLAN10</code>.</p>
+
+  <!-- ─── STEP 5 ─── -->
+  <span class="section-label" id="step5">Step 5 &mdash; Deploy Policies to Both Devices</span>
+
+  <h3>Deploy Sequence for KB_School_SW1 (Switch)</h3>
+
+  <p>Key lesson from May 13: never deploy with Supplemental CLI in the first pass. A Supplemental CLI error causes the deploy job to hang at exactly 15% indefinitely. Always confirm the base config deploys cleanly first.</p>
+
+  <ol>
+    <li><strong>First deploy: NO Supplemental CLI.</strong> Go to Configure &rarr; Network Policies &rarr; KB_School_SW1 &rarr; Deploy Policy &rarr; select SW1 &rarr; Deploy. Watch it reach 100%.</li>
+    <li><strong>Verify on SW1:</strong></li>
+  </ol>
+
+<pre class="terminal"><code>show vlan
+# Expected: Default (192.168.0.28/24) + VLAN10 (10.10.0.1/24, ipforwarding ON)
+
+show config | i VLAN10
+# Expected: create vlan, tag 10, ipaddress, ipforwarding entries</code></pre>
+
+  <ol start="3">
+    <li><strong>Confirm the exact VLAN name XIQ created on the switch.</strong> XIQ drops underscores: an XIQ object named <code>VLAN_10</code> becomes <code>VLAN10</code> on the switch. Today it was <code>VLAN10</code> &mdash; correct.</li>
+    <li><strong>Add Supplemental CLI</strong> with hardcoded name <code>VLAN10</code> (never <code>${vlan:VLAN10}</code> &mdash; that resolves to the number 10, which EXOS rejects).</li>
+    <li><strong>Second deploy: WITH Supplemental CLI.</strong> Deploy again. Confirm 100%. Verify:</li>
+  </ol>
+
+<pre class="terminal"><code>show config | i VLAN10
+# Must now show all 6 DHCP commands:
+# configure vlan VLAN10 dhcp-address-range 10.10.0.10 - 10.10.0.254
+# configure vlan VLAN10 dhcp-options default-gateway 10.10.0.1
+# configure vlan VLAN10 dhcp-options dns-server 8.8.8.8
+# configure vlan VLAN10 dhcp-options dns-server secondary 1.1.1.1
+# configure vlan VLAN10 dhcp-lease-timer 86400
+# enable dhcp ports 3 vlan VLAN10
+
+show dhcp-server
+# Must show: address range populated, DHCP enabled on port 3</code></pre>
+
+  <p>Both verified. DHCP pool live. No leases yet &mdash; no clients connected yet. That is expected at this stage.</p>
+
+  <h3>Deploy Sequence for KB_School_AP1_VLAN10 (Wireless)</h3>
+
+  <p>From XIQ Monitor &rarr; Devices: select AP1 &rarr; Update &rarr; Update Devices. XIQ pushes the wireless policy over CAPWAP. AP receives SSID config, user group bindings, and VLAN10 assignment. Deployment completes &mdash; AP shows &ldquo;Updating&rdquo; then transitions to &ldquo;Connected.&rdquo;</p>
+
+  <!-- ─── BUG 1 ─── -->
+  <span class="section-label" id="bug1">Bug 1 &mdash; AP1 Offline After Policy Deploy</span>
+
+  <h2>AP1 LED: Orange. XIQ: Disconnected. SSH: Failed.</h2>
+
+  <p>After the KB_School_AP1_VLAN10 policy was deployed, AP1 went offline. The LED changed from green (CAPWAP connected during factory reset phase) to <span class="bad">orange</span> (CAPWAP lost). XIQ showed the AP as Disconnected. SSH attempts failed &mdash; the AP was unreachable.</p>
+
+  <h3>Diagnostic Step 1 &mdash; Check the FDB</h3>
+
+  <p>From SW1, check the Forwarding Database for port 3. The FDB shows which MAC addresses the switch has learned on each port, and <em>on which VLAN</em> it learned them.</p>
+
+<pre class="terminal"><code>show fdb ports 3
+
+# Output:
+# MAC                VLANID   VLAN NAME   Age  Flags   Port
+# 00:e6:0e:55:66:80  10       VLAN10      0050  d m     3</code></pre>
+
+  <p>The AP&rsquo;s MAC address (00:E6:0E:55:66:80) appeared on <strong>VLAN10</strong>, not on the Default VLAN. This was the smoking gun. Understanding why this is wrong requires understanding how VLAN tagging works on a switch port.</p>
+
+  <!-- ─── TAGGING DEEP DIVE ─── -->
+  <span class="section-label" id="tagging">VLAN Tagging Deep Dive &mdash; What Tagged vs Untagged Actually Means</span>
+
+  <h3>The Basics: What is a VLAN Tag?</h3>
+
+  <p>When a frame travels across a network cable, it is just bytes. A <strong>VLAN tag</strong> (defined by IEEE 802.1Q) is an extra 4-byte label inserted into the Ethernet frame header. It contains the VLAN ID &mdash; a number from 1 to 4094 &mdash; that tells the network equipment &ldquo;this frame belongs to VLAN 10&rdquo; (or 20, or 100, etc.).</p>
+
+  <ul>
+    <li><strong>Tagged frame:</strong> has the 4-byte 802.1Q header. Any switch or device that receives it can read the VLAN ID and know which VLAN it belongs to.</li>
+    <li><strong>Untagged frame:</strong> a plain Ethernet frame with no VLAN label &mdash; the same format a computer or AP sends by default, because most end devices don&rsquo;t know about VLANs at all.</li>
+  </ul>
+
+<pre class="diagram"><code>TAGGED FRAME:
+  ┌──────────┬──────────┬────────────────────────┬───────────┬──────────────┐
+  │ Dest MAC │ Src MAC  │  802.1Q Tag (4 bytes)  │ EtherType │   Payload    │
+  │ 6 bytes  │ 6 bytes  │  TPID=0x8100, VID=10  │  2 bytes  │              │
+  └──────────┴──────────┴────────────────────────┴───────────┴──────────────┘
+                                ↑ this tells the switch: "I belong to VLAN 10"
+
+UNTAGGED FRAME:
+  ┌──────────┬──────────┬───────────┬──────────────┐
+  │ Dest MAC │ Src MAC  │ EtherType │   Payload    │
+  │ 6 bytes  │ 6 bytes  │  2 bytes  │              │
+  └──────────┴──────────┴───────────┴──────────────┘
+                   ↑ no VLAN label — belongs to whichever VLAN owns this port</code></pre>
+
+  <h3>How a Switch Port Handles Tagged vs Untagged</h3>
+
+  <p>A switch port that carries multiple VLANs (a &ldquo;trunk&rdquo; port) has two rules:</p>
+
+  <ul>
+    <li><strong>One untagged (native) VLAN.</strong> Frames arriving on this port <em>without</em> a tag are assigned to this VLAN. Frames <em>leaving</em> this port for this VLAN have their tag stripped before transmission. The device on the other end never sees a tag for the native VLAN.</li>
+    <li><strong>One or more tagged VLANs.</strong> Frames arriving <em>with</em> a matching tag are put into that VLAN. Frames leaving for these VLANs keep their tag. The device on the other end must understand 802.1Q to read the tag and handle it correctly.</li>
+  </ul>
+
+<pre class="diagram"><code>Port 3 — correct architecture (what we want):
+
+SW1 Port 3 ──────────────────────── AP1
+                                     │
+  Native VLAN = Default (VLAN 1)     │ AP's own traffic (untagged)
+  ◄── untagged frames ──────────────►│ AP DHCP, CAPWAP, SSH = no tag
+                                     │ → switch assigns to Default VLAN
+                                     │ → AP gets 192.168.0.x from QF-Modem
+                                     │ → AP can reach XIQ on internet ✅
+                                     │
+  Tagged VLAN = VLAN10 (tag=10)      │ Client traffic (tagged by AP)
+  ◄── [802.1Q tag: VID=10] ─────────►│ When a client joins KB_School_Broadcast,
+                                     │ AP wraps client frames with tag VID=10
+                                     │ → switch puts on VLAN10
+                                     │ → client gets 10.10.0.x from SW1 DHCP ✅</code></pre>
+
+  <h3>What XIQ Pushed Instead (The Bug)</h3>
+
+  <p>XIQ configured the AP Port Type with VLAN10 as the <em>untagged</em> (native) VLAN on port 3. The Default VLAN got pushed as tagged. This is the exact opposite of what is needed.</p>
+
+<pre class="diagram"><code>Port 3 — WRONG (what XIQ deployed):
+
+SW1 Port 3 ──────────────────────── AP1
+                                     │
+  Native VLAN = VLAN10               │ AP's own traffic (untagged)
+  ◄── untagged frames ──────────────►│ AP DHCP, CAPWAP, SSH = no tag
+                                     │ → switch assigns to VLAN10  ← WRONG
+                                     │ → AP gets 10.10.0.x from SW1 DHCP
+                                     │ → AP tries to reach XIQ from 10.10.0.x
+                                     │ → No route to cloud XIQ from 10.10.0.x ✗
+                                     │ → CAPWAP cannot establish ✗
+                                     │ → LED ORANGE ✗
+                                     │
+  Tagged VLAN = Default (VLAN 1)     │ Impossible for AP to use
+  ◄── [802.1Q tag: VID=1] ──────────►│ AP does not generate VLAN-tagged mgmt frames</code></pre>
+
+  <h3>Why Can&rsquo;t the AP Reach XIQ from 10.10.0.x?</h3>
+
+  <p>XIQ (ExtremeCloud IQ) is a cloud service on the internet. To reach it, the AP needs:</p>
+  <ol>
+    <li>An IP address on a subnet that has a path to the internet</li>
+    <li>A default gateway that can route to the internet</li>
+  </ol>
+
+  <p>When the AP is on the Default VLAN (192.168.0.x), its gateway is the QF-Modem (192.168.0.1) which has a direct internet connection. Path to XIQ: clear.</p>
+
+  <p>When the AP is on VLAN10 (10.10.0.x), its gateway is SW1&rsquo;s SVI (10.10.0.1). SW1 can forward to the QF-Modem via its default route, but the QF-Modem has no concept of forwarding 10.10.0.x management traffic to XIQ&rsquo;s servers. The 10.10.0.0/24 subnet is intended for client user traffic only &mdash; not for AP-to-cloud management.</p>
+
+  <div class="box alert">
+    <p class="box-label">The Key Insight</p>
+    <p>The AP has only one physical network interface. That interface sends untagged frames. Whichever VLAN is native/untagged on its switch port is where those frames land &mdash; and therefore which subnet the AP lives on. If the AP&rsquo;s management subnet cannot reach XIQ, CAPWAP cannot establish, full stop. The SSID, the PPSK config, the VLAN assignments &mdash; none of that matters if the AP cannot talk to XIQ first.</p>
+  </div>
+
+  <h3>Diagnostic Step 2 &mdash; Confirm with show vlan detail</h3>
+
+<pre class="terminal"><code>show vlan detail
+
+# Output (abbreviated):
+# VLAN Interface with name "Default" created by user
+#   ...
+#   Ports: 1-20 (untagged), active: 1 3   ← port 3 NOT shown here
+#
+# VLAN Interface with name "VLAN10" created by user
+#   Tag: 10, Virtual router: VR-Default
+#   SVI: 10.10.0.1/24, IP Forwarding: enabled
+#   Ports: (untagged) 3*, active    ← port 3 untagged on VLAN10 = THE BUG</code></pre>
+
+  <p>This confirmed it. VLAN10 owned port 3 as untagged. Default VLAN did not have port 3 at all (or had it tagged, which an AP cannot use). The AP&rsquo;s management frames had nowhere to go except VLAN10.</p>
+
+  <!-- ─── BUG 1 FIX ─── -->
+  <span class="section-label" id="bug1fix">Bug 1 Fix &mdash; Three CLI Commands, LED Goes Green</span>
+
+  <p>The fix is three commands: remove port 3 from VLAN10, add port 3 to Default as untagged (native), add port 3 back to VLAN10 as tagged.</p>
+
+<pre class="terminal"><code>configure vlan VLAN10 delete ports 3
+# Removes port 3 from VLAN10 entirely
+
+configure vlan Default add ports 3 untagged
+# Adds port 3 to Default VLAN as the native/untagged VLAN
+# Now: AP's untagged management frames → Default VLAN → 192.168.0.x
+
+configure vlan VLAN10 add ports 3 tagged
+# Adds port 3 to VLAN10 as a tagged VLAN
+# Now: frames with 802.1Q tag VID=10 → VLAN10 → 10.10.0.x
+
+save config</code></pre>
+
+  <h4>Verify the fix</h4>
+
+<pre class="terminal"><code>show vlan detail
+
+# Correct output after fix:
+# "Default" — Ports (untagged): 1-20, active: 1 *3   ← port 3 active, untagged
+# "VLAN10"  — Ports (tagged):   T*3, active           ← port 3 active, tagged</code></pre>
+
+  <p>Within seconds of running <code>save config</code>: AP1 LED changed from <span class="bad">orange</span> to <span class="ok">green</span>. The AP&rsquo;s management frames were now landing on Default VLAN &rarr; AP got a 192.168.0.x IP from QF-Modem &rarr; resolved <code>redirector.aerohive.com</code> &rarr; CAPWAP tunnel established &rarr; XIQ showed AP transitioning to &ldquo;Connected.&rdquo;</p>
+
+  <div class="box ok">
+    <p class="box-label">Why the LED Change Was Immediate</p>
+    <p>The AP had been continuously sending DHCP DISCOVER frames (broadcast) and CAPWAP discovery packets. The switch was receiving them (6,972 RX frames on port 3, 3,743 broadcasts recorded in port statistics) but delivering them to the wrong VLAN. The moment port 3 was corrected, the AP&rsquo;s next DHCP DISCOVER landed on Default VLAN, QF-Modem responded with a 192.168.0.x lease, and CAPWAP came up in the same connection cycle.</p>
+  </div>
+
+  <!-- ─── BUG 2 ─── -->
+  <span class="section-label" id="bug2">Bug 2 &mdash; SSID Up, DHCP Working, No Internet</span>
+
+  <h2>iPhone: 10.10.0.10. MacBook: 10.10.0.11. Safari: Times Out.</h2>
+
+  <p>AP1 connected to XIQ, policy pushed, <code>KB_School_Broadcast</code> SSID appeared in the device scan. Connected both an iPhone and a MacBook using PPSK. Both received IP addresses from VLAN10 DHCP:</p>
+
+  <ul>
+    <li>iPhone: 10.10.0.10</li>
+    <li>MacBook: 10.10.0.11</li>
+    <li>Gateway shown: 10.10.0.1 (SW1&rsquo;s VLAN10 SVI)</li>
+    <li>DNS shown: 8.8.8.8</li>
+  </ul>
+
+  <p>But internet access failed. Safari timed out. Ping to 8.8.8.8 received no response from the clients. DHCP was working perfectly. The routing table was correct. What was missing?</p>
+
+  <h3>Diagnostic: Ping from SW1 to client, then check routing table</h3>
+
+<pre class="terminal"><code>5320-16P-2MXT-2X-SwitchEngine.39 # ping 10.10.0.10
+Ping(ICMP) 10.10.0.10: 4 packets, 8 data bytes, interval 1 second(s).
+16 bytes from 10.10.0.10: icmp_seq=0 ttl=64 time=51 ms
+16 bytes from 10.10.0.10: icmp_seq=1 ttl=64 time=101 ms
+16 bytes from 10.10.0.10: icmp_seq=2 ttl=64 time=20 ms
+16 bytes from 10.10.0.10: icmp_seq=3 ttl=64 time=72 ms
+4 packets transmitted, 4 packets received, 0% loss</code></pre>
+
+  <p>SW1 could reach the client: confirmed. The client was alive. The switch could talk to it. So the problem was not on the local VLAN10 segment. The problem was in forwarding packets <em>out of</em> VLAN10 toward the internet.</p>
+
+<pre class="terminal"><code>show iproute
+
+Ori  Destination        Gateway         Mtr  Flags         VLAN       Duration
+#bo  Default Route      192.168.0.1     1    UG-D---um--f- Default    0d:1h:6m:6s
+#d   10.10.0.0/24       10.10.0.1       1    U------um--f- VLAN10     0d:0h:46m:20s
+#d   192.168.0.0/24     192.168.0.28    1    U------um--f- Default    0d:1h:6m:7s</code></pre>
+
+  <p>The routing table was correct:</p>
+  <ul>
+    <li>Default route <code>0.0.0.0/0 via 192.168.0.1</code> (origin <code>bo</code> = BOOTP/DHCP-learned from QF-Modem) &mdash; present and marked preferred (<code>#</code>)</li>
+    <li>Direct route for 10.10.0.0/24 via VLAN10 &mdash; present</li>
+    <li>Direct route for 192.168.0.0/24 via Default VLAN &mdash; present</li>
+  </ul>
+
+  <p>SW1 knew where to send packets. So what was stopping it?</p>
+
+  <!-- ─── BUG 2 DEEP DIVE ─── -->
+  <h3>What IP Forwarding Actually Does</h3>
+
+  <p>By default on EXOS, each VLAN is treated as an isolated Layer 3 island. A packet that arrives on VLAN10 stays on VLAN10. For SW1 to act as a <em>router</em> between VLANs &mdash; or to forward a packet from VLAN10 out through the Default VLAN to the QF-Modem &mdash; IP forwarding must be explicitly enabled on the <em>outgoing</em> VLAN interface.</p>
+
+<pre class="diagram"><code>Client on VLAN10 wants to reach 8.8.8.8 (internet):
+
+  iPhone (10.10.0.10)
+       │ sends packet to gateway 10.10.0.1
+       ▼
+  SW1 VLAN10 interface (10.10.0.1)
+       │ packet arrives, destination = 8.8.8.8
+       │ route lookup: default route = 192.168.0.1 via Default VLAN
+       │
+       ▼ ipforwarding vlan Default = OFF  ← THE BUG
+       ✗ SW1 refuses to forward out through Default VLAN
+       ✗ packet dropped here, never reaches QF-Modem
+
+  ─────────────────────────────────────────────────────────────
+
+  After fix — ipforwarding vlan Default = ON:
+
+  iPhone (10.10.0.10)
+       │
+       ▼
+  SW1 VLAN10 (10.10.0.1) ──forward──► SW1 Default VLAN (192.168.0.28)
+                                              │
+                                              ▼
+                                       QF-Modem (192.168.0.1)
+                                              │
+                                              ▼
+                                         Internet ✅</code></pre>
+
+  <p>Note that <code>ipforwarding</code> was enabled on VLAN10 by XIQ (because VLAN10 is a routed SVI). But XIQ does <strong>not</strong> enable it on the Default VLAN. After a factory reset, Default VLAN forwarding defaults to OFF. It must be enabled manually.</p>
+
+  <!-- ─── BUG 2 FIX ─── -->
+  <span class="section-label" id="bug2fix">Bug 2 Fix &mdash; enable ipforwarding vlan Default</span>
+
+<pre class="terminal"><code>5320-16P-2MXT-2X-SwitchEngine.40 # enable ipforwarding vlan Default
+* 5320-16P-2MXT-2X-SwitchEngine.41 # save config
+The configuration file primary.cfg already exists.
+Do you want to save configuration to primary.cfg and overwrite it? (y/N) Yes
+Saving configuration primary.cfg on master.. done!
+Configuration saved to primary.cfg successfully.</code></pre>
+
+  <p>Internet was restored immediately on both devices. The asterisk (<code>*</code>) in the prompt after the enable command is EXOS confirming the running config has unsaved changes &mdash; it disappears after <code>save config</code>.</p>
+
+  <div class="box warn">
+    <p class="box-label">This Must Be Run After Every Factory Reset</p>
+    <p>XIQ deploys <code>ipforwarding ON</code> for routed VLAN objects (like VLAN10) because you configured it in the SVI section. It does <em>not</em> configure the Default VLAN&rsquo;s ipforwarding because Default VLAN is not part of the Routing section in the XIQ policy. After every factory reset, <code>enable ipforwarding vlan Default</code> must be applied manually. Consider adding it to the Supplemental CLI so XIQ pushes it on every deploy.</p>
+  </div>
+
+  <!-- ─── BUG 3 ─── -->
+  <span class="section-label" id="bug3">Bug 3 &mdash; XIQ Policy Stuck at 15% on Re-Deploy</span>
+
+  <h2>Supplemental CLI Ran Twice. EXOS Already Had the Config. XIQ Hung.</h2>
+
+  <p>After verifying the XIQ Port Type (Native VLAN 1, Allowed VLAN 10 &mdash; correct), the policy was deployed again to push the confirmed port config to the switch. The deploy immediately hung at <strong>15%</strong>. Same symptom as May 13.</p>
+
+  <p>This time the Supplemental CLI commands themselves were syntactically correct &mdash; the issue was that <strong>DHCP was already configured and enabled on the switch</strong> from the earlier deploy. When XIQ re-ran the Supplemental CLI, EXOS returned an error on commands that were trying to configure something already in place (particularly <code>enable dhcp ports 3 vlan VLAN10</code> &mdash; DHCP was already enabled on that port). XIQ interprets any CLI error as a failure and hangs waiting for the job to complete.</p>
+
+  <div class="box alert">
+    <p class="box-label">Root Cause</p>
+    <p>Supplemental CLI is not idempotent on EXOS. Commands like <code>enable dhcp ports 3 vlan VLAN10</code> succeed on first run but error if DHCP is already enabled. XIQ does not handle this gracefully &mdash; it hangs at 15% instead of ignoring the error. The Supplemental CLI should be removed from the template once the initial provisioning is confirmed working.</p>
+  </div>
+
+  <h3>What to Do When Stuck at 15%</h3>
+  <ol>
+    <li><strong>Do nothing.</strong> Wait 5&ndash;10 minutes for the XIQ config job to time out. The lock will clear automatically. The switch is unaffected &mdash; its running config and DHCP pool remain intact.</li>
+    <li>Once the spinning indicator stops, go to the template: <strong>Advanced Settings &rarr; Supplemental CLI &rarr; remove or uncheck VLAN10_DHCP</strong>.</li>
+    <li>Deploy again. It will reach 100% cleanly.</li>
+    <li>DHCP config on the switch is not lost &mdash; it was saved to <code>primary.cfg</code> earlier. The switch will continue serving 10.10.0.x addresses without the Supplemental CLI in the template.</li>
+  </ol>
+
+  <div class="box ok">
+    <p class="box-label">PPSK Confirmed Working</p>
+    <p>Despite the XIQ policy being stuck, clients remained connected and PPSK continued to work. The switch and AP were not affected by the XIQ deploy lock. iPhone and MacBook both retained internet access throughout.</p>
+  </div>
+
+  <h3>The Right Sequence for Supplemental CLI &mdash; Every Time</h3>
+
+  <table>
+    <tr><th>Deploy Pass</th><th>Supplemental CLI</th><th>Purpose</th></tr>
+    <tr><td><strong>Pass 1</strong></td><td>OFF</td><td>Confirm base config (VLAN, ports, SVI, routing) deploys clean to 100%</td></tr>
+    <tr><td><strong>Pass 2</strong></td><td>ON</td><td>Push DHCP commands. Confirm 100%. Verify <code>show dhcp-server</code>.</td></tr>
+    <tr><td><strong>Pass 3+</strong> (any future deploy)</td><td><strong>OFF</strong></td><td>DHCP is already on the switch and saved. Remove Supplemental CLI to avoid re-run errors.</td></tr>
+  </table>
+
+  <div class="box warn">
+    <p class="box-label">Future Option: Make Supplemental CLI Idempotent</p>
+    <p>If you want to keep Supplemental CLI permanently in the template (e.g. for disaster recovery after a factory reset), prefix DHCP commands with a disable step to reset state before re-enabling:</p>
+  </div>
+
+<pre><code>disable dhcp ports 3 vlan VLAN10
+configure vlan VLAN10 dhcp-address-range 10.10.0.10 - 10.10.0.254
+configure vlan VLAN10 dhcp-options default-gateway 10.10.0.1
+configure vlan VLAN10 dhcp-options dns-server primary 8.8.8.8
+configure vlan VLAN10 dhcp-options dns-server secondary 1.1.1.1
+configure vlan VLAN10 dhcp-lease-timer 86400
+enable dhcp ports 3 vlan VLAN10
+enable ipforwarding vlan Default</code></pre>
+
+  <p>This way the CLI is safe to re-run on every deploy: it disables first, reconfigures, then re-enables. The last line also ensures <code>ipforwarding vlan Default</code> is always pushed. Note: this approach requires testing &mdash; not yet verified on this switch.</p>
+
+  <!-- ─── PORT TYPE VERIFICATION ─── -->
+  <span class="section-label" id="porttype">XIQ Port Type Verified &mdash; Switch Confirms Correct State</span>
+
+  <p>The XIQ Port Type (Edit Port Type &rarr; Summary tab) was shared for review. It showed:</p>
+
+  <table>
+    <tr><th>XIQ Port Type Field</th><th>Value</th><th>Meaning</th></tr>
+    <tr><td>Name</td><td>AP_VLAN... (AP port type)</td><td>Assigned to AP-facing ports</td></tr>
+    <tr><td>Port Usage</td><td>Trunk</td><td>Carries multiple VLANs on this port</td></tr>
+    <tr><td>Native VLAN</td><td><strong>1</strong></td><td>Default VLAN (VLAN 1) is untagged &mdash; AP management traffic ✅</td></tr>
+    <tr><td>Allowed VLANs</td><td><strong>10</strong></td><td>VLAN10 is tagged &mdash; client PPSK traffic ✅</td></tr>
+  </table>
+
+  <p>This is the correct configuration. The <code>show vlan detail</code> on SW1 independently confirmed the same state:</p>
+
+<pre class="terminal"><code>VLAN Interface with name Default
+    IPv4 Forwarding:  Enabled
+    Primary IP:       192.168.0.28/24
+    Ports (Untag):    *1,  *3,  2b, 4b-20b      ← port 3 untagged, ACTIVE ✅
+
+VLAN Interface with name VLAN10
+    IPv4 Forwarding:  Enabled
+    Primary IP:       10.10.0.1/24
+    Ports (Tag):      *3                          ← port 3 tagged, ACTIVE ✅</code></pre>
+
+  <p><strong>Reading the flags:</strong> <code>*</code> = active (link up, port forwarding). <code>Untag</code> section = native VLAN (untagged frames). <code>Tag</code> section = tagged VLAN (802.1Q frames). <code>b</code> = blocked (STP or no link) &mdash; all ports 2, 4&ndash;20 show <code>b</code> because they have no cable connected. Only ports 1 and 3 are active.</p>
+
+  <p>XIQ template and switch running config are in agreement. The next deploy from XIQ will push the correct port 3 tagging without needing a CLI fix.</p>
+
+  <!-- ─── POLICIES REFERENCE ─── -->
+  <span class="section-label" id="policies">Policy Reference &mdash; Complete Config Tables</span>
+
+  <h3>KB_School_SW1 &mdash; Switching/Routing</h3>
+  <table>
+    <tr><th>Parameter</th><th>Value</th></tr>
+    <tr><td>Policy Name</td><td>KB_School_SW1</td></tr>
+    <tr><td>Policy Type</td><td>Switching / Routing</td></tr>
+    <tr><td>Switch (Serial)</td><td>FJ012544G-00233 (5320-16P-2MXT-2X, IP 192.168.0.28)</td></tr>
+    <tr><td>VLAN Object</td><td>VLAN10, tag 10</td></tr>
+    <tr><td>Port 1 Mode</td><td>Trunk &mdash; Default VLAN native</td></tr>
+    <tr><td>Port 3 Mode</td><td>Default VLAN untagged (AP mgmt) + VLAN10 tagged (clients)</td></tr>
+    <tr><td>SVI IP</td><td>10.10.0.1 / 255.255.255.0</td></tr>
+    <tr><td>IPv4 Forwarding (VLAN10)</td><td>ON (XIQ pushes this)</td></tr>
+    <tr><td>IPv4 Forwarding (Default)</td><td>ON (must apply manually after factory reset)</td></tr>
+    <tr><td>DHCP Pool</td><td>10.10.0.10 &ndash; 10.10.0.254</td></tr>
+    <tr><td>Default Gateway</td><td>10.10.0.1</td></tr>
+    <tr><td>DNS Primary</td><td>8.8.8.8</td></tr>
+    <tr><td>DNS Secondary</td><td>1.1.1.1</td></tr>
+    <tr><td>Lease Time</td><td>86400 seconds (24 hours)</td></tr>
+    <tr><td>Supplemental CLI</td><td>VLAN10_DHCP &mdash; 6 hardcoded commands (see below)</td></tr>
+  </table>
+
+  <h3>KB_School_AP1_VLAN10 &mdash; Wireless</h3>
+  <table>
+    <tr><th>Parameter</th><th>Value</th></tr>
+    <tr><td>Policy Name</td><td>KB_School_AP1_VLAN10</td></tr>
+    <tr><td>Policy Type</td><td>Wireless</td></tr>
+    <tr><td>AP (Serial)</td><td>HA012519Y-10623 (AP3000, MAC 00:E6:0E:55:66:80)</td></tr>
+    <tr><td>SSID</td><td>KB_School_Broadcast</td></tr>
+    <tr><td>Authentication</td><td>PPSK</td></tr>
+    <tr><td>Encryption</td><td>WPA2, CCMP (AES)</td></tr>
+    <tr><td>User Group 1</td><td>Staff_PPSK (SERVICE / Cloud PPSK DB)</td></tr>
+    <tr><td>User Group 2</td><td>Students_PPSK (SERVICE / Cloud PPSK DB)</td></tr>
+    <tr><td>Default User Profile</td><td>VLAN10 (all users land on VLAN10 &rarr; 10.10.0.x)</td></tr>
+    <tr><td>AP Template</td><td>AP_3000-default-template</td></tr>
+  </table>
+
+  <!-- ─── SUPPLEMENTAL CLI ─── -->
+  <span class="section-label" id="supplemental">Supplemental CLI &mdash; Verified Working Commands</span>
+
+  <p>Deployed under XIQ Supplemental CLI name <code>VLAN10_DHCP</code>. All six commands confirmed in running config via <code>show config | i VLAN10</code>.</p>
+
+<pre><code>configure vlan VLAN10 dhcp-address-range 10.10.0.10 - 10.10.0.254
+configure vlan VLAN10 dhcp-options default-gateway 10.10.0.1
+configure vlan VLAN10 dhcp-options dns-server primary 8.8.8.8
+configure vlan VLAN10 dhcp-options dns-server secondary 1.1.1.1
+configure vlan VLAN10 dhcp-lease-timer 86400
+enable dhcp ports 3 vlan VLAN10</code></pre>
+
+  <div class="box warn">
+    <p class="box-label">Never Use ${vlan:} Variable in Supplemental CLI</p>
+    <p>XIQ offers a template variable <code>${vlan:OBJECT_NAME}</code> to inject VLAN names dynamically. On EXOS switches it resolves to the VLAN <strong>ID number</strong> (e.g. <code>10</code>), not the name. EXOS <code>configure vlan</code> commands require the name. Result: <em>&ldquo;%% A number within the range of 1&ndash;4094 is expected&rdquo;</em>, deploy hangs at 15%.</p>
+    <p>Always hardcode the name. Verify the exact name on the switch with <code>show vlan</code> after the first deploy. XIQ drops underscores: XIQ object <code>VLAN_10</code> &rarr; switch VLAN name <code>VLAN10</code>. XIQ object <code>Guest_100</code> &rarr; switch VLAN name <code>Guest100</code>.</p>
+  </div>
+
+  <!-- ─── LAB STATE ─── -->
+  <span class="section-label" id="labstate">Lab State &mdash; End of May 14</span>
+
+  <table>
+    <tr><th>Component</th><th>Status</th><th>Notes</th></tr>
+    <tr><td>SW1 &mdash; 5320-16P (192.168.0.28)</td><td class="ok">CONNECTED</td><td>IQAgent polling, policy deployed</td></tr>
+    <tr><td>SW1 Default VLAN ipforwarding</td><td class="ok">ON</td><td>Manually applied + saved after factory reset</td></tr>
+    <tr><td>SW1 VLAN10 SVI (10.10.0.1/24)</td><td class="ok">LIVE</td><td>ipforwarding ON, DHCP pool active</td></tr>
+    <tr><td>SW1 Port 3 tagging</td><td class="ok">CORRECT (CLI)</td><td>Default untagged + VLAN10 tagged &mdash; CLI fix applied, XIQ template NOT yet updated</td></tr>
+    <tr><td>KB_School_SW1 Policy</td><td class="ok">DEPLOYED</td><td>Supplemental CLI DHCP confirmed</td></tr>
+    <tr><td>AP1 &mdash; AP3000 (00:E6:0E:55:66:80)</td><td class="ok">CONNECTED</td><td>CAPWAP up, LED green</td></tr>
+    <tr><td>KB_School_AP1_VLAN10 Policy</td><td class="ok">DEPLOYED</td><td>Policy pushed via CAPWAP</td></tr>
+    <tr><td>KB_School_Broadcast SSID</td><td class="ok">LIVE</td><td>Broadcasting on 2.4/5 GHz</td></tr>
+    <tr><td>PPSK E2E Test</td><td class="ok">PASSED</td><td>iPhone 10.10.0.10, MacBook 10.10.0.11, internet confirmed</td></tr>
+    <tr><td>XIQ Port Type</td><td class="ok">VERIFIED CORRECT</td><td>Native VLAN 1 (untagged) + Allowed VLAN 10 (tagged) &mdash; matches switch running config</td></tr>
+    <tr><td>Supplemental CLI in template</td><td class="ok">REMOVED</td><td>DHCP config is on switch + saved. Supplemental CLI removed to prevent 15% hang on future deploys.</td></tr>
+    <tr><td>XIQ Policy (post-fix deploy)</td><td class="ok">DEPLOYED CLEAN</td><td>100% after removing Supplemental CLI. PPSK confirmed working throughout.</td></tr>
+    <tr><td>VLAN100 Sprint</td><td class="warn">PARKED</td><td>Deferred, resume as separate session</td></tr>
+    <tr><td>Boss Karl&rsquo;s VIQ &mdash; AP1 deploy</td><td class="ok">COMPLETE</td><td>AP1 onboarded, firmware updated, policy deployed, KB_School_Broadcast live. iPhone 10.10.0.10 on internet. ✅</td></tr>
+  </table>
+
+  <h3>SW1 Final Routing Table</h3>
+<pre><code>Ori  Destination        Gateway         Mtr  Flags         VLAN       Duration
+#bo  Default Route      192.168.0.1     1    UG-D---um--f- Default    0d:1h:6m:6s
+#d   10.10.0.0/24       10.10.0.1       1    U------um--f- VLAN10     0d:0h:46m:20s
+#d   192.168.0.0/24     192.168.0.28    1    U------um--f- Default    0d:1h:6m:7s
+
+Origin: (bo) = BOOTP/DHCP-learned  (d) = Direct/Connected
+(#) = Preferred unicast route  (f) = Provided to FIB  (U) = Up  (G) = has Gateway</code></pre>
+
+  <!-- ─── KEY COMMANDS ─── -->
+  <span class="section-label" id="commands">Key Commands Reference</span>
+
+  <h4>After factory reset &mdash; mandatory sequence</h4>
+<pre><code>enable ports all
+enable ipforwarding vlan Default
+save config</code></pre>
+
+  <h4>Verify VLAN config after XIQ deploy</h4>
+<pre><code>show vlan
+show vlan detail
+show config | i VLAN10</code></pre>
+
+  <h4>Diagnose AP management VLAN &mdash; smoking gun</h4>
+<pre><code>show fdb ports 3
+# AP MAC must appear on Default VLAN, NOT on a client VLAN
+# If AP MAC appears on VLAN10: port 3 tagging is inverted → apply port 3 fix below</code></pre>
+
+  <h4>Port 3 fix &mdash; when XIQ pushes VLAN10 as untagged</h4>
+<pre><code>configure vlan VLAN10 delete ports 3
+configure vlan Default add ports 3 untagged
+configure vlan VLAN10 add ports 3 tagged
+save config</code></pre>
+
+  <h4>Verify port 3 state after fix</h4>
+<pre><code>show vlan detail
+# Default: ... *3 active (untagged) — correct
+# VLAN10:  ... T*3 active (tagged)  — correct</code></pre>
+
+  <h4>Verify DHCP server</h4>
+<pre><code>show dhcp-server
+# Must show: address range populated, DHCP enabled on port 3, DNS servers listed</code></pre>
+
+  <h4>Verify routing table</h4>
+<pre><code>show iproute
+# Must show:
+#   #bo  Default Route  192.168.0.1  (BOOTP default route to QF-Modem)
+#   #d   10.10.0.0/24   10.10.0.1   (direct VLAN10 route)
+#   #d   192.168.0.0/24 192.168.0.28 (direct Default VLAN route)</code></pre>
+
+  <!-- ─── LESSONS ─── -->
+  <span class="section-label" id="lessons">Lessons Learned &mdash; 8 Principles</span>
+
+  <ol>
+    <li><strong>AP management traffic is always untagged.</strong> The AP sends its own DHCP, CAPWAP, and SSH frames without any 802.1Q tag. Whichever VLAN is native/untagged on the AP&rsquo;s switch port is where those frames land. Get this wrong and the AP cannot reach XIQ, regardless of everything else.</li>
+    <li><strong>Default VLAN must be native on the AP port.</strong> Default VLAN (VLAN 1, 192.168.0.x) has a direct path to QF-Modem and the internet, so AP management can reach XIQ. Client VLANs (VLAN10) must be tagged &mdash; the AP tags client frames itself, then sends them tagged to the switch.</li>
+    <li><strong><code>show fdb ports 3</code> is the AP diagnostic smoking gun.</strong> AP&rsquo;s MAC on Default VLAN = correct. AP&rsquo;s MAC on VLAN10 = tagging inverted, CAPWAP cannot establish.</li>
+    <li><strong>XIQ does not always get AP port tagging right on first deploy.</strong> Always run <code>show vlan detail</code> after deploying a new switch policy with an AP port. Never assume XIQ pushed the correct native/tagged split.</li>
+    <li><strong><code>enable ipforwarding vlan Default</code> is mandatory after every factory reset.</strong> XIQ enables ipforwarding for VLAN10 (because you configured it in the Routing section) but not for Default VLAN. Without it, SW1 refuses to forward client traffic out to QF-Modem. Clients get DHCP and a gateway, but internet times out. Confirmed May 14, April 7, March 29 2026.</li>
+    <li><strong>Deploy base config without Supplemental CLI first.</strong> A Supplemental CLI error hangs the deploy at exactly 15%. Confirm the base config passes 100% before adding DHCP commands.</li>
+    <li><strong>Never use <code>${vlan:}</code> in XIQ Supplemental CLI for EXOS.</strong> It resolves to the VLAN ID number (e.g. <code>10</code>), not the name. EXOS rejects it. Hardcode the VLAN name. XIQ drops underscores when naming VLANs on the switch (<code>VLAN_10</code> &rarr; <code>VLAN10</code>).</li>
+    <li><strong>EXOS factory reset is <code>unconfigure switch all</code></strong>, not <code>delete config.cfg</code> (that is Fabric Engine / VOSS only). Answer NO to the wizard&rsquo;s &ldquo;disable unconfigured ports&rdquo; question.</li>
+    <li><strong>Remove Supplemental CLI from the template after initial provisioning.</strong> Supplemental CLI is not idempotent on EXOS. Commands like <code>enable dhcp ports 3 vlan VLAN10</code> fail if DHCP is already enabled &mdash; XIQ hangs at 15%. Once the DHCP config is confirmed on the switch and saved to <code>primary.cfg</code>, remove the Supplemental CLI from the template. It will persist on the switch through reboots. Only add it back if doing a full factory reset.</li>
+  </ol>
+
+  <!-- ─── PARKED SPRINT ─── -->
+  <span class="section-label" id="vlan100">Parked Sprint &mdash; Khursheed_SW1_VLAN100</span>
+
+  <p>Deferred to its own session. Port 3 AP Port Type was already fixed before today. Supplemental CLI commands use hardcoded <code>Guest100</code>. The only outstanding issue is XIQ&rsquo;s config job lock (which kept the deploy blocked when a previous job was in-flight). Lock should be clear overnight.</p>
+
+  <h4>Resume Checklist</h4>
+  <ol>
+    <li>Edit <code>Khursheed_SW1_VLAN100</code> template in XIQ &mdash; if it saves, lock is clear</li>
+    <li>Confirm port 3 still has AP Port Type assigned</li>
+    <li>Deploy Policy &rarr; select SW1 &rarr; Deploy</li>
+    <li>Verify: <code>show dhcp-server</code> &rarr; pool 10.100.0.10&ndash;10.100.0.254, DHCP enabled port 3</li>
+    <li>Connect iPhone to PPSK_Demo &rarr; verify 10.100.0.x &rarr; ping 8.8.8.8</li>
+  </ol>
+
+  <!-- ─── PENDING ─── -->
+  <span class="section-label" id="pending">Pending &mdash; Next Session Backlog</span>
+
+  <table>
+    <tr><th>Priority</th><th>Item</th><th>Action</th></tr>
+    <tr><td class="ok">HIGH</td><td>XIQ Template &mdash; Port 3 fix</td><td>Update <code>Khursheed_5320_For_Karl</code> switch template: Port 3 = Default native (untagged) + VLAN10 tagged. Make XIQ the authoritative source. Otherwise the next deploy will re-break port 3.</td></tr>
+    <tr><td class="ok">HIGH</td><td>Add ipforwarding to Supplemental CLI</td><td>Add <code>enable ipforwarding vlan Default</code> to the Supplemental CLI block so XIQ pushes it on every deploy. Eliminates the manual step.</td></tr>
+    <tr><td class="warn">MED</td><td>VLAN100 sprint resume</td><td>Check XIQ lock cleared, redeploy, verify E2E VLAN100 PPSK internet.</td></tr>
+    <tr><td class="warn">MED</td><td>Boss Karl&rsquo;s VIQ</td><td>Get AP details from boss, onboard via CAPWAP, deploy PPSK in his VIQ org.</td></tr>
+    <tr><td class="warn">MED</td><td>WPA2/WPA3 Transition Mode</td><td>macOS Ventura+ grays out WPA2-only SSIDs. Add WPA2/WPA3 transition mode to <code>KB_School_Broadcast</code> in XIQ.</td></tr>
+    <tr><td class="warn">MED</td><td>QF-Modem static route verify</td><td>Confirm <code>10.10.0.0/24 &rarr; 192.168.0.28</code> is in QF-Modem routing table for VLAN10 return traffic.</td></tr>
+    <tr><td style="color:#888">LOW</td><td>QoS ACL fix</td><td>Branch <code>feature/qos-egress-validation</code>, week of May 18.</td></tr>
+  </table>
+
+  <hr class="divider">
+  <p class="footer">KhKLab &bull; 5320 Lab Journal &bull; May 14, 2026 &bull; Session: KB_School Clean-Slate Sprint<br>
+  Devices: SW1 (5320-16P, FJ012544G-00233, 192.168.0.28) &bull; AP1 (AP3000, HA012519Y-10623, 00:E6:0E:55:66:80)<br>
+  XIQ Policies: KB_School_SW1 &bull; KB_School_AP1_VLAN10 &bull; SSID: KB_School_Broadcast</p>
+
+</div>
+</body>
+</html>
