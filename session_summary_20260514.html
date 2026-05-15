@@ -118,6 +118,7 @@ a:hover { color: #111; }
     <a href="#labstate">Lab State &mdash; end of May 14, all components</a>
     <a href="#commands">Key Commands Reference</a>
     <a href="#lessons">Lessons Learned &mdash; 8 principles</a>
+    <a href="#vlan1split">Policy Update &mdash; Staff on VLAN1, Students on VLAN10</a>
     <a href="#pending">Pending &mdash; next session backlog</a>
   </div>
 
@@ -773,6 +774,44 @@ save config</code></pre>
     <li>Verify: <code>show dhcp-server</code> &rarr; pool 10.100.0.10&ndash;10.100.0.254, DHCP enabled port 3</li>
     <li>Connect iPhone to PPSK_Demo &rarr; verify 10.100.0.x &rarr; ping 8.8.8.8</li>
   </ol>
+
+  <!-- ─── VLAN1 SPLIT ─── -->
+  <span class="section-label" id="vlan1split">Policy Update &mdash; Staff on VLAN1, Students on VLAN10</span>
+
+  <p>After Karl&rsquo;s VIQ E2E was confirmed, the policy was updated to split the two user groups across different VLANs. Policy renamed <strong>KB_School_AP_VLAN10_VLAN1</strong>.</p>
+
+  <table>
+    <tr><th>User Group</th><th>User Profile</th><th>VLAN</th><th>Port 3 Frame</th><th>DHCP Source</th><th>IP Range</th></tr>
+    <tr><td><strong>Staff_PPSK</strong></td><td>KB_School_Staff</td><td>VLAN1 (Default)</td><td>Untagged</td><td>QF-Modem</td><td>192.168.0.x</td></tr>
+    <tr><td><strong>Students_PPSK</strong></td><td>KB_School_Students</td><td>VLAN10</td><td>Tagged (VID=10)</td><td>SW1</td><td>10.10.0.x</td></tr>
+  </table>
+
+  <h3>Why No SW1 Changes Were Needed</h3>
+
+  <p>Port 3 was already configured correctly for this split:</p>
+  <ul>
+    <li><strong>Default VLAN (VLAN1) = native/untagged</strong> on port 3. When XIQ assigns a staff client to VLAN1, the AP sends their frames with <em>no tag</em>. The switch receives untagged frames on port 3 and assigns them to the native VLAN &mdash; Default. Staff client gets 192.168.0.x from QF-Modem.</li>
+    <li><strong>VLAN10 = tagged</strong> on port 3. When XIQ assigns a student to VLAN10, the AP wraps their frames with an 802.1Q tag (VID=10). The switch sees the tag and routes to VLAN10. Student gets 10.10.0.x from SW1 DHCP.</li>
+  </ul>
+
+  <p>Confirmed with <code>show vlan detail</code> before deploying:</p>
+
+<pre><code>Default  →  Untag: *1, *3   ← port 3 untagged, active ✅
+VLAN10   →  Tag:   *3       ← port 3 tagged, active ✅</code></pre>
+
+  <div class="box ok">
+    <p class="box-label">Key Principle</p>
+    <p>VLAN1 (Default) is the native VLAN on the AP port. Clients assigned to VLAN1 by XIQ receive untagged frames from the AP &mdash; the switch&rsquo;s native VLAN assignment handles them automatically. No additional CLI or template change is required to support a second user group on VLAN1, as long as the native VLAN on the AP port is already Default.</p>
+  </div>
+
+  <h3>XIQ User Access Settings &mdash; Final Config</h3>
+  <table>
+    <tr><th>User Profile Name</th><th>VLAN/VLAN Group</th><th>Assignment Rule</th></tr>
+    <tr><td>KB_School_Staff</td><td>VLAN1</td><td>KB_School_Staff ✅</td></tr>
+    <tr><td>KB_School_Students</td><td>VLAN10</td><td>KB_School_Students ✅</td></tr>
+  </table>
+
+  <p>Default User Profile: VLAN10 (fallback if no rule matches). &ldquo;Apply a different user profile to various clients and user groups&rdquo; checkbox: ON. Saved and deployed to AP1 in Karl&rsquo;s VIQ.</p>
 
   <!-- ─── PENDING ─── -->
   <span class="section-label" id="pending">Pending &mdash; Next Session Backlog</span>
