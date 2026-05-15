@@ -107,6 +107,7 @@ tr:nth-child(even) td { background: #FAFAFA; }
     <a href="#ipforward">New Lesson &mdash; ipforwarding and Supplemental CLI</a>
     <a href="#iqagent">IQAgent Heartbeat Explained</a>
     <a href="#dialogue">XIQ&rarr;EP1 Architecture Dialogue</a>
+    <a href="#memory">Memory Alignment &amp; Claude Code Patterns</a>
     <a href="#pending">Pending</a>
   </div>
 
@@ -215,7 +216,7 @@ FDB always reflects NOW. ARP reflects up to 20 min of history.</code></pre>
   <!-- ─── DESIGN DIALOGUE ─── -->
   <span class="section-label" id="dialogue">XIQ&rarr;EP1 Architecture Design Dialogue</span>
 
-  <p>Today&rsquo;s second major thread: architecture design for the <strong>XIQ&rarr;EP1 Navigation Intelligence Engine</strong>. All dialogue verbatim &mdash; four sessions, four sets of decisions.</p>
+  <p>Today&rsquo;s second major thread: architecture design for the <strong>XIQ&rarr;EP1 Navigation Intelligence Engine</strong>. All dialogue verbatim &mdash; six sessions, fifteen architecture decisions (ADR-001&ndash;ADR-015).</p>
 
   <div class="box info">
     <p class="box-label" style="color:#0284c7">Linked-List Reference</p>
@@ -230,17 +231,42 @@ FDB always reflects NOW. ARP reflects up to 20 min of history.</code></pre>
     <p style="margin-top:8px">Full record: <a href="xiq-ep1-design-dialogue.html" style="color:#0284c7;font-weight:600">xiq-ep1-design-dialogue.html</a> &middot; Sprint hub: <a href="xiq-ep1-transition.html" style="color:#0284c7;font-weight:600">xiq-ep1-transition.html</a></p>
   </div>
 
+  <!-- ─── MEMORY & PATTERNS ─── -->
+  <span class="section-label" id="memory">Session Wrap-Up &mdash; Memory Alignment &amp; Claude Code Patterns</span>
+
+  <p>Final hour: memory files aligned to May 15 state + synthesis of 8 Claude Code best-practice sources.</p>
+
+  <h3>Memory Files Updated</h3>
+  <table>
+    <tr><th>File</th><th>What Was Recorded</th></tr>
+    <tr><td><code>feedback_fdb_vlan_verification.md</code></td><td><code>show fdb ports X</code> = authoritative VLAN truth. ARP ages up to 20 min. Dual-MAC = expected after PPSK test on same device.</td></tr>
+    <tr><td><code>feedback_supplemental_cli_idempotency.md</code></td><td><code>enable dhcp</code> + <code>enable ipforwarding</code> hang XIQ at 15% on re-run. Manual post-factory-reset only.</td></tr>
+    <tr><td><code>feedback_iqagent_heartbeat.md</code></td><td>POST /health-check/[serial] at ~60s cadence = normal IQAgent keepalive. <code>unknown</code> is proxy log level, not error.</td></tr>
+    <tr><td><code>project_5320_onboarding.md</code></td><td>Updated from May 11 → May 15: PPSK split confirmed, sprint backlog current, lessons learned reorganized.</td></tr>
+  </table>
+
+  <h3>Claude Code Patterns Synthesized</h3>
+  <p>8 URLs reviewed (official docs, everything-claude-code, Taggart critique, Ordax LinkedIn series, Boris Cherny features). Key new patterns saved to <code>reference_claude_patterns_may2026.md</code>:</p>
+  <ul>
+    <li><strong>Hooks vs CLAUDE.md</strong> &mdash; Hooks guarantee execution; CLAUDE.md is advisory. Never rely on CLAUDE.md alone for safety-critical steps.</li>
+    <li><strong>Writer/Reviewer subagent pattern</strong> &mdash; Fresh context reviewer catches what the implementing agent is blind to. Use for code review and mapping validation.</li>
+    <li><strong>Fan-out loop</strong> &mdash; <code>claude -p "prompt" --output-format stream-json</code> in bash loop = batch processing for 31 bins &times; N features.</li>
+    <li><strong>Karpathy KB production warnings</strong> &mdash; Truth rot (version-tag every doc), immutable raw sources (corrections go to <code>corpus/corrections/</code>), audit trail (log doc version per RAG chunk). Directly applicable to XIQ&rarr;EP1 corpus.</li>
+    <li><strong>TDD as hallucination correction</strong> &mdash; Write tests first; Claude self-corrects on failures without human review. Without tests, you are the only feedback loop.</li>
+  </ul>
+
   <!-- ─── PENDING ─── -->
   <span class="section-label" id="pending">Pending &mdash; Next Session</span>
 
   <table>
-    <tr><th>Priority</th><th>Item</th><th>Notes</th></tr>
-    <tr><td class="ok">HIGH</td><td>XIQ Switch Template &mdash; Port 3</td><td>Update template so XIQ is authoritative: Port 3 = Default native (untagged) + VLAN10 tagged. Otherwise the next deploy will re-invert the tagging.</td></tr>
-    <tr><td class="warn">MED</td><td>Post-factory-reset checklist</td><td>Print and laminate: <code>enable ports all</code> + <code>enable ipforwarding vlan Default</code> + <code>save config</code> before any XIQ deploy.</td></tr>
-    <tr><td class="warn">MED</td><td>VLAN100 sprint</td><td>Resume <code>Khursheed_SW1_VLAN100</code> &mdash; check XIQ lock cleared, redeploy, E2E verify.</td></tr>
-    <tr><td class="warn">MED</td><td>WPA2/WPA3 Transition Mode</td><td>macOS Ventura+ grays out WPA2-only SSIDs. Add transition mode to KB_School_Broadcast in XIQ.</td></tr>
-    <tr><td class="warn">MED</td><td>MacBook auto-connect mystery</td><td>Joined without passphrase prompt. Forget network, reconnect manually &mdash; likely macOS keychain cached the PPSK.</td></tr>
-    <tr><td style="color:#888">LOW</td><td>QoS ACL fix</td><td>Branch <code>feature/qos-egress-validation</code>, week of May 18.</td></tr>
+    <tr><th>Priority</th><th>Item</th><th>When</th><th>Notes</th></tr>
+    <tr><td class="ok">HIGH</td><td>XIQ&rarr;EP1 Engine &mdash; Sprint A Day 1</td><td>Mon May 19</td><td><code>gh repo create xiq-ep1-intelligence-engine</code> &rarr; Railway PostgreSQL &rarr; 5 SQL migrations &rarr; FastAPI scaffold &rarr; LangGraph 11-node skeleton &rarr; seed 31 bins. Target: <code>/health</code> returns <code>{"status":"ok","bins":31}</code>.</td></tr>
+    <tr><td class="ok">HIGH</td><td>XIQ Switch Template &mdash; Port 3</td><td>Mon May 19</td><td>Update template so XIQ is authoritative: Port 3 = Default native (untagged) + VLAN10 tagged.</td></tr>
+    <tr><td class="warn">MED</td><td>VLAN100 sprint</td><td>Mon May 19</td><td>Resume <code>Khursheed_SW1_VLAN100</code> &mdash; check XIQ lock cleared, redeploy, E2E verify.</td></tr>
+    <tr><td class="warn">MED</td><td>WPA2/WPA3 Transition Mode</td><td>May 18</td><td>macOS Ventura+ grays out WPA2-only SSIDs. Add transition mode to KB_School_Broadcast in XIQ.</td></tr>
+    <tr><td class="warn">MED</td><td>QoS ACL fix</td><td>May 18</td><td>Branch <code>feature/qos-egress-validation</code>. Fix DSCP=0 end-to-end marking.</td></tr>
+    <tr><td style="color:#888">LOW</td><td>MacBook auto-connect mystery</td><td>Next lab</td><td>Forget network, reconnect manually &mdash; likely macOS keychain cached the PPSK.</td></tr>
+    <tr><td style="color:#888">LOW</td><td>802.1X / NPS</td><td>TBD</td><td>Deferred. Waiting on boss to configure NPS + AD groups + <code>eapol enable</code> on SW2.</td></tr>
   </table>
 
   <hr class="divider">
