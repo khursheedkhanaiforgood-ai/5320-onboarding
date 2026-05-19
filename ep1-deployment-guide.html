@@ -89,8 +89,8 @@ tr:nth-child(even) td { background: #FAFAFA; }
 <hr class="nyt-rule-thin">
 
 <div class="byline">
-  <strong>May 19, 2026</strong> &nbsp;&mdash;&nbsp; EP1 Two-SSID Deployment Playbook + RAG Corpus v2.2 &nbsp;&mdash;&nbsp;
-  Source: EP1 Networking v25.9.0 User Guide (677 pp., April 2026)
+  <strong>May 19, 2026</strong> &nbsp;&mdash;&nbsp; EP1 Two-SSID Deployment Playbook + RAG Corpus v2.4 &nbsp;&mdash;&nbsp;
+  Source: EP1 Networking v25.9.0 User Guide (678 pp.) + Universal Switch Deployment Guide v25.7.0 (130 pp.) + Licensing Guide v25.10.0 &mdash; All documents read May 19, 2026
 </div>
 
 <h1>EP1 Network Policy Deployment: Employee PPSK + Guest CWP &mdash; Step-by-Step from the Source</h1>
@@ -109,6 +109,9 @@ tr:nth-child(even) td { background: #FAFAFA; }
   <a href="#phase4">Phase 4 &mdash; Guest SSID (Open / CWP / VLAN10)</a>
   <a href="#phase5">Phase 5 &mdash; Deploy (Upload + Perform Update)</a>
   <a href="#vlan-delta">XIQ vs. EP1 Field Delta Table</a>
+  <a href="#licensing">Licensing: 5320 Tier A, Stack Rules, AI Credits</a>
+  <a href="#ai-module">Extreme AI Expert &mdash; Deploy / Monitor / Troubleshoot / Workflow</a>
+  <a href="#troubleshoot-switches">Troubleshoot Switches &mdash; EP1 GUI Tools + CLI</a>
   <a href="#rag-local">RAG Corpus &mdash; Local Documents (9)</a>
   <a href="#rag-web">RAG Corpus &mdash; Web Research (Key Sources)</a>
   <a href="#page-index">Guide Page Index</a>
@@ -155,6 +158,42 @@ tr:nth-child(even) td { background: #FAFAFA; }
 </table>
 
 <p>The left sidebar on tab 2 (Wireless) also contains: <strong>Policy Settings</strong> (DNS, NTP, SNMP, Syslog, Device Credentials, Time Zone, Hive, VLAN, IP Tracking, LLDP), <strong>Management Settings</strong> (Management Options, Traffic Filters, MGT IP Filters), and <strong>Device Templates</strong>.</p>
+
+<!-- ─── LICENSING ─── -->
+<span class="section-label" id="licensing">Licensing &mdash; 5320 Tier A, Stack Rules, AI Credits</span>
+<p style="font-size:0.85rem;color:#6b7280;">Source: EP1 Networking + XIQ Subscription Licensing Guide v25.10.0 (pp.1&ndash;39, April 2026)</p>
+
+<table>
+  <thead><tr><th>Device Family</th><th>Tier</th><th>Subscription Required</th></tr></thead>
+  <tbody>
+    <tr><td><strong>5320, AP3000, AP4000 series</strong></td><td class="ep1">Tier A</td><td>EP1 Standard Networking</td></tr>
+    <tr><td>5400 series</td><td>Tier B</td><td>EP1 Standard Networking</td></tr>
+    <tr><td>5500 series, VSP 44xx/48xx/49xx</td><td>Tier C</td><td>EP1 Standard Networking</td></tr>
+    <tr><td>5700, VSP 7xxx/8xxx</td><td>Tier D</td><td>EP1 Standard Networking</td></tr>
+  </tbody>
+</table>
+
+<div class="box warn">
+  <p class="box-label">Stack Hard Rule &mdash; All Slots Must Match</p>
+  <p>Every unit in a switch stack MUST have the same subscription tier (all Standard or all Pilot). If any single slot has an insufficient subscription, the <strong>entire stack is treated as Unmanaged</strong> &mdash; not just the underpowered slot. Verify all subscriptions before onboarding stacks: <strong>Administration &amp; Settings &gt; Subscriptions &amp; Licensing</strong>.</p>
+</div>
+
+<div class="box">
+  <p class="box-label">Pilot Twin &mdash; Bundled at No Extra Cost</p>
+  <p>Every EP1 Standard Networking subscription includes a bundled <strong>ExtremeCloud IQ Pilot Twin</strong> subscription for backward compatibility with older Site Engine/Controller deployments. No separate purchase needed.</p>
+</div>
+
+<div class="box">
+  <p class="box-label">Trial Subscriptions</p>
+  <p><strong>90-day trial</strong> available, one-time only, for EP1 Networking / EP1 Security / SD-WAN. <strong>Not</strong> available for XIQ Classic. Activate: <strong>Administration &amp; Settings &gt; Subscriptions &amp; Licensing &gt; Add Trial</strong>.</p>
+</div>
+
+<div class="box warn">
+  <p class="box-label">AI Credits</p>
+  <p>Some AI Expert agent features (Service Agent operations in particular) <strong>activate AI Credits consumption</strong>. Monitor your credit balance before running Service Agent at scale: Administration &amp; Settings &gt; Subscriptions &amp; Licensing.</p>
+</div>
+
+<hr class="divider">
 
 <!-- ─── PHASE 0 ─── -->
 <span class="section-label" id="phase0">Phase 0 &mdash; EXOS SW1 Pre-flight</span>
@@ -496,6 +535,182 @@ configure dhcp-address-range Employee-Pool vlan Employee default-gateway 10.5.0.
   </div>
 </div>
 
+<!-- ─── AI MODULE ─── -->
+<span class="section-label" id="ai-module">Extreme AI Expert &mdash; EP1&rsquo;s Key Differentiator vs. XIQ</span>
+<p style="font-size:0.85rem;color:#6b7280;">Source: EP1 Networking v25.9.0 User Guide pp.37&ndash;46 (April 2026). <strong>No XIQ Classic equivalent</strong> for any of these features.</p>
+
+<div class="box ok">
+  <p class="box-label">Why This Matters</p>
+  <p>XIQ Classic had zero native AI capabilities. EP1 ships with <strong>Extreme AI Expert</strong> embedded in the portal &mdash; combining 29,000+ GTAC KB articles, product documentation, and live EP1 API telemetry in a single conversational interface. This is the strongest single argument for migrating enterprise clients who currently call GTAC for every non-trivial issue.</p>
+</div>
+
+<h3>Access &amp; Icon Reference (p.37)</h3>
+<p>Click the <strong>AI Expert icon</strong> in the left nav pane. Panel docks to the right of the screen by default (Dock mode). Toggle to <strong>Overlay</strong> mode for a free-floating panel. Click anywhere outside to dismiss overlay.</p>
+
+<table>
+  <thead><tr><th>Icon</th><th>Function</th></tr></thead>
+  <tbody>
+    <tr><td><strong>+</strong> (New Conversation)</td><td>Start a new AI query. Choose from 8 topics: About Me / Knowledge / Devices / Clients / Licensing / Alerts / Service Agent / Think it Through</td></tr>
+    <tr><td><strong>Conversations</strong></td><td>Full history of previous AI sessions. Reopen, edit, or delete. Clear All available.</td></tr>
+    <tr><td><strong>Canvas</strong> (purple square icon)</td><td>View and manage AI canvas dashboards. Up to 13 canvases per user (3 published + 10 draft). Published canvas = auto-refresh every hour while open.</td></tr>
+    <tr><td><strong>AI Agents Hub (Beta)</strong></td><td>Enable beta program features: Service Agent + Think it Through. Download Terms &amp; Conditions here.</td></tr>
+  </tbody>
+</table>
+
+<h3>Use Case 1: Deploy &amp; Create Policies Faster (p.38 &mdash; Talk to Knowledge)</h3>
+<div class="phase">
+  <div class="phase-header">
+    <span class="phase-num">AI Workflow</span>
+    <span class="phase-title">Knowledge Mode &mdash; Guide-Backed Policy Creation Assistance</span>
+  </div>
+  <div class="phase-body">
+    <p style="font-size:0.85rem;color:#555;margin-bottom:10px"><strong>Talk to Knowledge</strong> searches 29,000+ GTAC KB articles + all product documentation + Extreme Networks website content. Use this when you need verified step-by-step procedures without searching PDFs manually.</p>
+    <ol>
+      <li>Click AI Expert icon &rarr; click <strong>+</strong> (New Conversation)</li>
+      <li>Select topic: <strong>Knowledge</strong> &rarr; choose or type a query</li>
+      <li>Example: <em>&ldquo;How do I create a PPSK SSID with a Cloud User Group and VLAN 5 on a 5320 switch in EP1?&rdquo;</em></li>
+      <li>AI Expert returns the exact procedure from the User Guide, referencing the relevant page</li>
+      <li>Follow up in the same thread: <em>&ldquo;What port type should I use on the switch template for the AP uplink?&rdquo;</em></li>
+      <li>Click <strong>Add to Canvas</strong> to pin the answer as a widget for future reference</li>
+    </ol>
+    <div class="box">
+      <p class="box-label">Best Practice (p.41)</p>
+      <p>Always name the product model: <em>&ldquo;5320-24T-8XE&rdquo;</em> not just <em>&ldquo;switch.&rdquo;</em> For large networks (70,000+ users), include time scope: <em>&ldquo;clients connected in last 24 hours&rdquo;</em> instead of open-ended queries &mdash; significantly reduces response time.</p>
+    </div>
+  </div>
+</div>
+
+<h3>Use Case 2: Monitor Network in Real Time (p.38 &mdash; Talk to Data)</h3>
+<div class="phase">
+  <div class="phase-header">
+    <span class="phase-num">AI Workflow</span>
+    <span class="phase-title">Talk to Data &mdash; Live Network Queries via Natural Language</span>
+  </div>
+  <div class="phase-body">
+    <p style="font-size:0.85rem;color:#555;margin-bottom:10px"><strong>Talk to Data</strong> queries live EP1 APIs &mdash; same data as the dashboard, delivered as tables / bar charts / time-series graphs in response to natural language. Combines telemetry + config data. Shows reasoning transparency (data sources + API calls used).</p>
+    <ol>
+      <li>Click <strong>+</strong> &rarr; select topic: <strong>Devices</strong>, <strong>Clients</strong>, or <strong>Alerts</strong></li>
+      <li>Select an <strong>enablement prompt</strong> (structured query suggestions provided automatically at conversation start)</li>
+      <li>Example queries:<br>
+        &bull; <em>&ldquo;Show all APs with channel utilization above 80% in the last 24 hours.&rdquo;</em><br>
+        &bull; <em>&ldquo;List all clients that failed to authenticate in the last hour.&rdquo;</em><br>
+        &bull; <em>&ldquo;How many unacknowledged critical alerts do I have and what are the top device types?&rdquo;</em>
+      </li>
+      <li>AI Expert retrieves, correlates, and visualizes: output is tables, charts, or graphs</li>
+      <li>Follow up in same thread: <em>&ldquo;Of those 26 critical alerts, which 3 devices had the most?&rdquo;</em> &rarr; generates a breakdown chart</li>
+      <li>Click <strong>Add to Canvas</strong> &rarr; the query result becomes a <strong>live widget</strong> on your AI Canvas dashboard (auto-refreshes hourly when published)</li>
+    </ol>
+    <div class="box ok">
+      <p class="box-label">Standard Monitoring (Non-AI Alternative)</p>
+      <p><strong>Monitoring &gt; Dashboard</strong>: Alerts (3-day severity breakdown), Usage &amp; Capacity, Device Status (offline count), Client Health (issues count), Device Health. Filter by Sites.<br>
+      <strong>Monitoring &gt; Visualize</strong>: Geographic (default), Physical Layer (all managed + LLDP-discovered), Fabric Layer (IS-IS/SPB), Service Layer (VLANs/I-SIDs), Heat Map, Access view. Split view available for Physical+Service, Fabric+Service etc. Inspector Panel for per-element details.</p>
+    </div>
+  </div>
+</div>
+
+<h3>Use Case 3: Troubleshoot Errors with AI (pp.39&ndash;40 &mdash; Service Agent Beta)</h3>
+<div class="phase">
+  <div class="phase-header">
+    <span class="phase-num">AI Workflow</span>
+    <span class="phase-title">Service Agent (Beta) &mdash; AI-Driven Troubleshooting + Automated GTAC Cases</span>
+  </div>
+  <div class="phase-body">
+    <p style="font-size:0.85rem;color:#555;margin-bottom:10px"><strong>Service Agent</strong> is an intelligent support assistant that operates continuously inside EP1 to diagnose issues, gather evidence, and create GTAC cases. Uses <strong>Human-in-the-Loop (HITL)</strong> &mdash; you explicitly approve every action before it executes. Requires ExtremeWorks support package + Beta Program enabled.</p>
+    <ol>
+      <li>Enable: AI Agents Hub (Beta icon) &rarr; accept Terms &amp; Conditions &rarr; Enable Beta Program</li>
+      <li>Click <strong>+</strong> &rarr; select topic: <strong>Service Agent</strong></li>
+      <li>Describe the symptom: <em>&ldquo;AP3 in Building B shows clients connected but no traffic passes.&rdquo;</em></li>
+      <li>Service Agent asks clarifying questions: affected serial? Which site? When did this start?</li>
+      <li>Automatically queries device APIs: health metrics, config data, environmental context, error logs</li>
+      <li>Searches 30,000+ GTAC KB articles &rarr; recommends step-by-step resolution based on device context</li>
+      <li>If issue persists: builds an <strong>Evidence Report</strong> (device IDs, config data, health indicators, env metrics, conversation history)</li>
+      <li><strong>Review and approve</strong> the Evidence Report &rarr; Service Agent creates a GTAC case with ExtremeWorks &mdash; no copy/paste, no email, no form-filling</li>
+    </ol>
+    <div class="box warn">
+      <p class="box-label">HITL Hard Rule &mdash; Nothing Executes Without Your Approval</p>
+      <p>Service Agent will NOT: submit evidence reports, create GTAC cases, or execute any configuration changes without explicit user approval. This is by design. Current beta limitations: requires ExtremeWorks package; no proactive/autonomous monitoring; no mobile support; no co-delivered support.</p>
+    </div>
+  </div>
+</div>
+
+<h3>Use Case 4: Route Workflows on Performance Issues (p.39 &mdash; Think it Through Beta)</h3>
+<div class="phase">
+  <div class="phase-header">
+    <span class="phase-num">AI Workflow</span>
+    <span class="phase-title">Think it Through (Beta) &mdash; Multi-Step Reasoning for Complex Correlations</span>
+  </div>
+  <div class="phase-body">
+    <p style="font-size:0.85rem;color:#555;margin-bottom:10px"><strong>Think it Through</strong> combines real-time telemetry with documentation and KB content for multi-step analytical queries. Use when a problem spans multiple data sources and requires sequential reasoning to reach a conclusion.</p>
+    <ol>
+      <li>Enable via AI Agents Hub (same as Service Agent beta)</li>
+      <li>Click <strong>+</strong> &rarr; select topic: <strong>Think it Through</strong></li>
+      <li>Ask a multi-dimensional question: <em>&ldquo;Users on Floor 3 are reporting slow WiFi after yesterday&rsquo;s firmware update. What could be causing this and what should I check first?&rdquo;</em></li>
+      <li>Think it Through performs <strong>sequential reasoning</strong>: correlates firmware changelog + device health pre/post + client auth fail rates + channel utilization + GTAC KB articles</li>
+      <li>Returns a <strong>structured report</strong> with expandable reasoning section showing its data sources and API calls used &mdash; full transparency</li>
+      <li>Identifies root cause hypothesis with confidence level and supporting evidence</li>
+      <li>Escalation path: if Think it Through identifies a hardware or cloud bug, hand off to <strong>Service Agent</strong> for automated evidence collection + GTAC case creation</li>
+    </ol>
+    <div class="box">
+      <p class="box-label">Current Beta Limitations</p>
+      <p>Think it Through cannot create chart/table widgets for AI Canvas (text summaries only). May process reduced datasets on very large-scale networks. Integration with Service Agent for automated escalation is the recommended workflow for complex issues.</p>
+    </div>
+  </div>
+</div>
+
+<h3>AI Canvas &mdash; Persistent NOC / Ops Dashboard (pp.42&ndash;44)</h3>
+<p>Convert any Talk to Data result into a persistent live widget pinned to a named canvas. Use for NOC dashboards, shift handoffs, or weekly exec summaries. Each user can maintain separate canvases for different concerns.</p>
+
+<table>
+  <thead><tr><th>Canvas Mode</th><th>Refresh</th><th>Limit</th><th>Use Case</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Workspace canvas</strong></td><td>Live (system-managed)</td><td>1 (system, no limit)</td><td>Default EP1 landing dashboard</td></tr>
+    <tr><td><strong>Draft canvas</strong></td><td>Manual refresh only</td><td>10 per user</td><td>Work-in-progress monitoring views</td></tr>
+    <tr><td><strong>Published canvas</strong></td><td>Auto-refresh every hour while open</td><td>3 per user</td><td>Shared NOC / operations dashboards</td></tr>
+  </tbody>
+</table>
+
+<hr class="divider">
+
+<!-- ─── TROUBLESHOOT SWITCHES ─── -->
+<span class="section-label" id="troubleshoot-switches">Troubleshoot Switches &mdash; EP1 GUI Tools + CLI</span>
+<p style="font-size:0.85rem;color:#6b7280;">Source: Universal Switch Deployment Guide v25.7.0 pp.122&ndash;130</p>
+
+<table>
+  <thead><tr><th>Issue</th><th>EP1 Tool</th><th>Nav Path</th></tr></thead>
+  <tbody>
+    <tr><td>Find physical switch location (blink LED)</td><td>Locate Device</td><td>Monitoring &gt; Network Devices &gt; Device Status &gt; 3-dot &gt; <strong>Locate Device</strong>. Switch: set LED Timeout 0&ndash;604800s (0 = until disabled).</td></tr>
+    <tr><td>Run CLI command from EP1 GUI</td><td>Diagnostics CLI</td><td>Monitoring &gt; Network Devices &gt; Device Status &gt; 3-dot &gt; Utilities &gt; <strong>Diagnostics</strong>. Commands: Ping, Show CPU, Show Memory, Show Log, Show Running Config, Show Startup Config, Show Roaming Cache, Show IP Routes, Show ARP Cache, Show Version, Show GRE Tunnel, Show DNXP Neighbors, Show IKE SA.</td></tr>
+    <tr><td>Verify VLANs reachable on device</td><td>VLAN Probe</td><td>3-dot &gt; Utilities &gt; <strong>VLAN Probe</strong>. Set VLAN Range (up to 5 ranges, max 12 VLANs total, no overlap), Timeout 5&ndash;60s. Returns: hostname, MAC, available VLANs, unavailable VLANs, status.</td></tr>
+    <tr><td>Reset switch to factory defaults</td><td>Reset Device to Default</td><td>Monitoring &gt; Network Devices &gt; select device(s) &gt; 3-dot &gt; <strong>Reset Device to Default</strong></td></tr>
+    <tr><td>Check cable duplex/speed</td><td>Cable Test</td><td>Monitoring &gt; Network Devices &gt; select device &gt; Device Details Monitor &gt; scroll to port graphic &gt; select active (green) port &gt; Actions &gt; <strong>Run Cable Test</strong>. Note: temporarily interrupts port traffic.</td></tr>
+    <tr><td>Resolve out-of-sync config</td><td>Config Discrepancy</td><td>Check <strong>Updated</strong> column for &ldquo;Device Update Failed&rdquo; &rarr; three options: (1) <strong>Override from EP1</strong> (push EP1 config, overwrite switch), (2) <strong>Match EP1 from CLI</strong> (manual CLI fix), (3) <strong>Actions &gt; Clear Audit Mismatch</strong> (acknowledge only &mdash; no config change). Configuration Events visible at Device &gt; Monitor &gt; Monitoring &gt; Events &gt; Configuration Events.</td></tr>
+    <tr><td>Download tech-support bundle</td><td>Get Tech Support File</td><td>Network Devices &gt; select ONE device &gt; Action &gt; <strong>Get Tech Support File</strong> &gt; Yes &gt; Download Tech Support. One device at a time only.</td></tr>
+    <tr><td>View compliance / change audit trail</td><td>Audit Logs</td><td><strong>Administration &amp; Settings &gt; Logs &gt; Audit Logs</strong> (columns: Timestamp / Username / Context / Description). Exportable.</td></tr>
+  </tbody>
+</table>
+
+<h3>Switch Communication Troubleshoot (CLI)</h3>
+<p>When switch shows <em>No Connection</em> or stays offline after onboarding:</p>
+<pre><code>show iqagent                                            # Check connection state + cloud target address
+show iqagent discovery detail                           # Discovery issues: DNS fail, cloud unreachable
+ping extremecloudiq.com                                # Basic internet connectivity check (VR-Default)
+ping vr vr-mgmt extremecloudiq.com                    # If using dedicated management port/VR
+traceroute extremecloudiq.com                          # Find where packets drop
+traceroute vr vr-mgmt extremecloudiq.com
+configure iqagent server vr VR-Mgmt vlan Management   # Lock IQAgent to specific VR and VLAN</code></pre>
+
+<div class="box warn">
+  <p class="box-label">Switch Stack Consolidation Time</p>
+  <p>After onboarding all stack serial numbers, EP1 shows <strong>one entry per slot</strong> initially. Allow <strong>up to 15 minutes</strong> for all slots to consolidate into a single stack object in EP1. A red icon = slot offline or not yet onboarded &mdash; do not assume an error until 15 min has elapsed. Verify: all slots powered, stacking connections physically up, run CLI verification if slots remain offline.</p>
+</div>
+
+<div class="box warn">
+  <p class="box-label">Switch Isolated After Policy Push (VLAN/Trunk Issue)</p>
+  <p>If a config push locks the switch out of the cloud: (1) SSH in &rarr; <code>unconfigure switch all</code> &rarr; (2) Delete device from EP1 &rarr; (3) Re-add &rarr; (4) During next config update, enable <strong>&ldquo;Reboot and Revert Extreme Networks Switch Configuration if IQAgent is unresponsive after configuration update&rdquo;</strong> for auto-rollback protection on future pushes.</p>
+</div>
+
+<hr class="divider">
+
 <!-- ─── TRANSITION TIMELINE CORRECTION ─── -->
 <div class="box warn" style="margin-bottom:1.5rem;">
   <p class="box-label">Transition Timeline Correction &mdash; Source: CustomerFAQ May 6, 2026</p>
@@ -544,7 +759,7 @@ configure dhcp-address-range Employee-Pool vlan Employee default-gateway 10.5.0.
 </table>
 
 <!-- ─── RAG LOCAL ─── -->
-<span class="section-label" id="rag-local">RAG Corpus v2.1 &mdash; Local Documents</span>
+<span class="section-label" id="rag-local">RAG Corpus v2.4 &mdash; Local Documents</span>
 
 <p>Files at <code>/Users/khukhan/Downloads/EP1 and Other Items for Migration/</code> &mdash; 20 files across 5 product areas, staged for Sprint A ingestion. <strong>NEVER push to GitHub.</strong></p>
 
@@ -560,7 +775,7 @@ configure dhcp-address-range Employee-Pool vlan Employee default-gateway 10.5.0.
   <div class="doc-card">
     <div class="doc-card-type local">Local &nbsp;&bull;&nbsp; SWITCH</div>
     <h4>EP1 Universal Switch Deployment Guide v25.7.0</h4>
-    <p>129 pp. Feb 2026. Dual-persona: Switch Engine (EXOS 31.6+) + Fabric Engine (VOSS 8.6+). For EXOS SW1: skip &ldquo;Change NOS&rdquo; task. Key chapters: <strong>Onboard Switches</strong> p.14 (manual ≤10 serials, bulk CSV); <strong>Device Status Icons</strong> p.16 (Config Audit Match/Mismatch, RadSec Proxy, No Connection ≤10 min); <strong>Configure Network Policy</strong> p.23 (path: Configuration &gt; Network; Management Servers: VR-Default/VR-mgmt for EXOS); <strong>VLAN Attributes</strong> p.27 (Switch Template &gt; Switch Settings; override hierarchy: Device VLAN &gt; VLAN Attrs &gt; Device Template &gt; Common); <strong>ISPP</strong> p.28 (requires EP1 Security license); <strong>IPP</strong> p.30 (auto-assign port to VLAN by MAC/LLDP; requires SW 32.6.1.5+); <strong>Switch Template</strong> p.41 (save default as new before editing; enable Override Policy Common Settings; Trunk Port &ldquo;all&rdquo; keyword auto-tags all policy VLANs; Management Interface Settings = EXOS-only: set Mgmt VLAN + DHCP); <strong>Supplemental CLI</strong> p.60 (enable first: Admin &amp; Settings &gt; Backup &amp; Restore &gt; VIQ Management &gt; toggle ON; 8192 char max; <code>${vlan:name}</code> + <code>${ip:name}</code> objects; Complete Update required after each addition). Critical rule: no overlap between Supplemental CLI and EP1-managed config or Device Update Failure.</p>
+    <p><strong>130 pp.</strong> Feb 2026. Dual-persona: Switch Engine (EXOS 31.6+) + Fabric Engine (VOSS 8.6+). For EXOS SW1: skip &ldquo;Change NOS&rdquo; task. <strong>FULLY READ May 19 (all 130 pp.).</strong> Key chapters: <strong>Onboard Switches</strong> p.14 (manual ≤10 serials, bulk XLSX Patch 3+ required for VLAN values); <strong>Device Status Icons</strong> p.16; <strong>Configure Network Policy</strong> p.23 (Management Servers: VR-Default/VR-mgmt for EXOS); <strong>VLAN Attributes</strong> p.27 (override hierarchy: Device &gt; VLAN Attrs &gt; Template &gt; Common); <strong>Switch Template</strong> p.41 (save default as new; Trunk Port &ldquo;all&rdquo; keyword; Mgmt VLAN DHCP); <strong>Supplemental CLI</strong> p.60 (enable: Admin &amp; Settings &gt; Backup &amp; Restore &gt; VIQ Management; 8192 char; <code>${vlan:name}</code> objects; Complete Update required; no overlap with EP1-managed config); <strong>DNS 8-server limit warning</strong> (Switch Engine shares DNS slots between VR-Default + VR-Mgmt &mdash; can exceed 8 combined); <strong>Wired Device View</strong> pp.109&ndash;117 (tabs: Overview/Clients/Services-VLANs/Port Stats/Routing/Events/Alerts/Audit Logs; actions: Port Bounce/PoE Bounce/Cable Test); <strong>Troubleshoot Switches</strong> pp.122&ndash;130 (Locate Device, Diagnostics CLI, VLAN Probe, Reset to Default, VLAN/Trunk isolation fix, Stack consolidation 15 min, Cabletest, Config Discrepancy resolution, Tech Support File download).</p>
     <p><code>Extreme_Platform_ONE_Networking_25_7_0_Universal_Switch_Deployment_Guide-2.pdf</code></p>
   </div>
   <div class="doc-card">
@@ -572,35 +787,37 @@ configure dhcp-address-range Employee-Pool vlan Employee default-gateway 10.5.0.
   <div class="doc-card">
     <div class="doc-card-type local">Local &nbsp;&bull;&nbsp; PATCH</div>
     <h4>EP1 v25.9.0.199 Patch 1 Release Notes</h4>
-    <p>Cumulative fixes on top of 25.9.0.199 GA. Check for AP/switch-specific bug fixes before deployment.</p>
+    <p>29 pp. Cumulative fixes on 25.9.0.199 GA. <strong>Known issues persisting:</strong> SEN-616 (no wireless mesh topology view), XIQ-48210 (WIPS missing from outdoor sites), XIQ-19368 (SupCLI multicast rate limit overridden by UI config), XIQ-46735 (Auto Config toggle flips audit-match to mismatch &mdash; do NOT toggle). <strong>Limitations:</strong> no wireless mesh topology, no outdoor sites, LAG not shown if ports not UP. Firmware matrix same as base: EXOS 33.6.1, Fabric Engine 9.3.2, IQ Engine 10.8.6.</p>
     <p><code>Extreme_Platform_ONE_Networking_25_9_0_199_Patch_1_Release_Notes.pdf</code></p>
   </div>
   <div class="doc-card">
     <div class="doc-card-type local">Local &nbsp;&bull;&nbsp; PATCH</div>
     <h4>EP1 v25.9.0.199 Patch 2 Release Notes</h4>
+    <p>29 pp. Same known issues and limitations as Patch 1. Firmware matrix unchanged. No new hardware support added. Cumulative bug fixes only. Deploy-critical note: XIQ-46735 (Auto Config toggle) and XIQ-19368 (SupCLI multicast) remain unresolved through Patch 2.</p>
     <p><code>Extreme_Platform_ONE_Networking_25_9_0_199_Patch_2_Release_Notes.pdf</code></p>
   </div>
   <div class="doc-card">
     <div class="doc-card-type local">Local &nbsp;&bull;&nbsp; PATCH</div>
     <h4>EP1 v25.9.0.199 Patch 3 Release Notes</h4>
+    <p>29 pp. <strong>New hardware support: AP4060, AP4060X</strong>. <strong>Additional known issues added:</strong> XIQ-46182 (EXOS 31.7.4.2-patch1-7 no drag-and-drop in topology), XIQ-46795 (stack hostname not reflected in EP1 after rename), XIQ-47278. <strong>Critical bug fix (CFD-16926):</strong> VLAN and Auto-Sense values in XLSX bulk onboarding were silently NOT populated before Patch 3 &mdash; must be on Patch 3+ for XLSX bulk onboarding to work correctly. Deploy-critical: upgrade to Patch 3+ before using XLSX bulk onboard for switches.</p>
     <p><code>Extreme_Platform_ONE_Networking_25_9_0_199_Patch_3_Release_Notes.pdf</code></p>
   </div>
   <div class="doc-card">
     <div class="doc-card-type local">Local &nbsp;&bull;&nbsp; PATCH</div>
-    <h4>EP1 v25.9.2.1 Patch 4 Release Notes</h4>
-    <p>Latest patch as of May 2026. Contains fixes for PPSK RadSec, switch template push, and AP firmware compatibility.</p>
+    <h4>EP1 v25.9.2.1 Patch 4 Release Notes (Latest)</h4>
+    <p>29 pp. Version bump to 25.9.2-1. Same known issues as Patch 3 (XIQ-46182, XIQ-46795, XIQ-47278, XIQ-19368, XIQ-46735). <strong>New open issue: NVO-12227</strong> (FE7830 VIM2/VIM3 VLAN resets to default unexpectedly). Firmware matrix unchanged: EXOS 33.6.1 / Fabric Engine 9.3.2 / IQ Engine 10.8.6. Previous EXOS: 33.5.2.118-patch1-6. Use this patch level as your deployment baseline for May 2026.</p>
     <p><code>Extreme_Platform_ONE_Networking_25_9_2_1_Patch_4_Release_Notes.pdf</code></p>
   </div>
   <div class="doc-card">
     <div class="doc-card-type local">Local &nbsp;&bull;&nbsp; LICENSING</div>
     <h4>EP1 Networking + XIQ v25.10.0 Subscription Licensing Guide</h4>
-    <p>Licensing tiers: EP1 Standard vs. EP1 Plus. Feature gates: AI Canvas (Plus?), AirDefense containment, GuestEssentials. July 1 XIQ Classic default switch timeline.</p>
+    <p>39 pp. April 2026. Full read completed May 19. <strong>Subscription Tiers:</strong> Tier A = 5320 + APs; Tier B = 5400; Tier C = 5500/VSP 44-49xx; Tier D = 5700/VSP 7-8xxx. <strong>Pilot Twin</strong> bundled with every EP1 Standard sub (backward compat with Site Engine/Controller). <strong>Stack hard rule:</strong> all slots must match tier or entire stack = Unmanaged. <strong>Trial:</strong> 90-day one-time for EP1/Security/SD-WAN only (not XIQ Classic). <strong>AI Credits:</strong> consumed by some Service Agent operations &mdash; monitor at Admin &amp; Settings &gt; Subscriptions &amp; Licensing. Part numbers, allocation UI, subscription expiration behavior all documented pp.25&ndash;39.</p>
     <p><code>Extreme_Platform_ONE_Networking_and_ExtremeCloud_IQ_25_10_0_Subscription_Licensing_Guide.pdf</code></p>
   </div>
   <div class="doc-card">
-    <div class="doc-card-type local">Local &nbsp;&bull;&nbsp; UNREADABLE</div>
+    <div class="doc-card-type local">Local &nbsp;&bull;&nbsp; LINKS</div>
     <h4>EP1 Readme May 19 2026</h4>
-    <p>Binary .docx format &mdash; unreadable without pandoc conversion. May contain setup notes or errata. <strong>Pending: convert with <code>pandoc EP1_Readme*.docx -t plain</code></strong></p>
+    <p>Converted from .docx May 19. Contains only a curated URL list for EP1 resources: <strong>EP1 Support Docs, API Developer Space, EN Product Documentation, AirDefense Essentials, ExtremeAnalytics, XIQ, IoT Essentials, Location Essentials, IQ Engine docs, HW/SW Compatibility Matrix, Optics Compatibility, Training, GTAC, Extreme Hub Community, XIQ-to-EP1 Transition Video, GTAC Support, UI Transition/Menu Changes video</strong>. No errata or setup notes &mdash; pure reference link list.</p>
     <p><code>EP1_Readme_May 19 2026.docx</code></p>
   </div>
 </div>
@@ -696,7 +913,7 @@ configure dhcp-address-range Employee-Pool vlan Employee default-gateway 10.5.0.
 </div>
 
 <!-- ─── RAG WEB ─── -->
-<span class="section-label" id="rag-web">RAG Corpus v2.1 &mdash; Web Research Key Sources</span>
+<span class="section-label" id="rag-web">RAG Corpus v2.4 &mdash; Web Research Key Sources</span>
 
 <p>Sources identified via web research agent (May 19, 2026). URLs verified at time of research. Add to Sprint A LangGraph RAG ingestion pipeline.</p>
 
@@ -867,12 +1084,13 @@ configure dhcp-address-range Employee-Pool vlan Employee default-gateway 10.5.0.
     <li>&#9745; EP1 Security v25.6.0 User Guide &mdash; full TOC reviewed (ZTNA, 5-step onboarding)</li>
     <li>&#9745; EP1 Security v25.3.0 Alert Reference Guide &mdash; abstract reviewed</li>
     <li>&#9745; EP1 Security v25.6.0 Release Notes &mdash; abstract + new features reviewed</li>
-    <li>&#9744; Convert EP1_Readme_May 19 2026.docx (<code>brew install pandoc &amp;&amp; pandoc EP1_Readme*.docx -t plain</code>)</li>
-    <li>&#9745; Read Switch Deployment Guide pp.1&ndash;60 (EXOS onboarding path &mdash; full Network Policy + Supplemental CLI chapters read May 19)</li>
-    <li>&#9744; Read Licensing Guide (EP1 Standard vs Plus feature gates)</li>
-    <li>&#9744; Ingest Patch 4 release notes for AP/switch bug fixes relevant to lab</li>
+    <li>&#9745; Convert EP1_Readme_May 19 2026.docx (converted via Python zipfile May 19 &mdash; contains URL list only)</li>
+    <li>&#9745; Read Switch Deployment Guide pp.1&ndash;130 COMPLETE (all 130 pp. read May 19 &mdash; pp.121&ndash;130 Troubleshoot Switches)</li>
+    <li>&#9745; Read Licensing Guide COMPLETE (pp.1&ndash;39 read May 19 &mdash; Tier A/B/C/D, stack rules, AI Credits, trial subs)</li>
+    <li>&#9745; Read all 4 Patch release notes COMPLETE (Patch 1&ndash;4, pp.21&ndash;29 each &mdash; known issues, firmware matrix, AP4060 in Patch 3, CFD-16926 XLSX bug)</li>
     <li>&#9745; Transition CustomerFAQ reviewed (May 6, 2026 version &mdash; Q4 CY2026 retirement confirmed)</li>
     <li>&#9745; Feature Comparison matrix reviewed (April 9, 2026 &mdash; Essentials apps still Planned for EP1)</li>
+    <li>&#9745; Read EP1 User Guide AI Expert section (pp.37&ndash;46) COMPLETE &mdash; Talk to Knowledge/Data, Think it Through (Beta), Service Agent (Beta), AI Canvas, HITL model, RBAC</li>
     <li>&#9744; Fetch community post (requires Extreme Networks login): community.extremenetworks.com &rarr; ExtremeCloud IQ &rarr; UI Transition post</li>
     <li>&#9744; Populate Sprint A RAG DB (FastAPI + PostgreSQL) with all 20 local docs + key web sources</li>
   </ul>
@@ -880,8 +1098,8 @@ configure dhcp-address-range Employee-Pool vlan Employee default-gateway 10.5.0.
 
 <hr class="divider">
 <p class="footer">
-  KhKLab &nbsp;&bull;&nbsp; 5320 Lab Journal &nbsp;&bull;&nbsp; EP1 Deployment Reference &amp; RAG Corpus v2.2 &nbsp;&bull;&nbsp; May 19, 2026<br>
-  Source: Extreme Platform ONE Networking v25.9.0 User Guide (677 pp., April 2026)<br>
+  KhKLab &nbsp;&bull;&nbsp; 5320 Lab Journal &nbsp;&bull;&nbsp; EP1 Deployment Reference &amp; RAG Corpus v2.4 &nbsp;&bull;&nbsp; May 19, 2026<br>
+  Source: EP1 User Guide (678 pp.) + Universal Switch Deployment Guide (130 pp.) + Licensing Guide (39 pp.) + Patches 1&ndash;4 &mdash; All documents read May 19, 2026<br>
   Study plan: <a href="session_summary_20260519.html">May 19 EOD &mdash; EP1 Sprint Kickoff</a> &nbsp;&bull;&nbsp;
   Sprint tracker: <a href="xiq-ep1-transition.html">XIQ&rarr;EP1 Transition Sprint</a> &nbsp;&bull;&nbsp;
   Design architecture: <a href="xiq-ep1-design-dialogue.html">Design Dialogue Log</a><br>
