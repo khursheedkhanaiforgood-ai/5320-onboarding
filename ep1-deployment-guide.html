@@ -854,6 +854,12 @@ configure iqagent server vr VR-Mgmt vlan Management   # Lock IQAgent to specific
     <p>57 pp. March 2026. Full read May 19. <strong>Additional depth vs 25.10.0:</strong> Pilot Twin compatibility matrix (SE 25.2 = Pilot Twin only; SE 25.5+ = EP1 Standard; Controller = Pilot Twin only). Subscription Tier Priority failover table (higher tier auto-assigned if requested tier unavailable). Tunnel Concentrator requires Tier A per instance + per AP. <strong>Legacy Entitlement Keys:</strong> disabled &mdash; if LEK present + Portal linked, cannot onboard new devices. <strong>Contracts chapter</strong> (EP1 only): Green/Amber/Red status, filter by 30/60/90-day expiry. <strong>Entitlement Violations:</strong> auto-unmanage most recent devices, AP LED amber/white, CoPilot violations independent of Pilot violations. <strong>Proactive alerts:</strong> 90/60/30/7/6/5/4/3/2/1 days before expiry (opt-in). <strong>CUID:</strong> critical for GTAC support calls. <strong>Unlock Full Features</strong> (Pilot&rarr;EP1): non-reversible, blue icon indicator, must include all FE buildings. <strong>Troubleshooting Q&amp;A:</strong> Device License column (Manage&gt;Devices), CoPilot column, Feature License column (MACsec/Premier). Feature matrix: AIExpert/Inventory/Contracts/CustomRoles/FabricConfig = EP1 Standard only, NOT available on XIQ Pilot.</p>
     <p><code>Extreme_Platform_ONE_Networking_and_ExtremeCloud_IQ_25_8_0_Subscription_Licensing_Guide.pdf</code></p>
   </div>
+  <div class="doc-card" style="border-left:3px solid #7c3aed;">
+    <div class="doc-card-type local">Local &nbsp;&bull;&nbsp; ARCHITECTURE</div>
+    <h4>EP1 Cloud Architecture &amp; Security White Paper &#x2605; T1 Source</h4>
+    <p>13 pp. Official Extreme Networks. Read May 19, 2026. <strong>CONFIRMS microservice-driven SaaS, Kubernetes orchestration, container-based.</strong> Two-tier DC model: GDC (AWS-only, hosts AI Core + LLM + Orchestrator + IAM) + RDC (AWS/Azure/GCP, hosts customer VIQ). <strong>Shift-left anonymization:</strong> device telemetry anonymized inside RDC before reaching GDC &mdash; AI Core never sees raw client data. <strong>AI Core = 3 components:</strong> (1) Orchestration layer (safety guardrails, prompt injection protection, hallucination mitigation, bias monitoring); (2) Services layer (multi-agent workflows, LLM + SLM + traditional ML, Model-as-a-Service, real-time + batch inference); (3) Data Hub (Data Ingestion, Data Lake, Knowledge Graph, Metadata Management, RAG-as-a-Service, Auto Compliance). <strong>HITL is default</strong>: AI acts with same RBAC as initiating user &mdash; cannot exceed operator permissions. <strong>EP1 is NOT in the data path</strong> &mdash; network operates independently if EP1 goes down. API Policy: advance notice for deprecations, backward compat maintained during transition window. Backup limitation: cannot restore individual records &mdash; only entire RDC. VIQ backup from GUI = customer responsibility. Data flow: Device &rarr; Anonymization (RDC) &rarr; Data Hub &rarr; AI Service &rarr; Orchestrator &rarr; IAM &rarr; User.</p>
+    <p><code>flipbook-with-notes.pdf</code> (EP1 Cloud Architecture &amp; Security, &copy;2025 Extreme Networks)</p>
+  </div>
   <div class="doc-card">
     <div class="doc-card-type local">Local &nbsp;&bull;&nbsp; LINKS</div>
     <h4>EP1 Readme May 19 2026</h4>
@@ -1143,6 +1149,7 @@ configure iqagent server vr VR-Mgmt vlan Management   # Lock IQAgent to specific
     <li>&#9745; Read Switch Deployment Guide pp.1&ndash;130 COMPLETE (all 130 pp. read May 19 &mdash; pp.121&ndash;130 Troubleshoot Switches)</li>
     <li>&#9745; Read Licensing Guide v25.10.0 COMPLETE (pp.1&ndash;39 read May 19 &mdash; Tier A/B/C/D, stack rules, AI Credits, trial subs)</li>
     <li>&#9745; Read Licensing Guide v25.8.0 COMPLETE (pp.1&ndash;57 read May 19 &mdash; Pilot Twin compatibility matrix, Tier Priority failover, LEK blocking issue, Unlock Full Features, Contracts chapter, Entitlement Violations, Proactive alerts, CUID, Troubleshooting Q&amp;A)</li>
+    <li>&#9745; Read EP1 Cloud Architecture &amp; Security White Paper COMPLETE (13 pp. &mdash; Microservices CONFIRMED, Kubernetes CONFIRMED, GDC=AWS-only, RDC=multi-cloud, shift-left anonymization, AI Core 3-component architecture, HITL=default+RBAC-scoped, EP1 not in data path)</li>
     <li>&#9745; Read all 4 Patch release notes COMPLETE (Patch 1&ndash;4, pp.21&ndash;29 each &mdash; known issues, firmware matrix, AP4060 in Patch 3, CFD-16926 XLSX bug)</li>
     <li>&#9745; Transition CustomerFAQ reviewed (May 6, 2026 version &mdash; Q4 CY2026 retirement confirmed)</li>
     <li>&#9745; Feature Comparison matrix reviewed (April 9, 2026 &mdash; Essentials apps still Planned for EP1)</li>
@@ -1154,8 +1161,8 @@ configure iqagent server vr VR-Mgmt vlan Management   # Lock IQAgent to specific
 
 <hr class="divider">
 <p class="footer">
-  KhKLab &nbsp;&bull;&nbsp; 5320 Lab Journal &nbsp;&bull;&nbsp; EP1 Deployment Reference &amp; RAG Corpus v2.5 &nbsp;&bull;&nbsp; May 19, 2026<br>
-  Source: EP1 User Guide (678 pp.) + Universal Switch Deployment Guide (130 pp.) + Licensing Guides v25.10.0 (39 pp.) + v25.8.0 (57 pp.) + Patches 1&ndash;4 &mdash; All documents read May 19, 2026<br>
+  KhKLab &nbsp;&bull;&nbsp; 5320 Lab Journal &nbsp;&bull;&nbsp; EP1 Deployment Reference &amp; RAG Corpus v2.6 &nbsp;&bull;&nbsp; May 19, 2026<br>
+  Source: EP1 User Guide (678 pp.) + Universal Switch Deployment Guide (130 pp.) + Licensing Guides v25.10.0 + v25.8.0 + Patches 1&ndash;4 + Cloud Architecture &amp; Security White Paper &mdash; All read May 19, 2026<br>
   Study plan: <a href="session_summary_20260519.html">May 19 EOD &mdash; EP1 Sprint Kickoff</a> &nbsp;&bull;&nbsp;
   Sprint tracker: <a href="xiq-ep1-transition.html">XIQ&rarr;EP1 Transition Sprint</a> &nbsp;&bull;&nbsp;
   Design architecture: <a href="xiq-ep1-design-dialogue.html">Design Dialogue Log</a><br>
