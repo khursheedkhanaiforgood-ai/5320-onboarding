@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EP1 Two-SSID Deployment Guide + RAG Corpus — KhKLab May 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Libre+Franklin:ital,wght@0,400;0,500;0,600;0,700;1,400&family=SF+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Libre Baskerville', Georgia, serif; background: #FFFFFF; color: #111111; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 48px 24px 72px; }
+.container { max-width: 780px; width: 100%; }
+.nyt-rule-top { border: none; border-top: 3px solid #111; margin-bottom: 6px; }
+.nyt-rule-thin { border: none; border-top: 1px solid #111; margin-bottom: 18px; }
+.nyt-logo { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.22em; color: #666; text-align: center; margin-bottom: 6px; }
+.byline { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.72rem; color: #666; margin-bottom: 14px; letter-spacing: 0.02em; }
+.byline strong { color: #111; font-weight: 700; }
+h1 { font-family: 'Libre Baskerville', Georgia, serif; font-size: 2.1rem; font-weight: 700; color: #111; line-height: 1.15; margin-bottom: 14px; }
+.subtitle { font-family: 'Libre Baskerville', Georgia, serif; font-size: 1rem; font-style: italic; color: #444; line-height: 1.8; margin-bottom: 20px; border-bottom: 1px solid #E2E2E2; padding-bottom: 28px; }
+.section-label { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.18em; color: #1e40af; margin: 40px 0 12px; padding-bottom: 6px; border-bottom: 2px solid #1e40af; display: block; }
+h2 { font-family: 'Libre Baskerville', Georgia, serif; font-size: 1.35rem; font-weight: 700; color: #111; margin: 0 0 12px; }
+h3 { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #1e40af; margin: 22px 0 10px; }
+p { font-size: 0.97rem; line-height: 1.85; color: #222; margin-bottom: 12px; }
+ul, ol { padding-left: 22px; margin-bottom: 14px; }
+li { font-size: 0.94rem; line-height: 1.8; color: #222; margin-bottom: 4px; }
+code { font-family: 'SF Mono', 'Menlo', Consolas, monospace; font-size: 0.81rem; background: #F4F4F4; border: 1px solid #E2E2E2; padding: 1px 5px; border-radius: 3px; color: #1e40af; }
+pre { background: #F8F8F8; border: 1px solid #E2E2E2; border-left: 3px solid #1e40af; border-radius: 0 4px 4px 0; padding: 14px 16px; overflow-x: auto; margin: 10px 0 18px; }
+pre code { background: none; border: none; padding: 0; color: #111; font-size: 0.82rem; line-height: 1.65; }
+table { width: 100%; border-collapse: collapse; margin: 12px 0 20px; font-size: 0.87rem; }
+th { background: #EFF6FF; font-family: 'Libre Franklin', Arial, sans-serif; font-weight: 700; font-size: 0.71rem; text-transform: uppercase; letter-spacing: 0.07em; color: #1e40af; padding: 8px 10px; border: 1px solid #DBEAFE; text-align: left; }
+td { padding: 8px 10px; border: 1px solid #E2E2E2; color: #222; vertical-align: top; font-size: 0.88rem; line-height: 1.6; }
+tr:nth-child(even) td { background: #FAFAFA; }
+.ok  { color: #065f46; font-weight: 700; }
+.bad { color: #C62828; font-weight: 700; }
+.warn { color: #E65100; font-weight: 700; }
+.ep1 { color: #1e40af; font-weight: 700; }
+.box { border-left: 3px solid #1e40af; background: #EFF6FF; padding: 12px 16px; margin: 14px 0; border-radius: 0 4px 4px 0; }
+.box p { margin: 0; font-size: 0.92rem; line-height: 1.75; }
+.box p + p { margin-top: 8px; }
+.box ul { margin: 6px 0 0; }
+.box.warn { border-left-color: #F57F17; background: #FFFBF0; }
+.box.ok { border-left-color: #059669; background: #F0FFF4; }
+.box-label { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: #1e40af; margin-bottom: 6px; }
+.box.warn .box-label { color: #E65100; }
+.box.ok .box-label { color: #065f46; }
+.divider { border: none; border-top: 1px solid #E2E2E2; margin: 32px 0; }
+.toc { background: #F8F8F8; border: 1px solid #E2E2E2; border-radius: 4px; padding: 16px 20px; margin-bottom: 36px; }
+.toc-title { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.15em; color: #999; margin-bottom: 10px; }
+.toc a { display: block; font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.82rem; color: #1e40af; text-decoration: none; padding: 3px 0; border-bottom: 1px solid #F0F0F0; line-height: 1.5; }
+.toc a:last-child { border-bottom: none; }
+.toc a:hover { color: #111; }
+
+/* Phase blocks */
+.phase { border: 1px solid #DBEAFE; border-radius: 6px; margin-bottom: 24px; overflow: hidden; }
+.phase-header { background: #1e40af; color: #fff; padding: 10px 16px; display: flex; align-items: center; gap: 12px; }
+.phase-num { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.65rem; font-weight: 700; background: rgba(255,255,255,0.2); padding: 2px 8px; border-radius: 20px; letter-spacing: 0.1em; text-transform: uppercase; }
+.phase-title { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.9rem; font-weight: 700; }
+.phase-body { padding: 14px 16px; }
+.phase-body ol { padding-left: 20px; margin: 0; }
+.phase-body ol li { font-size: 0.9rem; line-height: 1.75; color: #222; margin-bottom: 6px; }
+.phase-body ol li strong { color: #1e40af; }
+.phase-body ol li code { font-size: 0.8rem; }
+
+/* RAG corpus */
+.doc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+@media (max-width: 600px) { .doc-grid { grid-template-columns: 1fr; } }
+.doc-card { border: 1px solid #E2E2E2; border-radius: 4px; padding: 12px 14px; }
+.doc-card-type { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 4px; }
+.doc-card-type.local { color: #065f46; }
+.doc-card-type.web { color: #1e40af; }
+.doc-card h4 { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.82rem; font-weight: 700; color: #111; margin-bottom: 4px; line-height: 1.4; }
+.doc-card p { font-size: 0.78rem; color: #555; line-height: 1.6; margin: 0; }
+.doc-card a { color: #1e40af; text-decoration: none; font-size: 0.75rem; }
+.doc-card a:hover { text-decoration: underline; }
+
+/* Step number badge */
+.step-badge { display: inline-block; background: #1e40af; color: #fff; font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.65rem; font-weight: 700; padding: 1px 7px; border-radius: 3px; margin-right: 6px; }
+
+.footer { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.75rem; color: #888; line-height: 1.8; margin-top: 40px; }
+.footer a { color: #1e40af; text-decoration: none; }
+</style>
+</head>
+<body>
+<div class="container">
+
+<hr class="nyt-rule-top">
+<div class="nyt-logo">KhKLab &nbsp;&bull;&nbsp; 5320 Lab Journal &nbsp;&bull;&nbsp; EP1 Deployment Reference</div>
+<hr class="nyt-rule-thin">
+
+<div class="byline">
+  <strong>May 19, 2026</strong> &nbsp;&mdash;&nbsp; EP1 Two-SSID Deployment Playbook + RAG Corpus v1.0 &nbsp;&mdash;&nbsp;
+  Source: EP1 Networking v25.9.0 User Guide (677 pp., April 2026)
+</div>
+
+<h1>EP1 Network Policy Deployment: Employee PPSK + Guest CWP &mdash; Step-by-Step from the Source</h1>
+
+<p class="subtitle">Extracted verbatim from Extreme Platform ONE Networking v25.9.0 User Guide pages 234&ndash;286. Every navigation path, tab name, and field label is guide-verified. Use this as the live cheat sheet during the Friday Sr Director session and as the RAG seed document for Sprint A ingestion.</p>
+
+<div class="toc">
+  <div class="toc-title">In This Guide</div>
+  <a href="#nav-correction">EP1 Nav Map &mdash; Corrected (v25.9.0)</a>
+  <a href="#policy-tabs">Policy Workflow Tabs</a>
+  <a href="#phase0">Phase 0 &mdash; EXOS SW1 Pre-flight</a>
+  <a href="#phase1">Phase 1 &mdash; Create Network Policy</a>
+  <a href="#phase2">Phase 2 &mdash; Policy Settings (DNS / NTP / SNMP / Time Zone)</a>
+  <a href="#phase3">Phase 3 &mdash; Employee SSID (PPSK / VLAN5)</a>
+  <a href="#phase4">Phase 4 &mdash; Guest SSID (Open / CWP / VLAN10)</a>
+  <a href="#phase5">Phase 5 &mdash; Deploy (Upload + Perform Update)</a>
+  <a href="#vlan-delta">XIQ vs. EP1 Field Delta Table</a>
+  <a href="#rag-local">RAG Corpus &mdash; Local Documents (9)</a>
+  <a href="#rag-web">RAG Corpus &mdash; Web Research (Key Sources)</a>
+  <a href="#page-index">Guide Page Index</a>
+</div>
+
+<!-- ─── NAV CORRECTION ─── -->
+<span class="section-label" id="nav-correction">EP1 Nav Map &mdash; Corrected v25.9.0</span>
+
+<div class="box warn">
+  <p class="box-label">Critical Correction (Confirmed from Guide pp.22&ndash;30)</p>
+  <p>EP1 Networking is a single portal with a left navigation pane &mdash; <strong>not</strong> a separate &ldquo;Connect app.&rdquo; The 9-dot menu (top-right) switches between licensed <em>products</em>: EP1 Networking, EP1 Security, XIQ Classic, SD-WAN. Within EP1 Networking, all configuration is reached via the left nav pane.</p>
+</div>
+
+<table>
+  <thead><tr><th>What You Want to Do</th><th>EP1 Networking Path</th><th>Prior Incorrect Nav</th></tr></thead>
+  <tbody>
+    <tr><td>Create / edit a Network Policy</td><td><strong>Configuration &gt; Network</strong> &rarr; select policy or +</td><td><span class="bad">Connect &gt; Network &gt; Network Policies</span></td></tr>
+    <tr><td>Configure SSIDs (within a policy)</td><td>Policy &rarr; tab <strong>2 Wireless</strong> &rarr; + Add SSID</td><td></td></tr>
+    <tr><td>Configure Switch Template</td><td>Policy &rarr; tab <strong>3 Switching/Routing</strong></td><td></td></tr>
+    <tr><td>Deploy policy to devices</td><td>Policy &rarr; tab <strong>4 Deploy Policy</strong> &rarr; select devices &rarr; UPLOAD</td><td></td></tr>
+    <tr><td>User Groups / PPSK users</td><td><strong>Configuration &gt; User Management</strong> (p.525)</td><td><span class="bad">Users &amp; User Groups (XIQ Classic path)</span></td></tr>
+    <tr><td>Reusable VLAN / AP / Switch templates</td><td><strong>Configuration &gt; Common Objects</strong> (p.432)</td><td></td></tr>
+    <tr><td>Monitor devices / push config</td><td><strong>Monitoring &gt; Network Devices</strong></td><td></td></tr>
+    <tr><td>AirDefense / WIPS</td><td><strong>Configuration &gt; Network Policy &gt; Configure WIPS</strong> (p.404) <em>or</em> EP1 Security app (9-dot)</td><td></td></tr>
+    <tr><td>AI Expert (Know/Data/Think)</td><td><strong>Workspace &gt; Extreme AI Expert</strong> (p.37)</td><td></td></tr>
+    <tr><td>AI Canvas (NL queries)</td><td><strong>Workspace &gt; AI Canvas</strong> (p.42) &mdash; EP1-only, no XIQ equivalent</td><td></td></tr>
+    <tr><td>Switch between products</td><td><strong>9-dot menu</strong> (top-right) &rarr; EP1 Networking / EP1 Security / XIQ Classic / SD-WAN</td><td></td></tr>
+  </tbody>
+</table>
+
+<!-- ─── POLICY TABS ─── -->
+<span class="section-label" id="policy-tabs">Policy Workflow Tabs (pp.234&ndash;235)</span>
+
+<p>When you open or create a Network Policy, four sequential tabs appear at the top:</p>
+
+<table>
+  <thead><tr><th>Tab</th><th>Name</th><th>What You Configure</th></tr></thead>
+  <tbody>
+    <tr><td><span class="step-badge">1</span></td><td><strong>Policy Details</strong></td><td>Policy type (Wireless / Switching / Routing / all), name, description, Presence Analytics</td></tr>
+    <tr><td><span class="step-badge">2</span></td><td><strong>Wireless</strong></td><td>SSIDs &mdash; add/edit each SSID, auth method, user group, user profile, CWP, Optional Settings</td></tr>
+    <tr><td><span class="step-badge">3</span></td><td><strong>Switching/Routing</strong></td><td>Switch templates, port types, routing (only appears if Switching or Routing type selected)</td></tr>
+    <tr><td><span class="step-badge">4</span></td><td><strong>Deploy Policy</strong></td><td>Select target devices, choose Delta or Complete update, PERFORM UPDATE</td></tr>
+  </tbody>
+</table>
+
+<p>The left sidebar on tab 2 (Wireless) also contains: <strong>Policy Settings</strong> (DNS, NTP, SNMP, Syslog, Device Credentials, Time Zone, Hive, VLAN, IP Tracking, LLDP), <strong>Management Settings</strong> (Management Options, Traffic Filters, MGT IP Filters), and <strong>Device Templates</strong>.</p>
+
+<!-- ─── PHASE 0 ─── -->
+<span class="section-label" id="phase0">Phase 0 &mdash; EXOS SW1 Pre-flight</span>
+
+<div class="phase">
+  <div class="phase-header">
+    <span class="phase-num">Pre-flight</span>
+    <span class="phase-title">SW1 EXOS &mdash; VLANs 5 &amp; 10, Port 3, DHCP, ipforwarding</span>
+  </div>
+  <div class="phase-body">
+    <p style="font-size:0.85rem;color:#555;margin-bottom:10px">Run on SW1 console before first AP1 test. Port 3 = uplink to AP1. Do NOT put <code>enable ipforwarding</code> in Supplemental CLI (XIQ hangs at 15%).</p>
+<pre><code>create vlan Employee tag 5
+create vlan Guest tag 10
+configure vlan Employee add ports 3 tagged
+configure vlan Guest add ports 3 tagged
+
+enable ipforwarding vlan Employee
+enable ipforwarding vlan Guest
+
+create dhcp-address-range Employee-Pool vr VR-Default 10.5.0.100-10.5.0.200
+configure dhcp-address-range Employee-Pool vlan Employee default-gateway 10.5.0.1 dns-server 8.8.8.8
+configure vlan Employee ipaddress 10.5.0.1 255.255.255.0
+enable dhcp ports 3 vlan Employee
+
+create dhcp-address-range Guest-Pool vr VR-Default 10.10.0.100-10.10.0.200
+configure dhcp-address-range Guest-Pool vlan Guest default-gateway 10.10.0.1 dns-server 8.8.8.8
+configure vlan Guest ipaddress 10.10.0.1 255.255.255.0
+enable dhcp ports 3 vlan Guest
+
+show vlan Employee detail
+show dhcp-server vlan Employee</code></pre>
+    <div class="box ok" style="margin-top:8px">
+      <p class="box-label">Verify</p>
+      <p><code>show fdb ports 3</code> should show AP1 MAC in VLAN 1 (native). After client connects to Employee SSID, AP tags frames with VLAN 5 — client MAC should appear in VLAN 5 FDB within 30s.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ─── PHASE 1 ─── -->
+<span class="section-label" id="phase1">Phase 1 &mdash; Create Network Policy (p.235)</span>
+
+<div class="phase">
+  <div class="phase-header">
+    <span class="phase-num">Phase 1</span>
+    <span class="phase-title">Add Network Policy &mdash; Configuration &gt; Network</span>
+  </div>
+  <div class="phase-body">
+    <ol>
+      <li>Go to <strong>Configuration &gt; Network</strong> (left nav pane in EP1 Networking portal)</li>
+      <li>Select <strong>Network Policies</strong> from the sub-menu</li>
+      <li>Click <strong>+</strong> (Add Network Policy button in list view, or select thumbnail <strong>Add Network Policy</strong>)</li>
+      <li>In <strong>New Policy</strong> window, select policy type: check <strong>Wireless</strong> (APs). Optionally also check <strong>Switching/Routing</strong> if managing SW1 via EP1.</li>
+      <li>Type a <strong>Policy Name</strong>: e.g., <code>KhKLab-Policy</code></li>
+      <li>(Optional) Type a <strong>Description</strong></li>
+      <li>Leave <strong>Presence Analytics</strong> disabled (lab &mdash; not needed)</li>
+      <li>Click <strong>SAVE</strong></li>
+      <li>Click <strong>NEXT</strong> &rarr; tab advances to <strong>2 Wireless</strong></li>
+    </ol>
+    <div class="box warn">
+      <p class="box-label">AP Prerequisite</p>
+      <p>EP1 assumes APs have already established CAPWAP connections (UDP 12222 or HTTPS TCP 80/443). AP1 must be in <em>your</em> VIQ org (not Karl&rsquo;s) before the policy push will land on it. Move AP1: unclaim from Karl&rsquo;s org → claim in your org → wait for CAPWAP reconnect.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ─── PHASE 2 ─── -->
+<span class="section-label" id="phase2">Phase 2 &mdash; Policy Settings (pp.236&ndash;253)</span>
+
+<div class="phase">
+  <div class="phase-header">
+    <span class="phase-num">Phase 2</span>
+    <span class="phase-title">Policy Settings &mdash; Time Zone, SNMP, Hive (Roaming Cache)</span>
+  </div>
+  <div class="phase-body">
+    <p style="font-size:0.85rem;color:#555;margin-bottom:10px">Accessed from the left sidebar inside the network policy workflow (tab 1 still active or via sidebar). Each setting has its own expandable sub-panel.</p>
+    <ol>
+      <li>In the policy left sidebar, click <strong>Policy Settings</strong></li>
+      <li><strong>Device Time Zone</strong> (p.245): toggle ON → select <strong>America/New_York (EST, UTC&minus;5)</strong></li>
+      <li><strong>SNMP Server</strong> (p.240): toggle ON → + Add server → IP or hostname → Version: <strong>v2c</strong> → Operation: <strong>Get and Trap</strong> → Community: <code>hivecommunity</code> → ADD SNMP SERVER → SAVE SNMP SERVER</li>
+      <li><strong>NTP Server</strong> (p.238): leave at default DHCP-provided (device auto-discovers <code>0.aerohive.pool.ntp.org</code> if DHCP does not advertise NTP). Optionally add explicit NTP IP.</li>
+      <li><strong>Hive</strong> (p.246): expand <strong>Client Roaming &gt; Share connected client information (Roaming cache)</strong>:
+        <ul>
+          <li><em>Devices send client information every</em>: default <strong>60 seconds</strong> &#10003; (leave as-is &mdash; lower = faster roaming)</li>
+          <li><em>Remove cached client information when absent after</em>: default 5 missed updates (5 &times; 60s = 5 min)</li>
+        </ul>
+      </li>
+      <li><strong>Management and Native VLAN</strong> (p.249): set MGT Interface VLAN if managing AP via a specific VLAN (optional for lab)</li>
+      <li>Click <strong>SAVE</strong> &rarr; <strong>Policy</strong> &rarr; <strong>NEXT</strong> to advance to tab <strong>2 Wireless</strong></li>
+    </ol>
+  </div>
+</div>
+
+<!-- ─── PHASE 3 ─── -->
+<span class="section-label" id="phase3">Phase 3 &mdash; Employee SSID (Private Pre-Shared Key / VLAN5)</span>
+
+<div class="phase">
+  <div class="phase-header">
+    <span class="phase-num">Phase 3</span>
+    <span class="phase-title">Employee SSID &mdash; PPSK Authentication + VLAN 5</span>
+  </div>
+  <div class="phase-body">
+    <p style="font-size:0.85rem;color:#555;margin-bottom:10px">On tab <strong>2 Wireless</strong> of the network policy. Guide ref: pp.268&ndash;279, 292.</p>
+    <ol>
+      <li>Select <strong>2 Wireless</strong> tab, then click <strong>+</strong> to add a new SSID (or select existing &rarr; edit icon)</li>
+      <li><strong>Name</strong>: <code>Employee</code> (internal EP1 name)</li>
+      <li><strong>Broadcast Name</strong>: <code>Employee</code> (what clients see in beacon; auto-derived from Name)</li>
+      <li><strong>Radio bands</strong>: check both <strong>Wi-Fi 0 Radio (2.4 GHz or 5 GHz)</strong> and <strong>Wi-Fi 1 Radio (5 GHz only)</strong> for dual-band</li>
+      <li>Under <strong>SSID Usage &gt; SSID Authentication</strong>, select <strong>Private Pre-Shared Key</strong> (p.292)</li>
+      <li><strong>User Group</strong>: click + to add new group
+        <ul>
+          <li>Name: <code>Staff</code></li>
+          <li>Password DB Location: <strong>Cloud</strong> (for cloud-resident PPSK database)</li>
+          <li>Password Type: <strong>PPSK</strong></li>
+          <li>PSK Generation Method: <strong>Password Only</strong></li>
+          <li>Password Length: 12 characters</li>
+          <li>Generate Password Using: <strong>Letters + Numbers</strong></li>
+          <li>Account Expiration: <strong>Never Expire</strong></li>
+          <li>Click <strong>SAVE USER GROUP</strong></li>
+        </ul>
+      </li>
+      <li><strong>Default User Profile</strong>: click + to add new profile
+        <ul>
+          <li>User Profile Name: <code>Employee-Profile</code></li>
+          <li>Connect to: <strong>VLAN</strong> &rarr; + New VLAN object: Name <code>Employee</code>, VLAN ID <code>5</code> &rarr; SAVE VLAN</li>
+          <li>Click <strong>SAVE USER PROFILE</strong></li>
+        </ul>
+      </li>
+      <li>Toggle <strong>Client Monitor ON</strong> (default &mdash; leave enabled)</li>
+      <li>Click <strong>SAVE</strong> to save the Employee SSID</li>
+    </ol>
+    <div class="box">
+      <p class="box-label">PPSK Users</p>
+      <p>Individual PPSK passphrases are added separately: <strong>Configuration &gt; User Management</strong> (p.525) &rarr; Add User &rarr; assign to the <code>Staff</code> user group &rarr; system generates passphrase. Each user gets a unique passphrase for the same SSID.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ─── PHASE 4 ─── -->
+<span class="section-label" id="phase4">Phase 4 &mdash; Guest SSID (Open / CWP / VLAN10)</span>
+
+<div class="phase">
+  <div class="phase-header">
+    <span class="phase-num">Phase 4</span>
+    <span class="phase-title">Guest SSID &mdash; Open Auth + Captive Web Portal + VLAN 10</span>
+  </div>
+  <div class="phase-body">
+    <p style="font-size:0.85rem;color:#555;margin-bottom:10px">Guide ref: pp.268&ndash;271, 295 (Device-based CWP), 302 (Cloud-based CWP). For lab: use Device-based CWP (UPA style) unless GuestEssentials is licensed.</p>
+    <ol>
+      <li>On tab <strong>2 Wireless</strong>, click <strong>+</strong> again to add a second SSID</li>
+      <li><strong>Name</strong>: <code>Guest</code></li>
+      <li><strong>Broadcast Name</strong>: <code>Guest_Wireless</code></li>
+      <li><strong>Radio bands</strong>: check both Wi-Fi 0 and Wi-Fi 1 (2.4 + 5 GHz). <em>Note: Open auth is not available for 6 GHz (Wi-Fi 2).</em></li>
+      <li>Under <strong>SSID Authentication</strong>, select <strong>Open</strong></li>
+      <li>For Captive Web Portal (step 12 of SSID workflow, p.271):
+        <ul>
+          <li>Select <strong>Customize and Preview Device-based Captive Web Portal Settings</strong> (p.295)</li>
+          <li>CWP Type: <strong>User Acceptance Policy (UPA)</strong> &mdash; simplest T&amp;C acceptance</li>
+          <li>Configure the T&amp;C text and optional redirect URL</li>
+          <li>Click <strong>SAVE CWP</strong></li>
+        </ul>
+      </li>
+      <li><strong>Default User Profile</strong>: click + to add new profile
+        <ul>
+          <li>User Profile Name: <code>Guest-Profile</code></li>
+          <li>Connect to: <strong>VLAN</strong> &rarr; + New VLAN object: Name <code>Guest</code>, VLAN ID <code>10</code> &rarr; SAVE VLAN</li>
+          <li>Click <strong>SAVE USER PROFILE</strong></li>
+        </ul>
+      </li>
+      <li>Under <strong>Optional Settings &gt; Traffic Filters</strong> (Additional Settings), add RFC 1918 firewall rules:
+        <ul>
+          <li>DENY 10.0.0.0/8 &rarr; ANY (block access to corporate LAN)</li>
+          <li>DENY 172.16.0.0/12 &rarr; ANY</li>
+          <li>DENY 192.168.0.0/16 &rarr; ANY</li>
+          <li>PERMIT ANY &rarr; ANY (allow internet)</li>
+        </ul>
+      </li>
+      <li>Toggle <strong>Client Monitor ON</strong></li>
+      <li>Click <strong>SAVE</strong> to save the Guest SSID</li>
+    </ol>
+    <div class="box warn">
+      <p class="box-label">GuestEssentials vs. Built-in CWP</p>
+      <p>Device-based CWP (configured here) = simple T&amp;C page, no identity capture, no audit trail. GuestEssentials (separate EP1 app) = full branded portal, email/SMS self-reg, sponsorship workflow, HIPAA-grade audit trail. For this lab: Device-based CWP is sufficient.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ─── PHASE 5 ─── -->
+<span class="section-label" id="phase5">Phase 5 &mdash; Deploy to AP1 (p.267)</span>
+
+<div class="phase">
+  <div class="phase-header">
+    <span class="phase-num">Phase 5</span>
+    <span class="phase-title">Deploy Policy &mdash; Tab 4 &rarr; UPLOAD &rarr; PERFORM UPDATE</span>
+  </div>
+  <div class="phase-body">
+    <ol>
+      <li>Navigate to tab <strong>4 Deploy Policy</strong> (or <strong>Configuration &gt; Network Policies</strong> &rarr; select policy &rarr; Deploy icon)</li>
+      <li>The device table shows all devices assigned to this policy. Use <strong>Assigned</strong> / <strong>Eligible</strong> / <strong>Filtered</strong> controls to find AP1.</li>
+      <li>Check the box next to <strong>AP1</strong></li>
+      <li>Click <strong>UPLOAD</strong></li>
+      <li>In <strong>Device Update</strong> window:
+        <ul>
+          <li>Update type: <strong>Delta</strong> (only changed configs) for incremental updates; <strong>Complete</strong> for full repush</li>
+          <li>(Optional) Enable <strong>Distributed Image Upgrade</strong> if WAN is slow</li>
+        </ul>
+      </li>
+      <li>Click <strong>PERFORM UPDATE</strong></li>
+      <li>Monitor: <strong>Monitoring &gt; Network Devices &gt; AP1</strong> &rarr; status changes to <strong>Connected + Updated</strong></li>
+      <li>The AP reboots to activate new config. Expect 60&ndash;90 sec downtime.</li>
+    </ol>
+    <div class="box ok">
+      <p class="box-label">Verify SSIDs</p>
+      <p>After AP reboots: iPhone WiFi scan should show both <code>Employee</code> and <code>Guest_Wireless</code>. Connect iPhone to Employee with a PPSK passphrase &rarr; check <code>show fdb ports 3</code> on SW1 &rarr; iPhone MAC should appear in VLAN 5. Connect to Guest_Wireless &rarr; browser should redirect to CWP T&amp;C page.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ─── XIQ vs EP1 DELTA ─── -->
+<span class="section-label" id="vlan-delta">XIQ vs. EP1 &mdash; Configuration Path Delta</span>
+
+<table>
+  <thead><tr><th>Task</th><th>XIQ Classic</th><th>EP1 Networking (v25.9.0)</th><th>Change</th></tr></thead>
+  <tbody>
+    <tr><td>Create Network Policy</td><td>Configure &gt; Network Policies &gt; +</td><td>Configuration &gt; Network &gt; + Add Network Policy</td><td class="warn">Nav restructured</td></tr>
+    <tr><td>Add SSID to policy</td><td>Network Policy &gt; Wireless Networks &gt; +</td><td>Policy &gt; tab 2 Wireless &gt; +</td><td class="ok">Same flow, tab-based</td></tr>
+    <tr><td>Select PPSK auth</td><td>SSID Usage &gt; Private Pre-Shared Key</td><td>SSID Authentication &gt; Private Pre-Shared Key</td><td class="ok">Same</td></tr>
+    <tr><td>User Group creation</td><td>Configure &gt; Users &amp; Groups &gt; + then link to SSID</td><td>Inline within SSID config OR Configuration &gt; User Management</td><td class="warn">Can create inline (new)</td></tr>
+    <tr><td>VLAN assignment</td><td>Default User Profile &gt; Connect to &gt; VLAN</td><td>Default User Profile &gt; Connect to &gt; VLAN or VLAN Group</td><td class="ok">Identical</td></tr>
+    <tr><td>Captive Web Portal</td><td>SSID &gt; Authentication &gt; CWP settings</td><td>SSID &gt; step 12 &gt; Device-based CWP (p.295) or Cloud CWP (p.302)</td><td class="warn">Two CWP types now explicit</td></tr>
+    <tr><td>SNMP policy</td><td>Network Policy &gt; Management &gt; SNMP</td><td>Policy Settings &gt; SNMP Server (left sidebar)</td><td class="warn">Nav moved to sidebar</td></tr>
+    <tr><td>Deploy policy</td><td>Network Policy &gt; Deploy &gt; check APs &gt; Update</td><td>Policy &gt; tab 4 Deploy Policy &gt; UPLOAD &gt; PERFORM UPDATE</td><td class="ok">Same intent, new tab</td></tr>
+    <tr><td>Reusable objects (VLANs, AP templates)</td><td>Configure &gt; Common Objects</td><td>Configuration &gt; Common Objects (p.432)</td><td class="ok">Identical</td></tr>
+    <tr><td>Monitor devices / push config</td><td>Monitor &gt; Devices</td><td>Monitoring &gt; Network Devices</td><td class="ok">Same intent</td></tr>
+    <tr><td>AI Canvas (NL dashboard queries)</td><td><span class="bad">Not available</span></td><td class="ep1">Workspace &gt; AI Canvas (p.42)</td><td class="ep1">EP1-only</td></tr>
+    <tr><td>Agent ONE (autonomous tasks)</td><td><span class="bad">Not available</span></td><td class="ep1">Announced ExtremeConnect May 2026 &mdash; Coworker mode July 2026</td><td class="ep1">EP1-only</td></tr>
+  </tbody>
+</table>
+
+<!-- ─── RAG LOCAL ─── -->
+<span class="section-label" id="rag-local">RAG Corpus v1.0 &mdash; Local Documents</span>
+
+<p>Files at <code>/Users/khukhan/Downloads/EP1/Documents/</code> &mdash; 9 files, ingested for Sprint A. <strong>NEVER push to GitHub.</strong></p>
+
+<div class="doc-grid">
+  <div class="doc-card">
+    <div class="doc-card-type local">Local &nbsp;&bull;&nbsp; PRIMARY</div>
+    <h4>EP1 Networking v25.9.0 User Guide</h4>
+    <p>677 pages. April 2026. Complete reference: Network Policies (p.234), SSID (p.268), CWP (p.295/302), Switch Templates (p.345), Common Objects (p.432), User Management (p.525), AirDefense (p.476), AI Canvas (p.42), Topology (p.78).</p>
+    <p><code>Extreme_Platform_ONE_Networking_25_9_0_User_Guide.pdf</code></p>
+  </div>
+  <div class="doc-card">
+    <div class="doc-card-type local">Local &nbsp;&bull;&nbsp; SWITCH</div>
+    <h4>EP1 Universal Switch Deployment Guide v25.7.0</h4>
+    <p>EXOS SwitchEngine + VOSS FabricEngine onboarding into EP1. Switch templates, port types, Supplemental CLI, Fabric Attach. Key for SW1 (EXOS) integration.</p>
+    <p><code>Extreme_Platform_ONE_Networking_25_7_0_Universal_Switch_Deployment_Guide-2.pdf</code></p>
+  </div>
+  <div class="doc-card">
+    <div class="doc-card-type local">Local &nbsp;&bull;&nbsp; RELEASE</div>
+    <h4>EP1 v25.9.0.199 Release Notes</h4>
+    <p>Base release notes for the v25.9.0.199 GA build. New features, known issues, upgrade path.</p>
+    <p><code>Extreme_Platform_ONE_Networking_25_9_0_199_Release_Notes.pdf</code></p>
+  </div>
+  <div class="doc-card">
+    <div class="doc-card-type local">Local &nbsp;&bull;&nbsp; PATCH</div>
+    <h4>EP1 v25.9.0.199 Patch 1 Release Notes</h4>
+    <p>Cumulative fixes on top of 25.9.0.199 GA. Check for AP/switch-specific bug fixes before deployment.</p>
+    <p><code>Extreme_Platform_ONE_Networking_25_9_0_199_Patch_1_Release_Notes.pdf</code></p>
+  </div>
+  <div class="doc-card">
+    <div class="doc-card-type local">Local &nbsp;&bull;&nbsp; PATCH</div>
+    <h4>EP1 v25.9.0.199 Patch 2 Release Notes</h4>
+    <p><code>Extreme_Platform_ONE_Networking_25_9_0_199_Patch_2_Release_Notes.pdf</code></p>
+  </div>
+  <div class="doc-card">
+    <div class="doc-card-type local">Local &nbsp;&bull;&nbsp; PATCH</div>
+    <h4>EP1 v25.9.0.199 Patch 3 Release Notes</h4>
+    <p><code>Extreme_Platform_ONE_Networking_25_9_0_199_Patch_3_Release_Notes.pdf</code></p>
+  </div>
+  <div class="doc-card">
+    <div class="doc-card-type local">Local &nbsp;&bull;&nbsp; PATCH</div>
+    <h4>EP1 v25.9.2.1 Patch 4 Release Notes</h4>
+    <p>Latest patch as of May 2026. Contains fixes for PPSK RadSec, switch template push, and AP firmware compatibility.</p>
+    <p><code>Extreme_Platform_ONE_Networking_25_9_2_1_Patch_4_Release_Notes.pdf</code></p>
+  </div>
+  <div class="doc-card">
+    <div class="doc-card-type local">Local &nbsp;&bull;&nbsp; LICENSING</div>
+    <h4>EP1 Networking + XIQ v25.10.0 Subscription Licensing Guide</h4>
+    <p>Licensing tiers: EP1 Standard vs. EP1 Plus. Feature gates: AI Canvas (Plus?), AirDefense containment, GuestEssentials. July 1 XIQ Classic default switch timeline.</p>
+    <p><code>Extreme_Platform_ONE_Networking_and_ExtremeCloud_IQ_25_10_0_Subscription_Licensing_Guide.pdf</code></p>
+  </div>
+  <div class="doc-card">
+    <div class="doc-card-type local">Local &nbsp;&bull;&nbsp; UNREADABLE</div>
+    <h4>EP1 Readme May 19 2026</h4>
+    <p>Binary .docx format &mdash; unreadable without pandoc conversion. May contain setup notes or errata. <strong>Pending: convert with <code>pandoc EP1_Readme*.docx -t plain</code></strong></p>
+    <p><code>EP1_Readme_May 19 2026.docx</code></p>
+  </div>
+</div>
+
+<!-- ─── RAG WEB ─── -->
+<span class="section-label" id="rag-web">RAG Corpus v1.0 &mdash; Web Research Key Sources</span>
+
+<p>Sources identified via web research agent (May 19, 2026). URLs verified at time of research. Add to Sprint A LangGraph RAG ingestion pipeline.</p>
+
+<div class="doc-grid">
+  <div class="doc-card">
+    <div class="doc-card-type web">Web &nbsp;&bull;&nbsp; OFFICIAL DOCS</div>
+    <h4>Extreme Networks Documentation Portal</h4>
+    <p>Master index for all EP1, XIQ, EXOS, VOSS documentation. Filter by product and version.</p>
+    <p><a href="https://extremenetworks.com/documentation" target="_blank">extremenetworks.com/documentation &nearr;</a></p>
+  </div>
+  <div class="doc-card">
+    <div class="doc-card-type web">Web &nbsp;&bull;&nbsp; TRANSITION FAQ</div>
+    <h4>XIQ New UI / EP1 Transition FAQ</h4>
+    <p>The only official Extreme document mapping XIQ Classic features to EP1. Navigation delta table. July 1 mandatory default date confirmed.</p>
+    <p>Search: &ldquo;ExtremeCloud IQ New UI Transition FAQ&rdquo; at extremenetworks.com/documentation</p>
+  </div>
+  <div class="doc-card">
+    <div class="doc-card-type web">Web &nbsp;&bull;&nbsp; EXTREMECONNECT 2026</div>
+    <h4>ExtremeConnect May 2026 &mdash; Agent ONE Announcement</h4>
+    <p>Agent ONE: Coworker mode (July 2026, autonomous network tasks), Operator mode (Q4 2026, proactive healing). EP1-only. Strongest &ldquo;why migrate&rdquo; argument for enterprise clients.</p>
+    <p>Search: &ldquo;Agent ONE ExtremeConnect 2026&rdquo; at extremenetworks.com/blog</p>
+  </div>
+  <div class="doc-card">
+    <div class="doc-card-type web">Web &nbsp;&bull;&nbsp; GUEST ESSENTIALS</div>
+    <h4>GuestEssentials Administration Guide</h4>
+    <p>Full portal designer, self-registration flows (email/SMS), employee sponsorship, social login, voucher codes, MAC Auth bypass. Audit trail for HIPAA/PCI compliance. Separate app from EP1 Networking.</p>
+    <p>Search: &ldquo;GuestEssentials Administration Guide&rdquo; at extremenetworks.com/documentation</p>
+  </div>
+  <div class="doc-card">
+    <div class="doc-card-type web">Web &nbsp;&bull;&nbsp; AIRDEFENSE</div>
+    <h4>AirDefense User Guide (EP1 Security Integration)</h4>
+    <p>Rogue AP detection, containment, threat classification. WIPS policy in EP1 Networking (p.404) + AirDefense as separate security app. PCI DSS Requirement 11.2 compliance output.</p>
+    <p>Search: &ldquo;AirDefense User Guide EP1&rdquo; at extremenetworks.com/documentation</p>
+  </div>
+  <div class="doc-card">
+    <div class="doc-card-type web">Web &nbsp;&bull;&nbsp; XIQ CLASSIC</div>
+    <h4>ExtremeCloud IQ User Guide (Current)</h4>
+    <p>XIQ Classic reference for migration comparison. Feature-by-feature baseline. Required for the XIQ&rarr;EP1 diff engine in Sprint A.</p>
+    <p>Search: &ldquo;ExtremeCloud IQ User Guide&rdquo; at extremenetworks.com/documentation</p>
+  </div>
+  <div class="doc-card">
+    <div class="doc-card-type web">Web &nbsp;&bull;&nbsp; PPSK</div>
+    <h4>Private Pre-Shared Key (PPSK) Configuration Guide (95 pp.)</h4>
+    <p>Complete PPSK object model: PCG, Cloud/Local DB, User Group, User Profile, Classification. Read in full May 18 Socratic session. Key constraints: SMS not delivered when PPSK Classification active.</p>
+    <p>Search: &ldquo;PPSK Configuration Guide XIQ&rdquo; at extremenetworks.com/documentation</p>
+  </div>
+  <div class="doc-card">
+    <div class="doc-card-type web">Web &nbsp;&bull;&nbsp; CAPWAP</div>
+    <h4>RFC 5415 &mdash; CAPWAP Protocol Specification</h4>
+    <p>Control and Provisioning of Wireless Access Points. AP&harr;EP1 control channel. UDP 12222 (primary) or HTTPS TCP 80/443 (fallback). Required for AP onboarding and policy push.</p>
+    <p><a href="https://datatracker.ietf.org/doc/html/rfc5415" target="_blank">RFC 5415 &nearr;</a></p>
+  </div>
+  <div class="doc-card">
+    <div class="doc-card-type web">Web &nbsp;&bull;&nbsp; NETWORK360</div>
+    <h4>Network360 Observability Guide</h4>
+    <p>Client health score (0&ndash;100), AP health metrics, per-client auth history, threshold alarms. Monitoring &gt; Network Devices view in EP1. Foundation for AI Canvas queries.</p>
+    <p>Search: &ldquo;Network360 ExtremeCloud IQ&rdquo; at extremenetworks.com/documentation</p>
+  </div>
+  <div class="doc-card">
+    <div class="doc-card-type web">Web &nbsp;&bull;&nbsp; AI CANVAS</div>
+    <h4>AI Canvas Product Page (EP1-Only Feature)</h4>
+    <p>Natural language interface for network health queries. No XIQ Classic equivalent. Key EP1 differentiator: &ldquo;Show me clients with RSSI below &minus;75 in the last 2 hours.&rdquo; Key selling point for non-technical NOC staff.</p>
+    <p>Search: &ldquo;AI Canvas ExtremeCloud EP1&rdquo; at extremenetworks.com</p>
+  </div>
+  <div class="doc-card">
+    <div class="doc-card-type web">Web &nbsp;&bull;&nbsp; IQ ENGINE</div>
+    <h4>IQ Engine (HiveOS) Release Notes &mdash; v10.7.5+</h4>
+    <p>AP firmware. LLDP on by default v10.7.5+. 802.11be (Wi-Fi 7) MLO support (v10.8+). PPSK-on-AP local DB. Required for compatibility mapping in Sprint A.</p>
+    <p>Search: &ldquo;IQ Engine Release Notes&rdquo; at extremenetworks.com/documentation</p>
+  </div>
+  <div class="doc-card">
+    <div class="doc-card-type web">Web &nbsp;&bull;&nbsp; EXOS</div>
+    <h4>SwitchEngine (EXOS) 33.x Administrator Guide</h4>
+    <p>DHCP server syntax (<code>dhcp-address-range</code> with dash separator + port required), VLAN, ipforwarding, LLDP, MSTP. SW1 is running 33.5.x.</p>
+    <p>Search: &ldquo;SwitchEngine 33 Administrator Guide&rdquo; at extremenetworks.com/documentation</p>
+  </div>
+</div>
+
+<!-- ─── PAGE INDEX ─── -->
+<span class="section-label" id="page-index">EP1 v25.9.0 User Guide &mdash; Key Page Index</span>
+
+<table>
+  <thead><tr><th>Page</th><th>Section</th><th>Use Case</th></tr></thead>
+  <tbody>
+    <tr><td>22&ndash;30</td><td>Navigation Pane, 9-dot Menu, Standard Icons</td><td>Portal orientation, product switching</td></tr>
+    <tr><td>37</td><td>Extreme AI Expert (Talk to Knowledge / Data / Think)</td><td>Knowledge base Q&amp;A, AI troubleshooting</td></tr>
+    <tr><td>42</td><td>AI Canvas</td><td>NL dashboard queries &mdash; EP1-only differentiator</td></tr>
+    <tr><td>78</td><td>Topology View</td><td>Visual network map, client trails</td></tr>
+    <tr><td>234</td><td>Configuration | Network Policies (chapter start)</td><td>Policy overview, all sub-topics listed</td></tr>
+    <tr><td>235</td><td>Add a Network Policy</td><td>Create new policy (9-step procedure)</td></tr>
+    <tr><td>236&ndash;253</td><td>Configure Policy Settings</td><td>DNS, NTP, SNMP, Syslog, Credentials, Time Zone, Hive, VLAN, IP Tracking, LLDP</td></tr>
+    <tr><td>246&ndash;248</td><td>Hive Profile Settings (roaming cache)</td><td>Roaming cache 60s default confirmed here</td></tr>
+    <tr><td>267</td><td>Deploy a Network Policy</td><td>Push to devices &mdash; Delta vs Complete</td></tr>
+    <tr><td>268&ndash;271</td><td>Configure the SSID (main procedure)</td><td>SSID name, radio bands, auth method, CWP link, User Profile</td></tr>
+    <tr><td>270</td><td>Auth Methods Table (Table 103)</td><td>Enterprise / Personal / Private Pre-Shared Key / Open / Enhanced Open</td></tr>
+    <tr><td>272&ndash;273</td><td>Cloud User Group Settings (Table 105)</td><td>PPSK Cloud DB, CWP Register, PSK generation, expiration</td></tr>
+    <tr><td>274&ndash;276</td><td>Local User Group Settings (Table 106)</td><td>PPSK Local DB (on AP), PCG, max clients per PSK</td></tr>
+    <tr><td>277&ndash;278</td><td>Add a User Profile / User Profile Settings</td><td>VLAN assignment (Connect to field)</td></tr>
+    <tr><td>292</td><td>Configure Private Pre-Shared Key SSID Authentication</td><td>PPSK auth procedure</td></tr>
+    <tr><td>295</td><td>Customize and Preview Device-based CWP Settings</td><td>UPA, custom HTML CWP</td></tr>
+    <tr><td>302</td><td>Customize and Preview Cloud-based Captive Portal Settings</td><td>Cloud CWP (GuestEssentials integration point)</td></tr>
+    <tr><td>318&ndash;319</td><td>Configure VLAN Settings</td><td>VLAN object creation in Common Objects</td></tr>
+    <tr><td>345</td><td>Configure Device Templates (AP)</td><td>AP-specific radio settings, MLO (p.345)</td></tr>
+    <tr><td>395</td><td>Configure Supplemental CLI</td><td>Raw CLI pushed to EXOS/VOSS &mdash; avoid ipforwarding / enable dhcp here</td></tr>
+    <tr><td>404</td><td>Configure WIPS (AirDefense)</td><td>Rogue AP detection policy within Network Policy</td></tr>
+    <tr><td>432</td><td>Configuration | Common Objects (chapter start)</td><td>Reusable VLANs, AP Templates, Switch Templates, SSIDs, Supplemental CLI</td></tr>
+    <tr><td>476</td><td>Configure AirDefense Policies (Common Objects)</td><td>WIPS profiles, threat rules, containment</td></tr>
+    <tr><td>525</td><td>Configuration | User Management (chapter start)</td><td>PPSK users, CWP users, PCG, Guest Accounts</td></tr>
+    <tr><td>532</td><td>Guest User Accounts (PPSK + CWP)</td><td>Creating individual guest PPSK / CWP credentials</td></tr>
+  </tbody>
+</table>
+
+<hr class="divider">
+
+<div class="box ok">
+  <p class="box-label">Sprint A RAG Ingestion Checklist</p>
+  <ul>
+    <li>&#9744; Convert EP1_Readme_May 19 2026.docx (<code>pandoc ... -t plain</code>)</li>
+    <li>&#9744; Read Switch Deployment Guide pp.1&ndash;50 (EXOS onboarding path)</li>
+    <li>&#9744; Read Licensing Guide (EP1 Standard vs Plus feature gates)</li>
+    <li>&#9744; Ingest Patch 4 release notes for AP/switch bug fixes relevant to lab</li>
+    <li>&#9744; Web-fetch Transition FAQ and add exact URLs to this corpus</li>
+    <li>&#9744; Web-fetch GuestEssentials admin guide and extract portal types + API endpoints</li>
+    <li>&#9744; Populate Sprint A RAG DB (FastAPI + PostgreSQL) with all 9 local docs + key web sources</li>
+  </ul>
+</div>
+
+<hr class="divider">
+<p class="footer">
+  KhKLab &nbsp;&bull;&nbsp; 5320 Lab Journal &nbsp;&bull;&nbsp; EP1 Deployment Reference &amp; RAG Corpus v1.0 &nbsp;&bull;&nbsp; May 19, 2026<br>
+  Source: Extreme Platform ONE Networking v25.9.0 User Guide (677 pp., April 2026)<br>
+  Study plan: <a href="session_summary_20260519.html">May 19 EOD &mdash; EP1 Sprint Kickoff</a> &nbsp;&bull;&nbsp;
+  Sprint tracker: <a href="xiq-ep1-transition.html">XIQ&rarr;EP1 Transition Sprint</a> &nbsp;&bull;&nbsp;
+  Design architecture: <a href="xiq-ep1-design-dialogue.html">Design Dialogue Log</a><br>
+  &copy; 2026 Khursheed Khan &nbsp;&bull;&nbsp; All rights reserved
+</p>
+
+</div>
+</body>
+</html>
