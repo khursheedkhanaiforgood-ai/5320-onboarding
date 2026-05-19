@@ -109,7 +109,7 @@ tr:nth-child(even) td { background: #FAFAFA; }
   <a href="#phase4">Phase 4 &mdash; Guest SSID (Open / CWP / VLAN10)</a>
   <a href="#phase5">Phase 5 &mdash; Deploy (Upload + Perform Update)</a>
   <a href="#vlan-delta">XIQ vs. EP1 Field Delta Table</a>
-  <a href="#licensing">Licensing: 5320 Tier A, Stack Rules, AI Credits</a>
+  <a href="#licensing">Licensing: Tiers, Stack Rules, Violations &amp; AI Credits</a>
   <a href="#ai-module">Extreme AI Expert &mdash; Deploy / Monitor / Troubleshoot / Workflow</a>
   <a href="#troubleshoot-switches">Troubleshoot Switches &mdash; EP1 GUI Tools + CLI</a>
   <a href="#rag-local">RAG Corpus &mdash; Local Documents (9)</a>
@@ -160,37 +160,67 @@ tr:nth-child(even) td { background: #FAFAFA; }
 <p>The left sidebar on tab 2 (Wireless) also contains: <strong>Policy Settings</strong> (DNS, NTP, SNMP, Syslog, Device Credentials, Time Zone, Hive, VLAN, IP Tracking, LLDP), <strong>Management Settings</strong> (Management Options, Traffic Filters, MGT IP Filters), and <strong>Device Templates</strong>.</p>
 
 <!-- ─── LICENSING ─── -->
-<span class="section-label" id="licensing">Licensing &mdash; 5320 Tier A, Stack Rules, AI Credits</span>
-<p style="font-size:0.85rem;color:#6b7280;">Source: EP1 Networking + XIQ Subscription Licensing Guide v25.10.0 (pp.1&ndash;39, April 2026)</p>
+<span class="section-label" id="licensing">Licensing &mdash; Tiers, Stack Rules, Violations &amp; AI Credits</span>
+<p style="font-size:0.85rem;color:#6b7280;">Source: EP1 + XIQ Subscription Licensing Guide v25.10.0 (39 pp. April 2026) &amp; v25.8.0 (57 pp. March 2026) &mdash; Both read in full May 19, 2026</p>
 
 <table>
-  <thead><tr><th>Device Family</th><th>Tier</th><th>Subscription Required</th></tr></thead>
+  <thead><tr><th>Device Family</th><th>Tier</th><th>Part Number Prefix</th></tr></thead>
   <tbody>
-    <tr><td><strong>5320, AP3000, AP4000 series</strong></td><td class="ep1">Tier A</td><td>EP1 Standard Networking</td></tr>
-    <tr><td>5400 series</td><td>Tier B</td><td>EP1 Standard Networking</td></tr>
-    <tr><td>5500 series, VSP 44xx/48xx/49xx</td><td>Tier C</td><td>EP1 Standard Networking</td></tr>
-    <tr><td>5700, VSP 7xxx/8xxx</td><td>Tier D</td><td>EP1 Standard Networking</td></tr>
+    <tr><td><strong>Universal APs, Non-Universal APs, 4000 Series, 5100 Series, 5300 Series (incl. 5320), AP3000, AP4000, Summit X435, X440-G2, SR/N/BR/XR/XA 1400 Series, Third-Party Management Engine</strong></td><td class="ep1">Tier A</td><td>EP1-STD-TA-S-C-*</td></tr>
+    <tr><td>5400 Series, Summit X450-G2, ERS 4800/4900</td><td>Tier B</td><td>EP1-STD-TB-S-C-*</td></tr>
+    <tr><td>5500 Series, Summit X460/465/590-G2, VSP 4450/4850/4900, ERS 5900</td><td>Tier C</td><td>EP1-STD-TC-S-C-*</td></tr>
+    <tr><td>5700 Series, 7000 Series, Summit X670-G2, X690, X870, VSP 7200/7400/8200/8400/8600 Series</td><td>Tier D</td><td>EP1-STD-TD-S-C-*</td></tr>
+    <tr><td>Devices managed by Third-Party Management Engine</td><td>Tier 3RD</td><td>EP1-STD-T3RD-S-C-EW-1YR</td></tr>
   </tbody>
 </table>
+<p style="font-size:0.82rem;color:#6b7280;margin-top:4px;"><strong>No subscription needed for:</strong> Digital Twin / simulated devices, Ping-only Site Engine devices, Navigator-subscribed devices, locally managed devices, Universal Compute Platform appliances/clusters, Unmanaged devices.</p>
 
 <div class="box warn">
-  <p class="box-label">Stack Hard Rule &mdash; All Slots Must Match</p>
-  <p>Every unit in a switch stack MUST have the same subscription tier (all Standard or all Pilot). If any single slot has an insufficient subscription, the <strong>entire stack is treated as Unmanaged</strong> &mdash; not just the underpowered slot. Verify all subscriptions before onboarding stacks: <strong>Administration &amp; Settings &gt; Subscriptions &amp; Licensing</strong>.</p>
+  <p class="box-label">Stack Hard Rule &mdash; Same Level + Sufficient Count for All Slots</p>
+  <p>All subscriptions in a stack must be the same <em>level</em> (all Standard OR all Pilot &mdash; cannot mix levels; can mix tiers within a level, e.g. Tier A + Tier B in one Standard stack). If <strong>any slot lacks a sufficient subscription, the entire stack is Unmanaged</strong> &mdash; not just that slot. Verify: <strong>Subscriptions &amp; Services &gt; Subscriptions &amp; Licensing</strong>.</p>
 </div>
 
 <div class="box">
-  <p class="box-label">Pilot Twin &mdash; Bundled at No Extra Cost</p>
-  <p>Every EP1 Standard Networking subscription includes a bundled <strong>ExtremeCloud IQ Pilot Twin</strong> subscription for backward compatibility with older Site Engine/Controller deployments. No separate purchase needed.</p>
+  <p class="box-label">Pilot Twin &mdash; Bundled Backwards-Compat Subscription</p>
+  <p>Every EP1 Standard Networking subscription includes a free <strong>XIQ Pilot Twin</strong> (same start/end/quantity). Visible only in Extreme Portal &mdash; <strong>not</strong> shown in XIQ Classic, XIQ New, or EP1 apps.</p>
+  <table style="margin-top:8px;font-size:0.82rem;">
+    <thead><tr><th>Management App Version</th><th>Subscription Compatibility</th></tr></thead>
+    <tbody>
+      <tr><td>Site Engine 25.2 and earlier</td><td>XIQ Pilot + XIQ Pilot Twin only &mdash; <strong>NOT EP1 Standard</strong></td></tr>
+      <tr><td><strong>Site Engine 25.5 and later</strong></td><td>XIQ Pilot + <strong>EP1 Standard Networking ✓</strong></td></tr>
+      <tr><td>XIQ Controller (all versions)</td><td>XIQ Pilot + XIQ Pilot Twin only &mdash; <strong>NOT EP1 Standard</strong></td></tr>
+    </tbody>
+  </table>
 </div>
 
 <div class="box">
-  <p class="box-label">Trial Subscriptions</p>
-  <p><strong>90-day trial</strong> available, one-time only, for EP1 Networking / EP1 Security / SD-WAN. <strong>Not</strong> available for XIQ Classic. Activate: <strong>Administration &amp; Settings &gt; Subscriptions &amp; Licensing &gt; Add Trial</strong>.</p>
+  <p class="box-label">Trial Subscriptions &mdash; 90-Day One-Time</p>
+  <p>Available once per product (if previously granted but <em>never used</em> = <strong>disqualified</strong>) for: EP1 Networking, EP1 Security, SD-WAN, Extreme Intuitive Insights. <strong>Not</strong> available for XIQ Classic. MSP tenants ineligible. Path: <strong>Subscriptions &amp; Services &gt; Subscriptions &amp; Licensing &gt; Start Trial</strong>.</p>
 </div>
 
 <div class="box warn">
-  <p class="box-label">AI Credits</p>
-  <p>Some AI Expert agent features (Service Agent operations in particular) <strong>activate AI Credits consumption</strong>. Monitor your credit balance before running Service Agent at scale: Administration &amp; Settings &gt; Subscriptions &amp; Licensing.</p>
+  <p class="box-label">Entitlement Violations &mdash; What Happens When Subs Run Out</p>
+  <p>EP1/XIQ auto-unmanages <strong>most recently onboarded devices first</strong> until compliant. Unmanaged APs stop CAPWAP telemetry, traps, and AVC reports. <strong>AP LED alternates amber/white</strong> (searching for new CAPWAP server). Banner: <em>&ldquo;LICENSE VIOLATION &ndash; Unlicensed devices. Check affected devices here.&rdquo;</em></p>
+  <p style="margin-top:6px;">Resolve: purchase/renew or unmanage overflow devices. Sync stale pool: <strong>Global Settings &gt; Administration &gt; License Management &gt; Synchronize</strong> (Classic) or Extreme Portal &gt; Assets &gt; Cloud Licenses Home. CUID must match between Portal and XIQ.</p>
+  <p style="margin-top:6px;font-size:0.82rem;"><strong>CoPilot note:</strong> CoPilot violations are independent of Pilot violations &mdash; both can be active simultaneously. Standard CoPilot features are not affected unless a Pilot violation is also active. Disable CoPilot per VIQ: <strong>Global Settings &gt; Administration &gt; VIQ Management &gt; Disable CoPilot feature for this VIQ</strong>.</p>
+</div>
+
+<div class="box warn">
+  <p class="box-label">Unlock Full Features &mdash; Pilot &rarr; EP1 Standard (NON-REVERSIBLE)</p>
+  <p>Mixed-subscription deployments show a <strong>blue icon</strong> on limited-feature buildings/sites. To unlock EP1 full features: <strong>Subscriptions &amp; Services &gt; Inventory &gt; Unlock Full Features</strong> (or Monitoring &gt; Visualize &gt; Quick Location Nav &gt; 3-dot &gt; Unlock Full Features). <strong>Non-reversible.</strong> If Fabric Engine devices present, must select ALL buildings with FE.</p>
+  <p style="font-size:0.82rem;margin-top:6px;"><strong>XIQ Pilot-only accounts are missing:</strong> AI Expert, Agent Workflows, AI Expert Actions, Contracts page, Inventory page, Custom Roles, Fabric Configuration, Visualize layer views. All require EP1 Standard Networking.</p>
+</div>
+
+<div class="box warn">
+  <p class="box-label">Legacy Entitlement Keys (LEK) &mdash; Blocking Issue</p>
+  <p>LEK are <strong>no longer available for purchase</strong> and are disabled in the new LEM schema. <strong>Critical:</strong> if your account has LEK present AND Extreme Portal is linked, you <strong>cannot add new devices or change Unmanaged to Managed</strong>. Contact GTAC to convert LEK to XIQ Pilot subscriptions. Perpetual LEK are incompatible with XIQ entirely.</p>
+</div>
+
+<div class="box">
+  <p class="box-label">AI Credits, CUID &amp; Expiration Alerts</p>
+  <p>Some AI Expert agents activate AI Credits. <strong>AI Credits are automatically revoked monthly</strong> (not permanently consumed). Monitor: <strong>Subscriptions &amp; Services &gt; Subscriptions &amp; Licensing &gt; Credits tab</strong>.</p>
+  <p style="margin-top:6px;"><strong>CUID</strong> (Customer Unique Identifier) = your license pool ID. Always quote CUID to GTAC. Visible on Subscriptions &amp; Licensing page header. Sync max once every 5 minutes.</p>
+  <p style="margin-top:6px;font-size:0.82rem;"><strong>Proactive expiry alerts (XIQ Classic):</strong> Banner + email at 90, 60, 30, 7, 6, 5, 4, 3, 2, 1 days before expiry. Daily from 7-day threshold. Opt-in: <strong>Global Settings &gt; Account Details &gt; &ldquo;Proactive license warning email messages&rdquo;</strong> toggle.</p>
 </div>
 
 <hr class="divider">
@@ -814,9 +844,15 @@ configure iqagent server vr VR-Mgmt vlan Management   # Lock IQAgent to specific
   </div>
   <div class="doc-card">
     <div class="doc-card-type local">Local &nbsp;&bull;&nbsp; LICENSING</div>
-    <h4>EP1 Networking + XIQ v25.10.0 Subscription Licensing Guide</h4>
-    <p>39 pp. April 2026. Full read completed May 19. <strong>Subscription Tiers:</strong> Tier A = 5320 + APs; Tier B = 5400; Tier C = 5500/VSP 44-49xx; Tier D = 5700/VSP 7-8xxx. <strong>Pilot Twin</strong> bundled with every EP1 Standard sub (backward compat with Site Engine/Controller). <strong>Stack hard rule:</strong> all slots must match tier or entire stack = Unmanaged. <strong>Trial:</strong> 90-day one-time for EP1/Security/SD-WAN only (not XIQ Classic). <strong>AI Credits:</strong> consumed by some Service Agent operations &mdash; monitor at Admin &amp; Settings &gt; Subscriptions &amp; Licensing. Part numbers, allocation UI, subscription expiration behavior all documented pp.25&ndash;39.</p>
+    <h4>EP1 + XIQ v25.10.0 Subscription Licensing Guide</h4>
+    <p>39 pp. April 2026. Full read May 19. <strong>Tiers:</strong> A = Universal APs + 5320/5100/5300/X435/X440-G2/1400; B = 5400/X450-G2/ERS48xx; C = 5500/X460-590/VSP 44-49xx; D = 5700/7000/X670-X890/VSP 72-86xx; 3RD = Third-Party managed. <strong>Stack:</strong> all slots same level or entire stack Unmanaged. <strong>Trial:</strong> once per product (disqualified if granted but unused); EP1/Security/SD-WAN/Intuitive Insights only; MSP tenants excluded. Part numbers pp.25&ndash;27.</p>
     <p><code>Extreme_Platform_ONE_Networking_and_ExtremeCloud_IQ_25_10_0_Subscription_Licensing_Guide.pdf</code></p>
+  </div>
+  <div class="doc-card">
+    <div class="doc-card-type local">Local &nbsp;&bull;&nbsp; LICENSING</div>
+    <h4>EP1 + XIQ v25.8.0 Subscription Licensing Guide (Earlier/More Complete)</h4>
+    <p>57 pp. March 2026. Full read May 19. <strong>Additional depth vs 25.10.0:</strong> Pilot Twin compatibility matrix (SE 25.2 = Pilot Twin only; SE 25.5+ = EP1 Standard; Controller = Pilot Twin only). Subscription Tier Priority failover table (higher tier auto-assigned if requested tier unavailable). Tunnel Concentrator requires Tier A per instance + per AP. <strong>Legacy Entitlement Keys:</strong> disabled &mdash; if LEK present + Portal linked, cannot onboard new devices. <strong>Contracts chapter</strong> (EP1 only): Green/Amber/Red status, filter by 30/60/90-day expiry. <strong>Entitlement Violations:</strong> auto-unmanage most recent devices, AP LED amber/white, CoPilot violations independent of Pilot violations. <strong>Proactive alerts:</strong> 90/60/30/7/6/5/4/3/2/1 days before expiry (opt-in). <strong>CUID:</strong> critical for GTAC support calls. <strong>Unlock Full Features</strong> (Pilot&rarr;EP1): non-reversible, blue icon indicator, must include all FE buildings. <strong>Troubleshooting Q&amp;A:</strong> Device License column (Manage&gt;Devices), CoPilot column, Feature License column (MACsec/Premier). Feature matrix: AIExpert/Inventory/Contracts/CustomRoles/FabricConfig = EP1 Standard only, NOT available on XIQ Pilot.</p>
+    <p><code>Extreme_Platform_ONE_Networking_and_ExtremeCloud_IQ_25_8_0_Subscription_Licensing_Guide.pdf</code></p>
   </div>
   <div class="doc-card">
     <div class="doc-card-type local">Local &nbsp;&bull;&nbsp; LINKS</div>
@@ -1105,7 +1141,8 @@ configure iqagent server vr VR-Mgmt vlan Management   # Lock IQAgent to specific
     <li>&#9745; EP1 Security v25.6.0 Release Notes &mdash; abstract + new features reviewed</li>
     <li>&#9745; Convert EP1_Readme_May 19 2026.docx (converted via Python zipfile May 19 &mdash; contains URL list only)</li>
     <li>&#9745; Read Switch Deployment Guide pp.1&ndash;130 COMPLETE (all 130 pp. read May 19 &mdash; pp.121&ndash;130 Troubleshoot Switches)</li>
-    <li>&#9745; Read Licensing Guide COMPLETE (pp.1&ndash;39 read May 19 &mdash; Tier A/B/C/D, stack rules, AI Credits, trial subs)</li>
+    <li>&#9745; Read Licensing Guide v25.10.0 COMPLETE (pp.1&ndash;39 read May 19 &mdash; Tier A/B/C/D, stack rules, AI Credits, trial subs)</li>
+    <li>&#9745; Read Licensing Guide v25.8.0 COMPLETE (pp.1&ndash;57 read May 19 &mdash; Pilot Twin compatibility matrix, Tier Priority failover, LEK blocking issue, Unlock Full Features, Contracts chapter, Entitlement Violations, Proactive alerts, CUID, Troubleshooting Q&amp;A)</li>
     <li>&#9745; Read all 4 Patch release notes COMPLETE (Patch 1&ndash;4, pp.21&ndash;29 each &mdash; known issues, firmware matrix, AP4060 in Patch 3, CFD-16926 XLSX bug)</li>
     <li>&#9745; Transition CustomerFAQ reviewed (May 6, 2026 version &mdash; Q4 CY2026 retirement confirmed)</li>
     <li>&#9745; Feature Comparison matrix reviewed (April 9, 2026 &mdash; Essentials apps still Planned for EP1)</li>
@@ -1117,8 +1154,8 @@ configure iqagent server vr VR-Mgmt vlan Management   # Lock IQAgent to specific
 
 <hr class="divider">
 <p class="footer">
-  KhKLab &nbsp;&bull;&nbsp; 5320 Lab Journal &nbsp;&bull;&nbsp; EP1 Deployment Reference &amp; RAG Corpus v2.4 &nbsp;&bull;&nbsp; May 19, 2026<br>
-  Source: EP1 User Guide (678 pp.) + Universal Switch Deployment Guide (130 pp.) + Licensing Guide (39 pp.) + Patches 1&ndash;4 &mdash; All documents read May 19, 2026<br>
+  KhKLab &nbsp;&bull;&nbsp; 5320 Lab Journal &nbsp;&bull;&nbsp; EP1 Deployment Reference &amp; RAG Corpus v2.5 &nbsp;&bull;&nbsp; May 19, 2026<br>
+  Source: EP1 User Guide (678 pp.) + Universal Switch Deployment Guide (130 pp.) + Licensing Guides v25.10.0 (39 pp.) + v25.8.0 (57 pp.) + Patches 1&ndash;4 &mdash; All documents read May 19, 2026<br>
   Study plan: <a href="session_summary_20260519.html">May 19 EOD &mdash; EP1 Sprint Kickoff</a> &nbsp;&bull;&nbsp;
   Sprint tracker: <a href="xiq-ep1-transition.html">XIQ&rarr;EP1 Transition Sprint</a> &nbsp;&bull;&nbsp;
   Design architecture: <a href="xiq-ep1-design-dialogue.html">Design Dialogue Log</a><br>
