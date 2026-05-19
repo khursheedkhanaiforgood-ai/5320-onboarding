@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>5320 Lab Journal — PPSK Bank Deployment Deep-Dive, May 18 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Libre+Franklin:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Libre Baskerville', Georgia, serif; background: #FFFFFF; color: #111111; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 48px 24px 72px; }
+.container { max-width: 760px; width: 100%; }
+.nyt-rule-top { border: none; border-top: 3px solid #111; margin-bottom: 6px; }
+.nyt-rule-thin { border: none; border-top: 1px solid #111; margin-bottom: 18px; }
+.nyt-logo { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.22em; color: #666; text-align: center; margin-bottom: 6px; }
+.byline { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.72rem; color: #666; margin-bottom: 14px; letter-spacing: 0.02em; }
+.byline strong { color: #111; font-weight: 700; }
+h1 { font-family: 'Libre Baskerville', Georgia, serif; font-size: 2.2rem; font-weight: 700; color: #111; line-height: 1.15; margin-bottom: 14px; }
+.subtitle { font-family: 'Libre Baskerville', Georgia, serif; font-size: 1rem; font-style: italic; color: #444; line-height: 1.8; margin-bottom: 20px; border-bottom: 1px solid #E2E2E2; padding-bottom: 28px; }
+.section-label { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.18em; color: #065f46; margin: 40px 0 12px; padding-bottom: 6px; border-bottom: 2px solid #065f46; display: block; }
+h2 { font-family: 'Libre Baskerville', Georgia, serif; font-size: 1.45rem; font-weight: 700; color: #111; margin: 0 0 14px; }
+h3 { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #065f46; margin: 24px 0 10px; }
+p { font-size: 0.97rem; line-height: 1.85; color: #222; margin-bottom: 12px; }
+ul, ol { padding-left: 22px; margin-bottom: 14px; }
+li { font-size: 0.95rem; line-height: 1.8; color: #222; margin-bottom: 4px; }
+code { font-family: 'SF Mono', Consolas, monospace; font-size: 0.82rem; background: #F4F4F4; border: 1px solid #E2E2E2; padding: 1px 5px; border-radius: 3px; color: #065f46; }
+pre { background: #F8F8F8; border: 1px solid #E2E2E2; border-radius: 4px; padding: 16px; overflow-x: auto; margin: 12px 0 18px; }
+pre code { background: none; border: none; padding: 0; color: #111; font-size: 0.83rem; line-height: 1.65; }
+pre.terminal { background: #1A1A1A; border-color: #333; }
+pre.terminal code { color: #E8E8E8; }
+pre.terminal code .prompt { color: #6EE7B7; }
+pre.terminal code .ok { color: #6EE7B7; }
+pre.terminal code .bad { color: #FCA5A5; }
+pre.diagram { background: #F0FFF4; border-color: #A7F3D0; font-size: 0.78rem; }
+pre.diagram code { color: #064E3B; }
+table { width: 100%; border-collapse: collapse; margin: 12px 0 20px; font-size: 0.88rem; }
+th { background: #F4F4F4; font-family: 'Libre Franklin', Arial, sans-serif; font-weight: 700; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: #065f46; padding: 8px 10px; border: 1px solid #E2E2E2; text-align: left; }
+td { padding: 8px 10px; border: 1px solid #E2E2E2; color: #222; vertical-align: top; }
+tr:nth-child(even) td { background: #FAFAFA; }
+.ok  { color: #065f46; font-weight: 700; }
+.bad { color: #C62828; font-weight: 700; }
+.warn { color: #E65100; font-weight: 700; }
+.box { border-left: 3px solid #059669; background: #F0FFF4; padding: 12px 16px; margin: 14px 0; border-radius: 0 4px 4px 0; }
+.box p { margin: 0; font-size: 0.92rem; line-height: 1.75; }
+.box p + p { margin-top: 8px; }
+.box ul { margin: 6px 0 0; }
+.box.warn { border-left-color: #F57F17; background: #FFFBF0; }
+.box.info { border-left-color: #0284c7; background: #F0F9FF; }
+.box-label { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: #065f46; margin-bottom: 6px; }
+.box.warn .box-label { color: #E65100; }
+.box.info .box-label { color: #0284c7; }
+.divider { border: none; border-top: 1px solid #E2E2E2; margin: 32px 0; }
+.toc { background: #F8F8F8; border: 1px solid #E2E2E2; border-radius: 4px; padding: 18px 22px; margin-bottom: 36px; }
+.toc-title { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.15em; color: #666; margin-bottom: 10px; }
+.toc a { display: block; font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.85rem; color: #065f46; text-decoration: none; padding: 4px 0; border-bottom: 1px dotted #E2E2E2; }
+.toc a:last-child { border-bottom: none; }
+.footer { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.7rem; color: #999; text-align: center; line-height: 1.9; margin-top: 8px; }
+
+/* Dialogue linked list */
+.dialogue-list { list-style: none; padding: 0; margin-bottom: 20px; }
+.dialogue-list li { border: 1px solid #E2E2E2; border-radius: 4px; margin-bottom: 8px; overflow: hidden; }
+.dialogue-item-header { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.78rem; font-weight: 700; background: #F4F4F4; padding: 8px 14px; color: #065f46; border-bottom: 1px solid #E2E2E2; display: flex; align-items: center; gap: 10px; }
+.dialogue-item-body { padding: 10px 14px; font-size: 0.88rem; line-height: 1.75; color: #222; }
+.dialogue-item-body .q { color: #9D174D; font-weight: 600; }
+.dialogue-item-body .a { color: #1E40AF; font-weight: 600; }
+.dialogue-item-body .gap { color: #C62828; font-size: 0.78rem; font-family: 'Libre Franklin', Arial, sans-serif; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; }
+.dialogue-item-body .learn { color: #065f46; font-size: 0.78rem; font-family: 'Libre Franklin', Arial, sans-serif; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; }
+.step-num { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.68rem; font-weight: 700; background: #065f46; color: #fff; border-radius: 50%; width: 20px; height: 20px; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <hr class="nyt-rule-top">
+  <div class="nyt-logo">KhKLab &nbsp;&bull;&nbsp; 5320 Lab Journal &nbsp;&bull;&nbsp; End-of-Day Report</div>
+  <hr class="nyt-rule-thin">
+
+  <div class="byline">
+    <strong>May 18, 2026</strong> &nbsp;&mdash;&nbsp; Session: PPSK Bank Deployment &mdash; Cover-to-Cover + Socratic Test &nbsp;&mdash;&nbsp;
+    Continues from <a href="session_summary_20260515.html" style="color:#065f46">May 15 (PPSK VLAN Split Confirmed)</a>
+  </div>
+
+  <h1>From 95 Pages to Deployed: PPSK Bank Deployment, Taught and Tested</h1>
+
+  <p class="subtitle">Today&rsquo;s session covered the entire 95-page PPSK Ultimate Guide v6 cover to cover, then shifted to a Socratic deployment test: designing three SSIDs (Employee, BYOD, Guest) for a bank deployment from scratch. Every XIQ configuration decision &mdash; from SSID structure through Optional Settings, Policy Details, SNMP, ARP suppression, and roaming cache &mdash; was worked through without being told the answer.</p>
+
+  <div class="toc">
+    <div class="toc-title">In This Report</div>
+    <a href="#context">Context &mdash; What the Day Was</a>
+    <a href="#task">Bank Deployment Task Requirements</a>
+    <a href="#vlan-map">VLAN Map &mdash; Professional Design Decision</a>
+    <a href="#ssid-decisions">SSID Design Decisions &mdash; Three Networks</a>
+    <a href="#optional-settings">Optional Settings &mdash; Per-SSID Config</a>
+    <a href="#policy-details">Policy Details &mdash; NTP, SNMP, ARP, Roaming Cache</a>
+    <a href="#exos-prep">EXOS Switch Preparation (Tomorrow)</a>
+    <a href="#firewall">Firewall Logic &mdash; RFC 1918 Rules</a>
+    <a href="#dialogue">Linked Dialogue &mdash; Every Exchange, Annotated</a>
+    <a href="#gaps">Knowledge Gaps Identified &amp; Resolved</a>
+    <a href="#pending">Pending &mdash; Switch Config + EOD</a>
+  </div>
+
+  <!-- ─── CONTEXT ─── -->
+  <span class="section-label" id="context">Context &mdash; What the Day Was</span>
+
+  <p>Karl&rsquo;s lab had bare-bones PPSK deployed on Friday May 15 &mdash; a single SSID with Staff&rarr;VLAN1 and Students&rarr;VLAN10. Monday May 18 was the &ldquo;expand and harden&rdquo; day: read the complete 95-page <em>PPSK Ultimate Guide v6</em> by Mike Rieben, then immediately apply it against a realistic bank deployment scenario using pure Socratic method &mdash; no answers given, only questions.</p>
+
+  <p>The format was deliberate: &ldquo;I would like to tell you how I would work the problem and have you critique my solution.&rdquo; The goal was deployable PPSK knowledge from memory.</p>
+
+  <!-- ─── TASK ─── -->
+  <span class="section-label" id="task">Bank Deployment Task Requirements</span>
+
+  <div class="box info">
+    <p class="box-label">Task Brief</p>
+    <p><strong>Three SSIDs for a bank:</strong></p>
+    <ul>
+      <li><strong>Employee PPSK</strong> &mdash; Staff devices. Unique key per employee. Available weekdays 7 AM &ndash; 7 PM only. No client-to-client communication. Internet only (no lateral movement).</li>
+      <li><strong>BYOD PPSK</strong> &mdash; Personal devices. Unique key per user. No client-to-client communication. Internet only. No time restriction.</li>
+      <li><strong>Guest Open/CWP</strong> &mdash; Walk-in clients. No passphrase. Captive portal with T&amp;C acceptance. Internet only. No client-to-client communication.</li>
+    </ul>
+    <p><strong>One device per key</strong> for Employee. <strong>Firewall</strong>: block all RFC 1918 private ranges, permit internet. <strong>Multicast</strong>: convert to unicast; drop non-essential broadcasts.</p>
+  </div>
+
+  <!-- ─── VLAN MAP ─── -->
+  <span class="section-label" id="vlan-map">VLAN Map &mdash; Professional Design Decision</span>
+
+  <p>The task did not specify a Guest VLAN. The professional decision was to assign VLAN 15 &mdash; keeping VLAN 1 clean for AP management (CAPWAP to XIQ must never be broken). VLAN 1 as a guest VLAN was correctly identified as a security risk during the session without prompting.</p>
+
+  <table>
+    <thead>
+      <tr><th>VLAN</th><th>Name</th><th>Purpose</th><th>Subnet</th><th>Source</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>1</td><td>Default</td><td>AP Management + CAPWAP</td><td>192.168.0.x</td><td>QF-Modem DHCP</td></tr>
+      <tr><td>5</td><td>BYOD</td><td>BYOD PPSK clients</td><td>10.10.5.x</td><td>SW1 DHCP</td></tr>
+      <tr><td>10</td><td>Employee</td><td>Employee PPSK clients</td><td>10.10.10.x</td><td>SW1 DHCP</td></tr>
+      <tr><td>15</td><td>Guest</td><td>Guest CWP clients</td><td>10.10.15.x</td><td>SW1 DHCP</td></tr>
+    </tbody>
+  </table>
+
+  <div class="box warn">
+    <p class="box-label">Why Not VLAN 1 for Guest?</p>
+    <p>VLAN 1 carries AP management traffic and the CAPWAP tunnel to XIQ. Putting untrusted guest clients on VLAN 1 risks disrupting AP connectivity and exposes management infrastructure to walk-in users. Always isolate guests on a dedicated VLAN.</p>
+  </div>
+
+  <!-- ─── SSID DECISIONS ─── -->
+  <span class="section-label" id="ssid-decisions">SSID Design Decisions &mdash; Three Networks</span>
+
+  <h3>Why Two PPSK SSIDs (Not One)</h3>
+  <p>Initial approach was one SSID for Employee + BYOD. The flaw: <strong>SSID availability schedules are set at the SSID level</strong>, not the user group level. Employee needs 7 AM&ndash;7 PM weekdays. BYOD has no restriction. These requirements cannot coexist on a single SSID &mdash; two SSIDs are required.</p>
+
+  <h3>Max Clients Per PSK = 1</h3>
+  <p>Employee requirement: one device per key. Location in XIQ: <code>Wireless Networks &gt; [SSID] &gt; Set the maximum number of clients per private PSK</code>. Range 0&ndash;15, 0 = no limit. Set to <strong>1</strong>. The User Group level overrides this if configured there &mdash; prefer SSID level for blanket enforcement.</p>
+
+  <div class="box">
+    <p class="box-label">Note &mdash; Local PPSK Required</p>
+    <p>Max clients per PSK is only supported with <strong>Local PPSK</strong>, not Cloud. Verify DB location is Local when using this feature.</p>
+  </div>
+
+  <h3>Guest SSID &mdash; Open + CWP + UPA</h3>
+  <p>Open (unsecured) SSID. Authentication: <code>Open &gt; Enable Captive Web Portal</code>. CWP type: <strong>Use Policy Acceptance (UPA)</strong> &mdash; presents T&amp;C page, no credentials required. This is correct for walk-in guests who need to accept terms before internet access.</p>
+
+  <!-- ─── OPTIONAL SETTINGS ─── -->
+  <span class="section-label" id="optional-settings">Optional Settings &mdash; Per-SSID Configuration</span>
+
+  <h3>Path</h3>
+  <p><code>Wireless Networks &gt; [SSID] &gt; Additional Settings &gt; Optional Settings</code></p>
+
+  <h3>Data Rates (5 GHz / 802.11a)</h3>
+  <table>
+    <thead><tr><th>Rate</th><th>Setting</th><th>Rule</th></tr></thead>
+    <tbody>
+      <tr><td>18 Mbps</td><td class="ok">Basic</td><td>Minimum required rate &mdash; set as beacon/probe rate</td></tr>
+      <tr><td>Above 18 Mbps (24, 36, 48, 54&hellip;)</td><td class="ok">Supported / Optional</td><td>Allowed but not required</td></tr>
+      <tr><td>Below 18 Mbps (6, 9, 12)</td><td class="warn">N/A / Disabled</td><td>Excluded &mdash; prevents legacy clients dragging airtime</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Interstation Traffic (Client Isolation)</h3>
+  <p>Location: <code>Optional Settings &gt; Traffic Filters &gt; Enable Inter-station Traffic</code></p>
+  <p><strong>Uncheck = blocked.</strong> Client-to-client communication is disabled. Required on all three SSIDs for the bank deployment. Note: the checkbox label is positive (&ldquo;Enable&rdquo;) &mdash; unchecking it disables communication. Easy to misread.</p>
+
+  <h3>Multicast Handling</h3>
+  <table>
+    <thead><tr><th>Setting</th><th>Value</th><th>Why</th></tr></thead>
+    <tbody>
+      <tr><td>Convert IP Multicast to Unicast</td><td class="ok">Always</td><td>Replicates multicast stream as unicast per client &mdash; uses full rate vs. lowest client rate</td></tr>
+      <tr><td>Enable Multicast Drop</td><td class="ok">Enabled</td><td>Discards multicast traffic that doesn&rsquo;t match exception list</td></tr>
+    </tbody>
+  </table>
+
+  <p><strong>Multicast Drop Exceptions &mdash; keep checked:</strong></p>
+  <ul>
+    <li>DHCPv4 &mdash; required for IP addressing</li>
+    <li>DHCPv6 &mdash; required for IPv6 addressing</li>
+    <li>ARP &mdash; required for gateway resolution (broadcast, appears here as protective exception)</li>
+    <li>IGMP-query &mdash; required for multicast group management</li>
+  </ul>
+  <p><strong>Unchecked (dropped):</strong> IPv6-Discovery, MDNS</p>
+
+  <div class="box info">
+    <p class="box-label">ARP and DHCP Are Broadcast, Not Multicast</p>
+    <p>ARP and DHCP frames are Layer 2 broadcasts (FF:FF:FF:FF:FF:FF), not multicast. They appear in the Multicast Drop exception list because the AP&rsquo;s broadcast filtering engine processes all non-unicast traffic in this section. Keeping them checked prevents the AP from accidentally discarding them when drop is enabled.</p>
+  </div>
+
+  <p><strong>Convert vs. Drop &mdash; the critical distinction:</strong> Convert = deliver better (as unicast per client). Drop = discard entirely. You can have both enabled simultaneously: convert the traffic that should be delivered, drop the traffic that should not.</p>
+
+  <!-- ─── POLICY DETAILS ─── -->
+  <span class="section-label" id="policy-details">Policy Details &mdash; NTP, SNMP, ARP, Roaming Cache</span>
+
+  <h3>NTP Server</h3>
+  <p>Location: <code>Policy Details &gt; Policy Settings &gt; NTP Server</code></p>
+  <p>Default Aerohive pool servers already present: <code>0.aerohive.pool.ntp.org</code> through <code>3.aerohive.pool.ntp.org</code>. For lab: leave defaults. For production: add <code>pool.ntp.org</code> or corporate NTP.</p>
+  <div class="box warn">
+    <p class="box-label">NTP + RadSec = Critical Dependency</p>
+    <p>If NTP is wrong, the RadSec certificate appears invalid (time drift). The AP cannot authenticate to the cloud. PPSK auth fails silently. Always check NTP first when troubleshooting: <code>#show idm</code> &rarr; look for <code>Valid</code> cert state.</p>
+  </div>
+
+  <h3>Device Time Zone</h3>
+  <p>Location: <code>Policy Details &gt; Policy Settings &gt; Device Time Zone</code> (separate clickable item in left nav). Already set to <strong>EST</strong>.</p>
+
+  <h3>SNMP Server</h3>
+  <p>Location: <code>Policy Details &gt; Policy Settings &gt; SNMP Server</code></p>
+  <table>
+    <thead><tr><th>Field</th><th>Lab Value</th><th>Production Recommendation</th></tr></thead>
+    <tbody>
+      <tr><td>Version</td><td>V2C</td><td>V3 preferred (real auth + encryption)</td></tr>
+      <tr><td>Operation</td><td class="ok">Get and Trap</td><td>Get and Trap &mdash; NMS can poll AND AP sends alerts</td></tr>
+      <tr><td>Community</td><td>hivecommunity (lab)</td><td>Custom non-default string &mdash; vendor default is public knowledge</td></tr>
+    </tbody>
+  </table>
+  <p><strong>Get</strong> = NMS polls the device (NMS initiates). <strong>Trap</strong> = device sends unsolicited alert when event occurs (device initiates). <strong>Get and Trap</strong> = both directions. <code>hivecommunity</code> is acceptable in a lab; in production it is equivalent to a default password.</p>
+
+  <h3>ARP Suppression</h3>
+  <p>Location: <code>Policy Details &gt; Management Settings &gt; [slider toward right] &rarr; ARP Suppression</code></p>
+  <p>The AP answers ARP requests from its local binding cache instead of flooding them over the air. Reduces broadcast overhead on the WLAN. On wired Ethernet the same broadcast is harmless; on wireless every broadcast burns airtime from every connected client.</p>
+  <p><strong>ARP Shield</strong> (also visible) is a different feature: anti-spoofing, validates ARP packets against a binding table. Not the same as ARP Suppression.</p>
+
+  <h3>Roaming Cache</h3>
+  <p>Location: <code>Optional Settings &gt; Client Related Network Settings &gt; Roaming cache update interval / Roaming cache ageout</code></p>
+  <table>
+    <thead><tr><th>Field</th><th>Default</th><th>Lab Value</th><th>Effect</th></tr></thead>
+    <tbody>
+      <tr><td>Update interval</td><td>300s</td><td class="ok">60s</td><td>How often AP shares PMK cache with neighbors. Lower = more frequent = faster roaming.</td></tr>
+      <tr><td>Ageout</td><td>1000</td><td>1000 (default)</td><td>Max PMK entries in cache. 1000 far exceeds a bank deployment of 50&ndash;100 clients.</td></tr>
+    </tbody>
+  </table>
+  <div class="box info">
+    <p class="box-label">Common Confusion</p>
+    <p>Higher interval &ne; faster roaming. Higher interval = longer time between cache syncs = neighbors have stale PMK. For active roaming environments, go lower (60s&ndash;120s).</p>
+  </div>
+
+  <!-- ─── EXOS PREP ─── -->
+  <span class="section-label" id="exos-prep">EXOS Switch Preparation (Tomorrow)</span>
+
+  <p>The AP is in Karl&rsquo;s VIQ; SW1 is in the local lab. Switch configuration is a separate task, deferred to tomorrow morning. Below is the full command set to run on SW1.</p>
+
+  <pre class="terminal"><code><span class="prompt">#</span> Create the new VLANs
+create vlan BYOD tag 5
+create vlan Employee tag 10
+create vlan Guest tag 15
+
+<span class="prompt">#</span> Tag all three on Port 3 (AP uplink)
+configure vlan BYOD add ports 3 tagged
+configure vlan Employee add ports 3 tagged
+configure vlan Guest add ports 3 tagged
+
+<span class="prompt">#</span> DHCP per VLAN (run once — NOT in Supplemental CLI template)
+configure vlan BYOD dhcp-address-range 10.10.5.10 - 10.10.5.254
+configure vlan BYOD dhcp-options default-gateway 10.10.5.1
+configure vlan BYOD dhcp-options dns-server primary 8.8.8.8
+configure vlan BYOD dhcp-lease-timer 86400
+
+configure vlan Employee dhcp-address-range 10.10.10.10 - 10.10.10.254
+configure vlan Employee dhcp-options default-gateway 10.10.10.1
+configure vlan Employee dhcp-options dns-server primary 8.8.8.8
+configure vlan Employee dhcp-lease-timer 86400
+
+configure vlan Guest dhcp-address-range 10.10.15.10 - 10.10.15.254
+configure vlan Guest dhcp-options default-gateway 10.10.15.1
+configure vlan Guest dhcp-options dns-server primary 8.8.8.8
+configure vlan Guest dhcp-lease-timer 86400
+
+<span class="prompt">#</span> Enable IP forwarding on all routed VLANs
+enable ipforwarding vlan BYOD
+enable ipforwarding vlan Employee
+enable ipforwarding vlan Guest
+enable ipforwarding vlan Default
+
+<span class="prompt">#</span> Default route (already present via BOOTP — verify first)
+show iproute
+<span class="ok"># If 'bo' origin route to 192.168.0.1 is present, do NOT add a duplicate</span>
+<span class="ok"># configure iproute add default 192.168.0.1 only if missing</span>
+
+save config</code></pre>
+
+  <div class="box warn">
+    <p class="box-label">QF-Modem Static Routes Required</p>
+    <p>The default route on SW1 sends outbound traffic toward the QF-Modem. But the modem has no routes back to 10.10.5.0/24, 10.10.10.0/24, or 10.10.15.0/24. Return traffic will be dropped. Add static routes on the QF-Modem for all three new subnets pointing back to SW1 (192.168.0.28).</p>
+  </div>
+
+  <div class="box info">
+    <p class="box-label">Why the Default Route Was Already There</p>
+    <p>During <code>show iproute</code> the default route 192.168.0.1 showed origin <code>bo</code> (BOOTP). EXOS learns a default gateway at boot via BOOTP/DHCP on VLAN 1. It was never manually configured &mdash; the modem&rsquo;s BOOTP response provided it. This is why VLAN10 clients had internet access in the previous lab without an explicit <code>iproute add default</code>.</p>
+  </div>
+
+  <!-- ─── FIREWALL ─── -->
+  <span class="section-label" id="firewall">Firewall Logic &mdash; RFC 1918 Rules</span>
+
+  <p>Applied to BYOD and Guest SSIDs. Employee uses the same rule set. Goal: internet-only access, no lateral movement to corporate infrastructure.</p>
+
+  <table>
+    <thead><tr><th>Rule #</th><th>From</th><th>To</th><th>Action</th><th>Why</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>Any</td><td>10.0.0.0/8</td><td class="bad">DENY</td><td>Block RFC 1918 Class A private range</td></tr>
+      <tr><td>2</td><td>Any</td><td>172.16.0.0/12</td><td class="bad">DENY</td><td>Block RFC 1918 Class B private range</td></tr>
+      <tr><td>3</td><td>Any</td><td>192.168.0.0/16</td><td class="bad">DENY</td><td>Block RFC 1918 Class C private range</td></tr>
+      <tr><td>4</td><td>Any</td><td>Any</td><td class="ok">PERMIT</td><td>Allow everything else (public internet)</td></tr>
+    </tbody>
+  </table>
+
+  <div class="box warn">
+    <p class="box-label">Rule Order Is Critical &mdash; First Match Wins</p>
+    <p>Firewall rules process top-down and stop at the first match. DENY RFC 1918 must come before PERMIT ANY/ANY. If you put PERMIT ANY/ANY first, all traffic including private addresses gets permitted &mdash; the DENY rules never execute.</p>
+  </div>
+
+  <div class="box info">
+    <p class="box-label">RFC 1918 = Private, Not Internet</p>
+    <p>192.168.0.0 is a private address range &mdash; same as 10.x and 172.16.x. All three are defined in RFC 1918 for private/internal use. They are never routed on the public internet. DENY these ranges = block corporate infrastructure. PERMIT anything else = internet only.</p>
+  </div>
+
+  <!-- ─── DIALOGUE LINKED LIST ─── -->
+  <span class="section-label" id="dialogue">Linked Dialogue &mdash; Every Exchange, Annotated</span>
+
+  <p>Each item below is one knowledge exchange from the Socratic session. The first attempt is shown; then the correction or teaching; then what was locked in.</p>
+
+  <ul class="dialogue-list">
+
+    <li id="d01">
+      <div class="dialogue-item-header"><span class="step-num">1</span> SSID Structure &mdash; One vs Two</div>
+      <div class="dialogue-item-body">
+        <p><span class="q">First attempt:</span> One SSID for Employee + BYOD combined.</p>
+        <p><span class="a">Correction:</span> SSID availability schedules operate at the SSID level. Employee needs 7 AM&ndash;7 PM; BYOD has no restriction. A single SSID cannot carry two different schedules. Two SSIDs required.</p>
+        <p><span class="learn">Locked in:</span> Whenever broadcast restrictions differ between user groups, separate SSIDs are mandatory.</p>
+      </div>
+    </li>
+
+    <li id="d02">
+      <div class="dialogue-item-header"><span class="step-num">2</span> One Device Per Key</div>
+      <div class="dialogue-item-body">
+        <p><span class="q">First attempt:</span> Max clients checkbox not checked (no limit).</p>
+        <p><span class="a">Correction:</span> &ldquo;Set the maximum number of clients per private PSK&rdquo; checkbox must be checked and set to <strong>1</strong>. Located at SSID level (User Group level would override).</p>
+        <p><span class="learn">Locked in:</span> Local PPSK only. Cloud PPSK does not support this feature.</p>
+      </div>
+    </li>
+
+    <li id="d03">
+      <div class="dialogue-item-header"><span class="step-num">3</span> Data Rates &mdash; 5 GHz</div>
+      <div class="dialogue-item-body">
+        <p><span class="q">First attempt:</span> &ldquo;Anything above 18 Mbps optional, all below N/A&rdquo; &mdash; correct on first pass.</p>
+        <p><span class="a">Verification:</span> 18 Mbps = Basic (beacon rate). Above = Supported/Optional. Below = N/A. Location: <code>Additional Settings &gt; Optional Settings &gt; Radio and Rates &gt; 5 GHz</code>.</p>
+        <p><span class="learn">Locked in:</span> Setting minimum basic rate to 18 Mbps prevents legacy slow clients from dragging airtime for all other clients.</p>
+      </div>
+    </li>
+
+    <li id="d04">
+      <div class="dialogue-item-header"><span class="step-num">4</span> Interstation Traffic (Client Isolation)</div>
+      <div class="dialogue-item-body">
+        <p><span class="q">First attempt:</span> Could not locate the setting independently. Needed guidance to navigate to <code>Additional Settings &gt; Optional Settings</code>.</p>
+        <p><span class="a">Teaching:</span> <code>Traffic Filters &gt; Enable Inter-station Traffic</code> &mdash; <strong>uncheck</strong> to block. Checkbox is positively labeled (Enable), so unchecking disables it.</p>
+        <p><span class="learn">Locked in:</span> This is the XIQ equivalent of the client isolation toggle used in QoS labs.</p>
+      </div>
+    </li>
+
+    <li id="d05">
+      <div class="dialogue-item-header"><span class="step-num">5</span> Multicast Fundamentals</div>
+      <div class="dialogue-item-body">
+        <p><span class="q">First attempt:</span> &ldquo;To enable MC drop just MDNS or others like ARP, DHCP?&rdquo; &mdash; conceptual confusion between convert and drop.</p>
+        <p><span class="a">Foundation teaching (2 min):</span> Convert = AP replicates stream as individual unicast per client (delivered better). Drop = AP discards the frame entirely. Both can be enabled simultaneously. ARP and DHCP are broadcast (FF:FF:FF:FF:FF:FF), not multicast &mdash; they appear in the MC exception list because the AP processes all non-unicast frames there.</p>
+        <p><span class="learn">Locked in:</span> Convert improves delivery. Drop reduces noise. Exceptions in drop = frames the AP will NOT drop even when drop is enabled.</p>
+      </div>
+    </li>
+
+    <li id="d06">
+      <div class="dialogue-item-header"><span class="step-num">6</span> Multicast Drop Exceptions</div>
+      <div class="dialogue-item-body">
+        <p><span class="q">First attempt:</span> Correctly identified MDNS and IPv6-Discovery to drop. Kept DHCPv4, DHCPv6, ARP, IGMP-query as exceptions.</p>
+        <p><span class="a">Confirmation:</span> Correct. MDNS (Apple service discovery) and IPv6-Discovery are non-essential on a corporate/guest WLAN. Dropping them reduces noise.</p>
+        <p><span class="learn">Locked in:</span> Exception list = what to KEEP. Uncheck what you want to drop.</p>
+      </div>
+    </li>
+
+    <li id="d07">
+      <div class="dialogue-item-header"><span class="step-num">7</span> Firewall Rules &mdash; Direction and Order</div>
+      <div class="dialogue-item-body">
+        <p><span class="q">First attempt:</span> &ldquo;ANY to 192.168.0.0 &rarr; PERMIT (to go to internet?)&rdquo; &mdash; two errors: permitting instead of denying, and misidentifying 192.168.0.0 as an internet address.</p>
+        <p><span class="a">Correction (two-step):</span> (1) 192.168.0.0 is RFC 1918 private &mdash; never on the internet. (2) The rule should DENY the private ranges, not permit them. PERMIT ANY/ANY at the end catches all internet traffic.</p>
+        <p><span class="learn">Locked in:</span> RFC 1918: 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16. All three = private. DENY first, PERMIT last.</p>
+      </div>
+    </li>
+
+    <li id="d08">
+      <div class="dialogue-item-header"><span class="step-num">8</span> Guest VLAN Assignment</div>
+      <div class="dialogue-item-body">
+        <p><span class="q">First attempt:</span> &ldquo;VLAN 1 I put for Guest?&rdquo;</p>
+        <p><span class="a">Challenge:</span> &ldquo;Cannot do that &mdash; why?&rdquo; User self-corrected: VLAN 1 = AP management, CAPWAP lifeline. Task gave no Guest VLAN number.</p>
+        <p><span class="a">Decision:</span> Professional call &mdash; assign VLAN 15, keep VLAN 1 clean for AP management. Documented reasoning independently.</p>
+        <p><span class="learn">Locked in:</span> When task is silent on VLAN assignment, avoid VLAN 1 for any user-facing purpose. Pick a dedicated VLAN and state why.</p>
+      </div>
+    </li>
+
+    <li id="d09">
+      <div class="dialogue-item-header"><span class="step-num">9</span> EXOS Default Route</div>
+      <div class="dialogue-item-body">
+        <p><span class="q">First attempt:</span> &ldquo;I did NOT configure a default route in my previous lab and yet it worked &mdash; I don&rsquo;t remember putting it there.&rdquo;</p>
+        <p><span class="a">Investigation:</span> <code>show iproute</code> revealed default route 192.168.0.1 with origin <code>bo</code> (BOOTP). EXOS learns the default gateway at boot via DHCP/BOOTP on VLAN 1. The modem&rsquo;s DHCP response provided it automatically.</p>
+        <p><span class="learn">Locked in:</span> EXOS <code>bo</code> = BOOTP-learned route. Do not add a duplicate <code>configure iproute add default</code> if <code>show iproute</code> already shows one.</p>
+      </div>
+    </li>
+
+    <li id="d10">
+      <div class="dialogue-item-header"><span class="step-num">10</span> ipforwarding on VLAN 1</div>
+      <div class="dialogue-item-body">
+        <p><span class="q">Question:</span> &ldquo;Enable ipforwarding on VLAN 5, 10, 15 &mdash; but also VLAN 1?&rdquo;</p>
+        <p><span class="a">Answer:</span> Yes, all four. VLAN 1 routes the management traffic to the modem. Without ipforwarding on VLAN 1, routed traffic from new VLANs cannot egress via the default gateway on VLAN 1.</p>
+        <p><span class="learn">Locked in:</span> ipforwarding must be enabled on every VLAN that participates in routing, including the default/management VLAN. It is not enabled by default (unlike EXOS DHCP server per VLAN).</p>
+      </div>
+    </li>
+
+    <li id="d11">
+      <div class="dialogue-item-header"><span class="step-num">11</span> NTP &mdash; Policy Details Location</div>
+      <div class="dialogue-item-body">
+        <p><span class="q">First attempt:</span> Found NTP under Policy Settings left nav. Aerohive pool servers already present (0&ndash;3.aerohive.pool.ntp.org).</p>
+        <p><span class="a">Context:</span> NTP is critical for RadSec certificate validation. Time drift = cert appears invalid = PPSK auth fails. Always verify NTP before assuming RadSec is broken.</p>
+        <p><span class="learn">Locked in:</span> <code>#show idm</code> &rarr; RadSec cert state. If cert shows Invalid, check NTP first.</p>
+      </div>
+    </li>
+
+    <li id="d12">
+      <div class="dialogue-item-header"><span class="step-num">12</span> Device Time Zone</div>
+      <div class="dialogue-item-body">
+        <p><span class="q">Issue:</span> Could not find Device Time Zone on the Policy Details screen. It was visible in the left nav but clicking appeared to not open it.</p>
+        <p><span class="a">Resolution:</span> Device Time Zone is a separate clickable item in the Policy Settings left nav panel &mdash; not part of the NTP screen. Clicking it directly opened the timezone dropdown. Already set to EST.</p>
+        <p><span class="learn">Locked in:</span> Policy Settings left nav items each open their own sub-pane. Click the item name, not a parent header.</p>
+      </div>
+    </li>
+
+    <li id="d13">
+      <div class="dialogue-item-header"><span class="step-num">13</span> SNMP &mdash; Operation Choice</div>
+      <div class="dialogue-item-body">
+        <p><span class="q">Question:</span> &ldquo;What about SNMP v2c, Get / None / Get and Trap / Trap?&rdquo;</p>
+        <p><span class="a">Teaching:</span> Get = NMS polls AP. Trap = AP alerts NMS unsolicited. Get and Trap = both. None = disabled.</p>
+        <p><span class="a">Choice:</span> Get and Trap &mdash; monitoring (poll) + real-time alerts.</p>
+        <p><span class="learn">Locked in:</span> Get and Trap is the standard production SNMP operation for managed infrastructure.</p>
+      </div>
+    </li>
+
+    <li id="d14">
+      <div class="dialogue-item-header"><span class="step-num">14</span> SNMP Community String</div>
+      <div class="dialogue-item-body">
+        <p><span class="q">Question:</span> &ldquo;Community is the password?&rdquo;</p>
+        <p><span class="a">Answer:</span> Yes, in SNMPv2c the community string IS authentication &mdash; no username, no encryption. <code>hivecommunity</code> is the Extreme/Aerohive default. Any attacker who identifies Extreme hardware immediately knows to try it. In production, use a custom string. Lab: <code>hivecommunity</code> acceptable.</p>
+        <p><span class="learn">Locked in:</span> SNMPv2c community = shared secret. Never use vendor defaults in production. SNMPv3 adds real auth + encryption.</p>
+      </div>
+    </li>
+
+    <li id="d15">
+      <div class="dialogue-item-header"><span class="step-num">15</span> ARP Suppression Location</div>
+      <div class="dialogue-item-body">
+        <p><span class="q">First attempt:</span> &ldquo;IP somewhere?&rdquo; &mdash; could not locate without guidance.</p>
+        <p><span class="a">Teaching:</span> ARP suppression is management-plane behavior (AP handles ARP locally). Path: <code>Policy Details &gt; Management Settings &gt; [slider right] &rarr; ARP Suppression</code>.</p>
+        <p><span class="a">Clarification:</span> ARP Shield (anti-spoofing) and ARP Suppression (flood reduction) are different features visible at the same location.</p>
+        <p><span class="learn">Locked in:</span> ARP Suppression = AP answers from local cache. ARP Shield = AP validates ARP against binding table to prevent spoofing.</p>
+      </div>
+    </li>
+
+    <li id="d16">
+      <div class="dialogue-item-header"><span class="step-num">16</span> Roaming Cache &mdash; Interval Direction</div>
+      <div class="dialogue-item-body">
+        <p><span class="q">First attempt:</span> &ldquo;Fast roaming, higher interval?&rdquo; &mdash; inverted logic.</p>
+        <p><span class="a">Correction:</span> Higher interval = less frequent cache sync = neighbors have stale PMK = slower roaming. Lower interval = more frequent sync = faster roaming. Set to 60s (default 300s).</p>
+        <p><span class="learn">Locked in:</span> Roaming cache interval = how often the AP shares PMK with neighbors. Lower = fresher neighbor caches = client can roam without re-authenticating faster.</p>
+      </div>
+    </li>
+
+  </ul>
+
+  <!-- ─── GAPS ─── -->
+  <span class="section-label" id="gaps">Knowledge Gaps Identified &amp; Resolved</span>
+
+  <table>
+    <thead><tr><th>#</th><th>Gap</th><th>Status</th><th>How Resolved</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>Where interstation setting lives in XIQ</td><td class="ok">Resolved</td><td>Additional Settings &gt; Optional Settings &gt; Traffic Filters</td></tr>
+      <tr><td>2</td><td>RFC 1918 address ranges</td><td class="ok">Resolved</td><td>10/8, 172.16/12, 192.168/16 &mdash; all private, never internet</td></tr>
+      <tr><td>3</td><td>Firewall rule direction/order</td><td class="ok">Resolved</td><td>First match wins; DENY private before PERMIT any</td></tr>
+      <tr><td>4</td><td>Multicast fundamentals (convert vs drop)</td><td class="ok">Resolved</td><td>Taught 2-min foundation; applied correctly</td></tr>
+      <tr><td>5</td><td>ARP and DHCP = broadcast, not multicast</td><td class="ok">Resolved</td><td>Layer 2 broadcast (FF:FF:FF:FF:FF:FF); appear in MC filter as exceptions only</td></tr>
+      <tr><td>6</td><td>ARP Suppression location in XIQ</td><td class="ok">Resolved</td><td>Policy Details &gt; Management Settings &gt; slider</td></tr>
+      <tr><td>7</td><td>Roaming cache interval logic</td><td class="ok">Resolved</td><td>Lower = faster sync = faster roaming (opposite of initial instinct)</td></tr>
+      <tr><td>8</td><td>SNMP community string purpose</td><td class="ok">Resolved</td><td>Community string = shared secret / password in v2c</td></tr>
+      <tr><td>9</td><td>EXOS default route origin &lsquo;bo&rsquo;</td><td class="ok">Resolved</td><td>BOOTP-learned from modem at boot &mdash; never manually configured</td></tr>
+      <tr><td>10</td><td>Device Time Zone location in XIQ</td><td class="ok">Resolved</td><td>Separate clickable item in Policy Settings left nav</td></tr>
+    </tbody>
+  </table>
+
+  <!-- ─── PENDING ─── -->
+  <span class="section-label" id="pending">Pending &mdash; Tomorrow Morning</span>
+
+  <div class="box warn">
+    <p class="box-label">Switch Config &mdash; Not Yet Run</p>
+    <ul>
+      <li>Create VLANs 5 (BYOD), 10 (Employee), 15 (Guest) on SW1</li>
+      <li>Tag all three on Port 3 (AP uplink)</li>
+      <li>Configure DHCP per VLAN with gateway + DNS</li>
+      <li>Enable ipforwarding on VLANs 1, 5, 10, 15</li>
+      <li>Verify default route origin <code>bo</code> present before adding manually</li>
+      <li>Add static routes on QF-Modem back to 10.10.5.0/24, 10.10.10.0/24, 10.10.15.0/24</li>
+    </ul>
+  </div>
+
+  <div class="box">
+    <p class="box-label">XIQ Config &mdash; AP Side Complete</p>
+    <ul>
+      <li>Employee SSID: PPSK, Local DB, max 1 client/PSK, VLAN 10, interstation blocked, firewall, multicast, data rates &mdash; <span class="ok">configured</span></li>
+      <li>BYOD SSID: PPSK, Local DB, VLAN 5, interstation blocked, firewall, multicast, data rates &mdash; <span class="ok">configured</span></li>
+      <li>Guest SSID: Open, CWP/UPA, VLAN 15, interstation blocked, firewall &mdash; <span class="ok">configured</span></li>
+      <li>Policy Details: NTP (Aerohive defaults), EST timezone, SNMP (v2c / Get&amp;Trap / hivecommunity), ARP Suppression, Roaming cache (60s) &mdash; <span class="ok">configured</span></li>
+      <li>Employee SSID Availability Schedule (7 AM&ndash;7 PM weekdays) &mdash; <span class="warn">confirm applied</span></li>
+      <li>Deploy Policy to AP &mdash; <span class="warn">pending switch config first</span></li>
+    </ul>
+  </div>
+
+  <hr class="divider">
+  <p class="footer">
+    KhKLab &nbsp;&bull;&nbsp; 5320 Lab Journal &nbsp;&bull;&nbsp; May 18, 2026<br>
+    Previous: <a href="session_summary_20260515.html" style="color:#065f46">May 15 &mdash; PPSK VLAN Split Verified</a><br>
+    &copy; 2026 Khursheed Khan &nbsp;&bull;&nbsp; All rights reserved
+  </p>
+
+</div>
+</body>
+</html>
