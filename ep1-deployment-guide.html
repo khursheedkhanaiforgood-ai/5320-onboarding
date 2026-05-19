@@ -214,8 +214,10 @@ show dhcp-server vlan Employee</code></pre>
       <li>Wait up to <strong>10 min</strong> &mdash; status shows <span class="warn">No Connection</span> icon initially; resolves to <span class="ok">Connected</span> after IQAgent establishes cloud tunnel</li>
     </ol>
     <div class="box warn">
-      <p class="box-label">IQAgent Prerequisite</p>
-      <p>SW1 must have IQAgent running and cloud connectivity (TCP 443 + HTTPS). IQAgent is pre-installed on Switch Engine 31.6+. Verify: <code>show idm</code> on SW1 CLI &rarr; RUN state = <strong>Connected</strong>, RadSec cert = <strong>Valid</strong>, port 2083 open.</p>
+      <p class="box-label">IQAgent + Firmware Prerequisites</p>
+      <p><strong>SW1 minimum firmware: Switch Engine 33.5</strong> (EP1 v25.9.0-199 requirement for 5320 series). If running lower, upgrade EXOS first via <code>download image-management</code> or drag-and-drop in Monitoring &gt; Network Devices. IQAgent is pre-installed on Switch Engine 31.6+; upgrade IQAgent if EXOS &lt;33.2 (see release notes p.10 for IQAgent version matrix).</p>
+      <p style="margin-top:8px"><strong>AP1 minimum firmware: IQ Engine 10.8.2</strong> (latest: 10.8.6 / AP 10.18.1). Verify: Monitoring &gt; Network Devices &gt; AP1 &gt; Firmware column.</p>
+      <p style="margin-top:8px"><strong>Firewall: allow SW1 and AP1 outbound to EP1 cloud.</strong> US East (VA/VA2): <code>34.202.197.0/26</code>, <code>44.192.245.0/26</code>, <code>3.234.248.0/27</code>. Ports: TCP 443 (HTTPS/IQAgent), TCP/UDP 2083 (RadSec). Verify IQAgent: <code>show idm</code> &rarr; RUN state = <strong>Connected</strong>, RadSec cert = <strong>Valid</strong>.</p>
     </div>
 
     <h3>Step 2 &mdash; Network Policy (Switching type)</h3>
@@ -307,6 +309,10 @@ configure dhcp-address-range Employee-Pool vlan Employee default-gateway 10.5.0.
     <div class="box ok">
       <p class="box-label">Verify</p>
       <p>On SW1 CLI: <code>show vlan detail</code> &mdash; VLANs 5/10/15 should appear with correct port assignments. <code>show fdb ports 3</code> &mdash; AP1 MAC in VLAN 1. After policy push Config Audit icon = Match (green checkmark).</p>
+    </div>
+    <div class="box warn">
+      <p class="box-label">Known Issue XIQ-46735 &mdash; Do Not Toggle Auto Config</p>
+      <p>In <strong>Administration &amp; Settings &gt; Backup &amp; Restore &gt; VIQ Management</strong>, do <strong>not</strong> toggle the <strong>Auto Config</strong> setting after devices reach audit-match state. This is a known bug in v25.9.0-199: toggling flips audit-match (green) devices to audit-mismatch (yellow) incorrectly. Source: Release Notes p.16 + p.18.</p>
     </div>
   </div>
 </div>
@@ -560,7 +566,7 @@ configure dhcp-address-range Employee-Pool vlan Employee default-gateway 10.5.0.
   <div class="doc-card">
     <div class="doc-card-type local">Local &nbsp;&bull;&nbsp; RELEASE</div>
     <h4>EP1 v25.9.0.199 Release Notes</h4>
-    <p>Base release notes for the v25.9.0.199 GA build. New features, known issues, upgrade path.</p>
+    <p>29 pp. April 2026. <strong>New features:</strong> Third-Party Management Engine (visualization, D360, config model, licensing — needs EP1-STD + EP1-STD-T3RD; Navigator/Pilot licenses incompatible); FA link visualization across MLAG clusters (EXOS=FA Proxy, VOSS=FA Server); RTT platform support improvements; auto AP-to-AP 802.11mc FTM ranging (6 GHz, USA/Canada only); LEK mandatory conversion banner. <strong>Minimum firmware for EP1 support:</strong> Switch Engine/EXOS = 33.5 (SW1 5320 must be on 33.5+); Fabric Engine/VOSS = 9.3.0.0; IQ Engine AP = 10.8.2 min, 10.8.6 latest; Visualization requires EXOS ≥33.3, VOSS ≥9.2.1.0, IQ Engine ≥10.8.2. <strong>Lab-critical known issues:</strong> XIQ-19368 (Supplemental CLI option incorrectly overridden by UI config for multicast rate limit — watch when using SupCLI + multicast together); XIQ-46735 (Auto Config toggle in VIQ Management flips audit-match devices to audit-mismatch — do NOT toggle). <strong>EP1 cloud firewall IPs (US East VA/VA2):</strong> 34.202.197.0/26, 44.192.245.0/26, 3.234.248.0/27.</p>
     <p><code>Extreme_Platform_ONE_Networking_25_9_0_199_Release_Notes.pdf</code></p>
   </div>
   <div class="doc-card">
