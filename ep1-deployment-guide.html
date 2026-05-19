@@ -89,7 +89,7 @@ tr:nth-child(even) td { background: #FAFAFA; }
 <hr class="nyt-rule-thin">
 
 <div class="byline">
-  <strong>May 19, 2026</strong> &nbsp;&mdash;&nbsp; EP1 Two-SSID Deployment Playbook + RAG Corpus v1.0 &nbsp;&mdash;&nbsp;
+  <strong>May 19, 2026</strong> &nbsp;&mdash;&nbsp; EP1 Two-SSID Deployment Playbook + RAG Corpus v2.2 &nbsp;&mdash;&nbsp;
   Source: EP1 Networking v25.9.0 User Guide (677 pp., April 2026)
 </div>
 
@@ -101,8 +101,9 @@ tr:nth-child(even) td { background: #FAFAFA; }
   <div class="toc-title">In This Guide</div>
   <a href="#nav-correction">EP1 Nav Map &mdash; Corrected (v25.9.0)</a>
   <a href="#policy-tabs">Policy Workflow Tabs</a>
-  <a href="#phase0">Phase 0 &mdash; EXOS SW1 Pre-flight</a>
-  <a href="#phase1">Phase 1 &mdash; Create Network Policy</a>
+  <a href="#phase0">Phase 0 &mdash; EXOS SW1 Pre-flight (CLI)</a>
+  <a href="#phase0b">Phase 0b &mdash; SW1 Onboarding into EP1 (Switch Template + Supplemental CLI)</a>
+  <a href="#phase1">Phase 1 &mdash; Create Network Policy (Wireless)</a>
   <a href="#phase2">Phase 2 &mdash; Policy Settings (DNS / NTP / SNMP / Time Zone)</a>
   <a href="#phase3">Phase 3 &mdash; Employee SSID (PPSK / VLAN5)</a>
   <a href="#phase4">Phase 4 &mdash; Guest SSID (Open / CWP / VLAN10)</a>
@@ -188,6 +189,124 @@ show dhcp-server vlan Employee</code></pre>
     <div class="box ok" style="margin-top:8px">
       <p class="box-label">Verify</p>
       <p><code>show fdb ports 3</code> should show AP1 MAC in VLAN 1 (native). After client connects to Employee SSID, AP tags frames with VLAN 5 — client MAC should appear in VLAN 5 FDB within 30s.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ─── PHASE 0b ─── -->
+<span class="section-label" id="phase0b">Phase 0b &mdash; SW1 Onboarding into EP1 (Switch Engine)</span>
+
+<div class="phase">
+  <div class="phase-header">
+    <span class="phase-num">Pre-flight B</span>
+    <span class="phase-title">EP1 Switch Onboarding &mdash; Template + VLAN + Supplemental CLI</span>
+  </div>
+  <div class="phase-body">
+    <p style="font-size:0.85rem;color:#555;margin-bottom:10px">Source: Universal Switch Deployment Guide v25.7.0, pp.14&ndash;60. Perform AFTER Phase 0 CLI pre-flight and BEFORE deploying network policy to AP1.</p>
+
+    <h3>Step 1 &mdash; Onboard SW1 (Monitoring &gt; Network Devices)</h3>
+    <ol>
+      <li>Go to <strong>Monitoring &gt; Network Devices</strong></li>
+      <li>Click <strong>Onboard Devices</strong> (or + icon)</li>
+      <li>Select <strong>Manual Entry</strong> (for ≤10 devices; use CSV bulk for more)</li>
+      <li>Enter SW1 serial number (format: 12-char alphanumeric on chassis label)</li>
+      <li>Click <strong>ADD DEVICE &rarr; DONE</strong></li>
+      <li>Wait up to <strong>10 min</strong> &mdash; status shows <span class="warn">No Connection</span> icon initially; resolves to <span class="ok">Connected</span> after IQAgent establishes cloud tunnel</li>
+    </ol>
+    <div class="box warn">
+      <p class="box-label">IQAgent Prerequisite</p>
+      <p>SW1 must have IQAgent running and cloud connectivity (TCP 443 + HTTPS). IQAgent is pre-installed on Switch Engine 31.6+. Verify: <code>show idm</code> on SW1 CLI &rarr; RUN state = <strong>Connected</strong>, RadSec cert = <strong>Valid</strong>, port 2083 open.</p>
+    </div>
+
+    <h3>Step 2 &mdash; Network Policy (Switching type)</h3>
+    <ol>
+      <li>Go to <strong>Configuration &gt; Network</strong> (left nav)</li>
+      <li>Open or create a policy: tab <strong>1 Policy Details</strong></li>
+      <li>Check both <strong>Wireless</strong> (for AP1) and <strong>Switching/Routing</strong> (for SW1); or create a separate switch-only policy</li>
+      <li>For <strong>Management Servers</strong> &mdash; Switch Engine/EXOS only: set routing instance to <strong>VR-Default</strong> or <strong>VR-mgmt</strong> so DNS, NTP, SNMP, and Syslog route correctly</li>
+      <li>Click <strong>SAVE &rarr; NEXT</strong></li>
+    </ol>
+
+    <h3>Step 3 &mdash; Create Switch Template</h3>
+    <ol>
+      <li>From the policy, click <strong>3 Switching/Routing</strong> tab &rarr; <strong>Switch Settings &rarr; Switch Template</strong></li>
+      <li>Select the default template for your model: e.g., <code>Switch Engine 5320-24T-8XE</code></li>
+      <li>Click <strong>Copy</strong> and give it a name (e.g., <code>KhKLab-SW1</code>). <em>Never edit the default template directly.</em></li>
+      <li>Open the new template and toggle <strong>Enable Override Policy Common Settings</strong> to <strong>ON</strong></li>
+      <li>Under <strong>Management Interface Settings</strong> (Switch Engine only): select <strong>VLAN Interface</strong> &rarr; Management VLAN = <code>1</code> &rarr; Management IP Settings = <strong>DHCP</strong></li>
+    </ol>
+
+    <h3>Step 4 &mdash; VLAN Attributes</h3>
+    <ol>
+      <li>In the switch template: <strong>Switch Settings &rarr; VLAN Attributes &rarr; +</strong></li>
+      <li>For each VLAN, select <strong>Manual</strong> and set VLAN ID + Name:</li>
+    </ol>
+    <table>
+      <thead><tr><th>VLAN Name</th><th>VLAN ID</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td><code>Mgmt</code></td><td>1</td><td>Native / management (AP1 CAPWAP, SW1 IQAgent)</td></tr>
+        <tr><td><code>Employee</code></td><td>5</td><td>Staff PPSK VLAN</td></tr>
+        <tr><td><code>Guest</code></td><td>10</td><td>Guest CWP VLAN (or Student VLAN)</td></tr>
+        <tr><td><code>GuestWireless</code></td><td>15</td><td>Walk-in guest VLAN (if separate from VLAN 10)</td></tr>
+      </tbody>
+    </table>
+    <p style="font-size:0.85rem;color:#555;">IGMP Snooping override order (highest priority first): Device-specific VLAN &rarr; VLAN Attributes &rarr; Device Template &rarr; Common Settings.</p>
+
+    <h3>Step 5 &mdash; Port Types (Trunk + Access)</h3>
+    <ol>
+      <li>In the policy: <strong>Switch Settings &rarr; Port Types &rarr; +</strong></li>
+      <li>Create a <strong>Trunk Port</strong> for the AP uplink (Port 3):
+        <ul>
+          <li>Port Usage: <strong>Trunk Port (802.1Q VLAN Tagging)</strong></li>
+          <li>Native VLAN: <code>Mgmt</code> (VLAN 1)</li>
+          <li>Allowed VLANs: <strong>all</strong> (Switch Engine keyword &mdash; auto-tags all VLANs assigned in any port type in this policy)</li>
+          <li>Enable <strong>LLDP Transmit</strong> + <strong>LLDP Receive</strong></li>
+          <li>STP: <strong>Edge Port OFF</strong> (it&rsquo;s a switch-to-AP uplink, not an edge/user port)</li>
+        </ul>
+      </li>
+      <li>Create an <strong>Access Port</strong> for workstation ports:
+        <ul>
+          <li>Port Usage: <strong>Access Port</strong></li>
+          <li>VLAN: assign <code>Employee</code> (VLAN 5) or <code>Guest</code> (VLAN 10) as needed</li>
+          <li>STP: <strong>Edge Port ON</strong> + BPDU Guard = <strong>Guard</strong></li>
+        </ul>
+      </li>
+      <li>In the switch template Port/VLAN Configuration view, assign the Trunk port type to Port 3 and the Access port type to remaining ports</li>
+    </ol>
+
+    <h3>Step 6 &mdash; Supplemental CLI (EXOS features not in EP1)</h3>
+    <div class="box warn">
+      <p class="box-label">Enable First</p>
+      <p>Go to <strong>Administration &amp; Settings &gt; Backup &amp; Restore &gt; VIQ Management</strong> &rarr; toggle <strong>Supplemental CLI</strong> to <strong>ON</strong>. This is a one-time org-level setting.</p>
+    </div>
+    <ol>
+      <li>In the switch template: <strong>Configuration &gt; Advanced Settings &gt; Supplemental CLI &gt; +</strong></li>
+      <li>Add EXOS commands that EP1 does NOT manage (example: DHCP server, ipforwarding, ACL):
+<pre><code>configure vlan Employee ipaddress 10.5.0.1 255.255.255.0
+enable ipforwarding vlan Employee
+create dhcp-address-range Employee-Pool vr VR-Default 10.5.0.100-10.5.0.200
+configure dhcp-address-range Employee-Pool vlan Employee default-gateway 10.5.0.1 dns-server 8.8.8.8</code></pre>
+      </li>
+      <li>Max <strong>8192 characters</strong>; one command per line</li>
+      <li>Use <code>${vlan:Employee}</code> to reference a VLAN object by name (resolves to VLAN ID); use <code>${ip:server_ip}</code> for IP objects</li>
+      <li>After adding Supplemental CLI: perform <strong>Complete Configuration Update</strong> (not Delta) to SW1</li>
+    </ol>
+    <div class="box" style="border-left-color:#dc2626;background:#FFF5F5">
+      <p class="box-label" style="color:#dc2626;">Hard Constraint &mdash; No Overlap Rule</p>
+      <p>Never put commands in Supplemental CLI that EP1 already generates from the Network Policy (VLANs, STP, IGMP, port types). Overlapping CLI = <strong>Device Update Failure</strong>. Also: <strong>never</strong> put <code>enable dhcp</code> or <code>enable ipforwarding</code> in Supplemental CLI &mdash; these hang EP1/XIQ at 15%. Run them manually via console after first deploy.</p>
+    </div>
+
+    <h3>Step 7 &mdash; Deploy to SW1</h3>
+    <ol>
+      <li>Go to <strong>Configuration &gt; Network Policies</strong> &rarr; select your policy &rarr; tab <strong>4 Deploy Policy</strong></li>
+      <li>Check the box next to <strong>SW1</strong> in the device table</li>
+      <li>Click <strong>UPLOAD</strong> &rarr; select <strong>Complete Configuration Update</strong> (first time or after Supplemental CLI change) or <strong>Delta</strong> (subsequent changes)</li>
+      <li>Click <strong>PERFORM UPDATE</strong></li>
+      <li>Monitor: <strong>Monitoring &gt; Network Devices &gt; SW1</strong> &rarr; Config Audit icon should change to <span class="ok">Match</span></li>
+    </ol>
+    <div class="box ok">
+      <p class="box-label">Verify</p>
+      <p>On SW1 CLI: <code>show vlan detail</code> &mdash; VLANs 5/10/15 should appear with correct port assignments. <code>show fdb ports 3</code> &mdash; AP1 MAC in VLAN 1. After policy push Config Audit icon = Match (green checkmark).</p>
     </div>
   </div>
 </div>
@@ -435,7 +554,7 @@ show dhcp-server vlan Employee</code></pre>
   <div class="doc-card">
     <div class="doc-card-type local">Local &nbsp;&bull;&nbsp; SWITCH</div>
     <h4>EP1 Universal Switch Deployment Guide v25.7.0</h4>
-    <p>EXOS SwitchEngine + VOSS FabricEngine onboarding into EP1. Switch templates, port types, Supplemental CLI, Fabric Attach. Key for SW1 (EXOS) integration.</p>
+    <p>129 pp. Feb 2026. Dual-persona: Switch Engine (EXOS 31.6+) + Fabric Engine (VOSS 8.6+). For EXOS SW1: skip &ldquo;Change NOS&rdquo; task. Key chapters: <strong>Onboard Switches</strong> p.14 (manual ≤10 serials, bulk CSV); <strong>Device Status Icons</strong> p.16 (Config Audit Match/Mismatch, RadSec Proxy, No Connection ≤10 min); <strong>Configure Network Policy</strong> p.23 (path: Configuration &gt; Network; Management Servers: VR-Default/VR-mgmt for EXOS); <strong>VLAN Attributes</strong> p.27 (Switch Template &gt; Switch Settings; override hierarchy: Device VLAN &gt; VLAN Attrs &gt; Device Template &gt; Common); <strong>ISPP</strong> p.28 (requires EP1 Security license); <strong>IPP</strong> p.30 (auto-assign port to VLAN by MAC/LLDP; requires SW 32.6.1.5+); <strong>Switch Template</strong> p.41 (save default as new before editing; enable Override Policy Common Settings; Trunk Port &ldquo;all&rdquo; keyword auto-tags all policy VLANs; Management Interface Settings = EXOS-only: set Mgmt VLAN + DHCP); <strong>Supplemental CLI</strong> p.60 (enable first: Admin &amp; Settings &gt; Backup &amp; Restore &gt; VIQ Management &gt; toggle ON; 8192 char max; <code>${vlan:name}</code> + <code>${ip:name}</code> objects; Complete Update required after each addition). Critical rule: no overlap between Supplemental CLI and EP1-managed config or Device Update Failure.</p>
     <p><code>Extreme_Platform_ONE_Networking_25_7_0_Universal_Switch_Deployment_Guide-2.pdf</code></p>
   </div>
   <div class="doc-card">
@@ -743,7 +862,7 @@ show dhcp-server vlan Employee</code></pre>
     <li>&#9745; EP1 Security v25.3.0 Alert Reference Guide &mdash; abstract reviewed</li>
     <li>&#9745; EP1 Security v25.6.0 Release Notes &mdash; abstract + new features reviewed</li>
     <li>&#9744; Convert EP1_Readme_May 19 2026.docx (<code>brew install pandoc &amp;&amp; pandoc EP1_Readme*.docx -t plain</code>)</li>
-    <li>&#9744; Read Switch Deployment Guide pp.1&ndash;50 (EXOS onboarding path)</li>
+    <li>&#9745; Read Switch Deployment Guide pp.1&ndash;60 (EXOS onboarding path &mdash; full Network Policy + Supplemental CLI chapters read May 19)</li>
     <li>&#9744; Read Licensing Guide (EP1 Standard vs Plus feature gates)</li>
     <li>&#9744; Ingest Patch 4 release notes for AP/switch bug fixes relevant to lab</li>
     <li>&#9745; Transition CustomerFAQ reviewed (May 6, 2026 version &mdash; Q4 CY2026 retirement confirmed)</li>
@@ -755,7 +874,7 @@ show dhcp-server vlan Employee</code></pre>
 
 <hr class="divider">
 <p class="footer">
-  KhKLab &nbsp;&bull;&nbsp; 5320 Lab Journal &nbsp;&bull;&nbsp; EP1 Deployment Reference &amp; RAG Corpus v2.1 &nbsp;&bull;&nbsp; May 19, 2026<br>
+  KhKLab &nbsp;&bull;&nbsp; 5320 Lab Journal &nbsp;&bull;&nbsp; EP1 Deployment Reference &amp; RAG Corpus v2.2 &nbsp;&bull;&nbsp; May 19, 2026<br>
   Source: Extreme Platform ONE Networking v25.9.0 User Guide (677 pp., April 2026)<br>
   Study plan: <a href="session_summary_20260519.html">May 19 EOD &mdash; EP1 Sprint Kickoff</a> &nbsp;&bull;&nbsp;
   Sprint tracker: <a href="xiq-ep1-transition.html">XIQ&rarr;EP1 Transition Sprint</a> &nbsp;&bull;&nbsp;
