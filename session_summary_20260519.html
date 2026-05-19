@@ -111,6 +111,7 @@ tr:nth-child(even) td { background: #FAFAFA; }
     <a href="#airdefense">AirDefense Key Facts</a>
     <a href="#observability">Observability &mdash; Network360 + AI Canvas</a>
     <a href="#topology">Lab Topology</a>
+    <a href="#arch-analysis">XIQ vs EP1 — E2E Architecture Analysis (Engineering Review)</a>
     <a href="#pending">Pending</a>
   </div>
 
@@ -174,6 +175,53 @@ tr:nth-child(even) td { background: #FAFAFA; }
   <div class="box ep1">
     <p class="box-label">The One-Line Migration Pitch</p>
     <p>&ldquo;EP1 is XIQ with a modular app structure, a natural language AI layer, enterprise guest management, and a zero-trust security module &mdash; and it&rsquo;s already the default. The question isn&rsquo;t whether to migrate, it&rsquo;s when.&rdquo;</p>
+  </div>
+
+  <!-- ─── ARCH ANALYSIS ─── -->
+  <span class="section-label" id="arch-analysis">XIQ vs EP1 &mdash; E2E Architecture Analysis &nbsp;<span style="font-size:0.55rem;background:#FEE2E2;color:#991b1b;border:1px solid #fca5a5;border-radius:3px;padding:1px 6px;letter-spacing:0.04em;vertical-align:middle;">ENGINEERING REVIEW — HYPOTHESES FLAGGED</span></span>
+
+  <p>This section documents a detailed architectural comparison produced during today&rsquo;s session. It traces three E2E flows (policy push, telemetry, AP optimization) at the component/subsystem level. Every claim is explicitly sourced. The extended engineering team &mdash; with 30+ years of industry experience and 15+ years per person with Extreme Networks &mdash; is asked to review, challenge, and annotate the open hypotheses before this is used in client-facing discussions.</p>
+
+  <div class="box" style="border-left-color:#7c3aed;background:#F5F3FF;margin-bottom:14px;">
+    <p class="box-label" style="color:#5b21b6;">Full Verbatim Dialogue &amp; Reasoning Log</p>
+    <p style="font-size:0.9rem;">The complete debate &mdash; including every question asked, every document read, how each conclusion was reached, and a 10-section annotation space for engineering input &mdash; is preserved verbatim at:<br>
+    <strong><a href="xiq-ep1-arch-debate.html" style="color:#5b21b6;font-size:0.97rem;">&#8594; XIQ vs EP1 Architectural Analysis: Dialogue &amp; Reasoning Log</a></strong><br>
+    <span style="font-size:0.82rem;color:#6b7280;">Includes: platform premise (confirmed facts + page refs), three-flow verbatim analysis, source challenge re-analysis, 7 open questions for R&amp;D, and dashed annotation boxes for engineering team responses.</span></p>
+  </div>
+
+  <p style="font-size:0.87rem;font-weight:700;color:#374151;font-family:'Libre Franklin',Arial,sans-serif;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;">What Is Confirmed (Official EN White Paper, ©2025 — page cited)</p>
+  <table>
+    <thead><tr><th>Confirmed Fact</th><th>Source</th></tr></thead>
+    <tbody>
+      <tr><td>EP1 = microservice-driven SaaS, container-based, Kubernetes-orchestrated</td><td>p.3, p.13</td></tr>
+      <tr><td>Device-facing protocol identical in XIQ and EP1: CAPWAP (DTLS) + HTTPS for config push AND telemetry</td><td>p.6</td></tr>
+      <tr><td>EP1 is NOT in the device data path — network independent if EP1 goes down</td><td>p.12</td></tr>
+      <tr><td>GDC = AWS-only (auth, device redirection, AI Core, LLM, Orchestrator, IAM)</td><td>p.2</td></tr>
+      <tr><td>RDC = AWS/Azure/GCP, one per geography, hosts customer VIQ</td><td>p.2</td></tr>
+      <tr><td>Shift-left anonymization: device telemetry anonymized inside RDC before GDC Data Hub</td><td>p.10</td></tr>
+      <tr><td>Official data flow diagram: Device → Anonymization (RDC) → Data Hub → AI Service → Orchestrator → IAM → User</td><td>p.10 (diagram)</td></tr>
+      <tr><td>Data Hub = 6 components: Data Ingestion, Data Lake (real-time + batch), Knowledge Graph, Metadata Management, RAG-as-a-Service, Auto Compliance</td><td>p.8</td></tr>
+      <tr><td>AI Core Services = "agentic system for complex workflows, multi-agent interaction" + LLMs + SLMs + traditional ML + real-time + batch inference</td><td>p.7</td></tr>
+      <tr><td>HITL = default. AI acts with same RBAC as initiating user — cannot exceed operator permissions</td><td>p.6</td></tr>
+      <tr><td>Feedback loops update AI models from real-world outcomes</td><td>p.9</td></tr>
+      <tr><td>NL → policy intent → HITL gate: AI Expert conversational interface confirmed</td><td>p.6</td></tr>
+    </tbody>
+  </table>
+
+  <p style="font-size:0.87rem;font-weight:700;color:#991b1b;font-family:'Libre Franklin',Arial,sans-serif;text-transform:uppercase;letter-spacing:0.06em;margin:20px 0 8px;">What Needs Engineering Verification (7 Open Questions)</p>
+  <ol style="font-size:0.9rem;line-height:1.95;margin-bottom:16px;">
+    <li><strong>Database technologies</strong> — what specific DB tech does the XIQ/EP1 base platform use for telemetry and config? The p.3 diagram shows "DB" per region but does not name it.</li>
+    <li><strong>Data Ingestion scope</strong> — does the Data Hub ingest config-change events (policy pushes), or only telemetry and observability data?</li>
+    <li><strong>Anonymization boundary</strong> — does anonymization apply to VIQ storage, or only to the copy forwarded to the GDC AI Core? (PII appendix p.11 implies VIQ retains raw data.)</li>
+    <li><strong>Optimization implementation</strong> — is it an actual multi-agent workflow as implied by p.7, or a simpler single-model ML pipeline?</li>
+    <li><strong>Knowledge Graph schema</strong> — are AP ↔ AP neighbor relationships modeled, enabling neighbor-aware channel optimization?</li>
+    <li><strong>AI Core → CAPWAP handoff</strong> — is the coupling synchronous API, async event (message bus), or operator-triggered?</li>
+    <li><strong>Feedback loop scope</strong> — does p.9 feedback loop apply to network optimization outcomes, or only to LLM accuracy and hallucination correction?</li>
+  </ol>
+
+  <div class="box" style="border-left-color:#f97316;background:#FFF7ED;margin-bottom:14px;">
+    <p class="box-label" style="color:#c2410c;">Call to Action for Extended Engineering Team</p>
+    <p style="font-size:0.92rem;">Please open <a href="xiq-ep1-arch-debate.html" style="font-weight:700;color:#c2410c;">xiq-ep1-arch-debate.html</a> and use the annotation boxes in Section 10 to record your responses. Reference your internal documentation or direct implementation knowledge. Corrections to any hypothesis are equally valuable &mdash; the goal is to make this analysis defensible before it reaches a client.</p>
   </div>
 
   <!-- ─── TUESDAY ─── -->

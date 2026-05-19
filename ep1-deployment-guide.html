@@ -79,6 +79,28 @@ tr:nth-child(even) td { background: #FAFAFA; }
 
 .footer { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.75rem; color: #888; line-height: 1.8; margin-top: 40px; }
 .footer a { color: #1e40af; text-decoration: none; }
+
+/* ─── Architecture Comparison v2.7 ─── */
+.badge-confirmed { display:inline-block; background:#DBEAFE; color:#1e40af; font-family:'Libre Franklin',Arial,sans-serif; font-size:0.62rem; font-weight:700; padding:1px 6px; border-radius:3px; letter-spacing:0.03em; white-space:nowrap; }
+.badge-hyp { display:inline-block; background:#FEE2E2; color:#991b1b; font-family:'Libre Franklin',Arial,sans-serif; font-size:0.62rem; font-weight:700; padding:1px 6px; border-radius:3px; letter-spacing:0.03em; white-space:nowrap; }
+.badge-t3 { display:inline-block; background:#F3F4F6; color:#374151; font-family:'Libre Franklin',Arial,sans-serif; font-size:0.62rem; font-weight:700; padding:1px 6px; border-radius:3px; letter-spacing:0.03em; white-space:nowrap; }
+.conf-legend { background:#F8F8F8; border:1px solid #E2E2E2; border-radius:4px; padding:12px 16px; margin:12px 0 20px; }
+.conf-legend-title { font-family:'Libre Franklin',Arial,sans-serif; font-size:0.68rem; font-weight:700; text-transform:uppercase; letter-spacing:0.12em; color:#666; margin-bottom:8px; }
+.conf-legend-row { font-size:0.83rem; line-height:1.7; color:#333; margin-bottom:4px; }
+.flow-wrap { overflow-x:auto; margin:12px 0 18px; padding-bottom:4px; }
+.flow-chain { display:flex; align-items:stretch; gap:0; min-width:max-content; }
+.flow-node { background:#fff; border:1px solid #D1D5DB; border-radius:4px; padding:7px 10px; min-width:88px; max-width:134px; text-align:center; font-family:'Libre Franklin',Arial,sans-serif; font-size:0.73rem; font-weight:600; color:#111; display:flex; flex-direction:column; align-items:center; justify-content:flex-start; line-height:1.3; }
+.flow-node.n-device { border-color:#6ee7b7; background:#ECFDF5; }
+.flow-node.n-rdc   { border-color:#a78bfa; background:#F5F3FF; }
+.flow-node.n-gdc   { border-color:#93c5fd; background:#EFF6FF; }
+.flow-node.n-user  { border-color:#fbbf24; background:#FFFBF0; }
+.flow-node.n-hyp   { border:1px dashed #fdba74; background:#FFF7ED; color:#92400e; }
+.flow-arrow { display:flex; align-items:center; padding:0 5px; color:#9CA3AF; font-size:1rem; align-self:center; flex-shrink:0; }
+.flow-sub { font-family:'Libre Franklin',Arial,sans-serif; font-size:0.58rem; font-weight:400; margin-top:3px; display:block; line-height:1.35; }
+.flow-sub.fc { color:#1d4ed8; }
+.flow-sub.fh { color:#b45309; }
+.verify-box { border:2px solid #f97316; background:#FFF7ED; border-radius:4px; padding:14px 18px; margin:20px 0; }
+.verify-box .box-label { color:#c2410c; margin-bottom:8px; }
 </style>
 </head>
 <body>
@@ -89,7 +111,7 @@ tr:nth-child(even) td { background: #FAFAFA; }
 <hr class="nyt-rule-thin">
 
 <div class="byline">
-  <strong>May 19, 2026</strong> &nbsp;&mdash;&nbsp; EP1 Two-SSID Deployment Playbook + RAG Corpus v2.4 &nbsp;&mdash;&nbsp;
+  <strong>May 19, 2026</strong> &nbsp;&mdash;&nbsp; EP1 Two-SSID Deployment Playbook + RAG Corpus v2.7 &nbsp;&mdash;&nbsp;
   Source: EP1 Networking v25.9.0 User Guide (678 pp.) + Universal Switch Deployment Guide v25.7.0 (130 pp.) + Licensing Guide v25.10.0 &mdash; All documents read May 19, 2026
 </div>
 
@@ -115,6 +137,7 @@ tr:nth-child(even) td { background: #FAFAFA; }
   <a href="#rag-local">RAG Corpus &mdash; Local Documents (9)</a>
   <a href="#rag-web">RAG Corpus &mdash; Web Research (Key Sources)</a>
   <a href="#page-index">Guide Page Index</a>
+  <a href="#arch-comparison">XIQ vs EP1 Architecture &mdash; Three Flows (Engineering Review)</a>
 </div>
 
 <!-- ─── NAV CORRECTION ─── -->
@@ -1130,6 +1153,218 @@ configure iqagent server vr VR-Mgmt vlan Management   # Lock IQAgent to specific
   </tbody>
 </table>
 
+<!-- ─── ARCH COMPARISON v2.7 ─── -->
+<span class="section-label" id="arch-comparison">XIQ vs EP1 — E2E Architecture: Three Flows &nbsp;<span style="font-size:0.55rem;background:#FEE2E2;color:#991b1b;border:1px solid #fca5a5;border-radius:3px;padding:1px 6px;letter-spacing:0.04em;vertical-align:middle;">ENGINEERING REVIEW — HYPOTHESES FLAGGED</span></span>
+
+<p>Three flows traced at the component/subsystem level: (1) policy push, (2) telemetry and observability, (3) AP optimization. Every claim is explicitly labeled. <strong>Solid-border boxes = confirmed by official Extreme Networks document (page cited). Dashed-border boxes = architectural hypothesis only — no official source confirms the specific implementation.</strong> Engineering should confirm or refute dashed-border claims before these are used in client-facing discussions.</p>
+
+<div class="box warn" style="margin-bottom:14px;">
+  <p class="box-label">Full Dialogue Log &mdash; How These Conclusions Were Reached</p>
+  <p>The debate, document readings, and step-by-step reasoning chain that produced this analysis is preserved verbatim in a linked document for R&amp;D peer review: <a href="xiq-ep1-arch-debate.html" style="font-weight:700;">XIQ vs EP1 Architectural Analysis &mdash; Dialogue &amp; Reasoning Log &rarr;</a></p>
+</div>
+
+<div class="conf-legend">
+  <div class="conf-legend-title">Source Confidence Key</div>
+  <div class="conf-legend-row"><span class="badge-confirmed">p.N ✓</span> &nbsp; <strong>Confirmed —</strong> <em>Extreme Platform ONE Cloud Architecture &amp; Security</em>, ©2025 Extreme Networks (13 pp., read May 19 2026). Exact page cited. Verbatim quotes used where marked.</div>
+  <div class="conf-legend-row"><span class="badge-hyp">HYPOTHESIS</span> &nbsp; <strong>Architecturally plausible</strong> based on standard microservices/SaaS patterns. Not confirmed in any official Extreme document. Must be verified or refuted by engineering.</div>
+  <div class="conf-legend-row"><span class="badge-t3">T3 SOURCE</span> &nbsp; Community post or AI-generated synthesis. Treat as hypothesis.</div>
+</div>
+
+<div class="box ok">
+  <p class="box-label">Confirmed Platform Premise (applies to all three flows)</p>
+  <ul>
+    <li><strong>EP1 = XIQ base platform + AI Core layer added on top.</strong> "The underlying platform, configurations, policies, and data remain unchanged" — ExtremeHub UI Transition announcement, SamPirok, Apr 9 2026 (in corpus: EN_Hub_XIQ-EP1.pdf).</li>
+    <li><strong>Both platforms use identical device-facing protocols:</strong> CAPWAP (DTLS) for config push + telemetry; HTTPS (TLS 1.2/1.3). "Network statistics and monitoring data are also sent via CAPWAP using DTLS and/or HTTPS protocol." <span class="badge-confirmed">p.6 ✓</span></li>
+    <li><strong>EP1 is NOT in the device data path.</strong> "Extreme Platform ONE is a network management and configuration orchestration platform and is not in the data path of customer data, nor does its operation impact the ability of end users or devices to access the network." <span class="badge-confirmed">p.12 ✓</span></li>
+    <li><strong>Microservices + Kubernetes:</strong> "Extreme Platform ONE is a microservice-driven SaaS application that extensively uses container-based solutions." <span class="badge-confirmed">p.3 ✓</span> Kubernetes named as Extreme's shared responsibility. <span class="badge-confirmed">p.13 ✓</span></li>
+    <li><strong>GDC = AWS-only,</strong> hosts auth + device redirection + global services (AI Core, LLM, Orchestrator, IAM). <strong>RDC = AWS/Azure/GCP,</strong> hosts customer VIQ. Infrastructure per region: Geo-Location DNS → Load Balancer → Auth Server ×2 → Primary DB + Local Replica + In-memory Cache. <span class="badge-confirmed">p.2 &amp; p.3 ✓</span> <em>DB technology not named in diagram.</em></li>
+  </ul>
+</div>
+
+<!-- FLOW 1 -->
+<h3 id="flow-policy">Flow 1 &mdash; Policy Push: Operator &rarr; Cloud &rarr; AP / Switch</h3>
+<p style="font-size:0.9rem;color:#444;margin-bottom:10px;"><em>Trigger: operator creates or modifies a Network Policy and deploys to managed devices.</em></p>
+
+<p style="font-size:0.76rem;font-family:'Libre Franklin',Arial,sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#374151;margin:0 0 6px;">XIQ Classic</p>
+<div class="flow-wrap">
+  <div class="flow-chain">
+    <div class="flow-node n-hyp">Operator UI<span class="flow-sub fh">Edit Policy / SSID</span></div>
+    <div class="flow-arrow">&#8594;</div>
+    <div class="flow-node n-hyp">Config Store<span class="flow-sub fh">HYPOTHESIS: relational DB. Tech not named in official docs.</span></div>
+    <div class="flow-arrow">&#8594;</div>
+    <div class="flow-node n-hyp">Config Compiler<span class="flow-sub fh">HYPOTHESIS: device-specific blob</span></div>
+    <div class="flow-arrow">&#8594;</div>
+    <div class="flow-node n-gdc">CAPWAP / SSH<span class="flow-sub fc">CONFIRMED p.6 — "uploading... device software image complete configurations"</span></div>
+    <div class="flow-arrow">&#8594;</div>
+    <div class="flow-node n-device">AP / Switch<span class="flow-sub fc">Config applied</span></div>
+  </div>
+</div>
+
+<p style="font-size:0.76rem;font-family:'Libre Franklin',Arial,sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#1e40af;margin:18px 0 6px;">EP1 — Same Base + AI Core Optional Layer</p>
+<div class="flow-wrap">
+  <div class="flow-chain">
+    <div class="flow-node n-hyp">Operator UI<span class="flow-sub fh">Edit Policy / SSID</span></div>
+    <div class="flow-arrow">&#8594;</div>
+    <div class="flow-node n-gdc">AI Expert (opt.)<span class="flow-sub fc">NL intent → HITL gate p.6 ✓. AI = same RBAC as user p.6 ✓</span></div>
+    <div class="flow-arrow">&#8594;</div>
+    <div class="flow-node n-rdc">VIQ Config Store (RDC)<span class="flow-sub fc">p.2 ✓</span></div>
+    <div class="flow-arrow">&#8594;</div>
+    <div class="flow-node n-gdc">CAPWAP / SSH<span class="flow-sub fc">CONFIRMED p.6 ✓ — identical to XIQ</span></div>
+    <div class="flow-arrow">&#8594;</div>
+    <div class="flow-node n-device">AP / Switch<span class="flow-sub fc">Config applied</span></div>
+  </div>
+</div>
+<p style="font-size:0.82rem;color:#555;margin-top:6px;"><strong>Confirmed EP1 additions:</strong> (1) AI Expert with NL interface for policy intent, HITL-gated before push <span class="badge-confirmed">p.6 ✓</span>. (2) Data Ingestion Service handles "structured and unstructured data from diverse sources including... APIs" <span class="badge-confirmed">p.8 ✓</span> — whether policy-push API calls are ingested is <span class="badge-hyp">HYPOTHESIS</span>. (3) Metadata Management "tracks data lineage, ownership, purpose, usage" <span class="badge-confirmed">p.8 ✓</span> — whether this applies to network config events specifically is <span class="badge-hyp">HYPOTHESIS</span>. CAPWAP push step is <strong>identical in both platforms</strong> <span class="badge-confirmed">p.6 ✓</span>.</p>
+
+<!-- FLOW 2 -->
+<h3 id="flow-telemetry" style="margin-top:28px;">Flow 2 &mdash; Telemetry &amp; Observability: Device &rarr; Cloud &rarr; Dashboard</h3>
+<p style="font-size:0.9rem;color:#444;margin-bottom:10px;"><em>Trigger: AP/switch reports client stats, RSSI, channel utilization, roaming events. User queries dashboard or AI Expert.</em></p>
+
+<p style="font-size:0.76rem;font-family:'Libre Franklin',Arial,sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#374151;margin:0 0 6px;">XIQ Classic</p>
+<div class="flow-wrap">
+  <div class="flow-chain">
+    <div class="flow-node n-device">AP / Switch<span class="flow-sub fc">RSSI, SNR, util, roaming</span></div>
+    <div class="flow-arrow">&#8594;</div>
+    <div class="flow-node n-gdc">CAPWAP / HTTPS<span class="flow-sub fc">CONFIRMED p.6 — "statistics and monitoring data also sent via CAPWAP"</span></div>
+    <div class="flow-arrow">&#8594;</div>
+    <div class="flow-node n-hyp">Telemetry Ingest<span class="flow-sub fh">HYPOTHESIS: ingest layer</span></div>
+    <div class="flow-arrow">&#8594;</div>
+    <div class="flow-node n-hyp">Time-Series DB<span class="flow-sub fh">HYPOTHESIS: technology unknown</span></div>
+    <div class="flow-arrow">&#8594;</div>
+    <div class="flow-node n-hyp">Dashboard / Alerts<span class="flow-sub fh">HYPOTHESIS: static thresholds + batch ML</span></div>
+  </div>
+</div>
+<p style="font-size:0.82rem;color:#6b7280;">XIQ telemetry storage architecture beyond CAPWAP ingest is <strong>not described in any official EN document in this corpus.</strong> Time-series DB and batch ML are standard SaaS patterns visible in the UI, but specific implementation = <span class="badge-hyp">HYPOTHESIS</span>.</p>
+
+<p style="font-size:0.76rem;font-family:'Libre Franklin',Arial,sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#1e40af;margin:18px 0 6px;">EP1 — Reproduced from White Paper p.10 Data Flow Diagram</p>
+
+<div class="box" style="border-left-color:#7c3aed;background:#F5F3FF;margin-bottom:12px;">
+  <p class="box-label" style="color:#5b21b6;">Direct Transcription — Official Diagram <span class="badge-confirmed">p.10 ✓</span></p>
+  <p style="font-size:0.87rem;">White paper p.10, section "Data Flow in the AI Core," contains the only official EP1 data flow diagram. Components and arrow connections below reproduce it exactly. <span style="color:#5b21b6;font-weight:700;">Purple = RDC boundary.</span> <span style="color:#1e40af;font-weight:700;">Blue = GDC boundary (AWS-only, p.2).</span></p>
+</div>
+
+<div class="flow-wrap">
+  <div class="flow-chain">
+    <div class="flow-node n-rdc">Extreme Device<br><span style="font-size:0.58rem;color:#5b21b6;font-weight:700;">RDC</span><span class="flow-sub fc">p.10 ✓</span></div>
+    <div class="flow-arrow">&#8594;</div>
+    <div class="flow-node n-rdc">Anonymization<br><span style="font-size:0.58rem;color:#5b21b6;font-weight:700;">RDC — shift-left</span><span class="flow-sub fc">p.10 ✓ "before data lands in the data hub"</span></div>
+    <div class="flow-arrow">&#8594;</div>
+    <div class="flow-node n-gdc">Data Hub<br><span style="font-size:0.58rem;color:#1e40af;font-weight:700;">GDC</span><span class="flow-sub fc">p.8 + p.10 ✓</span></div>
+    <div class="flow-arrow">&#8594;</div>
+    <div class="flow-node n-gdc">AI Service<br><span style="font-size:0.58rem;color:#1e40af;font-weight:700;">GDC</span><span class="flow-sub fc">p.10 ✓ ← also fed by LLM + AI/Data Gov. Service (p.10)</span></div>
+    <div class="flow-arrow">&#8594;</div>
+    <div class="flow-node n-gdc">Orchestrator<br><span style="font-size:0.58rem;color:#1e40af;font-weight:700;">GDC</span><span class="flow-sub fc">p.10 ✓</span></div>
+    <div class="flow-arrow">&#8594;</div>
+    <div class="flow-node n-gdc">IAM Service<br><span style="font-size:0.58rem;color:#1e40af;font-weight:700;">GDC</span><span class="flow-sub fc">p.10 ✓</span></div>
+    <div class="flow-arrow">&#8594;</div>
+    <div class="flow-node n-user">User<span class="flow-sub fc">p.10 ✓</span></div>
+  </div>
+</div>
+
+<table style="margin-top:12px;">
+  <thead><tr><th>Data Hub Component</th><th>Exact White Paper Function (p.8)</th><th>Open Question for Engineering</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Data Ingestion Service</strong></td><td>"robust data ingestion pipeline to efficiently capture and process both structured and unstructured data from diverse sources including databases, APIs, and file systems"</td><td>Does this ingest config-change events as well as telemetry? <span class="badge-hyp">VERIFY</span></td></tr>
+    <tr><td><strong>Data Lake and Processing</strong></td><td>"scalable data lake... <strong>real-time and batch inference</strong> for AI models, driving timely insights and decision making"</td><td>Specific lakehouse technology? <span class="badge-hyp">HYPOTHESIS: Apache Iceberg-style</span></td></tr>
+    <tr><td><strong>Knowledge Management (Graph)</strong></td><td>"complex relationships between data entities using a robust knowledge graph... from diverse sources (technical, operational, business, and content)"</td><td>Are AP ↔ client ↔ policy ↔ SSID relationships in the schema? <span class="badge-hyp">VERIFY</span></td></tr>
+    <tr><td><strong>Metadata Management</strong></td><td>"tracks data lineage, ownership, purpose, usage, and classification"</td><td>Applies to network config events? <span class="badge-hyp">VERIFY</span></td></tr>
+    <tr><td><strong>RAG as a Service</strong></td><td>"leverages a knowledge base to retrieve and incorporate relevant information into AI model inputs"</td><td>Historical telemetry retrievable as AI context — confirmed at capability level <span class="badge-confirmed">p.8 ✓</span></td></tr>
+    <tr><td><strong>Auto Compliance</strong></td><td>"automated auditing and monitoring capabilities to proactively identify and address potential compliance gaps"</td><td>Confirmed at capability level <span class="badge-confirmed">p.8 ✓</span></td></tr>
+  </tbody>
+</table>
+
+<div class="box warn">
+  <p class="box-label">Open Question — PII / Anonymization Boundary <span class="badge-hyp">VERIFY WITH ENGINEERING</span></p>
+  <p>White paper confirms anonymization occurs in the RDC "before data lands in the data hub" (p.10). The PII appendix (p.11) shows DevOps/Engineering has access to raw MAC, IP, hostname, roaming history — this is the VIQ data. The relationship between the raw VIQ data store and the anonymized AI Core path is not clarified. <strong>Question: does anonymization apply to all VIQ storage, or only to the copy forwarded to the GDC Data Hub?</strong></p>
+</div>
+
+<!-- FLOW 3 -->
+<h3 id="flow-optimization" style="margin-top:28px;">Flow 3 &mdash; AP Optimization: Observed Telemetry &rarr; Parameter Tuning &rarr; Push</h3>
+<p style="font-size:0.9rem;color:#444;margin-bottom:10px;"><em>Scenario: high channel utilization on AP1, 2.4 GHz. Platform derives and applies a channel change recommendation.</em></p>
+
+<p style="font-size:0.76rem;font-family:'Libre Franklin',Arial,sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#374151;margin:0 0 6px;">XIQ Classic</p>
+<div class="flow-wrap">
+  <div class="flow-chain">
+    <div class="flow-node n-hyp">Utilization Data<span class="flow-sub fh">HYPOTHESIS: threshold monitor</span></div>
+    <div class="flow-arrow">&#8594;</div>
+    <div class="flow-node n-hyp">ML Insights<span class="flow-sub fh">HYPOTHESIS: scheduled batch job</span></div>
+    <div class="flow-arrow">&#8594;</div>
+    <div class="flow-node n-hyp">Recommendation Card<span class="flow-sub fh">HYPOTHESIS: static rule UI surface</span></div>
+    <div class="flow-arrow">&#8594;</div>
+    <div class="flow-node n-hyp">Manual Operator Decision</div>
+    <div class="flow-arrow">&#8594;</div>
+    <div class="flow-node n-gdc">CAPWAP Push<span class="flow-sub fc">CONFIRMED p.6</span></div>
+    <div class="flow-arrow">&#8594;</div>
+    <div class="flow-node n-device">AP</div>
+  </div>
+</div>
+<p style="font-size:0.82rem;color:#6b7280;">XIQ RRM auto mode exists but its implementation is not documented in this corpus. No closed feedback loop confirmed. Everything above except the CAPWAP push = <span class="badge-hyp">HYPOTHESIS</span>.</p>
+
+<p style="font-size:0.76rem;font-family:'Libre Franklin',Arial,sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#1e40af;margin:18px 0 6px;">EP1</p>
+<div class="flow-wrap">
+  <div class="flow-chain">
+    <div class="flow-node n-gdc">Data Lake<span class="flow-sub fc">Real-time + batch — p.8 ✓</span></div>
+    <div class="flow-arrow">&#8594;</div>
+    <div class="flow-node n-gdc">AI Services Layer<span class="flow-sub fc">"Agentic system for complex workflows, multi-agent interaction" — p.7 ✓. LLMs + SLMs + ML — p.7 ✓</span></div>
+    <div class="flow-arrow">&#8594;</div>
+    <div class="flow-node n-gdc">Orchestration Layer<span class="flow-sub fc">Safety guardrails, hallucination mitigation — p.7 ✓</span></div>
+    <div class="flow-arrow">&#8594;</div>
+    <div class="flow-node n-gdc">HITL Gate<span class="flow-sub fc">"Default level of agency" — p.6 ✓</span></div>
+    <div class="flow-arrow">&#8594;</div>
+    <div class="flow-node n-rdc">CAPWAP Push<span class="flow-sub fc">CONFIRMED p.6 ✓</span></div>
+    <div class="flow-arrow">&#8594;</div>
+    <div class="flow-node n-device">AP</div>
+  </div>
+</div>
+
+<table style="margin-top:12px;">
+  <thead><tr><th>Optimization Claim</th><th>Status</th><th>Source — Verbatim Where Quoted</th></tr></thead>
+  <tbody>
+    <tr><td>Data Lake: real-time AND batch inference for AI models</td><td><span class="badge-confirmed">p.8 ✓</span></td><td>"real-time and batch inference for AI models, driving timely insights and decision making"</td></tr>
+    <tr><td>Services layer = multi-agent system for complex workflows</td><td><span class="badge-confirmed">p.7 ✓</span></td><td>"An agentic system for complex workflows, multi-agent interaction, and proactive task management"</td></tr>
+    <tr><td>Services integrates LLMs, SLMs, traditional ML</td><td><span class="badge-confirmed">p.7 ✓</span></td><td>"flexibility to integrate different types of models such as LLMs, SLMs, traditional ML models"</td></tr>
+    <tr><td>Real-time + batch inference ("Model as a Service")</td><td><span class="badge-confirmed">p.7 ✓</span></td><td>"Offer 'Model as a Service' functionality for real-time and batch inference"</td></tr>
+    <tr><td>HITL is the default action scope</td><td><span class="badge-confirmed">p.6 ✓</span></td><td>"The default level of agency is set with a Human-In-The-Loop (HITL) configuration"</td></tr>
+    <tr><td>AI acts with same RBAC as initiating user — cannot exceed permissions</td><td><span class="badge-confirmed">p.6 ✓</span></td><td>"done with the same access privileges and role-based access as the user who initiated it"</td></tr>
+    <tr><td>Feedback loops update AI models from real outcomes</td><td><span class="badge-confirmed">p.9 ✓</span></td><td>"We incorporate feedback from users and stakeholders to identify and correct any inaccuracies, helping to ensure the models remain accurate and reliable"</td></tr>
+    <tr><td>Specific multi-agent workflow: 3 agents (Channel Analyzer, Client Impact, Policy Conflict)</td><td><span class="badge-hyp">HYPOTHESIS</span></td><td>Illustrative decomposition of p.7 Services layer capability. Verify with engineering.</td></tr>
+    <tr><td>Knowledge Graph used for neighbor-AP lookup in optimization</td><td><span class="badge-hyp">HYPOTHESIS</span></td><td>KG tracks "technical... entities" (p.8). AP ↔ AP topology in schema = unconfirmed.</td></tr>
+    <tr><td>Optimization outcome written back to Data Lake for future training</td><td><span class="badge-hyp">HYPOTHESIS</span></td><td>Consistent with p.9 Feedback Loops + "Continuous Monitoring and Updates." Specific closed optimization loop = unconfirmed.</td></tr>
+    <tr><td>Event bus (e.g., Kafka) between AI decision and CAPWAP push</td><td><span class="badge-hyp">HYPOTHESIS</span></td><td>Standard microservices pattern. Not named in any official document.</td></tr>
+  </tbody>
+</table>
+
+<!-- SUMMARY TABLE -->
+<h3 style="margin-top:28px;">Platform Comparison — Summary</h3>
+<table>
+  <thead><tr><th>Dimension</th><th>XIQ Classic</th><th>EP1</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Device protocol (config + telemetry)</strong></td><td colspan="2" style="text-align:center;background:#F0FFF4;color:#065f46;font-weight:700;">IDENTICAL — CAPWAP/DTLS + HTTPS/TLS <span class="badge-confirmed">p.6 ✓</span></td></tr>
+    <tr><td><strong>Cloud base infrastructure</strong></td><td colspan="2" style="text-align:center;background:#F0FFF4;color:#065f46;font-weight:700;">SHARED — GDC/RDC, per-region: LB → Auth ×2 → DB + Replica + Cache <span class="badge-confirmed">p.3 ✓</span></td></tr>
+    <tr><td><strong>DB technology</strong></td><td colspan="2" style="text-align:center;"><span class="badge-hyp">HYPOTHESIS — not named in any official document</span></td></tr>
+    <tr><td><strong>Telemetry anonymization</strong></td><td>Not described — raw PII (MAC, IP, hostname) accessible to DevOps <span class="badge-confirmed">p.11 ✓</span></td><td>Shift-left in RDC ingestion pipeline before GDC <span class="badge-confirmed">p.10 ✓</span></td></tr>
+    <tr><td><strong>Data processing layer</strong></td><td>Internal architecture not in corpus <span class="badge-hyp">HYPOTHESIS: siloed stores</span></td><td>Data Hub: Data Lake + KG + RAG + Auto Compliance <span class="badge-confirmed">p.8 ✓</span></td></tr>
+    <tr><td><strong>AI inference</strong></td><td>No AI Core. ML Insights = <span class="badge-hyp">HYPOTHESIS: batch only</span></td><td>Real-time + batch. LLM + SLM + traditional ML <span class="badge-confirmed">p.7 ✓</span></td></tr>
+    <tr><td><strong>Natural language query</strong></td><td>Not available (Feature Comparison doc in corpus)</td><td>AI Expert (NL) + AI Canvas (NL dashboards) <span class="badge-confirmed">p.6 ✓</span></td></tr>
+    <tr><td><strong>Multi-agent optimization</strong></td><td>Not available</td><td>"agentic system for complex workflows, multi-agent interaction" <span class="badge-confirmed">p.7 ✓</span>. Specific workflow = <span class="badge-hyp">HYPOTHESIS</span></td></tr>
+    <tr><td><strong>HITL + RBAC gate on AI</strong></td><td>N/A</td><td>Default. Cannot exceed user permissions. <span class="badge-confirmed">p.6 ✓</span></td></tr>
+    <tr><td><strong>Feedback loop on AI models</strong></td><td>Not confirmed</td><td>Confirmed <span class="badge-confirmed">p.9 ✓</span>. Specific closed-loop mechanism = <span class="badge-hyp">HYPOTHESIS</span></td></tr>
+  </tbody>
+</table>
+
+<div class="verify-box">
+  <p class="box-label">Engineering / R&amp;D Verification Checklist — 7 Open Questions</p>
+  <ol style="font-size:0.87rem;line-height:1.9;margin:0;padding-left:20px;">
+    <li>What database technologies does the XIQ/EP1 base platform use for telemetry and config? The p.3 diagram shows "DB" per region but does not name the technology.</li>
+    <li>Does the EP1 Data Ingestion Service ingest network configuration change events (policy pushes), or is the Data Hub limited to telemetry and observability data?</li>
+    <li>Does anonymization in the RDC apply to data stored in VIQ (the base platform), or only to the copy forwarded to the GDC Data Hub? The PII appendix (p.11) implies VIQ retains raw data — but the anonymization boundary is not drawn.</li>
+    <li>Is the AP optimization path implemented as an actual multi-agent workflow (implied by p.7 Services layer), or as a simpler single-model ML pipeline with threshold rules?</li>
+    <li>Are AP ↔ AP neighbor relationships explicitly modeled in the Knowledge Graph schema, enabling neighbor-aware optimization decisions?</li>
+    <li>What is the coupling between the AI Core decision and the CAPWAP push — synchronous API call, async event (message bus), or operator-triggered?</li>
+    <li>Does the feedback loop (p.9) specifically apply to network optimization outcomes, or only to LLM accuracy and hallucination correction?</li>
+  </ol>
+</div>
+
 <hr class="divider">
 
 <div class="box ok">
@@ -1161,7 +1396,7 @@ configure iqagent server vr VR-Mgmt vlan Management   # Lock IQAgent to specific
 
 <hr class="divider">
 <p class="footer">
-  KhKLab &nbsp;&bull;&nbsp; 5320 Lab Journal &nbsp;&bull;&nbsp; EP1 Deployment Reference &amp; RAG Corpus v2.6 &nbsp;&bull;&nbsp; May 19, 2026<br>
+  KhKLab &nbsp;&bull;&nbsp; 5320 Lab Journal &nbsp;&bull;&nbsp; EP1 Deployment Reference &amp; RAG Corpus v2.7 &nbsp;&bull;&nbsp; May 19, 2026<br>
   Source: EP1 User Guide (678 pp.) + Universal Switch Deployment Guide (130 pp.) + Licensing Guides v25.10.0 + v25.8.0 + Patches 1&ndash;4 + Cloud Architecture &amp; Security White Paper &mdash; All read May 19, 2026<br>
   Study plan: <a href="session_summary_20260519.html">May 19 EOD &mdash; EP1 Sprint Kickoff</a> &nbsp;&bull;&nbsp;
   Sprint tracker: <a href="xiq-ep1-transition.html">XIQ&rarr;EP1 Transition Sprint</a> &nbsp;&bull;&nbsp;
