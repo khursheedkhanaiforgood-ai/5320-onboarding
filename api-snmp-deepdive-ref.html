@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>API & SNMP Deep Dive — XIQ & EP1 | Horizon Lab Reference</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --bg-secondary: #f7f6f2;
+    --bg-tertiary: #f0efe9;
+    --text: #1a1a18;
+    --text-secondary: #5f5e5a;
+    --text-tertiary: #888780;
+    --border: rgba(0,0,0,0.12);
+    --border-strong: rgba(0,0,0,0.22);
+    --accent-blue: #185FA5;
+    --accent-teal: #0F6E56;
+    --accent-amber: #BA7517;
+    --accent-coral: #993C1D;
+    --accent-purple: #534AB7;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    --font-mono: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1c1c1a;
+      --bg-secondary: #242422;
+      --bg-tertiary: #2c2c2a;
+      --text: #f0efe9;
+      --text-secondary: #b4b2a9;
+      --text-tertiary: #888780;
+      --border: rgba(255,255,255,0.10);
+      --border-strong: rgba(255,255,255,0.20);
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: var(--font-sans); background: var(--bg); color: var(--text); font-size: 15px; line-height: 1.6; }
+  
+  header { border-bottom: 0.5px solid var(--border); padding: 1.5rem 2rem; display: flex; align-items: center; gap: 1rem; }
+  .header-icon { width: 40px; height: 40px; background: #E1F5EE; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; font-size: 20px; }
+  .header-title { font-size: 17px; font-weight: 600; color: var(--text); }
+  .header-sub { font-size: 13px; color: var(--text-secondary); margin-top: 1px; }
+
+  .tab-bar { display: flex; gap: 0; border-bottom: 0.5px solid var(--border); padding: 0 2rem; overflow-x: auto; }
+  .tab { font-size: 13px; font-weight: 500; color: var(--text-secondary); padding: 10px 16px; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; white-space: nowrap; }
+  .tab:hover { color: var(--text); }
+  .tab.active { color: var(--accent-blue); border-bottom-color: var(--accent-blue); }
+
+  main { max-width: 860px; margin: 0 auto; padding: 2rem; }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  .section-label { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-tertiary); margin-bottom: 0.75rem; }
+  h2 { font-size: 18px; font-weight: 600; color: var(--text); margin-bottom: 0.5rem; }
+  p.body { font-size: 14px; line-height: 1.75; color: var(--text-secondary); margin-bottom: 0.75rem; }
+  hr { border: none; border-top: 0.5px solid var(--border); margin: 1.75rem 0; }
+
+  .card { background: var(--bg); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 1rem 1.25rem; margin-bottom: 12px; }
+  .card-secondary { background: var(--bg-secondary); }
+  .card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 0.75rem; }
+  .icon-badge { width: 32px; height: 32px; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 16px; }
+  .ib-blue   { background: #E6F1FB; }
+  .ib-teal   { background: #E1F5EE; }
+  .ib-amber  { background: #FAEEDA; }
+  .ib-coral  { background: #FAECE7; }
+  .ib-purple { background: #EEEDFE; }
+  .ib-gray   { background: #F1EFE8; }
+  .card-title { font-size: 14px; font-weight: 600; color: var(--text); }
+  .card-sub { font-size: 12px; color: var(--text-secondary); }
+
+  .kv-row { display: flex; font-size: 13px; padding: 6px 0; border-bottom: 0.5px solid var(--border); gap: 8px; align-items: flex-start; }
+  .kv-row:last-child { border-bottom: none; }
+  .kv-key { color: var(--text-secondary); flex: 0 0 160px; }
+  .kv-val { color: var(--text); flex: 1; }
+  code { font-family: var(--font-mono); font-size: 12px; background: var(--bg-tertiary); border: 0.5px solid var(--border); border-radius: 4px; padding: 1px 5px; }
+
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+  @media (max-width: 620px) { .grid2, .grid3 { grid-template-columns: 1fr; } }
+
+  .version-bar { display: flex; border-radius: var(--radius-md); overflow: hidden; border: 0.5px solid var(--border); margin-bottom: 1rem; }
+  .version-seg { flex: 1; text-align: center; padding: 10px 4px; font-size: 12px; font-weight: 600; }
+  .vs-label { font-size: 10px; display: block; opacity: 0.7; margin-top: 2px; font-weight: 400; }
+  .vs-v1 { background: #F1EFE8; color: #444441; }
+  .vs-v2 { background: #FAEEDA; color: #633806; }
+  .vs-v3 { background: #E1F5EE; color: #085041; }
+
+  .layer-stack { display: flex; flex-direction: column; gap: 3px; margin: 8px 0; }
+  .layer { display: flex; align-items: center; gap: 10px; border-radius: var(--radius-md); padding: 8px 12px; font-size: 13px; font-weight: 500; }
+  .l-app { background: #EEEDFE; color: #3C3489; }
+  .l-sec { background: #E1F5EE; color: #085041; }
+  .l-msg { background: #FAEEDA; color: #633806; }
+  .l-tr  { background: #F1EFE8; color: #444441; }
+  .l-badge { font-size: 10px; margin-left: auto; padding: 2px 7px; border-radius: 999px; background: rgba(0,0,0,0.1); font-weight: 500; }
+
+  .compare-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .compare-table th { text-align: left; padding: 8px 10px; font-size: 12px; font-weight: 600; color: var(--text-secondary); background: var(--bg-secondary); border-bottom: 0.5px solid var(--border-strong); }
+  .compare-table td { padding: 8px 10px; border-bottom: 0.5px solid var(--border); vertical-align: top; color: var(--text); }
+  .compare-table td:first-child { color: var(--text-secondary); }
+  .compare-table tr:last-child td { border-bottom: none; }
+
+  .ref-link { display: flex; align-items: flex-start; gap: 10px; padding: 8px 0; border-bottom: 0.5px solid var(--border); }
+  .ref-link:last-child { border-bottom: none; }
+  .ref-num { font-size: 11px; font-weight: 600; color: var(--text-tertiary); flex: 0 0 68px; padding-top: 2px; }
+  .ref-link a { color: var(--accent-blue); text-decoration: none; font-size: 13px; font-weight: 500; }
+  .ref-link a:hover { text-decoration: underline; }
+  .ref-desc { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+
+  .chip { display: inline-block; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 999px; }
+  .chip-amber { background: #FAEEDA; color: #633806; }
+  .chip-teal  { background: #E1F5EE; color: #085041; }
+  .chip-coral { background: #FAECE7; color: #712B13; }
+
+  .info-box { background: #E6F1FB; border-left: 3px solid var(--accent-blue); border-radius: 0 var(--radius-md) var(--radius-md) 0; padding: 10px 14px; font-size: 13px; color: #0C447C; margin: 1rem 0; line-height: 1.6; }
+  @media (prefers-color-scheme: dark) {
+    .info-box { background: #0c1f35; color: #85B7EB; }
+    .l-app { background: #26215C; color: #AFA9EC; }
+    .l-sec { background: #04342C; color: #5DCAA5; }
+    .l-msg { background: #412402; color: #EF9F27; }
+    .l-tr  { background: #2C2C2A; color: #B4B2A9; }
+    .vs-v1 { background: #2C2C2A; color: #D3D1C7; }
+    .vs-v2 { background: #412402; color: #FAC775; }
+    .vs-v3 { background: #04342C; color: #5DCAA5; }
+    .ib-blue   { background: #0c2a4a; }
+    .ib-teal   { background: #04342C; }
+    .ib-amber  { background: #412402; }
+    .ib-coral  { background: #4A1B0C; }
+    .ib-purple { background: #26215C; }
+    .ib-gray   { background: #2C2C2A; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-icon">📡</div>
+  <div>
+    <div class="header-title">API &amp; SNMP Deep Dive — XIQ &amp; EP1</div>
+    <div class="header-sub">Horizon Lab Reference · Switch Engine (SW1) + Fabric Engine (SW2) + AP3000s · May 2026</div>
+  </div>
+</header>
+
+<div class="tab-bar">
+  <div class="tab active" onclick="switchTab('snmp')">SNMP foundations</div>
+  <div class="tab" onclick="switchTab('modern')">Modern management APIs</div>
+  <div class="tab" onclick="switchTab('xiq')">XIQ API</div>
+  <div class="tab" onclick="switchTab('ep1')">EP1 / controller API</div>
+  <div class="tab" onclick="switchTab('compare')">XIQ vs EP1</div>
+  <div class="tab" onclick="switchTab('refs')">All references</div>
+</div>
+
+<main>
+
+<!-- ═══════════════ SNMP FOUNDATIONS ═══════════════ -->
+<div id="tab-snmp" class="tab-panel active">
+  <div class="section-label">Protocol overview</div>
+  <p class="body">SNMP is an IETF-standardized Application-layer protocol for reading and writing management information on network devices. Three generations exist — each solving the limitations of the previous. Your 5320-16P (both Switch Engine and Fabric Engine) implements all three.</p>
+
+  <div class="version-bar">
+    <div class="version-seg vs-v1">SNMPv1<span class="vs-label">RFC 1157 · 1990</span></div>
+    <div class="version-seg vs-v2">SNMPv2c<span class="vs-label">RFC 1901 · 1996</span></div>
+    <div class="version-seg vs-v3">SNMPv3<span class="vs-label">RFC 3410–3418 · 2002</span></div>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <div class="card-header">
+        <div class="icon-badge ib-gray">🔌</div>
+        <div><div class="card-title">SNMPv1</div><div class="card-sub">RFC 1157 · community string auth</div></div>
+      </div>
+      <div class="kv-row"><span class="kv-key">Auth</span><span class="kv-val">Cleartext community string</span></div>
+      <div class="kv-row"><span class="kv-key">Encryption</span><span class="kv-val">None</span></div>
+      <div class="kv-row"><span class="kv-key">PDU types</span><span class="kv-val">GetRequest, GetNextRequest, GetResponse, SetRequest, Trap</span></div>
+      <div class="kv-row"><span class="kv-key">Ports</span><span class="kv-val">UDP 161 (poll), UDP 162 (trap)</span></div>
+      <div class="kv-row"><span class="kv-key">Status</span><span class="kv-val"><span class="chip chip-coral">Legacy — avoid</span></span></div>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <div class="icon-badge ib-amber">🔶</div>
+        <div><div class="card-title">SNMPv2c</div><div class="card-sub">RFC 1901, 3416, 3417</div></div>
+      </div>
+      <div class="kv-row"><span class="kv-key">Auth</span><span class="kv-val">Cleartext community string</span></div>
+      <div class="kv-row"><span class="kv-key">Encryption</span><span class="kv-val">None</span></div>
+      <div class="kv-row"><span class="kv-key">New PDUs</span><span class="kv-val">GetBulkRequest, InformRequest (acknowledged traps)</span></div>
+      <div class="kv-row"><span class="kv-key">64-bit counters</span><span class="kv-val">Yes — fixes v1 overflow on Gig+ links</span></div>
+      <div class="kv-row"><span class="kv-key">Status</span><span class="kv-val"><span class="chip chip-amber">Widely deployed</span></span></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="icon-badge ib-teal">🔒</div>
+      <div><div class="card-title">SNMPv3 — the modern standard</div><div class="card-sub">RFC 3410–3418 (STD 62) · USM + VACM security</div></div>
+    </div>
+    <p class="body" style="margin-bottom:0.5rem;">SNMPv3 introduces a modular architecture with three named subsystems. This is the version the EXOS User Guide explicitly references for the 5320 platform.</p>
+    <div class="layer-stack">
+      <div class="layer l-app">Application layer (RFC 3413) <span class="l-badge">managers, agents, proxies</span></div>
+      <div class="layer l-sec">User-based Security Model — USM (RFC 3414) <span class="l-badge">auth + priv</span></div>
+      <div class="layer l-msg">Message Processing &amp; Dispatch (RFC 3412) <span class="l-badge">version negotiation</span></div>
+      <div class="layer l-tr">Transport (UDP/TCP) <span class="l-badge">port 161 / 162</span></div>
+    </div>
+    <div class="grid3" style="margin-top:0.75rem;">
+      <div>
+        <div class="section-label" style="margin-bottom:4px;">Security levels</div>
+        <div class="kv-row"><span class="kv-key" style="flex:0 0 100px;">noAuthNoPriv</span><span class="kv-val">No auth, no encrypt</span></div>
+        <div class="kv-row"><span class="kv-key" style="flex:0 0 100px;">authNoPriv</span><span class="kv-val">MD5/SHA auth</span></div>
+        <div class="kv-row"><span class="kv-key" style="flex:0 0 100px;">authPriv</span><span class="kv-val">Auth + AES/DES encrypt</span></div>
+      </div>
+      <div>
+        <div class="section-label" style="margin-bottom:4px;">Access control</div>
+        <div class="kv-row"><span class="kv-key" style="flex:0 0 70px;">Model</span><span class="kv-val">VACM (RFC 3415)</span></div>
+        <div class="kv-row"><span class="kv-key" style="flex:0 0 70px;">MIB views</span><span class="kv-val">included / excluded subtrees</span></div>
+        <div class="kv-row"><span class="kv-key" style="flex:0 0 70px;">EXOS CLI</span><span class="kv-val"><code>configure snmpv3 add mib-view</code></span></div>
+      </div>
+      <div>
+        <div class="section-label" style="margin-bottom:4px;">EXOS encryption</div>
+        <div class="kv-row"><span class="kv-key" style="flex:0 0 70px;">AES-128</span><span class="kv-val">Standard (RFC 3826)</span></div>
+        <div class="kv-row"><span class="kv-key" style="flex:0 0 70px;">AES-192/256</span><span class="kv-val">Proprietary — may not interop</span></div>
+        <div class="kv-row"><span class="kv-key" style="flex:0 0 70px;">DES</span><span class="kv-val">Legacy, avoid</span></div>
+      </div>
+    </div>
+  </div>
+
+  <hr>
+  <div class="section-label">MIB architecture</div>
+  <p class="body">The MIB (Management Information Base) is the schema that defines what objects an SNMP agent exposes. OIDs are hierarchical dotted-decimal addresses into this tree.</p>
+  <div class="grid2">
+    <div class="card">
+      <div class="card-header">
+        <div class="icon-badge ib-blue">📋</div>
+        <div><div class="card-title">Standard IETF MIBs (on 5320)</div><div class="card-sub">RFC-defined, vendor-neutral</div></div>
+      </div>
+      <div class="kv-row"><span class="kv-key">MIB-II</span><span class="kv-val">RFC 1213 — interfaces, IP, TCP, UDP, SNMP groups</span></div>
+      <div class="kv-row"><span class="kv-key">IF-MIB</span><span class="kv-val">RFC 2863 — modern interface stats + 64-bit counters</span></div>
+      <div class="kv-row"><span class="kv-key">BRIDGE-MIB</span><span class="kv-val">RFC 4188 — MAC table, STP</span></div>
+      <div class="kv-row"><span class="kv-key">Q-BRIDGE-MIB</span><span class="kv-val">RFC 4363 — VLAN membership</span></div>
+      <div class="kv-row"><span class="kv-key">OSPF-MIB</span><span class="kv-val">RFC 4750 — neighbor states, LSA counts</span></div>
+      <div class="kv-row"><span class="kv-key">ENTITY-MIB</span><span class="kv-val">RFC 4133 — chassis, slots, sensors</span></div>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <div class="icon-badge ib-coral">🏭</div>
+        <div><div class="card-title">Extreme proprietary MIBs</div><div class="card-sub">Enterprise OID 1.3.6.1.4.1.1916</div></div>
+      </div>
+      <div class="kv-row"><span class="kv-key">EXTREME-BASE-MIB</span><span class="kv-val">Chassis, platform identity, 5320 OIDs</span></div>
+      <div class="kv-row"><span class="kv-key">EXTREME-SYSTEM-MIB</span><span class="kv-val">CPU, memory, temp, PoE power budget</span></div>
+      <div class="kv-row"><span class="kv-key">EXTREME-VLAN-MIB</span><span class="kv-val">EXOS VLAN details beyond Q-BRIDGE</span></div>
+      <div class="kv-row"><span class="kv-key">EXTREME-PORT-MIB</span><span class="kv-val">Per-port PoE wattage, link state</span></div>
+      <div class="kv-row"><span class="kv-key">MIB files</span><span class="kv-val"><a href="https://github.com/librenms/librenms/tree/master/mibs/extreme" target="_blank">LibreNMS mirror on GitHub ↗</a></span></div>
+    </div>
+  </div>
+
+  <div class="card card-secondary">
+    <div class="card-title" style="margin-bottom:0.5rem;">XIQ SNMP configuration paths</div>
+    <div class="kv-row"><span class="kv-key">Network Policy SNMP</span><span class="kv-val">Configure → Network Policies → Additional Settings → SNMP Server</span></div>
+    <div class="kv-row"><span class="kv-key">Operations</span><span class="kv-val">None | Get | Get+Trap | Trap</span></div>
+    <div class="kv-row"><span class="kv-key">Versions</span><span class="kv-val">V1, V2c (community string), V3 (USM)</span></div>
+    <div class="kv-row"><span class="kv-key">Trap port</span><span class="kv-val">UDP 162 to configured management station</span></div>
+    <div class="kv-row"><span class="kv-key">Default community</span><span class="kv-val"><code>hivecommunity</code> (IQ Engine devices — change this)</span></div>
+  </div>
+</div>
+
+<!-- ═══════════════ MODERN MANAGEMENT APIs ═══════════════ -->
+<div id="tab-modern" class="tab-panel">
+  <div class="section-label">Why SNMP is no longer enough for configuration</div>
+  <p class="body">SNMP was designed for polling and notification — it excels at read-only monitoring. Configuration via SNMP SET is fragile, lacks transactions, and has no rollback. The IETF responded with YANG + NETCONF + RESTCONF, which underpin modern network automation including ExtremeXOS RESTCONF on the 5320.</p>
+
+  <div class="grid3">
+    <div class="card">
+      <div class="card-header"><div class="icon-badge ib-blue">📐</div><div><div class="card-title">YANG</div><div class="card-sub">RFC 7950</div></div></div>
+      <p class="body" style="font-size:13px;">Data modeling language — defines structure and semantics of config + state data. Analogous to SMIv2 for SNMP MIBs, but richer (types, groupings, augmentations).</p>
+      <div class="kv-row" style="font-size:12px;"><span class="kv-key">YANG 1.0</span><span class="kv-val">RFC 6020</span></div>
+      <div class="kv-row" style="font-size:12px;"><span class="kv-key">YANG 1.1</span><span class="kv-val">RFC 7950 (current)</span></div>
+    </div>
+    <div class="card">
+      <div class="card-header"><div class="icon-badge ib-teal">⚙️</div><div><div class="card-title">NETCONF</div><div class="card-sub">RFC 6241</div></div></div>
+      <p class="body" style="font-size:13px;">XML-RPC over SSH (port 830). Provides transactional config with candidate/running/startup datastores, locks, and confirmed-commit rollback.</p>
+      <div class="kv-row" style="font-size:12px;"><span class="kv-key">Transport</span><span class="kv-val">SSH (mandatory), TLS (optional)</span></div>
+      <div class="kv-row" style="font-size:12px;"><span class="kv-key">Encoding</span><span class="kv-val">XML</span></div>
+    </div>
+    <div class="card">
+      <div class="card-header"><div class="icon-badge ib-amber">🔗</div><div><div class="card-title">RESTCONF</div><div class="card-sub">RFC 8040</div></div></div>
+      <p class="body" style="font-size:13px;">NETCONF semantics over HTTPS. GET/POST/PATCH/DELETE on YANG-modeled resources. EXOS implements this natively on the switch itself.</p>
+      <div class="kv-row" style="font-size:12px;"><span class="kv-key">Transport</span><span class="kv-val">HTTPS</span></div>
+      <div class="kv-row" style="font-size:12px;"><span class="kv-key">Encoding</span><span class="kv-val">JSON or XML</span></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><div class="icon-badge ib-blue">⚖️</div><div><div class="card-title">SNMP vs NETCONF/RESTCONF — concept map</div></div></div>
+    <table class="compare-table">
+      <thead><tr><th>Concept</th><th>SNMP</th><th>NETCONF / RESTCONF</th></tr></thead>
+      <tbody>
+        <tr><td>Schema language</td><td>SMIv2 (RFC 2578)</td><td>YANG (RFC 7950)</td></tr>
+        <tr><td>Addressing</td><td>OID (1.3.6.1.2.1...)</td><td>URI path (/restconf/data/...)</td></tr>
+        <tr><td>Config write</td><td>SET (fragile, no tx)</td><td>edit-config with lock + commit</td></tr>
+        <tr><td>Rollback</td><td>Manual</td><td>confirmed-commit timer</td></tr>
+        <tr><td>Async events</td><td>Trap / InformRequest</td><td>YANG Push / Notifications</td></tr>
+        <tr><td>Security</td><td>USM (RFC 3414)</td><td>SSH / TLS at transport layer</td></tr>
+        <tr><td>Toolchain</td><td>Net-SNMP, SNMP libraries</td><td>curl, Postman, Python requests</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><div class="icon-badge ib-coral">💻</div><div><div class="card-title">RESTCONF on ExtremeXOS / Switch Engine</div><div class="card-sub">Direct switch access — no cloud required</div></div></div>
+    <div class="kv-row"><span class="kv-key">Base URL</span><span class="kv-val"><code>https://&lt;switch-ip&gt;/rest/restconf/</code></span></div>
+    <div class="kv-row"><span class="kv-key">Auth</span><span class="kv-val">HTTP Basic (admin credentials)</span></div>
+    <div class="kv-row"><span class="kv-key">Methods</span><span class="kv-val">GET (read), POST (create), PATCH (update), DELETE</span></div>
+    <div class="kv-row"><span class="kv-key">Format</span><span class="kv-val">JSON request/response bodies</span></div>
+    <div class="kv-row"><span class="kv-key">Docs</span><span class="kv-val"><a href="https://documentation.extremenetworks.com/restconf_31.6/GUID-E6C98F14-2CE0-4103-B1B7-F7052ECBE364.shtml" target="_blank">ExtremeXOS RESTCONF API Developer Guide ↗</a></span></div>
+  </div>
+
+  <div class="info-box">💡 <strong>Horizon lab note:</strong> RESTCONF on SW1 (192.168.0.28) lets you query VLAN state, IS-IS neighbors, and port config directly from the switch — useful when the XIQ cloud path is unavailable or you want sub-second verification during config changes.</div>
+</div>
+
+<!-- ═══════════════ XIQ API ═══════════════ -->
+<div id="tab-xiq" class="tab-panel">
+  <div class="section-label">ExtremeCloud IQ REST API</div>
+  <p class="body">XIQ exposes a cloud-hosted REST API that abstracts all managed devices — AP3000s, SW1 (Switch Engine), and SW2 (Fabric Engine) are all addressable through one unified endpoint. This is the northbound API for automation and integration.</p>
+
+  <div class="card">
+    <div class="card-header"><div class="icon-badge ib-blue">☁️</div><div><div class="card-title">Core API facts</div></div></div>
+    <div class="kv-row"><span class="kv-key">Base URL</span><span class="kv-val"><code>https://api.extremecloudiq.com</code></span></div>
+    <div class="kv-row"><span class="kv-key">Protocol</span><span class="kv-val">HTTPS only — RESTful design, JSON bodies</span></div>
+    <div class="kv-row"><span class="kv-key">Auth model</span><span class="kv-val">Bearer token (JWT) — login once, use token on all calls</span></div>
+    <div class="kv-row"><span class="kv-key">Token source</span><span class="kv-val">Global Settings → API Token Management in XIQ UI</span></div>
+    <div class="kv-row"><span class="kv-key">Swagger UI</span><span class="kv-val"><a href="https://extremecloudiq.com/api-docs/api-reference.html" target="_blank">api-reference.html (live, 400+ endpoints) ↗</a></span></div>
+    <div class="kv-row"><span class="kv-key">Rate limiting</span><span class="kv-val">RateLimit header returned on all responses</span></div>
+    <div class="kv-row"><span class="kv-key">OpenAPI spec</span><span class="kv-val"><a href="https://github.com/extremenetworks/ExtremeCloudIQ-OpenAPI-Specification" target="_blank">GitHub: ExtremeCloudIQ-OpenAPI-Specification ↗</a></span></div>
+  </div>
+
+  <div class="section-label" style="margin-top:1rem;">Key API capability areas</div>
+  <div class="grid3">
+    <div class="card">
+      <div class="card-header"><div class="icon-badge ib-teal">💾</div><div><div class="card-title">Device management</div></div></div>
+      <div class="kv-row" style="font-size:12px;"><span class="kv-key">Scopes</span><span class="kv-val">device:list, device:view, device:new, device:del</span></div>
+      <div class="kv-row" style="font-size:12px;"><span class="kv-key">Actions</span><span class="kv-val">reboot, reset, CLI push (device:cli), deploy config</span></div>
+    </div>
+    <div class="card">
+      <div class="card-header"><div class="icon-badge ib-purple">📶</div><div><div class="card-title">Wireless config</div></div></div>
+      <div class="kv-row" style="font-size:12px;"><span class="kv-key">Scope</span><span class="kv-val">Network policies, SSIDs, radio profiles</span></div>
+      <div class="kv-row" style="font-size:12px;"><span class="kv-key">Lab relevance</span><span class="kv-val">Corp/Guest SSID automation, VLAN assignment</span></div>
+    </div>
+    <div class="card">
+      <div class="card-header"><div class="icon-badge ib-amber">📊</div><div><div class="card-title">Client analytics</div></div></div>
+      <div class="kv-row" style="font-size:12px;"><span class="kv-key">Scope</span><span class="kv-val">client:r — connected clients, Client 360 data</span></div>
+      <div class="kv-row" style="font-size:12px;"><span class="kv-key">Use case</span><span class="kv-val">Pull client RSSI, AP association, fabric path</span></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><div class="icon-badge ib-coral">🐍</div><div><div class="card-title">SDK and tooling</div></div></div>
+    <div class="kv-row"><span class="kv-key">Python SDK</span><span class="kv-val"><a href="https://github.com/extremenetworks/ExtremeCloudIQ-SDK-Python" target="_blank">extremenetworks/ExtremeCloudIQ-SDK-Python ↗</a></span></div>
+    <div class="kv-row"><span class="kv-key">Postman (400+ req)</span><span class="kv-val"><a href="https://github.com/extremenetworks/ExtremeCloudIQ-APIs" target="_blank">extremenetworks/ExtremeCloudIQ-APIs ↗</a></span></div>
+    <div class="kv-row"><span class="kv-key">Go SDK</span><span class="kv-val"><a href="https://github.com/extremenetworks/ExtremeCloudIQ-SDK-Go" target="_blank">extremenetworks/ExtremeCloudIQ-SDK-Go ↗</a></span></div>
+    <div class="kv-row"><span class="kv-key">C# SDK</span><span class="kv-val"><a href="https://github.com/extremenetworks/ExtremeCloudIQ-SDK-CSharp" target="_blank">extremenetworks/ExtremeCloudIQ-SDK-CSharp ↗</a></span></div>
+    <div class="kv-row"><span class="kv-key">Developer portal</span><span class="kv-val"><a href="https://developer.extremecloudiq.com/" target="_blank">developer.extremecloudiq.com ↗</a></span></div>
+  </div>
+
+  <div class="info-box">💡 <strong>Horizon lab — AP1 recovery via API:</strong> Query AP1 (AH-556680) state via <code>GET /devices/{id}</code>, push native VLAN correction via the <code>device:cli</code> scope. Monitor FA assignment via Device 360 API calls. Pull Client 360 data after migration to verify Corp/Guest clients land on correct VLANs.</div>
+</div>
+
+<!-- ═══════════════ EP1 ═══════════════ -->
+<div id="tab-ep1" class="tab-panel">
+  <div class="section-label">EP1 / ExtremeCloud IQ Controller</div>
+  <p class="body">EP1 (Platform One / ExtremeCloud IQ Controller) is the on-premises controller managing APs and switches when you need local breakout, data sovereignty, or no cloud dependency. It exposes its own REST API Gateway — separate from the cloud XIQ API.</p>
+
+  <div class="card">
+    <div class="card-header"><div class="icon-badge ib-teal">🖥️</div><div><div class="card-title">EP1 REST API Gateway — core facts</div><div class="card-sub">ExtremeCloud IQ Controller v10.x</div></div></div>
+    <div class="kv-row"><span class="kv-key">Architecture</span><span class="kv-val">Single gateway entry point → multiple internal APIs</span></div>
+    <div class="kv-row"><span class="kv-key">Design</span><span class="kv-val">RESTful — standard HTTP verbs, JSON request/response</span></div>
+    <div class="kv-row"><span class="kv-key">Versioning</span><span class="kv-val">Semantic versioning: Major.Minor.Patch</span></div>
+    <div class="kv-row"><span class="kv-key">Breaking changes</span><span class="kv-val">Major version increment only</span></div>
+    <div class="kv-row"><span class="kv-key">OpenAPI spec</span><span class="kv-val"><a href="https://documentation.extremenetworks.com/ExtremeCloud_IQ_Controller/v10.03.01/API/index_gateway_api.html" target="_blank">EP1 Gateway API Reference ↗</a></span></div>
+    <div class="kv-row"><span class="kv-key">Client libs</span><span class="kv-val">Java (Jersey/JAX-RS), Python (Requests + JSON)</span></div>
+  </div>
+
+  <div class="grid2" style="margin-top:0;">
+    <div class="card">
+      <div class="card-header"><div class="icon-badge ib-purple">📋</div><div><div class="card-title">EP1 API capabilities</div></div></div>
+      <div class="kv-row" style="font-size:12px;"><span class="kv-key">ACL</span><span class="kv-val">Create/update/delete MAC ACL lists</span></div>
+      <div class="kv-row" style="font-size:12px;"><span class="kv-key">Sites</span><span class="kv-val">Site-specific SSID and switch config</span></div>
+      <div class="kv-row" style="font-size:12px;"><span class="kv-key">Devices</span><span class="kv-val">AP + switch onboarding, firmware push</span></div>
+      <div class="kv-row" style="font-size:12px;"><span class="kv-key">Clients</span><span class="kv-val">Connected client info, roaming history</span></div>
+    </div>
+    <div class="card">
+      <div class="card-header"><div class="icon-badge ib-amber">📡</div><div><div class="card-title">EP1 SNMP configuration</div></div></div>
+      <div class="kv-row" style="font-size:12px;"><span class="kv-key">Full appliance</span><span class="kv-val">Administration → System → Settings → SNMP</span></div>
+      <div class="kv-row" style="font-size:12px;"><span class="kv-key">Per-site switches</span><span class="kv-val">Configure → Sites → [site] → Advanced → SNMP</span></div>
+      <div class="kv-row" style="font-size:12px;"><span class="kv-key">Versions</span><span class="kv-val">SNMPv1, v2c, v3 supported</span></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><div class="icon-badge ib-blue">🔄</div><div><div class="card-title">EP1 vs XIQ — management plane relationship</div></div></div>
+    <p class="body" style="font-size:13px;">In the Horizon lab, EP1 is the SD-WAN/RDC component accessed via IPE on SW2 Port1, VLAN 4047. EP1 can operate in tandem with cloud XIQ or fully standalone. The APIs are complementary: XIQ API handles cloud-managed wireless and switch config; EP1 API handles on-prem policy enforcement, local SSID control, and site-specific ACLs.</p>
+    <div class="kv-row"><span class="kv-key">XIQ API scope</span><span class="kv-val">Cloud managed — APs, switches, network policies, global VIQ</span></div>
+    <div class="kv-row"><span class="kv-key">EP1 API scope</span><span class="kv-val">On-prem controller — local breakout, site policy, VLAN 4047 path</span></div>
+    <div class="kv-row"><span class="kv-key">Overlap</span><span class="kv-val">Device onboarding, SSID config — but via separate endpoints and auth</span></div>
+  </div>
+
+  <div class="info-box">⚠️ <strong>XIQ continuity note (May 2026):</strong> The Extreme community confirmed that all xAPI endpoints continue working unchanged through the XIQ UI → EP1 transition. EP1 is in active development with growing feature parity.</div>
+</div>
+
+<!-- ═══════════════ COMPARE ═══════════════ -->
+<div id="tab-compare" class="tab-panel">
+  <div class="section-label">Head-to-head: XIQ Cloud API vs EP1 Controller API</div>
+
+  <div class="card">
+    <table class="compare-table">
+      <thead><tr><th style="width:180px;">Dimension</th><th>XIQ Cloud API</th><th>EP1 / Controller API</th></tr></thead>
+      <tbody>
+        <tr><td>Hosting</td><td>Extreme RDC (cloud)</td><td>On-premises appliance</td></tr>
+        <tr><td>Auth</td><td>Bearer JWT (API token from XIQ UI)</td><td>Per-controller credentials, JWT</td></tr>
+        <tr><td>Base endpoint</td><td><code>api.extremecloudiq.com</code></td><td>Controller IP (on-prem LAN)</td></tr>
+        <tr><td>API style</td><td>REST / OpenAPI / JSON</td><td>REST / OpenAPI / JSON</td></tr>
+        <tr><td>Versioning</td><td>v1 / v2 path versioning</td><td>Semantic (Major.Minor.Patch)</td></tr>
+        <tr><td>AP management</td><td>Full — IQ Engine, CAPWAP, SSID, radio, firmware</td><td>Full — local CAPWAP tunnel, site policy</td></tr>
+        <tr><td>Switch management</td><td>Switch Engine + Fabric Engine via XIQ</td><td>Per-site switch config only</td></tr>
+        <tr><td>Fabric/SPB visibility</td><td>Network 360 SPB map, FA tab, Device 360</td><td>Limited — primarily wireless-focused</td></tr>
+        <tr><td>SNMP role</td><td>Policy-level SNMP server config pushed to devices</td><td>Appliance SNMP + per-site switch SNMP</td></tr>
+        <tr><td>Python SDK</td><td>Official (OpenAPI generated)</td><td>Community / custom REST calls</td></tr>
+        <tr><td>Rate limiting</td><td>Yes — RateLimit header enforced</td><td>Not publicly documented</td></tr>
+        <tr><td>Offline operation</td><td>Requires internet to RDC</td><td>Fully air-gappable</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section-label" style="margin-top:1.5rem;">When to use which — Horizon lab</div>
+  <div class="card card-secondary">
+    <div class="kv-row"><span class="kv-key" style="flex:0 0 200px;">Real-time monitoring</span><span class="kv-val">SNMP polling (SW1/SW2 directly) — lower latency than cloud API round-trip</span></div>
+    <div class="kv-row"><span class="kv-key" style="flex:0 0 200px;">Configuration push</span><span class="kv-val">XIQ API or device RESTCONF — never SNMP SET for production config</span></div>
+    <div class="kv-row"><span class="kv-key" style="flex:0 0 200px;">Fault alerting</span><span class="kv-val">SNMP traps to a collector (LibreNMS/Zabbix) for sub-second notification</span></div>
+    <div class="kv-row"><span class="kv-key" style="flex:0 0 200px;">PoE &amp; hardware telemetry</span><span class="kv-val">SNMP EXTREME-SYSTEM-MIB — power budget, temp, CPU/mem per-switch</span></div>
+    <div class="kv-row"><span class="kv-key" style="flex:0 0 200px;">SSID / AP policy</span><span class="kv-val">XIQ API exclusively — no SNMP equivalent for wireless policy</span></div>
+    <div class="kv-row"><span class="kv-key" style="flex:0 0 200px;">IS-IS / SPB state</span><span class="kv-val">CLI or RESTCONF on SW2 — XIQ Network 360 for topology visualization</span></div>
+    <div class="kv-row"><span class="kv-key" style="flex:0 0 200px;">IPE / SD-WAN path</span><span class="kv-val">EP1 API on VLAN 4047 — verify local breakout health</span></div>
+  </div>
+</div>
+
+<!-- ═══════════════ REFERENCES ═══════════════ -->
+<div id="tab-refs" class="tab-panel">
+
+  <div class="section-label">IETF RFCs — SNMP stack</div>
+  <div class="card">
+    <div class="ref-link"><span class="ref-num">RFC 1155</span><div><a href="https://datatracker.ietf.org/doc/rfc1155/" target="_blank">SMIv1 — Structure of Management Information</a><div class="ref-desc">Defines how MIB objects are described. Foundation for all MIBs.</div></div></div>
+    <div class="ref-link"><span class="ref-num">RFC 1157</span><div><a href="https://datatracker.ietf.org/doc/html/rfc1157" target="_blank">SNMPv1 — A Simple Network Management Protocol</a><div class="ref-desc">The original SNMP spec. Community string auth, UDP 161/162. Published May 1990.</div></div></div>
+    <div class="ref-link"><span class="ref-num">RFC 1212</span><div><a href="https://datatracker.ietf.org/doc/rfc1212/" target="_blank">Concise MIB Definitions</a><div class="ref-desc">Companion to SMIv1 — how to write MIB module definitions.</div></div></div>
+    <div class="ref-link"><span class="ref-num">RFC 1213</span><div><a href="https://datatracker.ietf.org/doc/rfc1213/" target="_blank">MIB-II — Management Information Base for TCP/IP</a><div class="ref-desc">The foundational MIB. Interfaces, IP, TCP, UDP, SNMP groups.</div></div></div>
+    <div class="ref-link"><span class="ref-num">RFC 1901</span><div><a href="https://datatracker.ietf.org/doc/rfc1901/" target="_blank">Introduction to Community-based SNMPv2</a><div class="ref-desc">The SNMPv2c framework — still community-string auth, adds GetBulk + Inform.</div></div></div>
+    <div class="ref-link"><span class="ref-num">RFC 2578</span><div><a href="https://datatracker.ietf.org/doc/rfc2578/" target="_blank">SMIv2 — Structure of Management Information v2</a><div class="ref-desc">Richer type system, 64-bit Counter64. STD 58.</div></div></div>
+    <div class="ref-link"><span class="ref-num">RFC 2863</span><div><a href="https://datatracker.ietf.org/doc/rfc2863/" target="_blank">IF-MIB — The Interfaces Group MIB</a><div class="ref-desc">Modern interface stats replacing MIB-II ifTable. Essential for port monitoring.</div></div></div>
+    <div class="ref-link"><span class="ref-num">RFC 3410</span><div><a href="https://datatracker.ietf.org/doc/rfc3410/" target="_blank">Introduction to SNMPv3 Framework</a><div class="ref-desc">High-level overview and applicability. STD 62.</div></div></div>
+    <div class="ref-link"><span class="ref-num">RFC 3411</span><div><a href="https://datatracker.ietf.org/doc/html/rfc3411" target="_blank">Architecture for SNMP Management Frameworks</a><div class="ref-desc">Defines the modular SNMPv3 architecture — the subsystems model.</div></div></div>
+    <div class="ref-link"><span class="ref-num">RFC 3412</span><div><a href="https://datatracker.ietf.org/doc/rfc3412/" target="_blank">Message Processing and Dispatching (SNMP)</a><div class="ref-desc">How SNMP engines negotiate and dispatch messages across versions.</div></div></div>
+    <div class="ref-link"><span class="ref-num">RFC 3413</span><div><a href="https://datatracker.ietf.org/doc/rfc3413/" target="_blank">SNMPv3 Applications</a><div class="ref-desc">Defines command generators, command responders, notification originators.</div></div></div>
+    <div class="ref-link"><span class="ref-num">RFC 3414</span><div><a href="https://datatracker.ietf.org/doc/rfc3414/" target="_blank">USM — User-based Security Model</a><div class="ref-desc">Auth (MD5/SHA) and privacy (DES/AES) for SNMPv3. EXOS implements this fully.</div></div></div>
+    <div class="ref-link"><span class="ref-num">RFC 3415</span><div><a href="https://datatracker.ietf.org/doc/rfc3415/" target="_blank">VACM — View-Based Access Control Model</a><div class="ref-desc">MIB subtree access control. EXOS: <code>configure snmpv3 add mib-view</code>.</div></div></div>
+    <div class="ref-link"><span class="ref-num">RFC 3416</span><div><a href="https://datatracker.ietf.org/doc/html/rfc3416" target="_blank">Protocol Operations for SNMPv2</a><div class="ref-desc">GetBulkRequest, InformRequest PDU definitions. Used in SNMPv2c and v3.</div></div></div>
+    <div class="ref-link"><span class="ref-num">RFC 3418</span><div><a href="https://datatracker.ietf.org/doc/rfc3418/" target="_blank">MIB for SNMP</a><div class="ref-desc">The SNMP agent's own MIB — stats on the SNMP engine itself.</div></div></div>
+    <div class="ref-link"><span class="ref-num">RFC 3826</span><div><a href="https://datatracker.ietf.org/doc/rfc3826/" target="_blank">AES Cipher in SNMP USM</a><div class="ref-desc">AES-128 privacy for SNMPv3. EXOS also implements 192/256 as proprietary extensions.</div></div></div>
+    <div class="ref-link"><span class="ref-num">RFC 4133</span><div><a href="https://datatracker.ietf.org/doc/rfc4133/" target="_blank">ENTITY-MIB</a><div class="ref-desc">Chassis, module, port, sensor hierarchy. Useful for 5320 hardware monitoring.</div></div></div>
+    <div class="ref-link"><span class="ref-num">RFC 4188</span><div><a href="https://datatracker.ietf.org/doc/rfc4188/" target="_blank">BRIDGE-MIB</a><div class="ref-desc">MAC address table, STP state per port.</div></div></div>
+    <div class="ref-link"><span class="ref-num">RFC 4363</span><div><a href="https://datatracker.ietf.org/doc/rfc4363/" target="_blank">Q-BRIDGE-MIB</a><div class="ref-desc">VLAN membership tables. Query which ports are in VLAN 20/30 on SW1.</div></div></div>
+  </div>
+
+  <div class="section-label" style="margin-top:1.5rem;">IETF RFCs — NETCONF / YANG / RESTCONF</div>
+  <div class="card">
+    <div class="ref-link"><span class="ref-num">RFC 6020</span><div><a href="https://datatracker.ietf.org/doc/rfc6020/" target="_blank">YANG 1.0 — Data Modeling Language for NETCONF</a><div class="ref-desc">First version of YANG. Defines module, container, leaf, list constructs.</div></div></div>
+    <div class="ref-link"><span class="ref-num">RFC 6241</span><div><a href="https://www.rfc-editor.org/rfc/rfc6241.html" target="_blank">NETCONF — Network Configuration Protocol</a><div class="ref-desc">XML-RPC over SSH. Transactional config with candidate datastore + commit.</div></div></div>
+    <div class="ref-link"><span class="ref-num">RFC 7895</span><div><a href="https://datatracker.ietf.org/doc/rfc7895/" target="_blank">YANG Module Library</a><div class="ref-desc">Allows clients to discover all YANG modules supported by a server.</div></div></div>
+    <div class="ref-link"><span class="ref-num">RFC 7950</span><div><a href="https://datatracker.ietf.org/doc/rfc7950/" target="_blank">YANG 1.1 — Data Modeling Language</a><div class="ref-desc">Current YANG spec. Actions, notifications, anydata. What EXOS RESTCONF uses.</div></div></div>
+    <div class="ref-link"><span class="ref-num">RFC 8040</span><div><a href="https://datatracker.ietf.org/doc/rfc8040/" target="_blank">RESTCONF — HTTP-Based Protocol for YANG</a><div class="ref-desc">NETCONF semantics over HTTPS. This is what ExtremeXOS Switch Engine implements natively.</div></div></div>
+    <div class="ref-link"><span class="ref-num">RFC 8072</span><div><a href="https://datatracker.ietf.org/doc/rfc8072/" target="_blank">YANG Patch — Media Type for Datastore Patches</a><div class="ref-desc">Atomic multi-edit patches in RESTCONF.</div></div></div>
+    <div class="ref-link"><span class="ref-num">IETF NETCONF WG</span><div><a href="https://datatracker.ietf.org/wg/netconf/about/" target="_blank">IETF NETCONF Working Group</a><div class="ref-desc">Active WG — ongoing work on NETCONF, RESTCONF, YANG evolution. Charter and current drafts.</div></div></div>
+  </div>
+
+  <div class="section-label" style="margin-top:1.5rem;">Extreme Networks documentation</div>
+  <div class="card">
+    <div class="ref-link"><span class="ref-num" style="min-width:80px;">XIQ API (live)</span><div><a href="https://extremecloudiq.com/api-docs/api-reference.html" target="_blank">XIQ API Reference — Swagger UI</a><div class="ref-desc">400+ endpoints. Auth, devices, wireless, clients, analytics. Always current.</div></div></div>
+    <div class="ref-link"><span class="ref-num" style="min-width:80px;">XIQ Dev portal</span><div><a href="https://developer.extremecloudiq.com/documentation/" target="_blank">ExtremeCloud IQ Developer Portal</a><div class="ref-desc">REST API concepts, rate limiting, authentication, pagination, dynamic responses.</div></div></div>
+    <div class="ref-link"><span class="ref-num" style="min-width:80px;">XIQ SNMP</span><div><a href="https://documentation.extremenetworks.com/XIQ/user_guide/GUID-73A88A22-96CF-400D-ABA8-FD3BAF02FEF8.shtml" target="_blank">XIQ User Guide — Configure SNMP Server</a><div class="ref-desc">Step-by-step for adding SNMP server profiles in Network Policy.</div></div></div>
+    <div class="ref-link"><span class="ref-num" style="min-width:80px;">EP1 API</span><div><a href="https://documentation.extremenetworks.com/ExtremeCloud_IQ_Controller/v10.03.01/API/index_gateway_api.html" target="_blank">EP1 REST API Gateway Reference</a><div class="ref-desc">On-prem controller API — ACL, sites, devices, clients. Downloadable OpenAPI spec.</div></div></div>
+    <div class="ref-link"><span class="ref-num" style="min-width:80px;">EXOS RESTCONF</span><div><a href="https://documentation.extremenetworks.com/restconf_31.6/GUID-E6C98F14-2CE0-4103-B1B7-F7052ECBE364.shtml" target="_blank">ExtremeXOS RESTCONF API Developer Guide</a><div class="ref-desc">On-switch RESTCONF — YANG-modeled direct access to SW1/SW2, no cloud needed.</div></div></div>
+    <div class="ref-link"><span class="ref-num" style="min-width:80px;">EXOS SNMPv3</span><div><a href="https://documentation.extremenetworks.com/exos_31.3/GUID-79586155-3EA1-4AED-AE1D-1E41879504E5.shtml" target="_blank">ExtremeXOS User Guide — SNMPv3</a><div class="ref-desc">EXOS SNMPv3 config: RFC references, USM, VACM, MIB access control.</div></div></div>
+    <div class="ref-link"><span class="ref-num" style="min-width:80px;">GitHub</span><div><a href="https://github.com/extremenetworks" target="_blank">Extreme Networks GitHub Organisation</a><div class="ref-desc">SDKs (Python, Go, C#), OpenAPI spec, Postman collections, sample scripts.</div></div></div>
+    <div class="ref-link"><span class="ref-num" style="min-width:80px;">MIB files</span><div><a href="https://github.com/librenms/librenms/tree/master/mibs/extreme" target="_blank">Extreme Networks MIBs — LibreNMS mirror</a><div class="ref-desc">EXTREME-BASE-MIB, EXTREME-SYSTEM-MIB, and others for SNMP collectors.</div></div></div>
+  </div>
+
+</div>
+</main>
+
+<script>
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelector('[onclick="switchTab(\'' + name + '\')"]').classList.add('active');
+  document.getElementById('tab-' + name).classList.add('active');
+  window.scrollTo(0, 0);
+}
+</script>
+</body>
+</html>
