@@ -60,6 +60,7 @@
 
 <div class="toc">
   <div class="toc-title">In This Study</div>
+  <a href="#foundations">Foundations</a>
   <a href="#rfc-index">RFC Index</a>
   <a href="#api-foundation">API Foundation</a>
   <a href="#api-auth">Auth: OAuth2 + Bearer</a>
@@ -91,7 +92,250 @@
   </p>
 </div>
 
-<!-- ═══════════════════════════════════════════════ RFC INDEX ═══ -->
+<!-- ═══════════════════════════════════════════ FOUNDATIONS ═══ -->
+<span class="section-label" id="foundations">Part 0 — Foundations: How APIs and SNMP Work</span>
+
+<p>Before reading the RFC index or the EP1-specific sections, build the mental model from first principles. This section walks both protocols from wire to outcome — then places three real scenarios in front of you so the abstractions lock in.</p>
+
+<h2>What Is a REST API Call? — E2E Mechanics</h2>
+
+<p>A REST API is a convention layered on top of HTTP. Nothing runs persistently on the remote device waiting for you. Each call is self-contained: you send a request, the server handles it, returns a response, and forgets you. That statelessness is both its power and its constraint.</p>
+
+<h3>What must reside on the calling host</h3>
+<table>
+  <tr><th>Requirement</th><th>What it does</th><th>Example</th></tr>
+  <tr><td>HTTP client library</td><td>Sends HTTPS requests, handles TLS, follows redirects</td><td>Python <code>requests</code>, curl, Go <code>net/http</code></td></tr>
+  <tr><td>JSON parser</td><td>Serialises request body, deserialises response</td><td>Python <code>json</code> stdlib — included by default</td></tr>
+  <tr><td>Client credentials</td><td>client_id + client_secret stored securely (env var or vault)</td><td>Obtained from XIQ / EP1 Settings → API Token</td></tr>
+  <tr><td>TCP 443 outbound</td><td>TLS connection to cloud endpoint</td><td>Firewall rule to <code>api.extremecloudiq.com</code></td></tr>
+  <tr><td>Token cache</td><td>Stores bearer token to avoid re-auth every call</td><td>In-memory variable; refresh when 401 received</td></tr>
+</table>
+<p style="font-size:0.84rem;color:#555;">No daemon, no SNMP agent, no background process. One Python script + two lines of credentials is the entirety of the host footprint.</p>
+
+<h3>The 8-step request lifecycle</h3>
+<div class="flow-row">
+  <div class="flow-node">1. Script starts</div><div class="flow-arrow">→</div>
+  <div class="flow-node">2. TCP+TLS 443</div><div class="flow-arrow">→</div>
+  <div class="flow-node">3. POST /oauth2/token</div><div class="flow-arrow">→</div>
+  <div class="flow-node green">4. Bearer token returned</div>
+</div>
+<div class="flow-row" style="margin-top:6px;">
+  <div class="flow-node">5. GET/PATCH/POST + <code>Authorization: Bearer</code></div><div class="flow-arrow">→</div>
+  <div class="flow-node">6. EP1 validates token</div><div class="flow-arrow">→</div>
+  <div class="flow-node green">7. 200 / 201 / 202 + JSON body</div>
+</div>
+<div class="flow-row" style="margin-top:6px;">
+  <div class="flow-node gray">8. If 202: poll GET /jobs/{id} until COMPLETED</div>
+</div>
+
+<p style="margin-top:14px;">Steps 1–4 are OAuth2 Client Credentials Grant (RFC 6749 §4.4). Steps 5–7 are a standard REST exchange per RFC 7231. Step 8 is the async job pattern — EP1 uses it for bulk operations that touch many devices.</p>
+
+<div class="box info">
+  <p class="box-label">Token lifetime</p>
+  <p style="font-size:0.84rem;">Bearer tokens from EP1 expire after 3600 s (1 hour). The correct pattern is: cache the token, use it until you receive a <code>401 Unauthorized</code>, then re-authenticate. Do not call <code>/oauth2/token</code> before every request — that wastes auth round-trips and may hit rate limits.</p>
+</div>
+
+<hr class="divider">
+<h2>Example 1 — Daily QoS Config Push to All APs in a Region <span class="badge badge-conf">CONFIRMED</span></h2>
+
+<p><strong>Scenario:</strong> Every night at 02:00, a script runs on the lab laptop. It updates the radio QoS profile on every AP3000 in the KhKLab region to enforce DSCP EF (Expedited Forwarding) for voice traffic. There are 12 APs today, but the pattern scales to any number.</p>
+
+<h3>Sequence of operations</h3>
+<ol>
+  <li><strong>Authenticate</strong> — POST <code>/oauth2/token</code> → cache bearer token</li>
+  <li><strong>Enumerate APs</strong> — GET <code>/devices?pageSize=100&amp;page=1&amp;locationId={region_id}</code> → collect all device IDs. Loop pages until <code>data.length &lt; pageSize</code></li>
+  <li><strong>For each AP:</strong> PATCH <code>/devices/{id}/network-policy</code> with updated QoS profile JSON body</li>
+  <li><strong>Deploy</strong> — POST <code>/devices/deploy</code> with the full list of AP IDs → receives <code>202 Accepted</code> + <code>job_id</code></li>
+  <li><strong>Poll job</strong> — GET <code>/jobs/{job_id}</code> every 10 s until <code>status = "COMPLETED"</code></li>
+  <li><strong>Audit</strong> — write pass/fail per device to a log file</li>
+</ol>
+
+<pre><code>import os, time, requests
+
+BASE = "https://api.extremecloudiq.com"
+CREDS = {"grant_type":"client_credentials","client_id":os.environ["XIQ_ID"],"client_secret":os.environ["XIQ_SECRET"]}
+
+# Step 1 — auth
+token = requests.post(f"{BASE}/oauth2/token", json=CREDS).json()["access_token"]
+h = {"Authorization": f"Bearer {token}"}
+
+# Step 2 — enumerate APs (one page, lab scale)
+aps = requests.get(f"{BASE}/devices?pageSize=100&page=1", headers=h).json()["data"]
+ap_ids = [ap["id"] for ap in aps]
+
+# Step 3 — update QoS profile on each
+QOS_PAYLOAD = {"qos_profile": {"voice_dscp": "EF", "video_dscp": "AF41"}}
+for ap_id in ap_ids:
+    requests.patch(f"{BASE}/devices/{ap_id}/network-policy", json=QOS_PAYLOAD, headers=h)
+
+# Step 4+5 — deploy and poll
+r = requests.post(f"{BASE}/devices/deploy", json={"ids": ap_ids}, headers=h)
+job_id = r.json()["job_id"]
+while True:
+    status = requests.get(f"{BASE}/jobs/{job_id}", headers=h).json()["status"]
+    if status == "COMPLETED": break
+    time.sleep(10)
+print(f"QoS deployed to {len(ap_ids)} APs")</code></pre>
+
+<p><em>What this teaches:</em> the API is fully stateless — the script could crash between steps 3 and 4 and resume by re-running the deploy step. Each HTTP request carries everything the server needs. The bearer token is the only "session."</p>
+
+<hr class="divider">
+<h2>Example 2 — Migrating 1,000 APs via API <span class="badge badge-conf">CONFIRMED</span></h2>
+
+<p><strong>Scenario:</strong> A client is moving from their legacy XIQ Classic network policy to a new EP1-native policy as part of a campus refresh. All 1,000 APs must be re-assigned in a single maintenance window. Manual UI work would take 4–6 hours. The API does it in under 10 minutes — but three engineering problems must be solved.</p>
+
+<h3>The three problems at scale</h3>
+
+<div class="box warn">
+  <p class="box-label">Problem 1 — Pagination (100 APs per page = 10 GET requests)</p>
+  <p style="font-size:0.84rem;">EP1 returns a maximum of 100 devices per call. To collect all 1,000 you must loop: page 1 → page 2 → … → page 10. Stop when <code>data.length &lt; pageSize</code>. If you call only page 1, you silently miss 900 APs. This is the most common migration script bug.</p>
+</div>
+
+<div class="box warn">
+  <p class="box-label">Problem 2 — Rate limiting (HTTP 429 Too Many Requests)</p>
+  <p style="font-size:0.84rem;">EP1 / XIQ enforces API rate limits. Sending 1,000 PATCH requests back-to-back will return <code>429</code> with a <code>Retry-After: 60</code> header. The correct pattern is exponential backoff: on 429, wait <code>Retry-After</code> seconds, then retry. Do not retry immediately. RFC 6585 §4 defines the 429 status.</p>
+</div>
+
+<div class="box warn">
+  <p class="box-label">Problem 3 — Partial failure (some APs unreachable during deploy)</p>
+  <p style="font-size:0.84rem;">During the deploy job, 12 of 1,000 APs may be offline (in closets, low on uplink). The job returns <code>COMPLETED_WITH_ERRORS</code>. Your script must parse the <code>errors[]</code> array, log the failed AP IDs, and either retry those only or page the on-call engineer. Never assume <code>COMPLETED</code> = 100% success.</p>
+</div>
+
+<pre><code>import os, time, requests
+
+BASE = "https://api.extremecloudiq.com"
+token = requests.post(f"{BASE}/oauth2/token", json={
+    "grant_type":"client_credentials",
+    "client_id":os.environ["XIQ_ID"],
+    "client_secret":os.environ["XIQ_SECRET"]
+}).json()["access_token"]
+h = {"Authorization": f"Bearer {token}"}
+
+# Paginated AP collection
+all_ids, page = [], 1
+while True:
+    resp = requests.get(f"{BASE}/devices?pageSize=100&page={page}", headers=h).json()
+    batch = resp.get("data", [])
+    all_ids += [d["id"] for d in batch]
+    if len(batch) < 100: break
+    page += 1
+
+NEW_POLICY = {"network_policy_id": "np-ep1-campus-v2"}
+
+# Patching with rate-limit backoff
+for ap_id in all_ids:
+    while True:
+        r = requests.patch(f"{BASE}/devices/{ap_id}/network-policy", json=NEW_POLICY, headers=h)
+        if r.status_code == 429:
+            time.sleep(int(r.headers.get("Retry-After", 60)))
+        else:
+            break
+
+# Async deploy — batched to 200 APs per job
+failed = []
+for i in range(0, len(all_ids), 200):
+    batch = all_ids[i:i+200]
+    job_id = requests.post(f"{BASE}/devices/deploy", json={"ids":batch}, headers=h).json()["job_id"]
+    while True:
+        result = requests.get(f"{BASE}/jobs/{job_id}", headers=h).json()
+        if result["status"] in ("COMPLETED","COMPLETED_WITH_ERRORS"): break
+        time.sleep(15)
+    failed += [e["device_id"] for e in result.get("errors",[])]
+
+print(f"Done. {len(all_ids)-len(failed)} success, {len(failed)} failed → {failed}")</code></pre>
+
+<p><em>What this teaches:</em> at scale, three things collapse — pagination correctness, backpressure handling, and failure accountability. The API surface is unchanged whether you touch 1 AP or 10,000; the engineering challenge is in your wrapper code.</p>
+
+<hr class="divider">
+<h2>Example 3 — SNMP AP Outage Detection <span class="badge badge-rfc">RFC</span></h2>
+
+<p><strong>Scenario:</strong> An AP3000 in the KhKLab goes offline — abrupt power loss, no graceful shutdown. The network management system (NMS) must detect this and page an engineer. How does SNMP actually do that, E2E?</p>
+
+<h3>Two detection paths</h3>
+<table>
+  <tr><th>Path</th><th>How it works</th><th>Latency</th><th>Caveat</th></tr>
+  <tr>
+    <td><strong>Trap path</strong></td>
+    <td>AP sends <code>ahAPDown</code> trap (OID 1.3.6.1.4.1.26928.1.1.1.2) to NMS on UDP 162 the moment the radio subsystem detects shutdown</td>
+    <td>&lt; 1 s</td>
+    <td>Requires graceful shutdown. Abrupt power cut = no trap sent.</td>
+  </tr>
+  <tr>
+    <td><strong>Poll path</strong></td>
+    <td>NMS sends GetRequest every 60 s to AP's management IP on UDP 161. After 2 consecutive timeouts (no response), marks device as DOWN.</td>
+    <td>60–75 s</td>
+    <td>Always works, even on hard crash. More conservative.</td>
+  </tr>
+</table>
+
+<h3>E2E SNMP session — trap path, step by step</h3>
+<div class="flow-row">
+  <div class="flow-node">AP powers off</div><div class="flow-arrow">→</div>
+  <div class="flow-node">snmpd sends <code>ahAPDown</code> trap<br><small>UDP 162 → NMS IP</small></div><div class="flow-arrow">→</div>
+  <div class="flow-node">NMS <code>snmptrapd</code> receives PDU</div>
+</div>
+<div class="flow-row" style="margin-top:6px;">
+  <div class="flow-node">Community string verified</div><div class="flow-arrow">→</div>
+  <div class="flow-node green">OID decoded via MIB</div><div class="flow-arrow">→</div>
+  <div class="flow-node green">Alert: "AP3000 offline"</div><div class="flow-arrow">→</div>
+  <div class="flow-node">Ticket / PagerDuty</div>
+</div>
+
+<h3>What must reside on the NMS host</h3>
+<table>
+  <tr><th>Component</th><th>Role</th><th>Example</th></tr>
+  <tr><td><code>snmpd</code> (on switch/AP)</td><td>SNMP agent — answers polls, sends traps</td><td>Built into EXOS &amp; IQ Engine OS (AP3000)</td></tr>
+  <tr><td><code>snmptrapd</code> (on NMS)</td><td>Listens on UDP 162, logs + executes handlers</td><td>net-snmp package on Ubuntu/CentOS</td></tr>
+  <tr><td>NMS application</td><td>Schedules polls, correlates traps, generates alerts</td><td>LibreNMS, Zabbix, SolarWinds</td></tr>
+  <tr><td>MIB files</td><td>Translates OIDs to human names</td><td>Extreme MIBs: <code>AEROHIVE-NETWORKS-HIVEAP-MIB</code></td></tr>
+  <tr><td>UDP 162 inbound open</td><td>Firewall rule on NMS host</td><td>iptables / nft: allow udp dport 162</td></tr>
+</table>
+
+<pre><code># /etc/snmp/snmptrapd.conf (NMS host)
+authCommunity log,execute,net public
+
+# Execute a shell script on any Aerohive AP trap
+traphandle 1.3.6.1.4.1.26928 /usr/local/bin/ap_trap_handler.sh
+
+# /usr/local/bin/ap_trap_handler.sh
+#!/bin/bash
+read HOSTNAME; read IP; read OID_LINE
+echo "$(date): AP trap from $IP OID=$OID_LINE" >> /var/log/ap_traps.log
+# escalate ahAPDown
+echo "$OID_LINE" | grep -q "ahAPDown" && \
+  curl -s -X POST https://events.pagerduty.com/v2/enqueue \
+    -d "{\"routing_key\":\"$PD_KEY\",\"event_action\":\"trigger\",\"payload\":{\"summary\":\"AP offline: $IP\"}}"</code></pre>
+
+<div class="box warn">
+  <p class="box-label">Hard crash caveat — the polling gap</p>
+  <p style="font-size:0.84rem;">If the AP loses power mid-frame (circuit breaker, PoE switch reboot, kicked power strip), the SNMP agent has zero time to send a trap. The NMS will not know until the next poll cycle fails — up to 75 seconds later. In a campus with active VoIP calls, that 75 s window is the gap between "something's wrong" and "the NMS confirmed it." Design alert thresholds accordingly.</p>
+</div>
+
+<hr class="divider">
+<h2>API vs SNMP — Side-by-Side Comparison <span class="badge badge-conf">CONFIRMED</span></h2>
+
+<table>
+  <tr><th>Dimension</th><th>REST API (EP1 / XIQ)</th><th>SNMP</th></tr>
+  <tr><td><strong>Who initiates</strong></td><td>Client/script always initiates (pull model)</td><td>NMS polls (pull) OR device sends trap (push)</td></tr>
+  <tr><td><strong>Transport</strong></td><td>TCP 443 / TLS 1.3 (RFC 8446)</td><td>UDP 161 (poll), UDP 162 (trap)</td></tr>
+  <tr><td><strong>Session state</strong></td><td>Stateless — each request self-contained (RFC 7231)</td><td>Stateless — each PDU independent</td></tr>
+  <tr><td><strong>Authentication</strong></td><td>OAuth2 Bearer token (RFC 6749 + RFC 6750)</td><td>Community string (v1/v2c) or USM (v3 RFC 3414)</td></tr>
+  <tr><td><strong>Encryption</strong></td><td>TLS everywhere (mandatory)</td><td>None (v1/v2c), AES optional (v3 authPriv)</td></tr>
+  <tr><td><strong>Host software (client/NMS)</strong></td><td>HTTP library + credentials only</td><td>NMS app + snmptrapd + MIB files</td></tr>
+  <tr><td><strong>Config capability</strong></td><td>Full CRUD — create, read, update, delete any object</td><td>Limited — SetRequest rarely used; MIBs define what's writable</td></tr>
+  <tr><td><strong>Async operations</strong></td><td>Yes — 202 + job polling for bulk/long ops</td><td>No native async model</td></tr>
+  <tr><td><strong>Fault detection latency</strong></td><td>Seconds (poll next cycle) or via webhook</td><td>&lt;1 s (trap) / 60–75 s (poll)</td></tr>
+  <tr><td><strong>Cloud dependency (EP1)</strong></td><td>Yes — requires reachability to <code>api.extremecloudiq.com</code></td><td>No — NMS talks direct to device IP; bypasses EP1 cloud</td></tr>
+  <tr><td><strong>Best for</strong></td><td>Provisioning, automation, migration, bulk config</td><td>Fault detection, performance monitoring, legacy NMS integration</td></tr>
+  <tr><td><strong>In KhKLab context</strong></td><td>EP1 API for all SSID/policy/device CRUD; scripts on lab laptop</td><td>AP3000 + SW1 EXOS traps to LibreNMS on management VLAN</td></tr>
+</table>
+
+<div class="box">
+  <p class="box-label">Architectural takeaway</p>
+  <p style="font-size:0.84rem;">API and SNMP are <strong>complementary, not competing</strong>. SNMP is the fast-path fault detector — it fires before any API poll would run. The API is the config and automation plane — it does things SNMP was never designed to do (create SSIDs, push QoS profiles, bulk-migrate devices). A mature network operations platform runs both: SNMP for the millisecond-latency operational layer, API for the automation layer above it.</p>
+</div>
+
+<!-- ═══════════════════════════════════════════ RFC INDEX ═══ -->
 <span class="section-label" id="rfc-index">RFC / IETF Reference Index</span>
 
 <p>Every RFC below is directly relevant to either the API or SNMP stack used in EP1. Links go to the canonical IETF RFC Editor. Open any entry to read the authoritative specification.</p>
@@ -610,6 +854,459 @@ GET /xapi/v1/jobs/abc-123/devices
   &copy; 2026 Khursheed Khan &nbsp;&bull;&nbsp; All rights reserved
 </p>
 
-</div>
+<!-- ═══════════════════════════════════════════════════════════════════
+     APPENDED: Claude web reference — API & SNMP Deep Dive (tabbed UI)
+     Source: API_SNMP_XIQ_EP1_DeepDive-2.html · EP1 definition corrected
+     ═══════════════════════════════════════════════════════════════════ -->
+
+<style>
+  /* Scoped to .tabbed-ref — prevents conflicts with NYT styles above */
+  .tabbed-ref *, .tabbed-ref *::before, .tabbed-ref *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  .tabbed-ref { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; font-size: 15px; line-height: 1.6; color: #1a1a18; background: #fff; margin-top: 60px; border-top: 3px solid #1a1a18; padding-top: 40px; }
+  .tabbed-ref h2 { font-size: 18px; font-weight: 600; color: #1a1a18; margin-bottom: 0.5rem; }
+  .tabbed-ref h3 { font-size: 15px; font-weight: 600; color: #1a1a18; margin: 1.25rem 0 0.5rem; }
+  .tabbed-ref hr { border: none; border-top: 0.5px solid rgba(0,0,0,0.12); margin: 1.75rem 0; }
+  .tabbed-ref code { font-family: 'SF Mono','Fira Code','Cascadia Code',monospace; font-size: 12px; background: #f0efe9; border: 0.5px solid rgba(0,0,0,0.12); border-radius: 4px; padding: 1px 5px; color: #1a1a18; }
+  .tabbed-ref pre { background: #1a1a18; color: #e8e6de; border-radius: 8px; padding: 1rem 1.25rem; font-family: 'SF Mono','Fira Code',monospace; font-size: 12px; line-height: 1.65; overflow-x: auto; margin: 0.75rem 0 1rem; border: 0.5px solid rgba(255,255,255,0.08); }
+  .tabbed-ref pre code { background: none; border: none; padding: 0; font-size: inherit; color: inherit; }
+  .tabref-label { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; font-size: 0.65rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #185FA5; margin-bottom: 8px; display: block; }
+  .tabref-title { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; font-size: 1.4rem; font-weight: 700; color: #1a1a18; margin-bottom: 4px; }
+  .tabref-sub { font-size: 13px; color: #5f5e5a; margin-bottom: 20px; }
+  /* Tab bar */
+  .tr-tab-bar { display: flex; gap: 0; border-bottom: 0.5px solid rgba(0,0,0,0.12); overflow-x: auto; margin-bottom: 0; }
+  .tr-tab { font-size: 13px; font-weight: 500; color: #5f5e5a; padding: 10px 16px; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; white-space: nowrap; }
+  .tr-tab:hover { color: #1a1a18; }
+  .tr-tab.active { color: #185FA5; border-bottom-color: #185FA5; }
+  .tr-main { max-width: 860px; margin: 0 auto; padding: 2rem 0; }
+  .tr-panel { display: none; }
+  .tr-panel.active { display: block; }
+  /* Cards */
+  .tr-sec-label { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: #888780; margin-bottom: 0.75rem; }
+  .tr-card { background: #fff; border: 0.5px solid rgba(0,0,0,0.12); border-radius: 12px; padding: 1rem 1.25rem; margin-bottom: 12px; }
+  .tr-card-sec { background: #f7f6f2; }
+  .tr-card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 0.75rem; }
+  .tr-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 16px; }
+  .tr-ib-blue { background: #E6F1FB; } .tr-ib-teal { background: #E1F5EE; }
+  .tr-ib-amber { background: #FAEEDA; } .tr-ib-coral { background: #FAECE7; }
+  .tr-ib-purple { background: #EEEDFE; } .tr-ib-gray { background: #F1EFE8; }
+  .tr-card-title { font-size: 14px; font-weight: 600; color: #1a1a18; }
+  .tr-card-sub { font-size: 12px; color: #5f5e5a; }
+  .tr-kv { display: flex; font-size: 13px; padding: 6px 0; border-bottom: 0.5px solid rgba(0,0,0,0.12); gap: 8px; align-items: flex-start; }
+  .tr-kv:last-child { border-bottom: none; }
+  .tr-kv-k { color: #5f5e5a; flex: 0 0 160px; }
+  .tr-kv-v { color: #1a1a18; flex: 1; }
+  .tr-grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .tr-grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+  @media(max-width:620px) { .tr-grid2,.tr-grid3 { grid-template-columns:1fr; } }
+  .tr-ver-bar { display: flex; border-radius: 8px; overflow: hidden; border: 0.5px solid rgba(0,0,0,0.12); margin-bottom: 1rem; }
+  .tr-vs { flex: 1; text-align: center; padding: 10px 4px; font-size: 12px; font-weight: 600; }
+  .tr-vs span { font-size: 10px; display: block; opacity: 0.7; margin-top: 2px; font-weight: 400; }
+  .tr-vs-v1 { background: #F1EFE8; color: #444441; } .tr-vs-v2 { background: #FAEEDA; color: #633806; } .tr-vs-v3 { background: #E1F5EE; color: #085041; }
+  .tr-layers { display: flex; flex-direction: column; gap: 3px; margin: 8px 0; }
+  .tr-layer { display: flex; align-items: center; gap: 10px; border-radius: 8px; padding: 8px 12px; font-size: 13px; font-weight: 500; }
+  .tr-l-app { background: #EEEDFE; color: #3C3489; } .tr-l-sec { background: #E1F5EE; color: #085041; }
+  .tr-l-msg { background: #FAEEDA; color: #633806; } .tr-l-tr { background: #F1EFE8; color: #444441; }
+  .tr-l-b { font-size: 10px; margin-left: auto; padding: 2px 7px; border-radius: 999px; background: rgba(0,0,0,0.1); font-weight: 500; }
+  .tr-cmp { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .tr-cmp th { text-align: left; padding: 8px 10px; font-size: 12px; font-weight: 600; color: #5f5e5a; background: #f7f6f2; border-bottom: 0.5px solid rgba(0,0,0,0.22); }
+  .tr-cmp td { padding: 8px 10px; border-bottom: 0.5px solid rgba(0,0,0,0.12); vertical-align: top; color: #1a1a18; }
+  .tr-cmp td:first-child { color: #5f5e5a; }
+  .tr-cmp tr:last-child td { border-bottom: none; }
+  .tr-ref-link { display: flex; align-items: flex-start; gap: 10px; padding: 8px 0; border-bottom: 0.5px solid rgba(0,0,0,0.12); }
+  .tr-ref-link:last-child { border-bottom: none; }
+  .tr-ref-num { font-size: 11px; font-weight: 600; color: #888780; flex: 0 0 68px; padding-top: 2px; }
+  .tr-ref-link a { color: #185FA5; text-decoration: none; font-size: 13px; font-weight: 500; }
+  .tr-ref-link a:hover { text-decoration: underline; }
+  .tr-ref-desc { font-size: 12px; color: #5f5e5a; margin-top: 2px; }
+  .tr-chip { display: inline-block; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 999px; }
+  .tr-chip-amber { background: #FAEEDA; color: #633806; }
+  .tr-chip-teal { background: #E1F5EE; color: #085041; }
+  .tr-chip-coral { background: #FAECE7; color: #712B13; }
+  .tr-info { background: #E6F1FB; border-left: 3px solid #185FA5; border-radius: 0 8px 8px 0; padding: 10px 14px; font-size: 13px; color: #0C447C; margin: 1rem 0; line-height: 1.6; }
+  .tr-body { font-size: 14px; line-height: 1.75; color: #5f5e5a; margin-bottom: 0.75rem; }
+  @media (prefers-color-scheme: dark) {
+    .tabbed-ref { color: #f0efe9; background: #1c1c1a; border-top-color: #f0efe9; }
+    .tabbed-ref h2, .tabbed-ref h3 { color: #f0efe9; }
+    .tabbed-ref hr { border-top-color: rgba(255,255,255,0.10); }
+    .tabbed-ref code { background: #2c2c2a; border-color: rgba(255,255,255,0.10); color: #f0efe9; }
+    .tr-card { background: #1c1c1a; border-color: rgba(255,255,255,0.10); }
+    .tr-card-sec { background: #242422; }
+    .tr-card-title { color: #f0efe9; } .tr-kv-v { color: #f0efe9; }
+    .tr-kv-k, .tr-card-sub, .tr-body { color: #b4b2a9; }
+    .tr-kv { border-bottom-color: rgba(255,255,255,0.10); }
+    .tr-tab-bar { border-bottom-color: rgba(255,255,255,0.10); }
+    .tr-tab { color: #b4b2a9; } .tr-tab:hover { color: #f0efe9; }
+    .tr-tab.active { color: #4A9FDB; border-bottom-color: #4A9FDB; }
+    .tr-info { background: #0c1f35; color: #85B7EB; }
+    .tr-cmp th { background: #242422; color: #b4b2a9; border-bottom-color: rgba(255,255,255,0.20); }
+    .tr-cmp td { border-bottom-color: rgba(255,255,255,0.10); color: #f0efe9; }
+    .tr-cmp td:first-child { color: #b4b2a9; }
+    .tr-ref-link { border-bottom-color: rgba(255,255,255,0.10); }
+    .tr-ref-link a { color: #4A9FDB; }
+    .tr-ref-num, .tr-ref-desc { color: #888780; }
+    .tr-vs-v1 { background: #2C2C2A; color: #D3D1C7; }
+    .tr-vs-v2 { background: #412402; color: #FAC775; }
+    .tr-vs-v3 { background: #04342C; color: #5DCAA5; }
+    .tr-ib-blue { background: #0c2a4a; } .tr-ib-teal { background: #04342C; }
+    .tr-ib-amber { background: #412402; } .tr-ib-coral { background: #4A1B0C; }
+    .tr-ib-purple { background: #26215C; } .tr-ib-gray { background: #2C2C2A; }
+    .tr-l-app { background: #26215C; color: #AFA9EC; }
+    .tr-l-sec { background: #04342C; color: #5DCAA5; }
+    .tr-l-msg { background: #412402; color: #EF9F27; }
+    .tr-l-tr  { background: #2C2C2A; color: #B4B2A9; }
+    .tabref-title { color: #f0efe9; }
+    .tabref-sub { color: #b4b2a9; }
+    .tr-sec-label { color: #888780; }
+  }
+</style>
+
+<div class="tabbed-ref">
+  <span class="tabref-label">Claude Web Reference · Appended · May 2026</span>
+  <div class="tabref-title">API &amp; SNMP Deep Dive — XIQ &amp; EP1</div>
+  <p class="tabref-sub">Horizon Lab Reference &nbsp;·&nbsp; SW1 (Switch Engine) + SW2 (Fabric Engine) + AP3000s &nbsp;·&nbsp; EP1 definition corrected per KhKLab context</p>
+
+  <div class="tr-tab-bar">
+    <div class="tr-tab active" onclick="trTab('foundations')">Foundations</div>
+    <div class="tr-tab" onclick="trTab('snmp')">SNMP foundations</div>
+    <div class="tr-tab" onclick="trTab('modern')">Modern management APIs</div>
+    <div class="tr-tab" onclick="trTab('xiq')">XIQ API</div>
+    <div class="tr-tab" onclick="trTab('ep1')">EP1 / controller API</div>
+    <div class="tr-tab" onclick="trTab('compare')">XIQ vs EP1</div>
+    <div class="tr-tab" onclick="trTab('refs')">All references</div>
+  </div>
+
+  <div class="tr-main">
+
+  <!-- FOUNDATIONS -->
+  <div id="tr-foundations" class="tr-panel active">
+    <div class="tr-sec-label">API vs SNMP — first principles</div>
+    <p class="tr-body">Two fundamentally different models for managing network infrastructure. Understanding both is essential before reading the protocol-specific tabs. This tab maps the mechanics, walks three real scenarios, and ends with a side-by-side decision table.</p>
+
+    <div class="tr-card">
+      <div class="tr-card-header"><div class="tr-icon tr-ib-teal">🔌</div><div><div class="tr-card-title">What is a REST API call?</div><div class="tr-card-sub">Stateless · TCP 443 · RFC 7230–7235</div></div></div>
+      <p class="tr-body" style="margin-bottom:0.5rem;">A REST call is a self-contained HTTP request. Nothing runs persistently on the remote device waiting for you. Each call carries all authentication and context it needs.</p>
+      <div class="tr-kv"><span class="tr-kv-k">Transport</span><span class="tr-kv-v">TCP 443 / TLS 1.3 (RFC 8446)</span></div>
+      <div class="tr-kv"><span class="tr-kv-k">Auth</span><span class="tr-kv-v">OAuth2 Client Credentials → Bearer token (RFC 6749 §4.4 + RFC 6750)</span></div>
+      <div class="tr-kv"><span class="tr-kv-k">Wire format</span><span class="tr-kv-v">JSON (RFC 8259) in request + response body</span></div>
+      <div class="tr-kv"><span class="tr-kv-k">Host requirement</span><span class="tr-kv-v">HTTP library + client_id/client_secret + TCP 443 outbound. No daemon.</span></div>
+      <div class="tr-kv"><span class="tr-kv-k">Async model</span><span class="tr-kv-v">202 Accepted + job_id → poll GET /jobs/{id} until COMPLETED</span></div>
+    </div>
+
+    <div class="tr-sec-label" style="margin-top:1.5rem;">8-step request lifecycle</div>
+    <div class="tr-card">
+      <div class="tr-kv"><span class="tr-kv-k">1</span><span class="tr-kv-v">Script starts, opens TCP+TLS to api.extremecloudiq.com:443</span></div>
+      <div class="tr-kv"><span class="tr-kv-k">2</span><span class="tr-kv-v">POST /oauth2/token with client_id + client_secret → receive bearer token (3600 s TTL)</span></div>
+      <div class="tr-kv"><span class="tr-kv-k">3</span><span class="tr-kv-v">Script caches token in memory</span></div>
+      <div class="tr-kv"><span class="tr-kv-k">4</span><span class="tr-kv-v">Send GET/PATCH/POST with Authorization: Bearer &lt;token&gt; header</span></div>
+      <div class="tr-kv"><span class="tr-kv-k">5</span><span class="tr-kv-v">EP1 gateway validates token (audience, expiry, scope)</span></div>
+      <div class="tr-kv"><span class="tr-kv-k">6</span><span class="tr-kv-v">EP1 applies operation, returns 200/201/202 + JSON body</span></div>
+      <div class="tr-kv"><span class="tr-kv-k">7</span><span class="tr-kv-v">If 202: poll GET /jobs/{job_id} every 10 s until status = "COMPLETED"</span></div>
+      <div class="tr-kv"><span class="tr-kv-k">8</span><span class="tr-kv-v">On 401: re-authenticate (step 2). On 429: wait Retry-After seconds then retry.</span></div>
+    </div>
+
+    <div class="tr-sec-label" style="margin-top:1.5rem;">What is SNMP? — The poll/trap model</div>
+    <div class="tr-card">
+      <div class="tr-card-header"><div class="tr-icon tr-ib-amber">📡</div><div><div class="tr-card-title">SNMP fundamentals</div><div class="tr-card-sub">UDP 161/162 · RFC 1157 (v1) → RFC 3410–3418 (v3)</div></div></div>
+      <p class="tr-body" style="margin-bottom:0.5rem;">SNMP is an application-layer protocol on top of UDP. The agent (on the device) exposes a MIB tree of named counters and state variables. The manager (NMS) reads them by polling or receives unsolicited notifications via traps.</p>
+      <div class="tr-kv"><span class="tr-kv-k">Poll (GetRequest)</span><span class="tr-kv-v">NMS → device UDP 161. Response returns OID value. No connection state.</span></div>
+      <div class="tr-kv"><span class="tr-kv-k">Trap</span><span class="tr-kv-v">Device → NMS UDP 162. Fires on event (AP down, auth failure). No ack (v1/v2c).</span></div>
+      <div class="tr-kv"><span class="tr-kv-k">Inform</span><span class="tr-kv-v">Like trap but NMS sends acknowledgment back. v2c/v3 only.</span></div>
+      <div class="tr-kv"><span class="tr-kv-k">Host requirement (NMS)</span><span class="tr-kv-v">snmptrapd + NMS app + Extreme MIB files + UDP 162 inbound</span></div>
+      <div class="tr-kv"><span class="tr-kv-k">Host requirement (device)</span><span class="tr-kv-v">snmpd built into EXOS/IQ Engine OS — zero install</span></div>
+    </div>
+
+    <div class="tr-sec-label" style="margin-top:1.5rem;">Scenario A — Daily QoS push to all APs in a region</div>
+    <div class="tr-card">
+      <div class="tr-card-header"><div class="tr-icon tr-ib-teal">🔁</div><div><div class="tr-card-title">Automated nightly QoS update</div><div class="tr-card-sub">API · PATCH /devices/{id}/network-policy · ~12 APs</div></div></div>
+      <p class="tr-body" style="margin-bottom:0.5rem;">Script runs at 02:00. Updates DSCP EF on voice queue across all AP3000s in KhKLab region.</p>
+      <div class="tr-kv"><span class="tr-kv-k">Step 1</span><span class="tr-kv-v">POST /oauth2/token → cache token</span></div>
+      <div class="tr-kv"><span class="tr-kv-k">Step 2</span><span class="tr-kv-v">GET /devices?pageSize=100&amp;page=1&amp;locationId=X → collect AP IDs</span></div>
+      <div class="tr-kv"><span class="tr-kv-k">Step 3</span><span class="tr-kv-v">PATCH /devices/{id}/network-policy for each AP with QoS JSON</span></div>
+      <div class="tr-kv"><span class="tr-kv-k">Step 4</span><span class="tr-kv-v">POST /devices/deploy with AP ID list → 202 + job_id</span></div>
+      <div class="tr-kv"><span class="tr-kv-k">Step 5</span><span class="tr-kv-v">Poll GET /jobs/{job_id} every 10 s until COMPLETED</span></div>
+      <div class="tr-kv"><span class="tr-kv-k">Total time</span><span class="tr-kv-v">~2 min for 12 APs. Scales linearly — 120 APs ≈ 4 min.</span></div>
+    </div>
+
+    <div class="tr-sec-label" style="margin-top:1.5rem;">Scenario B — 1,000 AP migration</div>
+    <div class="tr-card">
+      <div class="tr-card-header"><div class="tr-icon tr-ib-amber">⚡</div><div><div class="tr-card-title">Bulk policy re-assignment at scale</div><div class="tr-card-sub">API · three engineering problems</div></div></div>
+      <div class="tr-kv"><span class="tr-kv-k">Problem 1</span><span class="tr-kv-v">Pagination — 100 APs/page = 10 GET requests. Miss page 2–10 = silent failure.</span></div>
+      <div class="tr-kv"><span class="tr-kv-k">Problem 2</span><span class="tr-kv-v">Rate limit — 429 Too Many Requests. Must respect Retry-After header (RFC 6585 §4). Use exponential backoff.</span></div>
+      <div class="tr-kv"><span class="tr-kv-k">Problem 3</span><span class="tr-kv-v">Partial failure — job returns COMPLETED_WITH_ERRORS. Parse errors[] array, log failed AP IDs, retry or escalate.</span></div>
+      <div class="tr-kv"><span class="tr-kv-k">Strategy</span><span class="tr-kv-v">Batch into 200-AP deploy jobs. Parallel workers. Full audit log per AP ID.</span></div>
+      <div class="tr-kv"><span class="tr-kv-k">SNMP role here</span><span class="tr-kv-v">None. SNMP cannot create, reassign, or migrate network policy objects.</span></div>
+    </div>
+
+    <div class="tr-sec-label" style="margin-top:1.5rem;">Scenario C — SNMP AP outage detection</div>
+    <div class="tr-card">
+      <div class="tr-card-header"><div class="tr-icon tr-ib-coral">🔴</div><div><div class="tr-card-title">AP3000 hard power loss</div><div class="tr-card-sub">SNMP · ahAPDown trap · OID 1.3.6.1.4.1.26928.1.1.1.2</div></div></div>
+      <div class="tr-kv"><span class="tr-kv-k">Trap path</span><span class="tr-kv-v">AP sends ahAPDown trap → NMS UDP 162 → snmptrapd → alert. Latency: &lt;1 s. Requires graceful shutdown.</span></div>
+      <div class="tr-kv"><span class="tr-kv-k">Poll path</span><span class="tr-kv-v">NMS polls every 60 s. After 2 timeouts → marks DOWN. Latency: 60–75 s. Works on hard crash.</span></div>
+      <div class="tr-kv"><span class="tr-kv-k">Hard crash caveat</span><span class="tr-kv-v">Abrupt power cut = no trap. Only poll detects it. 75 s gap is by design.</span></div>
+      <div class="tr-kv"><span class="tr-kv-k">API role here</span><span class="tr-kv-v">Limited. EP1 API can read device status but requires a script polling on a schedule — same latency as SNMP poll.</span></div>
+    </div>
+
+    <div class="tr-sec-label" style="margin-top:1.5rem;">API vs SNMP — decision matrix</div>
+    <div class="tr-card">
+      <div class="tr-cmp">
+        <div class="tr-cmp-col">
+          <div class="tr-cmp-title">REST API</div>
+          <div class="tr-kv"><span class="tr-kv-k">Transport</span><span class="tr-kv-v">TCP 443 / TLS</span></div>
+          <div class="tr-kv"><span class="tr-kv-k">Initiator</span><span class="tr-kv-v">Client always</span></div>
+          <div class="tr-kv"><span class="tr-kv-k">Auth</span><span class="tr-kv-v">OAuth2 Bearer</span></div>
+          <div class="tr-kv"><span class="tr-kv-k">Encryption</span><span class="tr-kv-v">TLS mandatory</span></div>
+          <div class="tr-kv"><span class="tr-kv-k">Config CRUD</span><span class="tr-kv-v"><span class="tr-chip tr-chip-teal">Full</span></span></div>
+          <div class="tr-kv"><span class="tr-kv-k">Async</span><span class="tr-kv-v">Yes (202 + job)</span></div>
+          <div class="tr-kv"><span class="tr-kv-k">Fault latency</span><span class="tr-kv-v">Seconds</span></div>
+          <div class="tr-kv"><span class="tr-kv-k">Cloud dep.</span><span class="tr-kv-v">Yes (SaaS)</span></div>
+          <div class="tr-kv"><span class="tr-kv-k">Best for</span><span class="tr-kv-v">Provisioning, automation, migration</span></div>
+        </div>
+        <div class="tr-cmp-col">
+          <div class="tr-cmp-title">SNMP</div>
+          <div class="tr-kv"><span class="tr-kv-k">Transport</span><span class="tr-kv-v">UDP 161/162</span></div>
+          <div class="tr-kv"><span class="tr-kv-k">Initiator</span><span class="tr-kv-v">NMS (poll) or device (trap)</span></div>
+          <div class="tr-kv"><span class="tr-kv-k">Auth</span><span class="tr-kv-v">Community / USM (v3)</span></div>
+          <div class="tr-kv"><span class="tr-kv-k">Encryption</span><span class="tr-kv-v">Optional (v3 authPriv only)</span></div>
+          <div class="tr-kv"><span class="tr-kv-k">Config CRUD</span><span class="tr-kv-v"><span class="tr-chip tr-chip-amber">Read-heavy</span></span></div>
+          <div class="tr-kv"><span class="tr-kv-k">Async</span><span class="tr-kv-v">No</span></div>
+          <div class="tr-kv"><span class="tr-kv-k">Fault latency</span><span class="tr-kv-v">&lt;1 s (trap) / 75 s (poll)</span></div>
+          <div class="tr-kv"><span class="tr-kv-k">Cloud dep.</span><span class="tr-kv-v">None — device direct</span></div>
+          <div class="tr-kv"><span class="tr-kv-k">Best for</span><span class="tr-kv-v">Fault detection, perf monitoring</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tr-info" style="margin-top:1rem;">
+      <strong>Key insight:</strong> Run both. SNMP is the millisecond-latency operational sensor. API is the automation and provisioning plane. They serve different layers of the management stack and do not compete.
+    </div>
+  </div>
+
+  <!-- SNMP FOUNDATIONS -->
+  <div id="tr-snmp" class="tr-panel">
+    <div class="tr-sec-label">Protocol overview</div>
+    <p class="tr-body">SNMP is an IETF-standardized Application-layer protocol for reading and writing management information on network devices. Three generations exist — each solving the limitations of the previous. Your 5320-16P (both Switch Engine and Fabric Engine) implements all three.</p>
+    <div class="tr-ver-bar">
+      <div class="tr-vs tr-vs-v1">SNMPv1<span>RFC 1157 · 1990</span></div>
+      <div class="tr-vs tr-vs-v2">SNMPv2c<span>RFC 1901 · 1996</span></div>
+      <div class="tr-vs tr-vs-v3">SNMPv3<span>RFC 3410–3418 · 2002</span></div>
+    </div>
+    <div class="tr-grid2">
+      <div class="tr-card">
+        <div class="tr-card-header"><div class="tr-icon tr-ib-gray">🔌</div><div><div class="tr-card-title">SNMPv1</div><div class="tr-card-sub">RFC 1157 · community string auth</div></div></div>
+        <div class="tr-kv"><span class="tr-kv-k">Auth</span><span class="tr-kv-v">Cleartext community string</span></div>
+        <div class="tr-kv"><span class="tr-kv-k">Encryption</span><span class="tr-kv-v">None</span></div>
+        <div class="tr-kv"><span class="tr-kv-k">PDU types</span><span class="tr-kv-v">GetRequest, GetNextRequest, GetResponse, SetRequest, Trap</span></div>
+        <div class="tr-kv"><span class="tr-kv-k">Ports</span><span class="tr-kv-v">UDP 161 (poll), UDP 162 (trap)</span></div>
+        <div class="tr-kv"><span class="tr-kv-k">Status</span><span class="tr-kv-v"><span class="tr-chip tr-chip-coral">Legacy — avoid</span></span></div>
+      </div>
+      <div class="tr-card">
+        <div class="tr-card-header"><div class="tr-icon tr-ib-amber">🔶</div><div><div class="tr-card-title">SNMPv2c</div><div class="tr-card-sub">RFC 1901, 3416, 3417</div></div></div>
+        <div class="tr-kv"><span class="tr-kv-k">Auth</span><span class="tr-kv-v">Cleartext community string</span></div>
+        <div class="tr-kv"><span class="tr-kv-k">Encryption</span><span class="tr-kv-v">None</span></div>
+        <div class="tr-kv"><span class="tr-kv-k">New PDUs</span><span class="tr-kv-v">GetBulkRequest, InformRequest (acknowledged traps)</span></div>
+        <div class="tr-kv"><span class="tr-kv-k">64-bit counters</span><span class="tr-kv-v">Yes — fixes v1 overflow on Gig+ links</span></div>
+        <div class="tr-kv"><span class="tr-kv-k">Status</span><span class="tr-kv-v"><span class="tr-chip tr-chip-amber">Widely deployed</span></span></div>
+      </div>
+    </div>
+    <div class="tr-card">
+      <div class="tr-card-header"><div class="tr-icon tr-ib-teal">🔒</div><div><div class="tr-card-title">SNMPv3 — the modern standard</div><div class="tr-card-sub">RFC 3410–3418 (STD 62) · USM + VACM security</div></div></div>
+      <p class="tr-body" style="margin-bottom:0.5rem;">SNMPv3 introduces a modular architecture with three named subsystems.</p>
+      <div class="tr-layers">
+        <div class="tr-layer tr-l-app">Application layer (RFC 3413) <span class="tr-l-b">managers, agents, proxies</span></div>
+        <div class="tr-layer tr-l-sec">User-based Security Model — USM (RFC 3414) <span class="tr-l-b">auth + priv</span></div>
+        <div class="tr-layer tr-l-msg">Message Processing &amp; Dispatch (RFC 3412) <span class="tr-l-b">version negotiation</span></div>
+        <div class="tr-layer tr-l-tr">Transport (UDP/TCP) <span class="tr-l-b">port 161 / 162</span></div>
+      </div>
+    </div>
+    <hr>
+    <div class="tr-sec-label">MIB architecture</div>
+    <div class="tr-grid2">
+      <div class="tr-card">
+        <div class="tr-card-header"><div class="tr-icon tr-ib-blue">📋</div><div><div class="tr-card-title">Standard IETF MIBs (on 5320)</div><div class="tr-card-sub">RFC-defined, vendor-neutral</div></div></div>
+        <div class="tr-kv"><span class="tr-kv-k">MIB-II</span><span class="tr-kv-v">RFC 1213 — interfaces, IP, TCP, UDP, SNMP groups</span></div>
+        <div class="tr-kv"><span class="tr-kv-k">IF-MIB</span><span class="tr-kv-v">RFC 2863 — modern interface stats + 64-bit counters</span></div>
+        <div class="tr-kv"><span class="tr-kv-k">BRIDGE-MIB</span><span class="tr-kv-v">RFC 4188 — MAC table, STP</span></div>
+        <div class="tr-kv"><span class="tr-kv-k">Q-BRIDGE-MIB</span><span class="tr-kv-v">RFC 4363 — VLAN membership</span></div>
+        <div class="tr-kv"><span class="tr-kv-k">ENTITY-MIB</span><span class="tr-kv-v">RFC 4133 — chassis, slots, sensors</span></div>
+      </div>
+      <div class="tr-card">
+        <div class="tr-card-header"><div class="tr-icon tr-ib-coral">🏭</div><div><div class="tr-card-title">Extreme proprietary MIBs</div><div class="tr-card-sub">Enterprise OID 1.3.6.1.4.1.1916</div></div></div>
+        <div class="tr-kv"><span class="tr-kv-k">EXTREME-BASE-MIB</span><span class="tr-kv-v">Chassis, platform identity, 5320 OIDs</span></div>
+        <div class="tr-kv"><span class="tr-kv-k">EXTREME-SYSTEM-MIB</span><span class="tr-kv-v">CPU, memory, temp, PoE power budget</span></div>
+        <div class="tr-kv"><span class="tr-kv-k">EXTREME-VLAN-MIB</span><span class="tr-kv-v">EXOS VLAN details beyond Q-BRIDGE</span></div>
+        <div class="tr-kv"><span class="tr-kv-k">MIB files</span><span class="tr-kv-v"><a href="https://github.com/librenms/librenms/tree/master/mibs/extreme" target="_blank">LibreNMS mirror on GitHub ↗</a></span></div>
+      </div>
+    </div>
+    <div class="tr-card tr-card-sec">
+      <div class="tr-card-title" style="margin-bottom:0.5rem;">XIQ / EP1 SNMP configuration path</div>
+      <div class="tr-kv"><span class="tr-kv-k">Navigation</span><span class="tr-kv-v">Configure → Network Policies → Additional Settings → SNMP Server (p.240)</span></div>
+      <div class="tr-kv"><span class="tr-kv-k">Operations</span><span class="tr-kv-v">None | Get | Get+Trap | Trap</span></div>
+      <div class="tr-kv"><span class="tr-kv-k">Versions</span><span class="tr-kv-v">V1, V2c (community string), V3 (USM)</span></div>
+      <div class="tr-kv"><span class="tr-kv-k">Default community</span><span class="tr-kv-v"><code>hivecommunity</code> — change in production</span></div>
+    </div>
+  </div>
+
+  <!-- MODERN MANAGEMENT APIs -->
+  <div id="tr-modern" class="tr-panel">
+    <div class="tr-sec-label">Why SNMP is no longer enough for configuration</div>
+    <p class="tr-body">SNMP was designed for polling and notification. Configuration via SNMP SET is fragile, lacks transactions, and has no rollback. The IETF responded with YANG + NETCONF + RESTCONF, which underpin modern network automation including ExtremeXOS RESTCONF on the 5320.</p>
+    <div class="tr-grid3">
+      <div class="tr-card">
+        <div class="tr-card-header"><div class="tr-icon tr-ib-blue">📐</div><div><div class="tr-card-title">YANG</div><div class="tr-card-sub">RFC 7950</div></div></div>
+        <p class="tr-body" style="font-size:13px;">Data modeling language for config + state. Analogous to SMIv2 for SNMP MIBs.</p>
+        <div class="tr-kv" style="font-size:12px;"><span class="tr-kv-k">YANG 1.0</span><span class="tr-kv-v">RFC 6020</span></div>
+        <div class="tr-kv" style="font-size:12px;"><span class="tr-kv-k">YANG 1.1</span><span class="tr-kv-v">RFC 7950 (current)</span></div>
+      </div>
+      <div class="tr-card">
+        <div class="tr-card-header"><div class="tr-icon tr-ib-teal">⚙️</div><div><div class="tr-card-title">NETCONF</div><div class="tr-card-sub">RFC 6241</div></div></div>
+        <p class="tr-body" style="font-size:13px;">XML-RPC over SSH (port 830). Transactional config with candidate/running datastores + confirmed-commit rollback.</p>
+        <div class="tr-kv" style="font-size:12px;"><span class="tr-kv-k">Transport</span><span class="tr-kv-v">SSH (mandatory)</span></div>
+        <div class="tr-kv" style="font-size:12px;"><span class="tr-kv-k">Encoding</span><span class="tr-kv-v">XML</span></div>
+      </div>
+      <div class="tr-card">
+        <div class="tr-card-header"><div class="tr-icon tr-ib-amber">🔗</div><div><div class="tr-card-title">RESTCONF</div><div class="tr-card-sub">RFC 8040</div></div></div>
+        <p class="tr-body" style="font-size:13px;">NETCONF semantics over HTTPS. EXOS implements this natively on the switch itself.</p>
+        <div class="tr-kv" style="font-size:12px;"><span class="tr-kv-k">Transport</span><span class="tr-kv-v">HTTPS</span></div>
+        <div class="tr-kv" style="font-size:12px;"><span class="tr-kv-k">EXOS base URL</span><span class="tr-kv-v"><code>https://&lt;switch-ip&gt;/rest/restconf/</code></span></div>
+      </div>
+    </div>
+    <div class="tr-card">
+      <div class="tr-card-header"><div class="tr-icon tr-ib-blue">⚖️</div><div><div class="tr-card-title">SNMP vs NETCONF/RESTCONF — concept map</div></div></div>
+      <table class="tr-cmp">
+        <thead><tr><th>Concept</th><th>SNMP</th><th>NETCONF / RESTCONF</th></tr></thead>
+        <tbody>
+          <tr><td>Schema language</td><td>SMIv2 (RFC 2578)</td><td>YANG (RFC 7950)</td></tr>
+          <tr><td>Addressing</td><td>OID (1.3.6.1.2.1...)</td><td>URI path (/restconf/data/...)</td></tr>
+          <tr><td>Config write</td><td>SET (fragile, no tx)</td><td>edit-config with lock + commit</td></tr>
+          <tr><td>Rollback</td><td>Manual</td><td>confirmed-commit timer</td></tr>
+          <tr><td>Async events</td><td>Trap / InformRequest</td><td>YANG Push / Notifications</td></tr>
+          <tr><td>Security</td><td>USM (RFC 3414)</td><td>SSH / TLS at transport layer</td></tr>
+          <tr><td>Toolchain</td><td>Net-SNMP, SNMP libraries</td><td>curl, Postman, Python requests</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="tr-info">💡 <strong>Horizon lab:</strong> RESTCONF on SW1 (192.168.0.28) lets you query VLAN state, IS-IS neighbors, and port config directly from the switch — useful when the XIQ cloud path is unavailable or you want sub-second verification during config changes.</div>
+  </div>
+
+  <!-- XIQ API -->
+  <div id="tr-xiq" class="tr-panel">
+    <div class="tr-sec-label">ExtremeCloud IQ REST API</div>
+    <p class="tr-body">XIQ exposes a cloud-hosted REST API that abstracts all managed devices — AP3000s, SW1 (Switch Engine), and SW2 (Fabric Engine) — through one unified endpoint.</p>
+    <div class="tr-card">
+      <div class="tr-card-header"><div class="tr-icon tr-ib-blue">☁️</div><div><div class="tr-card-title">Core API facts</div></div></div>
+      <div class="tr-kv"><span class="tr-kv-k">Base URL</span><span class="tr-kv-v"><code>https://api.extremecloudiq.com</code></span></div>
+      <div class="tr-kv"><span class="tr-kv-k">Protocol</span><span class="tr-kv-v">HTTPS only — RESTful design, JSON bodies</span></div>
+      <div class="tr-kv"><span class="tr-kv-k">Auth model</span><span class="tr-kv-v">Bearer token (JWT) — login once, use on all calls</span></div>
+      <div class="tr-kv"><span class="tr-kv-k">Token source</span><span class="tr-kv-v">Global Settings → API Token Management in XIQ UI</span></div>
+      <div class="tr-kv"><span class="tr-kv-k">Swagger UI</span><span class="tr-kv-v"><a href="https://extremecloudiq.com/api-docs/api-reference.html" target="_blank">api-reference.html (live, 400+ endpoints) ↗</a></span></div>
+      <div class="tr-kv"><span class="tr-kv-k">OpenAPI spec</span><span class="tr-kv-v"><a href="https://github.com/extremenetworks/ExtremeCloudIQ-OpenAPI-Specification" target="_blank">GitHub: ExtremeCloudIQ-OpenAPI-Specification ↗</a></span></div>
+    </div>
+    <div class="tr-card">
+      <div class="tr-card-header"><div class="tr-icon tr-ib-coral">🐍</div><div><div class="tr-card-title">SDK and tooling</div></div></div>
+      <div class="tr-kv"><span class="tr-kv-k">Python SDK</span><span class="tr-kv-v"><a href="https://github.com/extremenetworks/ExtremeCloudIQ-SDK-Python" target="_blank">extremenetworks/ExtremeCloudIQ-SDK-Python ↗</a></span></div>
+      <div class="tr-kv"><span class="tr-kv-k">Postman</span><span class="tr-kv-v"><a href="https://github.com/extremenetworks/ExtremeCloudIQ-APIs" target="_blank">extremenetworks/ExtremeCloudIQ-APIs ↗</a></span></div>
+      <div class="tr-kv"><span class="tr-kv-k">Go SDK</span><span class="tr-kv-v"><a href="https://github.com/extremenetworks/ExtremeCloudIQ-SDK-Go" target="_blank">extremenetworks/ExtremeCloudIQ-SDK-Go ↗</a></span></div>
+      <div class="tr-kv"><span class="tr-kv-k">C# SDK</span><span class="tr-kv-v"><a href="https://github.com/extremenetworks/ExtremeCloudIQ-SDK-CSharp" target="_blank">extremenetworks/ExtremeCloudIQ-SDK-CSharp ↗</a></span></div>
+      <div class="tr-kv"><span class="tr-kv-k">Developer portal</span><span class="tr-kv-v"><a href="https://developer.extremecloudiq.com/" target="_blank">developer.extremecloudiq.com ↗</a></span></div>
+    </div>
+  </div>
+
+  <!-- EP1 -->
+  <div id="tr-ep1" class="tr-panel">
+    <div class="tr-sec-label">EP1 — Extreme Platform One</div>
+    <p class="tr-body">In the Horizon lab, EP1 (Extreme Platform One) is the on-premises management controller — the local counterpart to cloud XIQ. It is separate from the IPE, which is the SD-WAN appliance connected to SW2 Port1 on VLAN 4047. EP1 can operate in tandem with cloud XIQ or fully standalone.</p>
+    <div class="tr-card">
+      <div class="tr-card-header"><div class="tr-icon tr-ib-teal">🖥️</div><div><div class="tr-card-title">EP1 REST API Gateway — core facts</div><div class="tr-card-sub">ExtremeCloud IQ Controller v10.x</div></div></div>
+      <div class="tr-kv"><span class="tr-kv-k">Architecture</span><span class="tr-kv-v">Single gateway entry point → multiple internal APIs</span></div>
+      <div class="tr-kv"><span class="tr-kv-k">Design</span><span class="tr-kv-v">RESTful — standard HTTP verbs, JSON request/response</span></div>
+      <div class="tr-kv"><span class="tr-kv-k">Versioning</span><span class="tr-kv-v">Semantic versioning: Major.Minor.Patch</span></div>
+      <div class="tr-kv"><span class="tr-kv-k">OpenAPI spec</span><span class="tr-kv-v"><a href="https://documentation.extremenetworks.com/ExtremeCloud_IQ_Controller/v10.03.01/API/index_gateway_api.html" target="_blank">EP1 Gateway API Reference ↗</a></span></div>
+    </div>
+    <div class="tr-card">
+      <div class="tr-card-header"><div class="tr-icon tr-ib-blue">🔄</div><div><div class="tr-card-title">EP1 vs XIQ — management plane relationship</div></div></div>
+      <div class="tr-kv"><span class="tr-kv-k">XIQ API scope</span><span class="tr-kv-v">Cloud managed — APs, switches, network policies, global VIQ</span></div>
+      <div class="tr-kv"><span class="tr-kv-k">EP1 API scope</span><span class="tr-kv-v">On-prem controller — local AP/switch management, site policy, ACLs</span></div>
+      <div class="tr-kv"><span class="tr-kv-k">IPE (distinct)</span><span class="tr-kv-v">SD-WAN appliance on SW2 Port1 — VLAN 4047, RDC path. Not EP1.</span></div>
+      <div class="tr-kv"><span class="tr-kv-k">Overlap</span><span class="tr-kv-v">Device onboarding, SSID config — but via separate endpoints and auth</span></div>
+    </div>
+    <div class="tr-info">⚠️ <strong>XIQ continuity note (May 2026):</strong> All xAPI endpoints continue working unchanged through the XIQ UI → EP1 transition. EP1 is in active development with growing feature parity.</div>
+  </div>
+
+  <!-- COMPARE -->
+  <div id="tr-compare" class="tr-panel">
+    <div class="tr-sec-label">Head-to-head: XIQ Cloud API vs EP1 Controller API</div>
+    <div class="tr-card">
+      <table class="tr-cmp">
+        <thead><tr><th style="width:180px;">Dimension</th><th>XIQ Cloud API</th><th>EP1 / Controller API</th></tr></thead>
+        <tbody>
+          <tr><td>Hosting</td><td>Extreme RDC (cloud)</td><td>On-premises appliance</td></tr>
+          <tr><td>Auth</td><td>Bearer JWT (API token from XIQ UI)</td><td>Per-controller credentials, JWT</td></tr>
+          <tr><td>Base endpoint</td><td><code>api.extremecloudiq.com</code></td><td>Controller IP (on-prem LAN)</td></tr>
+          <tr><td>API style</td><td>REST / OpenAPI / JSON</td><td>REST / OpenAPI / JSON</td></tr>
+          <tr><td>AP management</td><td>Full — IQ Engine, CAPWAP, SSID, radio, firmware</td><td>Full — local CAPWAP tunnel, site policy</td></tr>
+          <tr><td>Switch management</td><td>Switch Engine + Fabric Engine via XIQ</td><td>Per-site switch config only</td></tr>
+          <tr><td>Fabric/SPB visibility</td><td>Network 360 SPB map, FA tab, Device 360</td><td>Limited — primarily wireless-focused</td></tr>
+          <tr><td>SNMP role</td><td>Policy-level SNMP server config pushed to devices</td><td>Appliance SNMP + per-site switch SNMP</td></tr>
+          <tr><td>Python SDK</td><td>Official (OpenAPI generated)</td><td>Community / custom REST calls</td></tr>
+          <tr><td>Offline operation</td><td>Requires internet to RDC</td><td>Fully air-gappable</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="tr-sec-label" style="margin-top:1.5rem;">When to use which — Horizon lab</div>
+    <div class="tr-card tr-card-sec">
+      <div class="tr-kv"><span class="tr-kv-k" style="flex:0 0 200px;">Real-time monitoring</span><span class="tr-kv-v">SNMP polling (SW1/SW2 directly) — lower latency than cloud API round-trip</span></div>
+      <div class="tr-kv"><span class="tr-kv-k" style="flex:0 0 200px;">Configuration push</span><span class="tr-kv-v">XIQ API or device RESTCONF — never SNMP SET for production config</span></div>
+      <div class="tr-kv"><span class="tr-kv-k" style="flex:0 0 200px;">Fault alerting</span><span class="tr-kv-v">SNMP traps to a collector (LibreNMS/Zabbix) for sub-second notification</span></div>
+      <div class="tr-kv"><span class="tr-kv-k" style="flex:0 0 200px;">PoE &amp; hardware telemetry</span><span class="tr-kv-v">SNMP EXTREME-SYSTEM-MIB — power budget, temp, CPU/mem per-switch</span></div>
+      <div class="tr-kv"><span class="tr-kv-k" style="flex:0 0 200px;">SSID / AP policy</span><span class="tr-kv-v">XIQ API exclusively — no SNMP equivalent for wireless policy</span></div>
+      <div class="tr-kv"><span class="tr-kv-k" style="flex:0 0 200px;">IS-IS / SPB state</span><span class="tr-kv-v">CLI or RESTCONF on SW2 — XIQ Network 360 for topology visualization</span></div>
+      <div class="tr-kv"><span class="tr-kv-k" style="flex:0 0 200px;">IPE / SD-WAN path</span><span class="tr-kv-v">EP1 API on VLAN 4047 — verify local breakout health</span></div>
+    </div>
+  </div>
+
+  <!-- REFERENCES -->
+  <div id="tr-refs" class="tr-panel">
+    <div class="tr-sec-label">IETF RFCs — SNMP stack</div>
+    <div class="tr-card">
+      <div class="tr-ref-link"><span class="tr-ref-num">RFC 1157</span><div><a href="https://datatracker.ietf.org/doc/html/rfc1157" target="_blank">SNMPv1</a><div class="tr-ref-desc">Community string auth, UDP 161/162. May 1990.</div></div></div>
+      <div class="tr-ref-link"><span class="tr-ref-num">RFC 1213</span><div><a href="https://datatracker.ietf.org/doc/rfc1213/" target="_blank">MIB-II</a><div class="tr-ref-desc">The foundational MIB. Interfaces, IP, TCP, UDP, SNMP groups.</div></div></div>
+      <div class="tr-ref-link"><span class="tr-ref-num">RFC 1901</span><div><a href="https://datatracker.ietf.org/doc/rfc1901/" target="_blank">SNMPv2c</a><div class="tr-ref-desc">Adds GetBulk + Inform. Still community-string auth.</div></div></div>
+      <div class="tr-ref-link"><span class="tr-ref-num">RFC 2863</span><div><a href="https://datatracker.ietf.org/doc/rfc2863/" target="_blank">IF-MIB</a><div class="tr-ref-desc">Modern interface stats + 64-bit counters.</div></div></div>
+      <div class="tr-ref-link"><span class="tr-ref-num">RFC 3414</span><div><a href="https://datatracker.ietf.org/doc/rfc3414/" target="_blank">USM — User-based Security Model</a><div class="tr-ref-desc">Auth (MD5/SHA) and privacy (DES/AES) for SNMPv3.</div></div></div>
+      <div class="tr-ref-link"><span class="tr-ref-num">RFC 3415</span><div><a href="https://datatracker.ietf.org/doc/rfc3415/" target="_blank">VACM — View-Based Access Control</a><div class="tr-ref-desc">MIB subtree access control per user/group.</div></div></div>
+      <div class="tr-ref-link"><span class="tr-ref-num">RFC 3826</span><div><a href="https://datatracker.ietf.org/doc/rfc3826/" target="_blank">AES Cipher in SNMP USM</a><div class="tr-ref-desc">AES-128 privacy for SNMPv3.</div></div></div>
+      <div class="tr-ref-link"><span class="tr-ref-num">RFC 4133</span><div><a href="https://datatracker.ietf.org/doc/rfc4133/" target="_blank">ENTITY-MIB</a><div class="tr-ref-desc">Chassis, module, port, sensor hierarchy.</div></div></div>
+      <div class="tr-ref-link"><span class="tr-ref-num">RFC 4363</span><div><a href="https://datatracker.ietf.org/doc/rfc4363/" target="_blank">Q-BRIDGE-MIB</a><div class="tr-ref-desc">VLAN membership tables.</div></div></div>
+    </div>
+    <div class="tr-sec-label" style="margin-top:1.5rem;">IETF RFCs — NETCONF / YANG / RESTCONF</div>
+    <div class="tr-card">
+      <div class="tr-ref-link"><span class="tr-ref-num">RFC 6241</span><div><a href="https://www.rfc-editor.org/rfc/rfc6241.html" target="_blank">NETCONF</a><div class="tr-ref-desc">XML-RPC over SSH. Transactional config with candidate datastore + commit.</div></div></div>
+      <div class="tr-ref-link"><span class="tr-ref-num">RFC 7950</span><div><a href="https://datatracker.ietf.org/doc/rfc7950/" target="_blank">YANG 1.1</a><div class="tr-ref-desc">Current YANG spec. What EXOS RESTCONF uses.</div></div></div>
+      <div class="tr-ref-link"><span class="tr-ref-num">RFC 8040</span><div><a href="https://datatracker.ietf.org/doc/rfc8040/" target="_blank">RESTCONF</a><div class="tr-ref-desc">NETCONF semantics over HTTPS. ExtremeXOS Switch Engine implements natively.</div></div></div>
+    </div>
+    <div class="tr-sec-label" style="margin-top:1.5rem;">Extreme Networks documentation</div>
+    <div class="tr-card">
+      <div class="tr-ref-link"><span class="tr-ref-num" style="min-width:80px;">XIQ API</span><div><a href="https://extremecloudiq.com/api-docs/api-reference.html" target="_blank">XIQ API Reference — Swagger UI</a><div class="tr-ref-desc">400+ endpoints. Always current.</div></div></div>
+      <div class="tr-ref-link"><span class="tr-ref-num" style="min-width:80px;">Dev portal</span><div><a href="https://developer.extremecloudiq.com/documentation/" target="_blank">ExtremeCloud IQ Developer Portal</a><div class="tr-ref-desc">Rate limiting, auth, pagination docs.</div></div></div>
+      <div class="tr-ref-link"><span class="tr-ref-num" style="min-width:80px;">EP1 API</span><div><a href="https://documentation.extremenetworks.com/ExtremeCloud_IQ_Controller/v10.03.01/API/index_gateway_api.html" target="_blank">EP1 REST API Gateway Reference</a><div class="tr-ref-desc">On-prem controller API.</div></div></div>
+      <div class="tr-ref-link"><span class="tr-ref-num" style="min-width:80px;">EXOS RESTCONF</span><div><a href="https://documentation.extremenetworks.com/restconf_31.6/GUID-E6C98F14-2CE0-4103-B1B7-F7052ECBE364.shtml" target="_blank">ExtremeXOS RESTCONF API Developer Guide</a><div class="tr-ref-desc">On-switch YANG-modeled direct access.</div></div></div>
+      <div class="tr-ref-link"><span class="tr-ref-num" style="min-width:80px;">GitHub</span><div><a href="https://github.com/extremenetworks" target="_blank">Extreme Networks GitHub Organisation</a><div class="tr-ref-desc">SDKs (Python, Go, C#), OpenAPI spec, Postman collections.</div></div></div>
+      <div class="tr-ref-link"><span class="tr-ref-num" style="min-width:80px;">MIB files</span><div><a href="https://github.com/librenms/librenms/tree/master/mibs/extreme" target="_blank">Extreme MIBs — LibreNMS mirror</a><div class="tr-ref-desc">EXTREME-BASE-MIB, EXTREME-SYSTEM-MIB, and others.</div></div></div>
+    </div>
+  </div>
+
+  </div><!-- /tr-main -->
+</div><!-- /tabbed-ref -->
+
+<script>
+function trTab(name) {
+  document.querySelectorAll('.tr-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tr-panel').forEach(p => p.classList.remove('active'));
+  document.querySelector('[onclick="trTab(\'' + name + '\')"]').classList.add('active');
+  document.getElementById('tr-' + name).classList.add('active');
+  document.querySelector('.tabbed-ref').scrollIntoView({behavior:'smooth', block:'start'});
+}
+</script>
+
 </body>
 </html>
