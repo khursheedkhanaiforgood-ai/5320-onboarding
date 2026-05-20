@@ -112,7 +112,9 @@ tr:nth-child(even) td { background: #FAFAFA; }
     <a href="#observability">Observability &mdash; Network360 + AI Canvas</a>
     <a href="#topology">Lab Topology</a>
     <a href="#arch-analysis">XIQ vs EP1 — E2E Architecture Analysis (Engineering Review)</a>
-    <a href="#pending">Pending</a>
+    <a href="#accomplished">Accomplished Today</a>
+    <a href="#tomorrow">Tomorrow's Sprint</a>
+    <a href="#pending">Pending / Parked</a>
   </div>
 
   <!-- ─── CONTEXT ─── -->
@@ -578,21 +580,105 @@ tr:nth-child(even) td { background: #FAFAFA; }
   </div>
 
   <!-- ─── PENDING ─── -->
-  <span class="section-label" id="pending">Pending &mdash; Active Tasks</span>
+  <!-- ─── ACCOMPLISHED ─── -->
+  <span class="section-label" id="accomplished">Accomplished Today &mdash; May 19, 2026</span>
 
-  <div class="box">
-    <p class="box-label">Now (Tuesday May 19)</p>
+  <div class="box" style="border-left:4px solid #065f46;">
+    <p class="box-label">Architecture Analysis</p>
     <ul>
-      <li>Configure Guest SSID CWP in XIQ (built-in, UPA) &rarr; document nav path</li>
-      <li>Repeat same config in EP1 &rarr; document nav delta vs. XIQ</li>
-      <li>SW1: create VLANs 5 + 10, tag on Port 3, enable ipforwarding, DHCP per VLAN</li>
-      <li>EP1 access confirmed (extremecloudiq.com &gt; 9-dot launcher)</li>
+      <li>Completed full component-level comparison of XIQ vs EP1 across three E2E flows: <strong>policy push · telemetry · AP optimization</strong></li>
+      <li>Every claim explicitly labeled: confirmed (page-cited from ©2025 white paper) or hypothesis (flagged for R&amp;D validation)</li>
+      <li>7 open engineering questions documented for extended team review (30+ yrs industry / 15+ yrs Extreme per person)</li>
+      <li>Created <a href="xiq-ep1-arch-debate.html" style="color:#065f46"><strong>xiq-ep1-arch-debate.html</strong></a> — verbatim dialogue log, 10-section annotation space for engineering team</li>
     </ul>
   </div>
 
+  <div class="box" style="border-left:4px solid #1e40af;">
+    <p class="box-label">RAG Corpus v2.4 — GitHub</p>
+    <ul>
+      <li><strong>26 PDFs</strong> copied from local Downloads and pushed to <code>docs/rag-corpus/</code> on GitHub main — all publicly hosted EN documents</li>
+      <li>All 26 filenames converted to clickable links in <a href="ep1-deployment-guide.html" style="color:#065f46">ep1-deployment-guide.html</a> v2.8 (underlined, bold, open in new tab)</li>
+      <li>4 missing doc-cards added: 121451 + 121452 transition guides + two v25.9.0 licensing guides &rarr; all 26 corpus files now have cards</li>
+      <li>Sources table in <a href="xiq-ep1-arch-debate.html" style="color:#065f46">xiq-ep1-arch-debate.html</a> fully linked to corpus PDFs</li>
+    </ul>
+  </div>
+
+  <div class="box" style="border-left:4px solid #7c3aed;">
+    <p class="box-label">Environment &amp; Tools</p>
+    <ul>
+      <li>Ollama confirmed running (v0.17.7) with 3 local models: <code>deepseek-r1:32b</code> (19 GB) · <code>qwen2.5-coder:32b</code> (19 GB) · <code>qwen2.5-coder:14b</code> (9 GB)</li>
+      <li>Air-gap protocol established: confidential documents &rarr; <code>ollama run deepseek-r1:32b</code> directly in terminal (never through Claude Code)</li>
+      <li>EN education URL (<code>education.extremenetworks.com/extremecloud-iq/</code>) confirmed behind Microsoft SSO &mdash; requires EN credentials to access</li>
+    </ul>
+  </div>
+
+  <div class="box" style="border-left:4px solid #d97706;">
+    <p class="box-label">Commits Today</p>
+    <ul>
+      <li><code>fe227f6</code> — XIQ vs EP1 arch analysis + debate log + EOD update</li>
+      <li><code>5efdd05</code> — Architecture debate card on all 3 landing pages</li>
+      <li><code>8c43845</code> — RAG Corpus v2.4: 26 PDFs + clickable links</li>
+      <li><code>2d9cf10</code> — Link visibility fix: underline always on + debate Sources table links</li>
+      <li><code>6b3840c</code> — 4 missing doc-cards added (121451, 121452, 25_9_0 ×2)</li>
+    </ul>
+  </div>
+
+  <!-- ─── TOMORROW ─── -->
+  <span class="section-label" id="tomorrow">Tomorrow&rsquo;s Sprint &mdash; Wednesday May 20</span>
+
+  <div class="box warn" style="border-left:4px solid #dc2626;">
+    <p class="box-label">Step 1 &mdash; First Thing: Deploy EP1 Policy (Two SSIDs)</p>
+    <ol>
+      <li><strong>SW1 pre-flight:</strong> VLANs 5 + 10 created, tagged on Port 3, DHCP enabled per VLAN, <code>enable ipforwarding</code> on console</li>
+      <li><strong>EP1 Network Policy:</strong> Employee SSID (PPSK / VLAN 5) + Guest SSID (CWP built-in / VLAN 10) &mdash; single policy, two SSIDs</li>
+      <li><strong>Push + Test:</strong> AP1 reboots, both SSIDs broadcast &rarr; connect iPhone to Employee (PPSK) &rarr; <code>show fdb ports 3</code> = MAC in VLAN 5 &rarr; connect to Guest &rarr; CWP redirect in browser</li>
+      <li><strong>Gate:</strong> Both SSIDs passing traffic on correct VLANs before moving to Step 2</li>
+    </ol>
+  </div>
+
   <div class="box info">
-    <p class="box-label">Web Research Running (Background)</p>
-    <p>Searching for latest EP1 documentation corpus, ExtremeConnect 2026 EP1 sessions, GuestEssentials docs, AirDefense user guide, UI Transition FAQ &mdash; to seed the XIQ&rarr;EP1 intelligence engine bibliography. Results will be added to <a href="xiq-ep1-transition.html" style="color:#0284c7">xiq-ep1-transition.html</a> and the design dialogue log when research completes.</p>
+    <p class="box-label">Step 2 &mdash; Guest Essentials (First Time)</p>
+    <ol>
+      <li>Launch GuestEssentials app from EP1 9-dot launcher</li>
+      <li>Create authorization policy &rarr; onboarding rule &rarr; splash template (T&amp;C accept-and-connect)</li>
+      <li>Attach to Guest SSID &rarr; test self-registration flow from iPhone</li>
+      <li>Reference: <a href="ep1-deployment-guide.html#rag-local" style="color:#0284c7">RAG Corpus &rarr; GuestEssentials User Guide (104 pp) + Config Guide (47 pp)</a></li>
+    </ol>
+  </div>
+
+  <div class="box info">
+    <p class="box-label">Step 3 &mdash; AirDefense Essentials (First Time)</p>
+    <ol>
+      <li>Launch AirDefense app from EP1 9-dot launcher</li>
+      <li>Create WIPS policy &rarr; attach to Network Policy &rarr; Additional Settings &rarr; WIPS</li>
+      <li>Configure AP1 Radio-Share sensor mode (client access + background scanning)</li>
+      <li>Complete CONFIG PUSH to activate &rarr; verify rogue detection dashboard</li>
+      <li>Reference: <a href="ep1-deployment-guide.html#rag-local" style="color:#0284c7">RAG Corpus &rarr; AirDefense User Guide (49 pp) + AP Sensor Config (15 pp)</a></li>
+    </ol>
+  </div>
+
+  <div class="box" style="border-left:4px solid #7c3aed;">
+    <p class="box-label">Step 4 &mdash; Architecture Framework (Resume)</p>
+    <ul>
+      <li>Return to <a href="xiq-ep1-arch-debate.html" style="color:#065f46">xiq-ep1-arch-debate.html</a> with engineering team annotations</li>
+      <li>Validate or refute the 7 open hypotheses using GuestEssentials + AirDefense hands-on data</li>
+      <li>Update confidence tiers: hypothesis &rarr; confirmed (or ruled out) based on observed behaviour</li>
+    </ul>
+  </div>
+
+  <!-- ─── PENDING ─── -->
+  <span class="section-label" id="pending">Pending &mdash; Parked Items</span>
+
+  <div class="box">
+    <p class="box-label">Parked (Not Blocking Tomorrow)</p>
+    <ul>
+      <li><strong>802.1X / NPS:</strong> deferred &mdash; not needed for Friday Sr Director session</li>
+      <li><strong>EP1 Security / ZTNA:</strong> deferred &mdash; separate 9-dot app, post-Friday sprint</li>
+      <li><strong>XIQ&rarr;EP1 architecture hypotheses:</strong> 7 open R&amp;D questions awaiting engineering team annotation at <a href="xiq-ep1-arch-debate.html" style="color:#065f46">xiq-ep1-arch-debate.html</a></li>
+      <li><strong>EN education portal:</strong> <code>education.extremenetworks.com/extremecloud-iq/</code> behind SSO &mdash; access with EN credentials when needed</li>
+      <li><strong>Confidential doc:</strong> use <code>ollama run deepseek-r1:32b</code> directly (air-gapped, never through Claude Code)</li>
+      <li><strong>PPSK EOD HTML (May 18):</strong> index card not completed &mdash; low priority, resume after Friday</li>
+    </ul>
   </div>
 
   <hr class="divider">
