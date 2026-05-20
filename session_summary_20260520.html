@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EP1 Two-SSID Deploy — May 20, 2026 | KhKLab EOD</title>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Libre+Franklin:wght@400;600;700;900&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Libre Baskerville', Georgia, serif; font-size: 1rem; line-height: 1.75; color: #111; background: #fff; max-width: 820px; margin: 0 auto; padding: 40px 24px 80px; }
+  h1 { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 2.1rem; font-weight: 900; line-height: 1.15; letter-spacing: -0.02em; margin-bottom: 6px; }
+  h2 { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 1.25rem; font-weight: 700; margin: 32px 0 10px; }
+  h3 { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 1rem; font-weight: 700; margin: 22px 0 6px; }
+  p { margin-bottom: 14px; }
+  ul, ol { margin: 8px 0 14px 22px; }
+  li { margin-bottom: 5px; }
+  a { color: #1e40af; }
+  a:hover { text-decoration: underline; }
+  code { font-family: 'SF Mono', Menlo, Consolas, monospace; font-size: 0.8rem; background: #F4F4F4; border: 1px solid #E2E2E2; padding: 1px 5px; border-radius: 3px; color: #1e40af; }
+  pre { background: #1e1e2e; color: #cdd6f4; border-radius: 6px; padding: 16px 18px; font-size: 0.8rem; line-height: 1.6; overflow-x: auto; margin: 12px 0 18px; }
+  pre code { background: none; border: none; padding: 0; color: inherit; font-size: inherit; }
+  .kicker { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.18em; color: #1e40af; margin-bottom: 8px; display: block; }
+  .byline { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.78rem; color: #555; border-top: 1px solid #E2E2E2; border-bottom: 1px solid #E2E2E2; padding: 8px 0; margin: 14px 0 24px; }
+  .section-label { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.18em; color: #065f46; margin: 44px 0 14px; padding-bottom: 6px; border-bottom: 2px solid #065f46; display: block; }
+  .toc { position: sticky; top: 0; background: #fff; border-bottom: 1px solid #E2E2E2; padding: 10px 0 8px; margin-bottom: 32px; z-index: 100; overflow-x: auto; white-space: nowrap; }
+  .toc-title { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.15em; color: #888; margin-bottom: 5px; }
+  .toc a { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.72rem; color: #1e40af; text-decoration: none; margin-right: 16px; }
+  .toc a:hover { text-decoration: underline; }
+  table { width: 100%; border-collapse: collapse; margin: 12px 0 20px; font-size: 0.84rem; }
+  th { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; background: #F9F9F9; padding: 8px 10px; border: 1px solid #E2E2E2; text-align: left; }
+  td { padding: 8px 10px; border: 1px solid #E2E2E2; vertical-align: top; }
+  tr:nth-child(even) { background: #FAFAFA; }
+  .box { border: 1px solid #E2E2E2; border-left: 4px solid #065f46; border-radius: 4px; padding: 14px 16px; margin: 18px 0; background: #F9FFF9; }
+  .box.warn { border-left-color: #d97706; background: #FFFBEB; }
+  .box.info { border-left-color: #1e40af; background: #EFF6FF; }
+  .box.err  { border-left-color: #dc2626; background: #FEF2F2; }
+  .box-label { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.14em; color: #6b7280; margin-bottom: 6px; }
+  .badge { display: inline-block; font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.58rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; padding: 1px 6px; border-radius: 10px; vertical-align: middle; margin-left: 4px; }
+  .badge-ok  { background: #D1FAE5; color: #065f46; border: 1px solid #6ee7b7; }
+  .badge-warn { background: #FEF3C7; color: #92400e; border: 1px solid #fcd34d; }
+  .badge-err  { background: #FEE2E2; color: #991b1b; border: 1px solid #fca5a5; }
+  .badge-info { background: #DBEAFE; color: #1e40af; border: 1px solid #93c5fd; }
+  .flow-row { display: flex; align-items: center; gap: 0; margin: 14px 0; flex-wrap: wrap; gap: 4px; }
+  .flow-node { border: 1px solid #93c5fd; background: #EFF6FF; border-radius: 4px; padding: 6px 12px; font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.75rem; font-weight: 600; white-space: nowrap; }
+  .flow-node.green { border-color: #6ee7b7; background: #D1FAE5; }
+  .flow-node.red   { border-color: #fca5a5; background: #FEE2E2; }
+  .flow-node.gray  { border-color: #D1D5DB; background: #F9FAFB; }
+  .flow-node.amber { border-color: #fcd34d; background: #FEF3C7; }
+  .flow-arrow { font-size: 1rem; color: #9CA3AF; padding: 0 2px; }
+  .divider { border: none; border-top: 1px solid #E2E2E2; margin: 36px 0; }
+  .result-row { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid #E2E2E2; font-size: 0.88rem; }
+  .result-row:last-child { border-bottom: none; }
+  .result-label { font-family: 'Libre Franklin', Arial, sans-serif; font-weight: 700; font-size: 0.82rem; flex: 0 0 200px; }
+  .footer { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.72rem; color: #888; text-align: center; line-height: 1.8; }
+  @media(max-width:600px) { .toc a { font-size: 0.65rem; } }
+</style>
+</head>
+<body>
+
+<div class="toc">
+  <div class="toc-title">May 20 Sprint</div>
+  <a href="#overview">Overview</a>
+  <a href="#design">Network Design</a>
+  <a href="#sw1-cli">SW1 CLI</a>
+  <a href="#qfmodem">QF-Modem Routes</a>
+  <a href="#ap1-migration">AP1 VIQ Migration</a>
+  <a href="#ep1-policy">EP1 Policy Build</a>
+  <a href="#results">Test Results</a>
+  <a href="#lessons">Lessons Learned</a>
+  <a href="#guest-troubleshoot">Guest VLAN Pending</a>
+  <a href="#tomorrow">Tomorrow</a>
+</div>
+
+<span class="kicker">KhKLab &nbsp;&bull;&nbsp; EP1 Sprint &nbsp;&bull;&nbsp; May 20, 2026</span>
+<h1>EP1 Two-SSID Deploy<br>Employee PPSK + Guest CWP</h1>
+<p class="byline">
+  Khursheed Khan &nbsp;&bull;&nbsp; May 20, 2026 &nbsp;&bull;&nbsp;
+  ALL EP1 session &nbsp;&bull;&nbsp; Stage 1: CLI for SW1 + UE for AP1
+</p>
+
+<!-- ═══ OVERVIEW ═══ -->
+<span class="section-label" id="overview">Session Overview</span>
+
+<p>Full-day EP1 (Extreme Platform One) sprint. Both SW1 and AP1 wiped to factory defaults. Goal: deploy a two-SSID network policy through EP1 — Employee on PPSK (VLAN 5) and Guest on Enhanced Open + CWP (VLAN 10) — and validate E2E from client join to IP assignment.</p>
+
+<p><strong>Stage 1</strong> (this session): SW1 configured via CLI, AP1 and network policy configured via EP1 UI. <strong>Stage 2</strong> (next session): everything via EP1 UI only — no CLI, including switch template for SW1.</p>
+
+<table>
+  <tr><th>Device</th><th>Model</th><th>Serial / IP</th><th>Role</th></tr>
+  <tr><td>SW1</td><td>5320-16P-2MXT-2X EXOS</td><td>192.168.0.28</td><td>Access switch · DHCP server · VLAN router</td></tr>
+  <tr><td>AP1</td><td>AP3000 IQ Engine</td><td>SN: HA012519Y-10623 · 192.168.0.12 (mgmt)</td><td>Wireless AP · RadSec proxy</td></tr>
+  <tr><td>QF-Modem</td><td>Home router</td><td>192.168.0.1</td><td>Default gateway · internet uplink</td></tr>
+</table>
+
+<!-- ═══ NETWORK DESIGN ═══ -->
+<span class="section-label" id="design">Network Design</span>
+
+<h3>VLAN Map</h3>
+<table>
+  <tr><th>VLAN</th><th>Name</th><th>Subnet</th><th>DHCP Source</th><th>Purpose</th></tr>
+  <tr><td>1</td><td>Default</td><td>192.168.0.x</td><td>QF-Modem</td><td>AP management · SW1 uplink · native/untagged</td></tr>
+  <tr><td>5</td><td>Employee</td><td>10.5.0.0/24 · GW 10.5.0.1</td><td>SW1</td><td>PPSK employee traffic</td></tr>
+  <tr><td>10</td><td>Guest</td><td>10.10.0.0/24 · GW 10.10.0.1</td><td>SW1</td><td>Enhanced Open + CWP guest traffic</td></tr>
+</table>
+
+<h3>SSID Map</h3>
+<table>
+  <tr><th>SSID</th><th>Security</th><th>Radio</th><th>VLAN</th><th>Schedule</th><th>Access</th></tr>
+  <tr><td><code>KhKLab_Employee</code></td><td>WPA2/WPA3 + PPSK</td><td>5 GHz only</td><td>5</td><td>Always</td><td>Pre-issued individual key · 1 device per key · no BYOD</td></tr>
+  <tr><td><code>KhKLab_Guest</code></td><td>Enhanced Open (OWE) + CWP</td><td>5 GHz + 2.4 GHz</td><td>10</td><td>M–F 10:00–14:00</td><td>Connect → CWP → self-register → internet only</td></tr>
+</table>
+
+<h3>Physical Topology</h3>
+<div class="flow-row">
+  <div class="flow-node gray">QF-Modem<br><small>192.168.0.1</small></div><div class="flow-arrow">→</div>
+  <div class="flow-node">SW1 Port 1<br><small>VLAN 1 uplink</small></div><div class="flow-arrow">→</div>
+  <div class="flow-node">SW1 Port 3<br><small>Trunk: VLAN 1 native<br>VLAN 5+10 tagged</small></div><div class="flow-arrow">→</div>
+  <div class="flow-node green">AP1<br><small>HA012519Y-10623</small></div>
+</div>
+
+<div class="box info">
+  <p class="box-label">Return path — QF-Modem static routes</p>
+  <p style="font-size:0.84rem;">QF-Modem needs two static routes so employee and guest traffic can reach the internet through SW1:<br>
+  <code>10.5.0.0/24 → 192.168.0.28</code> &nbsp;&bull;&nbsp; <code>10.10.0.0/24 → 192.168.0.28</code></p>
+</div>
+
+<!-- ═══ SW1 CLI ═══ -->
+<span class="section-label" id="sw1-cli">Step 1 — SW1 Post-Factory-Reset CLI</span>
+
+<p>Run once manually over console or SSH immediately after factory reset. These commands are <strong>not idempotent</strong> — do NOT put <code>enable ipforwarding</code> or <code>enable dhcp ports</code> into an EP1 Supplemental CLI template.</p>
+
+<div class="box warn">
+  <p class="box-label">Critical gotcha — two different DHCP commands</p>
+  <p style="font-size:0.84rem;"><code>enable dhcp vlan &lt;name&gt;</code> = DHCP <strong>client</strong> mode (SW1 asks for an IP). EXOS will throw an error if the VLAN already has a static IP — this is correct behaviour, not a bug. <br><br>
+  <code>enable dhcp ports &lt;port&gt; vlan &lt;name&gt;</code> = DHCP <strong>server</strong> mode (SW1 serves IPs to clients on that port). This is what you need.</p>
+</div>
+
+<pre><code># ── One-time post-factory-reset commands ──────────────────────────────────
+
+# Enable all ports and IP forwarding on Default VLAN
+enable ports all
+enable ipforwarding vlan Default
+
+# Create VLANs
+create vlan Employee tag 5
+create vlan Guest tag 10
+
+# SVI IP addresses — SW1 is the default gateway for VLAN 5 and 10
+configure vlan Employee ipaddress 10.5.0.1 255.255.255.0
+configure vlan Guest ipaddress 10.10.0.1 255.255.255.0
+
+# Port 3 trunk toward AP1
+# VLAN 1 is already native/untagged from factory reset — no change needed
+configure vlan Employee add ports 3 tagged
+configure vlan Guest add ports 3 tagged
+
+# DHCP server — address pools
+configure vlan Employee dhcp-address-range 10.5.0.10 - 10.5.0.254
+configure vlan Employee dhcp-options default-gateway 10.5.0.1
+configure vlan Employee dhcp-options dns-server primary 8.8.8.8
+configure vlan Employee dhcp-options dns-server secondary 1.1.1.1
+
+configure vlan Guest dhcp-address-range 10.10.0.10 - 10.10.0.254
+configure vlan Guest dhcp-options default-gateway 10.10.0.1
+configure vlan Guest dhcp-options dns-server primary 8.8.8.8
+configure vlan Guest dhcp-options dns-server secondary 1.1.1.1
+
+# Enable IP forwarding on both VLANs
+enable ipforwarding vlan Employee
+enable ipforwarding vlan Guest
+
+# Enable DHCP server on port 3 for each VLAN
+enable dhcp ports 3 vlan Employee
+enable dhcp ports 3 vlan Guest
+
+save config</code></pre>
+
+<h3>Verification</h3>
+<pre><code>show vlan
+# Expected: Default (f, 192.168.0.28/24), Employee (f, 10.5.0.1/24), Guest (f, 10.10.0.1/24)
+
+show dhcp-server
+# Expected: Ports DHCP Enabled: 3 on BOTH Employee and Guest</code></pre>
+
+<p>Confirmed output from this session:</p>
+<pre><code>VLAN "Employee":
+    DHCP Address Range   : 10.5.0.10->10.5.0.254
+    Default Gateway      : 10.5.0.1
+    Primary DNS Server   : 8.8.8.8
+    Ports DHCP Enabled   : 3
+
+VLAN "Guest":
+    DHCP Address Range   : 10.10.0.10->10.10.0.254
+    Default Gateway      : 10.10.0.1
+    Primary DNS Server   : 8.8.8.8
+    Ports DHCP Enabled   : 3</code></pre>
+
+<!-- ═══ QF-MODEM ═══ -->
+<span class="section-label" id="qfmodem">Step 2 — QF-Modem Static Routes</span>
+
+<p>Add two static routes on the home router so employee and guest traffic can route back through SW1 to reach the internet.</p>
+
+<table>
+  <tr><th>Type</th><th>Destination</th><th>Subnet Mask</th><th>Gateway</th></tr>
+  <tr><td>IPv4</td><td>10.5.0.0</td><td>255.255.255.0</td><td>192.168.0.28</td></tr>
+  <tr><td>IPv4</td><td>10.10.0.0</td><td>255.255.255.0</td><td>192.168.0.28</td></tr>
+</table>
+
+<p>Path on QF-Modem: <strong>Advanced → Routing → Static Routes → Add</strong></p>
+
+<!-- ═══ AP1 VIQ MIGRATION ═══ -->
+<span class="section-label" id="ap1-migration">Step 3 — AP1 VIQ Migration (Karl's Lab → KhKLab)</span>
+
+<div class="box warn">
+  <p class="box-label">Critical order — do not factory reset before releasing from old VIQ</p>
+  <p style="font-size:0.84rem;">An AP bound to a VIQ reconnects to that VIQ after every factory reset — the cloud owns it by serial number, not local config. Factory resetting first and hoping it appears in your VIQ will not work.</p>
+</div>
+
+<h3>Correct sequence</h3>
+<ol>
+  <li><strong>In Karl's VIQ</strong> (Khursheed had access): EP1 → Manage → Devices → AP1 → Delete/Remove from organization</li>
+  <li><strong>In your VIQ</strong>: EP1 → Manage → Devices → Onboard → enter serial number <code>HA012519Y-10623</code></li>
+  <li><strong>Factory reset AP1</strong> — from EP1 (Manage → Devices → AP1 → Actions → Reset to Factory Default) or physical button</li>
+  <li>AP1 boots → CAPWAP → connects to your VIQ → appears as <strong>Connected (green)</strong></li>
+</ol>
+
+<!-- ═══ EP1 POLICY BUILD ═══ -->
+<span class="section-label" id="ep1-policy">Step 4 — EP1 Network Policy Build</span>
+
+<p>Policy name: <strong><code>AP1_ViaEP1_VLAN5-10_PPSK_5</code></strong></p>
+
+<p>Path: EP1 → Configure → Network Policies → Add</p>
+
+<h3>SSID 1 — KhKLab_Employee</h3>
+<table>
+  <tr><th>Setting</th><th>Value</th></tr>
+  <tr><td>SSID Name</td><td>KhKLab_Employee</td></tr>
+  <tr><td>Authentication</td><td>Private Pre-Shared Key (PPSK)</td></tr>
+  <tr><td>Radio</td><td>5 GHz only</td></tr>
+  <tr><td>User Profile / VLAN</td><td>VLAN 5 (Employee)</td></tr>
+  <tr><td>PPSK Classification</td><td>None — all employees → VLAN 5</td></tr>
+  <tr><td>User Group storage</td><td>Cloud (up to 100K keys)</td></tr>
+  <tr><td>Max devices per key</td><td>1</td></tr>
+  <tr><td>BYOD</td><td>Disabled</td></tr>
+  <tr><td>Encryption</td><td>WPA2/WPA3 transition mode</td></tr>
+</table>
+
+<h3>SSID 2 — KhKLab_Guest</h3>
+<table>
+  <tr><th>Setting</th><th>Value</th></tr>
+  <tr><td>SSID Name</td><td>KhKLab_Guest</td></tr>
+  <tr><td>Authentication</td><td>Enhanced Open (OWE) + CWP</td></tr>
+  <tr><td>OWE mode</td><td>Transition Mode (OWE + open fallback for older devices)</td></tr>
+  <tr><td>Radio</td><td>5 GHz + 2.4 GHz</td></tr>
+  <tr><td>User Profile / VLAN</td><td>GuestVLAN_10 (VLAN 10)</td></tr>
+  <tr><td>CWP</td><td>Guest_CWP — self-registration enabled</td></tr>
+  <tr><td>Schedule</td><td>Mon–Fri 10:00–14:00</td></tr>
+  <tr><td>Inter-station traffic</td><td>Disabled (guests cannot see each other)</td></tr>
+  <tr><td>Firewall</td><td>DENY 10.0.0.0/8 → DENY 172.16.0.0/12 → DENY 192.168.0.0/16 → PERMIT any</td></tr>
+</table>
+
+<h3>Deploy sequence</h3>
+<div class="flow-row">
+  <div class="flow-node">Policy saved</div><div class="flow-arrow">→</div>
+  <div class="flow-node">Assign to AP1</div><div class="flow-arrow">→</div>
+  <div class="flow-node">Push/Deploy</div><div class="flow-arrow">→</div>
+  <div class="flow-node amber">AP1 reboots<br><small>orange LED</small></div><div class="flow-arrow">→</div>
+  <div class="flow-node green">Solid green<br><small>SSIDs broadcasting</small></div>
+</div>
+
+<p style="font-size:0.84rem;color:#555;">LED sequence during policy push: white (applying) → orange (rebooting) → green flashing (CAPWAP reconnect) → solid green (ready). Normal duration: 5–8 minutes.</p>
+
+<!-- ═══ RESULTS ═══ -->
+<span class="section-label" id="results">Step 5 — Test Results</span>
+
+<div class="result-row">
+  <div class="result-label">Employee PPSK join</div>
+  <span class="badge badge-ok">PASS</span>
+  <span style="font-size:0.84rem;">Connected to KhKLab_Employee · IP: <code>10.5.0.10</code> (VLAN 5 ✓)</span>
+</div>
+<div class="result-row">
+  <div class="result-label">Employee VLAN assignment</div>
+  <span class="badge badge-ok">PASS</span>
+  <span style="font-size:0.84rem;">DHCP lease from SW1 VLAN 5 pool (10.5.0.10–10.5.0.254)</span>
+</div>
+<div class="result-row">
+  <div class="result-label">Guest CWP page load</div>
+  <span class="badge badge-ok">PASS</span>
+  <span style="font-size:0.84rem;">CWP displayed correctly on connect to KhKLab_Guest</span>
+</div>
+<div class="result-row">
+  <div class="result-label">Guest VLAN assignment</div>
+  <span class="badge badge-err">PENDING</span>
+  <span style="font-size:0.84rem;">Client received <code>192.168.0.23</code> (VLAN 1) instead of <code>10.10.0.x</code> (VLAN 10). User Profile GuestVLAN_10 confirmed VLAN ID = 10. Root cause TBD.</span>
+</div>
+<div class="result-row">
+  <div class="result-label">AP1 PPSK email delivery</div>
+  <span class="badge badge-warn">NOT TESTED</span>
+  <span style="font-size:0.84rem;">Email not received during session. Resend via: Configure → User Management → Users → Send Credentials</span>
+</div>
+
+<!-- ═══ LESSONS LEARNED ═══ -->
+<span class="section-label" id="lessons">Lessons Learned</span>
+
+<h3>1. DHCP server vs client — two different EXOS commands</h3>
+<p><code>enable dhcp vlan &lt;name&gt;</code> enables <strong>DHCP client mode</strong> on the VLAN interface. EXOS throws an error if the VLAN already has a static IP — this is correct. The DHCP <strong>server</strong> requires a separate command:</p>
+<pre><code>enable dhcp ports &lt;port&gt; vlan &lt;name&gt;   ← server mode, enables on specific port
+# Confirmed by: "Ports DHCP Enabled: No ports enabled" in show dhcp-server
+# Fix: enable dhcp ports 3 vlan Employee / enable dhcp ports 3 vlan Guest</code></pre>
+
+<h3>2. VIQ migration order is non-negotiable</h3>
+<p>Delete AP from old VIQ <strong>before</strong> factory reset. The cloud owns the AP by serial number. A factory reset without the cloud-side release just reconnects the AP to the old VIQ. Sequence: delete from old org → onboard SN in new org → reset AP.</p>
+
+<h3>3. VLAN assignment in EP1 = User Profile, not SSID name</h3>
+<p>The SSID name and VLAN name can be anything — what controls which VLAN tag AP1 applies to client frames is the <strong>User Profile</strong> assigned to the SSID. Always verify: SSID → Default User Profile → VLAN ID.</p>
+
+<h3>4. AP3000 SSH password after EP1 onboarding</h3>
+<p>Default SSH credentials not found during this session. Password is set via Device Admin Profile in EP1. Location: Configure → Common Objects → Management → Device Admin Profiles. Configure this in the network policy before needing SSH access.</p>
+
+<h3>5. IQAgent heartbeat is normal</h3>
+<p><code>proxy device-connector unknown POST /health-check/[serial]</code> every ~60 s = normal IQAgent keepalive. Not an error or connection problem.</p>
+
+<!-- ═══ GUEST VLAN TROUBLESHOOT ═══ -->
+<span class="section-label" id="guest-troubleshoot">Guest VLAN Troubleshooting — Pending Next Session</span>
+
+<p><strong>Symptom:</strong> Guest client receives <code>192.168.0.23</code> (VLAN 1 / QF-Modem DHCP) instead of <code>10.10.0.x</code> (VLAN 10 / SW1 DHCP).</p>
+
+<p><strong>Already confirmed:</strong></p>
+<ul>
+  <li>GuestVLAN_10 User Profile: VLAN ID = 10 ✓</li>
+  <li>SW1 Port 3: VLAN Guest (10) tagged ✓</li>
+  <li>SW1 DHCP server: Ports DHCP Enabled: 3 for Guest ✓</li>
+  <li>Policy pushed to AP1 ✓</li>
+</ul>
+
+<p><strong>Hypotheses to check next session:</strong></p>
+<ol>
+  <li><strong>Pre-auth vs post-auth VLAN</strong> — with CWP enabled, verify the client gets VLAN 10 IP before completing the CWP (should happen at association, not after portal completion)</li>
+  <li><strong>Policy re-push needed</strong> — push the policy again after confirming GuestVLAN_10 VLAN ID, then forget/reconnect on client device</li>
+  <li><strong>OWE Transition Mode</strong> — check if client is connecting to the hidden OWE SSID or the open fallback and whether the User Profile applies to both</li>
+  <li><strong>SW1 verification</strong> — after a guest connects, run <code>show fdb ports 3</code> and <code>show iparp vlan Guest</code> to see if the MAC appears on VLAN 10 at SW1</li>
+</ol>
+
+<div class="box warn">
+  <p class="box-label">Quick diagnostic — run on SW1 while guest is connected</p>
+  <pre style="margin:8px 0 0;background:#1e1e2e;color:#cdd6f4;border-radius:4px;padding:12px;font-size:0.78rem;">show fdb ports 3
+show iparp vlan Guest
+show dhcp-server leases vlan Guest</pre>
+  <p style="font-size:0.82rem;margin-top:8px;">If the guest MAC does not appear on VLAN 10 in the FDB, AP1 is sending untagged frames. Check User Profile → VLAN ID in EP1 policy, repush, reconnect.</p>
+</div>
+
+<!-- ═══ TOMORROW ═══ -->
+<span class="section-label" id="tomorrow">Tomorrow's Sprint</span>
+
+<ol>
+  <li><strong>Fix Guest VLAN 10</strong> — run SW1 diagnostics, repush policy, retest</li>
+  <li><strong>PPSK email delivery</strong> — verify employee receives credentials email</li>
+  <li><strong>Guest Essentials</strong> — explore EP1 Guest Essentials module: sponsor approval flow, time-limited access, usage reports</li>
+  <li><strong>AirDefense</strong> — enable and configure AirDefense in EP1: rogue AP detection, RF threat alerting</li>
+  <li><strong>Stage 2</strong> — wipe SW1 + AP1, redo entire deploy via EP1 UI only (switch template + Supplemental CLI, no manual CLI)</li>
+  <li><strong>AP SSH access</strong> — configure Device Admin Profile in EP1 with known password before Stage 2</li>
+</ol>
+
+<hr class="divider">
+<p class="footer">
+  KhKLab &nbsp;&bull;&nbsp; EP1 Sprint EOD &nbsp;&bull;&nbsp; May 20, 2026<br>
+  EP1 Policy: <strong>AP1_ViaEP1_VLAN5-10_PPSK_5</strong> &nbsp;&bull;&nbsp; AP1 SN: HA012519Y-10623 &nbsp;&bull;&nbsp; SW1: 192.168.0.28<br>
+  <a href="ep1-api-snmp-study.html">API &amp; SNMP Deep Study</a> &nbsp;&bull;&nbsp;
+  <a href="ep1-deployment-guide.html">EP1 Deployment Guide v2.8</a> &nbsp;&bull;&nbsp;
+  <a href="index-nyt.html">← Lab Index</a><br>
+  &copy; 2026 Khursheed Khan &nbsp;&bull;&nbsp; All rights reserved
+</p>
+
+</body>
+</html>
