@@ -113,7 +113,7 @@ tr:nth-child(even) td { background: #FAFAFA; }
     <a href="#topology">Lab Topology</a>
     <a href="#arch-analysis">XIQ vs EP1 — E2E Architecture Analysis (Engineering Review)</a>
     <a href="#accomplished">Accomplished Today</a>
-    <a href="#tomorrow">Tomorrow's Sprint</a>
+    <a href="#tomorrow">Today's Sprint — May 20</a>
     <a href="#pending">Pending / Parked</a>
   </div>
 
@@ -624,10 +624,56 @@ tr:nth-child(even) td { background: #FAFAFA; }
   </div>
 
   <!-- ─── TOMORROW ─── -->
-  <span class="section-label" id="tomorrow">Tomorrow&rsquo;s Sprint &mdash; Wednesday May 20</span>
+  <span class="section-label" id="tomorrow">Today&rsquo;s Sprint &mdash; Wednesday May 20</span>
+
+  <div class="box" style="border-left:4px solid #0284c7;background:#f0f9ff;">
+    <p class="box-label">Step 0 &mdash; Morning Study: EP1 APIs + SNMP (Deep)</p>
+    <p style="font-size:0.85rem;color:#374151;margin-bottom:8px">Complete this before touching the lab. Goal: understand the programmatic + monitoring surface of EP1 so the Sr Director session can go beyond click-through.</p>
+    <ol>
+      <li>
+        <strong>EP1 REST API fundamentals</strong>
+        <ul style="margin-top:4px">
+          <li>Base URL, auth model (OAuth2 / Bearer token), rate limits &mdash; User Guide p.1&ndash;5 of API Developer Space</li>
+          <li>Key resource groups: Devices, Network Policies, SSIDs, User Management, Alerts, Location</li>
+          <li>Understand CRUD pattern: <code>GET /xapi/v1/devices</code> &rarr; <code>POST /xapi/v1/network-policies</code> &rarr; <code>PUT .../deploy</code></li>
+          <li>Pagination, field filtering (<code>?fields=</code>), async job pattern (config push returns a job ID, poll <code>GET /xapi/v1/jobs/{id}</code>)</li>
+          <li>EP1 Swagger/OpenAPI: available at <code>extremecloudiq.com/api-docs</code> (requires login)</li>
+        </ul>
+      </li>
+      <li>
+        <strong>SNMP in EP1</strong>
+        <ul style="margin-top:4px">
+          <li>SNMP configured per Network Policy: <strong>Additional Settings &rarr; Management Servers &rarr; SNMP Server</strong> (User Guide p.240)</li>
+          <li>Supported: SNMPv2c (community string) and SNMPv3 (auth/priv). Operations: Get + Trap</li>
+          <li>Community string default in lab: <code>hivecommunity</code> (EN default, change in production)</li>
+          <li>What APs trap on: client assoc/disassoc, rogue detection, channel change, AP up/down, config push status</li>
+          <li>Switches (EXOS): SNMP config is pushed via Supplemental CLI or switch template &mdash; separate from AP SNMP</li>
+          <li>SNMP MIBs: EP1 uses Aerohive MIBs for APs (downloadable from GTAC &rarr; MIB files). Standard IF-MIB + ENTITY-MIB apply to switches</li>
+          <li>Trap receiver: configure your NMS IP as SNMP server in EP1 &rarr; APs send traps directly to NMS, not through EP1 cloud</li>
+        </ul>
+      </li>
+      <li>
+        <strong>API vs SNMP — when to use which</strong>
+        <ul style="margin-top:4px">
+          <li><strong>API:</strong> provisioning automation, CI/CD pipeline integration, bulk onboarding, custom dashboards pulling live data</li>
+          <li><strong>SNMP:</strong> legacy NMS integration (SolarWinds, PRTG, Zabbix), real-time trap alerting, switch port utilisation polling</li>
+          <li><strong>Both together:</strong> SNMP for low-latency operational alerts &rarr; API for enrichment (pull device context from EP1 when trap fires)</li>
+        </ul>
+      </li>
+      <li>
+        <strong>Syslog (related &mdash; quick read)</strong>
+        <ul style="margin-top:4px">
+          <li>Also in Management Servers: Syslog server IP + port + severity threshold</li>
+          <li>APs send syslog directly to server (UDP 514 by default) &mdash; not through EP1 cloud</li>
+          <li>Combine with SNMP: syslog = verbose event stream, SNMP trap = actionable alert</li>
+        </ul>
+      </li>
+    </ol>
+    <p style="font-size:0.82rem;color:#1e40af;margin-top:8px"><strong>RAG references:</strong> <a href="ep1-deployment-guide.html#rag-local" style="color:#0284c7">EP1 Networking User Guide pp.238&ndash;242</a> (SNMP + Syslog config) &nbsp;&bull;&nbsp; EP1 API Developer Space (extremecloudiq.com, requires login)</p>
+  </div>
 
   <div class="box warn" style="border-left:4px solid #dc2626;">
-    <p class="box-label">Step 1 &mdash; First Thing: Deploy EP1 Policy (Two SSIDs)</p>
+    <p class="box-label">Step 1 &mdash; Deploy EP1 Policy (Two SSIDs)</p>
     <ol>
       <li><strong>SW1 pre-flight:</strong> VLANs 5 + 10 created, tagged on Port 3, DHCP enabled per VLAN, <code>enable ipforwarding</code> on console</li>
       <li><strong>EP1 Network Policy:</strong> Employee SSID (PPSK / VLAN 5) + Guest SSID (CWP built-in / VLAN 10) &mdash; single policy, two SSIDs</li>
