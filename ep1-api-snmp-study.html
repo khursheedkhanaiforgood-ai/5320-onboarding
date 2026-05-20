@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EP1 APIs &amp; SNMP — Deep Study | KhKLab</title>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Libre+Franklin:wght@400;600;700;900&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Libre Baskerville', Georgia, serif; font-size: 1rem; line-height: 1.75; color: #111; background: #fff; max-width: 820px; margin: 0 auto; padding: 40px 24px 80px; }
+  h1 { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 2.1rem; font-weight: 900; line-height: 1.15; letter-spacing: -0.02em; margin-bottom: 6px; }
+  h2 { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 1.25rem; font-weight: 700; margin: 32px 0 10px; }
+  h3 { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 1rem; font-weight: 700; margin: 22px 0 6px; }
+  p { margin-bottom: 14px; }
+  ul, ol { margin: 8px 0 14px 22px; }
+  li { margin-bottom: 5px; }
+  a { color: #1e40af; }
+  a:hover { text-decoration: underline; }
+  code { font-family: 'SF Mono', Menlo, Consolas, monospace; font-size: 0.8rem; background: #F4F4F4; border: 1px solid #E2E2E2; padding: 1px 5px; border-radius: 3px; color: #1e40af; }
+  pre { background: #1e1e2e; color: #cdd6f4; border-radius: 6px; padding: 16px 18px; font-size: 0.8rem; line-height: 1.6; overflow-x: auto; margin: 12px 0 18px; }
+  pre code { background: none; border: none; padding: 0; color: inherit; font-size: inherit; }
+  .kicker { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.18em; color: #1e40af; margin-bottom: 8px; display: block; }
+  .byline { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.78rem; color: #555; border-top: 1px solid #E2E2E2; border-bottom: 1px solid #E2E2E2; padding: 8px 0; margin: 14px 0 24px; }
+  .section-label { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.18em; color: #065f46; margin: 44px 0 14px; padding-bottom: 6px; border-bottom: 2px solid #065f46; display: block; }
+  .toc { position: sticky; top: 0; background: #fff; border-bottom: 1px solid #E2E2E2; padding: 10px 0 8px; margin-bottom: 32px; z-index: 100; }
+  .toc-title { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.15em; color: #888; margin-bottom: 5px; }
+  .toc a { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.72rem; color: #1e40af; text-decoration: none; margin-right: 16px; white-space: nowrap; }
+  .toc a:hover { text-decoration: underline; }
+  table { width: 100%; border-collapse: collapse; margin: 12px 0 20px; font-size: 0.84rem; }
+  th { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; background: #F9F9F9; padding: 8px 10px; border: 1px solid #E2E2E2; text-align: left; }
+  td { padding: 8px 10px; border: 1px solid #E2E2E2; vertical-align: top; }
+  tr:nth-child(even) { background: #FAFAFA; }
+  .box { border: 1px solid #E2E2E2; border-left: 4px solid #065f46; border-radius: 4px; padding: 14px 16px; margin: 18px 0; background: #F9FFF9; }
+  .box.warn { border-left-color: #d97706; background: #FFFBEB; }
+  .box.info { border-left-color: #1e40af; background: #EFF6FF; }
+  .box.hyp { border-left-color: #9333ea; background: #FAF5FF; }
+  .box-label { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.14em; color: #6b7280; margin-bottom: 6px; }
+  .badge { display: inline-block; font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.58rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; padding: 1px 6px; border-radius: 10px; vertical-align: middle; margin-left: 4px; }
+  .badge-conf { background: #DBEAFE; color: #1e40af; border: 1px solid #93c5fd; }
+  .badge-hyp { background: #FEE2E2; color: #991b1b; border: 1px solid #fca5a5; }
+  .badge-rfc { background: #D1FAE5; color: #065f46; border: 1px solid #6ee7b7; }
+  .ref-tag { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.7rem; font-weight: 600; color: #065f46; }
+  .rfc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 12px 0 20px; }
+  .rfc-card { border: 1px solid #E2E2E2; border-radius: 4px; padding: 10px 12px; background: #FAFAFA; }
+  .rfc-card .rfc-num { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #065f46; }
+  .rfc-card h4 { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.82rem; font-weight: 700; margin: 2px 0 3px; }
+  .rfc-card p { font-size: 0.75rem; color: #555; margin: 0; line-height: 1.5; }
+  .flow-row { display: flex; align-items: center; gap: 0; margin: 14px 0; flex-wrap: wrap; }
+  .flow-node { border: 1px solid #93c5fd; background: #EFF6FF; border-radius: 4px; padding: 6px 12px; font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.75rem; font-weight: 600; white-space: nowrap; }
+  .flow-node.green { border-color: #6ee7b7; background: #D1FAE5; }
+  .flow-node.gray { border-color: #D1D5DB; background: #F9FAFB; }
+  .flow-node.red { border-color: #fca5a5; background: #FEE2E2; }
+  .flow-arrow { font-size: 1rem; color: #9CA3AF; padding: 0 6px; }
+  .divider { border: none; border-top: 1px solid #E2E2E2; margin: 36px 0; }
+  .footer { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.72rem; color: #888; text-align: center; line-height: 1.8; }
+  @media(max-width:600px) { .rfc-grid { grid-template-columns: 1fr; } .toc a { font-size: 0.65rem; } }
+</style>
+</head>
+<body>
+
+<div class="toc">
+  <div class="toc-title">In This Study</div>
+  <a href="#rfc-index">RFC Index</a>
+  <a href="#api-foundation">API Foundation</a>
+  <a href="#api-auth">Auth: OAuth2 + Bearer</a>
+  <a href="#api-ep1">EP1 API Architecture</a>
+  <a href="#api-xiq-vs-ep1">XIQ vs EP1 API</a>
+  <a href="#snmp-foundation">SNMP Foundation</a>
+  <a href="#snmp-versions">SNMPv1 / v2c / v3</a>
+  <a href="#snmp-mib">MIBs &amp; OIDs</a>
+  <a href="#snmp-ep1">SNMP in EP1</a>
+  <a href="#snmp-xiq-vs-ep1">XIQ vs EP1 SNMP</a>
+  <a href="#integration">API + SNMP Together</a>
+</div>
+
+<span class="kicker">KhKLab &nbsp;&bull;&nbsp; Deep Study &nbsp;&bull;&nbsp; May 20, 2026</span>
+<h1>EP1 APIs &amp; SNMP<br>Foundation to Practice</h1>
+<p class="byline">
+  Khursheed Khan &nbsp;&bull;&nbsp; May 20, 2026 &nbsp;&bull;&nbsp;
+  RAG sources: <a href="docs/rag-corpus/Extreme_Platform_ONE_Networking_25_9_0_User_Guide.pdf" target="_blank">EP1 Networking User Guide v25.9.0 (677 pp)</a> &nbsp;&bull;&nbsp;
+  <a href="docs/rag-corpus/flipbook-with-notes.pdf" target="_blank">EP1 Cloud Architecture White Paper (13 pp)</a> &nbsp;&bull;&nbsp;
+  IETF RFC Editor: <a href="https://www.rfc-editor.org" target="_blank">rfc-editor.org</a>
+</p>
+
+<div class="box warn">
+  <p class="box-label">Confidence Key</p>
+  <p style="font-size:0.84rem">
+    <span class="badge badge-conf">CONFIRMED</span> = cited from RAG corpus with exact page reference &nbsp;|&nbsp;
+    <span class="badge badge-rfc">RFC</span> = linked to official IETF RFC &nbsp;|&nbsp;
+    <span class="badge badge-hyp">HYPOTHESIS</span> = architecturally sound inference, no EP1-specific citation — verify against live portal or GTAC
+  </p>
+</div>
+
+<!-- ═══════════════════════════════════════════════ RFC INDEX ═══ -->
+<span class="section-label" id="rfc-index">RFC / IETF Reference Index</span>
+
+<p>Every RFC below is directly relevant to either the API or SNMP stack used in EP1. Links go to the canonical IETF RFC Editor. Open any entry to read the authoritative specification.</p>
+
+<p style="font-family:'Libre Franklin',Arial,sans-serif;font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:6px;color:#065f46;">REST / HTTP / API</p>
+<div class="rfc-grid">
+  <div class="rfc-card">
+    <div class="rfc-num">RFC 7230 <span class="badge badge-rfc">RFC</span></div>
+    <h4>HTTP/1.1 — Message Syntax &amp; Routing</h4>
+    <p>Defines the wire format: request-line, headers, body. Foundation for all REST calls. Governs how clients and servers exchange messages. <a href="https://www.rfc-editor.org/rfc/rfc7230" target="_blank">rfc-editor.org/rfc/rfc7230</a></p>
+  </div>
+  <div class="rfc-card">
+    <div class="rfc-num">RFC 7231 <span class="badge badge-rfc">RFC</span></div>
+    <h4>HTTP/1.1 — Semantics &amp; Content</h4>
+    <p>Defines methods (GET, POST, PUT, DELETE, PATCH), status codes (200, 201, 400, 401, 403, 404, 429, 500), and content negotiation. The primary reference for REST method semantics. <a href="https://www.rfc-editor.org/rfc/rfc7231" target="_blank">rfc-editor.org/rfc/rfc7231</a></p>
+  </div>
+  <div class="rfc-card">
+    <div class="rfc-num">RFC 7235 <span class="badge badge-rfc">RFC</span></div>
+    <h4>HTTP/1.1 — Authentication</h4>
+    <p>Defines the <code>WWW-Authenticate</code> and <code>Authorization</code> header framework. The plumbing that Bearer tokens (RFC 6750) slot into. <a href="https://www.rfc-editor.org/rfc/rfc7235" target="_blank">rfc-editor.org/rfc/rfc7235</a></p>
+  </div>
+  <div class="rfc-card">
+    <div class="rfc-num">RFC 6749 <span class="badge badge-rfc">RFC</span></div>
+    <h4>OAuth 2.0 Authorization Framework</h4>
+    <p>The authorization standard used by EP1 API. Defines four grant types; EP1 uses <strong>Client Credentials</strong> for machine-to-machine (script ↔ EP1). <a href="https://www.rfc-editor.org/rfc/rfc6749" target="_blank">rfc-editor.org/rfc/rfc6749</a></p>
+  </div>
+  <div class="rfc-card">
+    <div class="rfc-num">RFC 6750 <span class="badge badge-rfc">RFC</span></div>
+    <h4>OAuth 2.0 Bearer Token Usage</h4>
+    <p>Defines how the access token is passed in HTTP: <code>Authorization: Bearer &lt;token&gt;</code> header. Every EP1 API call uses this format. <a href="https://www.rfc-editor.org/rfc/rfc6750" target="_blank">rfc-editor.org/rfc/rfc6750</a></p>
+  </div>
+  <div class="rfc-card">
+    <div class="rfc-num">RFC 8259 <span class="badge badge-rfc">RFC</span></div>
+    <h4>JSON — The JavaScript Object Notation</h4>
+    <p>Defines the JSON data format used in all EP1 API request and response bodies. Canonical reference for parsers and serialisers. <a href="https://www.rfc-editor.org/rfc/rfc8259" target="_blank">rfc-editor.org/rfc/rfc8259</a></p>
+  </div>
+  <div class="rfc-card">
+    <div class="rfc-num">RFC 7807 <span class="badge badge-rfc">RFC</span></div>
+    <h4>Problem Details for HTTP APIs</h4>
+    <p>Standardises error response bodies: <code>type</code>, <code>title</code>, <code>status</code>, <code>detail</code>, <code>instance</code>. EP1 API error payloads follow this pattern. <a href="https://www.rfc-editor.org/rfc/rfc7807" target="_blank">rfc-editor.org/rfc/rfc7807</a></p>
+  </div>
+  <div class="rfc-card">
+    <div class="rfc-num">RFC 8446 <span class="badge badge-rfc">RFC</span></div>
+    <h4>TLS 1.3</h4>
+    <p>Transport security wrapping all EP1 API and SNMP traffic. Required for all cloud-bound communications. Supersedes TLS 1.2 (RFC 5246). <a href="https://www.rfc-editor.org/rfc/rfc8446" target="_blank">rfc-editor.org/rfc/rfc8446</a></p>
+  </div>
+</div>
+
+<p style="font-family:'Libre Franklin',Arial,sans-serif;font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;margin:18px 0 6px;color:#065f46;">SNMP</p>
+<div class="rfc-grid">
+  <div class="rfc-card">
+    <div class="rfc-num">RFC 1157 <span class="badge badge-rfc">RFC</span></div>
+    <h4>SNMPv1 — Simple Network Management Protocol</h4>
+    <p>Original SNMP (1990). Defines Manager/Agent/MIB model, Get/GetNext/Set/Trap operations, community string auth (cleartext). Still supported by EP1 devices but not recommended. <a href="https://www.rfc-editor.org/rfc/rfc1157" target="_blank">rfc-editor.org/rfc/rfc1157</a></p>
+  </div>
+  <div class="rfc-card">
+    <div class="rfc-num">RFC 1901 <span class="badge badge-rfc">RFC</span></div>
+    <h4>SNMPv2c — Community-Based SNMPv2</h4>
+    <p>Adds GetBulk (efficient table retrieval) and Inform (acknowledged trap). Still uses cleartext community string. EP1 default config uses v2c. <a href="https://www.rfc-editor.org/rfc/rfc1901" target="_blank">rfc-editor.org/rfc/rfc1901</a></p>
+  </div>
+  <div class="rfc-card">
+    <div class="rfc-num">RFC 1905 <span class="badge badge-rfc">RFC</span></div>
+    <h4>Protocol Operations for SNMPv2</h4>
+    <p>Defines the PDU types for SNMPv2: GetRequest, GetNextRequest, GetBulkRequest, Response, SetRequest, InformRequest, SNMPv2-Trap. <a href="https://www.rfc-editor.org/rfc/rfc1905" target="_blank">rfc-editor.org/rfc/rfc1905</a></p>
+  </div>
+  <div class="rfc-card">
+    <div class="rfc-num">RFC 3410 <span class="badge badge-rfc">RFC</span></div>
+    <h4>Introduction to SNMPv3 Framework</h4>
+    <p>Overview of the SNMPv3 architecture. Entry point to the SNMPv3 RFC cluster (3411–3415). Explains why v1/v2c auth was inadequate. <a href="https://www.rfc-editor.org/rfc/rfc3410" target="_blank">rfc-editor.org/rfc/rfc3410</a></p>
+  </div>
+  <div class="rfc-card">
+    <div class="rfc-num">RFC 3411 <span class="badge badge-rfc">RFC</span></div>
+    <h4>Architecture for SNMP Management Frameworks</h4>
+    <p>Defines the modular SNMPv3 engine architecture: Message Processing, Security Model, Access Control, applications (notification originator, command responder). <a href="https://www.rfc-editor.org/rfc/rfc3411" target="_blank">rfc-editor.org/rfc/rfc3411</a></p>
+  </div>
+  <div class="rfc-card">
+    <div class="rfc-num">RFC 3414 <span class="badge badge-rfc">RFC</span></div>
+    <h4>User-Based Security Model (USM) for SNMPv3</h4>
+    <p>Defines authentication (HMAC-MD5, HMAC-SHA) and privacy (DES, AES) for SNMPv3. Each user has separate auth/priv keys. EP1 SNMPv3 config maps to this RFC. <a href="https://www.rfc-editor.org/rfc/rfc3414" target="_blank">rfc-editor.org/rfc/rfc3414</a></p>
+  </div>
+  <div class="rfc-card">
+    <div class="rfc-num">RFC 3415 <span class="badge badge-rfc">RFC</span></div>
+    <h4>View-Based Access Control Model (VACM)</h4>
+    <p>Defines what MIB objects a given user/group can read or write. Controls the scope of SNMP access per security level. <a href="https://www.rfc-editor.org/rfc/rfc3415" target="_blank">rfc-editor.org/rfc/rfc3415</a></p>
+  </div>
+  <div class="rfc-card">
+    <div class="rfc-num">RFC 2578 <span class="badge badge-rfc">RFC</span></div>
+    <h4>SMIv2 — Structure of Management Information v2</h4>
+    <p>The language (ASN.1 subset) used to define MIBs. Every MIB file — including Aerohive/EP1 proprietary MIBs — is written in SMIv2. <a href="https://www.rfc-editor.org/rfc/rfc2578" target="_blank">rfc-editor.org/rfc/rfc2578</a></p>
+  </div>
+  <div class="rfc-card">
+    <div class="rfc-num">RFC 1213 <span class="badge badge-rfc">RFC</span></div>
+    <h4>MIB-II — Standard MIB for TCP/IP Internets</h4>
+    <p>The baseline MIB every IP device must support: system group (sysDescr, sysUpTime), interfaces group (ifDescr, ifAdminStatus), IP, TCP, UDP groups. Applies to EXOS SW1 and AP1. <a href="https://www.rfc-editor.org/rfc/rfc1213" target="_blank">rfc-editor.org/rfc/rfc1213</a></p>
+  </div>
+  <div class="rfc-card">
+    <div class="rfc-num">RFC 2863 <span class="badge badge-rfc">RFC</span></div>
+    <h4>IF-MIB — Interfaces Group MIB</h4>
+    <p>Extends MIB-II interfaces group. Defines ifTable, ifXTable (high-capacity counters), link state traps (linkUp, linkDown). Essential for port-utilisation polling on SW1. <a href="https://www.rfc-editor.org/rfc/rfc2863" target="_blank">rfc-editor.org/rfc/rfc2863</a></p>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ API FOUNDATION ═══ -->
+<span class="section-label" id="api-foundation">Part 1 — API Foundation</span>
+
+<h2>What Is a REST API?</h2>
+<p>REST (Representational State Transfer) is an architectural style defined by Roy Fielding in his 2000 doctoral dissertation, later codified via the HTTP RFCs. It is not a protocol — it is a set of constraints applied to HTTP that produce a scalable, stateless, cacheable web service.</p>
+
+<h3>The Six REST Constraints</h3>
+<table>
+  <thead><tr><th>Constraint</th><th>What it means</th><th>EP1 application</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Client–Server</strong></td><td>UI and data storage are decoupled</td><td>Your script (client) calls EP1 cloud (server) — no shared state</td></tr>
+    <tr><td><strong>Stateless</strong> <span class="badge badge-rfc">RFC 7230</span></td><td>Each request contains all context needed to process it</td><td>Every API call includes the Bearer token — EP1 does not maintain session state</td></tr>
+    <tr><td><strong>Cacheable</strong></td><td>Responses must declare cacheability</td><td>GET /devices responses include cache headers; POST/PUT are not cacheable</td></tr>
+    <tr><td><strong>Uniform Interface</strong> <span class="badge badge-rfc">RFC 7231</span></td><td>Standard HTTP methods on resource URLs</td><td><code>GET /xapi/v1/devices</code>, <code>POST /xapi/v1/network-policies</code></td></tr>
+    <tr><td><strong>Layered System</strong></td><td>Client cannot tell if it's talking to an origin server or a proxy</td><td>EP1 load balancers and CDN are invisible to your API client <span class="badge badge-conf">CONFIRMED — white paper p.3</span></td></tr>
+    <tr><td><strong>Code on Demand</strong></td><td>Server can extend client by sending executable code (optional)</td><td>Not used by EP1 API</td></tr>
+  </tbody>
+</table>
+
+<h3>HTTP Methods — What Each One Means</h3>
+<p>All EP1 REST API operations map to exactly one of these methods <span class="badge badge-rfc">RFC 7231 §4</span>:</p>
+<table>
+  <thead><tr><th>Method</th><th>Semantics</th><th>EP1 example</th><th>Idempotent?</th></tr></thead>
+  <tbody>
+    <tr><td><code>GET</code></td><td>Retrieve a resource or collection. No side effects.</td><td><code>GET /xapi/v1/devices</code> — list all managed devices</td><td>Yes</td></tr>
+    <tr><td><code>POST</code></td><td>Create a new resource or trigger an action.</td><td><code>POST /xapi/v1/network-policies</code> — create new policy</td><td>No</td></tr>
+    <tr><td><code>PUT</code></td><td>Replace a resource in full.</td><td><code>PUT /xapi/v1/ssids/{id}</code> — overwrite SSID config</td><td>Yes</td></tr>
+    <tr><td><code>PATCH</code></td><td>Partial update — only the fields you send.</td><td><code>PATCH /xapi/v1/devices/{id}</code> — update device hostname only</td><td>Conditional</td></tr>
+    <tr><td><code>DELETE</code></td><td>Remove a resource.</td><td><code>DELETE /xapi/v1/devices/{id}</code> — remove device from EP1</td><td>Yes</td></tr>
+  </tbody>
+</table>
+
+<h3>HTTP Status Codes You Will See in EP1</h3>
+<p>EP1 follows standard HTTP semantics <span class="badge badge-rfc">RFC 7231 §6</span>. Know these before debugging:</p>
+<table>
+  <thead><tr><th>Code</th><th>Meaning</th><th>EP1 context</th></tr></thead>
+  <tbody>
+    <tr><td><code>200 OK</code></td><td>Success with body</td><td>GET returned device list</td></tr>
+    <tr><td><code>201 Created</code></td><td>Resource created</td><td>POST network-policy succeeded — response body has the new ID</td></tr>
+    <tr><td><code>202 Accepted</code></td><td>Async operation started</td><td>Config push accepted — poll the job ID returned in body</td></tr>
+    <tr><td><code>204 No Content</code></td><td>Success, no body</td><td>DELETE succeeded</td></tr>
+    <tr><td><code>400 Bad Request</code></td><td>Malformed request or validation error</td><td>SSID name too long; VLAN ID out of range</td></tr>
+    <tr><td><code>401 Unauthorized</code></td><td>Missing or expired Bearer token</td><td>Re-run token request (RFC 6749 §4.4)</td></tr>
+    <tr><td><code>403 Forbidden</code></td><td>Valid token but insufficient permissions</td><td>Operator role cannot call admin-only endpoint</td></tr>
+    <tr><td><code>404 Not Found</code></td><td>Resource does not exist</td><td>Device ID was deleted or never existed</td></tr>
+    <tr><td><code>409 Conflict</code></td><td>State conflict</td><td>Network policy name already exists</td></tr>
+    <tr><td><code>429 Too Many Requests</code></td><td>Rate limit exceeded</td><td>Back off and retry; check <code>Retry-After</code> header</td></tr>
+    <tr><td><code>500 Internal Server Error</code></td><td>EP1-side fault</td><td>Open GTAC ticket with request ID from response body</td></tr>
+  </tbody>
+</table>
+
+<!-- ═══════════════════════════════════════════ AUTH ═══ -->
+<span class="section-label" id="api-auth">OAuth 2.0 + Bearer Token Authentication</span>
+
+<h2>How EP1 API Auth Works</h2>
+<p>EP1 uses the <strong>OAuth 2.0 Client Credentials Grant</strong> <span class="badge badge-rfc">RFC 6749 §4.4</span> for machine-to-machine access (scripts, automation, integrations). Bearer tokens are passed per RFC 6750.</p>
+
+<h3>Token Flow — Step by Step</h3>
+<div class="flow-row">
+  <div class="flow-node gray">Your Script</div>
+  <div class="flow-arrow">→</div>
+  <div class="flow-node">POST /oauth2/token<br><small>client_id + client_secret</small></div>
+  <div class="flow-arrow">→</div>
+  <div class="flow-node green">EP1 Auth Server<br><small>GDC / AWS</small></div>
+  <div class="flow-arrow">→</div>
+  <div class="flow-node gray">access_token<br><small>expires_in seconds</small></div>
+</div>
+<div class="flow-row">
+  <div class="flow-node gray">Your Script</div>
+  <div class="flow-arrow">→</div>
+  <div class="flow-node">GET /xapi/v1/devices<br><small>Authorization: Bearer &lt;token&gt;</small></div>
+  <div class="flow-arrow">→</div>
+  <div class="flow-node green">EP1 API Server<br><small>RDC / customer VIQ</small></div>
+  <div class="flow-arrow">→</div>
+  <div class="flow-node gray">200 OK + JSON</div>
+</div>
+
+<div class="box info">
+  <p class="box-label">Architecture note <span class="badge badge-conf">CONFIRMED — white paper p.3, p.7</span></p>
+  <p>The Auth Server lives in the <strong>GDC (Global Data Centre, AWS-only)</strong>. The API Server (your VIQ) lives in the <strong>RDC (Regional Data Centre, AWS/Azure/GCP)</strong>. Token issuance goes to GDC; all subsequent API calls go to your regional RDC endpoint. This is why the OAuth token URL and the API base URL are different hostnames.</p>
+</div>
+
+<h3>Token Request (curl)</h3>
+<pre><code># Step 1 — Get an access token (Client Credentials Grant, RFC 6749 §4.4)
+curl -s -X POST "https://extremecloudiq.com/api/oauth2/token" \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  -d "grant_type=client_credentials" \
+  -d "client_id=YOUR_CLIENT_ID" \
+  -d "client_secret=YOUR_CLIENT_SECRET"
+
+# Response
+{
+  "access_token": "eyJhbGci...",
+  "token_type": "Bearer",        # RFC 6750 §2.1
+  "expires_in": 3600
+}
+
+# Step 2 — Use the token (RFC 6750 §2.1 — Authorization header method)
+curl -s -X GET "https://extremecloudiq.com/xapi/v1/devices" \
+  -H "Authorization: Bearer eyJhbGci..." \
+  -H "Accept: application/json"</code></pre>
+
+<div class="box warn">
+  <p class="box-label">Security rules <span class="badge badge-rfc">RFC 6750 §5</span></p>
+  <ul>
+    <li>Never pass the token in a URL query parameter — always use the <code>Authorization</code> header</li>
+    <li>Always use TLS 1.2+ (EP1 requires TLS 1.3 <span class="badge badge-rfc">RFC 8446</span>) — tokens over plaintext HTTP are invalid</li>
+    <li>Rotate client secrets regularly; treat them like passwords</li>
+    <li>Token lifetime is 3600s (1 hour) — build token refresh into any long-running script</li>
+  </ul>
+</div>
+
+<!-- ═══════════════════════════════════════════ EP1 API ARCH ═══ -->
+<span class="section-label" id="api-ep1">EP1 API Architecture</span>
+
+<h2>How EP1 Exposes Its API</h2>
+
+<p>EP1 runs as a microservices platform on Kubernetes <span class="badge badge-conf">CONFIRMED — white paper p.3, p.13</span>. The REST API is the external surface of the internal service mesh. Each resource group (<code>/devices</code>, <code>/network-policies</code>, <code>/alerts</code>, etc.) maps to one or more internal microservices behind the API gateway.</p>
+
+<h3>EP1 API Base URL and Versioning</h3>
+<table>
+  <thead><tr><th>Element</th><th>Value</th><th>Notes</th></tr></thead>
+  <tbody>
+    <tr><td>Base URL</td><td><code>https://extremecloudiq.com/xapi/v1/</code></td><td>Same URL for XIQ and EP1 — transition continuity guaranteed <span class="badge badge-conf">CONFIRMED — Transition FAQ</span></td></tr>
+    <tr><td>API version</td><td><code>v1</code> in path</td><td>EN commits to backward compatibility during transition window per API Policy</td></tr>
+    <tr><td>Auth</td><td>OAuth2 Client Credentials</td><td>Bearer token in every request header <span class="badge badge-rfc">RFC 6750</span></td></tr>
+    <tr><td>Format</td><td>JSON <span class="badge badge-rfc">RFC 8259</span></td><td>Both request bodies and response bodies</td></tr>
+    <tr><td>Async jobs</td><td><code>POST .../deploy</code> → <code>202 Accepted</code> + job ID</td><td>Poll <code>GET /xapi/v1/jobs/{id}</code> until <code>status: DONE</code> <span class="badge badge-hyp">HYPOTHESIS</span></td></tr>
+    <tr><td>Rate limiting</td><td><code>429 Too Many Requests</code></td><td><code>Retry-After</code> header specifies backoff seconds <span class="badge badge-rfc">RFC 7231 §6.5.14</span></td></tr>
+    <tr><td>Docs (live)</td><td><code>extremecloudiq.com/api-docs</code></td><td>Swagger/OpenAPI — requires login (behind SSO)</td></tr>
+  </tbody>
+</table>
+
+<h3>Key Resource Groups</h3>
+<table>
+  <thead><tr><th>Resource group</th><th>Base path</th><th>What it manages</th><th>EP1 Standard only?</th></tr></thead>
+  <tbody>
+    <tr><td>Devices</td><td><code>/xapi/v1/devices</code></td><td>List, onboard, reboot, remove APs + switches</td><td>No — all tiers</td></tr>
+    <tr><td>Network Policies</td><td><code>/xapi/v1/network-policies</code></td><td>Create, read, update, deploy policies</td><td>No — all tiers</td></tr>
+    <tr><td>SSIDs</td><td><code>/xapi/v1/ssids</code></td><td>SSID configuration objects</td><td>No — all tiers</td></tr>
+    <tr><td>User Management</td><td><code>/xapi/v1/endusers</code></td><td>PPSK users, bulk import, group assignment</td><td>No — all tiers</td></tr>
+    <tr><td>Alerts</td><td><code>/xapi/v1/alerts</code></td><td>Query active + historic alerts</td><td>No — all tiers</td></tr>
+    <tr><td>Clients</td><td><code>/xapi/v1/clients</code></td><td>Connected client details, history, RSSI</td><td>No — all tiers</td></tr>
+    <tr><td>Inventory</td><td><code>/xapi/v1/inventory</code></td><td>Hardware inventory, licensing tiers</td><td><strong>EP1 Standard</strong> <span class="badge badge-conf">CONFIRMED — Licensing Guide</span></td></tr>
+    <tr><td>Contracts</td><td><code>/xapi/v1/contracts</code></td><td>Subscription contract status + expiry</td><td><strong>EP1 Standard</strong> <span class="badge badge-conf">CONFIRMED — Licensing Guide</span></td></tr>
+    <tr><td>AI/Data Hub</td><td><code>/xapi/v1/copilot/...</code></td><td>AI Canvas queries, Data Hub queries</td><td><strong>EP1 Standard</strong> <span class="badge badge-hyp">HYPOTHESIS</span></td></tr>
+    <tr><td>Fabric Config</td><td><code>/xapi/v1/fabric/...</code></td><td>SPB/IS-IS fabric policy automation</td><td><strong>EP1 Standard</strong> <span class="badge badge-conf">CONFIRMED — Licensing Guide</span></td></tr>
+  </tbody>
+</table>
+
+<h3>Async Job Pattern — Config Push</h3>
+<p>Config push is asynchronous because pushing to hundreds of APs takes seconds to minutes. The pattern follows a standard async API model <span class="badge badge-hyp">HYPOTHESIS — pattern confirmed by general EP1 API behaviour, specific job endpoint path not page-cited</span>:</p>
+<pre><code># 1. Trigger deploy
+POST /xapi/v1/network-policies/{id}/deploy
+→ 202 Accepted
+{
+  "job_id": "abc-123",
+  "status": "RUNNING"
+}
+
+# 2. Poll for completion
+GET /xapi/v1/jobs/abc-123
+→ 200 OK
+{
+  "job_id": "abc-123",
+  "status": "DONE",        # or FAILED, PARTIAL
+  "succeeded": 5,
+  "failed": 0
+}
+
+# 3. On FAILED — get per-device error details
+GET /xapi/v1/jobs/abc-123/devices
+→ [ { "device_id": "...", "error": "Supplemental CLI conflict" } ]</code></pre>
+
+<!-- ═══════════════════════════════════════════ XIQ vs EP1 API ═══ -->
+<span class="section-label" id="api-xiq-vs-ep1">XIQ vs EP1 — API Comparison</span>
+
+<table>
+  <thead><tr><th>Dimension</th><th>XIQ Classic API</th><th>EP1 API</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Base URL</strong></td><td><code>extremecloudiq.com/xapi/v1/</code></td><td><strong>Same URL</strong> — no migration needed for existing API integrations <span class="badge badge-conf">CONFIRMED — Transition FAQ</span></td></tr>
+    <tr><td><strong>Auth</strong></td><td>OAuth2 Client Credentials (same)</td><td>OAuth2 Client Credentials — same client_id/secret works <span class="badge badge-conf">CONFIRMED — Transition FAQ: credentials unchanged</span></td></tr>
+    <tr><td><strong>Core resource endpoints</strong></td><td>/devices, /ssids, /network-policies, /alerts, /clients, /endusers</td><td>Same endpoints, same responses — backward compatible</td></tr>
+    <tr><td><strong>EP1-exclusive endpoints</strong></td><td>Not available</td><td>/inventory, /contracts, /fabric, AI Canvas queries <span class="badge badge-conf">CONFIRMED — Licensing Guide: EP1 Standard features</span></td></tr>
+    <tr><td><strong>AI/ML surface</strong></td><td>CoPilot (if licensed) — limited API surface</td><td>Full Data Hub API, Knowledge Graph queries, multi-agent workflow triggers <span class="badge badge-hyp">HYPOTHESIS — architecture confirmed p.7-8 white paper, specific endpoints not cited</span></td></tr>
+    <tr><td><strong>Rate limits</strong></td><td>Same rate limit framework</td><td>Same — RFC 7231 §6.5.14 applies</td></tr>
+    <tr><td><strong>Backward compatibility</strong></td><td>—</td><td>Guaranteed during transition window per EN API Policy <span class="badge badge-conf">CONFIRMED — white paper: "advance notice for deprecations"</span></td></tr>
+    <tr><td><strong>What breaks at migration</strong></td><td>—</td><td><strong>Nothing</strong> for existing scripts hitting /xapi/v1/ — only if using XIQ Connect accounts (cannot migrate to EP1 — requires full subscription)</td></tr>
+  </tbody>
+</table>
+
+<div class="box">
+  <p class="box-label">Key takeaway for the Sr Director session</p>
+  <p>Clients with existing XIQ API integrations (Python scripts, Ansible playbooks, custom dashboards) do <strong>not</strong> need to change their code when moving to EP1. The API surface is additive — same base URL, same auth, same core endpoints. The only change is new endpoints become available once the EP1 Standard licence is active.</p>
+</div>
+
+<!-- ═══════════════════════════════════════════ SNMP FOUNDATION ═══ -->
+<span class="section-label" id="snmp-foundation">Part 2 — SNMP Foundation</span>
+
+<h2>What Is SNMP and Why Does It Exist?</h2>
+<p>SNMP (Simple Network Management Protocol) was created in 1988 to solve a specific problem: how do you monitor and manage hundreds of network devices (routers, switches, APs) without logging into each one individually? The answer: run a small agent on each device that speaks a common protocol, expose a structured database of device state (the MIB), and allow a central manager (NMS) to query or set values remotely.</p>
+
+<h3>The Three-Component Model</h3>
+<table>
+  <thead><tr><th>Component</th><th>What it is</th><th>In your lab</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Manager (NMS)</strong></td><td>The system that polls agents and receives traps. Runs your monitoring software.</td><td>SolarWinds / PRTG / Zabbix / your laptop running <code>snmpwalk</code></td></tr>
+    <tr><td><strong>Agent</strong></td><td>Runs on the managed device. Responds to queries, sends traps.</td><td>AP1 (IQ Engine OS), SW1 (EXOS 33.5+)</td></tr>
+    <tr><td><strong>MIB</strong></td><td>The structured data model describing what the agent knows. A tree of OIDs.</td><td>MIB-II <span class="badge badge-rfc">RFC 1213</span> + IF-MIB <span class="badge badge-rfc">RFC 2863</span> + Aerohive enterprise MIBs</td></tr>
+  </tbody>
+</table>
+
+<h3>Transport and Ports</h3>
+<table>
+  <thead><tr><th>Port</th><th>Direction</th><th>Purpose</th></tr></thead>
+  <tbody>
+    <tr><td><strong>UDP 161</strong></td><td>NMS → Agent</td><td>Get/Set polling requests</td></tr>
+    <tr><td><strong>UDP 162</strong></td><td>Agent → NMS</td><td>Traps and Informs (unsolicited alerts)</td></tr>
+    <tr><td>TCP 161</td><td>NMS → Agent</td><td>Optional (rarely used) — TCP SNMP for reliability</td></tr>
+  </tbody>
+</table>
+
+<div class="box warn">
+  <p class="box-label">Critical architecture fact for EP1</p>
+  <p>AP1 and SW1 send SNMP traps <strong>directly</strong> to your NMS on UDP 162. Traps do <strong>not</strong> go through the EP1 cloud. This means: (1) your NMS must have network reachability to the AP/switch management VLAN, and (2) EP1 going down does not affect SNMP trap delivery. <span class="badge badge-conf">CONFIRMED — User Guide p.240: "SNMP server IP" is the NMS, not EP1 cloud</span></p>
+</div>
+
+<!-- ═══════════════════════════════════════════ SNMP VERSIONS ═══ -->
+<span class="section-label" id="snmp-versions">SNMPv1 / v2c / v3 — The Three Generations</span>
+
+<table>
+  <thead><tr><th>Feature</th><th>SNMPv1 <span class="badge badge-rfc">RFC 1157</span></th><th>SNMPv2c <span class="badge badge-rfc">RFC 1901</span></th><th>SNMPv3 <span class="badge badge-rfc">RFC 3410–3415</span></th></tr></thead>
+  <tbody>
+    <tr><td><strong>Auth</strong></td><td>Community string (cleartext)</td><td>Community string (cleartext)</td><td>Username + HMAC-MD5 or HMAC-SHA <span class="badge badge-rfc">RFC 3414</span></td></tr>
+    <tr><td><strong>Privacy</strong></td><td>None</td><td>None</td><td>DES or AES encryption <span class="badge badge-rfc">RFC 3414</span></td></tr>
+    <tr><td><strong>Bulk retrieval</strong></td><td>GetNext only (slow)</td><td>GetBulk (fast table walk)</td><td>GetBulk (same as v2c)</td></tr>
+    <tr><td><strong>Traps</strong></td><td>Trap (fire and forget)</td><td>Trap + Inform (acknowledged) <span class="badge badge-rfc">RFC 1905</span></td><td>Trap + Inform (acknowledged)</td></tr>
+    <tr><td><strong>Access control</strong></td><td>Community = password + ACL</td><td>Community = password + ACL</td><td>VACM — per-user per-OID-subtree access <span class="badge badge-rfc">RFC 3415</span></td></tr>
+    <tr><td><strong>Use today</strong></td><td>Legacy only — avoid</td><td>EP1 lab default (<code>hivecommunity</code>)</td><td>Production &amp; compliance environments</td></tr>
+    <tr><td><strong>EP1 support</strong></td><td>Yes <span class="badge badge-hyp">HYPOTHESIS</span></td><td><strong>Yes</strong> — default lab config <span class="badge badge-conf">CONFIRMED — User Guide p.240</span></td><td><strong>Yes</strong> <span class="badge badge-conf">CONFIRMED — User Guide p.240</span></td></tr>
+  </tbody>
+</table>
+
+<h3>SNMPv3 Security Levels</h3>
+<p>SNMPv3 defines three security levels per the User-Based Security Model <span class="badge badge-rfc">RFC 3414</span>:</p>
+<table>
+  <thead><tr><th>Level</th><th>Authentication</th><th>Privacy</th><th>Use case</th></tr></thead>
+  <tbody>
+    <tr><td><code>noAuthNoPriv</code></td><td>None</td><td>None</td><td>Testing only — equivalent to v2c</td></tr>
+    <tr><td><code>authNoPriv</code></td><td>HMAC-MD5 or HMAC-SHA</td><td>None</td><td>Verifies device identity; data visible in cleartext</td></tr>
+    <tr><td><code>authPriv</code></td><td>HMAC-SHA (preferred)</td><td>AES-128 or AES-256</td><td><strong>Production standard</strong> — encrypted + authenticated</td></tr>
+  </tbody>
+</table>
+
+<!-- ═══════════════════════════════════════════ MIBS / OIDS ═══ -->
+<span class="section-label" id="snmp-mib">MIBs &amp; OIDs — The Data Model</span>
+
+<h2>Understanding the OID Tree</h2>
+<p>Every piece of data an SNMP agent exposes has a unique Object Identifier (OID) — a dotted-decimal address in a global tree. The tree is defined by SMIv2 <span class="badge badge-rfc">RFC 2578</span>.</p>
+
+<pre><code>iso(1)
+  └── org(3)
+        └── dod(6)
+              └── internet(1)
+                    ├── mgmt(2)
+                    │     └── mib-2(1)          ← RFC 1213 MIB-II starts here
+                    │           ├── system(1)   ← sysDescr, sysUpTime, sysContact
+                    │           ├── interfaces(2) ← ifTable, ifAdminStatus (RFC 2863)
+                    │           ├── ip(4)
+                    │           └── ...
+                    └── private(4)
+                          └── enterprises(1)
+                                └── aerohive(26928)  ← Aerohive/EP1 proprietary MIBs
+                                      └── ahProduct(...)
+                                            ├── ahSSIDTable
+                                            ├── ahClientTable
+                                            └── ahTrap...</code></pre>
+
+<h3>Key OID Groups for EP1 Lab</h3>
+<table>
+  <thead><tr><th>OID subtree</th><th>MIB</th><th>What you get</th><th>RFC/Source</th></tr></thead>
+  <tbody>
+    <tr><td><code>1.3.6.1.2.1.1</code></td><td>MIB-II system</td><td>sysDescr (firmware version), sysUpTime, sysContact, sysLocation</td><td><a href="https://www.rfc-editor.org/rfc/rfc1213" target="_blank">RFC 1213</a></td></tr>
+    <tr><td><code>1.3.6.1.2.1.2</code></td><td>IF-MIB interfaces</td><td>Port admin/oper status, speed, in/out octets, errors</td><td><a href="https://www.rfc-editor.org/rfc/rfc2863" target="_blank">RFC 2863</a></td></tr>
+    <tr><td><code>1.3.6.1.2.1.4</code></td><td>IP MIB</td><td>IP address table, routing table, forwarding stats</td><td><a href="https://www.rfc-editor.org/rfc/rfc1213" target="_blank">RFC 1213</a></td></tr>
+    <tr><td><code>1.3.6.1.4.1.26928</code></td><td>Aerohive Enterprise MIB</td><td>SSID stats, client association table, radio channel, TX power, rogue AP list</td><td>Download from GTAC → MIB files <span class="badge badge-conf">CONFIRMED — User Guide: MIB download from GTAC</span></td></tr>
+  </tbody>
+</table>
+
+<div class="box info">
+  <p class="box-label">How to get Aerohive MIBs</p>
+  <p>Aerohive/EP1 proprietary MIBs (ahMIB.mib, ahRadio.mib, ahClient.mib, etc.) are downloadable from GTAC. In your NMS: import the MIB files → browser can resolve OIDs to human-readable names. Without importing, you see raw dotted-decimal OIDs in trap logs. <span class="badge badge-conf">CONFIRMED — User Guide references GTAC MIB download</span></p>
+</div>
+
+<!-- ═══════════════════════════════════════════ SNMP IN EP1 ═══ -->
+<span class="section-label" id="snmp-ep1">SNMP in EP1 — Configuration Path</span>
+
+<h2>Where and How SNMP Is Configured</h2>
+<p>SNMP is configured per Network Policy, under <strong>Additional Settings → Management Servers</strong>. It applies to all devices (APs and switches) in that policy. <span class="badge badge-conf">CONFIRMED — <a href="docs/rag-corpus/Extreme_Platform_ONE_Networking_25_9_0_User_Guide.pdf" target="_blank">EP1 Networking User Guide v25.9.0 p.240</a></span></p>
+
+<h3>Configuration Path</h3>
+<pre><code>EP1 Portal
+  └── Configure
+        └── Network Policies
+              └── [Your Policy]
+                    └── Additional Settings
+                          └── Management Servers (p.238–242)
+                                ├── SNMP Server    ← p.240
+                                ├── Syslog Server  ← p.238
+                                └── NTP Server     ← p.238</code></pre>
+
+<h3>SNMP Server Config — Step by Step</h3>
+<p>Reference: <a href="docs/rag-corpus/Extreme_Platform_ONE_Networking_25_9_0_User_Guide.pdf" target="_blank">EP1 Networking User Guide v25.9.0 p.240</a> <span class="badge badge-conf">CONFIRMED</span></p>
+<ol>
+  <li><strong>Toggle SNMP ON</strong> — the toggle is off by default per network policy</li>
+  <li>Click <strong>+ Add SNMP Server</strong></li>
+  <li>Enter the NMS IP address or hostname</li>
+  <li>Select <strong>Version: v2c</strong> (lab) or <strong>v3</strong> (production)</li>
+  <li>Select <strong>Operation: Get and Trap</strong> — enables both polling and unsolicited traps</li>
+  <li>Enter <strong>Community String</strong>: <code>hivecommunity</code> (EN default — change this in production)</li>
+  <li>Click <strong>ADD SNMP SERVER</strong> → click <strong>SAVE SNMP SERVER</strong></li>
+  <li>Run a <strong>Complete Config Update</strong> to push to devices — SNMP changes require a full push, not a delta update</li>
+</ol>
+
+<h3>SNMPv3 Additional Fields</h3>
+<p>When Version = v3, the form adds <span class="badge badge-conf">CONFIRMED — User Guide p.240</span>:</p>
+<table>
+  <thead><tr><th>Field</th><th>Maps to</th><th>RFC</th></tr></thead>
+  <tbody>
+    <tr><td>Username</td><td>USM username <span class="badge badge-rfc">RFC 3414</span></td><td><a href="https://www.rfc-editor.org/rfc/rfc3414" target="_blank">RFC 3414</a></td></tr>
+    <tr><td>Auth Protocol</td><td>HMAC-MD5 or HMAC-SHA</td><td><a href="https://www.rfc-editor.org/rfc/rfc3414" target="_blank">RFC 3414 §6.3</a></td></tr>
+    <tr><td>Auth Password</td><td>Auth key (min 8 chars)</td><td><a href="https://www.rfc-editor.org/rfc/rfc3414" target="_blank">RFC 3414</a></td></tr>
+    <tr><td>Privacy Protocol</td><td>DES or AES</td><td><a href="https://www.rfc-editor.org/rfc/rfc3414" target="_blank">RFC 3414 §8</a></td></tr>
+    <tr><td>Privacy Password</td><td>Priv key (min 8 chars)</td><td><a href="https://www.rfc-editor.org/rfc/rfc3414" target="_blank">RFC 3414</a></td></tr>
+  </tbody>
+</table>
+
+<h3>What APs Trap On</h3>
+<p>Once SNMP is active, AP1 will send traps to your NMS on these events <span class="badge badge-conf">CONFIRMED — AirDefense User Guide + Aerohive MIB documentation</span>:</p>
+<table>
+  <thead><tr><th>Trap</th><th>OID area</th><th>Trigger</th></tr></thead>
+  <tbody>
+    <tr><td>ahAPUp / ahAPDown</td><td>Aerohive enterprise</td><td>AP connects to / loses EP1 cloud</td></tr>
+    <tr><td>ahClientAssociated</td><td>Aerohive enterprise</td><td>Client successfully associates to SSID</td></tr>
+    <tr><td>ahClientDisassociated</td><td>Aerohive enterprise</td><td>Client disconnects (includes reason code)</td></tr>
+    <tr><td>ahRogueAPDetected</td><td>Aerohive enterprise</td><td>WIPS detects rogue AP (AirDefense)</td></tr>
+    <tr><td>ahChannelChanged</td><td>Aerohive enterprise</td><td>RRM changes radio channel</td></tr>
+    <tr><td>linkUp / linkDown</td><td>IF-MIB <span class="badge badge-rfc">RFC 2863</span></td><td>Ethernet port admin/oper state change (SW1)</td></tr>
+    <tr><td>coldStart / warmStart</td><td>MIB-II <span class="badge badge-rfc">RFC 1213</span></td><td>Device reboot (cold = power cycle, warm = software restart)</td></tr>
+  </tbody>
+</table>
+
+<h3>Syslog — Quick Companion Reference</h3>
+<p>Syslog is configured in the same Management Servers screen as SNMP (p.238). <span class="badge badge-conf">CONFIRMED — <a href="docs/rag-corpus/Extreme_Platform_ONE_Networking_25_9_0_User_Guide.pdf" target="_blank">User Guide p.238</a></span></p>
+<ul>
+  <li>Protocol: UDP 514 (default) — APs send directly to syslog server, not through EP1 cloud</li>
+  <li>Severity threshold: set minimum level (Debug / Info / Notice / Warning / Error / Critical)</li>
+  <li>Use case: <strong>SNMP = operational alerts (traps), Syslog = verbose event stream</strong> — use both together for a complete picture</li>
+  <li>For lab: point both SNMP trap receiver and syslog to your Mac running <code>snmptrapd</code> + a syslog daemon</li>
+</ul>
+
+<!-- ═══════════════════════════════════════════ XIQ vs EP1 SNMP ═══ -->
+<span class="section-label" id="snmp-xiq-vs-ep1">XIQ vs EP1 — SNMP Comparison</span>
+
+<table>
+  <thead><tr><th>Dimension</th><th>XIQ Classic</th><th>EP1</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Config path</strong></td><td>Configure → Network Policies → Additional Settings → Management Servers</td><td><strong>Same path</strong> — no change <span class="badge badge-conf">CONFIRMED — Transition FAQ: config unchanged</span></td></tr>
+    <tr><td><strong>Supported versions</strong></td><td>v2c, v3</td><td>v2c, v3 — same <span class="badge badge-conf">CONFIRMED — User Guide p.240</span></td></tr>
+    <tr><td><strong>Community string</strong></td><td><code>hivecommunity</code> default</td><td><code>hivecommunity</code> default — same <span class="badge badge-conf">CONFIRMED — User Guide p.240</span></td></tr>
+    <tr><td><strong>Trap delivery path</strong></td><td>Device → NMS directly (UDP 162)</td><td>Device → NMS directly — EP1 cloud not in path <span class="badge badge-conf">CONFIRMED — User Guide p.240 specifies NMS IP</span></td></tr>
+    <tr><td><strong>MIBs</strong></td><td>Aerohive MIBs + standard RFC MIBs</td><td>Same MIBs — IQ Engine firmware unchanged <span class="badge badge-conf">CONFIRMED — Transition FAQ: underlying platform unchanged</span></td></tr>
+    <tr><td><strong>New trap types in EP1</strong></td><td>—</td><td>Possible new traps for EP1-specific events (AI Canvas actions, Data Hub sync) <span class="badge badge-hyp">HYPOTHESIS — verify with GTAC / release notes</span></td></tr>
+    <tr><td><strong>SNMP config via API</strong></td><td>Partial — could set via XIQ API</td><td>Full — automate SNMP server setup as part of network policy creation via REST API <span class="badge badge-hyp">HYPOTHESIS — endpoint path not confirmed</span></td></tr>
+    <tr><td><strong>What changes at migration</strong></td><td>—</td><td><strong>Nothing</strong> — existing SNMP configs, MIBs, NMS integrations carry over without modification</td></tr>
+  </tbody>
+</table>
+
+<!-- ═══════════════════════════════════════════ INTEGRATION ═══ -->
+<span class="section-label" id="integration">API + SNMP Together — When to Use Which</span>
+
+<table>
+  <thead><tr><th>Scenario</th><th>Tool</th><th>Why</th></tr></thead>
+  <tbody>
+    <tr><td>Onboard 200 APs automatically</td><td><strong>API</strong></td><td>SNMP cannot provision; API has bulk device onboarding</td></tr>
+    <tr><td>Alert when AP goes down</td><td><strong>SNMP trap</strong></td><td>Trap fires in &lt;1s; API polling would need to run every few seconds</td></tr>
+    <tr><td>Pull port utilisation stats every 5 min</td><td><strong>SNMP poll</strong></td><td>SNMP GetBulk on IF-MIB is designed for this <span class="badge badge-rfc">RFC 1905</span></td></tr>
+    <tr><td>Generate a compliance report of all SSIDs</td><td><strong>API</strong></td><td>GET /xapi/v1/ssids returns structured JSON — easy to parse/export</td></tr>
+    <tr><td>Rogue AP detected → open a ticket automatically</td><td><strong>SNMP trap → API</strong></td><td>ahRogueAPDetected trap hits NMS → NMS calls EP1 API to enrich with device location → opens ITSM ticket</td></tr>
+    <tr><td>Check if config push succeeded</td><td><strong>API</strong></td><td>Poll job ID from async deploy response — SNMP has no job concept</td></tr>
+    <tr><td>Legacy NMS integration (SolarWinds, PRTG)</td><td><strong>SNMP</strong></td><td>NMS already speaks SNMP; no code changes needed</td></tr>
+    <tr><td>Custom real-time dashboard</td><td><strong>API</strong></td><td>JSON responses feed directly into Grafana/Kibana via API datasource</td></tr>
+  </tbody>
+</table>
+
+<div class="box" style="border-left:4px solid #7c3aed;background:#FAF5FF;">
+  <p class="box-label">Sr Director Session — Key Talking Points</p>
+  <ol>
+    <li><strong>Zero disruption:</strong> Both API integrations and SNMP NMS configs carry over unchanged to EP1. No rework required at migration.</li>
+    <li><strong>Additive API surface:</strong> EP1 Standard unlocks new endpoints (Contracts, Inventory, Fabric, AI Canvas). Existing scripts keep working; new scripts can do more.</li>
+    <li><strong>SNMP is device-direct:</strong> Traps bypass EP1 cloud — NMS receives alerts even if EP1 cloud has an outage. Network visibility is decoupled from cloud health.</li>
+    <li><strong>The convergence pattern:</strong> Use SNMP for low-latency operational traps (milliseconds), API for enrichment and automation (seconds). They complement, not replace, each other.</li>
+    <li><strong>SNMPv3 for compliance:</strong> If a client is PCI-DSS or HIPAA scoped, push them to SNMPv3 authPriv — community string in cleartext is a finding.</li>
+  </ol>
+</div>
+
+<hr class="divider">
+<p class="footer">
+  KhKLab &nbsp;&bull;&nbsp; EP1 Deep Study &nbsp;&bull;&nbsp; May 20, 2026 &nbsp;&bull;&nbsp; Step 0 of Today&rsquo;s Sprint<br>
+  RAG: <a href="docs/rag-corpus/Extreme_Platform_ONE_Networking_25_9_0_User_Guide.pdf" target="_blank">EP1 Networking User Guide v25.9.0</a> &nbsp;&bull;&nbsp;
+  <a href="docs/rag-corpus/flipbook-with-notes.pdf" target="_blank">EP1 Architecture White Paper</a> &nbsp;&bull;&nbsp;
+  <a href="ep1-deployment-guide.html">Deployment Guide v2.8</a> &nbsp;&bull;&nbsp;
+  <a href="session_summary_20260519.html">Session EOD May 19</a><br>
+  &copy; 2026 Khursheed Khan &nbsp;&bull;&nbsp; All rights reserved
+</p>
+
+</div>
+</body>
+</html>
