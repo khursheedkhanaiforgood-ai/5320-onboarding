@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>XIQ → EP1 Intelligent Xformation Engine | Design &amp; Sprint Plan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Libre+Franklin:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Libre Baskerville', Georgia, serif; background: #fff; color: #111; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 48px 24px 72px; }
+.container { max-width: 960px; width: 100%; }
+hr.rule-top  { border: none; border-top: 3px solid #111; margin-bottom: 6px; }
+hr.rule-thin { border: none; border-top: 1px solid #111; margin-bottom: 18px; }
+hr.rule      { border: none; border-top: 1px solid #E2E2E2; margin: 36px 0; }
+.kicker { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.22em; color: #666; display: block; text-align: center; margin-bottom: 6px; }
+h1 { font-family: 'Libre Baskerville', Georgia, serif; font-size: 2.1rem; font-weight: 700; line-height: 1.12; margin-bottom: 12px; text-align: center; }
+.subtitle { font-family: 'Libre Baskerville', Georgia, serif; font-size: 1rem; font-style: italic; color: #444; text-align: center; line-height: 1.8; margin-bottom: 20px; border-bottom: 1px solid #E2E2E2; padding-bottom: 24px; }
+.byline { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.72rem; color: #666; text-align: center; margin-bottom: 28px; }
+.section-eye { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.18em; color: #1e40af; display: block; margin: 36px 0 8px; border-bottom: 2px solid #1e40af; padding-bottom: 5px; }
+h2 { font-family: 'Libre Baskerville', Georgia, serif; font-size: 1.3rem; font-weight: 700; margin-bottom: 10px; }
+h3 { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #1e40af; margin: 22px 0 8px; }
+h4 { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.8rem; font-weight: 700; color: #374151; margin: 16px 0 6px; }
+p { font-size: 0.96rem; line-height: 1.85; color: #222; margin-bottom: 12px; }
+ul, ol { padding-left: 22px; margin-bottom: 14px; }
+li { font-size: 0.94rem; line-height: 1.8; color: #222; margin-bottom: 4px; }
+code { font-family: 'SF Mono', Consolas, monospace; font-size: 0.8rem; background: #F4F4F4; border: 1px solid #E2E2E2; padding: 1px 5px; border-radius: 3px; color: #1d4ed8; }
+pre { font-family: 'SF Mono', Consolas, monospace; font-size: 0.78rem; background: #0f172a; color: #93c5fd; padding: 16px 18px; border-radius: 4px; overflow-x: auto; margin: 12px 0 16px; line-height: 1.65; }
+pre .c  { color: #64748b; }
+pre .g  { color: #86efac; }
+pre .y  { color: #fde68a; }
+pre .r  { color: #fca5a5; }
+pre .w  { color: #f1f5f9; }
+table { width: 100%; border-collapse: collapse; margin: 12px 0 20px; font-size: 0.86rem; }
+th { background: #EFF6FF; font-family: 'Libre Franklin', Arial, sans-serif; font-weight: 700; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.08em; color: #1e40af; padding: 8px 10px; border: 1px solid #BFDBFE; text-align: left; }
+td { padding: 8px 10px; border: 1px solid #E2E2E2; vertical-align: top; line-height: 1.6; }
+tr:nth-child(even) td { background: #FAFAFA; }
+.box { border-left: 3px solid #1e40af; background: #EFF6FF; padding: 14px 16px; margin: 14px 0; border-radius: 0 4px 4px 0; }
+.box.warn { border-left-color: #F57F17; background: #FFFBF0; }
+.box.red  { border-left-color: #C62828; background: #FCEEEE; }
+.box.green { border-left-color: #065f46; background: #F0FFF4; }
+.box.purple { border-left-color: #7c3aed; background: #F5F3FF; }
+.box p { margin: 0; font-size: 0.91rem; line-height: 1.75; }
+.box p + p { margin-top: 8px; }
+.box-label { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: #1e40af; margin-bottom: 6px; }
+.box.warn .box-label { color: #E65100; }
+.box.red .box-label  { color: #C62828; }
+.box.green .box-label { color: #065f46; }
+.box.purple .box-label { color: #7c3aed; }
+.badge { display: inline-block; font-family: 'Libre Franklin', sans-serif; font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; padding: 2px 7px; border-radius: 10px; margin-right: 5px; }
+.badge.blue   { background: #DBEAFE; color: #1e40af; }
+.badge.green  { background: #D1FAE5; color: #065f46; }
+.badge.warn   { background: #FEF3C7; color: #92400E; }
+.badge.red    { background: #FEE2E2; color: #991B1B; }
+.badge.purple { background: #EDE9FE; color: #6d28d9; }
+/* ─── TAB SYSTEM ─── */
+.tab-nav { display: flex; border-bottom: 2px solid #111; margin: 32px 0 0; gap: 0; }
+.tab-btn { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; padding: 10px 20px; border: none; border-bottom: 3px solid transparent; background: transparent; cursor: pointer; color: #666; margin-bottom: -2px; transition: color 0.15s; white-space: nowrap; }
+.tab-btn:hover { color: #1e40af; }
+.tab-btn.active { color: #1e40af; border-bottom-color: #1e40af; }
+.tab-panel { display: none; padding-top: 28px; }
+.tab-panel.active { display: block; }
+/* ─── NODE CARDS ─── */
+.node-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; margin: 16px 0; }
+.node-card { border: 1px solid #BFDBFE; border-radius: 6px; padding: 14px; background: #fff; }
+.node-card .node-id { font-family: 'Libre Franklin', sans-serif; font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #1e40af; }
+.node-card h4 { margin: 4px 0 6px; font-size: 0.86rem; color: #111; text-transform: none; letter-spacing: 0; }
+.node-card p  { font-size: 0.82rem; line-height: 1.65; color: #444; margin: 0; }
+.node-card.support { border-color: #C4B5FD; }
+.node-card.support .node-id { color: #7c3aed; }
+/* ─── SPRINT CARDS ─── */
+.sprint-card { border: 1px solid #E2E2E2; border-radius: 6px; padding: 18px 20px; margin: 14px 0; }
+.sprint-card h4 { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.82rem; font-weight: 700; text-transform: none; letter-spacing: 0; margin: 0 0 6px; color: #111; }
+.sprint-card .sprint-meta { font-family: 'Libre Franklin', sans-serif; font-size: 0.72rem; color: #888; margin-bottom: 10px; }
+.sprint-card ul { margin-bottom: 0; }
+.sprint-card.critical { border-color: #FCA5A5; border-left: 4px solid #C62828; }
+.sprint-card.critical h4 { color: #C62828; }
+/* ─── FLOW DIAGRAM ─── */
+.flow { font-family: 'SF Mono', Consolas, monospace; font-size: 0.76rem; background: #0f172a; color: #93c5fd; padding: 20px; border-radius: 6px; overflow-x: auto; line-height: 2; margin: 14px 0; }
+.flow .label { color: #fde68a; }
+.flow .arrow { color: #64748b; }
+.flow .store  { color: #86efac; }
+.flow .agent  { color: #c4b5fd; }
+.flow .conf   { color: #fca5a5; }
+.footer { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.68rem; color: #999; text-align: center; line-height: 1.9; margin-top: 8px; }
+a { color: #1e40af; }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <hr class="rule-top">
+  <span class="kicker">KhKLab &nbsp;&bull;&nbsp; XIQ → EP1 Intelligence Engine &nbsp;&bull;&nbsp; System Design &amp; Sprint Plan &nbsp;&bull;&nbsp; May 21, 2026</span>
+  <hr class="rule-thin">
+
+  <h1>XIQ→EP1 Intelligent Xformation<br><em style="font-weight:400;font-size:1.5rem;">Design, Architecture &amp; Execution Plan</em></h1>
+  <p class="subtitle">A GPS navigator for network UI configuration — step-by-step screen-level guidance mapping<br>every XIQ workflow to its EP1 equivalent before the July 1, 2026 XIQ GUI retirement.</p>
+  <div class="byline">Thursday May 21, 2026 &nbsp;&mdash;&nbsp; Khursheed Khan &nbsp;&mdash;&nbsp; KhKLab / Extreme Platform One Sprint</div>
+
+  <!-- ─── TAB NAV ─── -->
+  <div class="tab-nav">
+    <button class="tab-btn active" onclick="showTab('system')">① System Design</button>
+    <button class="tab-btn" onclick="showTab('agentic')">② Agentic Architecture</button>
+    <button class="tab-btn" onclick="showTab('sprints')">③ Sprints &amp; Execution</button>
+    <button class="tab-btn" onclick="showTab('validation')">④ Automated Validation</button>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════
+       TAB 1 — SYSTEM DESIGN
+  ══════════════════════════════════════════════════════ -->
+  <div id="tab-system" class="tab-panel active">
+
+    <span class="section-eye">Vision</span>
+    <h2>What This System Does</h2>
+    <p>When a network engineer asks <em>"how do I configure CWP for PPSK in EP1?"</em> or <em>"show me the AP VLAN tagging workflow,"</em> they get an exact, screen-by-screen guide: which portal, which left-nav item, which dropdown value, which field label, which button to click — not a generic document reference. The system knows the answer for a specific version pair (XIQ 25.8.0 → EP1 25.9.0) and tells you when EP1 doesn't have a direct equivalent and what to do instead.</p>
+
+    <div class="box green">
+      <div class="box-label">Core Analogy</div>
+      <p>It is a GPS navigator for UI configuration. XIQ is your starting map. EP1 is your destination. The engine knows every road, one-way street, and detour — including roads that EP1 hasn't built yet (gaps).</p>
+    </div>
+
+    <h3>Two Query Types — Always Classified First</h3>
+    <p>Every user query enters a classifier before any graph traversal. This determines response depth:</p>
+
+    <table>
+      <tr><th>Query Type</th><th>Example</th><th>Response</th><th>Graph Operation</th></tr>
+      <tr>
+        <td><span class="badge blue">workflow</span></td>
+        <td>"Show me the AP VLAN tagging workflow"</td>
+        <td>Full multi-step sequence: each step is one screen card (portal → nav → field → value → button)</td>
+        <td>Full LangGraph traversal — XIQ subgraph → translation → EP1 subgraph</td>
+      </tr>
+      <tr>
+        <td><span class="badge purple">lookup</span></td>
+        <td>"Which menu do I use to configure CWP for PPSK?"</td>
+        <td>Single screen card: nav path + field label only. No step sequence.</td>
+        <td>Single Neo4j node lookup by intent keyword → return nav_path + screen_id</td>
+      </tr>
+      <tr>
+        <td><span class="badge green">compare</span></td>
+        <td>"What's different between XIQ and EP1 for switch policy?"</td>
+        <td>Side-by-side diff table: XIQ steps on left, EP1 on right, gaps highlighted</td>
+        <td>Both subgraphs fetched, diff computed at Node 5</td>
+      </tr>
+    </table>
+
+    <span class="section-eye">Data Architecture</span>
+    <h2>Three Layers of Truth</h2>
+    <p>The engine has three independent data sources. Confidence is only high when all three agree.</p>
+
+    <table>
+      <tr><th>Layer</th><th>What it Captures</th><th>Store</th><th>Weight (c)</th><th>Updates</th></tr>
+      <tr>
+        <td><strong>L1 — RAG Corpus</strong></td>
+        <td>What documentation <em>says</em> exists. 14 Extreme PDFs: Feature Comparison (ground truth), EP1 User Guide 25.9.0, Security Guide, Release Notes, EN_Hub_XIQ-EP1, Switch Deployment Guide, etc.</td>
+        <td>pgvector<br>(text-embedding-3-small, chunk 512)</td>
+        <td>c_doc = 0.3</td>
+        <td>On new PDF release</td>
+      </tr>
+      <tr>
+        <td><strong>L2 — GUI Capture</strong></td>
+        <td>What actually <em>exists</em> in the UI. Every screen: portal, nav path, field labels, dropdown options, button labels. Images tagged with version + screen_id.</td>
+        <td>Neo4j Aura<br>(workflow graph nodes)</td>
+        <td>c_gui = 0.4</td>
+        <td>On Playwright re-scrape</td>
+      </tr>
+      <tr>
+        <td><strong>L3 — Live Lab</strong></td>
+        <td>What actually <em>works</em> when pushed. Execution Agent deploys policy, captures CLI output, verifies per-field.</td>
+        <td>PostgreSQL<br>(execution_log table)</td>
+        <td>c_lab = 0.3</td>
+        <td>On every Execution Agent run</td>
+      </tr>
+    </table>
+
+    <div class="box blue">
+      <div class="box-label">Confidence Formula (from Cisco EN CLI Agent)</div>
+      <p><code>confidence = Σ(w × c) / Σ(w)</code> &nbsp;→&nbsp; <code>c_doc×0.3 + c_gui×0.4 + c_lab×0.3</code></p>
+      <p style="margin-top:8px;">Each layer scores 0.0–1.0. A step with c=0.95 has been documented, found in UI, and lab-verified. A step with c=0.40 exists in docs but scraper didn't find it → likely restructured or gap.</p>
+    </div>
+
+    <h3>RAG vs Scrape — Four Outcomes Per Step</h3>
+    <table>
+      <tr><th>RAG Says</th><th>Scraper Finds</th><th>Status</th><th>Action</th></tr>
+      <tr><td>Feature at path X</td><td>Feature at path X</td><td><span class="badge green">confirmed</span></td><td>High confidence, render step</td></tr>
+      <tr><td>Feature at path X</td><td>Feature at path Y</td><td><span class="badge warn">restructured</span></td><td>Medium confidence, show new nav path</td></tr>
+      <tr><td>Feature exists</td><td>Nothing found</td><td><span class="badge red">gap</span></td><td>Log to Gaps Register, show workaround</td></tr>
+      <tr><td>Not mentioned</td><td>Feature found</td><td><span class="badge purple">ep1_only</span></td><td>Flag as new capability, document</td></tr>
+    </table>
+
+    <span class="section-eye">Tech Stack</span>
+    <h2>Infrastructure Components</h2>
+
+    <table>
+      <tr><th>Layer</th><th>Technology</th><th>Purpose</th><th>Hosted</th></tr>
+      <tr><td>API</td><td>FastAPI (Python 3.12)</td><td>All endpoints, ported from cisco-en-cli-agent skeleton</td><td>Railway</td></tr>
+      <tr><td>Agents</td><td>LangGraph 0.2+</td><td>12-node stateful workflow graph</td><td>Railway</td></tr>
+      <tr><td>Frontend</td><td>React 18 + Vite</td><td>Version picker, 2-col step viewer, confidence badges</td><td>Railway / Netlify</td></tr>
+      <tr><td>Graph DB</td><td>Neo4j Aura Free</td><td>Workflow graph: XIQ nodes + EP1 nodes + edges (MAPS_TO, RESTRUCTURED_TO, GAP)</td><td>Neo4j Cloud</td></tr>
+      <tr><td>Vector DB</td><td>pgvector (PostgreSQL ext)</td><td>RAG embeddings for 14 PDFs + semantic intent matching</td><td>Railway</td></tr>
+      <tr><td>Relational DB</td><td>PostgreSQL 16</td><td>8 tables: platform_version, bin, workflow_step, field_map, gap, execution_log, confidence_score, scrape_run</td><td>Railway</td></tr>
+      <tr><td>Scraper</td><td>Playwright (Python)</td><td>Headless browser captures every XIQ + EP1 screen</td><td>GitHub Actions / local</td></tr>
+      <tr><td>Embeddings</td><td>OpenAI text-embedding-3-small</td><td>PDF chunk embeddings + intent vector</td><td>OpenAI API</td></tr>
+      <tr><td>LLM</td><td>claude-sonnet-4-6</td><td>Intent parsing, translation reasoning, gap workaround generation</td><td>Anthropic API</td></tr>
+      <tr><td>CI/CD</td><td>GitHub Actions</td><td>Auto-trigger scraper on XIQ/EP1 version bump</td><td>GitHub</td></tr>
+    </table>
+
+    <span class="section-eye">Version Control</span>
+    <h2>Version-Pair Architecture</h2>
+    <p>All mappings, screenshots, and confidence scores are tagged to an exact version pair. A workflow confirmed for <code>XIQ 25.8.0 → EP1 25.9.0</code> is stored separately from <code>XIQ 25.8.0 → EP1 25.9.2</code>. Users pick their pair from a top-nav dropdown. Admins trigger re-scrapes when a new EP1 patch ships.</p>
+
+    <div class="box warn">
+      <div class="box-label">Hard Deadline</div>
+      <p><strong>July 1, 2026 — XIQ GUI retired.</strong> Sprint B (XIQ Playwright scraper) MUST complete before this date. All XIQ screens must be captured and version-tagged in Neo4j. This is the irreversible clock on the entire project.</p>
+    </div>
+
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════
+       TAB 2 — AGENTIC ARCHITECTURE
+  ══════════════════════════════════════════════════════ -->
+  <div id="tab-agentic" class="tab-panel">
+
+    <span class="section-eye">Overview</span>
+    <h2>17-Agent System</h2>
+    <p>12 LangGraph nodes form the stateful execution graph (Node 0 is the head orchestrator). 5 supporting agents run outside the graph as standalone services. Every node receives the same LangGraph <code>State</code> object and appends to it; nothing is discarded mid-run.</p>
+
+    <div class="flow">
+<span class="label">User Intent</span>
+  <span class="arrow">──▶</span> <span class="agent">Node 0: Orchestrator</span>
+         <span class="arrow">─┬─▶</span> <span class="agent">Node 1: Intent Parser</span>  <span class="c">(pgvector semantic search + query type: workflow|lookup|compare)</span>
+          <span class="arrow">│     └──▶</span> <span class="agent">Node 2: XIQ Workflow Builder</span>  <span class="c">(Neo4j graph traversal — XIQ subgraph)</span>
+          <span class="arrow">│           └──▶</span> <span class="agent">Node 3: Version Resolver</span>  <span class="c">(lock to version pair from user session)</span>
+          <span class="arrow">│                 └──▶</span> <span class="agent">Node 4: EP1 Translator</span>  <span class="c">(c_doc via pgvector + c_gui via Neo4j per step)</span>
+          <span class="arrow">│                       └──▶</span> <span class="agent">Node 5: Confidence Aggregator</span>  <span class="c">(Σ(w×c)/Σ(w) per step)</span>
+          <span class="arrow">│                             └──▶</span> <span class="agent">Node 6: Gap Detector</span>  <span class="c">(c &lt; 0.40 → gap; c 0.40-0.69 → warn)</span>
+          <span class="arrow">│                                   ├──▶</span> <span class="agent">Node 7: Nav Path Generator</span>  <span class="c">(builds screen card: portal→nav→field→value→button)</span>
+          <span class="arrow">│                                   └──▶</span> <span class="agent">Node 9: Fallback Agent</span>  <span class="c">(RAG workaround when gap detected)</span>
+          <span class="arrow">│</span>
+          <span class="arrow">└──────────────────────────────────────▶</span> <span class="agent">Node 8: Response Formatter</span>  <span class="c">(workflow steps | single card | diff table)</span>
+                                                          <span class="arrow">└──▶</span> <span class="agent">Node 10: Execution Agent</span>  <span class="c">(optional: push to live network)</span>
+                                                                  <span class="arrow">└──▶</span> <span class="agent">Node 11: Feedback Loop</span>  <span class="c">(update c_lab, auto-create gap on failure)</span>
+    </div>
+
+    <span class="section-eye">LangGraph Nodes (0–11)</span>
+    <h2>Node Descriptions</h2>
+
+    <div class="node-grid">
+      <div class="node-card">
+        <div class="node-id">Node 0</div>
+        <h4>Orchestrator</h4>
+        <p>Head node. Receives raw user intent + session context (version pair, auth). Routes to Node 1. Manages retry logic and error escalation. Owns the LangGraph State object lifecycle.</p>
+      </div>
+      <div class="node-card">
+        <div class="node-id">Node 1</div>
+        <h4>Intent Parser</h4>
+        <p>pgvector semantic search over RAG corpus → candidate XIQ feature nodes. Classifies query: <code>workflow</code> | <code>lookup</code> | <code>compare</code>. Lookup short-circuits to Node 7. Compare routes to dual subgraph fetch.</p>
+      </div>
+      <div class="node-card">
+        <div class="node-id">Node 2</div>
+        <h4>XIQ Workflow Builder</h4>
+        <p>Neo4j traversal of XIQ subgraph from Node 1 seed node. Expands full step sequence. Each step includes: screen_id, nav_path, field_label, input_value, button_label, screenshot_ref.</p>
+      </div>
+      <div class="node-card">
+        <div class="node-id">Node 3</div>
+        <h4>Version Resolver</h4>
+        <p>Filters all graph traversals to the active version pair from user session. Prevents cross-version contamination. Logs version pair on every execution_log entry.</p>
+      </div>
+      <div class="node-card">
+        <div class="node-id">Node 4</div>
+        <h4>EP1 Translator</h4>
+        <p>For each XIQ step: (1) pgvector search over 14 PDFs → c_doc score; (2) Neo4j lookup → does EP1 graph have this node? → c_gui score. Feature Comparison PDF queried first — highest-weight RAG source.</p>
+      </div>
+      <div class="node-card">
+        <div class="node-id">Node 5</div>
+        <h4>Confidence Aggregator</h4>
+        <p>Computes per-step confidence: <code>Σ(w×c)/Σ(w)</code>. Weights: c_doc=0.3, c_gui=0.4, c_lab=0.3. When c_lab is absent (not yet lab-validated), renormalises to c_doc=0.43 + c_gui=0.57. Emits confidence tier: HIGH ≥0.80, MED 0.50–0.79, LOW &lt;0.50.</p>
+      </div>
+      <div class="node-card">
+        <div class="node-id">Node 6</div>
+        <h4>Gap Detector</h4>
+        <p>Any step with confidence &lt;0.40 → <code>GAP</code> (route to Node 9). Steps 0.40–0.69 → <code>WARN</code> (flag in UI, continue). Steps ≥0.70 → <code>OK</code>. Detected gaps auto-staged for Gaps Register (bin + description + workaround TBD).</p>
+      </div>
+      <div class="node-card">
+        <div class="node-id">Node 7</div>
+        <h4>Nav Path Generator</h4>
+        <p>Builds the screen card for each step: portal URL prefix, left-nav path, tab name (if any), field label, dropdown option or text value, submit button label. This is the GPS turn-by-turn output.</p>
+      </div>
+      <div class="node-card">
+        <div class="node-id">Node 8</div>
+        <h4>Response Formatter</h4>
+        <p>Assembles final output by query type: full workflow (ordered step cards + confidence badges), single lookup card, or side-by-side diff table. Attaches screenshot thumbnails where available.</p>
+      </div>
+      <div class="node-card">
+        <div class="node-id">Node 9</div>
+        <h4>Fallback Agent</h4>
+        <p>Activated on GAP. Queries RAG: "what does EP1 documentation suggest as workaround?" Generates Supplemental CLI block or manual steps as alternative. If no workaround found → escalates to Gap Curator (supporting agent).</p>
+      </div>
+      <div class="node-card">
+        <div class="node-id">Node 10</div>
+        <h4>Execution Agent</h4>
+        <p>Optional node (admin-only, requires live lab). Pushes the generated EP1 configuration to real hardware. Captures CLI output. Compares each anticipated value to actual. Updates c_lab per step. On failure: routes to Node 11.</p>
+      </div>
+      <div class="node-card">
+        <div class="node-id">Node 11</div>
+        <h4>Feedback Loop</h4>
+        <p>Processes Execution Agent result. Success: <code>c_lab += 0.1</code> (capped at 1.0), re-write confidence row in PostgreSQL. Failure: auto-create gap entry in Gaps Register + flag step as BROKEN in Neo4j + notify Gap Curator agent.</p>
+      </div>
+    </div>
+
+    <span class="section-eye">Supporting Agents (5)</span>
+    <h2>Out-of-Graph Services</h2>
+
+    <div class="node-grid">
+      <div class="node-card support">
+        <div class="node-id">Support Agent 1</div>
+        <h4>Playwright Scraper</h4>
+        <p>Headless browser automation. Crawls every XIQ + EP1 screen. Tags each screenshot: platform, version, screen_id, nav_path, fields_in_view, timestamp. Outputs gui_baseline_xiq.json + gui_baseline_ep1.json → Neo4j bulk load.</p>
+      </div>
+      <div class="node-card support">
+        <div class="node-id">Support Agent 2</div>
+        <h4>PDF Ingestor</h4>
+        <p>Chunks 14 PDFs (512-token chunks, 50-token overlap). Embeds each chunk with text-embedding-3-small. Stores in pgvector with metadata: source_pdf, page_number, version_tag. Feature Comparison PDF given priority chunk_weight=2.0.</p>
+      </div>
+      <div class="node-card support">
+        <div class="node-id">Support Agent 3</div>
+        <h4>Gap Curator</h4>
+        <p>Human-in-the-loop interface for unresolved gaps. Displays auto-staged gaps from Node 6 and Node 11. Curator fills in: bin assignment, workaround description, severity. Closes feedback loop before gap enters Gaps Register.</p>
+      </div>
+      <div class="node-card support">
+        <div class="node-id">Support Agent 4</div>
+        <h4>Version Manager</h4>
+        <p>Admin-only. Registers new platform versions, triggers Playwright Scraper for diff-scrape, computes version delta (new nodes, removed nodes, renamed nodes). Updates Neo4j with version-tagged edges.</p>
+      </div>
+      <div class="node-card support">
+        <div class="node-id">Support Agent 5</div>
+        <h4>Schema Migrator</h4>
+        <p>Alembic-based. Runs on deploy. Ensures 8-table PostgreSQL schema is current. Seeds initial data: 31 XIQ→EP1 bins, G-01/G-02/G-03 gaps, version pair records for XIQ 25.8.0 + EP1 25.9.0.</p>
+      </div>
+    </div>
+
+    <span class="section-eye">State Object</span>
+    <h2>LangGraph State Schema</h2>
+    <pre>
+<span class="c"># Every node reads + writes this — nothing is lost between hops</span>
+<span class="w">class XformState(TypedDict):</span>
+    <span class="c"># input</span>
+    <span class="w">user_intent:        str</span>
+    <span class="w">query_type:         Literal["workflow", "lookup", "compare"]</span>
+    <span class="w">version_pair:       tuple[str, str]          </span><span class="c"># ("XIQ-25.8.0", "EP1-25.9.0")</span>
+    <span class="c"># XIQ side</span>
+    <span class="w">xiq_steps:          list[WorkflowStep]</span>
+    <span class="w">xiq_seed_node_id:   str</span>
+    <span class="c"># EP1 side</span>
+    <span class="w">ep1_steps:          list[WorkflowStep]</span>
+    <span class="w">ep1_screen_cards:   list[ScreenCard]</span>
+    <span class="c"># confidence</span>
+    <span class="w">confidence_per_step: list[float]</span>
+    <span class="w">gaps_detected:      list[GapRecord]</span>
+    <span class="w">fallback_blocks:    list[FallbackBlock]</span>
+    <span class="c"># execution (optional)</span>
+    <span class="w">execution_result:   ExecutionResult | None</span>
+    <span class="w">lab_feedback:       list[LabFeedback]</span>
+    <span class="c"># output</span>
+    <span class="w">formatted_response: FormattedResponse</span></pre>
+
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════
+       TAB 3 — SPRINTS & EXECUTION
+  ══════════════════════════════════════════════════════ -->
+  <div id="tab-sprints" class="tab-panel">
+
+    <span class="section-eye">Timeline</span>
+    <h2>Six Sprints — Hard Deadline July 1, 2026</h2>
+
+    <div class="box red">
+      <div class="box-label">Critical Path</div>
+      <p><strong>41 days to July 1, 2026 when XIQ GUI is retired.</strong> Sprint B (XIQ Playwright scrape) is the irreversible bottleneck — every XIQ screen must be captured before that date. Everything else can be built after, but Sprint B cannot be delayed. Start it immediately after Sprint A infrastructure is stable.</p>
+    </div>
+
+    <div class="sprint-card">
+      <h4>Sprint A — Infrastructure Setup</h4>
+      <div class="sprint-meta"><span class="badge blue">Est: 1 day</span> <span class="badge green">next session</span> &nbsp;Repository + DB + API skeleton</div>
+      <ul>
+        <li>Create GitHub repo <code>xiq-ep1-intelligence-engine</code> (new, separate from cisco-en-cli-agent)</li>
+        <li>Fork FastAPI skeleton from cisco-en-cli-agent — port 2-col layout, confidence badge pattern</li>
+        <li>Provision Railway PostgreSQL — run Schema Migrator (8 tables below)</li>
+        <li>Provision Neo4j Aura Free — create constraints + indexes for platform_version, screen_id, nav_path</li>
+        <li>Seed PostgreSQL: 31 XIQ→EP1 bins + G-01 / G-02 / G-03 gap records</li>
+        <li>FastAPI <code>/health</code> + <code>/version-pairs</code> + <code>/query</code> stubs returning 501</li>
+        <li>GitHub Actions: lint + test on push to main</li>
+      </ul>
+    </div>
+
+    <div class="sprint-card critical">
+      <h4>⚠ Sprint B — XIQ Playwright Scraper (MUST complete before July 1)</h4>
+      <div class="sprint-meta"><span class="badge red">CRITICAL</span> <span class="badge warn">Est: 3–4 days</span> &nbsp;Capture all XIQ screens before GUI retirement</div>
+      <ul>
+        <li>Playwright script: headless login to XIQ, systematic nav through all 31 bins</li>
+        <li>Screens to capture: Network Policy, SSID, Switch Policy/Template, VLANs, User Groups, PPSK Config, CWP Config, Network Access, AirDefense, GE, Monitor → Devices, Devices → AP/Switch → Actions</li>
+        <li>Every screenshot tagged: <code>{platform, version, screen_id, nav_path, fields_in_view, timestamp}</code></li>
+        <li>Extract field labels + dropdown options from DOM → <code>gui_baseline_xiq.json</code></li>
+        <li>Neo4j bulk load: one node per screen, edges for nav relationships, version=XIQ-25.8.0</li>
+        <li>Store screenshots in <code>assets/screens/xiq/</code> keyed by screen_id</li>
+      </ul>
+    </div>
+
+    <div class="sprint-card">
+      <h4>Sprint C — EP1 Doc Ingest + Playwright Scraper</h4>
+      <div class="sprint-meta"><span class="badge blue">Est: 2–3 days</span> &nbsp;Build the RAG corpus + EP1 GUI graph</div>
+      <ul>
+        <li>PDF Ingestor: chunk + embed all 14 PDFs from <code>/Users/khukhan/Downloads/EP1 and Other Items for Migration/</code></li>
+        <li>Priority order: (1) Feature Comparison PDF — chunk_weight=2.0; (2) EP1 User Guide 25.9.0; (3) EN_Hub_XIQ-EP1.pdf; (4) Security Guide 25.6.0; (5) remaining 10</li>
+        <li>pgvector store: 512-token chunks, 50-token overlap, metadata: source_pdf, page_number, version_tag</li>
+        <li>EP1 Playwright: same screen-by-screen crawl as Sprint B — EP1 portal, same 31 bins</li>
+        <li>Output: <code>gui_baseline_ep1.json</code> → Neo4j, version=EP1-25.9.0</li>
+        <li>Initial RAG vs Scrape reconciliation: run 4-outcome classifier per XIQ node → seed gap register from confirmed mismatches</li>
+      </ul>
+    </div>
+
+    <div class="sprint-card">
+      <h4>Sprint D — LangGraph Agent Coding</h4>
+      <div class="sprint-meta"><span class="badge blue">Est: 5–7 days</span> &nbsp;Build nodes 0–11 + 5 supporting agents</div>
+      <ul>
+        <li>Start with Node 1 (Intent Parser) + Node 4 (EP1 Translator) — highest value, testable standalone</li>
+        <li>Node 1: pgvector semantic search + query type classifier (regex + LLM fallback)</li>
+        <li>Node 4: pgvector doc search (c_doc) + Neo4j node lookup (c_gui) → confidence per step</li>
+        <li>Node 5: confidence aggregator — handles missing c_lab gracefully (renormalise weights)</li>
+        <li>Node 6: gap detector with threshold config: GAP_THRESHOLD=0.40, WARN_THRESHOLD=0.70</li>
+        <li>Nodes 2, 3, 7, 8: workflow builder + version resolver + nav path generator + formatter</li>
+        <li>Nodes 9, 10, 11: fallback + execution + feedback (Sprint F dependency)</li>
+        <li>5 supporting agents: Playwright Scraper (done in Sprint B/C), PDF Ingestor (done in Sprint C), Gap Curator (simple FastAPI admin UI), Version Manager, Schema Migrator</li>
+      </ul>
+    </div>
+
+    <div class="sprint-card">
+      <h4>Sprint E — React Frontend</h4>
+      <div class="sprint-meta"><span class="badge blue">Est: 3–4 days</span> &nbsp;User-facing interface</div>
+      <ul>
+        <li>Version picker: top-nav dropdown — user selects <code>XIQ version × EP1 version</code> pair</li>
+        <li>Query box: natural language input + query type auto-detected (shown as badge, user can override)</li>
+        <li>Two-column response: XIQ steps (left) → EP1 steps (right), aligned row-by-row</li>
+        <li>Per-step confidence badge: HIGH (green), MED (amber), LOW (red), GAP (strikethrough + workaround)</li>
+        <li>Lookup mode: single screen card — nav breadcrumb + field map table</li>
+        <li>Compare mode: diff table with change type badges (confirmed / restructured / gap / ep1_only)</li>
+        <li>Admin view (gated): trigger scraper, review staged gaps, publish versions</li>
+        <li>Port 2-col layout from cisco-en-cli-agent as starting template</li>
+      </ul>
+    </div>
+
+    <div class="sprint-card">
+      <h4>Sprint F — E2E Integration + Automated Validation</h4>
+      <div class="sprint-meta"><span class="badge blue">Est: 3–4 days</span> &nbsp;Wire all agents + close the feedback loop</div>
+      <ul>
+        <li>Wire all LangGraph nodes end-to-end: State passes cleanly from Node 0 → 11</li>
+        <li>Execution Agent (Node 10): EP1 API + EXOS SSH push — deploy policy, capture <code>show vlan</code> + <code>show dhcp-server</code></li>
+        <li>Per-field verification: compare anticipated values to actual CLI output</li>
+        <li>On failure: auto-create gap record, flag Neo4j node, notify Gap Curator</li>
+        <li>GitHub Actions: weekly cron → re-scrape known workflows against live EP1 → update confidence scores</li>
+        <li>E2E test: "configure PPSK VLAN5 on AP1" → full workflow → execution → verification → feedback</li>
+      </ul>
+    </div>
+
+    <span class="section-eye">Database Schema</span>
+    <h2>8 PostgreSQL Tables</h2>
+    <table>
+      <tr><th>Table</th><th>Key Columns</th><th>Purpose</th></tr>
+      <tr><td><code>platform_version</code></td><td>id, platform (XIQ|EP1), version, scrape_run_id, is_active</td><td>Registry of all versioned snapshots</td></tr>
+      <tr><td><code>bin</code></td><td>id, bin_number, name, description, xiq_nav_path, ep1_nav_path</td><td>31 XIQ→EP1 feature bins</td></tr>
+      <tr><td><code>workflow_step</code></td><td>id, bin_id, platform_version_id, step_order, screen_id, nav_path, field_label, input_value, button_label, screenshot_path</td><td>Per-step screen cards for both platforms</td></tr>
+      <tr><td><code>field_map</code></td><td>id, xiq_step_id, ep1_step_id, map_type (confirmed|restructured|gap|ep1_only)</td><td>XIQ↔EP1 step-level mapping</td></tr>
+      <tr><td><code>gap</code></td><td>id, bin_id, gap_code (G-01…), severity, description, workaround, status (open|resolved)</td><td>Gaps Register — mirrors xiq-ep1-transition.html</td></tr>
+      <tr><td><code>execution_log</code></td><td>id, workflow_step_id, version_pair, anticipated, actual, passed, timestamp</td><td>Live lab validation results</td></tr>
+      <tr><td><code>confidence_score</code></td><td>id, field_map_id, c_doc, c_gui, c_lab, confidence, tier (HIGH|MED|LOW|GAP), updated_at</td><td>Per-step confidence — updated by Node 11</td></tr>
+      <tr><td><code>scrape_run</code></td><td>id, platform_version_id, started_at, completed_at, screens_captured, errors</td><td>Scraper run audit log</td></tr>
+    </table>
+
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════
+       TAB 4 — AUTOMATED VALIDATION
+  ══════════════════════════════════════════════════════ -->
+  <div id="tab-validation" class="tab-panel">
+
+    <span class="section-eye">Why Automate Validation</span>
+    <h2>The Execution Agent Closes the Loop</h2>
+    <p>Documentation says one thing. The UI shows another. But does the configuration actually push correctly? The Execution Agent (Node 10) answers that question by deploying the generated policy to live hardware and comparing field-by-field. Without this, confidence is theoretical. With it, confidence is empirical.</p>
+    <p>The second reason is drift. EP1 ships patches roughly every 6 weeks. A nav path that worked in EP1 25.9.0 may have moved in EP1 25.9.2. Automated re-validation catches this before a user hits it in production.</p>
+
+    <span class="section-eye">Execution Flow</span>
+    <h2>Node 10 Step-by-Step</h2>
+
+    <div class="flow">
+<span class="label">Trigger</span>: Admin approves execution OR CI/CD weekly cron fires
+       <span class="arrow">│</span>
+       <span class="arrow">▼</span>
+<span class="agent">1. Config Generator</span>   <span class="c">— convert EP1 workflow steps into API calls (EP1 REST) + CLI blocks (EXOS SSH)</span>
+       <span class="arrow">▼</span>
+<span class="agent">2. Dry-Run Check</span>      <span class="c">— syntax validation only, no push. Gate: all fields present + version matches</span>
+       <span class="arrow">▼</span>
+<span class="agent">3. Push to Lab</span>        <span class="c">— EP1 API: create/update Network Policy → push to AP1 + SW1</span>
+                         <span class="c">  EXOS SSH: verify show vlan, show dhcp-server, show ports</span>
+       <span class="arrow">▼</span>
+<span class="agent">4. Capture Actual</span>     <span class="c">— SSH to SW1: `show vlan`, `show dhcp-server`, `show ports X information detail`</span>
+                         <span class="c">  SSH to AP1: `show capwap`, `show interface`, `show hivemanager`</span>
+       <span class="arrow">▼</span>
+<span class="agent">5. Per-Field Compare</span>  <span class="c">— for each anticipated value: exact match OR regex match</span>
+                         <span class="c">  e.g. anticipated: "VLAN5_Employee 10.5.0.1/24 f"  actual: parsed from show vlan</span>
+       <span class="arrow">├── PASS ──▶</span> <span class="store">c_lab += 0.1 (capped 1.0) → write confidence_score → log execution_log</span>
+       <span class="arrow">└── FAIL ──▶</span> <span class="conf">auto-create gap_record → flag Neo4j node BROKEN → notify Gap Curator → log execution_log</span>
+    </div>
+
+    <span class="section-eye">CI/CD Pipeline</span>
+    <h2>GitHub Actions — Weekly Re-Validation</h2>
+
+    <pre>
+<span class="c"># .github/workflows/validate.yml — runs every Monday 06:00 UTC</span>
+<span class="w">on:</span>
+  <span class="w">schedule:</span>
+    <span class="w">- cron: '0 6 * * MON'</span>
+  <span class="w">workflow_dispatch:</span>          <span class="c"># manual trigger on EP1 patch day</span>
+
+<span class="w">jobs:</span>
+  <span class="w">validate:</span>
+    <span class="w">steps:</span>
+      <span class="w">- name: Run EP1 Playwright diff-scrape</span>
+        <span class="c">  # capture current EP1 UI → compare to Neo4j baseline</span>
+        <span class="c">  # flag any screen_id whose nav_path changed</span>
+      <span class="w">- name: Run Execution Agent on known-good workflows</span>
+        <span class="c">  # push PPSK VLAN5, Guest VLAN10, AP policy</span>
+        <span class="c">  # verify show vlan + show dhcp-server + show capwap</span>
+      <span class="w">- name: Update confidence scores</span>
+        <span class="c">  # PASS → c_lab += 0.1 / FAIL → flag + create gap</span>
+      <span class="w">- name: Publish validation report</span>
+        <span class="c">  # POST to Slack #infra-alerts if any step BROKEN</span></pre>
+
+    <span class="section-eye">Version Drift Detection</span>
+    <h2>What Happens When EP1 Ships a Patch</h2>
+
+    <div class="box warn">
+      <div class="box-label">Drift Scenario</div>
+      <p>EP1 25.9.2 ships. The CWP configuration screen moves from <em>Configure → Network Policies → [policy] → SSIDs → [ssid] → User Authentication → CWP</em> to a new top-level <em>Configure → Captive Portal → Profiles</em> path. Users following the 25.9.0 workflow hit a dead end.</p>
+    </div>
+
+    <p>The Version Manager (Support Agent 4) handles this:</p>
+    <ol>
+      <li>Admin registers EP1 25.9.2 via admin UI → triggers diff-scrape</li>
+      <li>Playwright scraper runs on EP1 25.9.2 → captures all screens</li>
+      <li>Diff engine compares Neo4j nodes: EP1-25.9.0 vs EP1-25.9.2</li>
+      <li>Changed nodes flagged as <code>RESTRUCTURED</code> — old nav_path deprecated, new path set</li>
+      <li>Confidence scores for affected steps reset: c_gui=0.0 pending re-validation</li>
+      <li>Gap Curator reviews staged changes → approves or escalates</li>
+      <li>Users on EP1-25.9.2 version pair immediately see updated nav paths</li>
+    </ol>
+
+    <span class="section-eye">Confidence Tiers</span>
+    <h2>What Confidence Means to the User</h2>
+    <table>
+      <tr><th>Tier</th><th>Score</th><th>Meaning</th><th>UI Treatment</th></tr>
+      <tr>
+        <td><span class="badge green">HIGH</span></td>
+        <td>≥ 0.80</td>
+        <td>Documented + found in UI + lab-verified. Safe to follow.</td>
+        <td>Green badge, no annotation</td>
+      </tr>
+      <tr>
+        <td><span class="badge warn">MED</span></td>
+        <td>0.50 – 0.79</td>
+        <td>Documented + found in UI, but not yet lab-validated OR minor discrepancy.</td>
+        <td>Amber badge, "verify in lab" note</td>
+      </tr>
+      <tr>
+        <td><span class="badge red">LOW</span></td>
+        <td>0.40 – 0.49</td>
+        <td>RAG says it exists but UI evidence is weak. May be restructured.</td>
+        <td>Red badge, "path may have changed" warning</td>
+      </tr>
+      <tr>
+        <td><span class="badge red">GAP</span></td>
+        <td>&lt; 0.40</td>
+        <td>Not found in UI. Either genuinely missing from EP1 or completely relocated.</td>
+        <td>Strikethrough step, workaround block shown, gap code (G-XX) linked</td>
+      </tr>
+    </table>
+
+    <div class="box purple">
+      <div class="box-label">The Honest System Principle</div>
+      <p>This engine must be more honest than a human consultant. A consultant might guess or omit uncertainty. This system shows the confidence score on every step. A gap is not a failure — it is the most valuable output: it tells the engineer exactly where EP1 is not ready and gives them a workaround rather than a dead end.</p>
+    </div>
+
+    <span class="section-eye">Links &amp; Resources</span>
+    <h2>Reference Files</h2>
+    <table>
+      <tr><th>Resource</th><th>Location</th><th>Role</th></tr>
+      <tr><td>XIQ→EP1 Gaps Register</td><td><a href="xiq-ep1-transition.html">xiq-ep1-transition.html</a></td><td>Live gap tracker — engine Gaps Register mirrors this</td></tr>
+      <tr><td>Architecture Debate</td><td><a href="xiq-ep1-arch-debate.html">xiq-ep1-arch-debate.html</a></td><td>Design rationale, hypothesis vs confirmed</td></tr>
+      <tr><td>EP1 Deployment Guide</td><td><a href="ep1-deployment-guide.html">ep1-deployment-guide.html</a></td><td>Reference for SW1/AP1 zero-CLI deploy</td></tr>
+      <tr><td>Feature Comparison PDF</td><td>/Users/khukhan/Downloads/EP1 and Other Items for Migration/</td><td>Ground truth RAG source — XIQ→EP1 explicit mapping</td></tr>
+      <tr><td>Cisco EN CLI Agent</td><td>github.com/khursheedkhanaiforgood-ai/cisco-en-cli-agent</td><td>Prototype — port skeleton, confidence formula, 2-col UI</td></tr>
+    </table>
+
+  </div><!-- end tab-validation -->
+
+  <hr class="rule">
+  <div class="footer">
+    XIQ → EP1 Intelligent Xformation Engine &nbsp;&bull;&nbsp; KhKLab &nbsp;&bull;&nbsp; May 21, 2026<br>
+    July 1, 2026: XIQ GUI retired &nbsp;&bull;&nbsp; Sprint B (Playwright scrape) is the critical path<br>
+    Branch: feature/xiq-ep1-intelligence-engine
+  </div>
+
+</div><!-- container -->
+
+<script>
+function showTab(name) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  event.currentTarget.classList.add('active');
+}
+</script>
+</body>
+</html>
