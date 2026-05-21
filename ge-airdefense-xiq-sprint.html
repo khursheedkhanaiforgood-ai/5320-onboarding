@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Guest Essentials + AirDefense in XIQ | KhKLab Sprint Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Libre+Franklin:wght@400;600;700;900&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Libre Baskerville', Georgia, serif; font-size: 1rem; line-height: 1.75; color: #111; background: #fff; max-width: 820px; margin: 0 auto; padding: 40px 24px 80px; }
+  h1 { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 2.1rem; font-weight: 900; line-height: 1.15; letter-spacing: -0.02em; margin-bottom: 6px; }
+  h2 { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 1.35rem; font-weight: 900; margin: 44px 0 12px; border-top: 3px solid #111; padding-top: 14px; }
+  h3 { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 1rem; font-weight: 700; margin: 22px 0 6px; }
+  p { margin-bottom: 14px; }
+  ul, ol { margin: 8px 0 14px 22px; }
+  li { margin-bottom: 5px; }
+  a { color: #1e40af; }
+  code { font-family: 'SF Mono', Menlo, Consolas, monospace; font-size: 0.8rem; background: #F4F4F4; border: 1px solid #E2E2E2; padding: 1px 5px; border-radius: 3px; color: #1e40af; }
+  pre { background: #1e1e2e; color: #cdd6f4; border-radius: 6px; padding: 16px 18px; font-size: 0.8rem; line-height: 1.6; overflow-x: auto; margin: 12px 0 18px; }
+  pre code { background: none; border: none; padding: 0; color: inherit; font-size: inherit; }
+  .kicker { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.18em; color: #1e40af; margin-bottom: 8px; display: block; }
+  .byline { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.78rem; color: #555; border-top: 1px solid #E2E2E2; border-bottom: 1px solid #E2E2E2; padding: 8px 0; margin: 14px 0 24px; }
+  .section-label { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.18em; color: #065f46; margin: 44px 0 14px; padding-bottom: 6px; border-bottom: 2px solid #065f46; display: block; }
+  .section-label.blue { color: #1e40af; border-bottom-color: #1e40af; }
+  .toc { position: sticky; top: 0; background: #fff; border-bottom: 1px solid #E2E2E2; padding: 10px 0 8px; margin-bottom: 32px; z-index: 100; overflow-x: auto; white-space: nowrap; }
+  .toc-title { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.15em; color: #888; margin-bottom: 5px; }
+  .toc a { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.72rem; color: #1e40af; text-decoration: none; margin-right: 16px; }
+  .toc a:hover { text-decoration: underline; }
+  .toc .sep { color: #ccc; margin-right: 16px; }
+  table { width: 100%; border-collapse: collapse; margin: 12px 0 20px; font-size: 0.84rem; }
+  th { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; background: #F9F9F9; padding: 8px 10px; border: 1px solid #E2E2E2; text-align: left; }
+  td { padding: 8px 10px; border: 1px solid #E2E2E2; vertical-align: top; }
+  tr:nth-child(even) { background: #FAFAFA; }
+  .box { border: 1px solid #E2E2E2; border-left: 4px solid #065f46; border-radius: 4px; padding: 14px 16px; margin: 18px 0; background: #F9FFF9; }
+  .box.warn { border-left-color: #d97706; background: #FFFBEB; }
+  .box.info { border-left-color: #1e40af; background: #EFF6FF; }
+  .box.blue { border-left-color: #1e40af; background: #EFF6FF; }
+  .box-label { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.14em; color: #6b7280; margin-bottom: 6px; }
+  .badge { display: inline-block; font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.58rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; padding: 1px 6px; border-radius: 10px; vertical-align: middle; margin-left: 4px; }
+  .badge-ok  { background: #D1FAE5; color: #065f46; border: 1px solid #6ee7b7; }
+  .badge-warn { background: #FEF3C7; color: #92400e; border: 1px solid #fcd34d; }
+  .badge-info { background: #DBEAFE; color: #1e40af; border: 1px solid #93c5fd; }
+  .step { counter-increment: step-counter; display: flex; gap: 14px; margin: 16px 0; }
+  .step-num { flex: 0 0 28px; height: 28px; border-radius: 50%; background: #065f46; color: #fff; font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.75rem; font-weight: 700; display: flex; align-items: center; justify-content: center; margin-top: 2px; }
+  .step-num.blue { background: #1e40af; }
+  .step-body { flex: 1; }
+  .step-body strong { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.9rem; }
+  .nav-path { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.78rem; font-weight: 600; color: #065f46; background: #F0FDF4; border: 1px solid #BBF7D0; border-radius: 4px; padding: 4px 10px; display: inline-block; margin: 4px 0 8px; }
+  .nav-path.blue { color: #1e40af; background: #EFF6FF; border-color: #BFDBFE; }
+  .divider { border: none; border-top: 1px solid #E2E2E2; margin: 44px 0; }
+  .checklist { list-style: none; margin-left: 0; }
+  .checklist li { padding: 6px 0; border-bottom: 1px solid #F3F4F6; font-size: 0.9rem; }
+  .checklist li::before { content: "☐ "; font-size: 1rem; color: #9CA3AF; }
+  .flow-row { display: flex; align-items: center; gap: 4px; margin: 14px 0; flex-wrap: wrap; }
+  .flow-node { border: 1px solid #93c5fd; background: #EFF6FF; border-radius: 4px; padding: 5px 10px; font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.72rem; font-weight: 600; white-space: nowrap; }
+  .flow-node.green { border-color: #6ee7b7; background: #D1FAE5; }
+  .flow-node.amber { border-color: #fcd34d; background: #FEF3C7; }
+  .flow-arrow { font-size: 0.9rem; color: #9CA3AF; padding: 0 2px; }
+  .footer { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.72rem; color: #888; text-align: center; line-height: 1.8; margin-top: 44px; }
+  @media(max-width:600px) { .toc a { font-size: 0.65rem; } h1 { font-size: 1.6rem; } }
+</style>
+</head>
+<body>
+
+<div class="toc">
+  <div class="toc-title">Sprint Guide — May 20, 2026</div>
+  <a href="#ge-overview">GE Overview</a>
+  <a href="#ge-access">Access GE</a>
+  <a href="#ge-nav">GE Nav</a>
+  <a href="#ge-defaults">Defaults</a>
+  <a href="#ge-policy">Onboarding Policy</a>
+  <a href="#ge-splash">Splash Template</a>
+  <a href="#ge-xiq-link">XIQ SSID Link</a>
+  <a href="#ge-rule">Onboarding Rule</a>
+  <a href="#ge-test">Test GE</a>
+  <span class="sep">|</span>
+  <a href="#ad-overview">AD Overview</a>
+  <a href="#ad-access">Access AD</a>
+  <a href="#ad-wips">WIPS Policy</a>
+  <a href="#ad-sensor">Sensor Config</a>
+  <a href="#ad-alarms">Alarms</a>
+  <a href="#ad-test">Verify AD</a>
+</div>
+
+<span class="kicker">KhKLab &nbsp;&bull;&nbsp; XIQ Classic &nbsp;&bull;&nbsp; Self-Study Sprint &nbsp;&bull;&nbsp; May 20, 2026</span>
+<h1>Guest Essentials + AirDefense<br>in XIQ Classic</h1>
+<p class="byline">
+  Khursheed Khan &nbsp;&bull;&nbsp; May 20, 2026 &nbsp;&bull;&nbsp;
+  Two sprints · XIQ Classic only · Not available in EP1 yet
+</p>
+
+<p>Both Guest Essentials and AirDefense Essentials are <strong>XIQ Classic only</strong> — they appear as "Planned" in the EP1 feature roadmap. This guide walks through both from scratch, with exact navigation paths, field names, and verification steps. Follow Sprint 1 (GE) fully before starting Sprint 2 (AD).</p>
+
+<div class="box warn">
+  <p class="box-label">Prerequisite</p>
+  <p style="font-size:0.84rem;">Both services require an <strong>ExtremeCloud IQ Pilot license</strong> on your account. Log into XIQ Classic — not EP1. If your account shows only a Connect license, GE and AirDefense will not appear under Essentials.</p>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SPRINT 1 — GUEST ESSENTIALS
+     ═══════════════════════════════════════════════════════════ -->
+
+<h2 id="ge-overview">Sprint 1 — Guest Essentials</h2>
+
+<p>Guest Essentials is ExtremeCloud IQ's guest lifecycle management service. It wraps your open/CWP SSID with a self-service registration portal, time-limited access, sponsor approval workflows, and analytics. It sits <em>on top of</em> the network policy you already built in XIQ — the AP still handles the wireless, GE handles the identity and portal layer.</p>
+
+<h3>What GE adds to KhKLab_Guest</h3>
+<table>
+  <tr><th>Without GE</th><th>With GE</th></tr>
+  <tr><td>CWP shows a simple accept page</td><td>CWP is a branded splash page with registration form</td></tr>
+  <tr><td>Guest gets VLAN 10 on accept</td><td>Guest must register (email, SMS, or social) before access granted</td></tr>
+  <tr><td>No record of who connected</td><td>Guest user record with name, email, device, timestamp, expiry</td></tr>
+  <tr><td>No expiry control</td><td>Access expires automatically (1 day default, configurable)</td></tr>
+  <tr><td>No analytics</td><td>Dashboard: visitors, dwell time, conversion, demographics</td></tr>
+</table>
+
+<!-- ACCESS -->
+<span class="section-label" id="ge-access">Step 1 — Access Guest Essentials</span>
+
+<div class="step">
+  <div class="step-num">1</div>
+  <div class="step-body">
+    <strong>Log into XIQ Classic</strong> — not EP1. URL: <code>extremecloudiq.com</code>
+  </div>
+</div>
+<div class="step">
+  <div class="step-num">2</div>
+  <div class="step-body">
+    <strong>Left nav → Essentials</strong> (grid/apps icon, near the bottom of the left panel)<br>
+    A sub-menu expands showing available Essentials services.
+  </div>
+</div>
+<div class="step">
+  <div class="step-num">3</div>
+  <div class="step-body">
+    <strong>Click Extreme Guest</strong><br>
+    The ExtremeGuest Essentials Overview dashboard opens with a map and all-zero counters (expected — nothing configured yet).
+  </div>
+</div>
+<div class="step">
+  <div class="step-num">4</div>
+  <div class="step-body">
+    <strong>Click ≡ (hamburger) at the top-left of the GE panel</strong> to expand the full left nav.<br>
+    You should now see the GE-specific menu tree.
+  </div>
+</div>
+
+<!-- NAV STRUCTURE -->
+<span class="section-label" id="ge-nav">GE Left Nav — Full Structure</span>
+
+<p>Once the hamburger is clicked, the full GE nav appears. This is separate from the main XIQ nav — you are now inside the GE micro-app.</p>
+
+<table>
+  <tr><th>Top-level</th><th>Sub-items</th></tr>
+  <tr><td><strong>Monitor</strong></td><td>Summary · Dashboard · Dwell</td></tr>
+  <tr><td><strong>Configure</strong></td><td>
+    Settings → Authorization Policy, Access Groups<br>
+    Network<br>
+    Location<br>
+    Devices<br>
+    Notification → Policy<br>
+    Onboarding → Policy, Rules<br>
+    Splash Templates<br>
+    Users<br>
+    Clients
+  </td></tr>
+  <tr><td><strong>Analyze</strong></td><td>Analytics and reports</td></tr>
+</table>
+
+<div class="box info">
+  <p class="box-label">Key insight</p>
+  <p style="font-size:0.84rem;">The user you created earlier (<code>khursheed.khan@gmail.com</code>) was created under <strong>XIQ main → Configure → Guest Essentials Users</strong> — that is the XIQ Classic shortcut, not the GE app itself. Both routes write to the same user database. Your user record is valid.</p>
+</div>
+
+<!-- DEFAULTS -->
+<span class="section-label" id="ge-defaults">Step 2 — Review Default Policies (no changes needed)</span>
+
+<p>GE ships with four default Authorization Policies and four default Access Groups. You do not need to create new ones for a basic lab — just confirm they exist.</p>
+
+<div class="nav-path">Configure → Settings → Authorization Policy</div>
+
+<table>
+  <tr><th>Policy</th><th>Purpose</th></tr>
+  <tr><td><code>GuestAccessPolicy</code></td><td>For registered guests — authenticates and grants access. <strong>This is what KhKLab_Guest users will use.</strong></td></tr>
+  <tr><td><code>UnregisteredPolicy</code></td><td>First-time users before registration completes</td></tr>
+  <tr><td><code>TempAccessPolicy</code></td><td>Short temporary access (5-min window with a message)</td></tr>
+  <tr><td><code>DenyAccessPolicy</code></td><td>Registered but not authorized — denies access</td></tr>
+</table>
+
+<div class="nav-path">Configure → Settings → Access Groups</div>
+
+<table>
+  <tr><th>Group</th><th>Linked Policy</th><th>When applied</th></tr>
+  <tr><td><code>GuestAccess</code></td><td>GuestAccessPolicy</td><td>After successful registration ← <strong>this is what your user has</strong></td></tr>
+  <tr><td><code>Unregistered</code></td><td>UnregisteredPolicy</td><td>Before registration</td></tr>
+  <tr><td><code>TempAccess</code></td><td>TempAccessPolicy</td><td>Walk-in no-registration access</td></tr>
+  <tr><td><code>DenyAccess</code></td><td>DenyAccessPolicy</td><td>Blocked users</td></tr>
+</table>
+
+<!-- ONBOARDING POLICY -->
+<span class="section-label" id="ge-policy">Step 3 — Create Onboarding Policy</span>
+
+<p>The onboarding policy defines <em>what happens when a guest submits the CWP form</em> — do they get immediate access, or must they verify via email/SMS OTP first?</p>
+
+<div class="nav-path">Configure → Onboarding → Policy → + (Add)</div>
+
+<table>
+  <tr><th>Field</th><th>Value for KhKLab</th><th>Notes</th></tr>
+  <tr><td>Name</td><td><code>KhKLab_GuestOnboard</code></td><td>Any unique name</td></tr>
+  <tr><td>Description</td><td>Guest onboarding for KhKLab_Guest SSID</td><td></td></tr>
+  <tr><td>Condition Type</td><td><strong>Any</strong> (for lab — no OTP)</td><td>Options: Any · Email · SMS · Social. "Any" = immediate access, no validation required.</td></tr>
+  <tr><td>Action</td><td>Register Client</td><td>Records device MAC and assigns to GuestAccess group</td></tr>
+  <tr><td>Access Group</td><td>GuestAccess</td><td>Assigns GuestAccessPolicy on completion</td></tr>
+  <tr><td>Validity Period</td><td>1 Day (or match your 1-week user expiry)</td><td>Default = 1 Day 30 Minutes</td></tr>
+</table>
+
+<p>Click <strong>SAVE</strong>.</p>
+
+<div class="box warn">
+  <p class="box-label">If you want email OTP verification instead</p>
+  <p style="font-size:0.84rem;">Set Condition Type = <strong>Email</strong>. Action becomes "Send One-Time-Passcode to User". GE will email the guest a 6-digit OTP they must enter on the splash page. Requires Configure → Notification → Policy to have a valid SMTP server configured.</p>
+</div>
+
+<!-- SPLASH TEMPLATE -->
+<span class="section-label" id="ge-splash">Step 4 — Configure Splash Template</span>
+
+<p>The splash template is the CWP portal page guests see. GE ships with a default <code>Accept_and_Connect</code> template — for lab purposes, clone and use it as-is.</p>
+
+<div class="nav-path">Configure → Splash Templates → select Accept_and_Connect → Clone</div>
+
+<div class="step">
+  <div class="step-num">1</div>
+  <div class="step-body"><strong>Clone Accept_and_Connect</strong> — name it <code>KhKLab_SplashTemplate</code></div>
+</div>
+<div class="step">
+  <div class="step-num">2</div>
+  <div class="step-body"><strong>Edit the clone</strong> — drag-and-drop layout editor. For lab: keep default fields (Full Name, Email, Phone). Optionally add logo.</div>
+</div>
+<div class="step">
+  <div class="step-num">3</div>
+  <div class="step-body"><strong>Assign to Location and Network</strong> — at the bottom of the splash template editor:
+    <ul>
+      <li>Location: KhursheedsLab (or Global)</li>
+      <li>Network: KhKLab_Guest</li>
+    </ul>
+  </div>
+</div>
+<div class="step">
+  <div class="step-num">4</div>
+  <div class="step-body"><strong>SAVE</strong></div>
+</div>
+
+<!-- XIQ SSID LINK -->
+<span class="section-label" id="ge-xiq-link">Step 5 — Enable GE on the SSID in XIQ Network Policy</span>
+
+<p>This step is done in <strong>main XIQ</strong> (not inside the GE app). You must tell the network policy that <code>KhKLab_Guest</code> uses Guest Essentials — this is the toggle that activates the GE redirect on the AP.</p>
+
+<div class="nav-path">XIQ main → Configure → Network Policies → AP1_ViaEP1_VLAN5-10_PPSK_5 → Wireless Networks → KhKLab_Guest → Edit</div>
+
+<div class="step">
+  <div class="step-num">1</div>
+  <div class="step-body"><strong>Find KhKLab_Guest</strong> in the Wireless Networks tab and click to edit it.</div>
+</div>
+<div class="step">
+  <div class="step-num">2</div>
+  <div class="step-body"><strong>Toggle ON: Enable ExtremeGuest Essentials</strong> (blue toggle). This replaces the basic CWP with the GE portal.</div>
+</div>
+<div class="step">
+  <div class="step-num">3</div>
+  <div class="step-body"><strong>Optional — Enable HTTPS</strong> for the captive portal (recommended for production). Requires a certificate uploaded to XIQ and a Webserver Domain Name (FQDN).</div>
+</div>
+<div class="step">
+  <div class="step-num">4</div>
+  <div class="step-body"><strong>SAVE</strong> the wireless network config.</div>
+</div>
+<div class="step">
+  <div class="step-num">5</div>
+  <div class="step-body"><strong>Push policy to AP1</strong> — Manage → Devices → AP1 → Deploy Policy → Update.</div>
+</div>
+
+<!-- ONBOARDING RULE -->
+<span class="section-label" id="ge-rule">Step 6 — Create Onboarding Rule (the SSID → Policy link)</span>
+
+<p>The onboarding rule is what GE uses to match an incoming guest connection to a policy. It links: <em>this SSID + this location → apply this onboarding policy</em>. Without a rule, GE won't know what to do with guests connecting to KhKLab_Guest.</p>
+
+<div class="nav-path">Configure → Onboarding → Rules → + (Add)</div>
+
+<table>
+  <tr><th>Field</th><th>Value</th><th>Notes</th></tr>
+  <tr><td>Rule Name</td><td><code>KhKLab_GuestRule</code></td><td>Any unique name</td></tr>
+  <tr><td>Policy</td><td><code>KhKLab_GuestOnboard</code></td><td>The policy you created in Step 3</td></tr>
+  <tr><td>Network</td><td><code>KhKLab_Guest</code></td><td>Must match the SSID broadcast name exactly</td></tr>
+  <tr><td>Location</td><td>KhursheedsLab (or Global)</td><td>Match the location assigned to AP1 in XIQ</td></tr>
+  <tr><td>Precedence</td><td>1</td><td>Lower number = higher priority. Use 1 for your only rule.</td></tr>
+</table>
+
+<p>Click <strong>SAVE</strong>.</p>
+
+<div class="box">
+  <p class="box-label">Precedence logic</p>
+  <p style="font-size:0.84rem;">If multiple rules match (same SSID, different locations), the rule with the <strong>lowest precedence number wins</strong>. For a single-rule lab, precedence 1 is fine.</p>
+</div>
+
+<!-- TEST GE -->
+<span class="section-label" id="ge-test">Step 7 — Test and Verify Guest Essentials</span>
+
+<p>After AP1 finishes its config push (green LED):</p>
+
+<div class="step">
+  <div class="step-num">1</div>
+  <div class="step-body"><strong>Connect to KhKLab_Guest</strong> on a test device (forget first if previously connected).</div>
+</div>
+<div class="step">
+  <div class="step-num">2</div>
+  <div class="step-body"><strong>CWP opens</strong> — you should now see the <strong>GE splash template</strong> (branded form with Full Name, Email, Phone fields) instead of the basic accept page.</div>
+</div>
+<div class="step">
+  <div class="step-num">3</div>
+  <div class="step-body"><strong>Fill in the form and click Accept.</strong> If Condition Type = Any, access is granted immediately. You should receive a welcome confirmation page.</div>
+</div>
+<div class="step">
+  <div class="step-num">4</div>
+  <div class="step-body"><strong>Verify IP</strong> — should be <code>10.10.0.x</code> (VLAN 10). If <code>192.168.0.x</code>, the CWP post-auth VLAN override (EP1 policy setting) may need re-checking.</div>
+</div>
+<div class="step">
+  <div class="step-num">5</div>
+  <div class="step-body"><strong>In GE → Monitor → Dashboard</strong> — verify Total Users count increments to 1 and the guest appears in the Users table.</div>
+</div>
+
+<h3>GE verification checklist</h3>
+<ul class="checklist">
+  <li>Splash template displays (not basic accept page)</li>
+  <li>Registration form accepts input</li>
+  <li>Welcome / access-granted page shows after Accept</li>
+  <li>Client gets 10.10.0.x (VLAN 10)</li>
+  <li>GE Monitor → Dashboard: Total Users = 1</li>
+  <li>GE → Configure → Users: guest email appears in list</li>
+  <li>Guest can browse internet (google.com loads)</li>
+</ul>
+
+<div class="box warn">
+  <p class="box-label">If splash page doesn't change to GE template</p>
+  <p style="font-size:0.84rem;">
+    1. Confirm "Enable ExtremeGuest Essentials" toggle is ON in the XIQ network policy SSID config<br>
+    2. Confirm policy was pushed to AP1 (green audit icon in XIQ Manage → Devices)<br>
+    3. Confirm Onboarding Rule exists with correct SSID name (must be exact match including case)<br>
+    4. Try: Manage → Devices → AP1 → clear AP cache or reboot
+  </p>
+</div>
+
+<hr class="divider">
+
+<!-- ═══════════════════════════════════════════════════════════
+     SPRINT 2 — AIRDEFENSE
+     ═══════════════════════════════════════════════════════════ -->
+
+<h2 id="ad-overview">Sprint 2 — AirDefense Essentials</h2>
+
+<p>AirDefense Essentials is XIQ's cloud-based WIDS/WIPS (Wireless Intrusion Detection/Prevention System). Your AP3000 acts as a sensor — it scans RF channels while still serving clients (Radio-Share mode) and reports threats to the AirDefense cloud engine. You see results in the AirDefense dashboard inside XIQ.</p>
+
+<h3>What AirDefense detects</h3>
+<table>
+  <tr><th>Category</th><th>Threat types</th></tr>
+  <tr><td>Exploits</td><td>Impersonation attacks, rogue exploits, DoS deauth floods, DoS disassociation, TKIP out-of-sequence, DTP trunk negotiation</td></tr>
+  <tr><td>Reconnaissance</td><td>Wireless scanning, probing, NetBIOS traffic, unauthorized sniffing</td></tr>
+  <tr><td>Rogue Activity</td><td>Rogue APs (detected by BSS MAC range analysis), rogue clients, evil twins</td></tr>
+  <tr><td>Vulnerabilities</td><td>Weak encryption (WEP leakage), misconfigured APs</td></tr>
+</table>
+
+<div class="box info">
+  <p class="box-label">AP3000 sensor mode</p>
+  <p style="font-size:0.84rem;">AP3000 operates in <strong>Radio-Share mode</strong> — both radios continue to serve clients AND scan for threats on the channels they're operating on. A dedicated sensor AP (monitor-only, no client service) sees more channels but AP3000 in Radio-Share is sufficient for a lab.</p>
+</div>
+
+<!-- ACCESS AD -->
+<span class="section-label id="ad-access">Step 1 — Access AirDefense and Subscribe</span>
+
+<div class="step">
+  <div class="step-num blue">1</div>
+  <div class="step-body"><strong>XIQ Classic → left nav → Essentials → Extreme AirDefense Essentials</strong></div>
+</div>
+<div class="step">
+  <div class="step-num blue">2</div>
+  <div class="step-body"><strong>Click Subscribe</strong> (shown on the AirDefense landing page if not yet subscribed).<br>This activates the AirDefense Essentials service on your Pilot account.</div>
+</div>
+<div class="step">
+  <div class="step-num blue">3</div>
+  <div class="step-body">The AirDefense Overview dashboard loads. Left nav now shows: <strong>Overview · Alarms · Sensors · Settings</strong>. All counters will be zero until sensors are configured.</div>
+</div>
+
+<!-- WIPS POLICY -->
+<span class="section-label blue" id="ad-wips">Step 2 — Enable AirDefense in the Network Policy (WIPS)</span>
+
+<p>The AP must have a WIPS policy with AirDefense Essentials enabled before it starts sending threat data. This is done in <strong>XIQ main</strong>, not inside the AirDefense app.</p>
+
+<div class="nav-path blue">XIQ main → Configure → Common Objects → Security → WIPS Policies → + (Add)</div>
+
+<div class="step">
+  <div class="step-num blue">1</div>
+  <div class="step-body"><strong>Create a new WIPS policy</strong> (or check if one exists):<br>
+    <table>
+      <tr><th>Field</th><th>Value</th></tr>
+      <tr><td>Name</td><td><code>KhKLab_WIPS</code></td></tr>
+      <tr><td>Enable AirDefense Essentials</td><td><strong>Toggle ON</strong> ← this is the critical setting</td></tr>
+      <tr><td>Allow channel change for auth</td><td>Optional — leave unchecked for lab</td></tr>
+    </table>
+  </div>
+</div>
+<div class="step">
+  <div class="step-num blue">2</div>
+  <div class="step-body"><strong>SAVE the WIPS policy.</strong></div>
+</div>
+<div class="step">
+  <div class="step-num blue">3</div>
+  <div class="step-body"><strong>Assign WIPS policy to the network policy</strong>:<br>
+    <div class="nav-path blue">Configure → Network Policies → AP1_ViaEP1_VLAN5-10_PPSK_5 → Additional Settings → WIPS</div>
+    Select <code>KhKLab_WIPS</code> → Apply → Save.
+  </div>
+</div>
+<div class="step">
+  <div class="step-num blue">4</div>
+  <div class="step-body"><strong>Push policy to AP1</strong>: Manage → Devices → AP1 → Deploy Policy → Update → Complete Configuration Update → Perform Update.<br>
+  Wait for green audit icon. AP1 will reboot and begin connecting to AirDefense server.</div>
+</div>
+
+<!-- SENSOR CONFIG -->
+<span class="section-label blue" id="ad-sensor">Step 3 — Verify AP1 Appears as a Sensor</span>
+
+<div class="nav-path blue">AirDefense app → left nav → Sensors</div>
+
+<p>After AP1 reboots and reconnects (~3–5 minutes), it should appear in the Sensors table:</p>
+
+<table>
+  <tr><th>Column</th><th>Expected value</th></tr>
+  <tr><td>Status</td><td><span class="badge badge-ok">ONLINE</span> (green)</td></tr>
+  <tr><td>Host Name</td><td>AP1 hostname as set in XIQ</td></tr>
+  <tr><td>Serial #</td><td>HA012519Y-10623</td></tr>
+  <tr><td>Model</td><td>AP3000</td></tr>
+  <tr><td>Location</td><td>KhursheedsLab</td></tr>
+  <tr><td>Alarms</td><td>0 initially — may increment within minutes as scanning begins</td></tr>
+  <tr><td>Last Seen</td><td>Timestamp within last 2 minutes</td></tr>
+</table>
+
+<div class="box blue">
+  <p class="box-label">Sensors by Connectivity widget</p>
+  <p style="font-size:0.84rem;">Top of Sensors page shows two counters: <strong>CONNECTED</strong> (green) and <strong>DISCONNECTED</strong> (red). You should see 1 Connected, 0 Disconnected. If AP1 shows Disconnected, wait another 2 minutes — first-time cloud handshake can take up to 5 min.</p>
+</div>
+
+<!-- ALARMS -->
+<span class="section-label blue" id="ad-alarms">Step 4 — Understand the Alarms View</span>
+
+<div class="nav-path blue">AirDefense app → left nav → Alarms</div>
+
+<p>Once AP1 is scanning, alarms will start appearing. In a home lab environment, expect low-level alarms from neighboring WiFi devices (other SSIDs, phones, IoT).</p>
+
+<h3>Alarm severity levels</h3>
+<table>
+  <tr><th>Badge</th><th>Severity</th><th>Meaning</th></tr>
+  <tr><td><span style="color:#dc2626;font-weight:700;">● CRITICAL</span></td><td>Critical</td><td>Active attack in progress — immediate action</td></tr>
+  <tr><td><span style="color:#d97706;font-weight:700;">● MAJOR</span></td><td>Major</td><td>Significant threat, investigate soon</td></tr>
+  <tr><td><span style="color:#ca8a04;font-weight:700;">● MINOR</span></td><td>Minor</td><td>Policy violation or low-level anomaly</td></tr>
+  <tr><td><span style="color:#1e40af;font-weight:700;">● INFO</span></td><td>Info</td><td>Informational — neighboring devices, normal scanning artifacts</td></tr>
+</table>
+
+<h3>Alarm lifecycle states</h3>
+<div class="flow-row">
+  <div class="flow-node amber">NEW</div><div class="flow-arrow">→</div>
+  <div class="flow-node" style="border-color:#fca5a5;background:#FEE2E2;">ACTIVE</div><div class="flow-arrow">→</div>
+  <div class="flow-node amber">INACTIVE</div><div class="flow-arrow">→</div>
+  <div class="flow-node green">CLEARED</div><div class="flow-arrow">→</div>
+  <div class="flow-node" style="border-color:#D1D5DB;background:#F9FAFB;">EXPIRED</div>
+</div>
+
+<h3>Alarm table columns</h3>
+<table>
+  <tr><th>Column</th><th>What it shows</th></tr>
+  <tr><td>Alarm</td><td>Threat name — click for full details</td></tr>
+  <tr><td>Severity</td><td>Critical / Major / Minor / Info</td></tr>
+  <tr><td>State</td><td>Active / Inactive / Expired</td></tr>
+  <tr><td>Category</td><td>Exploits / Reconnaissance / Rogue Activity / Vulnerabilities</td></tr>
+  <tr><td>Sensor</td><td>AP1 MAC — the sensor that detected it</td></tr>
+  <tr><td>Device MAC</td><td>MAC of the device that triggered the alarm</td></tr>
+  <tr><td>Site</td><td>Location in XIQ hierarchy</td></tr>
+  <tr><td>Active Time</td><td>When alarm was first raised</td></tr>
+</table>
+
+<h3>Handling a rogue AP alarm</h3>
+<ol>
+  <li>Click the alarm row → Alarm Details dialog opens</li>
+  <li>Review: Raised Against (target MAC), Reported By (AP1 sensor), Category</li>
+  <li>If it's a known device (your own AP): click <strong>Rogue Terminate → Sanction</strong> → device added to sanctioned list, alarm clears</li>
+  <li>If it's unknown: click <strong>Rogue Locate</strong> → map shows estimated position (requires ExtremeLocation Essentials)</li>
+  <li>To dismiss: click <strong>Clear Alarm</strong> (skull icon)</li>
+</ol>
+
+<h3>Alarm Management — enable/disable alarm categories</h3>
+<div class="nav-path blue">AirDefense app → Settings → Alarm Management</div>
+<p>Toggle entire alarm categories on or off. For a home lab, consider disabling <strong>Reconnaissance</strong> alarms temporarily — neighbor devices generate many INFO-level recon alarms that are not relevant to your lab.</p>
+
+<!-- VERIFY AD -->
+<span class="section-label blue" id="ad-test">Step 5 — Verify AirDefense is Working</span>
+
+<ul class="checklist">
+  <li>Sensors page: AP1 shows ONLINE with recent Last Seen timestamp</li>
+  <li>Sensors by Connectivity widget: 1 Connected, 0 Disconnected</li>
+  <li>Overview dashboard: Alarms Overview widget shows > 0 alarms within 5–10 min of AP1 coming online</li>
+  <li>Live Alarms table: at least one alarm row visible (even INFO severity is fine)</li>
+  <li>Click any alarm → Alarm Details dialog opens with full info</li>
+  <li>Alarm Count by Severity widget: shows distribution (most will be INFO in a home lab)</li>
+</ul>
+
+<div class="box warn">
+  <p class="box-label">If no sensors appear after 5 minutes</p>
+  <p style="font-size:0.84rem;">
+    1. Confirm WIPS policy has "Enable AirDefense Essentials" toggled ON<br>
+    2. Confirm the network policy was pushed and the AP1 config push shows green audit icon<br>
+    3. Confirm AP1 is Online in XIQ Manage → Devices<br>
+    4. Try: Manage → Devices → AP1 → Reboot (not factory reset)
+  </p>
+</div>
+
+<hr class="divider">
+
+<!-- SUMMARY TABLE -->
+<span class="section-label">Sprint Summary</span>
+
+<table>
+  <tr><th>Sprint</th><th>Status after this guide</th><th>Key constraint</th></tr>
+  <tr>
+    <td><strong>Guest Essentials</strong></td>
+    <td>GE app configured · splash template live · guest user registered · access time-limited</td>
+    <td>XIQ Classic only · "Enable ExtremeGuest Essentials" toggle must be ON in network policy SSID</td>
+  </tr>
+  <tr>
+    <td><strong>AirDefense</strong></td>
+    <td>AP1 as sensor · alarms flowing · rogue classification understood</td>
+    <td>XIQ Classic only · Pilot license required · AP3000 = Radio-Share mode (not dedicated sensor)</td>
+  </tr>
+  <tr>
+    <td><strong>PPSK Self-Registration</strong></td>
+    <td>Toggle learned: "Return Aerohive Private PSK" on open CWP SSID delivers PPSK to employee after registration</td>
+    <td>Domain filter (@company.com) NOT in EP1 v25.9.0 UI — deploy deferred. Full solution requires 802.1X.</td>
+  </tr>
+  <tr>
+    <td><strong>Stage 2 (EP1 UI)</strong></td>
+    <td>Deferred — factory reset SW1 + AP1, full EP1 UI deploy</td>
+    <td>Do after GE + AD sessions complete</td>
+  </tr>
+</table>
+
+<hr class="divider">
+
+<!-- ═══ SPRINT 3 (FUTURE) — PPSK SELF-REGISTRATION + 802.1X ═══ -->
+<h2 id="ppsk-selfreg">Sprint 3 (Future) — PPSK Self-Registration &amp; 802.1X</h2>
+
+<div class="box warn">
+  <p class="box-label">Deferred sprint — do when 802.1X / NPS is available</p>
+  <p style="font-size:0.84rem;">This sprint is parked until a RADIUS/NPS server is in place. The goal: employees self-service their PPSK using their corporate email, with domain validation enforced at the authentication layer.</p>
+</div>
+
+<h3>What was learned today — the "Return Aerohive Private PSK" toggle</h3>
+<p>EP1 has a two-SSID self-registration mechanism for PPSK. An open onboarding SSID with CWP collects the employee's email, auto-generates a unique PPSK, and delivers it by email/SMS. The employee then connects to the secure PPSK SSID using the received key.</p>
+
+<div class="flow-row">
+  <div class="flow-node amber">Employee_Onboard<br><small>Open + CWP</small></div><div class="flow-arrow">→</div>
+  <div class="flow-node">Fills email on CWP</div><div class="flow-arrow">→</div>
+  <div class="flow-node green">PPSK emailed/SMS'd</div><div class="flow-arrow">→</div>
+  <div class="flow-node">KhKLab_Employee<br><small>PPSK → VLAN 5</small></div>
+</div>
+
+<h3>The critical toggle</h3>
+<div class="nav-path">EP1 → Configure → Network Policies → [policy] → Add SSID (Open) → Enable CWP → Features</div>
+<table>
+  <tr><th>Toggle</th><th>Where</th><th>Effect</th></tr>
+  <tr><td><strong>Enable Self-Registration</strong></td><td>CWP Features (Table 113, p.295)</td><td>Shows registration form on splash page</td></tr>
+  <tr><td><strong>Return Aerohive Private PSK</strong></td><td>CWP Features (Table 113, p.295)</td><td>After registration, CWP delivers the employee's unique PPSK from the Cloud User Group</td></tr>
+  <tr><td><strong>Choose a PPSK Server</strong></td><td>PPSK Settings (Table 114, p.296)</td><td>Points to the Employees Cloud User Group — the source of PPSK keys</td></tr>
+</table>
+
+<h3>The product gap — why this sprint is deferred</h3>
+<div class="box warn">
+  <p class="box-label">EP1 v25.9.0 product gap — domain filter not in UI</p>
+  <p style="font-size:0.84rem;">EP1 v25.9.0 has <strong>no domain allowlist</strong> for PPSK self-registration. There is no field to restrict registration to @extremenetworks.com or any other domain. Without domain filtering, any person who connects to the open onboarding SSID can register and receive a PPSK — defeating the purpose of employee-only access.</p>
+</div>
+
+<h3>Proper solution — 802.1X + RADIUS</h3>
+<p>The correct enterprise solution for "employee self-service with domain enforcement" is <strong>802.1X PEAP-MSCHAPv2</strong> with a RADIUS server (Windows NPS or FreeRADIUS) backed by Active Directory:</p>
+<ol>
+  <li>Employee connects to KhKLab_Employee (802.1X SSID)</li>
+  <li>AP sends RADIUS Access-Request to NPS</li>
+  <li>NPS validates username/password against AD — domain membership enforced automatically</li>
+  <li>On success: RADIUS returns VLAN 5 attribute → employee lands on 10.5.0.x</li>
+  <li>No PPSK needed — corporate credentials ARE the key</li>
+</ol>
+
+<div class="box info">
+  <p class="box-label">Reminder — when to run this sprint</p>
+  <p style="font-size:0.84rem;">Run Sprint 3 when NPS/RADIUS server is available in the lab. This was deferred from the May 11 session. The 802.1X PEAP-MSCHAPv2 arc was designed then — pick it up from the <a href="session_summary_20260511.html">May 11 EOD</a>.</p>
+</div>
+
+<p class="footer">
+  KhKLab &nbsp;&bull;&nbsp; XIQ Classic Sprint Guide &nbsp;&bull;&nbsp; May 20, 2026<br>
+  References: ExtremeGuest Essentials 25.6.0 User Guide · AirDefense Essentials 25.6.0 User Guide · XIQ Setup Guides<br>
+  <a href="ge-ad-study-block.html">May 21 Study Block</a> &nbsp;&bull;&nbsp;
+  <a href="session_summary_20260520.html">← May 20 EOD</a> &nbsp;&bull;&nbsp;
+  <a href="ep1-deployment-guide.html">EP1 Deployment Guide</a> &nbsp;&bull;&nbsp;
+  <a href="index-nyt.html">← Lab Index</a><br>
+  &copy; 2026 Khursheed Khan &nbsp;&bull;&nbsp; All rights reserved
+</p>
+
+</body>
+</html>

@@ -290,13 +290,28 @@ VLAN "Guest":
 </div>
 <div class="result-row">
   <div class="result-label">Guest VLAN assignment</div>
-  <span class="badge badge-err">PENDING</span>
-  <span style="font-size:0.84rem;">Client received <code>192.168.0.23</code> (VLAN 1) instead of <code>10.10.0.x</code> (VLAN 10). User Profile GuestVLAN_10 confirmed VLAN ID = 10. Root cause TBD.</span>
+  <span class="badge badge-ok">PASS</span>
+  <span style="font-size:0.84rem;">Client now receives <code>10.10.0.x</code> (VLAN 10 ✓). Root cause was missing CWP post-auth VLAN override — set to force VLAN 10 after portal completion. Policy re-pushed. Confirmed working.</span>
 </div>
 <div class="result-row">
   <div class="result-label">AP1 PPSK email delivery</div>
   <span class="badge badge-warn">NOT TESTED</span>
   <span style="font-size:0.84rem;">Email not received during session. Resend via: Configure → User Management → Users → Send Credentials</span>
+</div>
+<div class="result-row">
+  <div class="result-label">Guest Essentials</div>
+  <span class="badge badge-warn">PARTIAL</span>
+  <span style="font-size:0.84rem;">GE app accessed via XIQ Classic (Essentials → Extreme Guest). Guest user created manually: khursheed.khan@gmail.com · Group: GuestAccess · Expiry: 5/27/2026 (1 week). SSID linking not completed — GE internal nav unclear. Colleague consultation needed.</span>
+</div>
+<div class="result-row">
+  <div class="result-label">AirDefense Essentials</div>
+  <span class="badge badge-warn">DEFERRED</span>
+  <span style="font-size:0.84rem;">Not available in EP1 (listed as Planned). XIQ Classic only. Deferred to next session after GE colleague consultation.</span>
+</div>
+<div class="result-row">
+  <div class="result-label">Stage 2 — All EP1 UI</div>
+  <span class="badge badge-warn">DEFERRED</span>
+  <span style="font-size:0.84rem;">Factory reset SW1 + AP1, full EP1 UI deploy (switch template + Supplemental CLI). Deferred to next session.</span>
 </div>
 
 <!-- ═══ LESSONS LEARNED ═══ -->
@@ -320,45 +335,52 @@ VLAN "Guest":
 <h3>5. IQAgent heartbeat is normal</h3>
 <p><code>proxy device-connector unknown POST /health-check/[serial]</code> every ~60 s = normal IQAgent keepalive. Not an error or connection problem.</p>
 
+<h3>6. CWP pre-auth VLAN vs post-auth VLAN override — the guest VLAN 10 root cause</h3>
+<p>When CWP is enabled, a guest client always associates on the <strong>Default (VLAN 1)</strong> first. This is intentional: the client needs basic IP connectivity to reach the captive portal. The SSID User Profile (GuestVLAN_10) only applies <em>after</em> the CWP authentication completes — but only if a <strong>post-authentication VLAN override</strong> is explicitly configured in the CWP settings.</p>
+<p>Without the override, the client stays on whatever VLAN it landed on during pre-auth (VLAN 1 in this case), even after completing the CWP flow. The override is a separate field from the User Profile VLAN.</p>
+<div class="box info">
+  <p class="box-label">Fix location in EP1</p>
+  <p style="font-size:0.84rem;">Configure → Network Policies → [policy] → KhKLab_Guest → CWP settings → <strong>Post-Authentication Action</strong> → Override Default → set to <strong>VLAN 10</strong><br><br>
+  After saving: re-push policy to AP1 → forget KhKLab_Guest on device → reconnect → complete CWP → verify IP is <code>10.10.0.x</code> and <code>show fdb ports 3</code> shows MAC on <code>Guest(0010)</code>.</p>
+</div>
+
 <!-- ═══ GUEST VLAN TROUBLESHOOT ═══ -->
-<span class="section-label" id="guest-troubleshoot">Guest VLAN Troubleshooting — Pending Next Session</span>
+<span class="section-label" id="guest-troubleshoot">Guest VLAN 10 — Root Cause Found and Fixed</span>
 
-<p><strong>Symptom:</strong> Guest client receives <code>192.168.0.23</code> (VLAN 1 / QF-Modem DHCP) instead of <code>10.10.0.x</code> (VLAN 10 / SW1 DHCP).</p>
+<p><strong>Symptom:</strong> Guest client received <code>192.168.0.23</code> (VLAN 1 / QF-Modem DHCP) instead of <code>10.10.0.x</code> (VLAN 10 / SW1 DHCP) after completing CWP.</p>
 
-<p><strong>Already confirmed:</strong></p>
-<ul>
-  <li>GuestVLAN_10 User Profile: VLAN ID = 10 ✓</li>
-  <li>SW1 Port 3: VLAN Guest (10) tagged ✓</li>
-  <li>SW1 DHCP server: Ports DHCP Enabled: 3 for Guest ✓</li>
-  <li>Policy pushed to AP1 ✓</li>
-</ul>
+<p><strong>Root cause:</strong> CWP post-authentication VLAN override was not set. With CWP enabled, the client always lands on Default (VLAN 1) pre-auth to reach the portal. After completing CWP, EP1 does not automatically shift the client to the User Profile VLAN — a separate <strong>post-auth override</strong> must be explicitly configured in the CWP settings.</p>
 
-<p><strong>Hypotheses to check next session:</strong></p>
+<p><strong>Fix applied:</strong></p>
 <ol>
-  <li><strong>Pre-auth vs post-auth VLAN</strong> — with CWP enabled, verify the client gets VLAN 10 IP before completing the CWP (should happen at association, not after portal completion)</li>
-  <li><strong>Policy re-push needed</strong> — push the policy again after confirming GuestVLAN_10 VLAN ID, then forget/reconnect on client device</li>
-  <li><strong>OWE Transition Mode</strong> — check if client is connecting to the hidden OWE SSID or the open fallback and whether the User Profile applies to both</li>
-  <li><strong>SW1 verification</strong> — after a guest connects, run <code>show fdb ports 3</code> and <code>show iparp vlan Guest</code> to see if the MAC appears on VLAN 10 at SW1</li>
+  <li>EP1 → Configure → Network Policies → policy → KhKLab_Guest → CWP settings</li>
+  <li>Post-Authentication Action → <strong>Override Default → VLAN 10</strong></li>
+  <li>Save → re-push policy to AP1</li>
+  <li>Device: forget KhKLab_Guest → reconnect → complete CWP</li>
 </ol>
 
-<div class="box warn">
-  <p class="box-label">Quick diagnostic — run on SW1 while guest is connected</p>
-  <pre style="margin:8px 0 0;background:#1e1e2e;color:#cdd6f4;border-radius:4px;padding:12px;font-size:0.78rem;">show fdb ports 3
-show iparp vlan Guest
-show dhcp-server leases vlan Guest</pre>
-  <p style="font-size:0.82rem;margin-top:8px;">If the guest MAC does not appear on VLAN 10 in the FDB, AP1 is sending untagged frames. Check User Profile → VLAN ID in EP1 policy, repush, reconnect.</p>
+<div class="box">
+  <p class="box-label">Result — RESOLVED</p>
+  <p style="font-size:0.84rem;">After applying the post-auth VLAN override and re-pushing the policy, guest client received <code>10.10.0.x</code> from SW1 VLAN 10 DHCP pool. <code>show fdb ports 3</code> confirms MAC on <code>Guest(0010)</code>.</p>
 </div>
 
 <!-- ═══ TOMORROW ═══ -->
 <span class="section-label" id="tomorrow">Tomorrow's Sprint</span>
 
 <ol>
-  <li><strong>Fix Guest VLAN 10</strong> — run SW1 diagnostics, repush policy, retest</li>
-  <li><strong>PPSK email delivery</strong> — verify employee receives credentials email</li>
-  <li><strong>Guest Essentials</strong> — explore EP1 Guest Essentials module: sponsor approval flow, time-limited access, usage reports</li>
-  <li><strong>AirDefense</strong> — enable and configure AirDefense in EP1: rogue AP detection, RF threat alerting</li>
-  <li><strong>Stage 2</strong> — wipe SW1 + AP1, redo entire deploy via EP1 UI only (switch template + Supplemental CLI, no manual CLI)</li>
-  <li><strong>AP SSH access</strong> — configure Device Admin Profile in EP1 with known password before Stage 2</li>
+  <li><strong>Guest VLAN 10</strong> <span class="badge badge-ok">DONE</span> — CWP post-auth override fixed, both SSIDs fully working</li>
+  <li><strong>PPSK email delivery</strong> — verify employee receives credentials email via XIQ: Configure → User Management → Users → Send Credentials</li>
+  <li><strong>Guest Essentials</strong> <span class="badge badge-warn">TOMORROW</span> — sprint guide ready → <a href="ge-airdefense-xiq-sprint.html">GE + AirDefense Sprint Guide</a>. Guest user created (GuestAccess, 1-week expiry). Resume at Step 3 (Onboarding Policy). Note: reading docs alone is insufficient — GE nav requires live UI screenshots to follow. Best done with a colleague or by screensharing.</li>
+  <li><strong>AirDefense Essentials</strong> <span class="badge badge-warn">TOMORROW</span> — sprint guide ready → <a href="ge-airdefense-xiq-sprint.html#ad-overview">AirDefense Sprint</a>. XIQ Classic only. Same note: navigate live in XIQ, not from docs alone.</li>
+  <li><strong>PPSK Self-Registration</strong> — toggle learned: "Return Aerohive Private PSK" on open CWP SSID auto-delivers PPSK after registration. Domain filter (@extremenetworks.com) = <strong>product gap in EP1 v25.9.0</strong> — not in UI. <strong>Future sprint: 802.1X + RADIUS/NPS</strong> → <a href="ge-airdefense-xiq-sprint.html#ppsk-selfreg">Sprint 3 doc</a>.</li>
+  <li><strong>Stage 2 — Full EP1 UI, Zero CLI</strong> <span class="badge badge-warn">TOMORROW</span> — factory reset SW1 + AP1. Entire deploy via EP1 only:
+    <ul style="margin-top:6px;">
+      <li><strong>SW1</strong>: EP1 Switch Template (VLANs 5+10, Port 3 trunk) + Supplemental CLI template (dhcp-address-range only — NOT enable dhcp / enable ipforwarding)</li>
+      <li><strong>AP1</strong>: same network policy <code>AP1_ViaEP1_VLAN5-10_PPSK_5</code>, pushed from EP1</li>
+      <li><strong>No console, no SSH, no manual CLI</strong> — if something breaks, diagnose via EP1 only</li>
+      <li>Configure Device Admin Profile in EP1 first so AP SSH is available if needed</li>
+    </ul>
+  </li>
 </ol>
 
 <hr class="divider">
