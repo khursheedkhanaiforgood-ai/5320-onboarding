@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>XIQ → EP1 Intelligent Xformation Engine | Design &amp; Sprint Plan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Libre+Franklin:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Libre Baskerville', Georgia, serif; background: #fff; color: #111; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 48px 24px 72px; }
+.container { max-width: 960px; width: 100%; }
+hr.rule-top  { border: none; border-top: 3px solid #111; margin-bottom: 6px; }
+hr.rule-thin { border: none; border-top: 1px solid #111; margin-bottom: 18px; }
+hr.rule      { border: none; border-top: 1px solid #E2E2E2; margin: 36px 0; }
+.kicker { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.22em; color: #666; display: block; text-align: center; margin-bottom: 6px; }
+h1 { font-family: 'Libre Baskerville', Georgia, serif; font-size: 2.1rem; font-weight: 700; line-height: 1.12; margin-bottom: 12px; text-align: center; }
+.subtitle { font-family: 'Libre Baskerville', Georgia, serif; font-size: 1rem; font-style: italic; color: #444; text-align: center; line-height: 1.8; margin-bottom: 20px; border-bottom: 1px solid #E2E2E2; padding-bottom: 24px; }
+.byline { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.72rem; color: #666; text-align: center; margin-bottom: 28px; }
+.section-eye { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.18em; color: #1e40af; display: block; margin: 36px 0 8px; border-bottom: 2px solid #1e40af; padding-bottom: 5px; }
+h2 { font-family: 'Libre Baskerville', Georgia, serif; font-size: 1.3rem; font-weight: 700; margin-bottom: 10px; }
+h3 { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #1e40af; margin: 22px 0 8px; }
+h4 { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.8rem; font-weight: 700; color: #374151; margin: 16px 0 6px; }
+p { font-size: 0.96rem; line-height: 1.85; color: #222; margin-bottom: 12px; }
+ul, ol { padding-left: 22px; margin-bottom: 14px; }
+li { font-size: 0.94rem; line-height: 1.8; color: #222; margin-bottom: 4px; }
+code { font-family: 'SF Mono', Consolas, monospace; font-size: 0.8rem; background: #F4F4F4; border: 1px solid #E2E2E2; padding: 1px 5px; border-radius: 3px; color: #1d4ed8; }
+pre { font-family: 'SF Mono', Consolas, monospace; font-size: 0.78rem; background: #0f172a; color: #93c5fd; padding: 16px 18px; border-radius: 4px; overflow-x: auto; margin: 12px 0 16px; line-height: 1.65; }
+pre .c  { color: #64748b; }
+pre .g  { color: #86efac; }
+pre .y  { color: #fde68a; }
+pre .r  { color: #fca5a5; }
+pre .w  { color: #f1f5f9; }
+table { width: 100%; border-collapse: collapse; margin: 12px 0 20px; font-size: 0.86rem; }
+th { background: #EFF6FF; font-family: 'Libre Franklin', Arial, sans-serif; font-weight: 700; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.08em; color: #1e40af; padding: 8px 10px; border: 1px solid #BFDBFE; text-align: left; }
+td { padding: 8px 10px; border: 1px solid #E2E2E2; vertical-align: top; line-height: 1.6; }
+tr:nth-child(even) td { background: #FAFAFA; }
+.box { border-left: 3px solid #1e40af; background: #EFF6FF; padding: 14px 16px; margin: 14px 0; border-radius: 0 4px 4px 0; }
+.box.warn { border-left-color: #F57F17; background: #FFFBF0; }
+.box.red  { border-left-color: #C62828; background: #FCEEEE; }
+.box.green { border-left-color: #065f46; background: #F0FFF4; }
+.box.purple { border-left-color: #7c3aed; background: #F5F3FF; }
+.box p { margin: 0; font-size: 0.91rem; line-height: 1.75; }
+.box p + p { margin-top: 8px; }
+.box-label { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: #1e40af; margin-bottom: 6px; }
+.box.warn .box-label { color: #E65100; }
+.box.red .box-label  { color: #C62828; }
+.box.green .box-label { color: #065f46; }
+.box.purple .box-label { color: #7c3aed; }
+.badge { display: inline-block; font-family: 'Libre Franklin', sans-serif; font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; padding: 2px 7px; border-radius: 10px; margin-right: 5px; }
+.badge.blue   { background: #DBEAFE; color: #1e40af; }
+.badge.green  { background: #D1FAE5; color: #065f46; }
+.badge.warn   { background: #FEF3C7; color: #92400E; }
+.badge.red    { background: #FEE2E2; color: #991B1B; }
+.badge.purple { background: #EDE9FE; color: #6d28d9; }
+/* ─── TAB SYSTEM ─── */
+.tab-nav { display: flex; border-bottom: 2px solid #111; margin: 32px 0 0; gap: 0; }
+.tab-btn { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; padding: 10px 20px; border: none; border-bottom: 3px solid transparent; background: transparent; cursor: pointer; color: #666; margin-bottom: -2px; transition: color 0.15s; white-space: nowrap; }
+.tab-btn:hover { color: #1e40af; }
+.tab-btn.active { color: #1e40af; border-bottom-color: #1e40af; }
+.tab-panel { display: none; padding-top: 28px; }
+.tab-panel.active { display: block; }
+/* ─── NODE CARDS ─── */
+.node-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; margin: 16px 0; }
+.node-card { border: 1px solid #BFDBFE; border-radius: 6px; padding: 14px; background: #fff; }
+.node-card .node-id { font-family: 'Libre Franklin', sans-serif; font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #1e40af; }
+.node-card h4 { margin: 4px 0 6px; font-size: 0.86rem; color: #111; text-transform: none; letter-spacing: 0; }
+.node-card p  { font-size: 0.82rem; line-height: 1.65; color: #444; margin: 0; }
+.node-card.support { border-color: #C4B5FD; }
+.node-card.support .node-id { color: #7c3aed; }
+/* ─── SPRINT CARDS ─── */
+.sprint-card { border: 1px solid #E2E2E2; border-radius: 6px; padding: 18px 20px; margin: 14px 0; }
+.sprint-card h4 { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.82rem; font-weight: 700; text-transform: none; letter-spacing: 0; margin: 0 0 6px; color: #111; }
+.sprint-card .sprint-meta { font-family: 'Libre Franklin', sans-serif; font-size: 0.72rem; color: #888; margin-bottom: 10px; }
+.sprint-card ul { margin-bottom: 0; }
+.sprint-card.critical { border-color: #FCA5A5; border-left: 4px solid #C62828; }
+.sprint-card.critical h4 { color: #C62828; }
+/* ─── FLOW DIAGRAM ─── */
+.flow { font-family: 'SF Mono', Consolas, monospace; font-size: 0.76rem; background: #0f172a; color: #93c5fd; padding: 20px; border-radius: 6px; overflow-x: auto; line-height: 2; margin: 14px 0; }
+.flow .label { color: #fde68a; }
+.flow .arrow { color: #64748b; }
+.flow .store  { color: #86efac; }
+.flow .agent  { color: #c4b5fd; }
+.flow .conf   { color: #fca5a5; }
+.footer { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.68rem; color: #999; text-align: center; line-height: 1.9; margin-top: 8px; }
+a { color: #1e40af; }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <hr class="rule-top">
+  <span class="kicker">KhKLab &nbsp;&bull;&nbsp; XIQ → EP1 Intelligence Engine &nbsp;&bull;&nbsp; System Design &amp; Sprint Plan &nbsp;&bull;&nbsp; May 21, 2026</span>
+  <hr class="rule-thin">
+
+  <h1>XIQ→EP1 Intelligent Xformation<br><em style="font-weight:400;font-size:1.5rem;">Design, Architecture &amp; Execution Plan</em></h1>
+  <p class="subtitle">A GPS navigator for network UI configuration — step-by-step screen-level guidance mapping<br>every XIQ workflow to its EP1 equivalent before the July 1, 2026 XIQ GUI retirement.</p>
+  <div class="byline">Thursday May 21, 2026 &nbsp;&mdash;&nbsp; Khursheed Khan &nbsp;&mdash;&nbsp; KhKLab / Extreme Platform One Sprint</div>
+
+  <!-- ─── TAB NAV ─── -->
+  <div class="tab-nav">
+    <button class="tab-btn active" onclick="showTab('system')">① System Design</button>
+    <button class="tab-btn" onclick="showTab('agentic')">② Agentic Architecture</button>
+    <button class="tab-btn" onclick="showTab('sprints')">③ Sprints &amp; Execution</button>
+    <button class="tab-btn" onclick="showTab('validation')">④ Automated Validation</button>
+    <button class="tab-btn" onclick="showTab('learning')">⑤ Learning &amp; Growth</button>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════
+       TAB 1 — SYSTEM DESIGN
+  ══════════════════════════════════════════════════════ -->
+  <div id="tab-system" class="tab-panel active">
+
+    <span class="section-eye">Vision</span>
+    <h2>What This System Does</h2>
+    <p>When a network engineer asks <em>"how do I configure CWP for PPSK in EP1?"</em> or <em>"show me the AP VLAN tagging workflow,"</em> they get an exact, screen-by-screen guide: which portal, which left-nav item, which dropdown value, which field label, which button to click — not a generic document reference. The system knows the answer for a specific version pair (XIQ 25.8.0 → EP1 25.9.0) and tells you when EP1 doesn't have a direct equivalent and what to do instead.</p>
+
+    <div class="box green">
+      <div class="box-label">Core Analogy</div>
+      <p>It is a GPS navigator for UI configuration. XIQ is your starting map. EP1 is your destination. The engine knows every road, one-way street, and detour — including roads that EP1 hasn't built yet (gaps).</p>
+    </div>
+
+    <h3>Two Query Types — Always Classified First</h3>
+    <p>Every user query enters a classifier before any graph traversal. This determines response depth:</p>
+
+    <table>
+      <tr><th>Query Type</th><th>Example</th><th>Response</th><th>Graph Operation</th></tr>
+      <tr>
+        <td><span class="badge blue">workflow</span></td>
+        <td>"Show me the AP VLAN tagging workflow"</td>
+        <td>Full multi-step sequence: each step is one screen card (portal → nav → field → value → button)</td>
+        <td>Full LangGraph traversal — XIQ subgraph → translation → EP1 subgraph</td>
+      </tr>
+      <tr>
+        <td><span class="badge purple">lookup</span></td>
+        <td>"Which menu do I use to configure CWP for PPSK?"</td>
+        <td>Single screen card: nav path + field label only. No step sequence.</td>
+        <td>Single Neo4j node lookup by intent keyword → return nav_path + screen_id</td>
+      </tr>
+      <tr>
+        <td><span class="badge green">compare</span></td>
+        <td>"What's different between XIQ and EP1 for switch policy?"</td>
+        <td>Side-by-side diff table: XIQ steps on left, EP1 on right, gaps highlighted</td>
+        <td>Both subgraphs fetched, diff computed at Node 5</td>
+      </tr>
+    </table>
+
+    <span class="section-eye">Data Architecture</span>
+    <h2>Three Layers of Truth</h2>
+    <p>The engine has three independent data sources. Confidence is only high when all three agree.</p>
+
+    <table>
+      <tr><th>Layer</th><th>What it Captures</th><th>Store</th><th>Weight (c)</th><th>Updates</th></tr>
+      <tr>
+        <td><strong>L1 — RAG Corpus</strong></td>
+        <td>What documentation <em>says</em> exists. 14 Extreme PDFs: Feature Comparison (ground truth), EP1 User Guide 25.9.0, Security Guide, Release Notes, EN_Hub_XIQ-EP1, Switch Deployment Guide, etc.</td>
+        <td>pgvector<br>(text-embedding-3-small, chunk 512)</td>
+        <td>c_doc = 0.3</td>
+        <td>On new PDF release</td>
+      </tr>
+      <tr>
+        <td><strong>L2 — GUI Capture</strong></td>
+        <td>What actually <em>exists</em> in the UI. Every screen: portal, nav path, field labels, dropdown options, button labels. Images tagged with version + screen_id.</td>
+        <td>Neo4j Aura<br>(workflow graph nodes)</td>
+        <td>c_gui = 0.4</td>
+        <td>On Playwright re-scrape</td>
+      </tr>
+      <tr>
+        <td><strong>L3 — Live Lab</strong></td>
+        <td>What actually <em>works</em> when pushed. Execution Agent deploys policy, captures CLI output, verifies per-field.</td>
+        <td>PostgreSQL<br>(execution_log table)</td>
+        <td>c_lab = 0.3</td>
+        <td>On every Execution Agent run</td>
+      </tr>
+    </table>
+
+    <div class="box blue">
+      <div class="box-label">Confidence Formula (from Cisco EN CLI Agent)</div>
+      <p><code>confidence = Σ(w × c) / Σ(w)</code> &nbsp;→&nbsp; <code>c_doc×0.3 + c_gui×0.4 + c_lab×0.3</code></p>
+      <p style="margin-top:8px;">Each layer scores 0.0–1.0. A step with c=0.95 has been documented, found in UI, and lab-verified. A step with c=0.40 exists in docs but scraper didn't find it → likely restructured or gap.</p>
+    </div>
+
+    <h3>RAG vs Scrape — Four Outcomes Per Step</h3>
+    <table>
+      <tr><th>RAG Says</th><th>Scraper Finds</th><th>Status</th><th>Action</th></tr>
+      <tr><td>Feature at path X</td><td>Feature at path X</td><td><span class="badge green">confirmed</span></td><td>High confidence, render step</td></tr>
+      <tr><td>Feature at path X</td><td>Feature at path Y</td><td><span class="badge warn">restructured</span></td><td>Medium confidence, show new nav path</td></tr>
+      <tr><td>Feature exists</td><td>Nothing found</td><td><span class="badge red">gap</span></td><td>Log to Gaps Register, show workaround</td></tr>
+      <tr><td>Not mentioned</td><td>Feature found</td><td><span class="badge purple">ep1_only</span></td><td>Flag as new capability, document</td></tr>
+    </table>
+
+    <span class="section-eye">Tech Stack</span>
+    <h2>Infrastructure Components</h2>
+
+    <table>
+      <tr><th>Layer</th><th>Technology</th><th>Purpose</th><th>Hosted</th></tr>
+      <tr><td>API</td><td>FastAPI (Python 3.12)</td><td>All endpoints, ported from cisco-en-cli-agent skeleton</td><td>Railway</td></tr>
+      <tr><td>Agents</td><td>LangGraph 0.2+</td><td>12-node stateful workflow graph</td><td>Railway</td></tr>
+      <tr><td>Frontend</td><td>React 18 + Vite</td><td>Version picker, 2-col step viewer, confidence badges</td><td>Railway / Netlify</td></tr>
+      <tr><td>Graph DB</td><td>Neo4j Aura Free</td><td>Workflow graph: XIQ nodes + EP1 nodes + edges (MAPS_TO, RESTRUCTURED_TO, GAP)</td><td>Neo4j Cloud</td></tr>
+      <tr><td>Vector DB</td><td>pgvector (PostgreSQL ext)</td><td>RAG embeddings for 14 PDFs + semantic intent matching</td><td>Railway</td></tr>
+      <tr><td>Relational DB</td><td>PostgreSQL 16</td><td>8 tables: platform_version, bin, workflow_step, field_map, gap, execution_log, confidence_score, scrape_run</td><td>Railway</td></tr>
+      <tr><td>Scraper</td><td>Playwright (Python)</td><td>Headless browser captures every XIQ + EP1 screen</td><td>GitHub Actions / local</td></tr>
+      <tr><td>Embeddings</td><td>OpenAI text-embedding-3-small</td><td>PDF chunk embeddings + intent vector</td><td>OpenAI API</td></tr>
+      <tr><td>LLM</td><td>claude-sonnet-4-6</td><td>Intent parsing, translation reasoning, gap workaround generation</td><td>Anthropic API</td></tr>
+      <tr><td>CI/CD</td><td>GitHub Actions</td><td>Auto-trigger scraper on XIQ/EP1 version bump</td><td>GitHub</td></tr>
+    </table>
+
+    <span class="section-eye">Version Control</span>
+    <h2>Version-Pair Architecture</h2>
+    <p>All mappings, screenshots, and confidence scores are tagged to an exact version pair. A workflow confirmed for <code>XIQ 25.8.0 → EP1 25.9.0</code> is stored separately from <code>XIQ 25.8.0 → EP1 25.9.2</code>. Users pick their pair from a top-nav dropdown. Admins trigger re-scrapes when a new EP1 patch ships.</p>
+
+    <div class="box warn">
+      <div class="box-label">Hard Deadline</div>
+      <p><strong>July 1, 2026 — XIQ GUI retired.</strong> Sprint B (XIQ Playwright scraper) MUST complete before this date. All XIQ screens must be captured and version-tagged in Neo4j. This is the irreversible clock on the entire project.</p>
+    </div>
+
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════
+       TAB 2 — AGENTIC ARCHITECTURE
+  ══════════════════════════════════════════════════════ -->
+  <div id="tab-agentic" class="tab-panel">
+
+    <span class="section-eye">Overview</span>
+    <h2>17-Agent System — Plan First, Then Execute</h2>
+    <p>12 LangGraph nodes form the stateful execution graph. <strong>Node 0 is not just a router — it is a path planner.</strong> Before any traversal begins, it computes the full path confidence using Neo4j edge weights, identifies low-confidence steps, and surfaces HITL checkpoints upfront. The agent never walks blind. 5 supporting agents run outside the graph as standalone services.</p>
+
+    <div class="box blue">
+      <div class="box-label">Google Maps Analogy — How This Engine Actually Navigates</div>
+      <p>Google Maps does not reason from first principles to find a route. It executes a shortest-path algorithm over a pre-encoded weighted graph where every road has quality metrics. Our engine works the same way: Neo4j is the road network, edge confidence weights are the road quality, and Node 0 is the routing algorithm. <strong>Learning = updating edge weights.</strong> The graph IS the memory. A step validated 12 times in the lab has a high-weight edge — the agent "knows" it's a safe road before it takes it.</p>
+    </div>
+
+    <div class="flow">
+<span class="label">User Intent</span>
+  <span class="arrow">──▶</span> <span class="agent">Node 0: Path Planner + Orchestrator</span>
+         <span class="arrow">│   Phase 1 — PLAN (before any traversal):</span>
+         <span class="c">│     1. Seed XIQ node (from Node 1)</span>
+         <span class="c">│     2. Neo4j full-path traversal → get ALL edge weights on route</span>
+         <span class="c">│     3. path_confidence = min(edge.confidence) — worst bottleneck</span>
+         <span class="c">│     4. Flag low-confidence + gap edges BEFORE execution</span>
+         <span class="c">│     5. Generate "route preview" — user sees what's coming</span>
+         <span class="c">│     6. HITL gate: user confirms before traversal begins</span>
+         <span class="arrow">│   Phase 2 — EXECUTE (step-by-step with anticipation):</span>
+         <span class="arrow">─┬─▶</span> <span class="agent">Node 1: Intent Parser</span>  <span class="c">(pgvector semantic search + query type: workflow|lookup|compare)</span>
+          <span class="arrow">│     └──▶</span> <span class="agent">Node 2: XIQ Workflow Builder</span>  <span class="c">(Neo4j — XIQ subgraph, reads edge weights)</span>
+          <span class="arrow">│           └──▶</span> <span class="agent">Node 3: Version Resolver</span>  <span class="c">(lock to version pair — version-tagged edges only)</span>
+          <span class="arrow">│                 └──▶</span> <span class="agent">Node 4: EP1 Translator</span>  <span class="c">(edge weights c_doc+c_gui + confirmed_examples few-shot)</span>
+          <span class="arrow">│                       └──▶</span> <span class="agent">Node 5: Confidence Aggregator</span>  <span class="c">(Σ(w×c)/Σ(w) per step)</span>
+          <span class="arrow">│                             └──▶</span> <span class="agent">Node 6: Gap Detector</span>  <span class="c">(c &lt; 0.40 → gap; c 0.40-0.69 → warn)</span>
+          <span class="arrow">│                                   ├──▶</span> <span class="agent">Node 7: Nav Path Generator</span>  <span class="c">(screen card: portal→nav→field→value→button)</span>
+          <span class="arrow">│                                   └──▶</span> <span class="agent">Node 9: Fallback Agent</span>  <span class="c">(RAG workaround + HITL confirmation)</span>
+          <span class="arrow">│</span>
+          <span class="arrow">└──────────────────────────────────────▶</span> <span class="agent">Node 8: Response Formatter</span>  <span class="c">(workflow steps | single card | diff table)</span>
+                                                          <span class="arrow">└──▶</span> <span class="agent">Node 10: Execution Agent</span>  <span class="c">(optional: push to live network)</span>
+                                                                  <span class="arrow">└──▶</span> <span class="agent">Node 11: Feedback Loop</span>  <span class="c">(update c_lab, auto-create gap on failure)</span>
+    </div>
+
+    <span class="section-eye">LangGraph Nodes (0–11)</span>
+    <h2>Node Descriptions</h2>
+
+    <div class="node-grid">
+      <div class="node-card">
+        <div class="node-id">Node 0</div>
+        <h4>Path Planner + Orchestrator</h4>
+        <p><strong>Phase 1 — Plan:</strong> After Node 1 returns the XIQ seed node, Node 0 runs a full Neo4j path traversal, reads all edge weights, computes <code>path_confidence = min(edge.confidence)</code>, identifies low-confidence and gap edges, generates a "route preview," and presents a <strong>HITL confirmation gate before any step executes.</strong> User sees what's coming — no surprises. <strong>Phase 2 — Execute:</strong> routes through Nodes 1–9. Manages retry and error escalation.</p>
+      </div>
+      <div class="node-card">
+        <div class="node-id">Node 1</div>
+        <h4>Intent Parser</h4>
+        <p>pgvector semantic search over RAG corpus → candidate XIQ feature nodes. Classifies query: <code>workflow</code> | <code>lookup</code> | <code>compare</code>. Lookup short-circuits to Node 7. Compare routes to dual subgraph fetch.</p>
+      </div>
+      <div class="node-card">
+        <div class="node-id">Node 2</div>
+        <h4>XIQ Workflow Builder</h4>
+        <p>Neo4j traversal of XIQ subgraph from Node 1 seed node. Expands full step sequence. Each step includes: screen_id, nav_path, field_label, input_value, button_label, screenshot_ref.</p>
+      </div>
+      <div class="node-card">
+        <div class="node-id">Node 3</div>
+        <h4>Version Resolver</h4>
+        <p>Filters all graph traversals to the active version pair from user session. Prevents cross-version contamination. Logs version pair on every execution_log entry.</p>
+      </div>
+      <div class="node-card">
+        <div class="node-id">Node 4</div>
+        <h4>EP1 Translator</h4>
+        <p>For each XIQ step: (1) pgvector search over 14 PDFs → c_doc score; (2) Neo4j lookup → c_gui score; (3) <strong>pgvector search on confirmed_examples → top-5 similar confirmed mappings → injected as few-shot context into Claude prompt.</strong> This is the learning mechanism — translations improve as the example store grows.</p>
+      </div>
+      <div class="node-card">
+        <div class="node-id">Node 5</div>
+        <h4>Confidence Aggregator</h4>
+        <p>Computes per-step confidence: <code>Σ(w×c)/Σ(w)</code>. Weights: c_doc=0.3, c_gui=0.4, c_lab=0.3. When c_lab is absent (not yet lab-validated), renormalises to c_doc=0.43 + c_gui=0.57. Emits confidence tier: HIGH ≥0.80, MED 0.50–0.79, LOW &lt;0.50.</p>
+      </div>
+      <div class="node-card">
+        <div class="node-id">Node 6</div>
+        <h4>Gap Detector</h4>
+        <p>Any step with confidence &lt;0.40 → <code>GAP</code> (route to Node 9). Steps 0.40–0.69 → <code>WARN</code> (flag in UI, continue). Steps ≥0.70 → <code>OK</code>. Detected gaps auto-staged for Gaps Register (bin + description + workaround TBD).</p>
+      </div>
+      <div class="node-card">
+        <div class="node-id">Node 7</div>
+        <h4>Nav Path Generator</h4>
+        <p>Builds the screen card for each step: portal URL prefix, left-nav path, tab name (if any), field label, dropdown option or text value, submit button label. This is the GPS turn-by-turn output.</p>
+      </div>
+      <div class="node-card">
+        <div class="node-id">Node 8</div>
+        <h4>Response Formatter</h4>
+        <p>Assembles final output by query type: full workflow (ordered step cards + confidence badges), single lookup card, or side-by-side diff table. Attaches screenshot thumbnails where available.</p>
+      </div>
+      <div class="node-card">
+        <div class="node-id">Node 9</div>
+        <h4>Fallback Agent</h4>
+        <p>Activated on GAP. Queries RAG: "what does EP1 documentation suggest as workaround?" Generates Supplemental CLI block or manual steps as alternative. If no workaround found → escalates to Gap Curator (supporting agent).</p>
+      </div>
+      <div class="node-card">
+        <div class="node-id">Node 10</div>
+        <h4>Execution Agent</h4>
+        <p>Optional node (admin-only, requires live lab). Pushes the generated EP1 configuration to real hardware. Captures CLI output. Compares each anticipated value to actual. Updates c_lab per step. On failure: routes to Node 11.</p>
+      </div>
+      <div class="node-card">
+        <div class="node-id">Node 11</div>
+        <h4>Feedback Loop</h4>
+        <p>Processes Execution Agent result. <strong>Success:</strong> c_lab updated via weighted running average (converges to true reliability over N runs) → write to <code>confidence_score</code> → <strong>write to <code>confirmed_examples</code> (source=lab)</strong> → log to <code>query_log</code>. <strong>Failure:</strong> c_lab drops → auto-create gap → flag Neo4j node BROKEN → notify Gap Curator → Gap Curator correction written to <code>confirmed_examples</code> (source=curator, weight=2×).</p>
+      </div>
+    </div>
+
+    <span class="section-eye">Supporting Agents (5)</span>
+    <h2>Out-of-Graph Services</h2>
+
+    <div class="node-grid">
+      <div class="node-card support">
+        <div class="node-id">Support Agent 1</div>
+        <h4>Playwright Scraper</h4>
+        <p>Headless browser automation. Crawls every XIQ + EP1 screen. Tags each screenshot: platform, version, screen_id, nav_path, fields_in_view, timestamp. Outputs gui_baseline_xiq.json + gui_baseline_ep1.json → Neo4j bulk load.</p>
+      </div>
+      <div class="node-card support">
+        <div class="node-id">Support Agent 2</div>
+        <h4>PDF Ingestor</h4>
+        <p>Chunks 14 PDFs (512-token chunks, 50-token overlap). Embeds each chunk with text-embedding-3-small. Stores in pgvector with metadata: source_pdf, page_number, version_tag. Feature Comparison PDF given priority chunk_weight=2.0.</p>
+      </div>
+      <div class="node-card support">
+        <div class="node-id">Support Agent 3</div>
+        <h4>Gap Curator</h4>
+        <p>Human-in-the-loop interface for unresolved gaps. Displays auto-staged gaps from Node 6 and Node 11. Curator fills in: bin assignment, workaround description, severity. Closes feedback loop before gap enters Gaps Register.</p>
+      </div>
+      <div class="node-card support">
+        <div class="node-id">Support Agent 4</div>
+        <h4>Version Manager</h4>
+        <p>Admin-only. Registers new platform versions, triggers Playwright Scraper for diff-scrape, computes version delta (new nodes, removed nodes, renamed nodes). Updates Neo4j with version-tagged edges.</p>
+      </div>
+      <div class="node-card support">
+        <div class="node-id">Support Agent 5</div>
+        <h4>Schema Migrator</h4>
+        <p>Alembic-based. Runs on deploy. Ensures 8-table PostgreSQL schema is current. Seeds initial data: 31 XIQ→EP1 bins, G-01/G-02/G-03 gaps, version pair records for XIQ 25.8.0 + EP1 25.9.0.</p>
+      </div>
+    </div>
+
+    <span class="section-eye">Neo4j Edge Schema — The Encoded Memory</span>
+    <h2>Road Quality Metrics on Every Edge</h2>
+    <p>The confirmed_examples store handles semantic similarity (finding analogous past routes). But <strong>structural learning — "this road has been driven safely 12 times" — lives as edge properties in Neo4j.</strong> This is what gives Node 0 anticipatory capability: it reads these properties before traversal begins and knows which roads are safe, which are unpaved, and which don't exist yet.</p>
+
+    <pre>
+<span class="c">// Every XIQ→EP1 mapping edge carries road-quality metrics</span>
+<span class="w">(xiq_node:Screen {screen_id: "xiq.network_policy.ssid.auth.ppsk"})</span>
+<span class="w">  -[r:MAPS_TO {</span>
+    <span class="c">// ── confidence (the road quality) ─────────────────────</span>
+    <span class="w">confidence:       0.87,</span>   <span class="c">← current weighted score — what Node 0 reads for path planning</span>
+    <span class="w">c_doc:            0.80,</span>   <span class="c">← what EP1 documentation says about this path</span>
+    <span class="w">c_gui:            0.90,</span>   <span class="c">← what Playwright confirmed in the UI</span>
+    <span class="w">c_lab:            0.85,</span>   <span class="c">← empirical: how many times this road was driven safely</span>
+
+    <span class="c">// ── traversal history (the learning) ──────────────────</span>
+    <span class="w">traversal_count:  12,</span>     <span class="c">← total attempts on this road</span>
+    <span class="w">success_count:    11,</span>     <span class="c">← successful traversals (1 failure → c_lab pulled down)</span>
+    <span class="w">last_validated:   "2026-05-21",</span>
+    <span class="w">source:           "lab",</span>  <span class="c">← highest-quality: lab &gt; curator &gt; scrape &gt; doc</span>
+
+    <span class="c">// ── versioning ─────────────────────────────────────────</span>
+    <span class="w">version_pair:     "XIQ-25.8.0__EP1-25.9.0",</span>
+    <span class="w">ep1_patch:        "25.9.0"</span>
+<span class="w">}]-&gt;(ep1_node:Screen {screen_id: "ep1.network_policy.wireless.ssid.auth.ppsk"})</span>
+
+<span class="c">// When EP1 patches and nav path changes — edge is RESTRUCTURED, not deleted</span>
+<span class="w">(ep1_node_v0)-[r2:RESTRUCTURED_TO {</span>
+    <span class="w">from_version: "25.9.0", to_version: "25.9.2",</span>
+    <span class="w">confidence:   0.0</span>   <span class="c">← c_gui reset — must be re-earned after path change</span>
+<span class="w">}]-&gt;(ep1_node_v2)</span>
+
+<span class="c">// A gap — the road doesn't exist (yet)</span>
+<span class="w">(xiq_gap_node)-[r3:GAP {</span>
+    <span class="w">gap_code: "G-01", severity: "high",</span>
+    <span class="w">workaround: "CLI: unconfigure switch all"</span>
+<span class="w">}]-&gt;(:GapNode {description: "EXOS factory reset not available in EP1"})</span></pre>
+
+    <h3>How Node 0 Uses Edge Weights for Path Planning</h3>
+    <pre>
+<span class="c"># Node 0 path planning — runs BEFORE any step execution</span>
+<span class="w">MATCH path = (start:XIQScreen {screen_id: $seed_id})</span>
+<span class="w">             -[:MAPS_TO*]-&gt;</span>
+<span class="w">             (end:EP1Screen {screen_id: $destination_id})</span>
+<span class="w">WHERE ALL(r IN relationships(path) WHERE r.version_pair = $version_pair)</span>
+<span class="w">RETURN path,</span>
+<span class="w">       [r IN relationships(path) | r.confidence] AS edge_confidences,</span>
+<span class="w">       reduce(min_c = 1.0, r IN relationships(path) | CASE WHEN r.confidence &lt; min_c THEN r.confidence ELSE min_c END) AS path_confidence,</span>
+<span class="w">       [r IN relationships(path) WHERE r.confidence &lt; 0.40 | r] AS gap_edges,</span>
+<span class="w">       [r IN relationships(path) WHERE r.confidence &gt;= 0.40 AND r.confidence &lt; 0.70 | r] AS warn_edges</span>
+<span class="c"># Result: Node 0 knows the full route quality map before taking one step</span>
+<span class="c"># "You have 6 steps. Step 3 is unpaved (WARN). Step 5 is a dead end (GAP)."</span></pre>
+
+    <span class="section-eye">State Object</span>
+    <h2>LangGraph State Schema</h2>
+    <pre>
+<span class="c"># Every node reads + writes this — nothing is lost between hops</span>
+<span class="w">class XformState(TypedDict):</span>
+    <span class="c"># input</span>
+    <span class="w">user_intent:        str</span>
+    <span class="w">query_type:         Literal["workflow", "lookup", "compare"]</span>
+    <span class="w">version_pair:       tuple[str, str]          </span><span class="c"># ("XIQ-25.8.0", "EP1-25.9.0")</span>
+    <span class="c"># Node 0 path plan — computed before step execution begins</span>
+    <span class="w">path_edge_weights:  list[float]              </span><span class="c"># confidence on every edge in planned route</span>
+    <span class="w">path_confidence:    float                    </span><span class="c"># min(path_edge_weights) — worst bottleneck</span>
+    <span class="w">route_preview:      str                      </span><span class="c"># human-readable upfront summary for user</span>
+    <span class="w">hitl_gate_passed:   bool                     </span><span class="c"># user confirmed after seeing route preview</span>
+    <span class="c"># XIQ side</span>
+    <span class="w">xiq_steps:          list[WorkflowStep]</span>
+    <span class="w">xiq_seed_node_id:   str</span>
+    <span class="c"># EP1 side</span>
+    <span class="w">ep1_steps:          list[WorkflowStep]</span>
+    <span class="w">ep1_screen_cards:   list[ScreenCard]</span>
+    <span class="c"># confidence</span>
+    <span class="w">confidence_per_step: list[float]</span>
+    <span class="w">gaps_detected:      list[GapRecord]</span>
+    <span class="w">fallback_blocks:    list[FallbackBlock]</span>
+    <span class="c"># execution (optional)</span>
+    <span class="w">execution_result:   ExecutionResult | None</span>
+    <span class="w">lab_feedback:       list[LabFeedback]</span>
+    <span class="c"># output</span>
+    <span class="w">formatted_response: FormattedResponse</span></pre>
+
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════
+       TAB 3 — SPRINTS & EXECUTION
+  ══════════════════════════════════════════════════════ -->
+  <div id="tab-sprints" class="tab-panel">
+
+    <span class="section-eye">Timeline</span>
+    <h2>Six Sprints — Hard Deadline July 1, 2026</h2>
+
+    <div class="box red">
+      <div class="box-label">Critical Path</div>
+      <p><strong>41 days to July 1, 2026 when XIQ GUI is retired.</strong> Sprint B (XIQ Playwright scrape) is the irreversible bottleneck — every XIQ screen must be captured before that date. Everything else can be built after, but Sprint B cannot be delayed. Start it immediately after Sprint A infrastructure is stable.</p>
+    </div>
+
+    <div class="sprint-card">
+      <h4>Sprint A — Infrastructure Setup</h4>
+      <div class="sprint-meta"><span class="badge blue">Est: 1 day</span> <span class="badge green">next session</span> &nbsp;Repository + DB + API skeleton</div>
+      <ul>
+        <li>Create GitHub repo <code>xiq-ep1-intelligence-engine</code> (new, separate from cisco-en-cli-agent)</li>
+        <li>Fork FastAPI skeleton from cisco-en-cli-agent — port 2-col layout, confidence badge pattern</li>
+        <li>Provision Railway PostgreSQL — run Schema Migrator (8 tables below)</li>
+        <li>Provision Neo4j Aura Free — create constraints + indexes for platform_version, screen_id, nav_path</li>
+        <li>Seed PostgreSQL: 31 XIQ→EP1 bins + G-01 / G-02 / G-03 gap records</li>
+        <li>FastAPI <code>/health</code> + <code>/version-pairs</code> + <code>/query</code> stubs returning 501</li>
+        <li>GitHub Actions: lint + test on push to main</li>
+      </ul>
+    </div>
+
+    <div class="sprint-card critical">
+      <h4>⚠ Sprint B — XIQ Playwright Scraper (MUST complete before July 1)</h4>
+      <div class="sprint-meta"><span class="badge red">CRITICAL</span> <span class="badge warn">Est: 3–4 days</span> &nbsp;Capture all XIQ screens before GUI retirement</div>
+      <ul>
+        <li>Playwright script: headless login to XIQ, systematic nav through all 31 bins</li>
+        <li>Screens to capture: Network Policy, SSID, Switch Policy/Template, VLANs, User Groups, PPSK Config, CWP Config, Network Access, AirDefense, GE, Monitor → Devices, Devices → AP/Switch → Actions</li>
+        <li>Every screenshot tagged: <code>{platform, version, screen_id, nav_path, fields_in_view, timestamp}</code></li>
+        <li>Extract field labels + dropdown options from DOM → <code>gui_baseline_xiq.json</code></li>
+        <li>Neo4j bulk load: one node per screen, edges for nav relationships, version=XIQ-25.8.0</li>
+        <li>Store screenshots in <code>assets/screens/xiq/</code> keyed by screen_id</li>
+      </ul>
+    </div>
+
+    <div class="sprint-card">
+      <h4>Sprint C — EP1 Doc Ingest + Playwright Scraper</h4>
+      <div class="sprint-meta"><span class="badge blue">Est: 2–3 days</span> &nbsp;Build the RAG corpus + EP1 GUI graph</div>
+      <ul>
+        <li>PDF Ingestor: chunk + embed all 14 PDFs from <code>/Users/khukhan/Downloads/EP1 and Other Items for Migration/</code></li>
+        <li>Priority order: (1) Feature Comparison PDF — chunk_weight=2.0; (2) EP1 User Guide 25.9.0; (3) EN_Hub_XIQ-EP1.pdf; (4) Security Guide 25.6.0; (5) remaining 10</li>
+        <li>pgvector store: 512-token chunks, 50-token overlap, metadata: source_pdf, page_number, version_tag</li>
+        <li>EP1 Playwright: same screen-by-screen crawl as Sprint B — EP1 portal, same 31 bins</li>
+        <li>Output: <code>gui_baseline_ep1.json</code> → Neo4j, version=EP1-25.9.0</li>
+        <li>Initial RAG vs Scrape reconciliation: run 4-outcome classifier per XIQ node → seed gap register from confirmed mismatches</li>
+      </ul>
+    </div>
+
+    <div class="sprint-card">
+      <h4>Sprint D — LangGraph Agent Coding</h4>
+      <div class="sprint-meta"><span class="badge blue">Est: 5–7 days</span> &nbsp;Build nodes 0–11 + 5 supporting agents + learning infrastructure</div>
+      <ul>
+        <li>Add <code>confirmed_examples</code> table (10th table) + <code>query_log</code> table (11th table) via new Alembic migration</li>
+        <li>Add <code>AsyncPostgresSaver</code> checkpointer to LangGraph compiled graph — full state persistence</li>
+        <li>Start with Node 1 (Intent Parser) + Node 4 (EP1 Translator) — highest value, testable standalone</li>
+        <li>Node 1: pgvector semantic search + query type classifier (regex + LLM fallback)</li>
+        <li>Node 4 (extended): pgvector doc search (c_doc) + Neo4j lookup (c_gui) + <strong>pgvector search on confirmed_examples → inject top-5 as few-shot context</strong></li>
+        <li>Node 5: confidence aggregator — handles missing c_lab gracefully (renormalise weights)</li>
+        <li>Node 6: gap detector with threshold config: GAP_THRESHOLD=0.40, WARN_THRESHOLD=0.70</li>
+        <li>Nodes 2, 3, 7, 8: workflow builder + version resolver + nav path generator + formatter</li>
+        <li>Nodes 9, 10, 11: fallback + execution + feedback (Sprint F dependency)</li>
+        <li>5 supporting agents: Playwright Scraper (done in Sprint B/C), PDF Ingestor (done in Sprint C), Gap Curator (simple FastAPI admin UI), Version Manager, Schema Migrator</li>
+      </ul>
+    </div>
+
+    <div class="sprint-card">
+      <h4>Sprint E — React Frontend</h4>
+      <div class="sprint-meta"><span class="badge blue">Est: 3–4 days</span> &nbsp;User-facing interface</div>
+      <ul>
+        <li>Version picker: top-nav dropdown — user selects <code>XIQ version × EP1 version</code> pair</li>
+        <li>Query box: natural language input + query type auto-detected (shown as badge, user can override)</li>
+        <li>Two-column response: XIQ steps (left) → EP1 steps (right), aligned row-by-row</li>
+        <li>Per-step confidence badge: HIGH (green), MED (amber), LOW (red), GAP (strikethrough + workaround)</li>
+        <li>Lookup mode: single screen card — nav breadcrumb + field map table</li>
+        <li>Compare mode: diff table with change type badges (confirmed / restructured / gap / ep1_only)</li>
+        <li>Admin view (gated): trigger scraper, review staged gaps, publish versions</li>
+        <li>Port 2-col layout from cisco-en-cli-agent as starting template</li>
+      </ul>
+    </div>
+
+    <div class="sprint-card">
+      <h4>Sprint F — E2E Integration + Automated Validation</h4>
+      <div class="sprint-meta"><span class="badge blue">Est: 3–4 days</span> &nbsp;Wire all agents + close the feedback loop</div>
+      <ul>
+        <li>Wire all LangGraph nodes end-to-end: State passes cleanly from Node 0 → 11</li>
+        <li>Execution Agent (Node 10): EP1 API + EXOS SSH push — deploy policy, capture <code>show vlan</code> + <code>show dhcp-server</code></li>
+        <li>Per-field verification: compare anticipated values to actual CLI output</li>
+        <li>On failure: auto-create gap record, flag Neo4j node, notify Gap Curator</li>
+        <li>GitHub Actions: weekly cron → re-scrape known workflows against live EP1 → update confidence scores</li>
+        <li>E2E test: "configure PPSK VLAN5 on AP1" → full workflow → execution → verification → feedback</li>
+      </ul>
+    </div>
+
+    <span class="section-eye">Database Schema</span>
+    <h2>8 PostgreSQL Tables</h2>
+    <table>
+      <tr><th>Table</th><th>Key Columns</th><th>Purpose</th></tr>
+      <tr><td><code>platform_version</code></td><td>id, platform (XIQ|EP1), version, scrape_run_id, is_active</td><td>Registry of all versioned snapshots</td></tr>
+      <tr><td><code>bin</code></td><td>id, bin_number, name, description, xiq_nav_path, ep1_nav_path</td><td>31 XIQ→EP1 feature bins</td></tr>
+      <tr><td><code>workflow_step</code></td><td>id, bin_id, platform_version_id, step_order, screen_id, nav_path, field_label, input_value, button_label, screenshot_path</td><td>Per-step screen cards for both platforms</td></tr>
+      <tr><td><code>field_map</code></td><td>id, xiq_step_id, ep1_step_id, map_type (confirmed|restructured|gap|ep1_only)</td><td>XIQ↔EP1 step-level mapping</td></tr>
+      <tr><td><code>gap</code></td><td>id, bin_id, gap_code (G-01…), severity, description, workaround, status (open|resolved)</td><td>Gaps Register — mirrors xiq-ep1-transition.html</td></tr>
+      <tr><td><code>execution_log</code></td><td>id, workflow_step_id, version_pair, anticipated, actual, passed, timestamp</td><td>Live lab validation results</td></tr>
+      <tr><td><code>confidence_score</code></td><td>id, field_map_id, c_doc, c_gui, c_lab, confidence, tier (HIGH|MED|LOW|GAP), updated_at</td><td>Per-step confidence — updated by Node 11</td></tr>
+      <tr><td><code>scrape_run</code></td><td>id, platform_version_id, started_at, completed_at, screens_captured, errors</td><td>Scraper run audit log</td></tr>
+    </table>
+
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════
+       TAB 4 — AUTOMATED VALIDATION
+  ══════════════════════════════════════════════════════ -->
+  <div id="tab-validation" class="tab-panel">
+
+    <span class="section-eye">Why Automate Validation</span>
+    <h2>The Execution Agent Closes the Loop</h2>
+    <p>Documentation says one thing. The UI shows another. But does the configuration actually push correctly? The Execution Agent (Node 10) answers that question by deploying the generated policy to live hardware and comparing field-by-field. Without this, confidence is theoretical. With it, confidence is empirical.</p>
+    <p>The second reason is drift. EP1 ships patches roughly every 6 weeks. A nav path that worked in EP1 25.9.0 may have moved in EP1 25.9.2. Automated re-validation catches this before a user hits it in production.</p>
+
+    <span class="section-eye">Execution Flow</span>
+    <h2>Node 10 Step-by-Step</h2>
+
+    <div class="flow">
+<span class="label">Trigger</span>: Admin approves execution OR CI/CD weekly cron fires
+       <span class="arrow">│</span>
+       <span class="arrow">▼</span>
+<span class="agent">1. Config Generator</span>   <span class="c">— convert EP1 workflow steps into API calls (EP1 REST) + CLI blocks (EXOS SSH)</span>
+       <span class="arrow">▼</span>
+<span class="agent">2. Dry-Run Check</span>      <span class="c">— syntax validation only, no push. Gate: all fields present + version matches</span>
+       <span class="arrow">▼</span>
+<span class="agent">3. Push to Lab</span>        <span class="c">— EP1 API: create/update Network Policy → push to AP1 + SW1</span>
+                         <span class="c">  EXOS SSH: verify show vlan, show dhcp-server, show ports</span>
+       <span class="arrow">▼</span>
+<span class="agent">4. Capture Actual</span>     <span class="c">— SSH to SW1: `show vlan`, `show dhcp-server`, `show ports X information detail`</span>
+                         <span class="c">  SSH to AP1: `show capwap`, `show interface`, `show hivemanager`</span>
+       <span class="arrow">▼</span>
+<span class="agent">5. Per-Field Compare</span>  <span class="c">— for each anticipated value: exact match OR regex match</span>
+                         <span class="c">  e.g. anticipated: "VLAN5_Employee 10.5.0.1/24 f"  actual: parsed from show vlan</span>
+       <span class="arrow">├── PASS ──▶</span> <span class="store">c_lab += 0.1 (capped 1.0) → write confidence_score → log execution_log</span>
+       <span class="arrow">└── FAIL ──▶</span> <span class="conf">auto-create gap_record → flag Neo4j node BROKEN → notify Gap Curator → log execution_log</span>
+    </div>
+
+    <span class="section-eye">CI/CD Pipeline</span>
+    <h2>GitHub Actions — Weekly Re-Validation</h2>
+
+    <pre>
+<span class="c"># .github/workflows/validate.yml — runs every Monday 06:00 UTC</span>
+<span class="w">on:</span>
+  <span class="w">schedule:</span>
+    <span class="w">- cron: '0 6 * * MON'</span>
+  <span class="w">workflow_dispatch:</span>          <span class="c"># manual trigger on EP1 patch day</span>
+
+<span class="w">jobs:</span>
+  <span class="w">validate:</span>
+    <span class="w">steps:</span>
+      <span class="w">- name: Run EP1 Playwright diff-scrape</span>
+        <span class="c">  # capture current EP1 UI → compare to Neo4j baseline</span>
+        <span class="c">  # flag any screen_id whose nav_path changed</span>
+      <span class="w">- name: Run Execution Agent on known-good workflows</span>
+        <span class="c">  # push PPSK VLAN5, Guest VLAN10, AP policy</span>
+        <span class="c">  # verify show vlan + show dhcp-server + show capwap</span>
+      <span class="w">- name: Update confidence scores</span>
+        <span class="c">  # PASS → c_lab += 0.1 / FAIL → flag + create gap</span>
+      <span class="w">- name: Publish validation report</span>
+        <span class="c">  # POST to Slack #infra-alerts if any step BROKEN</span></pre>
+
+    <span class="section-eye">Version Drift Detection</span>
+    <h2>What Happens When EP1 Ships a Patch</h2>
+
+    <div class="box warn">
+      <div class="box-label">Drift Scenario</div>
+      <p>EP1 25.9.2 ships. The CWP configuration screen moves from <em>Configure → Network Policies → [policy] → SSIDs → [ssid] → User Authentication → CWP</em> to a new top-level <em>Configure → Captive Portal → Profiles</em> path. Users following the 25.9.0 workflow hit a dead end.</p>
+    </div>
+
+    <p>The Version Manager (Support Agent 4) handles this:</p>
+    <ol>
+      <li>Admin registers EP1 25.9.2 via admin UI → triggers diff-scrape</li>
+      <li>Playwright scraper runs on EP1 25.9.2 → captures all screens</li>
+      <li>Diff engine compares Neo4j nodes: EP1-25.9.0 vs EP1-25.9.2</li>
+      <li>Changed nodes flagged as <code>RESTRUCTURED</code> — old nav_path deprecated, new path set</li>
+      <li>Confidence scores for affected steps reset: c_gui=0.0 pending re-validation</li>
+      <li>Gap Curator reviews staged changes → approves or escalates</li>
+      <li>Users on EP1-25.9.2 version pair immediately see updated nav paths</li>
+    </ol>
+
+    <span class="section-eye">Confidence Tiers</span>
+    <h2>What Confidence Means to the User</h2>
+    <table>
+      <tr><th>Tier</th><th>Score</th><th>Meaning</th><th>UI Treatment</th></tr>
+      <tr>
+        <td><span class="badge green">HIGH</span></td>
+        <td>≥ 0.80</td>
+        <td>Documented + found in UI + lab-verified. Safe to follow.</td>
+        <td>Green badge, no annotation</td>
+      </tr>
+      <tr>
+        <td><span class="badge warn">MED</span></td>
+        <td>0.50 – 0.79</td>
+        <td>Documented + found in UI, but not yet lab-validated OR minor discrepancy.</td>
+        <td>Amber badge, "verify in lab" note</td>
+      </tr>
+      <tr>
+        <td><span class="badge red">LOW</span></td>
+        <td>0.40 – 0.49</td>
+        <td>RAG says it exists but UI evidence is weak. May be restructured.</td>
+        <td>Red badge, "path may have changed" warning</td>
+      </tr>
+      <tr>
+        <td><span class="badge red">GAP</span></td>
+        <td>&lt; 0.40</td>
+        <td>Not found in UI. Either genuinely missing from EP1 or completely relocated.</td>
+        <td>Strikethrough step, workaround block shown, gap code (G-XX) linked</td>
+      </tr>
+    </table>
+
+    <div class="box purple">
+      <div class="box-label">The Honest System Principle</div>
+      <p>This engine must be more honest than a human consultant. A consultant might guess or omit uncertainty. This system shows the confidence score on every step. A gap is not a failure — it is the most valuable output: it tells the engineer exactly where EP1 is not ready and gives them a workaround rather than a dead end.</p>
+    </div>
+
+    <span class="section-eye">Links &amp; Resources</span>
+    <h2>Reference Files</h2>
+    <table>
+      <tr><th>Resource</th><th>Location</th><th>Role</th></tr>
+      <tr><td>XIQ→EP1 Gaps Register</td><td><a href="xiq-ep1-transition.html">xiq-ep1-transition.html</a></td><td>Live gap tracker — engine Gaps Register mirrors this</td></tr>
+      <tr><td>Architecture Debate</td><td><a href="xiq-ep1-arch-debate.html">xiq-ep1-arch-debate.html</a></td><td>Design rationale, hypothesis vs confirmed</td></tr>
+      <tr><td>EP1 Deployment Guide</td><td><a href="ep1-deployment-guide.html">ep1-deployment-guide.html</a></td><td>Reference for SW1/AP1 zero-CLI deploy</td></tr>
+      <tr><td>Feature Comparison PDF</td><td>/Users/khukhan/Downloads/EP1 and Other Items for Migration/</td><td>Ground truth RAG source — XIQ→EP1 explicit mapping</td></tr>
+      <tr><td>Cisco EN CLI Agent</td><td>github.com/khursheedkhanaiforgood-ai/cisco-en-cli-agent</td><td>Prototype — port skeleton, confidence formula, 2-col UI</td></tr>
+    </table>
+
+  </div><!-- end tab-validation -->
+
+  <!-- ══════════════════════════════════════════════════════
+       TAB 5 — LEARNING & GROWTH
+  ══════════════════════════════════════════════════════ -->
+  <div id="tab-learning" class="tab-panel">
+
+    <span class="section-eye">Design Principle</span>
+    <h2>Learning Must Be Encoded, Not Retrieved</h2>
+    <p>A critical architectural distinction: there are two types of knowledge, and they must not be confused.</p>
+    <table>
+      <tr><th>Type</th><th>Where it lives</th><th>What it enables</th><th>Google Maps equivalent</th></tr>
+      <tr>
+        <td><strong>Structural learning</strong></td>
+        <td>Neo4j edge properties (<code>confidence</code>, <code>traversal_count</code>, <code>success_count</code>)</td>
+        <td>Node 0 anticipates the full path before taking a step. Knows which roads are safe, unpaved, or missing.</td>
+        <td>Road network with traffic/quality weights — the route algorithm runs over this</td>
+      </tr>
+      <tr>
+        <td><strong>Semantic learning</strong></td>
+        <td>pgvector (RAG corpus + confirmed_examples)</td>
+        <td>Node 4 explains steps in context. Finds analogous past mappings to improve LLM translations.</td>
+        <td>POI names, address geocoding — helps interpret "go to Starbucks," not find the road</td>
+      </tr>
+    </table>
+    <p>The confirmed_examples store was initially framed as the primary learning mechanism. That was wrong. It is the semantic layer — useful for LLM context injection in Node 4. <strong>The primary learning mechanism is the graph edge weights.</strong> When a path has been traversed successfully 12 times, that fact is encoded in <code>success_count=12</code> and <code>confidence=0.92</code> on the Neo4j edge. Node 0 reads those properties and knows — before moving — that this road is safe. That is anticipatory navigation, not reactive gap discovery.</p>
+    <p>Learning operates at four distinct timescales, each with its own mechanism. None require retraining a model. The graph IS the memory.</p>
+
+    <div class="box purple">
+      <div class="box-label">Auditability Requirement</div>
+      <p>Every learned fact must be traceable. When confidence changes, the reason must be queryable: <em>"This step's c_lab moved from 0.3 to 0.7 because the Execution Agent ran it successfully 4 times between May 21 and June 10, with CLI output saved in execution_log rows 47, 52, 61, 68."</em> No black-box learning. Every update has a source, a timestamp, and a human-readable reason.</p>
+    </div>
+
+    <span class="section-eye">Four Learning Mechanisms</span>
+    <h2>How the Engine Grows</h2>
+
+    <table>
+      <tr><th>#</th><th>Mechanism</th><th>Type</th><th>Trigger</th><th>What Updates</th></tr>
+      <tr>
+        <td>1</td>
+        <td><strong>Edge weight update (lab)</strong></td>
+        <td><span class="badge blue">Structural</span></td>
+        <td>Execution Agent completes</td>
+        <td>Neo4j: <code>confidence</code>, <code>c_lab</code>, <code>traversal_count</code>, <code>success_count</code> on the traversed edge. Node 0 immediately sees improved road quality on next planning run.</td>
+      </tr>
+      <tr>
+        <td>2</td>
+        <td><strong>Graph growth (version patch)</strong></td>
+        <td><span class="badge blue">Structural</span></td>
+        <td>EP1 patch ships → diff-scrape</td>
+        <td>Neo4j: new nodes added, RESTRUCTURED_TO edges created, deprecated edges flagged, c_gui reset on changed paths. Version-tagged — old version pair unaffected.</td>
+      </tr>
+      <tr>
+        <td>3</td>
+        <td><strong>Analogical learning (few-shot)</strong></td>
+        <td><span class="badge purple">Semantic</span></td>
+        <td>Any confirmed mapping</td>
+        <td>confirmed_examples pgvector store → Node 4's LLM translations become richer. NOT what gives Node 0 anticipation — that comes from edge weights. This improves explanation quality.</td>
+      </tr>
+      <tr>
+        <td>4</td>
+        <td><strong>HITL correction (curator)</strong></td>
+        <td><span class="badge blue">Structural</span> + <span class="badge purple">Semantic</span></td>
+        <td>Gap Curator reviews and corrects</td>
+        <td>Neo4j: edge redirected to correct EP1 node (structural). confirmed_examples: corrected path added at weight=2× (semantic). Gap record updated. Node 0 sees corrected road on next plan.</td>
+      </tr>
+    </table>
+
+    <h3>Mechanism 1 — Empirical Confidence (Lab-Driven)</h3>
+    <p>Node 11 currently does <code>c_lab += 0.1</code> per successful run. The full implementation uses a weighted running average: after N successful runs the score converges toward the true reliability of the step. Failures pull it back. The formula:</p>
+    <pre>
+<span class="c"># c_lab converges to true reliability over N runs</span>
+<span class="w">c_lab_new = (c_lab_prev * (n-1) + result) / n</span>
+<span class="c"># result = 1.0 on pass, 0.0 on fail</span>
+<span class="c"># after 5 passes: c_lab ≈ 1.0  |  after 1 fail from 0.8: c_lab drops to 0.64</span>
+
+<span class="c"># "Battle-tested" threshold: 5+ successful runs with c_lab ≥ 0.90</span>
+<span class="c"># UI shows ⚔ badge — independently validated, not just documented</span></pre>
+
+    <h3>Mechanism 2 — Knowledge Graph Growth (Version-Driven)</h3>
+    <p>The Neo4j graph is the living map. When EP1 25.9.2 ships:</p>
+    <ol>
+      <li>Version Manager registers new version → triggers Playwright diff-scrape</li>
+      <li>Scraper runs against EP1 25.9.2 → captures all screens</li>
+      <li>Diff engine: compares every node between 25.9.0 and 25.9.2 → flags RESTRUCTURED (nav path changed), ADDED (new feature), REMOVED (feature dropped)</li>
+      <li>Neo4j updated: old nodes deprecated, new nodes added, RESTRUCTURED edges drawn</li>
+      <li>c_gui reset to 0.0 on changed nodes — confidence must be re-earned</li>
+      <li>Users on 25.9.2 version pair immediately see updated nav paths; users on 25.9.0 pair unaffected</li>
+    </ol>
+    <p>The graph never stagnates. Each version is a snapshot; the engine holds all snapshots simultaneously and serves the right one based on session context.</p>
+
+    <h3>Mechanism 3 — Analogical Learning (Few-Shot Accumulation)</h3>
+    <p>This is the most powerful learning mechanism. Node 4 (EP1 Translator) currently does a pgvector search over RAG + a Neo4j lookup per step. Extended Node 4 adds a third retrieval: the <strong>Confirmed Examples Store</strong>.</p>
+
+    <div class="flow">
+<span class="label">New XIQ step arrives at Node 4:</span> "Configure → Network Policies → [policy] → SSIDs → [ssid] → User Auth → CWP → Self-Reg"
+       <span class="arrow">│</span>
+       <span class="arrow">▼</span>
+<span class="agent">Step 1: embed XIQ step description</span>  <span class="c">→ 1536-dim vector</span>
+       <span class="arrow">▼</span>
+<span class="agent">Step 2: pgvector search on confirmed_examples</span>  <span class="c">→ top-5 most similar confirmed XIQ→EP1 mappings</span>
+       <span class="arrow">│</span>
+       <span class="arrow">│  Example hit: "Configure → [policy] → SSIDs → [ssid] → User Auth → PPSK"</span>
+       <span class="arrow">│              → EP1: "Configure → [policy] → Wireless → SSIDs → [ssid] → Auth → PPSK"</span>
+       <span class="arrow">│              → confirmed by lab, c_lab=0.92, source=lab, run=5x</span>
+       <span class="arrow">▼</span>
+<span class="agent">Step 3: inject as few-shot context into Claude prompt</span>
+       <span class="c">  "Here are 5 confirmed XIQ→EP1 mappings structurally similar to this step.</span>
+       <span class="c">   Use their patterns to infer the EP1 equivalent of the new step."</span>
+       <span class="arrow">▼</span>
+<span class="agent">Step 4: Claude generates EP1 nav path</span>  <span class="c">→ grounded in empirical evidence, not just documentation</span>
+    </div>
+
+    <p>As more workflows are validated — in the lab, by curators, by Playwright scrapes — the example store grows. Month 3 Node 4 is measurably better than Month 1 Node 4 on unseen workflows. <strong>This is learning by analogy — the same mechanism expert engineers use.</strong></p>
+
+    <h3>Mechanism 4 — Human-in-the-Loop (Two Levels, Not One)</h3>
+    <p>Agents cannot deliver 100% guarantee. HITL is the formal acknowledgment of that — not a workaround, but a design principle. Like Google Maps where you still confirm the route and destination before driving, the engine presents human verification opportunities at two levels:</p>
+    <ul>
+      <li><strong>Level 1 — Upfront confirmation gate (Node 0):</strong> Before any step executes, the route preview surfaces all low-confidence and gap edges. "This workflow has 6 steps. Steps 3 and 5 require your attention before we begin." User confirms or requests alternative.</li>
+      <li><strong>Level 2 — Mid-traversal pause (Node 6 + Gap Curator):</strong> If a gap edge is encountered during execution, the graph pauses, surfaces the state, and waits for curator confirmation before continuing.</li>
+    </ul>
+    <p>LangGraph's HITL feature (interrupt/resume with checkpointer) implements both levels natively.</p>
+
+    <div class="flow">
+<span class="label">Gap Detector (Node 6) flags confidence=0.28</span>
+       <span class="arrow">▼</span>
+<span class="store">State saved to PostgreSQL checkpointer</span>  <span class="c">(full XformState at this point in the run)</span>
+       <span class="arrow">▼</span>
+<span class="agent">Gap Curator UI surfaces the step:</span>
+  <span class="c">  "Node 4 proposed: Configure → [policy] → Wired → Switch Templates → VLANs"</span>
+  <span class="c">  "Confidence: 0.28 (LOW). Is this correct?"</span>
+       <span class="arrow">│</span>
+       <span class="arrow">├── CORRECT  ──▶</span> <span class="store">confirmed_examples.add(source='curator', weight=1.0)</span>  <span class="c">→ resume</span>
+       <span class="arrow">│</span>
+       <span class="arrow">└── WRONG ──▶</span> Curator types corrected nav path
+                     <span class="arrow">▼</span>
+               <span class="store">confirmed_examples.add(corrected_path, source='curator', weight=2.0)</span>
+               <span class="store">Neo4j: update node nav_path</span>
+               <span class="store">gap.status = 'resolved' or 'workaround'</span>
+               <span class="agent">Graph resumes from checkpointed state with corrected path</span>
+    </div>
+
+    <div class="box blue">
+      <div class="box-label">Why curator corrections get weight=2.0</div>
+      <p>A human expert saying "this is wrong, the correct path is X" is the highest-quality signal in the system. It outweighs a PDF citation (c_doc) and outweighs a Playwright scrape (c_gui) because it represents ground truth validated by domain knowledge. The 2× weight ensures this signal propagates strongly into future translations via few-shot retrieval.</p>
+    </div>
+
+    <span class="section-eye">New Data Structures</span>
+    <h2>Two New Tables for Learning</h2>
+
+    <table>
+      <tr><th>Table</th><th>Key Columns</th><th>Purpose</th></tr>
+      <tr>
+        <td><code>confirmed_examples</code></td>
+        <td>id, xiq_screen_id, ep1_screen_id, xiq_nav_path, ep1_nav_path, confidence, source (lab|curator|scrape), weight (1.0 default, 2.0 for curator), embedding vector(1536), version_pair, created_at</td>
+        <td>Few-shot context store for Node 4. pgvector similarity search retrieves top-5 most similar confirmed mappings for each new XIQ step being translated.</td>
+      </tr>
+      <tr>
+        <td><code>query_log</code></td>
+        <td>id, intent, query_type, version_pair, confidence_avg, gap_count, user_feedback (null|accepted|flagged|corrected), correction_note, timestamp</td>
+        <td>Audit trail + pattern analysis. Enables: which workflows are queried most (prioritise for Sprint B scraping), which steps most often fail (prioritise Gap Curator), usage-driven confidence prioritisation.</td>
+      </tr>
+    </table>
+
+    <span class="section-eye">LangGraph Features Used</span>
+    <h2>Why LangGraph Was the Right Choice for This</h2>
+
+    <table>
+      <tr><th>LangGraph Feature</th><th>How It Enables Learning</th></tr>
+      <tr>
+        <td><strong>AsyncPostgresSaver checkpointer</strong></td>
+        <td>Every run's full XformState persisted to PostgreSQL after each node. Full lineage of every inference — queryable, replayable, auditable. "Show me exactly what Node 4 returned for this query on May 28" is a SQL query, not a guess.</td>
+      </tr>
+      <tr>
+        <td><strong>HITL interrupt/resume</strong></td>
+        <td>Graph pauses at Node 6, surfaces state to Gap Curator UI, accepts correction, resumes from saved checkpoint. Corrections stored. Native LangGraph — no custom plumbing needed.</td>
+      </tr>
+      <tr>
+        <td><strong>Streaming</strong></td>
+        <td>Real-time node-by-node output. UI can show "confidence updating from lab result" as it happens. Learning is visible, not hidden.</td>
+      </tr>
+      <tr>
+        <td><strong>State-based routing</strong></td>
+        <td>Confidence tiers drive routing. As a step's confidence improves over time, it stops routing to Fallback Agent — the graph self-optimises without any code change.</td>
+      </tr>
+    </table>
+
+    <span class="section-eye">The Self-Improving Loop</span>
+    <h2>Convergence Over Time</h2>
+
+    <div class="flow">
+<span class="label">Month 1:</span>  c_doc=0.6, c_gui=0.5, c_lab=None  <span class="arrow">→</span>  confidence=0.557 <span class="conf">[MED]</span>  <span class="c">  few-shot store: 0 examples</span>
+<span class="label">Month 2:</span>  3 lab runs pass  <span class="arrow">→</span>  c_lab=0.75  <span class="arrow">→</span>  confidence=0.645 <span class="conf">[MED]</span>  <span class="c">  step enters confirmed_examples</span>
+<span class="label">Month 3:</span>  EP1 patch → re-scrape → c_gui=0.85  <span class="arrow">→</span>  confidence=0.745 <span class="conf">[HIGH]</span>  <span class="c">  similar steps get few-shot boost</span>
+<span class="label">Month 4:</span>  5 lab runs, curator confirmed  <span class="arrow">→</span>  c_lab=0.92  <span class="arrow">→</span>  confidence=0.844 <span class="conf">[HIGH ⚔]</span>  <span class="c">  battle-tested</span>
+    </div>
+
+    <p>A new workflow that shares structural patterns with battle-tested steps benefits immediately from analogical learning. The engine does not need to re-derive every mapping from scratch — it reasons from precedent, exactly as a senior engineer would.</p>
+
+    <div class="box green">
+      <div class="box-label">Independent Assessment</div>
+      <p>Every confidence score, every learning event, every curator correction is stored with a timestamp, a source, and a reason. An independent assessor can query: <em>"Show me all steps where confidence changed between May 21 and June 21 — what caused each change?"</em> The answer is a SQL query over <code>confidence_score</code>, <code>execution_log</code>, <code>confirmed_examples</code>, and <code>query_log</code>. Nothing is hidden. Nothing is inferred from a black box. The system is accountable at every layer.</p>
+    </div>
+
+  </div><!-- end tab-learning -->
+
+  <hr class="rule">
+  <div class="footer">
+    XIQ → EP1 Intelligent Xformation Engine &nbsp;&bull;&nbsp; KhKLab &nbsp;&bull;&nbsp; May 21, 2026<br>
+    July 1, 2026: XIQ GUI retired &nbsp;&bull;&nbsp; Sprint B (Playwright scrape) is the critical path<br>
+    Branch: feature/xiq-ep1-intelligence-engine
+  </div>
+
+</div><!-- container -->
+
+<script>
+function showTab(name) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  event.currentTarget.classList.add('active');
+}
+</script>
+</body>
+</html>
