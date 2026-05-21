@@ -104,6 +104,7 @@ a { color: #1e40af; }
     <button class="tab-btn" onclick="showTab('agentic')">② Agentic Architecture</button>
     <button class="tab-btn" onclick="showTab('sprints')">③ Sprints &amp; Execution</button>
     <button class="tab-btn" onclick="showTab('validation')">④ Automated Validation</button>
+    <button class="tab-btn" onclick="showTab('learning')">⑤ Learning &amp; Growth</button>
   </div>
 
   <!-- ══════════════════════════════════════════════════════
@@ -270,7 +271,7 @@ a { color: #1e40af; }
       <div class="node-card">
         <div class="node-id">Node 4</div>
         <h4>EP1 Translator</h4>
-        <p>For each XIQ step: (1) pgvector search over 14 PDFs → c_doc score; (2) Neo4j lookup → does EP1 graph have this node? → c_gui score. Feature Comparison PDF queried first — highest-weight RAG source.</p>
+        <p>For each XIQ step: (1) pgvector search over 14 PDFs → c_doc score; (2) Neo4j lookup → c_gui score; (3) <strong>pgvector search on confirmed_examples → top-5 similar confirmed mappings → injected as few-shot context into Claude prompt.</strong> This is the learning mechanism — translations improve as the example store grows.</p>
       </div>
       <div class="node-card">
         <div class="node-id">Node 5</div>
@@ -305,7 +306,7 @@ a { color: #1e40af; }
       <div class="node-card">
         <div class="node-id">Node 11</div>
         <h4>Feedback Loop</h4>
-        <p>Processes Execution Agent result. Success: <code>c_lab += 0.1</code> (capped at 1.0), re-write confidence row in PostgreSQL. Failure: auto-create gap entry in Gaps Register + flag step as BROKEN in Neo4j + notify Gap Curator agent.</p>
+        <p>Processes Execution Agent result. <strong>Success:</strong> c_lab updated via weighted running average (converges to true reliability over N runs) → write to <code>confidence_score</code> → <strong>write to <code>confirmed_examples</code> (source=lab)</strong> → log to <code>query_log</code>. <strong>Failure:</strong> c_lab drops → auto-create gap → flag Neo4j node BROKEN → notify Gap Curator → Gap Curator correction written to <code>confirmed_examples</code> (source=curator, weight=2×).</p>
       </div>
     </div>
 
@@ -422,11 +423,13 @@ a { color: #1e40af; }
 
     <div class="sprint-card">
       <h4>Sprint D — LangGraph Agent Coding</h4>
-      <div class="sprint-meta"><span class="badge blue">Est: 5–7 days</span> &nbsp;Build nodes 0–11 + 5 supporting agents</div>
+      <div class="sprint-meta"><span class="badge blue">Est: 5–7 days</span> &nbsp;Build nodes 0–11 + 5 supporting agents + learning infrastructure</div>
       <ul>
+        <li>Add <code>confirmed_examples</code> table (10th table) + <code>query_log</code> table (11th table) via new Alembic migration</li>
+        <li>Add <code>AsyncPostgresSaver</code> checkpointer to LangGraph compiled graph — full state persistence</li>
         <li>Start with Node 1 (Intent Parser) + Node 4 (EP1 Translator) — highest value, testable standalone</li>
         <li>Node 1: pgvector semantic search + query type classifier (regex + LLM fallback)</li>
-        <li>Node 4: pgvector doc search (c_doc) + Neo4j node lookup (c_gui) → confidence per step</li>
+        <li>Node 4 (extended): pgvector doc search (c_doc) + Neo4j lookup (c_gui) + <strong>pgvector search on confirmed_examples → inject top-5 as few-shot context</strong></li>
         <li>Node 5: confidence aggregator — handles missing c_lab gracefully (renormalise weights)</li>
         <li>Node 6: gap detector with threshold config: GAP_THRESHOLD=0.40, WARN_THRESHOLD=0.70</li>
         <li>Nodes 2, 3, 7, 8: workflow builder + version resolver + nav path generator + formatter</li>
@@ -602,6 +605,189 @@ a { color: #1e40af; }
     </table>
 
   </div><!-- end tab-validation -->
+
+  <!-- ══════════════════════════════════════════════════════
+       TAB 5 — LEARNING & GROWTH
+  ══════════════════════════════════════════════════════ -->
+  <div id="tab-learning" class="tab-panel">
+
+    <span class="section-eye">Design Principle</span>
+    <h2>The Engine Must Learn — Not Just Serve</h2>
+    <p>A system that returns the same answer in month 6 as it did in month 1 is not intelligent — it is a static reference. EP1 ships patches every 6 weeks. Extreme publishes new documentation. Engineers validate configurations against real hardware. Every one of these events contains signal. The engine must absorb that signal and become more accurate over time.</p>
+    <p>Learning operates at four distinct timescales, each with its own mechanism. None of them require retraining a model. All of them are implemented through data, graph updates, and LangGraph's native persistence features.</p>
+
+    <div class="box purple">
+      <div class="box-label">Auditability Requirement</div>
+      <p>Every learned fact must be traceable. When confidence changes, the reason must be queryable: <em>"This step's c_lab moved from 0.3 to 0.7 because the Execution Agent ran it successfully 4 times between May 21 and June 10, with CLI output saved in execution_log rows 47, 52, 61, 68."</em> No black-box learning. Every update has a source, a timestamp, and a human-readable reason.</p>
+    </div>
+
+    <span class="section-eye">Four Learning Mechanisms</span>
+    <h2>How the Engine Grows</h2>
+
+    <table>
+      <tr><th>Mechanism</th><th>Timescale</th><th>Trigger</th><th>What Updates</th><th>LangGraph Feature</th></tr>
+      <tr>
+        <td><strong>1. Empirical Confidence</strong></td>
+        <td>Every lab run</td>
+        <td>Execution Agent (Node 10) completes</td>
+        <td>c_lab per step → confidence_score table → tier reclassification</td>
+        <td>Node 11 Feedback Loop</td>
+      </tr>
+      <tr>
+        <td><strong>2. Knowledge Graph Growth</strong></td>
+        <td>Every EP1 patch</td>
+        <td>Version Manager triggers diff-scrape</td>
+        <td>Neo4j: new nodes, deprecated nodes, updated nav paths → c_gui recalculated</td>
+        <td>Support Agent 4 (Version Manager)</td>
+      </tr>
+      <tr>
+        <td><strong>3. Analogical Learning</strong></td>
+        <td>Continuous</td>
+        <td>Any confirmed mapping (lab or curator)</td>
+        <td>confirmed_examples store → Node 4 few-shot context gets richer</td>
+        <td>pgvector similarity + Node 4 extension</td>
+      </tr>
+      <tr>
+        <td><strong>4. Human-in-the-Loop Correction</strong></td>
+        <td>On demand</td>
+        <td>Gap Curator reviews staged gap</td>
+        <td>Corrected nav path → Neo4j + confirmed_examples (weight 2×) + gap closed</td>
+        <td>LangGraph HITL pause/resume + checkpointer</td>
+      </tr>
+    </table>
+
+    <h3>Mechanism 1 — Empirical Confidence (Lab-Driven)</h3>
+    <p>Node 11 currently does <code>c_lab += 0.1</code> per successful run. The full implementation uses a weighted running average: after N successful runs the score converges toward the true reliability of the step. Failures pull it back. The formula:</p>
+    <pre>
+<span class="c"># c_lab converges to true reliability over N runs</span>
+<span class="w">c_lab_new = (c_lab_prev * (n-1) + result) / n</span>
+<span class="c"># result = 1.0 on pass, 0.0 on fail</span>
+<span class="c"># after 5 passes: c_lab ≈ 1.0  |  after 1 fail from 0.8: c_lab drops to 0.64</span>
+
+<span class="c"># "Battle-tested" threshold: 5+ successful runs with c_lab ≥ 0.90</span>
+<span class="c"># UI shows ⚔ badge — independently validated, not just documented</span></pre>
+
+    <h3>Mechanism 2 — Knowledge Graph Growth (Version-Driven)</h3>
+    <p>The Neo4j graph is the living map. When EP1 25.9.2 ships:</p>
+    <ol>
+      <li>Version Manager registers new version → triggers Playwright diff-scrape</li>
+      <li>Scraper runs against EP1 25.9.2 → captures all screens</li>
+      <li>Diff engine: compares every node between 25.9.0 and 25.9.2 → flags RESTRUCTURED (nav path changed), ADDED (new feature), REMOVED (feature dropped)</li>
+      <li>Neo4j updated: old nodes deprecated, new nodes added, RESTRUCTURED edges drawn</li>
+      <li>c_gui reset to 0.0 on changed nodes — confidence must be re-earned</li>
+      <li>Users on 25.9.2 version pair immediately see updated nav paths; users on 25.9.0 pair unaffected</li>
+    </ol>
+    <p>The graph never stagnates. Each version is a snapshot; the engine holds all snapshots simultaneously and serves the right one based on session context.</p>
+
+    <h3>Mechanism 3 — Analogical Learning (Few-Shot Accumulation)</h3>
+    <p>This is the most powerful learning mechanism. Node 4 (EP1 Translator) currently does a pgvector search over RAG + a Neo4j lookup per step. Extended Node 4 adds a third retrieval: the <strong>Confirmed Examples Store</strong>.</p>
+
+    <div class="flow">
+<span class="label">New XIQ step arrives at Node 4:</span> "Configure → Network Policies → [policy] → SSIDs → [ssid] → User Auth → CWP → Self-Reg"
+       <span class="arrow">│</span>
+       <span class="arrow">▼</span>
+<span class="agent">Step 1: embed XIQ step description</span>  <span class="c">→ 1536-dim vector</span>
+       <span class="arrow">▼</span>
+<span class="agent">Step 2: pgvector search on confirmed_examples</span>  <span class="c">→ top-5 most similar confirmed XIQ→EP1 mappings</span>
+       <span class="arrow">│</span>
+       <span class="arrow">│  Example hit: "Configure → [policy] → SSIDs → [ssid] → User Auth → PPSK"</span>
+       <span class="arrow">│              → EP1: "Configure → [policy] → Wireless → SSIDs → [ssid] → Auth → PPSK"</span>
+       <span class="arrow">│              → confirmed by lab, c_lab=0.92, source=lab, run=5x</span>
+       <span class="arrow">▼</span>
+<span class="agent">Step 3: inject as few-shot context into Claude prompt</span>
+       <span class="c">  "Here are 5 confirmed XIQ→EP1 mappings structurally similar to this step.</span>
+       <span class="c">   Use their patterns to infer the EP1 equivalent of the new step."</span>
+       <span class="arrow">▼</span>
+<span class="agent">Step 4: Claude generates EP1 nav path</span>  <span class="c">→ grounded in empirical evidence, not just documentation</span>
+    </div>
+
+    <p>As more workflows are validated — in the lab, by curators, by Playwright scrapes — the example store grows. Month 3 Node 4 is measurably better than Month 1 Node 4 on unseen workflows. <strong>This is learning by analogy — the same mechanism expert engineers use.</strong></p>
+
+    <h3>Mechanism 4 — Human-in-the-Loop Correction (LangGraph Native)</h3>
+    <p>LangGraph's HITL feature allows the graph to pause at any node, surface state to a human, accept a correction, and resume from the saved checkpoint. This is not a workaround — it is a first-class LangGraph capability designed exactly for this use case.</p>
+
+    <div class="flow">
+<span class="label">Gap Detector (Node 6) flags confidence=0.28</span>
+       <span class="arrow">▼</span>
+<span class="store">State saved to PostgreSQL checkpointer</span>  <span class="c">(full XformState at this point in the run)</span>
+       <span class="arrow">▼</span>
+<span class="agent">Gap Curator UI surfaces the step:</span>
+  <span class="c">  "Node 4 proposed: Configure → [policy] → Wired → Switch Templates → VLANs"</span>
+  <span class="c">  "Confidence: 0.28 (LOW). Is this correct?"</span>
+       <span class="arrow">│</span>
+       <span class="arrow">├── CORRECT  ──▶</span> <span class="store">confirmed_examples.add(source='curator', weight=1.0)</span>  <span class="c">→ resume</span>
+       <span class="arrow">│</span>
+       <span class="arrow">└── WRONG ──▶</span> Curator types corrected nav path
+                     <span class="arrow">▼</span>
+               <span class="store">confirmed_examples.add(corrected_path, source='curator', weight=2.0)</span>
+               <span class="store">Neo4j: update node nav_path</span>
+               <span class="store">gap.status = 'resolved' or 'workaround'</span>
+               <span class="agent">Graph resumes from checkpointed state with corrected path</span>
+    </div>
+
+    <div class="box blue">
+      <div class="box-label">Why curator corrections get weight=2.0</div>
+      <p>A human expert saying "this is wrong, the correct path is X" is the highest-quality signal in the system. It outweighs a PDF citation (c_doc) and outweighs a Playwright scrape (c_gui) because it represents ground truth validated by domain knowledge. The 2× weight ensures this signal propagates strongly into future translations via few-shot retrieval.</p>
+    </div>
+
+    <span class="section-eye">New Data Structures</span>
+    <h2>Two New Tables for Learning</h2>
+
+    <table>
+      <tr><th>Table</th><th>Key Columns</th><th>Purpose</th></tr>
+      <tr>
+        <td><code>confirmed_examples</code></td>
+        <td>id, xiq_screen_id, ep1_screen_id, xiq_nav_path, ep1_nav_path, confidence, source (lab|curator|scrape), weight (1.0 default, 2.0 for curator), embedding vector(1536), version_pair, created_at</td>
+        <td>Few-shot context store for Node 4. pgvector similarity search retrieves top-5 most similar confirmed mappings for each new XIQ step being translated.</td>
+      </tr>
+      <tr>
+        <td><code>query_log</code></td>
+        <td>id, intent, query_type, version_pair, confidence_avg, gap_count, user_feedback (null|accepted|flagged|corrected), correction_note, timestamp</td>
+        <td>Audit trail + pattern analysis. Enables: which workflows are queried most (prioritise for Sprint B scraping), which steps most often fail (prioritise Gap Curator), usage-driven confidence prioritisation.</td>
+      </tr>
+    </table>
+
+    <span class="section-eye">LangGraph Features Used</span>
+    <h2>Why LangGraph Was the Right Choice for This</h2>
+
+    <table>
+      <tr><th>LangGraph Feature</th><th>How It Enables Learning</th></tr>
+      <tr>
+        <td><strong>AsyncPostgresSaver checkpointer</strong></td>
+        <td>Every run's full XformState persisted to PostgreSQL after each node. Full lineage of every inference — queryable, replayable, auditable. "Show me exactly what Node 4 returned for this query on May 28" is a SQL query, not a guess.</td>
+      </tr>
+      <tr>
+        <td><strong>HITL interrupt/resume</strong></td>
+        <td>Graph pauses at Node 6, surfaces state to Gap Curator UI, accepts correction, resumes from saved checkpoint. Corrections stored. Native LangGraph — no custom plumbing needed.</td>
+      </tr>
+      <tr>
+        <td><strong>Streaming</strong></td>
+        <td>Real-time node-by-node output. UI can show "confidence updating from lab result" as it happens. Learning is visible, not hidden.</td>
+      </tr>
+      <tr>
+        <td><strong>State-based routing</strong></td>
+        <td>Confidence tiers drive routing. As a step's confidence improves over time, it stops routing to Fallback Agent — the graph self-optimises without any code change.</td>
+      </tr>
+    </table>
+
+    <span class="section-eye">The Self-Improving Loop</span>
+    <h2>Convergence Over Time</h2>
+
+    <div class="flow">
+<span class="label">Month 1:</span>  c_doc=0.6, c_gui=0.5, c_lab=None  <span class="arrow">→</span>  confidence=0.557 <span class="conf">[MED]</span>  <span class="c">  few-shot store: 0 examples</span>
+<span class="label">Month 2:</span>  3 lab runs pass  <span class="arrow">→</span>  c_lab=0.75  <span class="arrow">→</span>  confidence=0.645 <span class="conf">[MED]</span>  <span class="c">  step enters confirmed_examples</span>
+<span class="label">Month 3:</span>  EP1 patch → re-scrape → c_gui=0.85  <span class="arrow">→</span>  confidence=0.745 <span class="conf">[HIGH]</span>  <span class="c">  similar steps get few-shot boost</span>
+<span class="label">Month 4:</span>  5 lab runs, curator confirmed  <span class="arrow">→</span>  c_lab=0.92  <span class="arrow">→</span>  confidence=0.844 <span class="conf">[HIGH ⚔]</span>  <span class="c">  battle-tested</span>
+    </div>
+
+    <p>A new workflow that shares structural patterns with battle-tested steps benefits immediately from analogical learning. The engine does not need to re-derive every mapping from scratch — it reasons from precedent, exactly as a senior engineer would.</p>
+
+    <div class="box green">
+      <div class="box-label">Independent Assessment</div>
+      <p>Every confidence score, every learning event, every curator correction is stored with a timestamp, a source, and a reason. An independent assessor can query: <em>"Show me all steps where confidence changed between May 21 and June 21 — what caused each change?"</em> The answer is a SQL query over <code>confidence_score</code>, <code>execution_log</code>, <code>confirmed_examples</code>, and <code>query_log</code>. Nothing is hidden. Nothing is inferred from a black box. The system is accountable at every layer.</p>
+    </div>
+
+  </div><!-- end tab-learning -->
 
   <hr class="rule">
   <div class="footer">
