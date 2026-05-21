@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EOD — May 21, 2026 | KhKLab EP1 Zero-CLI Deploy</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Libre+Franklin:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Libre Baskerville', Georgia, serif; background: #fff; color: #111; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 48px 24px 72px; }
+.container { max-width: 900px; width: 100%; }
+hr.rule-top  { border: none; border-top: 3px solid #111; margin-bottom: 6px; }
+hr.rule-thin { border: none; border-top: 1px solid #111; margin-bottom: 18px; }
+hr.rule      { border: none; border-top: 1px solid #E2E2E2; margin: 36px 0; }
+.kicker { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.22em; color: #666; display: block; text-align: center; margin-bottom: 6px; }
+h1 { font-family: 'Libre Baskerville', Georgia, serif; font-size: 2.1rem; font-weight: 700; line-height: 1.12; margin-bottom: 12px; text-align: center; }
+.subtitle { font-family: 'Libre Baskerville', Georgia, serif; font-size: 1rem; font-style: italic; color: #444; text-align: center; line-height: 1.8; margin-bottom: 20px; border-bottom: 1px solid #E2E2E2; padding-bottom: 24px; }
+.byline { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.72rem; color: #666; text-align: center; margin-bottom: 20px; }
+.section-eye { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.18em; color: #065f46; display: block; margin: 36px 0 8px; border-bottom: 2px solid #065f46; padding-bottom: 5px; }
+h2 { font-family: 'Libre Baskerville', Georgia, serif; font-size: 1.25rem; font-weight: 700; margin-bottom: 10px; }
+h3 { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #065f46; margin: 20px 0 8px; }
+p { font-size: 0.96rem; line-height: 1.85; color: #222; margin-bottom: 12px; }
+ul, ol { padding-left: 22px; margin-bottom: 14px; }
+li { font-size: 0.94rem; line-height: 1.8; color: #222; margin-bottom: 4px; }
+code { font-family: 'SF Mono', Consolas, monospace; font-size: 0.8rem; background: #F4F4F4; border: 1px solid #E2E2E2; padding: 1px 5px; border-radius: 3px; color: #065f46; }
+pre { font-family: 'SF Mono', Consolas, monospace; font-size: 0.78rem; background: #1a1a2e; color: #a8ff78; padding: 16px 18px; border-radius: 4px; overflow-x: auto; margin: 12px 0 16px; line-height: 1.65; }
+table { width: 100%; border-collapse: collapse; margin: 12px 0 20px; font-size: 0.86rem; }
+th { background: #F0FFF4; font-family: 'Libre Franklin', Arial, sans-serif; font-weight: 700; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.08em; color: #065f46; padding: 8px 10px; border: 1px solid #A7F3D0; text-align: left; }
+td { padding: 8px 10px; border: 1px solid #E2E2E2; vertical-align: top; line-height: 1.6; }
+tr:nth-child(even) td { background: #FAFAFA; }
+.box { border-left: 3px solid #065f46; background: #F0FFF4; padding: 14px 16px; margin: 14px 0; border-radius: 0 4px 4px 0; }
+.box.warn { border-left-color: #F57F17; background: #FFFBF0; }
+.box.red  { border-left-color: #C62828; background: #FCEEEE; }
+.box.blue { border-left-color: #1565C0; background: #EFF5FF; }
+.box p { margin: 0; font-size: 0.91rem; line-height: 1.75; }
+.box p + p { margin-top: 8px; }
+.box-label { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: #065f46; margin-bottom: 6px; }
+.box.warn .box-label { color: #E65100; }
+.box.red .box-label  { color: #C62828; }
+.box.blue .box-label { color: #1565C0; }
+.gap-badge { display: inline-block; font-family: 'Libre Franklin', sans-serif; font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; background: #FEE2E2; color: #991B1B; padding: 2px 7px; border-radius: 10px; margin-right: 6px; }
+.done-badge { display: inline-block; font-family: 'Libre Franklin', sans-serif; font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; background: #D1FAE5; color: #065f46; padding: 2px 7px; border-radius: 10px; margin-right: 6px; }
+.tbd-badge  { display: inline-block; font-family: 'Libre Franklin', sans-serif; font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; background: #FEF3C7; color: #92400E; padding: 2px 7px; border-radius: 10px; margin-right: 6px; }
+.toc { background: #F0FFF4; border: 1px solid #A7F3D0; border-left: 4px solid #065f46; border-radius: 4px; padding: 14px 18px; margin: 24px 0; }
+.toc-title { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.15em; color: #065f46; margin-bottom: 8px; }
+.toc a { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.84rem; color: #065f46; text-decoration: none; display: inline-block; margin-right: 18px; margin-bottom: 4px; }
+.toc a:hover { text-decoration: underline; }
+.footer { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.68rem; color: #999; text-align: center; line-height: 1.9; margin-top: 8px; }
+a { color: #065f46; }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <hr class="rule-top">
+  <span class="kicker">KhKLab &nbsp;&bull;&nbsp; Extreme Platform One &nbsp;&bull;&nbsp; Stage 2 Zero-CLI Deploy &nbsp;&bull;&nbsp; May 21, 2026</span>
+  <hr class="rule-thin">
+
+  <h1>EP1 Zero-CLI Lab Deploy<br>Three Real Gaps Found</h1>
+  <p class="subtitle">Stage 2 of the KhKLab two-SSID deployment — SW1 fully configured from EP1 with no console CLI,<br>three production gaps discovered and documented, AP1 policy pending after lunch.</p>
+  <div class="byline">Thursday May 21, 2026 &nbsp;&mdash;&nbsp; Khursheed Khan &nbsp;&mdash;&nbsp; KhKLab 5320-16P-2MXT-2X + AP3000</div>
+
+  <div class="toc">
+    <div class="toc-title">In This Report</div>
+    <a href="#accomplished">Accomplished</a>
+    <a href="#sw1">SW1 Verified Config</a>
+    <a href="#gaps">Gaps G-01 / G-02 / G-03</a>
+    <a href="#ap1">AP1 Policy — TBD</a>
+    <a href="#sprint-a">Sprint A — Agentic Architecture</a>
+    <a href="#lessons">Lessons Learned</a>
+    <a href="#tomorrow">Tomorrow</a>
+    <a href="#urls">URLs &amp; Files</a>
+  </div>
+
+  <!-- ═══ ACCOMPLISHED ═══ -->
+  <span class="section-eye" id="accomplished">Accomplished</span>
+  <h2>What Got Done Today</h2>
+
+  <table>
+    <tr><th>Item</th><th>Result</th></tr>
+    <tr><td>SW1 factory reset</td><td><span class="done-badge">Done</span> <code>unconfigure switch all</code> — confirmed G-01: no EP1 equivalent for EXOS switch reset</td></tr>
+    <tr><td>AP1 factory reset</td><td><span class="done-badge">Done</span> EP1 → Devices → Actions → Factory Reset (correct path — no physical button needed)</td></tr>
+    <tr><td>SW1 onboarded to EP1</td><td><span class="done-badge">Done</span> ZTP → claimed → policy assigned</td></tr>
+    <tr><td>EP1 switch policy built</td><td><span class="done-badge">Done</span> <code>SW1_EP1_VLAN5-10_Employee-Guest</code> — VLANs, IPs, ports, DHCP pushed from EP1</td></tr>
+    <tr><td>SW1 fully verified</td><td><span class="done-badge">Done</span> show vlan + show dhcp-server both clean</td></tr>
+    <tr><td>3 gaps documented</td><td><span class="done-badge">Done</span> G-01, G-02, G-03 logged in xiq-ep1-transition.html and pushed to GitHub Pages</td></tr>
+    <tr><td>AP1 network policy</td><td><span class="tbd-badge">After Lunch</span> KhKLab_AP1_Policy — Employee PPSK + Guest CWP</td></tr>
+    <tr><td>E2E client test</td><td><span class="tbd-badge">After Lunch</span> Employee → 10.5.0.x · Guest → 10.10.0.x post-CWP</td></tr>
+  </table>
+
+  <!-- ═══ SW1 VERIFIED CONFIG ═══ -->
+  <span class="section-eye" id="sw1">SW1 Verified Config</span>
+  <h2>SW1 — Full EP1 Push, Zero CLI</h2>
+
+  <p>Policy <code>SW1_EP1_VLAN5-10_Employee-Guest</code> pushed from EP1. Everything below confirmed via <code>show vlan</code> and <code>show dhcp-server</code>.</p>
+
+  <pre>5320-16P-2MXT-2X-SwitchEngine # show vlan
+Name            VID  Addr              Flags   Ports  Router
+Default         1    192.168.0.28/24   -----   1/20   VR-Default
+VLAN5_Employee  5    10.5.0.1/24       f----   0/1    VR-Default
+VLAN10_Guest    10   10.10.0.1/24      f----   0/1    VR-Default
+f = IP Forwarding Enabled (pushed by EP1 natively — better than XIQ)</pre>
+
+  <pre>5320-16P-2MXT-2X-SwitchEngine # show dhcp-server
+VLAN "VLAN5_Employee":
+    DHCP Address Range   : 10.5.0.10 -> 10.5.0.254
+    Default Gateway      : 10.5.0.1
+    Primary DNS          : 8.8.8.8   Secondary DNS: 1.1.1.1
+    Ports DHCP Enabled   : 3  ✓
+
+VLAN "VLAN10_Guest":
+    DHCP Address Range   : 10.10.0.10 -> 10.10.0.254
+    Default Gateway      : 10.10.0.1
+    Primary DNS          : 8.8.8.8   Secondary DNS: 1.1.1.1
+    Ports DHCP Enabled   : 3  ✓</pre>
+
+  <h3>What EP1 Pushed Natively vs Supplemental CLI</h3>
+  <table>
+    <tr><th>Config Item</th><th>How It Got There</th><th>Notes</th></tr>
+    <tr><td>VLAN creation</td><td>EP1 template</td><td>No <code>create vlan</code> in Supplemental CLI needed</td></tr>
+    <tr><td>SVI IP addresses</td><td>EP1 template</td><td>10.5.0.1/24 and 10.10.0.1/24</td></tr>
+    <tr><td>IP forwarding (flag f)</td><td>EP1 template</td><td><strong>EP1 improvement over XIQ</strong> — XIQ did not push this</td></tr>
+    <tr><td>Port 3 tagged VLANs</td><td>EP1 template</td><td>VLAN5_Employee + VLAN10_Guest tagged</td></tr>
+    <tr><td>DHCP pools + DNS + GW</td><td>Supplemental CLI</td><td>Idempotent — safe to re-push</td></tr>
+    <tr><td><code>enable dhcp ports 3</code></td><td>Supplemental CLI</td><td>First push only — remove before re-push (G-02)</td></tr>
+    <tr><td>Underscore in VLAN names</td><td>EP1 template</td><td><strong>EP1 fixed XIQ bug</strong> — VLAN5_Employee preserved intact</td></tr>
+  </table>
+
+  <div class="box">
+    <p class="box-label">First Push Failure — Root Cause</p>
+    <p>Initial Supplemental CLI included <code>create vlan</code> and <code>configure vlan ipaddress</code>. EP1 creates VLANs via its own template mechanism first, then runs Supplemental CLI — so <code>create vlan</code> in Supplemental CLI hit an "already exists" error and failed the push. Fix: Supplemental CLI scope is DHCP-only. EP1 handles everything else natively.</p>
+  </div>
+
+  <!-- ═══ GAPS ═══ -->
+  <span class="section-eye" id="gaps">Gaps Discovered — G-01, G-02, G-03</span>
+  <h2>Three Production Gaps Found in Live Lab</h2>
+
+  <div class="box red">
+    <p class="box-label"><span class="gap-badge">G-01</span> Bin #1 — Switch Factory Reset</p>
+    <p><strong>EP1 cannot factory reset EXOS switches.</strong> EP1 can reboot a switch remotely but cannot wipe config. AP factory reset IS available (EP1 → Devices → AP → Actions → Factory Reset). EXOS requires console/SSH: <code>unconfigure switch all</code>.</p>
+    <p style="margin-top:8px"><strong>Client advice:</strong> Always retain console/SSH access to EXOS switches. Switch lifecycle management requires CLI for factory reset regardless of EP1 access level.</p>
+  </div>
+
+  <div class="box warn">
+    <p class="box-label"><span class="gap-badge">G-02</span> Bin #6/#9 — DHCP Server Activation Not Idempotent</p>
+    <p><strong><code>enable dhcp ports</code> cannot be in a reusable Supplemental CLI template.</strong> Works on first push (fresh factory reset). On re-push, EXOS throws error — push hangs. Must be removed from template before any policy re-push, or run manually once via SSH post-deploy.</p>
+    <p style="margin-top:8px"><strong>Client advice:</strong> Two options — (1) include for initial deploy, remove before re-push; (2) run manually once after first push. Document this in every client handoff.</p>
+  </div>
+
+  <div class="box red">
+    <p class="box-label"><span class="gap-badge">G-03</span> Bin #8 — EP1 Disables Ports on Policy Push</p>
+    <p><strong>EP1 switch policy push administratively disabled Port 3</strong> — the AP-facing trunk port. AP1 lost link, DHCP, IP, and CAPWAP tunnel. Appeared offline in EP1 despite white LED on physical device. Root cause: EP1 port template defaulted to admin-disabled for ports not explicitly set to enabled.</p>
+    <p style="margin-top:8px"><strong>Fix:</strong> In EP1 switch policy port assignments, explicitly set <strong>Admin Enabled</strong> on every AP-facing and uplink port. After any switch policy push, verify with <code>show ports X information detail</code> — confirm <code>Admin state: Enabled</code>.</p>
+    <p style="margin-top:8px"><strong>Recovery CLI used:</strong> <code>enable port 3</code> then <code>save configuration</code></p>
+  </div>
+
+  <!-- ═══ AP1 POLICY TBD ═══ -->
+  <span class="section-eye" id="ap1">AP1 Network Policy — After Lunch</span>
+  <h2>KhKLab_AP1_Policy <span class="tbd-badge">TBD</span></h2>
+
+  <p>AP1 (AH-556680, 192.168.0.12, IQ Engine 10.8r6) is online and connected to EP1. Network policy not yet built or pushed.</p>
+
+  <table>
+    <tr><th>SSID</th><th>Security</th><th>VLAN</th><th>Band</th><th>Status</th></tr>
+    <tr><td><code>KhKLab_Employee</code></td><td>WPA2/WPA3 + PPSK</td><td>VLAN5_Employee</td><td>5 GHz only</td><td><span class="tbd-badge">TBD</span></td></tr>
+    <tr><td><code>KhKLab_Guest</code></td><td>Enhanced Open + CWP</td><td>VLAN10_Guest</td><td>Dual band</td><td><span class="tbd-badge">TBD</span></td></tr>
+  </table>
+
+  <div class="box blue">
+    <p class="box-label">After Lunch — Resume Steps</p>
+    <p>1. EP1 → Configure → Network Policies → + Add → <code>KhKLab_AP1_Policy</code><br>
+    2. Add SSID KhKLab_Employee → WPA2/WPA3 PPSK → VLAN5_Employee → 5 GHz only<br>
+    3. Add SSID KhKLab_Guest → Enhanced Open + CWP → VLAN10_Guest → dual band<br>
+    4. Assign AP1 → push → verify port Admin Enabled in EP1 port template first (G-03 lesson)<br>
+    5. E2E test: Employee client → 10.5.0.x · Guest client → 10.10.0.x post-CWP</p>
+  </div>
+
+  <!-- ═══ SPRINT A ═══ -->
+  <span class="section-eye" id="sprint-a">XIQ → EP1 Sprint A — Agentic Architecture Gap</span>
+  <h2>The Systematic Approach Has Not Started</h2>
+
+  <p>The <a href="xiq-ep1-transition.html#engine">Navigation Intelligence Engine</a> was designed on May 15 as a full agentic pipeline to systematically map every XIQ screen to EP1. Sprint A was scheduled May 19–26. It has not been started.</p>
+
+  <h3>What Was Designed</h3>
+  <table>
+    <tr><th>Component</th><th>Purpose</th><th>Status</th></tr>
+    <tr><td><strong>Playwright GUI Cataloger</strong></td><td>Log into XIQ + EP1, scrape every screen — every button, dropdown, form field, table header, screenshot → <code>gui_baseline_xiq.json</code> + <code>gui_baseline_ep1.json</code></td><td><span class="tbd-badge">Not Started</span></td></tr>
+    <tr><td><strong>Cross-Validation Agent</strong></td><td>Diff the two JSONs — find every XIQ item with no EP1 equivalent</td><td><span class="tbd-badge">Not Started</span></td></tr>
+    <tr><td><strong>RAG Corpus</strong></td><td>All EP1-Docs + EP1 Security-UZTNA + Feature Comparison PDFs ingested as vector store</td><td><span class="tbd-badge">Not Started</span></td></tr>
+    <tr><td><strong>11-node LangGraph Engine</strong></td><td>Intake → XIQ Navigator → EP1 Navigator → Confidence Agent → Gap Detector → Response Synthesizer</td><td><span class="tbd-badge">Not Started</span></td></tr>
+    <tr><td><strong>FastAPI + Railway deploy</strong></td><td>REST API exposing the engine: POST /map → returns EP1 equivalent + confidence + gaps</td><td><span class="tbd-badge">Not Started</span></td></tr>
+  </table>
+
+  <h3>What Manual Lab Gave Us Today</h3>
+  <p>Three gaps (G-01/G-02/G-03) that a doc scraper would likely have <em>missed</em> — because they only surface when you actually push a policy to real hardware. Manual lab and agentic scraping are complementary, not substitutes.</p>
+
+  <div class="box warn">
+    <p class="box-label">Sprint A Must Start Next Session</p>
+    <p>The 31-bin EP1 Location column is entirely blank. Without Sprint A, the transition guide has no systematic coverage — only the gaps we happen to discover by hand. <strong>Karl's July 1 deadline is 41 days away.</strong> Sprint A takes 6 days. It must start immediately.</p>
+    <p style="margin-top:8px">Reference PDFs catalogued today and ready to ingest: <a href="xiq-ep1-transition.html#engine">xiq-ep1-transition.html#engine</a></p>
+  </div>
+
+  <!-- ═══ LESSONS ═══ -->
+  <span class="section-eye" id="lessons">Lessons Learned</span>
+  <h2>Six Things Learned Today</h2>
+
+  <ol>
+    <li><strong>EP1 factory resets APs from UI</strong> — Monitor → Devices → AP → Actions → Factory Reset. No physical button needed. Physical pin is only needed when EP1 is unreachable.</li>
+    <li><strong>EP1 cannot factory reset EXOS switches</strong> — CLI only. Always keep console/SSH credentials in client handoff.</li>
+    <li><strong>EP1 natively enables IP forwarding</strong> on VLAN SVIs — XIQ did not. The <code>f</code> flag appears without any CLI.</li>
+    <li><strong>EP1 preserves underscores in VLAN names</strong> — <code>VLAN5_Employee</code> stays intact. XIQ used to silently drop underscores (<code>Guest_100</code> → <code>Guest100</code>).</li>
+    <li><strong>Supplemental CLI scope is narrower than XIQ</strong> — EP1 handles VLAN creation, IPs, ports, ipforwarding natively. Supplemental CLI = DHCP pools only.</li>
+    <li><strong>After SSH key changes</strong> (factory reset): <code>ssh-keygen -R &lt;ip&gt;</code> clears the stale host key, then reconnect normally.</li>
+  </ol>
+
+  <!-- ═══ TOMORROW ═══ -->
+  <span class="section-eye" id="tomorrow">Tomorrow</span>
+  <h2>Next Session Priorities</h2>
+
+  <table>
+    <tr><th>Priority</th><th>Task</th><th>Notes</th></tr>
+    <tr><td>1</td><td>Build + push <code>KhKLab_AP1_Policy</code></td><td>Employee PPSK VLAN5_Employee + Guest CWP VLAN10_Guest · check port Admin Enabled</td></tr>
+    <tr><td>2</td><td>E2E client validation</td><td>Employee → 10.5.0.x · Guest → 10.10.0.x post-CWP</td></tr>
+    <tr><td>3</td><td>Fix Port 3 in EP1 switch template</td><td>Set Admin Enabled to prevent G-03 on re-push</td></tr>
+    <tr><td>4</td><td><strong>Start Sprint A</strong></td><td>Create GitHub repo, Playwright scraper, RAG corpus ingest — 41 days to July 1</td></tr>
+    <tr><td>5</td><td>Wire EP1 reference PDFs into #engine section</td><td>Copy to <code>ref/ep1/</code>, link in xiq-ep1-transition.html#engine</td></tr>
+  </table>
+
+  <!-- ═══ URLs ═══ -->
+  <span class="section-eye" id="urls">URLs &amp; Files</span>
+  <h2>Reference Links</h2>
+
+  <table>
+    <tr><th>Resource</th><th>Link</th></tr>
+    <tr><td>XIQ → EP1 Transition Guide</td><td><a href="xiq-ep1-transition.html">xiq-ep1-transition.html</a></td></tr>
+    <tr><td>Gaps Register (G-01/G-02/G-03)</td><td><a href="xiq-ep1-transition.html#gaps">xiq-ep1-transition.html#gaps</a></td></tr>
+    <tr><td>Engine Sprint Plan</td><td><a href="xiq-ep1-transition.html#engine">xiq-ep1-transition.html#engine</a></td></tr>
+    <tr><td>GE + AirDefense Study Block</td><td><a href="ge-ad-study-block.html">ge-ad-study-block.html</a></td></tr>
+    <tr><td>May 20 EOD</td><td><a href="session_summary_20260520.html">session_summary_20260520.html</a></td></tr>
+    <tr><td>EP1 Reference PDFs</td><td>/Users/khukhan/Downloads/EP1 and Other Items for Migration/</td></tr>
+    <tr><td>SW1 IP</td><td>192.168.0.28</td></tr>
+    <tr><td>AP1 IP</td><td>192.168.0.12 (AH-556680, IQ Engine 10.8r6)</td></tr>
+  </table>
+
+  <hr class="rule">
+  <p class="footer">
+    KhKLab &bull; EP1 Zero-CLI Deploy &bull; May 21, 2026<br>
+    SW1: 5320-16P-2MXT-2X-SwitchEngine &bull; AP1: AP3000-WW AH-556680 &bull; IQ Engine 10.8r6<br>
+    Gaps: G-01 (switch reset) &bull; G-02 (DHCP idempotency) &bull; G-03 (port disabled on push)<br>
+    Branch: main &bull; Repo: 5320-onboarding &bull; <a href="index-nyt.html">5320 Lab Landing</a><br>
+    &copy; 2026 Khursheed Khan &bull; All rights reserved &bull; Educational use only
+  </p>
+
+</div>
+</body>
+</html>
