@@ -224,20 +224,33 @@ a { color: #1e40af; }
   <div id="tab-agentic" class="tab-panel">
 
     <span class="section-eye">Overview</span>
-    <h2>17-Agent System</h2>
-    <p>12 LangGraph nodes form the stateful execution graph (Node 0 is the head orchestrator). 5 supporting agents run outside the graph as standalone services. Every node receives the same LangGraph <code>State</code> object and appends to it; nothing is discarded mid-run.</p>
+    <h2>17-Agent System — Plan First, Then Execute</h2>
+    <p>12 LangGraph nodes form the stateful execution graph. <strong>Node 0 is not just a router — it is a path planner.</strong> Before any traversal begins, it computes the full path confidence using Neo4j edge weights, identifies low-confidence steps, and surfaces HITL checkpoints upfront. The agent never walks blind. 5 supporting agents run outside the graph as standalone services.</p>
+
+    <div class="box blue">
+      <div class="box-label">Google Maps Analogy — How This Engine Actually Navigates</div>
+      <p>Google Maps does not reason from first principles to find a route. It executes a shortest-path algorithm over a pre-encoded weighted graph where every road has quality metrics. Our engine works the same way: Neo4j is the road network, edge confidence weights are the road quality, and Node 0 is the routing algorithm. <strong>Learning = updating edge weights.</strong> The graph IS the memory. A step validated 12 times in the lab has a high-weight edge — the agent "knows" it's a safe road before it takes it.</p>
+    </div>
 
     <div class="flow">
 <span class="label">User Intent</span>
-  <span class="arrow">──▶</span> <span class="agent">Node 0: Orchestrator</span>
+  <span class="arrow">──▶</span> <span class="agent">Node 0: Path Planner + Orchestrator</span>
+         <span class="arrow">│   Phase 1 — PLAN (before any traversal):</span>
+         <span class="c">│     1. Seed XIQ node (from Node 1)</span>
+         <span class="c">│     2. Neo4j full-path traversal → get ALL edge weights on route</span>
+         <span class="c">│     3. path_confidence = min(edge.confidence) — worst bottleneck</span>
+         <span class="c">│     4. Flag low-confidence + gap edges BEFORE execution</span>
+         <span class="c">│     5. Generate "route preview" — user sees what's coming</span>
+         <span class="c">│     6. HITL gate: user confirms before traversal begins</span>
+         <span class="arrow">│   Phase 2 — EXECUTE (step-by-step with anticipation):</span>
          <span class="arrow">─┬─▶</span> <span class="agent">Node 1: Intent Parser</span>  <span class="c">(pgvector semantic search + query type: workflow|lookup|compare)</span>
-          <span class="arrow">│     └──▶</span> <span class="agent">Node 2: XIQ Workflow Builder</span>  <span class="c">(Neo4j graph traversal — XIQ subgraph)</span>
-          <span class="arrow">│           └──▶</span> <span class="agent">Node 3: Version Resolver</span>  <span class="c">(lock to version pair from user session)</span>
-          <span class="arrow">│                 └──▶</span> <span class="agent">Node 4: EP1 Translator</span>  <span class="c">(c_doc via pgvector + c_gui via Neo4j per step)</span>
+          <span class="arrow">│     └──▶</span> <span class="agent">Node 2: XIQ Workflow Builder</span>  <span class="c">(Neo4j — XIQ subgraph, reads edge weights)</span>
+          <span class="arrow">│           └──▶</span> <span class="agent">Node 3: Version Resolver</span>  <span class="c">(lock to version pair — version-tagged edges only)</span>
+          <span class="arrow">│                 └──▶</span> <span class="agent">Node 4: EP1 Translator</span>  <span class="c">(edge weights c_doc+c_gui + confirmed_examples few-shot)</span>
           <span class="arrow">│                       └──▶</span> <span class="agent">Node 5: Confidence Aggregator</span>  <span class="c">(Σ(w×c)/Σ(w) per step)</span>
           <span class="arrow">│                             └──▶</span> <span class="agent">Node 6: Gap Detector</span>  <span class="c">(c &lt; 0.40 → gap; c 0.40-0.69 → warn)</span>
-          <span class="arrow">│                                   ├──▶</span> <span class="agent">Node 7: Nav Path Generator</span>  <span class="c">(builds screen card: portal→nav→field→value→button)</span>
-          <span class="arrow">│                                   └──▶</span> <span class="agent">Node 9: Fallback Agent</span>  <span class="c">(RAG workaround when gap detected)</span>
+          <span class="arrow">│                                   ├──▶</span> <span class="agent">Node 7: Nav Path Generator</span>  <span class="c">(screen card: portal→nav→field→value→button)</span>
+          <span class="arrow">│                                   └──▶</span> <span class="agent">Node 9: Fallback Agent</span>  <span class="c">(RAG workaround + HITL confirmation)</span>
           <span class="arrow">│</span>
           <span class="arrow">└──────────────────────────────────────▶</span> <span class="agent">Node 8: Response Formatter</span>  <span class="c">(workflow steps | single card | diff table)</span>
                                                           <span class="arrow">└──▶</span> <span class="agent">Node 10: Execution Agent</span>  <span class="c">(optional: push to live network)</span>
@@ -250,8 +263,8 @@ a { color: #1e40af; }
     <div class="node-grid">
       <div class="node-card">
         <div class="node-id">Node 0</div>
-        <h4>Orchestrator</h4>
-        <p>Head node. Receives raw user intent + session context (version pair, auth). Routes to Node 1. Manages retry logic and error escalation. Owns the LangGraph State object lifecycle.</p>
+        <h4>Path Planner + Orchestrator</h4>
+        <p><strong>Phase 1 — Plan:</strong> After Node 1 returns the XIQ seed node, Node 0 runs a full Neo4j path traversal, reads all edge weights, computes <code>path_confidence = min(edge.confidence)</code>, identifies low-confidence and gap edges, generates a "route preview," and presents a <strong>HITL confirmation gate before any step executes.</strong> User sees what's coming — no surprises. <strong>Phase 2 — Execute:</strong> routes through Nodes 1–9. Manages retry and error escalation.</p>
       </div>
       <div class="node-card">
         <div class="node-id">Node 1</div>
@@ -341,6 +354,58 @@ a { color: #1e40af; }
       </div>
     </div>
 
+    <span class="section-eye">Neo4j Edge Schema — The Encoded Memory</span>
+    <h2>Road Quality Metrics on Every Edge</h2>
+    <p>The confirmed_examples store handles semantic similarity (finding analogous past routes). But <strong>structural learning — "this road has been driven safely 12 times" — lives as edge properties in Neo4j.</strong> This is what gives Node 0 anticipatory capability: it reads these properties before traversal begins and knows which roads are safe, which are unpaved, and which don't exist yet.</p>
+
+    <pre>
+<span class="c">// Every XIQ→EP1 mapping edge carries road-quality metrics</span>
+<span class="w">(xiq_node:Screen {screen_id: "xiq.network_policy.ssid.auth.ppsk"})</span>
+<span class="w">  -[r:MAPS_TO {</span>
+    <span class="c">// ── confidence (the road quality) ─────────────────────</span>
+    <span class="w">confidence:       0.87,</span>   <span class="c">← current weighted score — what Node 0 reads for path planning</span>
+    <span class="w">c_doc:            0.80,</span>   <span class="c">← what EP1 documentation says about this path</span>
+    <span class="w">c_gui:            0.90,</span>   <span class="c">← what Playwright confirmed in the UI</span>
+    <span class="w">c_lab:            0.85,</span>   <span class="c">← empirical: how many times this road was driven safely</span>
+
+    <span class="c">// ── traversal history (the learning) ──────────────────</span>
+    <span class="w">traversal_count:  12,</span>     <span class="c">← total attempts on this road</span>
+    <span class="w">success_count:    11,</span>     <span class="c">← successful traversals (1 failure → c_lab pulled down)</span>
+    <span class="w">last_validated:   "2026-05-21",</span>
+    <span class="w">source:           "lab",</span>  <span class="c">← highest-quality: lab &gt; curator &gt; scrape &gt; doc</span>
+
+    <span class="c">// ── versioning ─────────────────────────────────────────</span>
+    <span class="w">version_pair:     "XIQ-25.8.0__EP1-25.9.0",</span>
+    <span class="w">ep1_patch:        "25.9.0"</span>
+<span class="w">}]-&gt;(ep1_node:Screen {screen_id: "ep1.network_policy.wireless.ssid.auth.ppsk"})</span>
+
+<span class="c">// When EP1 patches and nav path changes — edge is RESTRUCTURED, not deleted</span>
+<span class="w">(ep1_node_v0)-[r2:RESTRUCTURED_TO {</span>
+    <span class="w">from_version: "25.9.0", to_version: "25.9.2",</span>
+    <span class="w">confidence:   0.0</span>   <span class="c">← c_gui reset — must be re-earned after path change</span>
+<span class="w">}]-&gt;(ep1_node_v2)</span>
+
+<span class="c">// A gap — the road doesn't exist (yet)</span>
+<span class="w">(xiq_gap_node)-[r3:GAP {</span>
+    <span class="w">gap_code: "G-01", severity: "high",</span>
+    <span class="w">workaround: "CLI: unconfigure switch all"</span>
+<span class="w">}]-&gt;(:GapNode {description: "EXOS factory reset not available in EP1"})</span></pre>
+
+    <h3>How Node 0 Uses Edge Weights for Path Planning</h3>
+    <pre>
+<span class="c"># Node 0 path planning — runs BEFORE any step execution</span>
+<span class="w">MATCH path = (start:XIQScreen {screen_id: $seed_id})</span>
+<span class="w">             -[:MAPS_TO*]-&gt;</span>
+<span class="w">             (end:EP1Screen {screen_id: $destination_id})</span>
+<span class="w">WHERE ALL(r IN relationships(path) WHERE r.version_pair = $version_pair)</span>
+<span class="w">RETURN path,</span>
+<span class="w">       [r IN relationships(path) | r.confidence] AS edge_confidences,</span>
+<span class="w">       reduce(min_c = 1.0, r IN relationships(path) | CASE WHEN r.confidence &lt; min_c THEN r.confidence ELSE min_c END) AS path_confidence,</span>
+<span class="w">       [r IN relationships(path) WHERE r.confidence &lt; 0.40 | r] AS gap_edges,</span>
+<span class="w">       [r IN relationships(path) WHERE r.confidence &gt;= 0.40 AND r.confidence &lt; 0.70 | r] AS warn_edges</span>
+<span class="c"># Result: Node 0 knows the full route quality map before taking one step</span>
+<span class="c"># "You have 6 steps. Step 3 is unpaved (WARN). Step 5 is a dead end (GAP)."</span></pre>
+
     <span class="section-eye">State Object</span>
     <h2>LangGraph State Schema</h2>
     <pre>
@@ -350,6 +415,11 @@ a { color: #1e40af; }
     <span class="w">user_intent:        str</span>
     <span class="w">query_type:         Literal["workflow", "lookup", "compare"]</span>
     <span class="w">version_pair:       tuple[str, str]          </span><span class="c"># ("XIQ-25.8.0", "EP1-25.9.0")</span>
+    <span class="c"># Node 0 path plan — computed before step execution begins</span>
+    <span class="w">path_edge_weights:  list[float]              </span><span class="c"># confidence on every edge in planned route</span>
+    <span class="w">path_confidence:    float                    </span><span class="c"># min(path_edge_weights) — worst bottleneck</span>
+    <span class="w">route_preview:      str                      </span><span class="c"># human-readable upfront summary for user</span>
+    <span class="w">hitl_gate_passed:   bool                     </span><span class="c"># user confirmed after seeing route preview</span>
     <span class="c"># XIQ side</span>
     <span class="w">xiq_steps:          list[WorkflowStep]</span>
     <span class="w">xiq_seed_node_id:   str</span>
@@ -612,9 +682,25 @@ a { color: #1e40af; }
   <div id="tab-learning" class="tab-panel">
 
     <span class="section-eye">Design Principle</span>
-    <h2>The Engine Must Learn — Not Just Serve</h2>
-    <p>A system that returns the same answer in month 6 as it did in month 1 is not intelligent — it is a static reference. EP1 ships patches every 6 weeks. Extreme publishes new documentation. Engineers validate configurations against real hardware. Every one of these events contains signal. The engine must absorb that signal and become more accurate over time.</p>
-    <p>Learning operates at four distinct timescales, each with its own mechanism. None of them require retraining a model. All of them are implemented through data, graph updates, and LangGraph's native persistence features.</p>
+    <h2>Learning Must Be Encoded, Not Retrieved</h2>
+    <p>A critical architectural distinction: there are two types of knowledge, and they must not be confused.</p>
+    <table>
+      <tr><th>Type</th><th>Where it lives</th><th>What it enables</th><th>Google Maps equivalent</th></tr>
+      <tr>
+        <td><strong>Structural learning</strong></td>
+        <td>Neo4j edge properties (<code>confidence</code>, <code>traversal_count</code>, <code>success_count</code>)</td>
+        <td>Node 0 anticipates the full path before taking a step. Knows which roads are safe, unpaved, or missing.</td>
+        <td>Road network with traffic/quality weights — the route algorithm runs over this</td>
+      </tr>
+      <tr>
+        <td><strong>Semantic learning</strong></td>
+        <td>pgvector (RAG corpus + confirmed_examples)</td>
+        <td>Node 4 explains steps in context. Finds analogous past mappings to improve LLM translations.</td>
+        <td>POI names, address geocoding — helps interpret "go to Starbucks," not find the road</td>
+      </tr>
+    </table>
+    <p>The confirmed_examples store was initially framed as the primary learning mechanism. That was wrong. It is the semantic layer — useful for LLM context injection in Node 4. <strong>The primary learning mechanism is the graph edge weights.</strong> When a path has been traversed successfully 12 times, that fact is encoded in <code>success_count=12</code> and <code>confidence=0.92</code> on the Neo4j edge. Node 0 reads those properties and knows — before moving — that this road is safe. That is anticipatory navigation, not reactive gap discovery.</p>
+    <p>Learning operates at four distinct timescales, each with its own mechanism. None require retraining a model. The graph IS the memory.</p>
 
     <div class="box purple">
       <div class="box-label">Auditability Requirement</div>
@@ -625,34 +711,34 @@ a { color: #1e40af; }
     <h2>How the Engine Grows</h2>
 
     <table>
-      <tr><th>Mechanism</th><th>Timescale</th><th>Trigger</th><th>What Updates</th><th>LangGraph Feature</th></tr>
+      <tr><th>#</th><th>Mechanism</th><th>Type</th><th>Trigger</th><th>What Updates</th></tr>
       <tr>
-        <td><strong>1. Empirical Confidence</strong></td>
-        <td>Every lab run</td>
-        <td>Execution Agent (Node 10) completes</td>
-        <td>c_lab per step → confidence_score table → tier reclassification</td>
-        <td>Node 11 Feedback Loop</td>
+        <td>1</td>
+        <td><strong>Edge weight update (lab)</strong></td>
+        <td><span class="badge blue">Structural</span></td>
+        <td>Execution Agent completes</td>
+        <td>Neo4j: <code>confidence</code>, <code>c_lab</code>, <code>traversal_count</code>, <code>success_count</code> on the traversed edge. Node 0 immediately sees improved road quality on next planning run.</td>
       </tr>
       <tr>
-        <td><strong>2. Knowledge Graph Growth</strong></td>
-        <td>Every EP1 patch</td>
-        <td>Version Manager triggers diff-scrape</td>
-        <td>Neo4j: new nodes, deprecated nodes, updated nav paths → c_gui recalculated</td>
-        <td>Support Agent 4 (Version Manager)</td>
+        <td>2</td>
+        <td><strong>Graph growth (version patch)</strong></td>
+        <td><span class="badge blue">Structural</span></td>
+        <td>EP1 patch ships → diff-scrape</td>
+        <td>Neo4j: new nodes added, RESTRUCTURED_TO edges created, deprecated edges flagged, c_gui reset on changed paths. Version-tagged — old version pair unaffected.</td>
       </tr>
       <tr>
-        <td><strong>3. Analogical Learning</strong></td>
-        <td>Continuous</td>
-        <td>Any confirmed mapping (lab or curator)</td>
-        <td>confirmed_examples store → Node 4 few-shot context gets richer</td>
-        <td>pgvector similarity + Node 4 extension</td>
+        <td>3</td>
+        <td><strong>Analogical learning (few-shot)</strong></td>
+        <td><span class="badge purple">Semantic</span></td>
+        <td>Any confirmed mapping</td>
+        <td>confirmed_examples pgvector store → Node 4's LLM translations become richer. NOT what gives Node 0 anticipation — that comes from edge weights. This improves explanation quality.</td>
       </tr>
       <tr>
-        <td><strong>4. Human-in-the-Loop Correction</strong></td>
-        <td>On demand</td>
-        <td>Gap Curator reviews staged gap</td>
-        <td>Corrected nav path → Neo4j + confirmed_examples (weight 2×) + gap closed</td>
-        <td>LangGraph HITL pause/resume + checkpointer</td>
+        <td>4</td>
+        <td><strong>HITL correction (curator)</strong></td>
+        <td><span class="badge blue">Structural</span> + <span class="badge purple">Semantic</span></td>
+        <td>Gap Curator reviews and corrects</td>
+        <td>Neo4j: edge redirected to correct EP1 node (structural). confirmed_examples: corrected path added at weight=2× (semantic). Gap record updated. Node 0 sees corrected road on next plan.</td>
       </tr>
     </table>
 
@@ -703,8 +789,13 @@ a { color: #1e40af; }
 
     <p>As more workflows are validated — in the lab, by curators, by Playwright scrapes — the example store grows. Month 3 Node 4 is measurably better than Month 1 Node 4 on unseen workflows. <strong>This is learning by analogy — the same mechanism expert engineers use.</strong></p>
 
-    <h3>Mechanism 4 — Human-in-the-Loop Correction (LangGraph Native)</h3>
-    <p>LangGraph's HITL feature allows the graph to pause at any node, surface state to a human, accept a correction, and resume from the saved checkpoint. This is not a workaround — it is a first-class LangGraph capability designed exactly for this use case.</p>
+    <h3>Mechanism 4 — Human-in-the-Loop (Two Levels, Not One)</h3>
+    <p>Agents cannot deliver 100% guarantee. HITL is the formal acknowledgment of that — not a workaround, but a design principle. Like Google Maps where you still confirm the route and destination before driving, the engine presents human verification opportunities at two levels:</p>
+    <ul>
+      <li><strong>Level 1 — Upfront confirmation gate (Node 0):</strong> Before any step executes, the route preview surfaces all low-confidence and gap edges. "This workflow has 6 steps. Steps 3 and 5 require your attention before we begin." User confirms or requests alternative.</li>
+      <li><strong>Level 2 — Mid-traversal pause (Node 6 + Gap Curator):</strong> If a gap edge is encountered during execution, the graph pauses, surfaces the state, and waits for curator confirmation before continuing.</li>
+    </ul>
+    <p>LangGraph's HITL feature (interrupt/resume with checkpointer) implements both levels natively.</p>
 
     <div class="flow">
 <span class="label">Gap Detector (Node 6) flags confidence=0.28</span>
