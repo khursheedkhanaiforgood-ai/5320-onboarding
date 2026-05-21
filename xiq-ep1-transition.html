@@ -568,6 +568,14 @@ tr:nth-child(even) td { background: #FAFAFA; }
       <td>Always retain console/SSH access to EXOS switches. Never assume EP1 can recover a misconfigured switch without CLI. Document in client handoff: switch lifecycle management requires CLI access for factory reset.</td>
       <td>May 21 — lab wipe sprint</td>
     </tr>
+    <tr>
+      <td>G-02</td>
+      <td><strong>#6/#9</strong> Switch Policy / Supplemental CLI</td>
+      <td>EXOS DHCP Server Activation</td>
+      <td>EP1 switch template <strong>cannot include <code>enable dhcp ports</code> in a reusable Supplemental CLI template</strong>. The command is not idempotent on EXOS — re-pushing a policy that contains it causes the push to hang. EP1 natively handles VLAN creation, SVI IPs, port assignments, and IP forwarding. DHCP pool ranges can go in Supplemental CLI. But <code>enable dhcp ports X vlan Y</code> must be removed from the template after first push or excluded entirely and run once manually post-factory-reset.</td>
+      <td>Two options: (1) Include <code>enable dhcp ports</code> in Supplemental CLI for initial deploy only — remove before any re-push. (2) Run manually via SSH after first policy push. Document in client handoff: any policy re-push on EXOS requires removing DHCP enable lines from Supplemental CLI first.</td>
+      <td>May 21 — Stage 2 EP1 zero-CLI deploy</td>
+    </tr>
   </table>
 
   <!-- ─── DESIGN DIALOGUE LOG ─── -->
