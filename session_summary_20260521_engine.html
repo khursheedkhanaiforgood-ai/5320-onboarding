@@ -211,15 +211,85 @@ a:hover { text-decoration: underline; }
 
   <p>This statement preceded the most important architectural challenge of the session — and led to a significant correction. It is a standing instruction: no design decision in this system is locked without being challenged first.</p>
 
-  <h3>Step 6 — Can the Engine Learn?</h3>
-  <p>The question was posed directly: can this architecture learn and grow? The initial answer described <code>confirmed_examples</code> in pgvector as the learning mechanism. The user probed this. The exchange that followed led to a fundamental redesign.</p>
+  <h3>Step 6 — Can the Engine Learn? The Exchange That Changed the Architecture</h3>
+  <p>The question was posed directly: can this architecture learn and grow? The initial answer described <code>confirmed_examples</code> in pgvector as the primary learning mechanism — curated mappings accumulate over time, feeding the LLM better context. The user probed this. What followed was the most important exchange of the session.</p>
 
-  <div class="quote">
-    <p>"So, there is NO way for the Lead AI Agent to anticipate the next step without having in memory something similar? This seems to be counterintuitive to learning. Take Google Maps — it does not know how to go from A to B but just executes commands based on what is stored. So, we are looking for the metrics our agents will use to guide it from source to destination... Learning MUST be encoded somehow, and the HITL is a must for 100% guarantee which the agents cannot really deliver. Even in Google Maps, I must double-check the route and destination."</p>
-    <span class="attribution">— User, identifying the flaw in the semantic-only learning design</span>
+  <!-- ═══ VERBATIM DIALOGUE ═══ -->
+  <div style="border:2px solid #1d4ed8;border-radius:6px;overflow:hidden;margin:20px 0">
+    <div style="background:#1e3a8a;padding:8px 16px;font-family:'Libre Franklin',sans-serif;font-size:0.6rem;font-weight:700;text-transform:uppercase;letter-spacing:0.18em;color:#DBEAFE">Verbatim Dialogue — 20:45 May 21, 2026 — The Architectural Correction</div>
+
+    <!-- USER -->
+    <div style="padding:16px 20px;border-bottom:1px solid #BFDBFE;background:#F8FAFC">
+      <div style="font-family:'Libre Franklin',sans-serif;font-size:0.62rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#64748b;margin-bottom:8px">Khursheed Khan</div>
+      <p style="font-style:italic;color:#1e293b;font-size:0.95rem;line-height:1.9;margin:0">"So, there is NO way for the Lead_AI_Agent to anticipate the next step without having in memory somethig similar? This seems to be counterintuitive to learning. Take googl_maps for example. It does not know how to go form a to b but just executes commands based on what is stored. So, we are looking for the metrics our agents will use to guide it from source to destination, sort of like guiding a blind person around the block with audibles? Learning MUST be encoded somehow, and the HITL is a must for 100% guarantee which the agents cannot really deliver, and we understand that. Even in google maps, I must double check the route and destinatoin :)"</p>
+      <div style="font-family:'Libre Franklin',sans-serif;font-size:0.68rem;color:#94a3b8;margin-top:8px">Verbatim — original spelling preserved</div>
+    </div>
+
+    <!-- ASSISTANT -->
+    <div style="padding:16px 20px;background:#fff">
+      <div style="font-family:'Libre Franklin',sans-serif;font-size:0.62rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#1d4ed8;margin-bottom:8px">Claude (Response)</div>
+
+      <p style="margin-bottom:10px">You've identified a genuine architectural gap. Let me be precise about what I missed and what needs to change.</p>
+
+      <p style="font-weight:700;margin-bottom:6px">What I designed was reactive, not anticipatory.</p>
+      <p style="margin-bottom:10px">The confirmed_examples store finds <em>similar past trips</em>. That's semantic memory. What Google Maps uses is fundamentally different: <strong>a weighted directed graph where the weights ARE the encoded learning</strong>. Maps doesn't retrieve "similar routes." It traverses a graph where every edge has metrics — distance, speed, traffic — and those metrics ARE the knowledge. The route is found by executing an algorithm over those weights, not by remembering analogies.</p>
+      <p style="margin-bottom:16px">Our Lead Agent (Node 0) currently has no lookahead. It routes to Node 1, waits, routes to Node 2, waits, discovers a gap at step 4. That's a blindfolded walk. The audible guide model requires Node 0 to plan the full path FIRST, compute its confidence BEFORE moving, and announce what's coming.</p>
+
+      <p style="font-weight:700;margin-bottom:8px">The correction: two distinct types of encoded knowledge</p>
+      <table style="margin-bottom:16px">
+        <tr><th>Type</th><th>Where it lives</th><th>What it IS</th><th>Google Maps equivalent</th></tr>
+        <tr><td><strong>Structural</strong></td><td>Neo4j edge properties</td><td>The navigation graph with weighted roads</td><td>Road network + traffic data</td></tr>
+        <tr><td><strong>Semantic</strong></td><td>pgvector (RAG + confirmed_examples)</td><td>What concepts mean, how to explain steps</td><td>POI names, address geocoding</td></tr>
+      </table>
+      <p style="margin-bottom:16px">The confirmed_examples store is semantic — it helps Node 4 <em>explain</em> a step. But the structural learning — "this road has been driven successfully 12 times, that road has a pothole" — must live as <strong>edge weights in Neo4j</strong>.</p>
+
+      <p style="font-weight:700;margin-bottom:8px">What every Neo4j edge needs — the "road quality" properties</p>
+      <pre style="margin-bottom:16px">XIQ_node -[MAPS_TO {
+    confidence:        0.87,   ← current weight (the road quality)
+    c_doc:             0.80,   ← what docs say about this road
+    c_gui:             0.90,   ← what scraper found at this road
+    c_lab:             0.85,   ← how many cars have driven it successfully
+    traversal_count:   12,     ← total attempts
+    success_count:     11,     ← successful traversals
+    last_validated:    2026-05-21,
+    source:            "lab",  ← highest-quality validation
+    version_pair:      "XIQ-25.8.0__EP1-25.9.0"
+}]-> EP1_node
+
+Learning = updating these edge properties.
+When the Execution Agent validates a step, it updates the Neo4j edge.
+The graph IS the memory.</pre>
+
+      <p style="font-weight:700;margin-bottom:8px">Node 0 gets path planning — the anticipatory capability</p>
+      <p style="margin-bottom:8px">Before executing anything, Node 0 must:</p>
+      <pre style="margin-bottom:16px">1. Get full path (XIQ seed → EP1 destination) via Neo4j Cypher shortest-path
+2. Read all edge properties on every hop
+3. Compute:
+   - path_confidence = min(edge.confidence) ← worst bottleneck
+   - low_confidence_steps = edges where confidence &lt; warn_threshold
+   - gap_steps = edges where confidence &lt; gap_threshold OR edge doesn't exist
+4. Generate "route preview" BEFORE execution:
+   "This workflow has 6 steps.
+    Step 3 confidence: 0.42 (LOW) — EP1 nav path changed in 25.9.0, verify manually
+    Step 5 confidence: 0.28 (GAP) — no EP1 equivalent found, workaround available
+    Steps 1, 2, 4, 6 confidence: HIGH (>0.80), lab-validated 8+ times"
+5. Surface HITL checkpoints upfront — user confirms before traversal begins</pre>
+      <p style="margin-bottom:16px">This is the audible guide. You are told about the curb before you reach it, not after you trip.</p>
+
+      <p style="font-weight:700;margin-bottom:8px">HITL repositioned — not just for correction, but for confirmation gates</p>
+      <p style="margin-bottom:8px">You're right that agents cannot deliver 100% guarantee. HITL is the formal acknowledgment of that. But it operates at two levels:</p>
+      <ol style="padding-left:22px;margin-bottom:12px">
+        <li style="margin-bottom:6px"><strong>Upfront confirmation gate</strong> (Node 0's route preview) — "here are the low-confidence steps, do you want to proceed?"</li>
+        <li><strong>Mid-traversal pause</strong> (Node 6 → Gap Curator) — "I've hit a gap, here's my best guess, confirm before I continue"</li>
+      </ol>
+      <p style="margin-bottom:0">Like Google Maps: you see the route summary before you drive (level 1), and if there's a complex interchange it says "keep right in 200m" to prepare you (level 2). You still verify the final destination.</p>
+    </div>
   </div>
 
-  <p>This was a correct diagnosis. <code>confirmed_examples</code> finds similar past trips (semantic retrieval) — it is reactive, not anticipatory. A navigator that can only find similar past routes cannot tell you that road 3 on your current route is under construction before you get there. The correction is described in the <a href="#node0">Node 0 section below</a>.</p>
+  <div class="box indigo">
+    <div class="box-label">Why "Guiding a Blind Person Around the Block with Audibles" Is the Better Framing</div>
+    <p>The Google Maps analogy captures the graph-traversal and edge-weight mechanics perfectly. But the user's audible guide framing adds something Maps doesn't: <strong>the engine must announce what's ahead so the user can prepare</strong>, not just compute the optimal route. A GPS for a sighted driver can show a map and let the driver figure it out. An audible guide for someone who can't see the obstacles must be proactive — "curb in 3 steps, low-confidence corner ahead, gap at the intersection." That is exactly what the route_preview + two-level HITL design achieves. The framing shaped the UX intent, not just the graph mechanics.</p>
+  </div>
 
   <hr class="rule">
 
