@@ -576,6 +576,14 @@ tr:nth-child(even) td { background: #FAFAFA; }
       <td>Two options: (1) Include <code>enable dhcp ports</code> in Supplemental CLI for initial deploy only — remove before any re-push. (2) Run manually via SSH after first policy push. Document in client handoff: any policy re-push on EXOS requires removing DHCP enable lines from Supplemental CLI first.</td>
       <td>May 21 — Stage 2 EP1 zero-CLI deploy</td>
     </tr>
+    <tr>
+      <td>G-03</td>
+      <td><strong>#8</strong> Port Types &amp; Assignments</td>
+      <td>EP1 Switch Policy Disables Ports on Push</td>
+      <td>EP1 switch policy push <strong>administratively disabled Port 3</strong> (the AP-facing trunk port), cutting AP1's link and preventing it from reaching EP1. Root cause: EP1 port template defaulted to admin-disabled for trunk/tagged ports not explicitly set to enabled in the switch policy. AP1 lost DHCP, IP, and CAPWAP tunnel — appeared as offline in EP1 despite physical white LED.</td>
+      <td>In EP1 switch policy port assignments, explicitly set every AP-facing and uplink port to <strong>Admin Enabled</strong>. Do not assume ports default to enabled after a policy push. After any switch policy push, verify with <code>show ports X information detail</code> — check <code>Admin state: Enabled</code>. Workaround: <code>enable port X</code> via CLI then fix the port template in EP1.</td>
+      <td>May 21 — Stage 2 EP1 zero-CLI deploy</td>
+    </tr>
   </table>
 
   <!-- ─── DESIGN DIALOGUE LOG ─── -->
