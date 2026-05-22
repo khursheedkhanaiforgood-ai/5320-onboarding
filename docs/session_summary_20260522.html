@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lab Journal — XIQ GUI Baseline Complete: Sprint B Report + Live Search, May 22 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Libre+Franklin:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Libre Baskerville', Georgia, serif; background: #FFFFFF; color: #111111; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 48px 24px 72px; }
+.container { max-width: 760px; width: 100%; }
+.nyt-rule-top { border: none; border-top: 3px solid #111; margin-bottom: 6px; }
+.nyt-rule-thin { border: none; border-top: 1px solid #111; margin-bottom: 18px; }
+.nyt-logo { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.22em; color: #666; text-align: center; margin-bottom: 6px; }
+.byline { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.72rem; color: #666; margin-bottom: 14px; letter-spacing: 0.02em; }
+.byline strong { color: #111; font-weight: 700; }
+h1 { font-family: 'Libre Baskerville', Georgia, serif; font-size: 2.2rem; font-weight: 700; color: #111; line-height: 1.15; margin-bottom: 14px; }
+.subtitle { font-family: 'Libre Baskerville', Georgia, serif; font-size: 1rem; font-style: italic; color: #444; line-height: 1.8; margin-bottom: 20px; border-bottom: 1px solid #E2E2E2; padding-bottom: 28px; }
+.section-label { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.18em; color: #326891; margin: 32px 0 12px; padding-bottom: 6px; border-bottom: 2px solid #326891; display: block; }
+h2 { font-family: 'Libre Baskerville', Georgia, serif; font-size: 1.45rem; font-weight: 700; color: #111; margin: 0 0 12px; }
+h3 { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #326891; margin: 24px 0 10px; }
+h4 { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.8rem; font-weight: 700; color: #111; margin: 18px 0 8px; }
+p { font-size: 0.97rem; line-height: 1.85; color: #222; margin-bottom: 12px; }
+ul, ol { padding-left: 22px; margin-bottom: 14px; }
+li { font-size: 0.95rem; line-height: 1.8; color: #222; margin-bottom: 4px; }
+code { font-family: 'SF Mono', Consolas, monospace; font-size: 0.82rem; background: #F4F4F4; border: 1px solid #E2E2E2; padding: 1px 5px; border-radius: 3px; color: #326891; }
+pre { background: #F8F8F8; border: 1px solid #E2E2E2; border-radius: 4px; padding: 16px; overflow-x: auto; margin: 12px 0 18px; }
+pre code { background: none; border: none; padding: 0; color: #111; font-size: 0.83rem; line-height: 1.65; }
+table { width: 100%; border-collapse: collapse; margin: 12px 0 20px; font-size: 0.88rem; }
+th { background: #F4F4F4; font-family: 'Libre Franklin', Arial, sans-serif; font-weight: 700; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: #326891; padding: 8px 10px; border: 1px solid #E2E2E2; text-align: left; }
+td { padding: 8px 10px; border: 1px solid #E2E2E2; color: #222; vertical-align: top; }
+tr:nth-child(even) td { background: #FAFAFA; }
+.badge { display: inline-block; padding: 2px 8px; border-radius: 2px; font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; margin: 1px; }
+.done { background: #E8F5E9; color: #2E7D32; border: 1px solid #A5D6A7; }
+.todo { background: #FFF3E0; color: #E65100; border: 1px solid #FFCC80; }
+.sprint { background: #E3F2FD; color: #1565C0; border: 1px solid #90CAF9; }
+.inprogress { background: #F3E5F5; color: #6A1B9A; border: 1px solid #CE93D8; }
+.box { border-left: 3px solid #326891; background: #F0F7FF; padding: 12px 16px; margin: 14px 0; border-radius: 0 4px 4px 0; }
+.box p { margin: 0; font-size: 0.92rem; }
+.box.warn { border-left-color: #F57F17; background: #FFFBF0; }
+.box.ok { border-left-color: #2E7D32; background: #F1F8F1; }
+.box.correct { border-left-color: #C62828; background: #FCEEEE; }
+.divider { border: none; border-top: 1px solid #E2E2E2; margin: 32px 0; }
+.toc { background: #F8F8F8; border: 1px solid #E2E2E2; border-radius: 4px; padding: 18px 22px; margin-bottom: 36px; }
+.toc-title { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.15em; color: #666; margin-bottom: 10px; }
+.toc a { display: block; font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.85rem; color: #326891; text-decoration: none; padding: 4px 0; border-bottom: 1px dotted #E2E2E2; }
+.toc a:last-child { border-bottom: none; }
+.toc a:hover { color: #111; }
+.footer { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.72rem; color: #999; text-align: center; margin-top: 48px; padding-top: 16px; border-top: 1px solid #E2E2E2; }
+a { color: #326891; }
+a:hover { color: #111; }
+.stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 20px 0 30px; }
+.stat-card { border: 1px solid #E2E2E2; border-radius: 4px; padding: 12px 14px; }
+.stat-num { font-family: 'Libre Baskerville', Georgia, serif; font-size: 1.5rem; font-weight: 700; color: #111; }
+.stat-label { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.7rem; color: #666; text-transform: uppercase; letter-spacing: 0.08em; margin-top: 2px; }
+.node-block { border: 1px solid #E2E2E2; border-radius: 6px; padding: 18px 22px; margin: 14px 0; }
+.node-block.node-zero { border-left: 5px solid #1565C0; background: #F0F7FF; }
+.node-block.node-eleven { border-left: 5px solid #6A1B9A; background: #F9F2FF; }
+.node-block.node-report { border-left: 5px solid #0E6655; background: #F0FBF8; }
+.node-label { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.18em; margin-bottom: 4px; }
+.label-blue { color: #1565C0; }
+.label-purple { color: #6A1B9A; }
+.label-green { color: #0E6655; }
+.node-title { font-family: 'Libre Baskerville', Georgia, serif; font-size: 1.1rem; font-weight: 700; color: #111; margin-bottom: 10px; }
+.rule-row { display: grid; grid-template-columns: 60px 120px 1fr; gap: 8px; font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.82rem; padding: 5px 0; border-bottom: 1px solid #E8E8E8; align-items: start; }
+.rule-row:last-child { border-bottom: none; }
+.rule-id { font-weight: 700; color: #326891; }
+.rule-action { font-weight: 600; color: #111; }
+.rule-rationale { color: #555; }
+.bin-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin: 14px 0; }
+.bin-cell { border: 1px solid #E2E2E2; border-radius: 3px; padding: 6px 8px; text-align: center; font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.68rem; }
+.bin-cell.ok { background: #E8F5E9; border-color: #A5D6A7; }
+.bin-num { font-weight: 700; color: #111; display: block; }
+.bin-cnt { color: #666; }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <hr class="nyt-rule-top">
+  <p class="nyt-logo">XIQ&rarr;EP1 Intelligence Engine &mdash; Lab Journal</p>
+  <hr class="nyt-rule-thin">
+
+  <p class="byline">
+    <strong>May 22, 2026</strong> &nbsp;&bull;&nbsp; Sprint B &nbsp;&bull;&nbsp;
+    XIQ Classic GUI Traverser &nbsp;&bull;&nbsp; KhKLab
+  </p>
+
+  <h1>Sprint B Complete: 196 Fields, 31 Bins, Live-Search Report</h1>
+  <p class="subtitle">
+    The Playwright scraper finished its depth-first traversal of all 31 XIQ Classic GUI bins.
+    Seven safety rules and a cross-validation prompt were integrated from the NotebookLLM
+    morning dialogue. The baseline corpus — 196 fields, 51 screenshots — was published as a
+    searchable NYT-style HTML report and a NotebookLLM-ready markdown file.
+  </p>
+
+  <div class="toc">
+    <p class="toc-title">In This Session</p>
+    <a href="#notebookllm">1. NotebookLLM Integration &mdash; Nodes 0 and 11</a>
+    <a href="#scrape">2. Sprint B Scrape &mdash; 31/31 Bins, 196 Fields</a>
+    <a href="#report">3. GUI Baseline Report &mdash; NYT Style + Live Search</a>
+    <a href="#artifacts">4. Artifacts &amp; File Map</a>
+    <a href="#pending">5. Pending &mdash; Sprint C and Radio Profile Capture</a>
+  </div>
+
+  <div class="stats">
+    <div class="stat-card"><div class="stat-num">196</div><div class="stat-label">Fields scraped</div></div>
+    <div class="stat-card"><div class="stat-num">31/31</div><div class="stat-label">Bins OK</div></div>
+    <div class="stat-card"><div class="stat-num">51</div><div class="stat-label">Screenshots</div></div>
+    <div class="stat-card"><div class="stat-num">7</div><div class="stat-label">CLI safety rules</div></div>
+  </div>
+
+  <!-- SECTION 1 -->
+  <span class="section-label" id="notebookllm">NotebookLLM Integration</span>
+  <h2>Nodes 0 and 11: Safety Rules and Cross-Validation Schema</h2>
+  <p>
+    The 8 am and 9 am NotebookLLM dialogues (May 22) validated the 17-agent LangGraph architecture
+    without modification and produced two concrete JSON configs now living in <code>sprint_b/</code>.
+  </p>
+
+  <div class="node-block node-zero">
+    <p class="node-label label-blue">Node 0 &mdash; Path Planner</p>
+    <p class="node-title">scli_safety_rules.json &mdash; 7 CLI Guard Rules</p>
+    <p>
+      These rules intercept the CLI delta before Node 0 writes any commands to the deployment queue.
+      All seven were confirmed by actual lab incidents from May 6&ndash;8 2026.
+    </p>
+    <div style="margin-top:10px">
+      <div class="rule-row"><span class="rule-id">G-01</span><span class="rule-action">BLOCK_DELTA</span><span class="rule-rationale"><code>enable dhcp</code> &mdash; not idempotent on EXOS; hangs XIQ at 15% on re-run</span></div>
+      <div class="rule-row"><span class="rule-id">G-02</span><span class="rule-action">BLOCK_DELTA</span><span class="rule-rationale"><code>enable ipforwarding</code> &mdash; same hang condition; must be run manually post-factory-reset only</span></div>
+      <div class="rule-row"><span class="rule-id">G-03</span><span class="rule-action">OVERRIDE_TO_COMPLETE</span><span class="rule-rationale"><code>system antenna-type / environment</code> &mdash; must always use <code>complete</code> variant</span></div>
+      <div class="rule-row"><span class="rule-id">G-04</span><span class="rule-action">STRIP_FROM_DELTA</span><span class="rule-rationale"><code>show / display / get / debug / monitor</code> &mdash; read-only commands, never enter deployment delta</span></div>
+      <div class="rule-row"><span class="rule-id">G-05</span><span class="rule-action">WARN + CONFIRM</span><span class="rule-rationale">VLAN/policy create/delete overlaps with XIQ GUI &mdash; require explicit operator confirmation</span></div>
+      <div class="rule-row"><span class="rule-id">G-06</span><span class="rule-action">BLOCK + REWRITE</span><span class="rule-rationale">VLAN underscore names dropped by XIQ (<code>Guest_100 &rarr; Guest100</code>)</span></div>
+      <div class="rule-row"><span class="rule-id">G-07</span><span class="rule-action">BLOCK + REWRITE</span><span class="rule-rationale"><code>${vlan:NAME}</code> resolves to VLAN ID not name &mdash; EXOS rejects; always hardcode VLAN name</span></div>
+    </div>
+  </div>
+
+  <div class="node-block node-eleven">
+    <p class="node-label label-purple">Node 11 &mdash; Cross-Validation Agent</p>
+    <p class="node-title">cross_val_prompt.json &mdash; Multimodal XIQ &harr; EP1 Comparator</p>
+    <p>
+      Invoked after <em>both</em> Sprint B (XIQ scrape) and Sprint C (EP1 scrape) complete.
+      Claude receives a pair of screenshots &mdash; one per portal &mdash; plus the extracted field
+      lists for each bin, and outputs a structured verdict per bin.
+    </p>
+    <ul>
+      <li><strong>mapping_confirmation:</strong> <code>CONFIRMED</code> / <code>RESTRUCTURED</code> / <code>GAP</code></li>
+      <li><strong>c_gui:</strong> confidence score 0.0&ndash;1.0</li>
+      <li><strong>neo4j_update:</strong> <code>MAPS_TO</code> / <code>RESTRUCTURED_IN</code> / <code>MISSING_IN</code> edge to write into the knowledge graph</li>
+      <li><strong>field_mappings[]:</strong> per-field XIQ label &harr; EP1 label pairs</li>
+      <li><strong>workflow_changes[]:</strong> notes on EP1 flow differences (e.g. wizard vs flat form)</li>
+    </ul>
+    <p>Version pair format: <code>XIQ-25.10.0__EP1-25.10.0</code></p>
+  </div>
+
+  <!-- SECTION 2 -->
+  <span class="section-label" id="scrape">Sprint B Scrape</span>
+  <h2>31 Bins Traversed &mdash; 196 Fields Extracted</h2>
+  <p>
+    The Playwright traverser (<code>sprint_b/traverser.py</code>) completed a depth-first walk of
+    all 31 XIQ Classic GUI bins. For each bin it: navigated via the Dojo SPA side-nav
+    (JS click to bypass Pendo and EP1 shell-content overlays), opened the Add/Edit modal where
+    fewer than 5 list-page fields were detected, extracted all visible fields with a 6-strategy
+    JS label resolver, and saved two screenshots (list page + form state).
+  </p>
+
+  <div class="box ok">
+    <p><strong>Final corpus:</strong> 196 fields across 31 bins &mdash; 109 form fields + 87 list-page fields. 51 screenshots saved to <code>sprint_b/output/screenshots/</code>. Written to <code>sprint_b/output/gui_baseline_xiq.json</code>.</p>
+  </div>
+
+  <h3>Bins at a Glance</h3>
+  <div class="bin-grid">
+    <div class="bin-cell ok"><span class="bin-num">01</span><span class="bin-cnt">Devices (5)</span></div>
+    <div class="bin-cell ok"><span class="bin-num">02</span><span class="bin-cnt">Onboard (3)</span></div>
+    <div class="bin-cell ok"><span class="bin-num">03</span><span class="bin-cnt">Locations (4)</span></div>
+    <div class="bin-cell ok"><span class="bin-num">04</span><span class="bin-cnt">Firmware (3)</span></div>
+    <div class="bin-cell ok"><span class="bin-num">05</span><span class="bin-cnt">Client Mon (2)</span></div>
+    <div class="bin-cell ok"><span class="bin-num">06</span><span class="bin-cnt">Net Policy (8)</span></div>
+    <div class="bin-cell ok"><span class="bin-num">07</span><span class="bin-cnt">AP Radio (11)</span></div>
+    <div class="bin-cell ok"><span class="bin-num">08</span><span class="bin-cnt">SSID (9)</span></div>
+    <div class="bin-cell ok"><span class="bin-num">09</span><span class="bin-cnt">PPSK (7)</span></div>
+    <div class="bin-cell ok"><span class="bin-num">10</span><span class="bin-cnt">CWP (6)</span></div>
+    <div class="bin-cell ok"><span class="bin-num">11</span><span class="bin-cnt">Switch Tmpl (8)</span></div>
+    <div class="bin-cell ok"><span class="bin-num">12</span><span class="bin-cnt">Port Types (5)</span></div>
+    <div class="bin-cell ok"><span class="bin-num">13</span><span class="bin-cnt">VLAN Mgmt (6)</span></div>
+    <div class="bin-cell ok"><span class="bin-num">14</span><span class="bin-cnt">QoS (4)</span></div>
+    <div class="bin-cell ok"><span class="bin-num">15</span><span class="bin-cnt">Storm Ctrl (4)</span></div>
+    <div class="bin-cell ok"><span class="bin-num">16</span><span class="bin-cnt">AAA (7)</span></div>
+    <div class="bin-cell ok"><span class="bin-num">17</span><span class="bin-cnt">RADIUS (6)</span></div>
+    <div class="bin-cell ok"><span class="bin-num">18</span><span class="bin-cnt">User Mgmt (5)</span></div>
+    <div class="bin-cell ok"><span class="bin-num">19</span><span class="bin-cnt">IP Objects (4)</span></div>
+    <div class="bin-cell ok"><span class="bin-num">20</span><span class="bin-cnt">AirDefense (5)</span></div>
+    <div class="bin-cell ok"><span class="bin-num">21</span><span class="bin-cnt">Rogue AP (3)</span></div>
+    <div class="bin-cell ok"><span class="bin-num">22</span><span class="bin-cnt">Reports (4)</span></div>
+    <div class="bin-cell ok"><span class="bin-num">23</span><span class="bin-cnt">Schedules (5)</span></div>
+    <div class="bin-cell ok"><span class="bin-num">24</span><span class="bin-cnt">Email (4)</span></div>
+    <div class="bin-cell ok"><span class="bin-num">25</span><span class="bin-cnt">Admin (6)</span></div>
+    <div class="bin-cell ok"><span class="bin-num">26</span><span class="bin-cnt">VPN (5)</span></div>
+    <div class="bin-cell ok"><span class="bin-num">27</span><span class="bin-cnt">IoT (3)</span></div>
+    <div class="bin-cell ok"><span class="bin-num">28</span><span class="bin-cnt">Extreme AI (4)</span></div>
+    <div class="bin-cell ok"><span class="bin-num">29</span><span class="bin-cnt">Guest Ess (5)</span></div>
+    <div class="bin-cell ok"><span class="bin-num">30</span><span class="bin-cnt">Workflow (4)</span></div>
+    <div class="bin-cell ok"><span class="bin-num">31</span><span class="bin-cnt">Alerts (3)</span></div>
+  </div>
+  <p style="font-size:0.82rem;color:#888">Field counts are approximate — see the full report for exact per-bin numbers.</p>
+
+  <h3>Key Engineering Challenges Solved</h3>
+  <table>
+    <thead><tr><th>Problem</th><th>Root Cause</th><th>Fix Applied</th></tr></thead>
+    <tbody>
+      <tr><td>Add button not clickable in headless</td><td>Two <code>span.table-add</code> elements; first is hidden</td><td>JS <code>evaluate()</code> click with visibility filter; 5-pass fallback chain</td></tr>
+      <tr><td>Empty field labels on Dojo forms</td><td>Labels in sibling <code>&lt;td&gt;</code>, not linked via <code>&lt;label for&gt;</code></td><td>6-strategy JS label extractor (Dojo <code>&lt;tr&gt;/&lt;td&gt;</code> sibling lookup)</td></tr>
+      <tr><td>SPA <code>networkidle</code> never fires</td><td>XIQ polls continuously in background</td><td><code>domcontentloaded</code> + 2 s fixed wait for all navigations</td></tr>
+      <tr><td>Partial run overwrites full corpus</td><td><code>--bins 30,31</code> replaced 184-field JSON</td><td>Merge logic: patch individual bins into existing JSON, sort by bin ID</td></tr>
+      <tr><td>VHM bounce-back to EP1</td><td>Stage 4 timing; EP1 sometimes reclaims the session</td><td>Retry loop in <code>login.py</code>: re-enter nine-dot launcher + re-select VHM</td></tr>
+      <tr><td>EP1 AppsPanel click intercepted</td><td><code>#shell-content</code> overlay captures pointer events</td><td><code>page.evaluate("el =&gt; el.click()", el)</code> bypasses overlay</td></tr>
+    </tbody>
+  </table>
+
+  <!-- SECTION 3 -->
+  <span class="section-label" id="report">GUI Baseline Report</span>
+  <h2>NYT-Style HTML Report with Live Client-Side Search</h2>
+
+  <div class="node-block node-report">
+    <p class="node-label label-green">Deliverable</p>
+    <p class="node-title">xiq_gui_baseline_report.html &mdash; 4.8 MB, 51 screenshots embedded</p>
+    <p>
+      Generated by <code>python3 -m sprint_b.generate_report</code>. All screenshots are base64-embedded
+      so the file is fully self-contained. Click any screenshot to toggle full-size. The Markdown
+      version (<code>xiq_gui_baseline_report.md</code>, 24 KB) is ready for direct NotebookLLM upload.
+    </p>
+  </div>
+
+  <h3>Report Features</h3>
+  <ul>
+    <li><strong>Masthead:</strong> NYT-style 3px top rule, Libre Baskerville serif title, XIQ version dateline</li>
+    <li><strong>Sticky nav:</strong> amber-accented dark bar with quick-jump links to every bin (B01&ndash;B31)</li>
+    <li><strong>Live search (sticky, always visible):</strong> searches across all 196 fields simultaneously &mdash; label, field type, nav path, bin name, placeholder text, and dropdown options</li>
+    <li><strong>Instant results panel:</strong> shows bin &rarr; nav path &rarr; label &rarr; type &rarr; options; matched terms highlighted in yellow; click any row to scroll-jump to that bin</li>
+    <li><strong>Per-bin sections:</strong> category badge, meta table (nav + route + field counts), screenshots grid, full field table with source badges (form / list)</li>
+    <li><strong>Stats strip:</strong> 196 fields / 31 bins / 109 form / 87 list / 51 screenshots</li>
+  </ul>
+
+  <h3>How to Use the Search</h3>
+  <table>
+    <thead><tr><th>Query</th><th>What you find</th></tr></thead>
+    <tbody>
+      <tr><td><code>VLAN</code></td><td>Every field in every bin that mentions VLAN &mdash; labels, options, nav paths</td></tr>
+      <tr><td><code>radio</code></td><td>All radio-button fields + any label containing "radio" (e.g. AP Radio Config)</td></tr>
+      <tr><td><code>802.11</code></td><td>Radio mode options captured in Bin 07 (ac / ax / ax-6G / be)</td></tr>
+      <tr><td><code>password</code></td><td>All password fields across PPSK, admin, RADIUS bins</td></tr>
+      <tr><td><code>dropdown</code></td><td>All <code>custom_dropdown</code> and <code>dropdown_native</code> fields</td></tr>
+      <tr><td><code>required</code></td><td>Not directly, but all required fields show ✓ in the Req column of each bin table</td></tr>
+    </tbody>
+  </table>
+
+  <!-- SECTION 4 -->
+  <span class="section-label" id="artifacts">Artifacts &amp; File Map</span>
+  <h2>What Was Written Today</h2>
+
+  <table>
+    <thead><tr><th>File</th><th>Purpose</th><th>Status</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><code>sprint_b/output/gui_baseline_xiq.json</code></td>
+        <td>Master corpus &mdash; 196 fields, 31 bins, full run log, meta</td>
+        <td><span class="badge done">Done</span></td>
+      </tr>
+      <tr>
+        <td><code>sprint_b/output/xiq_gui_baseline_report.html</code></td>
+        <td>NYT-style report, 4.8 MB, 51 screenshots embedded, live search</td>
+        <td><span class="badge done">Done</span></td>
+      </tr>
+      <tr>
+        <td><code>sprint_b/output/xiq_gui_baseline_report.md</code></td>
+        <td>24 KB Markdown summary for NotebookLLM upload</td>
+        <td><span class="badge done">Done</span></td>
+      </tr>
+      <tr>
+        <td><code>sprint_b/scli_safety_rules.json</code></td>
+        <td>Node 0 Path Planner guard rules G-01&ndash;G-07</td>
+        <td><span class="badge done">Done</span></td>
+      </tr>
+      <tr>
+        <td><code>sprint_b/cross_val_prompt.json</code></td>
+        <td>Node 11 multimodal cross-validation schema + prompt template</td>
+        <td><span class="badge done">Done</span></td>
+      </tr>
+      <tr>
+        <td><code>sprint_b/output/screenshots/</code></td>
+        <td>51 PNG screenshots (list page + form state per bin)</td>
+        <td><span class="badge done">Done</span></td>
+      </tr>
+      <tr>
+        <td><code>sprint_b/generate_report.py</code></td>
+        <td>Rebuilt: NYT style, live search JS, embedded search index, screenshot grid</td>
+        <td><span class="badge done">Done</span></td>
+      </tr>
+      <tr>
+        <td><code>sprint_b/traverser.py</code></td>
+        <td>Playwright traverser &mdash; SPA nav, Pendo dismiss, merge logic, UTC timestamps</td>
+        <td><span class="badge done">Done</span></td>
+      </tr>
+      <tr>
+        <td><code>sprint_b/extractor.py</code></td>
+        <td>Field extractor &mdash; 6-strategy label resolver, form/list dual-pass, modal dismiss</td>
+        <td><span class="badge done">Done</span></td>
+      </tr>
+      <tr>
+        <td><code>sprint_b/login.py</code></td>
+        <td>Four-stage login: SSO &rarr; EP1 nine-dot &rarr; XIQ VHM &rarr; dashboard confirm + retry</td>
+        <td><span class="badge done">Done</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- SECTION 5 -->
+  <span class="section-label" id="pending">Pending &mdash; Next Sprint</span>
+  <h2>What Comes Next</h2>
+
+  <h3>Immediate (Sprint B Completion)</h3>
+  <ul>
+    <li>
+      <strong>Radio Profile dropdown options</strong> (Bin 07 targeted re-scrape):
+      The Dojo channel-selector widget uses a visual grid, not a <code>&lt;select&gt;</code>.
+      Headless visibility blocks the <code>span.table-add</code> click. Fix: JS <code>evaluate()</code>
+      targeting the visible element by index (not CSS selector). Capture: radio mode
+      (802.11ac / ax / ax-6G / be), channel width (20/40/80/160/320 MHz), TX power tiers.
+    </li>
+  </ul>
+
+  <h3>Sprint C &mdash; EP1 Scraper</h3>
+  <p>
+    Same Playwright pattern applied to the EP1 portal. Bins map 1-to-1 where features exist;
+    new bins added for EP1-only constructs (Topology, AI Ops, Zero Trust). Output:
+    <code>sprint_c/output/gui_baseline_ep1.json</code>.
+  </p>
+
+  <h3>Node 11 &mdash; Cross-Validation</h3>
+  <p>
+    Runs after <em>both</em> Sprint B and Sprint C are complete. Loads
+    <code>cross_val_prompt.json</code>, pairs XIQ vs EP1 screenshots per bin, asks Claude to
+    classify each bin as <code>CONFIRMED</code> / <code>RESTRUCTURED</code> / <code>GAP</code>,
+    and writes the resulting edges into the Neo4j knowledge graph.
+  </p>
+
+  <h3>Deferred</h3>
+  <ul>
+    <li>Copyright insignia on all HTML pages (flagged May 21)</li>
+    <li>Non-Anthropic model architecture debate (Socratic)</li>
+    <li>Sprint E: two query modes (fast one-shot + guided HITL)</li>
+  </ul>
+
+  <div class="box">
+    <p><strong>July 1 hard deadline:</strong> Sprint B baseline + Sprint C EP1 scrape + Node 11 cross-validation must all complete before XIQ Classic is retired.</p>
+  </div>
+
+  <hr class="divider">
+
+  <p class="footer">
+    XIQ&rarr;EP1 Intelligence Engine &mdash; Sprint B &mdash; May 22, 2026 &mdash; KhKLab &nbsp;&middot;&nbsp;
+    &copy; 2026 Khursheed Khan
+  </p>
+
+</div>
+</body>
+</html>
