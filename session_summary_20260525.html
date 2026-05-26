@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lab Journal — 802.11 Mastery Repo + Two-Agent Curriculum Architecture, May 25 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Libre+Franklin:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Libre Baskerville', Georgia, serif; background: #FFFFFF; color: #111111; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 48px 24px 72px; }
+.container { max-width: 760px; width: 100%; }
+.nyt-rule-top { border: none; border-top: 3px solid #111; margin-bottom: 6px; }
+.nyt-rule-thin { border: none; border-top: 1px solid #111; margin-bottom: 18px; }
+.nyt-logo { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.22em; color: #666; text-align: center; margin-bottom: 6px; }
+.byline { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.72rem; color: #666; margin-bottom: 14px; letter-spacing: 0.02em; }
+.byline strong { color: #111; font-weight: 700; }
+h1 { font-family: 'Libre Baskerville', Georgia, serif; font-size: 2.2rem; font-weight: 700; color: #111; line-height: 1.15; margin-bottom: 14px; }
+.subtitle { font-family: 'Libre Baskerville', Georgia, serif; font-size: 1rem; font-style: italic; color: #444; line-height: 1.8; margin-bottom: 20px; border-bottom: 1px solid #E2E2E2; padding-bottom: 28px; }
+.section-label { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.18em; color: #a16207; margin: 32px 0 12px; padding-bottom: 6px; border-bottom: 2px solid #a16207; display: block; }
+h2 { font-family: 'Libre Baskerville', Georgia, serif; font-size: 1.45rem; font-weight: 700; color: #111; margin: 0 0 12px; }
+h3 { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #a16207; margin: 24px 0 10px; }
+h4 { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.8rem; font-weight: 700; color: #111; margin: 18px 0 8px; }
+p { font-size: 0.97rem; line-height: 1.85; color: #222; margin-bottom: 12px; }
+ul, ol { padding-left: 22px; margin-bottom: 14px; }
+li { font-size: 0.95rem; line-height: 1.8; color: #222; margin-bottom: 4px; }
+code { font-family: 'SF Mono', Consolas, monospace; font-size: 0.82rem; background: #F4F4F4; border: 1px solid #E2E2E2; padding: 1px 5px; border-radius: 3px; color: #a16207; }
+pre { background: #F8F8F8; border: 1px solid #E2E2E2; border-radius: 4px; padding: 16px; overflow-x: auto; margin: 12px 0 18px; }
+pre code { background: none; border: none; padding: 0; color: #111; font-size: 0.83rem; line-height: 1.65; }
+table { width: 100%; border-collapse: collapse; margin: 12px 0 20px; font-size: 0.88rem; }
+th { background: #F4F4F4; font-family: 'Libre Franklin', Arial, sans-serif; font-weight: 700; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: #a16207; padding: 8px 10px; border: 1px solid #E2E2E2; text-align: left; }
+td { padding: 8px 10px; border: 1px solid #E2E2E2; color: #222; vertical-align: top; }
+tr:nth-child(even) td { background: #FAFAFA; }
+.badge { display: inline-block; padding: 2px 8px; border-radius: 2px; font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; margin: 1px; }
+.done { background: #E8F5E9; color: #2E7D32; border: 1px solid #A5D6A7; }
+.todo { background: #FFF3E0; color: #E65100; border: 1px solid #FFCC80; }
+.inprogress { background: #F3E5F5; color: #6A1B9A; border: 1px solid #CE93D8; }
+.box { border-left: 3px solid #a16207; background: #FFFBF0; padding: 12px 16px; margin: 14px 0; border-radius: 0 4px 4px 0; }
+.box p { margin: 0; font-size: 0.92rem; }
+.box.ok { border-left-color: #2E7D32; background: #F1F8F1; }
+.box.rule { border-left-color: #C62828; background: #FCEEEE; }
+.divider { border: none; border-top: 1px solid #E2E2E2; margin: 32px 0; }
+.toc { background: #F8F8F8; border: 1px solid #E2E2E2; border-radius: 4px; padding: 18px 22px; margin-bottom: 36px; }
+.toc-title { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.15em; color: #666; margin-bottom: 10px; }
+.toc a { display: block; font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.85rem; color: #a16207; text-decoration: none; padding: 4px 0; border-bottom: 1px dotted #E2E2E2; }
+.toc a:last-child { border-bottom: none; }
+.toc a:hover { color: #111; }
+.footer { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.72rem; color: #999; text-align: center; margin-top: 48px; padding-top: 16px; border-top: 1px solid #E2E2E2; }
+a { color: #a16207; }
+a:hover { color: #111; }
+.stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 20px 0 30px; }
+.stat-card { border: 1px solid #E2E2E2; border-radius: 4px; padding: 12px 14px; }
+.stat-num { font-family: 'Libre Baskerville', Georgia, serif; font-size: 1.5rem; font-weight: 700; color: #111; }
+.stat-label { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.7rem; color: #666; text-transform: uppercase; letter-spacing: 0.08em; margin-top: 2px; }
+.agent-block { border: 1px solid #E2E2E2; border-radius: 6px; padding: 18px 22px; margin: 14px 0; }
+.agent-block.architect { border-left: 5px solid #1565C0; background: #F0F7FF; }
+.agent-block.curriculum { border-left: 5px solid #a16207; background: #FFFBF0; }
+.agent-block.shared { border-left: 5px solid #2E7D32; background: #F1F8F1; }
+.agent-label { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.18em; margin-bottom: 4px; }
+.label-blue { color: #1565C0; }
+.label-amber { color: #a16207; }
+.label-green { color: #2E7D32; }
+.agent-title { font-family: 'Libre Baskerville', Georgia, serif; font-size: 1.1rem; font-weight: 700; color: #111; margin-bottom: 10px; }
+</style>
+</head>
+<body>
+<div class="container">
+  <hr class="nyt-rule-top">
+  <div class="nyt-logo">KhKLab &nbsp;&bull;&nbsp; 802.11 Mastery &nbsp;&bull;&nbsp; Lab Journal</div>
+  <hr class="nyt-rule-thin">
+
+  <p class="byline"><strong>Sunday, May 25, 2026</strong> &nbsp;&bull;&nbsp; 802.11 Mastery Repo Launch + Two-Agent Curriculum Architecture</p>
+  <h1>802.11 Mastery Goes Live — Two-Agent Architecture Established</h1>
+  <p class="subtitle">A 34-day, 6-phase 802.11 curriculum is now on GitHub Pages, with a dedicated Socratic Curriculum Agent and a shared memory handoff protocol between two Claude Code sessions.</p>
+
+  <div class="toc">
+    <div class="toc-title">Contents</div>
+    <a href="#accomplished">Accomplished</a>
+    <a href="#repo">wifi-80211-mastery Repo</a>
+    <a href="#two-agent">Two-Agent Architecture</a>
+    <a href="#shared-memory">Shared Memory Protocol</a>
+    <a href="#write-boundary">Write Boundary Rule</a>
+    <a href="#curriculum-ready">Curriculum Ready State</a>
+    <a href="#urls">URLs & Files</a>
+    <a href="#pending">Pending</a>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats">
+    <div class="stat-card"><div class="stat-num">6</div><div class="stat-label">Phases</div></div>
+    <div class="stat-card"><div class="stat-num">34</div><div class="stat-label">Study Days</div></div>
+    <div class="stat-card"><div class="stat-num">76</div><div class="stat-label">Assessment Qs</div></div>
+    <div class="stat-card"><div class="stat-num">2</div><div class="stat-label">Agent Threads</div></div>
+  </div>
+
+  <!-- ACCOMPLISHED -->
+  <span class="section-label" id="accomplished">Accomplished</span>
+  <h2>What Got Built Today</h2>
+  <ul>
+    <li><span class="badge done">Done</span> New public GitHub repo <strong>wifi-80211-mastery</strong> created and live on GitHub Pages</li>
+    <li><span class="badge done">Done</span> 11 HTML files: landing page, hub, 6 phase study pages, references, assessments</li>
+    <li><span class="badge done">Done</span> 46 phase-by-phase assessment questions across 6 quizzes + 30-question CWNA-108 mock</li>
+    <li><span class="badge done">Done</span> CWNA-108 chapter cross-reference, 802.11be-2024 deep refs (15 Wi-Fi 7 features → standard sections), EP1 cross-links to 5320-onboarding branch</li>
+    <li><span class="badge done">Done</span> Two-agent architecture designed: <strong>Architect_CodeAgent</strong> + <strong>Socratic_CurriculumAgent</strong></li>
+    <li><span class="badge done">Done</span> Shared state file <code>project_wifi_mastery_progress.md</code> created in memory directory</li>
+    <li><span class="badge done">Done</span> Write boundary rule established and saved to feedback memory</li>
+    <li><span class="badge done">Done</span> Multi-LLM research framework plan approved (8 phases, 4-layer hallucination detection)</li>
+  </ul>
+
+  <!-- REPO -->
+  <span class="section-label" id="repo">wifi-80211-mastery Repo</span>
+  <h2>Curriculum Repository</h2>
+  <p>A completely new public repo, separate from 5320-onboarding, dedicated to the 802.11 mastery curriculum. NYT journal style throughout — white background, Libre Baskerville serif, phase-color-coded cards.</p>
+
+  <h3>File Inventory</h3>
+  <table>
+    <tr><th>File</th><th>Phase / Type</th><th>Color</th><th>Content</th></tr>
+    <tr><td><code>index.html</code></td><td>Landing</td><td>Black</td><td>8-card grid, progress table, phase badges</td></tr>
+    <tr><td><code>docs/study_80211_index.html</code></td><td>Hub</td><td>—</td><td>34-day curriculum map, all phases linked</td></tr>
+    <tr><td><code>docs/study_phase1_phy.html</code></td><td>Phase 1</td><td>Teal #134e4a</td><td>8 days: OFDM → MCS → DFS → 6 GHz → MU-MIMO → MLO → EDCA → Wi-Fi 7</td></tr>
+    <tr><td><code>docs/study_phase2_mac.html</code></td><td>Phase 2</td><td>Orange #7c2d12</td><td>6 days: EDCA → BSS Color → A-MPDU → TWT → Power Save → Multicast</td></tr>
+    <tr><td><code>docs/study_phase3_security.html</code></td><td>Phase 3</td><td>Rose #9d174d</td><td>6 days: FT/OKC → SAE H2E → MFP → OWE-T → EAP-TLS → BTM</td></tr>
+    <tr><td><code>docs/study_phase4_qos_roaming.html</code></td><td>Phase 4</td><td>Violet #581c87</td><td>5 days: DSCP↔UP → AP3000 QoS → Voice roaming → Sticky → MBO</td></tr>
+    <tr><td><code>docs/study_phase5_capacity.html</code></td><td>Phase 5</td><td>Blue #1d4ed8</td><td>5 days: Airtime math → RSSI tiers → SSID overhead → CCI → Wi-Fi 7 ceiling</td></tr>
+    <tr><td><code>docs/study_phase6_capstone.html</code></td><td>Phase 6</td><td>Emerald #065f46</td><td>4 days: WLPC 6-process → 30-row table → Frame stats → Capstone report</td></tr>
+    <tr><td><code>docs/references.html</code></td><td>Reference</td><td>Black</td><td>CWNA-108 map, 802.11be-2024 §refs, EP1 cross-links, corpus tiers</td></tr>
+    <tr><td><code>docs/assessments.html</code></td><td>Assessment</td><td>Amber</td><td>6 phase quizzes (46 Qs) + 30-Q CWNA-108 mock, self-scoring &lt;details&gt; blocks</td></tr>
+  </table>
+
+  <div class="box ok">
+    <p><strong>Corpus privacy rule:</strong> The WLPC T1/T2/T3 files (~150 private PDFs at /Users/khukhan/Downloads/WLPC Troubleshooting/) are NEVER committed to GitHub. References.html points to them by filename only.</p>
+  </div>
+
+  <!-- TWO-AGENT -->
+  <span class="section-label" id="two-agent">Two-Agent Architecture</span>
+  <h2>How the Two Agents Divide the Work</h2>
+  <p>The curriculum is operated by two separate Claude Code sessions running in parallel on separate threads. Each session has a defined domain and a shared state file for handoffs.</p>
+
+  <div class="agent-block architect">
+    <div class="agent-label label-blue">Architect_CodeAgent</div>
+    <div class="agent-title">Builds, maintains, and publishes the curriculum site</div>
+    <ul>
+      <li>Creates and edits all HTML files in the wifi-80211-mastery repo</li>
+      <li>Manages commits, GitHub Pages, and repo structure</li>
+      <li>Owns <code>MEMORY.md</code> — the global memory index. Only this agent writes to it.</li>
+      <li>Creates new memory files when needed; updates the MEMORY.md index</li>
+      <li>Creates this EOD HTML and links it from 5320-onboarding index pages</li>
+      <li>Reads <code>project_wifi_mastery_progress.md</code> to know curriculum state, but does not edit it during curriculum sessions</li>
+    </ul>
+  </div>
+
+  <div class="agent-block curriculum">
+    <div class="agent-label label-amber">Socratic_CurriculumAgent</div>
+    <div class="agent-title">Teaches the curriculum — one day at a time, Socratic method</div>
+    <ul>
+      <li>Reads <code>project_wifi_mastery_progress.md</code> at the start of every session to know which Phase and Day to teach</li>
+      <li>Asks 1–2 Socratic questions; waits for answers; probes gaps before revealing any explanation</li>
+      <li>Uses the lab exercise at the end of the exchange, not the start</li>
+      <li>After each session, writes back to <code>project_wifi_mastery_progress.md</code> only — updates Current State (phase/day advance) and appends a session log entry</li>
+      <li><strong>Does NOT touch MEMORY.md</strong> — that is Architect_CodeAgent's domain exclusively</li>
+    </ul>
+  </div>
+
+  <div class="agent-block shared">
+    <div class="agent-label label-green">Shared State File</div>
+    <div class="agent-title">The handoff mechanism between both agents</div>
+    <p style="margin-bottom:8px">File: <code>/Users/khukhan/.claude/projects/-Users-khukhan/memory/project_wifi_mastery_progress.md</code></p>
+    <ul>
+      <li><strong>Current State block</strong> — Phase N, Day N, Status (NOT STARTED / IN PROGRESS / COMPLETE)</li>
+      <li><strong>Curriculum map</strong> — 6-phase status table</li>
+      <li><strong>Handoff notes</strong> — lab gear, corpus tiers, prior incident context, knowledge depth</li>
+      <li><strong>Session log</strong> — append-only; one entry per session with date, topics covered, gaps noted</li>
+      <li><strong>Pending deliverables</strong> — items that flow back to Architect_CodeAgent (e.g. capstone report)</li>
+    </ul>
+  </div>
+
+  <!-- SHARED MEMORY PROTOCOL -->
+  <span class="section-label" id="shared-memory">Shared Memory Protocol</span>
+  <h2>How the Handoff Works in Practice</h2>
+
+  <h3>Start of a Curriculum Session</h3>
+  <ol>
+    <li>Socratic_CurriculumAgent reads <code>project_wifi_mastery_progress.md</code></li>
+    <li>Checks the <strong>Current State</strong> block: Phase N, Day N</li>
+    <li>Reads the corresponding day card from the live HTML (e.g. <code>study_phase1_phy.html #day1</code>)</li>
+    <li>Begins with the Socratic question — no preamble, no lecture</li>
+  </ol>
+
+  <h3>End of a Curriculum Session</h3>
+  <ol>
+    <li>Curriculum Agent updates <strong>Current State</strong> block: advances to next day (or marks phase complete)</li>
+    <li>Appends a session log entry: date, phase/day, topics covered, any gaps the user struggled with</li>
+    <li>If a deliverable was produced (e.g. capstone report), notes it under Pending Deliverables for Architect to pick up</li>
+  </ol>
+
+  <h3>Start of an Architect Session (after a curriculum session)</h3>
+  <ol>
+    <li>Architect reads <code>project_wifi_mastery_progress.md</code> to see what the curriculum agent did</li>
+    <li>Picks up any deliverables flagged (e.g. "user produced capstone report — need to publish to HTML")</li>
+    <li>Does NOT modify the progress file during normal operation — only reads it</li>
+  </ol>
+
+  <!-- WRITE BOUNDARY -->
+  <span class="section-label" id="write-boundary">Write Boundary Rule</span>
+  <h2>The Critical Boundary</h2>
+
+  <div class="box rule">
+    <p><strong>Curriculum Agent write scope:</strong> ONE file only — <code>project_wifi_mastery_progress.md</code></p>
+  </div>
+
+  <div class="box ok">
+    <p><strong>MEMORY.md:</strong> Managed exclusively by Architect_CodeAgent. The Curriculum Agent never reads from or writes to MEMORY.md. Violation would corrupt the global memory index shared across all projects.</p>
+  </div>
+
+  <p>This boundary was established during the May 25 session after the Architect_CodeAgent incorrectly updated MEMORY.md from a curriculum context. Saved as <code>feedback_curriculum_agent_write_boundary.md</code> so it persists across all future sessions.</p>
+
+  <h3>Why This Matters</h3>
+  <p>MEMORY.md is a global index used across every project — 5320-onboarding, VOSS simulator, Cisco agent, EP1 engine, and now wifi-80211-mastery. If the Curriculum Agent were to write to it, it could overwrite cross-project pointers or create duplicate entries that corrupt another agent's context. The progress file is the Curriculum Agent's sandbox.</p>
+
+  <!-- CURRICULUM READY -->
+  <span class="section-label" id="curriculum-ready">Curriculum Ready State</span>
+  <h2>Where We Are — Phase 1, Day 1 Queued</h2>
+
+  <table>
+    <tr><th>Phase</th><th>Topic</th><th>Days</th><th>Status</th></tr>
+    <tr><td>1</td><td>PHY &amp; RF Internals</td><td>8</td><td><span class="badge todo">Not Started</span></td></tr>
+    <tr><td>2</td><td>MAC &amp; Frame Mechanics</td><td>6</td><td><span class="badge todo">Not Started</span></td></tr>
+    <tr><td>3</td><td>Security Architecture</td><td>6</td><td><span class="badge todo">Not Started</span></td></tr>
+    <tr><td>4</td><td>QoS, Roaming &amp; Convergence</td><td>5</td><td><span class="badge todo">Not Started</span></td></tr>
+    <tr><td>5</td><td>Capacity Planning &amp; HDD</td><td>5</td><td><span class="badge todo">Not Started</span></td></tr>
+    <tr><td>6</td><td>Field Troubleshooting Capstone</td><td>4</td><td><span class="badge todo">Not Started</span></td></tr>
+  </table>
+
+  <h3>Phase 1, Day 1 — First Question Loaded</h3>
+  <div class="box">
+    <p><strong>Topic:</strong> OFDM Symbol Structure &amp; Subcarrier Spacing<br>
+    <strong>Opening question:</strong> 802.11ac uses 312.5 kHz subcarrier spacing. 802.11ax dropped that to 78.125 kHz — exactly one quarter. The symbol time grew from 3.2 μs to 12.8 μs as a direct consequence. Why does narrower subcarrier spacing force a longer symbol time — and once you have that 12.8 μs symbol, what problem does it solve that 3.2 μs couldn't, specifically in a dense indoor multipath environment?<br>
+    <strong>Lab:</strong> AP1 <code>capture interface wifi0 duration 30</code> → Wireshark → decode HE Capabilities IE → confirm 4× symbol time in HE PHY header<br>
+    <strong>T1 reading:</strong> 802.11ax-2021.pdf §27.3.2 (OFDM parameters table)</p>
+  </div>
+
+  <!-- URLS -->
+  <span class="section-label" id="urls">URLs &amp; Files</span>
+  <h2>Key Locations</h2>
+  <table>
+    <tr><th>Resource</th><th>Location</th></tr>
+    <tr><td>wifi-80211-mastery repo</td><td><a href="https://github.com/khursheedkhanaiforgood/wifi-80211-mastery">github.com/khursheedkhanaiforgood/wifi-80211-mastery</a></td></tr>
+    <tr><td>GitHub Pages (live)</td><td><a href="https://khursheedkhanaiforgood.github.io/wifi-80211-mastery/">khursheedkhanaiforgood.github.io/wifi-80211-mastery/</a></td></tr>
+    <tr><td>Phase 1 — PHY</td><td>docs/study_phase1_phy.html</td></tr>
+    <tr><td>Assessments</td><td>docs/assessments.html</td></tr>
+    <tr><td>References (CWNA + .be + EP1)</td><td>docs/references.html</td></tr>
+    <tr><td>Curriculum progress file</td><td>/Users/khukhan/.claude/projects/-Users-khukhan/memory/project_wifi_mastery_progress.md</td></tr>
+    <tr><td>Write boundary rule</td><td>/Users/khukhan/.claude/projects/-Users-khukhan/memory/feedback_curriculum_agent_write_boundary.md</td></tr>
+    <tr><td>Multi-LLM framework (approved, not started)</td><td>/Users/khukhan/multi-llm-research/ (greenfield)</td></tr>
+  </table>
+
+  <!-- PENDING -->
+  <span class="section-label" id="pending">Pending</span>
+  <h2>Next Session</h2>
+  <ul>
+    <li><span class="badge todo">Tomorrow AM</span> <strong>Phase 1, Day 1 Socratic session</strong> — OFDM subcarrier spacing. Curriculum Agent reads progress file, asks the queued question, waits for answer before explaining.</li>
+    <li><span class="badge todo">Phase 6</span> <strong>docs/study_capstone_report.html</strong> — deliverable for Phase 6 Day 4 (WLPC-style incident report for May 7 DHCP incident). Not created yet — intentional.</li>
+    <li><span class="badge todo">Multi-LLM</span> <strong>Multi-LLM research framework</strong> — plan approved May 24, coding not started. 8 phases, 4-layer hallucination detection, greenfield at /Users/khukhan/multi-llm-research/</li>
+    <li><span class="badge todo">Housekeeping</span> <strong>project_index_dedup_pending.md</strong> — session_summary_20260422.html linked twice on all 3 index pages. Consolidate to one pointer.</li>
+  </ul>
+
+  <hr class="divider">
+  <div class="footer">&copy; 2026 KhKLab &nbsp;&bull;&nbsp; Lab Journal &nbsp;&bull;&nbsp; May 25, 2026 &nbsp;&bull;&nbsp; wifi-80211-mastery launch + two-agent curriculum architecture</div>
+</div>
+</body>
+</html>
