@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lab Journal — Two-Agent Architecture Wrap-Up & EOD Review, May 28 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Libre+Franklin:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Libre Baskerville', Georgia, serif; background: #FFFFFF; color: #111111; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 48px 24px 72px; }
+.container { max-width: 760px; width: 100%; }
+.nyt-rule-top { border: none; border-top: 3px solid #111; margin-bottom: 6px; }
+.nyt-rule-thin { border: none; border-top: 1px solid #111; margin-bottom: 18px; }
+.nyt-logo { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.22em; color: #666; text-align: center; margin-bottom: 6px; }
+.byline { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.72rem; color: #666; margin-bottom: 14px; letter-spacing: 0.02em; }
+.byline strong { color: #111; font-weight: 700; }
+h1 { font-family: 'Libre Baskerville', Georgia, serif; font-size: 2.2rem; font-weight: 700; color: #111; line-height: 1.15; margin-bottom: 14px; }
+.subtitle { font-family: 'Libre Baskerville', Georgia, serif; font-size: 1rem; font-style: italic; color: #444; line-height: 1.8; margin-bottom: 20px; border-bottom: 1px solid #E2E2E2; padding-bottom: 28px; }
+
+nav#toc { position: sticky; top: 0; background: #fff; border-bottom: 1px solid #ddd; padding: 0.6rem 0; z-index: 100; margin-bottom: 2rem; }
+nav#toc ul { display: flex; flex-wrap: wrap; gap: 0.3rem 1.2rem; list-style: none; justify-content: center; }
+nav#toc a { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase; color: #111; text-decoration: none; padding: 0.2rem 0; border-bottom: 2px solid transparent; transition: border-color 0.15s; }
+nav#toc a:hover { border-color: #a16207; color: #a16207; }
+
+.section-label { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.18em; color: #a16207; margin: 32px 0 12px; padding-bottom: 6px; border-bottom: 2px solid #a16207; display: block; }
+h2 { font-family: 'Libre Baskerville', Georgia, serif; font-size: 1.45rem; font-weight: 700; color: #111; margin: 0 0 12px; }
+h3 { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #a16207; margin: 24px 0 10px; }
+p { font-size: 0.97rem; line-height: 1.85; color: #222; margin-bottom: 12px; }
+ul, ol { padding-left: 22px; margin-bottom: 14px; }
+li { font-size: 0.95rem; line-height: 1.8; color: #222; margin-bottom: 4px; }
+code { font-family: 'SF Mono', Consolas, monospace; font-size: 0.82rem; background: #F4F4F4; border: 1px solid #E2E2E2; padding: 1px 5px; border-radius: 3px; color: #a16207; }
+pre { background: #F8F8F8; border: 1px solid #E2E2E2; border-radius: 4px; padding: 16px; overflow-x: auto; margin: 12px 0 18px; font-family: 'SF Mono', Consolas, monospace; font-size: 0.83rem; line-height: 1.65; color: #111; }
+table { width: 100%; border-collapse: collapse; margin: 12px 0 20px; font-size: 0.88rem; }
+th { background: #F4F4F4; font-family: 'Libre Franklin', Arial, sans-serif; font-weight: 700; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: #a16207; padding: 8px 10px; border: 1px solid #E2E2E2; text-align: left; }
+td { padding: 8px 10px; border: 1px solid #E2E2E2; color: #222; vertical-align: top; }
+tr:nth-child(even) td { background: #FAFAFA; }
+.badge { display: inline-block; padding: 2px 8px; border-radius: 2px; font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; margin: 1px; }
+.done { background: #E8F5E9; color: #2E7D32; border: 1px solid #A5D6A7; }
+.todo { background: #FFF3E0; color: #E65100; border: 1px solid #FFCC80; }
+.deferred { background: #F3E5F5; color: #6A1B9A; border: 1px solid #CE93D8; }
+.box { border-left: 3px solid #a16207; background: #FFFBF0; padding: 12px 16px; margin: 14px 0; border-radius: 0 4px 4px 0; }
+.box p { margin: 0; font-size: 0.92rem; }
+.box.ok { border-left-color: #2E7D32; background: #F1F8F1; }
+.box.warn { border-left-color: #C62828; background: #FCEEEE; }
+.box.blue { border-left-color: #1565C0; background: #F0F7FF; }
+.divider { border: none; border-top: 1px solid #E2E2E2; margin: 32px 0; }
+.footer { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.72rem; color: #999; text-align: center; margin-top: 48px; padding-top: 16px; border-top: 1px solid #E2E2E2; }
+a { color: #a16207; }
+a:hover { color: #111; }
+
+/* Timeline */
+.timeline { margin: 1rem 0 1.4rem; padding: 0; list-style: none; }
+.timeline li { display: flex; gap: 1rem; padding-bottom: 1rem; position: relative; }
+.timeline li::before { content: ''; position: absolute; left: 0.55rem; top: 1.4rem; bottom: 0; width: 1px; background: #ddd; }
+.timeline li:last-child::before { display: none; }
+.tl-dot { width: 1.1rem; height: 1.1rem; border-radius: 50%; background: #111; flex-shrink: 0; margin-top: 0.32rem; }
+.tl-dot.amber { background: #a16207; }
+.tl-dot.green { background: #2E7D32; }
+.tl-dot.grey { background: #aaa; }
+.tl-content { font-size: 0.9rem; line-height: 1.6; }
+.tl-label { font-size: 0.72rem; font-family: 'Libre Franklin', Arial, sans-serif; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: #888; }
+
+/* Compare grid */
+.compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 14px 0; }
+@media (max-width: 600px) { .compare-grid { grid-template-columns: 1fr; } }
+.compare-card { border: 1px solid #E2E2E2; border-radius: 4px; padding: 14px 16px; }
+.compare-card.may24 { border-top: 4px solid #1565C0; }
+.compare-card.may25 { border-top: 4px solid #a16207; }
+.compare-date { font-family: 'Libre Franklin', Arial, sans-serif; font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #888; margin-bottom: 6px; }
+.compare-title { font-family: 'Libre Baskerville', Georgia, serif; font-size: 1rem; font-weight: 700; margin-bottom: 10px; }
+</style>
+</head>
+<body>
+<div class="container">
+  <hr class="nyt-rule-top">
+  <div class="nyt-logo">KhKLab &nbsp;&bull;&nbsp; 802.11 Mastery &nbsp;&bull;&nbsp; Lab Journal</div>
+  <hr class="nyt-rule-thin">
+
+  <p class="byline"><strong>Thursday, May 28, 2026</strong> &nbsp;&bull;&nbsp; Two-Agent Architecture Wrap-Up &amp; EOD Style Review</p>
+  <h1>Wrap-Up: Architecture Live, Curriculum Queued, EOD Review Deferred</h1>
+  <p class="subtitle">The two-agent system is operational. Shared state file in place. Write boundary enforced. Phase 1 Day 1 of 802.11 Mastery carries over to next session. EOD HTML template unification flagged for review.</p>
+
+  <nav id="toc">
+    <ul>
+      <li><a href="#accomplished">Accomplished</a></li>
+      <li><a href="#timeline">Timeline</a></li>
+      <li><a href="#eod-review">EOD Review</a></li>
+      <li><a href="#state">Curriculum State</a></li>
+      <li><a href="#urls">URLs</a></li>
+      <li><a href="#pending">Pending</a></li>
+    </ul>
+  </nav>
+
+  <!-- ACCOMPLISHED -->
+  <span class="section-label" id="accomplished">Accomplished</span>
+  <h2>What Was Completed</h2>
+  <ul>
+    <li><span class="badge done">Done</span> <code>project_wifi_mastery_progress.md</code> created — shared state file for Socratic Curriculum Agent and Architect_CodeAgent handoffs</li>
+    <li><span class="badge done">Done</span> Write boundary rule saved to <code>feedback_curriculum_agent_write_boundary.md</code> — Curriculum Agent writes to progress file only; MEMORY.md is Architect domain exclusively</li>
+    <li><span class="badge done">Done</span> <code>session_summary_20260525.html</code> created, committed (<code>52df80e</code>), and pushed to 5320-onboarding/main</li>
+    <li><span class="badge done">Done</span> All 3 landing pages updated with amber May 25 card (index.html, index-nyt.html, index-harpers.html)</li>
+    <li><span class="badge done">Done</span> Broken worktree <code>.git</code> file repaired at <code>/private/tmp/main-5320/</code></li>
+    <li><span class="badge done">Done</span> May 24 EOD reviewed — comparison notes recorded (see below)</li>
+    <li><span class="badge done">Done</span> Repo URL corrected in progress file: <code>khursheedkhanaiforgood-ai</code> (not <code>khursheedkhanaiforgood</code>)</li>
+  </ul>
+
+  <!-- TIMELINE -->
+  <span class="section-label" id="timeline">Session Timeline</span>
+  <h2>How the Session Unfolded</h2>
+  <ul class="timeline">
+    <li>
+      <div class="tl-dot amber"></div>
+      <div class="tl-content"><div class="tl-label">Architect_CodeAgent</div>Created <code>project_wifi_mastery_progress.md</code> — shared state file for both agents. Populated with Phase 1 Day 1 NOT STARTED, curriculum map, handoff notes (lab gear, corpus tiers, prior incidents, knowledge depth), Socratic method reminder.</div>
+    </li>
+    <li>
+      <div class="tl-dot amber"></div>
+      <div class="tl-content"><div class="tl-label">Architect_CodeAgent</div>User flagged write boundary: Curriculum Agent must only write to progress file — never MEMORY.md. Saved as <code>feedback_curriculum_agent_write_boundary.md</code>.</div>
+    </li>
+    <li>
+      <div class="tl-dot amber"></div>
+      <div class="tl-content"><div class="tl-label">Architect_CodeAgent</div>Phase 1 Day 1 Socratic question loaded: "802.11ax uses 78.125 kHz subcarrier spacing instead of 312.5 kHz — why does symbol time grow 4×, and what does that solve in a dense indoor multipath environment?" User held for next session.</div>
+    </li>
+    <li>
+      <div class="tl-dot green"></div>
+      <div class="tl-content"><div class="tl-label">EOD HTML — May 25</div>Created <code>session_summary_20260525.html</code>. Covers: repo file inventory, two-agent architecture, shared memory protocol, write boundary, curriculum ready state. Pushed to 5320-onboarding/main (commit <code>52df80e</code>). All 3 index pages updated with amber card.</div>
+    </li>
+    <li>
+      <div class="tl-dot grey"></div>
+      <div class="tl-content"><div class="tl-label">EOD Style Review</div>Compared May 24 EOD (at <code>/Users/khukhan/docs/session_summary_20260524.html</code>) with May 25 EOD. Key findings recorded. Unification of styles deferred to next session.</div>
+    </li>
+  </ul>
+
+  <!-- EOD REVIEW -->
+  <span class="section-label" id="eod-review">EOD Style Review</span>
+  <h2>May 24 vs May 25 EOD — What to Keep from Each</h2>
+  <p>Two sessions produced two EOD files with different strengths. A unified template should borrow from both. Review and merge is deferred — notes captured here for next session.</p>
+
+  <div class="compare-grid">
+    <div class="compare-card may24">
+      <div class="compare-date">May 24 EOD — Architect_CodeAgent</div>
+      <div class="compare-title">Stronger in these areas</div>
+      <ul>
+        <li><strong>Sticky <code>nav#toc</code></strong> — scrolls with page; essential for long EODs</li>
+        <li><strong>Timeline section</strong> — dot-and-line chronological view of what happened; great for reviewing a session cold</li>
+        <li><strong>2-column agent cards</strong> — side-by-side Architect / Socratic layout, clean grid</li>
+        <li><strong>Source Sans 3</strong> pairing with Libre Baskerville — slightly tighter than Libre Franklin</li>
+      </ul>
+    </div>
+    <div class="compare-card may25">
+      <div class="compare-date">May 25 EOD — This session</div>
+      <div class="compare-title">Stronger in these areas</div>
+      <ul>
+        <li><strong>Write boundary documented</strong> — red/green callout boxes, clearly states the rule and why it matters</li>
+        <li><strong>Protocol flows</strong> — numbered steps for "Start of curriculum session" / "End of session" / "Start of Architect session"</li>
+        <li><strong>File inventory table</strong> — all 11 repo files with phase, color, content</li>
+        <li><strong>Stat cards</strong> — 4-up grid (6 phases, 34 days, 76 Qs, 2 agent threads)</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="box blue">
+    <p><strong>Deferred action:</strong> Merge into one canonical EOD template — sticky TOC + timeline from May 24; write boundary boxes + protocol flows + stat cards from May 25. Apply forward to all future EODs.</p>
+  </div>
+
+  <div class="box warn">
+    <p><strong>URL bug in May 24 EOD</strong> (lines 441–442): repo URLs reference <code>khursheedkhanaiforgood</code> instead of <code>khursheedkhanaiforgood-ai</code>. Fix if linked publicly from a landing page.</p>
+  </div>
+
+  <!-- CURRICULUM STATE -->
+  <span class="section-label" id="state">Curriculum State</span>
+  <h2>Where Things Stand — Phase 1, Day 1 Pending</h2>
+
+  <table>
+    <tr><th>Phase</th><th>Topic</th><th>Days</th><th>Status</th></tr>
+    <tr><td>1</td><td>PHY &amp; RF Internals</td><td>8</td><td><span class="badge todo">Not Started</span></td></tr>
+    <tr><td>2</td><td>MAC &amp; Frame Mechanics</td><td>6</td><td><span class="badge todo">Not Started</span></td></tr>
+    <tr><td>3</td><td>Security Architecture</td><td>6</td><td><span class="badge todo">Not Started</span></td></tr>
+    <tr><td>4</td><td>QoS, Roaming &amp; Convergence</td><td>5</td><td><span class="badge todo">Not Started</span></td></tr>
+    <tr><td>5</td><td>Capacity Planning &amp; HDD</td><td>5</td><td><span class="badge todo">Not Started</span></td></tr>
+    <tr><td>6</td><td>Field Troubleshooting Capstone</td><td>4</td><td><span class="badge todo">Not Started</span></td></tr>
+  </table>
+
+  <div class="box">
+    <p><strong>Phase 1 Day 1 — first question loaded and ready:</strong><br>
+    "802.11ac uses 312.5 kHz subcarrier spacing. 802.11ax dropped it to 78.125 kHz — exactly ¼. Symbol time grew from 3.2 μs to 12.8 μs. Why does narrower subcarrier spacing force a longer symbol time — and what problem does 12.8 μs solve that 3.2 μs couldn't, in a dense indoor multipath environment?"</p>
+  </div>
+
+  <!-- URLS -->
+  <span class="section-label" id="urls">URLs &amp; Key Files</span>
+  <h2>Key Locations</h2>
+  <table>
+    <tr><th>Resource</th><th>Location</th></tr>
+    <tr><td>wifi-80211-mastery repo</td><td><a href="https://github.com/khursheedkhanaiforgood-ai/wifi-80211-mastery">github.com/khursheedkhanaiforgood-ai/wifi-80211-mastery</a></td></tr>
+    <tr><td>GitHub Pages (live)</td><td><a href="https://khursheedkhanaiforgood-ai.github.io/wifi-80211-mastery/">khursheedkhanaiforgood-ai.github.io/wifi-80211-mastery/</a></td></tr>
+    <tr><td>5320-onboarding landing</td><td><a href="https://khursheedkhanaiforgood-ai.github.io/5320-onboarding/">khursheedkhanaiforgood-ai.github.io/5320-onboarding/</a></td></tr>
+    <tr><td>May 25 EOD (this repo)</td><td><a href="session_summary_20260525.html">session_summary_20260525.html</a></td></tr>
+    <tr><td>May 24 EOD (local)</td><td>/Users/khukhan/docs/session_summary_20260524.html</td></tr>
+    <tr><td>Curriculum progress file</td><td>/Users/khukhan/.claude/projects/-Users-khukhan/memory/project_wifi_mastery_progress.md</td></tr>
+    <tr><td>Write boundary rule</td><td>/Users/khukhan/.claude/projects/-Users-khukhan/memory/feedback_curriculum_agent_write_boundary.md</td></tr>
+  </table>
+
+  <!-- PENDING -->
+  <span class="section-label" id="pending">Pending</span>
+  <h2>Next Session</h2>
+  <ul>
+    <li><span class="badge todo">Next</span> <strong>Phase 1, Day 1 Socratic session</strong> — OFDM subcarrier spacing. Question is loaded. Curriculum Agent reads progress file, asks the question, waits for answer.</li>
+    <li><span class="badge deferred">Deferred</span> <strong>Unified EOD HTML template</strong> — merge May 24 sticky TOC + timeline with May 25 protocol flows + write boundary boxes.</li>
+    <li><span class="badge deferred">Deferred</span> <strong>Fix May 24 EOD repo URLs</strong> — <code>khursheedkhanaiforgood</code> → <code>khursheedkhanaiforgood-ai</code> (if publicly linked).</li>
+    <li><span class="badge deferred">Deferred</span> <strong>Multi-LLM research framework</strong> — plan approved, implementation not started. 8 phases, greenfield at /Users/khukhan/multi-llm-research/</li>
+    <li><span class="badge deferred">Deferred</span> <strong>docs/study_capstone_report.html</strong> — Phase 6 Day 4 deliverable. Intentionally not created yet.</li>
+  </ul>
+
+  <hr class="divider">
+  <div class="footer">&copy; 2026 KhKLab &nbsp;&bull;&nbsp; Lab Journal &nbsp;&bull;&nbsp; May 28, 2026 &nbsp;&bull;&nbsp; Two-agent architecture wrap-up &amp; EOD review</div>
+</div>
+</body>
+</html>
