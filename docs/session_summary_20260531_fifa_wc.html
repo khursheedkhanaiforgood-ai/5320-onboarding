@@ -221,6 +221,9 @@
   <a href="#review">Engineer Review</a>
   <a href="#karl">Karl Lab</a>
   <a href="#open">Open Questions</a>
+  <a href="#journey">Architecture Journey</a>
+  <a href="#sprint1">Sprint 1 — Local</a>
+  <a href="#sprint2">Sprint 2 — AD</a>
 </nav>
 
 
@@ -854,8 +857,345 @@ AP/EP1 log:
 </section>
 
 
+<!-- ── SECTION 15: ARCHITECTURE JOURNEY ───────────────────────────── -->
+<section id="journey">
+  <h2>15. Architecture Journey — How We Arrived at the Policy Design</h2>
+
+  <p>This section captures the dialogue verbatim — the questions, discoveries, and decisions that built the EP1 Security policy architecture from first principles. Each node in the linked progression below is a question that unlocked the next.</p>
+
+  <div class="callout-blue">
+    <p><strong>Hardware confirmed:</strong> AP3000 (IQ Engine OS) + ExtremeSwitching 5320 (EXOS SwitchEngine). EP1 Security subscription confirmed active. Lab target: factory-fresh build from scratch.</p>
+  </div>
+
+  <h3>Linked Progression</h3>
+  <ol>
+    <li><a href="#j1">Q: How do I get to ExtremeControl from EP1?</a> → <em>9-dot Apps launcher → Extreme Platform ONE Security</em></li>
+    <li><a href="#j2">Q: EP1.docx — what does it show?</a> → <em>EP1 is a hub; Security is a named module; confirmed subscription active</em></li>
+    <li><a href="#j3">Q: EP1_SecurityPolicy.docx — what's in there?</a> → <em>Two policy types: Hybrid Policy vs Network Policy; built-in firewall (Default DNS DHCP = Allow / Default All Networks = Deny)</em></li>
+    <li><a href="#j4">Q: EP1_Security_UsersGroups.docx — what does Users &amp; Devices look like?</a> → <em>No users yet; Add Local User = email + password; hard cap of 100 local users; Create User Group = dual-panel picker</em></li>
+    <li><a href="#j5">Q: 100 local users for now, but 72,000 fans need AD — how does that work?</a> → <em>Fans never touch AD (catch-all Guest policy); AD only for ~800 credentialed users (teams + VIP + staff)</em></li>
+    <li><a href="#j6">Q: Six policies live in EP1 Security — but how do I assign them to SW1?</a> → <em>Policies are never assigned to SW1 directly; AP3000 is the RADIUS client; EP1 Security is the decision engine; 5320 just carries tagged VLANs</em></li>
+    <li><a href="#j7">Q: What about VLANs for Guest, POS, VIP?</a> → <em>Full set: VLAN 10/20/30/40/50/99 — six VLANs, six Network Policies, correct build order established</em></li>
+    <li><a href="#j8">Q: Let's wipe both SW1 and AP1 and build from scratch</a> → <em>Factory reset procedures for 5320 (EXOS) and AP3000 (IQ Engine); full re-onboarding sequence</em></li>
+    <li><a href="#j9">Q: Is EP1 Security where the six policies reside, and does it validate what AP3000 sends to RADIUS and assign the VLAN?</a> → <em>Confirmed: AP3000 = bouncer, EP1 Security = guest list, 5320 = room</em></li>
+  </ol>
+
+  <hr style="border:none; border-top:1px solid #e0e0e0; margin: 32px 0;">
+
+  <h3 id="j1">Node 1 — How Do I Get to ExtremeControl from EP1?</h3>
+  <p><strong>Question:</strong> "Before then, how do I get to ExtremeControl since I only have access to Extreme Platform One (EP1)?"</p>
+  <p><strong>Answer:</strong> The EP1 portal has a <strong>9-dot Apps launcher</strong> in the top-right corner. Clicking it reveals a dropdown of all EN cloud modules under your subscription:</p>
+  <table>
+    <tr><th>App in Launcher</th><th>What It Is</th></tr>
+    <tr><td>ExtremeCloud IQ (Classic)</td><td>Legacy XIQ portal</td></tr>
+    <tr><td><strong>Extreme Platform ONE Security</strong></td><td><strong>This is ExtremeControl / cloud NAC</strong></td></tr>
+    <tr><td>ExtremeCloud SD-WAN</td><td>IPE SD-WAN management</td></tr>
+    <tr><td>Extreme Intuitive Insights</td><td>AIOps analytics</td></tr>
+  </table>
+  <p>EP1 Security = cloud-delivered ExtremeControl. Same RADIUS rule engine, same policy logic — no on-premises appliance required. Requires the EP1 Security subscription to appear (confirmed active).</p>
+
+  <hr style="border:none; border-top:1px solid #e0e0e0; margin: 32px 0;">
+
+  <h3 id="j2">Node 2 — EP1 Portal Screenshot (EP1.docx)</h3>
+  <p><strong>File:</strong> EP1.docx — single screenshot of the EP1 workspace with the Apps dropdown open.</p>
+  <p><strong>Key finding:</strong> The left nav in EP1 Core shows: Workspace → Monitoring → Configuration (Sites, Network Policies, Third-Party Management) → Reports → Subscriptions &amp; Services → Administration &amp; Settings. The Apps menu is top-right. EP1 is a unified launcher, not a monolithic portal — each module opens in its own context.</p>
+
+  <hr style="border:none; border-top:1px solid #e0e0e0; margin: 32px 0;">
+
+  <h3 id="j3">Node 3 — Network Policy Screen (EP1_SecurityPolicy.docx)</h3>
+  <p><strong>File:</strong> EP1_SecurityPolicy.docx — screenshot of "Add Network Policy" in EP1 Security.</p>
+  <p><strong>Key findings:</strong></p>
+  <ul>
+    <li>Two policy types exist: <strong>Hybrid Policy</strong> (security + network combined) and <strong>Network Policy</strong> (VLAN assignment + traffic rules). For dynamic VLAN, use <strong>Network Policy</strong>.</li>
+    <li>Conditions panel: Any User Group ✓, Any Device Group ✓, Any Location ✓, Any Time ✓, Any Authentication Type ✓. Uncheck to scope the policy to a specific group.</li>
+    <li><strong>Network Access</strong> has two sub-settings: Default Access (Deny) and Select Existing VLAN toggle. Toggle VLAN on → enter VLAN ID → policy returns that VLAN in the RADIUS Access-Accept.</li>
+    <li><strong>Network Service Group</strong> section at the bottom: Default DNS DHCP = Allow, Default All Networks = Deny. This is a built-in per-policy firewall — the policy is not just a VLAN assignment, it also controls what traffic is permitted on that VLAN. Use this to enforce POS isolation, Guest internet-only, etc.</li>
+    <li>The VLAN ID and ISID fields appear side by side — ISID is for VOSS fabric binding (skip for SW1/EXOS lab; fill in only if SW2 VOSS is in scope).</li>
+  </ul>
+
+  <hr style="border:none; border-top:1px solid #e0e0e0; margin: 32px 0;">
+
+  <h3 id="j4">Node 4 — Users &amp; Devices Screen (EP1_Security_UsersGroups.docx)</h3>
+  <p><strong>File:</strong> EP1_Security_UsersGroups.docx — three screenshots: Users list (empty), Add Local User dialog, Create User Group dialog.</p>
+  <p><strong>Key findings:</strong></p>
+  <ul>
+    <li><strong>No users found</strong> — fresh portal, nothing pre-configured. Starting from zero.</li>
+    <li>Users &amp; Devices has two top-level tabs: <strong>Users</strong> and <strong>Devices</strong>. Under Users: <strong>Users</strong> sub-tab and <strong>User Groups</strong> sub-tab.</li>
+    <li><strong>Add Local User</strong>: fields are Email Address + Password only. Banner reads: <em>"100 local users are supported."</em> — this is a hard cap, not a soft limit.</li>
+    <li><strong>Create User Group</strong>: User Group Name + Description + dual-panel picker (Available / Added). The note reads: <em>"Disabled Users are not shown in the available list."</em> Groups are the unit that Network Policies reference — you don't attach a policy to an individual user, you attach it to a group.</li>
+    <li>The <strong>Identity Provider</strong> column in the Users table (visible but empty) confirms AD/LDAP integration is supported — once configured, users sync from AD and their Identity Provider shows in this column.</li>
+  </ul>
+
+  <hr style="border:none; border-top:1px solid #e0e0e0; margin: 32px 0;">
+
+  <h3 id="j5">Node 5 — 100 Local Users vs 72,000 Fans: Who Needs What?</h3>
+  <p><strong>Question:</strong> "For the first phase, local, I have up to 100 clients? You said for 72,000 fans we must use AD. How does that part work?"</p>
+  <p><strong>Answer:</strong> The 72,000 fans <em>never authenticate via 802.1X and never need AD accounts</em>. They hit the catch-all Guest Network Policy (no User Group condition), land on VLAN 30, get an IP, then a browser opens the CWP. AD is only needed for the ~800 credentialed users:</p>
+  <table>
+    <tr><th>User Type</th><th>Count</th><th>Auth</th><th>Identity Source</th><th>VLAN</th></tr>
+    <tr><td>Fans</td><td>72,000</td><td>CWP only</td><td>None — catch-all</td><td>30</td></tr>
+    <tr><td>Team USA players</td><td>~50</td><td>802.1X</td><td>AD</td><td>10</td></tr>
+    <tr><td>Team AUS players</td><td>~50</td><td>802.1X</td><td>AD</td><td>20</td></tr>
+    <tr><td>VIP/Premium</td><td>~500</td><td>802.1X</td><td>AD</td><td>40</td></tr>
+    <tr><td>Event staff</td><td>~200</td><td>802.1X</td><td>AD</td><td>99</td></tr>
+    <tr><td>POS terminals</td><td>~100</td><td>MAB</td><td>MAC database</td><td>50</td></tr>
+  </table>
+  <p>The 100-user local cap is sufficient for Karl Lab testing of the full dynamic VLAN flow. For production, only the ~800 credentialed users need AD — and the fans never touch it.</p>
+
+  <hr style="border:none; border-top:1px solid #e0e0e0; margin: 32px 0;">
+
+  <h3 id="j6">Node 6 — How Are the Six Policies Assigned to SW1?</h3>
+  <p><strong>Question:</strong> "I create users in EP1 Security and groups. I create the VLANs in EP1 Security Networks. In SW1 I create the VLANs. Now on EP1 I create six policies. But how do I assign the six policies to SW1?"</p>
+  <p><strong>Answer:</strong> The policies are <em>never assigned directly to SW1</em>. The binding model has three components:</p>
+  <pre>MacBook → [802.1X / EAP] → AP3000 (Authenticator)
+AP3000  → [RADIUS Access-Request] → EP1 Security (evaluates 6 policies → returns VLAN ID)
+AP3000  → [tags client traffic with VLAN 10] → 5320 SW1 (just needs VLAN 10 to exist + AP uplink tagged)</pre>
+  <p>SW1 is passive. EP1 Security registers AP3000 as a RADIUS client (NAD) via <code>EP1 Security → Configuration → Network</code>. The 5320 only needs the VLANs to exist and the AP uplink port tagged for each VLAN — it never communicates with EP1 Security directly for wireless authentication.</p>
+  <table>
+    <tr><th>Device</th><th>Role</th><th>Knows about policies?</th></tr>
+    <tr><td>AP3000</td><td>Authenticator — relays EAP, enforces VLAN assignment</td><td>No</td></tr>
+    <tr><td>EP1 Security</td><td>RADIUS server + policy engine</td><td><strong>Yes — policies live here</strong></td></tr>
+    <tr><td>5320 SW1</td><td>Data plane — carries tagged VLAN traffic</td><td>No</td></tr>
+    <tr><td>EP1 Core</td><td>AP3000 config — SSID, radio, RADIUS pointer</td><td>No</td></tr>
+  </table>
+
+  <hr style="border:none; border-top:1px solid #e0e0e0; margin: 32px 0;">
+
+  <h3 id="j7">Node 7 — Full VLAN Set: Guest, POS, VIP</h3>
+  <p><strong>Question:</strong> "What about VLANs for Guest, POS, VIP Guest etc.?"</p>
+  <p><strong>Answer:</strong> Build the full set from the start. Six VLANs, six Network Policies, one catch-all:</p>
+  <table>
+    <tr><th>Priority</th><th>Policy Name</th><th>User Group Condition</th><th>Auth Type</th><th>VLAN</th></tr>
+    <tr><td>1</td><td>Policy_POS</td><td>Device Group: Lab_POS (MACs)</td><td>MAB</td><td>50</td></tr>
+    <tr><td>2</td><td>Policy_TeamUSA</td><td>Lab_TeamUSA</td><td>802.1X</td><td>10</td></tr>
+    <tr><td>3</td><td>Policy_TeamAUS</td><td>Lab_TeamAUS</td><td>802.1X</td><td>20</td></tr>
+    <tr><td>4</td><td>Policy_VIP</td><td>Lab_VIP</td><td>802.1X</td><td>40</td></tr>
+    <tr><td>5</td><td>Policy_Staff</td><td>Lab_Staff</td><td>802.1X</td><td>99</td></tr>
+    <tr><td>6</td><td>Policy_Guest</td><td><em>none — catch-all</em></td><td>Any</td><td>30</td></tr>
+  </table>
+  <div class="callout">
+    <p><strong>Priority order is critical.</strong> EP1 Security evaluates top to bottom — first match wins. Policy_Guest must be last or it matches every unauthenticated device before the 802.1X policies get a chance.</p>
+  </div>
+
+  <hr style="border:none; border-top:1px solid #e0e0e0; margin: 32px 0;">
+
+  <h3 id="j8">Node 8 — Factory Reset: AP3000 + 5320</h3>
+  <p><strong>Decision:</strong> "I want to build from scratch, wipe both SW1 and AP1."</p>
+  <p><strong>SW1 (5320 EXOS):</strong></p>
+  <pre>unconfigure switch all    ← correct EXOS command (NOT delete /intflash/config.cfg — that is VOSS only)
+# After reboot, clear stale SSH host key on your Mac:
+ssh-keygen -R &lt;SW1_IP&gt;</pre>
+  <p><strong>AP1 (AP3000 IQ Engine):</strong> Via EP1 Core → Monitor → Devices → AP3000 → Actions → Reset to Factory Default. Or physical: hold reset pinhole 10+ seconds until LEDs cycle.</p>
+  <p><strong>After reset — SW1 rebuild order:</strong> hostname → VLANs (10/20/30/40/50/99) → tag AP uplink port for all client VLANs → optional DHCP per VLAN → IQAgent → save.</p>
+
+  <hr style="border:none; border-top:1px solid #e0e0e0; margin: 32px 0;">
+
+  <h3 id="j9">Node 9 — Architecture Confirmed</h3>
+  <p><strong>Question:</strong> "Is that where the six policies would reside, and EP1 Security will validate what the AP1 sends to RADIUS and put that user where it belongs with the assigned VLAN? I have AP3000 and SW 5320."</p>
+  <p><strong>Answer: Yes — exactly right.</strong></p>
+  <pre>AP3000 = the bouncer     (relays credentials, enforces the decision)
+EP1 Security = the guest list  (six policies live here, decision made here)
+5320 SW1 = the room      (VLAN exists, door is open, client walks in)</pre>
+  <p>AP3000 supports 802.1X offload — it handles the full EAP exchange itself and sends only the RADIUS Access-Request to EP1 Security. The 5320 never talks to EP1 Security for wireless auth. If you later want wired 802.1X on 5320 switch ports (e.g., POS terminals on a wired port), the 5320 becomes a second RADIUS client and you register its IP separately in <code>EP1 Security → Configuration → Network</code>.</p>
+</section>
+
+
+<!-- ── SECTION 16: SPRINT 1 — LOCAL CLIENTS ──────────────────────── -->
+<section id="sprint1">
+  <h2>16. Sprint 1 — Karl Lab Build with Local Clients</h2>
+
+  <div class="callout-green">
+    <p><strong>Goal:</strong> Validate the complete dynamic VLAN flow end-to-end using local EP1 Security users — no AD, no external identity provider. AP3000 + 5320 SW1, factory-fresh. Up to 100 local users supported.</p>
+  </div>
+
+  <h3>Step 1 — Factory Reset &amp; Re-onboard</h3>
+  <pre># 5320 SW1
+unconfigure switch all              # reboot to factory defaults
+ssh-keygen -R &lt;SW1_IP&gt;             # clear stale host key on Mac
+
+# AP3000: EP1 Core → Monitor → Devices → Reset to Factory Default
+# AP3000 reboots, starts CAPWAP discovery, appears in EP1 as unclaimed</pre>
+
+  <h3>Step 2 — Build 5320 SW1</h3>
+  <pre># Hostname
+configure snmp sysName "KhKLab-SW1"
+
+# All six FIFA lab VLANs
+create vlan "TeamUSA"  tag 10
+create vlan "TeamAUS"  tag 20
+create vlan "Guest"    tag 30
+create vlan "VIP"      tag 40
+create vlan "POS"      tag 50
+create vlan "Mgmt"     tag 99
+
+# Tag AP3000 uplink port (replace 1 with your actual port number)
+configure vlan TeamUSA add ports 1 tagged
+configure vlan TeamAUS add ports 1 tagged
+configure vlan Guest   add ports 1 tagged
+configure vlan VIP     add ports 1 tagged
+configure vlan POS     add ports 1 tagged
+
+# Optional: DHCP per VLAN for full IP assignment test
+configure vlan TeamUSA ipaddress 10.10.0.1/24
+configure vlan TeamAUS ipaddress 10.20.0.1/24
+configure vlan Guest   ipaddress 10.30.0.1/24
+configure vlan VIP     ipaddress 10.40.0.1/24
+configure vlan POS     ipaddress 10.50.0.1/24
+enable dhcp ports vlan TeamUSA
+enable dhcp ports vlan TeamAUS
+enable dhcp ports vlan Guest
+enable dhcp ports vlan VIP
+enable dhcp ports vlan POS
+
+save configuration</pre>
+
+  <h3>Step 3 — Re-claim AP3000 in EP1 Core</h3>
+  <pre>EP1 Core → Global Settings → VIQ Management → Devices → Add Device
+  → Enter AP3000 serial number
+  → Assign to your Site
+  → AP3000 connects via CAPWAP and pulls its network policy</pre>
+
+  <h3>Step 4 — Register AP3000 as RADIUS Client in EP1 Security</h3>
+  <pre>EP1 Security → Configuration → Network → Add
+  Device IP:     [AP3000 management IP]
+  Shared Secret: FIFAlab2026!
+  Role:          Network Access Device</pre>
+
+  <h3>Step 5 — Create Local Users in EP1 Security</h3>
+  <p><code>EP1 Security → Policy → Users &amp; Devices → Users → Add Local User</code></p>
+  <table>
+    <tr><th>Email</th><th>Password</th><th>Represents</th></tr>
+    <tr><td>testusa@wc2026.lab</td><td>Test1234!</td><td>Team USA player</td></tr>
+    <tr><td>testaus@wc2026.lab</td><td>Test1234!</td><td>Team AUS player</td></tr>
+    <tr><td>testvip@wc2026.lab</td><td>Test1234!</td><td>VIP guest</td></tr>
+    <tr><td>teststaff@wc2026.lab</td><td>Test1234!</td><td>Staff</td></tr>
+  </table>
+  <p><em>POS and Guest need no local users — POS uses MAB (MAC address only), Guest is catch-all (no credential).</em></p>
+
+  <h3>Step 6 — Create User Groups</h3>
+  <p><code>EP1 Security → Policy → Users &amp; Devices → User Groups → Create User Group</code></p>
+  <table>
+    <tr><th>Group Name</th><th>Members</th></tr>
+    <tr><td>Lab_TeamUSA</td><td>testusa@wc2026.lab</td></tr>
+    <tr><td>Lab_TeamAUS</td><td>testaus@wc2026.lab</td></tr>
+    <tr><td>Lab_VIP</td><td>testvip@wc2026.lab</td></tr>
+    <tr><td>Lab_Staff</td><td>teststaff@wc2026.lab</td></tr>
+  </table>
+
+  <h3>Step 7 — Create Six Network Policies (in priority order)</h3>
+  <p><code>EP1 Security → Policy → Security Policies → Add Network Policy</code></p>
+  <table>
+    <tr><th>Priority</th><th>Policy Name</th><th>Uncheck Condition</th><th>Select Group</th><th>VLAN ID</th><th>Network Services</th></tr>
+    <tr><td>1</td><td>Policy_POS</td><td>Any Device Group</td><td>Lab_POS (device MACs)</td><td>50</td><td>DNS/DHCP + Allow payment IPs only</td></tr>
+    <tr><td>2</td><td>Policy_TeamUSA</td><td>Any User Group</td><td>Lab_TeamUSA</td><td>10</td><td>DNS/DHCP + Allow all (lab)</td></tr>
+    <tr><td>3</td><td>Policy_TeamAUS</td><td>Any User Group</td><td>Lab_TeamAUS</td><td>20</td><td>DNS/DHCP + Allow all (lab)</td></tr>
+    <tr><td>4</td><td>Policy_VIP</td><td>Any User Group</td><td>Lab_VIP</td><td>40</td><td>DNS/DHCP + Allow all (lab)</td></tr>
+    <tr><td>5</td><td>Policy_Staff</td><td>Any User Group</td><td>Lab_Staff</td><td>99</td><td>DNS/DHCP + Allow all (lab)</td></tr>
+    <tr><td>6</td><td>Policy_Guest</td><td><em>leave all checked</em></td><td><em>none — catch-all</em></td><td>30</td><td>DNS/DHCP + internet only</td></tr>
+  </table>
+  <div class="callout">
+    <p><strong>During lab testing</strong> set Default All Networks to <strong>Allow</strong> on policies 2–5 so you can verify VLAN assignment without fighting the firewall. Once VLAN placement is confirmed via <code>show fdb</code>, tighten the Network Service Groups per role.</p>
+  </div>
+
+  <h3>Step 8 — Configure WC_Secure SSID in EP1 Core</h3>
+  <pre>EP1 Core → Network Policies → Wireless Networks → Add SSID
+  Name:     WC_Secure
+  Security: WPA3-Enterprise (or WPA2/WPA3 transition for mixed clients)
+  Auth:     802.1X
+  RADIUS Server Group: [EP1 Security RADIUS endpoint]
+  ✅ Enable Dynamic VLAN Assignment
+  Default VLAN (fallback): 30</pre>
+
+  <h3>Verification</h3>
+  <pre># Connect MacBook to WC_Secure, authenticate as testusa@wc2026.lab
+
+# On 5320 SW1:
+show fdb                        # MacBook MAC should appear on VLAN 10
+show vlan TeamUSA               # MacBook should be listed as active
+
+# In EP1 Core:
+Monitor → Clients → [MacBook] → Association Details
+# Look for: Dynamic VLAN: 10
+
+# Repeat with testaus@wc2026.lab → should land on VLAN 20
+# Repeat with no credentials (Guest) → should land on VLAN 30</pre>
+
+  <div class="callout-green">
+    <p><strong>Sprint 1 success criteria:</strong> Three clients — testusa (VLAN 10), testaus (VLAN 20), guest/no-auth (VLAN 30) — all confirmed via <code>show fdb</code> on the 5320. One AP, one SSID, three different VLANs. The FIFA architecture is validated at small scale.</p>
+  </div>
+</section>
+
+
+<!-- ── SECTION 17: SPRINT 2 — AD INTEGRATION ─────────────────────── -->
+<section id="sprint2">
+  <h2>17. Sprint 2 — Active Directory Integration for Production Scale</h2>
+
+  <div class="callout-blue">
+    <p><strong>Goal:</strong> Replace local EP1 Security users with AD-backed groups. The six Network Policies don't change — only the identity source behind the User Groups changes. Sprint 1 is the proof of concept; Sprint 2 is production-ready.</p>
+  </div>
+
+  <h3>What You Need for AD — Prerequisites Checklist</h3>
+  <table>
+    <tr><th>#</th><th>Requirement</th><th>Detail</th><th>Who provides it</th></tr>
+    <tr><td>1</td><td><strong>Active Directory server</strong></td><td>Windows Server with AD DS role. Can be on-prem or Azure AD (LDAP connector required for Azure AD).</td><td>Your IT team / FIFA IT</td></tr>
+    <tr><td>2</td><td><strong>LDAP/LDAPS connectivity</strong></td><td>EP1 Security cloud must reach your AD server. Port 389 (LDAP) or 636 (LDAPS — preferred). If AD is on-prem, either: open firewall rule from EP1 Security cloud IPs, or deploy EN's on-prem RADIUS proxy.</td><td>Network/firewall team</td></tr>
+    <tr><td>3</td><td><strong>Service account (bind account)</strong></td><td>A read-only AD account with permission to query users and group membership. Example: <code>svc_ep1@wc2026.local</code>. Does NOT need admin rights — just read on the user/group OUs.</td><td>AD admin</td></tr>
+    <tr><td>4</td><td><strong>Base DN</strong></td><td>The LDAP distinguished name where users live. Example: <code>DC=wc2026,DC=local</code>. If users are in an OU: <code>OU=Teams,DC=wc2026,DC=local</code>.</td><td>AD admin</td></tr>
+    <tr><td>5</td><td><strong>AD Security Groups</strong></td><td>One group per VLAN role: <code>CN=TeamUSA</code>, <code>CN=TeamAUS</code>, <code>CN=Premium</code>, <code>CN=Staff</code>. Users are members of the group, not the VLAN. Policy maps group → VLAN.</td><td>AD admin</td></tr>
+    <tr><td>6</td><td><strong>User accounts in AD</strong></td><td>Each credentialed user (player, VIP, staff) needs an AD account with a UPN (<code>firstname.lastname@wc2026.local</code>) and group membership. For EAP-TLS: also needs a client certificate (MDM-pushed).</td><td>FIFA IT / EN onboarding team</td></tr>
+    <tr><td>7</td><td><strong>EAP method decision</strong></td><td>PEAP-MSCHAPv2 = username + password (simpler). EAP-TLS = client certificate (stronger, PCI required for POS). For Karl Lab Sprint 2: start with PEAP-MSCHAPv2.</td><td>Architecture decision</td></tr>
+    <tr><td>8</td><td><strong>Client device supplicant config</strong></td><td>For PEAP-MSCHAPv2: Windows/Mac auto-prompt. For EAP-TLS: certificate must be pushed via MDM (Jamf/Intune) before the device connects. macOS and iOS handle 802.1X natively — no additional software.</td><td>Device management team</td></tr>
+  </table>
+
+  <h3>EP1 Security — Configure Identity Provider (AD)</h3>
+  <pre>EP1 Security → Administration &amp; Settings → Access Management → Add Identity Provider
+  Type:        Active Directory / LDAP
+  Name:        WC2026_AD
+  LDAP URL:    ldap://ad.wc2026.local  (or ldaps:// for encrypted)
+  Base DN:     DC=wc2026,DC=local
+  Bind User:   svc_ep1@wc2026.local
+  Bind Pass:   [service account password]
+  → Test Connection → Confirm: "Successfully connected"</pre>
+
+  <h3>Swap Local Groups for AD Groups</h3>
+  <p>Once AD is connected, go to <code>Users &amp; Devices → User Groups</code>. The dual-panel picker now shows AD users (synced from the Base DN). Delete the local lab groups and recreate with AD membership:</p>
+  <table>
+    <tr><th>Group Name</th><th>Sprint 1 (local)</th><th>Sprint 2 (AD-backed)</th></tr>
+    <tr><td>Lab_TeamUSA</td><td>testusa@wc2026.lab (local)</td><td>All members of <code>CN=TeamUSA,OU=Teams,DC=wc2026,DC=local</code></td></tr>
+    <tr><td>Lab_TeamAUS</td><td>testaus@wc2026.lab (local)</td><td>All members of <code>CN=TeamAUS,OU=Teams,DC=wc2026,DC=local</code></td></tr>
+    <tr><td>Lab_VIP</td><td>testvip@wc2026.lab (local)</td><td>All members of <code>CN=Premium,OU=VIP,DC=wc2026,DC=local</code></td></tr>
+    <tr><td>Lab_Staff</td><td>teststaff@wc2026.lab (local)</td><td>All members of <code>CN=Staff,OU=Staff,DC=wc2026,DC=local</code></td></tr>
+  </table>
+  <p><strong>The six Network Policies do not change at all.</strong> They still reference the same group names. Only the group backing changes from local to AD.</p>
+
+  <h3>Visiting Team Rotation — AD-Only Operation</h3>
+  <pre># Match 1: USA vs Australia
+# TeamAUS group members = Australian player accounts
+
+# Match 2: USA vs France
+# No EP1 Security changes needed. AD admin only:
+AD → open CN=TeamAUS → Remove Australian accounts → Add French player accounts
+
+# EP1 Security picks up new group membership on next authentication.
+# Policy_TeamAUS still returns VLAN 20.
+# Zero downtime. Zero policy edits.</pre>
+
+  <div class="callout-green">
+    <p><strong>Sprint 2 success criteria:</strong> A real AD user in <code>CN=TeamUSA</code> authenticates to <code>WC_Secure</code> with their AD credentials and lands on VLAN 10. A user added to <code>CN=TeamAUS</code> lands on VLAN 20. A user removed from all groups lands on VLAN 30 (Guest catch-all). Verified via <code>show fdb</code> on 5320 SW1. The system is production-ready.</p>
+  </div>
+
+  <h3>Sprint 2 Open Item — Karl Lab AD Options</h3>
+  <p>If you don't have a Windows AD server in the lab, three alternatives for Sprint 2 testing:</p>
+  <ol>
+    <li><strong>Windows Server VM</strong> — spin up a free 180-day eval in your EVE-NG lab, add AD DS role, create the five groups. Fastest path to a real LDAP endpoint.</li>
+    <li><strong>FreeIPA</strong> — open-source Linux directory with LDAP. EP1 Security can bind to it identically. Runs on a lightweight Ubuntu VM.</li>
+    <li><strong>Azure AD + LDAP connector</strong> — if you have an M365 or Azure subscription. Requires Azure AD DS (paid tier) to expose LDAP endpoints. More overhead for a lab, but mirrors a real enterprise deployment.</li>
+  </ol>
+</section>
+
+
 <footer>
-  <p>Session 2026-05-31 &nbsp;·&nbsp; FIFA World Cup 2026 Seattle WiFi Design &nbsp;·&nbsp; Draft v1.0</p>
+  <p>Session 2026-05-31 &nbsp;·&nbsp; FIFA World Cup 2026 Seattle WiFi Design &nbsp;·&nbsp; Draft v1.1 (EP1 Security Architecture + Sprint 1/2 Build)</p>
   <p>Sources: <a href="https://www.extremenetworks.com/resources/case-study/seattle-seahawks-achieve-operational-freedom">EN / Lumen Field Case Study</a> &nbsp;·&nbsp; <a href="https://www.extremenetworks.com/resources/blogs/stadium-wi-fi-7-redefining-high-density-connectivity-with-ap5060">EN AP5060 Stadium Blog</a> &nbsp;·&nbsp; <a href="https://www.seattlefwc26.org/destination/stadium">FIFA WC26 Seattle Stadium</a> &nbsp;·&nbsp; <a href="https://www.seattlefwc26.org/news/seattle-soccer-house-at-pacific-place-to-deliver-a-free-immersive-world-cup-experience-on-a-70-foot-screen">Seattle Soccer House</a> &nbsp;·&nbsp; RFC 3580 (802.1X + RADIUS VLAN) &nbsp;·&nbsp; RFC 8110 (OWE) &nbsp;·&nbsp; IEEE 802.11be (WiFi-7)</p>
   <p>&copy; 2026 Khursheed Khan. All rights reserved.</p>
 </footer>
