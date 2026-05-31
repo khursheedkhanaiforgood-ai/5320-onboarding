@@ -377,22 +377,23 @@ Tunnel-Private-Group-ID = "50"</pre>
   <h3><span class="badge badge-deploy">Policy 1</span> WC_Secure — 802.1X with Dynamic VLAN</h3>
 
   <h4>Step 1: Create RADIUS Server Profile</h4>
-  <pre>EP1 → Network Policies → Common Objects → Authentication → RADIUS Server Groups
+  <div class="callout-blue">
+    <p><strong>EP1 Security uses RadSec (RFC 6614) — not classic RADIUS UDP.</strong> The built-in RADIUS server runs on TCP port 2083 with TLS encryption. The shared secret is the conventional RadSec placeholder <code>radsec</code> — actual security comes from mutual TLS certificates, not the secret string. Do not use port 1812/1813.</p>
+  </div>
+  <pre>EP1 Core → Network Policies → Common Objects → Authentication → RADIUS Server Groups
 → Add RADIUS Server
-  Name: WC_RADIUS_Primary
-  IP: 10.99.1.10   (NPS Server 1 — OOB management network)
-  Port: 1812 / 1813
-  Shared Secret: [strong random string, min 32 chars]
+  Name:          WC_RADIUS_EP1_Security
+  FQDN:          radius.oh-uz.extremecloudiq.com
+  IP:            3.15.90.11   (AWS Ohio — US East)
+  Auth Port:     2083         ← RadSec, NOT 1812
+  Acct Port:     2083         ← RadSec, NOT 1813
+  Shared Secret: radsec       ← RadSec conventional placeholder
+  Protocol:      RadSec (TLS)
   Timeout: 5s    Retries: 3
 
-→ Add RADIUS Server (backup)
-  Name: WC_RADIUS_Secondary
-  IP: 10.99.1.11
-  (same config)
-
 → Create RADIUS Group: WC_RADIUS_Group
-  Primary: WC_RADIUS_Primary
-  Secondary: WC_RADIUS_Secondary</pre>
+  Primary: WC_RADIUS_EP1_Security
+  (EP1 Security is HA by default in cloud — no secondary entry needed)</pre>
 
   <h4>Step 2: Create SSIDs</h4>
   <pre>EP1 → Network Policies → Wireless Networks → Add SSID
@@ -798,10 +799,13 @@ Phase 3 (-3 days): RF validation
   </ul>
 
   <h3>NPS Configuration Steps (Windows Server)</h3>
+  <div class="callout">
+    <p><strong>Note (updated):</strong> This section was written before EP1 Security was confirmed as the RADIUS server. If using EP1 Security's built-in RADIUS (RadSec, port 2083), NPS is not needed — EP1 Security replaces it entirely. This NPS walkthrough remains valid only if you are running a separate Windows NPS server alongside EP1 Security (e.g., for wired 802.1X on SW1 switch ports where RadSec is not yet configured). For all wireless 802.1X via AP3000, use EP1 Security directly.</p>
+  </div>
   <pre>1. NPS → RADIUS Clients → Add
    Friendly name: Test_AP
    Address: [AP management IP]
-   Shared Secret: [match what you enter in EP1/XIQ RADIUS profile]
+   Shared Secret: radsec   ← must match EP1 Security RadSec shared secret
 
 2. NPS → Network Policies → New
    Name: WiFi_VLAN10_Policy
@@ -1056,10 +1060,15 @@ save configuration</pre>
   → AP3000 connects via CAPWAP and pulls its network policy</pre>
 
   <h3>Step 4 — Register AP3000 as RADIUS Client in EP1 Security</h3>
-  <pre>EP1 Security → Configuration → Network → Add
-  Device IP:     [AP3000 management IP]
-  Shared Secret: FIFAlab2026!
-  Role:          Network Access Device</pre>
+  <pre>EP1 Security → Administration &amp; Settings → Access Management → RADIUS → RADIUS Servers
+  (EP1 Security's built-in RADIUS is already listed:
+   radius.oh-uz.extremecloudiq.com  |  3.15.90.11  |  Port 2083  |  radsec  |  Ohio US East)
+
+  No manual NAD registration needed for wireless — AP3000 authenticates
+  via EP1 Core's RADIUS Server Group pointing to radius.oh-uz.extremecloudiq.com.
+
+  For wired 802.1X on 5320 SW1 ports (future sprint only):
+  → Register SW1 IP as a separate RADIUS client with shared secret: radsec</pre>
 
   <h3>Step 5 — Create Local Users in EP1 Security</h3>
   <p><code>EP1 Security → Policy → Users &amp; Devices → Users → Add Local User</code></p>
@@ -1102,7 +1111,12 @@ save configuration</pre>
   Name:     WC_Secure
   Security: WPA3-Enterprise (or WPA2/WPA3 transition for mixed clients)
   Auth:     802.1X
-  RADIUS Server Group: [EP1 Security RADIUS endpoint]
+  RADIUS Server Group → Add RADIUS Server:
+    FQDN:          radius.oh-uz.extremecloudiq.com
+    IP:            3.15.90.11
+    Auth Port:     2083    ← RadSec
+    Acct Port:     2083    ← RadSec
+    Shared Secret: radsec
   ✅ Enable Dynamic VLAN Assignment
   Default VLAN (fallback): 30</pre>
 
