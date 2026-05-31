@@ -225,6 +225,7 @@
   <a href="#sprint1">Sprint 1 — Local</a>
   <a href="#sprint2">Sprint 2 — AD</a>
   <a href="#labstate">Lab State</a>
+  <a href="#idp">Identity Providers</a>
 </nav>
 
 
@@ -1303,8 +1304,104 @@ configure iproute add default 192.168.0.1</pre>
 </section>
 
 
+<!-- ── SECTION 19: IDENTITY PROVIDERS ─────────────────────────────── -->
+<section id="idp">
+  <h2>19. Identity Providers — AD, Local Users, and the Full Picture</h2>
+
+  <div class="callout-blue">
+    <p><strong>Core insight:</strong> An Identity Provider is any system that answers "who is this user and what groups do they belong to?" EP1 Security doesn't care which one you use — the Network Policies stay identical regardless.</p>
+  </div>
+
+  <h3>What Active Directory Is</h3>
+  <p>AD is a <strong>directory service</strong> — a database of users, passwords, groups, and computers. Microsoft developed it; it runs on Windows Server. Every enterprise that uses Windows runs AD. Think of it as the corporate phonebook and security guard combined: it knows every user and every group, and answers authentication requests from other systems.</p>
+  <p>EP1 Security delegates credential validation entirely to AD. AD says yes or no and returns group membership. EP1 Security only makes the VLAN decision — it never stores the password.</p>
+
+  <h3>How EP1 Security Uses AD</h3>
+  <pre>MacBook → WC_Secure SSID
+  "I am j.smith@wc2026.local / Password123"
+        ↓
+    AP3000 → RADIUS request (port 2083 RadSec) → EP1 Security
+        ↓
+    EP1 Security → LDAP query (port 636) → AD Server
+    "Is j.smith valid? What groups?"
+        ↓
+    AD: "Valid. Member of CN=TeamUSA"
+        ↓
+    EP1 Security: matches Policy_TeamUSA → VLAN 10
+        ↓
+    Client lands on VLAN 10 ✓</pre>
+
+  <h3>The Three Protocols</h3>
+  <table>
+    <tr><th>Protocol</th><th>Between</th><th>Purpose</th><th>Port</th></tr>
+    <tr><td>RadSec</td><td>AP3000 → EP1 Security</td><td>RADIUS over TLS — carries EAP auth request</td><td>2083</td></tr>
+    <tr><td>LDAP</td><td>EP1 Security → AD</td><td>Query user credentials + group membership</td><td>389</td></tr>
+    <tr><td>LDAPS</td><td>EP1 Security → AD</td><td>Same but encrypted — preferred for production</td><td>636</td></tr>
+  </table>
+  <p>The client never talks to AD directly. RADIUS and LDAP are separate conversations — RADIUS is AP → EP1 Security, LDAP is EP1 Security → AD.</p>
+
+  <h3>Types of Identity Providers EP1 Security Supports</h3>
+  <table>
+    <tr><th>IdP Type</th><th>Protocol</th><th>Best For</th><th>FIFA Use Case</th></tr>
+    <tr><td><strong>Active Directory</strong></td><td>LDAP/LDAPS</td><td>Enterprises on Windows Server</td><td>Teams, staff, VIP</td></tr>
+    <tr><td><strong>Azure AD</strong></td><td>LDAP or SAML</td><td>Cloud-first orgs, M365 users</td><td>Corporate IT / FIFA HQ</td></tr>
+    <tr><td><strong>FreeIPA</strong></td><td>LDAP</td><td>Linux shops, open source</td><td>University/lab alternative</td></tr>
+    <tr><td><strong>Local Users (built-in)</strong></td><td>Built-in</td><td>Lab testing, &lt;100 users</td><td>Sprint 1 lab</td></tr>
+    <tr><td><strong>RADIUS proxy</strong></td><td>RADIUS</td><td>Cascading to another RADIUS server</td><td>Eduroam roaming</td></tr>
+    <tr><td><strong>MDM (Jamf/Intune)</strong></td><td>Certificate</td><td>Device identity, no password</td><td>POS terminals, managed laptops</td></tr>
+  </table>
+
+  <h3>Local Users IS an Identity Provider</h3>
+  <p>This is the key insight. Local users are EP1 Security's <strong>built-in IdP</strong>. When you add <code>testusa@wc2026.lab</code> with a password, EP1 Security itself is acting as the IdP. No external system needed.</p>
+  <table>
+    <tr><th>Sprint</th><th>IdP</th><th>Cap</th><th>Network Policies</th></tr>
+    <tr><td>Sprint 1</td><td>EP1 Security built-in (local users)</td><td>100 users</td><td>Unchanged</td></tr>
+    <tr><td>Sprint 2</td><td>Active Directory (external)</td><td>Unlimited</td><td>Unchanged</td></tr>
+  </table>
+  <p>The Network Policies reference <strong>User Groups</strong> — not the IdP. When you swap from local to AD, only the backing of the group changes. The group name stays the same. The policy stays the same. The VLAN stays the same.</p>
+
+  <h3>Local + AD Coexist in the Same Group</h3>
+  <p>The User Group dual-panel picker lets you add both local users and AD users to the same group simultaneously:</p>
+  <pre>Lab_TeamUSA group members:
+  ├── testusa@wc2026.lab     (local — permanent lab test account)
+  └── j.smith@wc2026.local   (AD — real team player)</pre>
+  <p>Keep one local test account in each group permanently. If AD goes down or the LDAP connection drops, the local account still works to confirm the infrastructure side is healthy. It's a useful diagnostic tool — not just a Sprint 1 stepping stone.</p>
+
+  <h3>AD vs No AD — Decision Point</h3>
+  <table>
+    <tr><th>Scenario</th><th>Credentialed users</th><th>Need AD?</th></tr>
+    <tr><td>Karl Lab Sprint 1</td><td>4 test accounts</td><td>No — local users sufficient</td></tr>
+    <tr><td>Karl Lab Sprint 2</td><td>4 test accounts + Windows Server VM</td><td>Optional — validates the integration</td></tr>
+    <tr><td>Real FIFA match (small staff)</td><td>&lt;100</td><td>No — local users sufficient</td></tr>
+    <tr><td>Real FIFA match (full roster)</td><td>~160+ (teams + VIP + staff)</td><td>Yes — exceeds 100 cap</td></tr>
+    <tr><td>72,000 fans</td><td>0 — catch-all Guest policy</td><td>Never — fans bypass IdP entirely</td></tr>
+  </table>
+
+  <h3>Where IdP Lives in EP1 Security</h3>
+  <pre>Administration &amp; Settings
+└── Access Management
+    ├── User Accounts        ← portal admin logins
+    ├── Identity Providers   ← configure AD/LDAP here (Sprint 2)
+    ├── Mobile Device Mgmt   ← MDM for certificate-based auth (POS)
+    └── RADIUS               ← built-in RadSec endpoint (port 2083)</pre>
+
+  <h3>FIFA IdP Assignment by Role</h3>
+  <table>
+    <tr><th>User Group</th><th>IdP</th><th>Reason</th></tr>
+    <tr><td>Teams + Staff</td><td>AD on-prem at venue</td><td>Works if internet drops; low latency at stadium</td></tr>
+    <tr><td>VIP/Premium</td><td>AD or Azure AD</td><td>Depends on FIFA IT infrastructure</td></tr>
+    <tr><td>POS terminals</td><td>MDM (Jamf/Intune)</td><td>Certificate pushed to device — no password, PCI-DSS compliant</td></tr>
+    <tr><td>72,000 fans</td><td>None</td><td>Catch-all Guest policy — no IdP needed</td></tr>
+  </table>
+
+  <div class="callout-green">
+    <p><strong>One-line summary:</strong> IdP = the system EP1 Security asks "is this user valid and what groups are they in?" AD is the most common enterprise answer. Local users are EP1 Security being its own answer. Either way the Network Policies stay unchanged — the identity layer and the policy layer are fully decoupled.</p>
+  </div>
+</section>
+
+
 <footer>
-  <p>Session 2026-05-31 &nbsp;·&nbsp; FIFA World Cup 2026 Seattle WiFi Design &nbsp;·&nbsp; Draft v1.3 (Lab build state + RADIUS corrections)</p>
+  <p>Session 2026-05-31 &nbsp;·&nbsp; FIFA World Cup 2026 Seattle WiFi Design &nbsp;·&nbsp; Draft v1.4 (IdP dialogue + lab state)</p>
   <p>Sources: <a href="https://www.extremenetworks.com/resources/case-study/seattle-seahawks-achieve-operational-freedom">EN / Lumen Field Case Study</a> &nbsp;·&nbsp; <a href="https://www.extremenetworks.com/resources/blogs/stadium-wi-fi-7-redefining-high-density-connectivity-with-ap5060">EN AP5060 Stadium Blog</a> &nbsp;·&nbsp; <a href="https://www.seattlefwc26.org/destination/stadium">FIFA WC26 Seattle Stadium</a> &nbsp;·&nbsp; <a href="https://www.seattlefwc26.org/news/seattle-soccer-house-at-pacific-place-to-deliver-a-free-immersive-world-cup-experience-on-a-70-foot-screen">Seattle Soccer House</a> &nbsp;·&nbsp; RFC 3580 (802.1X + RADIUS VLAN) &nbsp;·&nbsp; RFC 6614 (RadSec) &nbsp;·&nbsp; RFC 8110 (OWE) &nbsp;·&nbsp; IEEE 802.11be (WiFi-7)</p>
   <p>&copy; 2026 Khursheed Khan. All rights reserved.</p>
 </footer>
