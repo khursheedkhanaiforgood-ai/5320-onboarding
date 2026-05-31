@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FIFA World Cup 2026 Seattle — WiFi Design Document</title>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Source+Code+Pro:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Libre Baskerville', Georgia, serif;
+    background: #fff;
+    color: #1a1a1a;
+    font-size: 17px;
+    line-height: 1.75;
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 48px 32px 120px;
+  }
+
+  header {
+    border-bottom: 3px solid #1a1a1a;
+    padding-bottom: 20px;
+    margin-bottom: 12px;
+  }
+  .dateline {
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #666;
+    margin-bottom: 8px;
+  }
+  h1 {
+    font-size: 2.3rem;
+    font-weight: 700;
+    line-height: 1.15;
+    margin-bottom: 10px;
+  }
+  .deck {
+    font-size: 1.1rem;
+    font-style: italic;
+    color: #444;
+    border-left: 3px solid #1a1a1a;
+    padding-left: 16px;
+    margin-top: 10px;
+  }
+
+  nav#toc {
+    position: sticky;
+    top: 0;
+    background: #fff;
+    border-bottom: 1px solid #ddd;
+    padding: 10px 0;
+    margin: 20px 0 40px;
+    z-index: 100;
+    font-size: 12px;
+    letter-spacing: 0.05em;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 0;
+  }
+  nav#toc a {
+    color: #1a1a1a;
+    text-decoration: none;
+    margin-right: 16px;
+    text-transform: uppercase;
+    font-weight: 700;
+    border-bottom: 2px solid transparent;
+    padding-bottom: 2px;
+    transition: border-color 0.15s;
+  }
+  nav#toc a:hover { border-color: #1a1a1a; }
+
+  section { margin-bottom: 56px; }
+  h2 {
+    font-size: 1.05rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    font-weight: 700;
+    border-top: 2px solid #1a1a1a;
+    padding-top: 14px;
+    margin-bottom: 20px;
+    color: #1a1a1a;
+  }
+  h3 {
+    font-size: 1rem;
+    font-weight: 700;
+    margin: 28px 0 8px;
+  }
+  h4 {
+    font-size: 0.95rem;
+    font-weight: 700;
+    font-style: italic;
+    margin: 18px 0 6px;
+    color: #333;
+  }
+  p { margin-bottom: 14px; }
+  ul, ol { margin: 10px 0 16px 24px; }
+  li { margin-bottom: 6px; }
+
+  .badge {
+    display: inline-block;
+    font-family: 'Source Code Pro', monospace;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border-radius: 3px;
+    margin-right: 6px;
+    vertical-align: middle;
+  }
+  .badge-done   { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+  .badge-block  { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+  .badge-wip    { background: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
+  .badge-next   { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+  .badge-warn   { background: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
+  .badge-ref    { background: #e2e3e5; color: #383d41; border: 1px solid #d6d8db; }
+  .badge-deploy { background: #d6d8ff; color: #2c2c8a; border: 1px solid #b8baf8; }
+
+  code {
+    font-family: 'Source Code Pro', monospace;
+    font-size: 14px;
+    background: #f5f5f5;
+    padding: 1px 5px;
+    border-radius: 3px;
+    color: #c7254e;
+  }
+  pre {
+    font-family: 'Source Code Pro', monospace;
+    font-size: 13px;
+    background: #f8f8f8;
+    border: 1px solid #e0e0e0;
+    border-left: 4px solid #1a1a1a;
+    padding: 16px 18px;
+    overflow-x: auto;
+    margin: 14px 0 20px;
+    line-height: 1.55;
+  }
+
+  .callout {
+    background: #fffbf0;
+    border: 1px solid #e8d5a3;
+    border-left: 5px solid #c9973a;
+    padding: 16px 20px;
+    margin: 18px 0;
+    border-radius: 2px;
+  }
+  .callout-red {
+    background: #fff5f5;
+    border: 1px solid #f5c6cb;
+    border-left: 5px solid #c0392b;
+    padding: 16px 20px;
+    margin: 18px 0;
+    border-radius: 2px;
+  }
+  .callout-blue {
+    background: #f0f7ff;
+    border: 1px solid #b8d4f0;
+    border-left: 5px solid #1a6fba;
+    padding: 16px 20px;
+    margin: 18px 0;
+    border-radius: 2px;
+  }
+  .callout-green {
+    background: #f0fff4;
+    border: 1px solid #a8dfb8;
+    border-left: 5px solid #1a7a3a;
+    padding: 16px 20px;
+    margin: 18px 0;
+    border-radius: 2px;
+  }
+  .callout p:last-child, .callout-red p:last-child,
+  .callout-blue p:last-child, .callout-green p:last-child { margin-bottom: 0; }
+
+  table { width: 100%; border-collapse: collapse; margin: 16px 0 24px; font-size: 14.5px; }
+  th { background: #1a1a1a; color: #fff; text-align: left; padding: 9px 12px; font-size: 12px; letter-spacing: 0.07em; text-transform: uppercase; }
+  td { padding: 9px 12px; border-bottom: 1px solid #e8e8e8; vertical-align: top; }
+  tr:nth-child(even) td { background: #fafafa; }
+
+  .section-label {
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #888;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+
+  footer {
+    border-top: 1px solid #ccc;
+    padding-top: 20px;
+    font-size: 13px;
+    color: #888;
+    font-style: italic;
+    margin-top: 60px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="dateline">Sunday, 31 May 2026 &nbsp;·&nbsp; FIFA World Cup 2026 Seattle &nbsp;·&nbsp; WiFi Design</div>
+  <h1>Seattle World Cup WiFi — Full Design Document</h1>
+  <p class="deck">802.1X dynamic VLAN deep-dive, 10K AP policy architecture, backhaul analysis, EP1 deployment playbook, and SOC/NOC routing for the USA–Australia and five other matches at Lumen Field.</p>
+</header>
+
+<nav id="toc">
+  <a href="#context">Context</a>
+  <a href="#dot1x">802.1X Dynamic VLAN</a>
+  <a href="#architecture">Architecture</a>
+  <a href="#ep1deploy">EP1 Policies</a>
+  <a href="#guest">Guest Security</a>
+  <a href="#qos">QoS</a>
+  <a href="#backhaul">Backhaul</a>
+  <a href="#rf">RF &amp; Goodput</a>
+  <a href="#aiops">AIOps</a>
+  <a href="#dr">Disaster Recovery</a>
+  <a href="#p5g">P5G Coexistence</a>
+  <a href="#review">Engineer Review</a>
+  <a href="#karl">Karl Lab</a>
+  <a href="#open">Open Questions</a>
+</nav>
+
+
+<!-- ── SECTION 1: CONTEXT ─────────────────────────────────────────── -->
+<section id="context">
+  <h2>1. Event &amp; Infrastructure Context</h2>
+
+  <h3>The Venue</h3>
+  <p>Seattle hosts six FIFA World Cup 2026 matches at <strong>Lumen Field</strong> (officially "Seattle Stadium" for the tournament), a 72,000-capacity, 325,000 sq ft facility built in 2002 and operated by First &amp; Goal Inc. on behalf of the Washington State Public Stadium Authority. FIFA has reserved the Seattle Center as the tournament fan hub. The <strong>Seattle Soccer House</strong> at Pacific Place (600 Pine St, 27,000 sq ft, six themed zones) runs June 15 – July 2 and July 6–7, 2026. Regional fan zones extend across Washington state (Bellingham, Everett, Spokane, Tri-Cities, and others).</p>
+
+  <h3><span class="badge badge-ref">Reference</span> Extreme Networks at Lumen Field</h3>
+  <div class="callout-blue">
+    <p>Extreme Networks has been the incumbent WiFi vendor at Lumen Field for <strong>over ten years</strong>. The production stack is ExtremeWireless + ExtremeSwitching + ExtremeCloud IQ. For the World Cup upgrade, the venue has committed to "WiFi upgrades to meet current FIFA requirements." The EN AP5060 (WiFi-7, 802.11be, tri-band) is the relevant AP family for this upgrade.</p>
+    <p>Chip Suttles, VP Technology, Seattle Seahawks: <em>"I was an early adopter of Extreme. What I like most about my ten-year relationship is that it's the same folks I've been working with for ten years."</em></p>
+  </div>
+
+  <h3>AP5060 — The Reference Hardware</h3>
+  <table>
+    <tr><th>Parameter</th><th>Specification</th></tr>
+    <tr><td>Standard</td><td>802.11be (WiFi-7)</td></tr>
+    <tr><td>Bands</td><td>Tri-band: 2.4 GHz / 5 GHz / 6 GHz</td></tr>
+    <tr><td>Max modulation</td><td>4096-QAM (MCS 13)</td></tr>
+    <tr><td>Architecture</td><td>"6 GHz First" — clean spectrum, no legacy interference</td></tr>
+    <tr><td>Radios</td><td>Software-defined; dynamic spectrum allocation across bands</td></tr>
+    <tr><td>Security sensor</td><td>Always-on tri-band, dedicated hardware (zero data radio trade-off)</td></tr>
+    <tr><td>Form factors</td><td>AP5060U (under-seat bowl), AP5060D (directional — concourse, gates)</td></tr>
+    <tr><td>Ruggedization</td><td>Weatherized; rated for spills, pressure washing, temp swings</td></tr>
+  </table>
+
+  <h3>Scenario Scope (from the brief)</h3>
+  <ul>
+    <li>10,000 WiFi-7 APs across stadium + Seattle Center fan hub</li>
+    <li>2,000 stadium/perimeter APs for load-testing</li>
+    <li>Policy live 7 days before USA–Australia match</li>
+    <li>Peak concurrent load: 72,000+ fans at stadium; tens of thousands at Seattle Center</li>
+    <li>5G+ mobile network overlay; SATCOM/Starlink backup where supported</li>
+  </ul>
+</section>
+
+
+<!-- ── SECTION 2: 802.1X DYNAMIC VLAN ────────────────────────────── -->
+<section id="dot1x">
+  <h2>2. 802.1X Dynamic VLAN Assignment — Deep Dive</h2>
+
+  <h3>The Core Concept: One SSID, Many VLANs</h3>
+  <p>You read correctly. Traditional design ties one SSID to one VLAN: <code>Home_Team → VLAN 10</code>, <code>Visiting_Team → VLAN 20</code>, <code>Staff → VLAN 30</code>. Three SSIDs, three beacons per AP, three times the overhead. At 10,000 APs this is significant airtime waste.</p>
+  <p><strong>Dynamic VLAN assignment</strong> means a single SSID (e.g., <code>WC_Secure</code>) handles all authenticated users. After the client passes 802.1X, the RADIUS server returns three attributes in the Access-Accept message that tell the AP exactly which VLAN to place the client in — regardless of which SSID they joined.</p>
+
+  <div class="callout-blue">
+    <p><strong>The three RADIUS attributes (RFC 3580):</strong></p>
+    <ul>
+      <li><code>Tunnel-Type (64)</code> = <strong>VLAN (13)</strong></li>
+      <li><code>Tunnel-Medium-Type (65)</code> = <strong>IEEE-802 (6)</strong></li>
+      <li><code>Tunnel-Private-Group-ID (81)</code> = <strong>"10"</strong> (VLAN ID as string, or VLAN name)</li>
+    </ul>
+    <p>The AP reads these three attributes and places the client on VLAN 10 — no matter what SSID they connected to. Change attribute 81 to "20" and the next user ends up on VLAN 20. Complete isolation, one SSID.</p>
+  </div>
+
+  <h3>Authentication Flow — Step by Step</h3>
+  <ol>
+    <li>Client associates to <code>WC_Secure</code> SSID (WPA3-Enterprise or WPA2-Enterprise)</li>
+    <li>AP (Authenticator) sends EAPOL-Start to client</li>
+    <li>Client returns EAP-Response/Identity (username: <code>j.smith@teamusa.org</code>)</li>
+    <li>AP forwards RADIUS Access-Request to NPS/FreeRADIUS with username + EAP method</li>
+    <li>RADIUS checks AD group membership: <code>j.smith</code> → group <code>TeamUSA_WiFi</code></li>
+    <li>RADIUS sends Access-Accept with: <code>Tunnel-Type=VLAN</code>, <code>Tunnel-Medium-Type=IEEE-802</code>, <code>Tunnel-Private-Group-ID=10</code></li>
+    <li>AP assigns client to <strong>VLAN 10</strong> and completes the 4-way WPA handshake</li>
+    <li>A visiting team member (<code>a.jones@teamaus.com</code>) authenticates → group <code>TeamAUS_WiFi</code> → RADIUS returns VLAN 20 → complete isolation</li>
+  </ol>
+
+  <h3>Why This Matters for a 10,000 AP Deployment</h3>
+  <table>
+    <tr><th>Approach</th><th>SSID Count</th><th>Beacon overhead per AP</th><th>Airtime impact</th></tr>
+    <tr><td>Traditional (SSID per role)</td><td>5 SSIDs</td><td>5 × ~200µs every 100ms</td><td>~10ms/s beacon overhead</td></tr>
+    <tr><td>Dynamic VLAN (consolidated)</td><td>3 SSIDs</td><td>3 × ~200µs every 100ms</td><td>~6ms/s beacon overhead</td></tr>
+    <tr><td>Saving at 10K APs</td><td>—</td><td>20,000 fewer beacons/sec</td><td>~40% reduction in beacon airtime</td></tr>
+  </table>
+  <p>At stadium density (hundreds of clients per AP), every microsecond of reclaimed airtime directly translates to throughput. Dynamic VLAN is not just elegant — it's a capacity design decision.</p>
+
+  <h3>What You Need on the RADIUS Server (NPS example)</h3>
+  <pre># Windows NPS — Network Policy Reply Attributes for group TeamUSA_WiFi
+Tunnel-Type         = VLAN         (Tag = 1, Value = 13)
+Tunnel-Medium-Type  = IEEE-802     (Tag = 1, Value = 6)
+Tunnel-Private-Group-ID = "10"    (Tag = 1, Value = string "10")
+
+# Same policy, group TeamAUS_WiFi
+Tunnel-Private-Group-ID = "20"
+
+# Staff group
+Tunnel-Private-Group-ID = "30"
+
+# POS terminals (machine cert or device identity)
+Tunnel-Private-Group-ID = "50"</pre>
+
+  <div class="callout">
+    <p><strong>Tag = 1 on all three attributes is mandatory.</strong> If the Tag values don't match across the three Tunnel attributes, the AP ignores all three and falls back to the SSID's default VLAN. This is the most common misconfiguration in lab exercises.</p>
+  </div>
+
+  <h3>EAP Method Selection for This Deployment</h3>
+  <table>
+    <tr><th>User Group</th><th>EAP Method</th><th>Credential</th><th>Reason</th></tr>
+    <tr><td>Team USA / Team AUS players + staff</td><td>EAP-TLS</td><td>Client certificate (MDM-pushed)</td><td>Strongest auth; no password phishing risk; silent connection</td></tr>
+    <tr><td>Media / broadcasters</td><td>PEAP-MSCHAPv2</td><td>AD username + password</td><td>No cert infrastructure needed; provisioned via event credentials</td></tr>
+    <tr><td>FIFA Officials</td><td>PEAP-MSCHAPv2 or EAP-TLS</td><td>Per-role</td><td>FIFA IT governance decision</td></tr>
+    <tr><td>POS terminals</td><td>EAP-TLS</td><td>Device certificate</td><td>PCI-DSS requirement; no user interaction</td></tr>
+  </table>
+</section>
+
+
+<!-- ── SECTION 3: ARCHITECTURE ────────────────────────────────────── -->
+<section id="architecture">
+  <h2>3. VLAN &amp; SSID Architecture</h2>
+
+  <h3>VLAN Map</h3>
+  <table>
+    <tr><th>VLAN</th><th>Name</th><th>Subnet</th><th>Purpose</th><th>Security Tier</th></tr>
+    <tr><td>10</td><td>Team_Home</td><td>10.10.10.0/24</td><td>Home team (USA) — players, coaches, medical</td><td>Tier 1 — fully isolated</td></tr>
+    <tr><td>20</td><td>Team_Visit</td><td>10.10.20.0/24</td><td>Visiting team — dynamic per match</td><td>Tier 1 — fully isolated</td></tr>
+    <tr><td>30</td><td>Guest</td><td>10.30.0.0/20</td><td>Fan internet access — OWE + CWP</td><td>Tier 3 — internet-only</td></tr>
+    <tr><td>40</td><td>Premium_Guest</td><td>10.40.0.0/22</td><td>Authenticated premium fans</td><td>Tier 2 — internet + priority QoS</td></tr>
+    <tr><td>50</td><td>POS</td><td>10.50.0.0/24</td><td>Point-of-sale terminals</td><td>Tier 2 — PCI-scoped</td></tr>
+    <tr><td>99</td><td>Management</td><td>10.99.0.0/24</td><td>AP + switch OOB management</td><td>Admin-only, ACL-locked</td></tr>
+  </table>
+
+  <h3>SSID Map (3 SSIDs — Dynamic VLAN reduces beacon overhead)</h3>
+  <table>
+    <tr><th>SSID</th><th>Security</th><th>VLAN Assignment</th><th>Hours</th><th>AP Scope</th></tr>
+    <tr><td><code>WC_Secure</code></td><td>WPA3-Enterprise (802.1X)</td><td>Dynamic: VLAN 10 or 20 via RADIUS attr 64/65/81</td><td>24 × 7</td><td>Team-serving APs only</td></tr>
+    <tr><td><code>WC_Guest</code></td><td>OWE (Opportunistic Wireless Encryption)</td><td>Static VLAN 30; Premium upgrade via CWP → VLAN 40</td><td>06:00–22:00 PST</td><td>APs one tier away from Team APs</td></tr>
+    <tr><td><code>WC_Staff</code></td><td>WPA3-Enterprise (802.1X) or PPSK</td><td>Dynamic: VLAN 40 (Premium) or VLAN 50 (POS) via RADIUS</td><td>24 × 7</td><td>All APs (staff/POS everywhere)</td></tr>
+  </table>
+
+  <div class="callout-green">
+    <p><strong>Key architectural decision:</strong> <code>WC_Secure</code> (one SSID) replaces the original <em>Home_Team</em> + <em>Visiting_Team</em> (two SSIDs) via dynamic VLAN. Both teams join the same SSID but their RADIUS group membership routes them to VLAN 10 or VLAN 20 respectively. Complete L2 isolation — they cannot see each other. No policy change needed between matches; just update the RADIUS group for the visiting team.</p>
+  </div>
+
+  <h3>Topology Isolation Rule</h3>
+  <p>Per the brief: Guest APs must be "one tier away" from Team APs. Implementation:</p>
+  <ul>
+    <li><strong>Team APs</strong>: Locker rooms, tunnel access, team bench areas, media tribune. These broadcast only <code>WC_Secure</code>. <code>WC_Guest</code> is <em>not</em> configured on these APs.</li>
+    <li><strong>General APs</strong>: Concourse, bowl seating, fan zones. These broadcast <code>WC_Guest</code> + <code>WC_Staff</code>. <code>WC_Secure</code> is not broadcast here.</li>
+    <li>Enforced in EP1 via separate Network Policies applied to separate AP groups (<code>AP_Group_Team</code> vs <code>AP_Group_General</code>).</li>
+  </ul>
+</section>
+
+
+<!-- ── SECTION 4: EP1 POLICY DEPLOYMENT ──────────────────────────── -->
+<section id="ep1deploy">
+  <h2>4. EP1 Policy Deployment — Step by Step</h2>
+
+  <h3><span class="badge badge-deploy">Policy 1</span> WC_Secure — 802.1X with Dynamic VLAN</h3>
+
+  <h4>Step 1: Create RADIUS Server Profile</h4>
+  <pre>EP1 → Network Policies → Common Objects → Authentication → RADIUS Server Groups
+→ Add RADIUS Server
+  Name: WC_RADIUS_Primary
+  IP: 10.99.1.10   (NPS Server 1 — OOB management network)
+  Port: 1812 / 1813
+  Shared Secret: [strong random string, min 32 chars]
+  Timeout: 5s    Retries: 3
+
+→ Add RADIUS Server (backup)
+  Name: WC_RADIUS_Secondary
+  IP: 10.99.1.11
+  (same config)
+
+→ Create RADIUS Group: WC_RADIUS_Group
+  Primary: WC_RADIUS_Primary
+  Secondary: WC_RADIUS_Secondary</pre>
+
+  <h4>Step 2: Create SSIDs</h4>
+  <pre>EP1 → Network Policies → Wireless Networks → Add SSID
+  Name: WC_Secure
+  SSID broadcast: WC_Secure
+  Security: WPA3-Enterprise (or WPA2/WPA3 transition for mixed clients)
+  Auth: 802.1X
+  RADIUS Group: WC_RADIUS_Group
+  ✅ Enable Dynamic VLAN Assignment   ← THIS IS THE KEY TOGGLE
+  Default VLAN (fallback if RADIUS returns no attrs): VLAN 10
+  PMF: Required (WPA3) or Optional (transition)</pre>
+
+  <div class="callout">
+    <p><strong>The "Dynamic VLAN Assignment" checkbox</strong> in EP1 tells the AP to honour RADIUS Tunnel attributes 64, 65, and 81 and override the static VLAN configured on the SSID. Without this checked, the AP ignores what RADIUS returns and puts every client on the default VLAN. This one toggle is the entire feature.</p>
+  </div>
+
+  <h4>Step 3: Apply to AP Group</h4>
+  <pre>EP1 → Network Policies → [Policy Name] → Wireless Networks
+→ Add WC_Secure to policy
+→ Assign policy to AP Group: AP_Group_Team
+  (Locker rooms, tunnels, team bench, media tribune only)</pre>
+
+  <h3><span class="badge badge-deploy">Policy 2</span> WC_Guest — OWE + CWP + Time Gate</h3>
+
+  <h4>Step 1: Create Guest SSID</h4>
+  <pre>EP1 → Network Policies → Wireless Networks → Add SSID
+  Name: WC_Guest
+  Security: Enhanced Open (OWE)
+  Default VLAN: 30
+  ✅ Enable Captive Web Portal
+  CWP Profile: WC_CWP_Profile (see below)
+  Firewall: internet-only policy on VLAN 30
+    → deny 10.10.10.0/24   (Team Home VLAN)
+    → deny 10.10.20.0/24   (Team Visit VLAN)
+    → deny 10.50.0.0/24    (POS VLAN)
+    → deny 10.99.0.0/24    (Management VLAN)
+    → permit guest-guest communication (same VLAN 30)
+    → permit internet (default route)</pre>
+
+  <h4>Step 2: CWP Profile</h4>
+  <pre>EP1 → Common Objects → CWP → Add
+  Name: WC_CWP_Profile
+  Type: Self-Registration
+  Fields: First Name, Last Name, Email (required), Phone (required)
+  ✅ Store client data securely (EP1 handles encryption at rest)
+  ✅ Skip registration for returning devices (match on MAC or device fingerprint)
+  Redirect URL (post-registration): https://fifa.com/worldcup/seattle
+
+  Optional integration: Ticketing DB webhook
+  → On registration: POST {email, phone} to FIFA ticketing API
+  → If ticket_status = VALID → allow, log as verified_fan = true
+  → If ticket_status = NOT_FOUND → allow with lower QoS tier (VLAN 30 standard)
+  → If ticketing API is unreachable → fail-open (allow, flag for review)</pre>
+
+  <h4>Step 3: Time-Based SSID Scheduling</h4>
+  <pre>EP1 → Network Policies → Wireless Networks → WC_Guest → Advanced
+→ SSID Schedule
+  Active: 06:00–22:00 PST (America/Los_Angeles timezone)
+  Days: All tournament match days (June 11 – July 19, 2026)
+  Note: WC_Secure and WC_Staff have NO schedule — they are always-on</pre>
+
+  <h4>Step 4: BSS Min Rate — Device Admission Control</h4>
+  <pre>EP1 → Network Policies → Radio Profiles → [Profile Name] → Advanced
+→ BSS Min Rate: 18 Mbps
+  (Clients that cannot achieve 18 Mbps are refused association)
+→ Management Frame Rate: 12 Mbps
+  (Keeps beacon/probe frames off low data rates)
+
+For clients below threshold:
+→ Enable "Rate Limiting Redirect" CWP page
+  Message: "Your device may not support the minimum data rate for this network.
+  Please check: [EN supported device list URL]"</pre>
+</section>
+
+
+<!-- ── SECTION 5: GUEST SECURITY ─────────────────────────────────── -->
+<section id="guest">
+  <h2>5. Guest Security — OWE, Rogue Clients, and Ticketing Verification</h2>
+
+  <h3>Why OWE and Not Open / WPA2-PSK</h3>
+  <p><strong>Open WiFi</strong> (no encryption) means every over-the-air packet is readable by any device in range. At a 72,000-person event this is a serious credential theft risk, especially with CWP collecting emails and phone numbers.</p>
+  <p><strong>WPA2-PSK</strong> with a published passphrase is functionally equivalent to open — anyone who knows the passphrase can decrypt all traffic.</p>
+  <p><strong>OWE (RFC 8110 / 802.11-2020)</strong> provides per-client encryption with no passphrase. Each client negotiates a unique session key during association. An attacker who captures the air cannot decrypt any other client's traffic. The user experience is identical to open WiFi — no passphrase prompt.</p>
+
+  <h3>Rogue Client Prevention Stack</h3>
+  <table>
+    <tr><th>Layer</th><th>Control</th><th>How Configured in EP1</th></tr>
+    <tr><td>L1/L2</td><td>OWE per-client encryption</td><td>SSID security mode = Enhanced Open</td></tr>
+    <tr><td>L2</td><td>Client isolation</td><td>Firewall profile: deny peer-to-peer on VLAN 30 <em>(Note: brief requests Guest-Guest communication — leave this enabled for fan-to-fan sharing at venue; disable if security posture changes)</em></td></tr>
+    <tr><td>L3</td><td>Internet-only firewall</td><td>ACL blocking access to all internal VLANs</td></tr>
+    <tr><td>L3</td><td>DHCP scope limits</td><td>10.30.0.0/20 = 4,094 IPs max; lease time 4h (prevents squatting)</td></tr>
+    <tr><td>Application</td><td>CWP registration + ticketing DB</td><td>Webhook to FIFA ticketing API on first association</td></tr>
+    <tr><td>RF</td><td>AirDefense / rogue AP detection</td><td>EP1 always-on security sensor on AP5060 (dedicated tri-band radio)</td></tr>
+    <tr><td>RF</td><td>Rogue containment</td><td>EP1 → AirDefense → auto-contain policy for evil-twin SSIDs</td></tr>
+  </table>
+
+  <div class="callout-red">
+    <p><strong>Geofence assumption risk:</strong> The brief states "anyone in the vicinity of Seattle Center or the stadiums would be a bona fide WC Soccer user." This is operationally convenient but a security gap — a rogue actor within RF range qualifies. The ticketing DB check partially mitigates this, but if the API is unavailable you're fail-open. Raise this explicitly with the core security team: <em>should the ticketing check be advisory (log only) or enforcing (block if no valid ticket)?</em></p>
+  </div>
+</section>
+
+
+<!-- ── SECTION 6: QoS DESIGN ─────────────────────────────────────── -->
+<section id="qos">
+  <h2>6. QoS — Video Priority, POS, Premium Guest Hierarchy</h2>
+
+  <h3>Traffic Class Hierarchy</h3>
+  <table>
+    <tr><th>Priority</th><th>Traffic Class</th><th>DSCP</th><th>WMM AC</th><th>Guaranteed Rate</th><th>VLAN</th></tr>
+    <tr><td>1 (highest)</td><td>POS Transactions</td><td>EF (46)</td><td>AC_VO</td><td>10 Mbps guaranteed</td><td>50</td></tr>
+    <tr><td>2</td><td>Team communications (VoIP/Video)</td><td>EF (46)</td><td>AC_VO</td><td>20 Mbps guaranteed</td><td>10, 20</td></tr>
+    <tr><td>3</td><td>Guest Video (fans streaming replays)</td><td>AF41 (34)</td><td>AC_VI</td><td>5 Mbps guaranteed / 25 Mbps burst</td><td>30, 40</td></tr>
+    <tr><td>4</td><td>Premium Guest data</td><td>AF21 (18)</td><td>AC_BE</td><td>Best effort with priority</td><td>40</td></tr>
+    <tr><td>5</td><td>Guest best-effort</td><td>BE (0)</td><td>AC_BE</td><td>Best effort</td><td>30</td></tr>
+    <tr><td>6 (lowest)</td><td>Guest bulk/background</td><td>CS1 (8)</td><td>AC_BK</td><td>Best effort, deprioritized</td><td>30</td></tr>
+  </table>
+
+  <h3>Video QoS for Guests — The 5/25 Mbps Stake</h3>
+  <p>A FIFA fan app video stream (720p replay) requires approximately 3–5 Mbps. At 72,000 concurrent fans, assume 30% actively streaming = 21,600 streams. The <code>WC_Guest</code> policy should guarantee 5 Mbps per active video session with a 25 Mbps burst cap to prevent single-client monopolization. Configure in EP1 as a per-client rate limit on VLAN 30 video traffic (DSCP AF41 marking + WMM AC_VI queue).</p>
+
+  <div class="callout">
+    <p><strong>Jitter target:</strong> For acceptable video (no rebuffering), target &lt;30ms jitter end-to-end within the WiFi domain. At AP5060 with WiFi-7 HARQ (Hybrid Automatic Repeat reQuest), L2 retransmission jitter is dramatically reduced vs WiFi-6. Your binding constraint will be the backhaul — see Section 7.</p>
+  </div>
+
+  <h3>EP1 QoS Configuration</h3>
+  <pre>EP1 → Network Policies → User Profiles → WC_Guest_Profile
+→ Rate Limiting:
+  Upload: 25 Mbps per client
+  Download: 25 Mbps per client
+→ Application QoS:
+  Video streaming apps (YouTube, FIFA+, ESPN): DSCP AF41 → WMM AC_VI
+  VoIP: DSCP EF → WMM AC_VO
+  Bulk transfer: DSCP CS1 → WMM AC_BK
+→ Assign to VLAN 30
+
+EP1 → Network Policies → User Profiles → WC_Premium_Profile
+→ Rate Limiting:
+  Upload: 50 Mbps per client
+  Download: 50 Mbps per client
+→ Priority: AC_BE with DSCP AF21 marking (above standard Guest)
+→ Assign to VLAN 40</pre>
+</section>
+
+
+<!-- ── SECTION 7: BACKHAUL ────────────────────────────────────────── -->
+<section id="backhaul">
+  <h2>7. Backhaul Architecture &amp; Bottleneck Analysis</h2>
+
+  <h3>Backhaul Topology</h3>
+  <table>
+    <tr><th>Layer</th><th>Technology</th><th>Capacity</th><th>Redundancy</th></tr>
+    <tr><td>AP → Access Switch</td><td>PoE+ (802.3at) or PoE++ (802.3bt) copper</td><td>2.5 GbE or 10 GbE per AP</td><td>Port-level; switch redundancy via stacking</td></tr>
+    <tr><td>Access → Distribution</td><td>Fiber (OS2 single-mode preferred in stadium)</td><td>10 GbE or 25 GbE uplinks</td><td>LAG (802.3ad) dual uplinks</td></tr>
+    <tr><td>Distribution → Core</td><td>Fiber</td><td>100 GbE</td><td>VOSS SPB fabric (if EN) — multi-path by default</td></tr>
+    <tr><td>Core → Internet</td><td>Metro fiber to ISP</td><td>100 GbE × 2 circuits (BGP multi-home)</td><td>Dual ISP; failover &lt;1s with BFD</td></tr>
+    <tr><td>Emergency backup</td><td>SATCOM / Starlink</td><td>~500 Mbps down, ~50 Mbps up (shared)</td><td>Activated on primary fiber loss; high latency (20–50ms additional)</td></tr>
+  </table>
+
+  <h3>Bottleneck Analysis — Where the Math Breaks Down</h3>
+
+  <h4>Scenario: 10,000 APs, busy-hour peak</h4>
+  <p>WiFi-7 per-AP theoretical aggregate: ~14.5 Gbps. Real-world stadium efficiency (overhead, contention, mixed clients): ~8–10% utilization → <strong>1–1.5 Gbps aggregate per AP</strong> at true peak.</p>
+  <p>10,000 APs × 1 Gbps average = <strong>10 Tbps theoretical aggregate</strong>. This does not exist as backhaul — nor does it need to. The internet uplinks are the binding constraint.</p>
+
+  <div class="callout-red">
+    <p><strong>Critical bottleneck: Internet uplink.</strong> Two 100 GbE circuits = 200 Gbps total. At 72,000 simultaneous fans averaging 5 Mbps each = 360 Gbps demand — <em>nearly 2× your uplink capacity</em>. Resolution strategies:</p>
+    <ul>
+      <li><strong>CDN pre-positioning</strong>: Cache FIFA+ content (match replays, stats) at a local CDN PoP or on-premises appliance. Keeps most fan traffic local, off the WAN.</li>
+      <li><strong>Traffic shaping</strong>: Per-client 25 Mbps cap on Guest VLAN reduces peak demand to ~72,000 × 2 Mbps average realistic = 144 Gbps — within your 200 Gbps budget.</li>
+      <li><strong>Additional circuits</strong>: Work with CenturyLink/Lumen (the stadium naming rights holder has a relationship) for temporary 100 GbE burst capacity for the tournament window.</li>
+      <li><strong>SATCOM supplement</strong>: Starlink Business can add ~500 Mbps per terminal. Deploying 10–20 terminals adds 5–10 Gbps — helpful for staff/POS VLANs but not a fan traffic solution at this scale.</li>
+    </ul>
+  </div>
+
+  <h4>Distribution-level bottleneck</h4>
+  <p>At 10 GbE access switch uplinks with 24 APs per switch (each AP at 2.5 GbE), you have 60 Gbps of AP capacity feeding a 10 GbE uplink — a 6:1 oversubscription ratio. Acceptable for fan WiFi where simultaneous full utilization is rare. For Team VLANs (lower contention, higher criticality), ensure those switches have 25 GbE uplinks and &lt;4:1 oversubscription.</p>
+
+  <h3>PoE Budget</h3>
+  <p>AP5060 power consumption: approximately 30W (PoE+, 802.3at). At 10,000 APs: <strong>300 kW total PoE load</strong>. Each PoE switch must have adequate power budget provisioned — do not rely on "budget sharing" modes that throttle AP radio power. Work with the facilities/electrical team to confirm switch PSU capacity and UPS runtime for the stadium distribution layer.</p>
+</section>
+
+
+<!-- ── SECTION 8: RF DESIGN & GOODPUT ─────────────────────────────── -->
+<section id="rf">
+  <h2>8. RF Design &amp; Goodput Calculations</h2>
+
+  <h3>AP Density and Channel Plan</h3>
+  <table>
+    <tr><th>Zone</th><th>AP Count</th><th>AP Model</th><th>Deployment</th><th>Primary Band</th></tr>
+    <tr><td>Stadium bowl seating</td><td>~4,000</td><td>AP5060U</td><td>Under-seat, row-by-row</td><td>6 GHz (clean spectrum)</td></tr>
+    <tr><td>Concourse / gates</td><td>~2,000</td><td>AP5060D</td><td>Directional, ceiling/wall mount</td><td>5 GHz + 6 GHz</td></tr>
+    <tr><td>Seattle Center fan hub</td><td>~3,000</td><td>AP5060D</td><td>Outdoor/covered, pole mount</td><td>5 GHz + 6 GHz</td></tr>
+    <tr><td>Team areas (locker, tunnel, bench)</td><td>~500</td><td>AP5060U</td><td>Ceiling, low density</td><td>6 GHz / 5 GHz</td></tr>
+    <tr><td>Media / press tribune</td><td>~500</td><td>AP5060D</td><td>Directional, sector coverage</td><td>6 GHz</td></tr>
+  </table>
+
+  <h3>Max Goodput — System Calculation</h3>
+
+  <h4>Per-AP capacity (WiFi-7, 6 GHz, stadium conditions)</h4>
+  <table>
+    <tr><th>Parameter</th><th>Value</th><th>Note</th></tr>
+    <tr><td>Channel width</td><td>160 MHz (stadium; 320 MHz impractical with 10K APs)</td><td>Requires careful channel reuse plan</td></tr>
+    <tr><td>MCS index</td><td>MCS 11 average (4096-QAM not achievable at stadium range/SINR)</td><td>MCS 13 only at &lt;5m; average client MCS at 10–15m ≈ MCS 9–11</td></tr>
+    <tr><td>Spatial streams (AP)</td><td>4SS (AP5060)</td><td>—</td></tr>
+    <tr><td>Spatial streams (client)</td><td>2SS average (iPhone 16, Samsung S25)</td><td>Limiting factor = client capability</td></tr>
+    <tr><td>Theoretical PHY rate (2SS, MCS11, 160MHz)</td><td>~2.9 Gbps</td><td>Per associated client at ideal SINR</td></tr>
+    <tr><td>MAC efficiency</td><td>~65%</td><td>OFDMA + MU-MIMO overhead</td></tr>
+    <tr><td>Goodput per client at ideal SINR</td><td>~1.9 Gbps</td><td>Not realistic at 100+ clients/AP</td></tr>
+    <tr><td>Real goodput per AP (100 clients)</td><td>~2–4 Gbps aggregate</td><td>OFDMA divides channel among clients</td></tr>
+    <tr><td>Per-client at 100 clients/AP</td><td>20–40 Mbps</td><td>Sufficient for video + browsing</td></tr>
+    <tr><td>Per-client at 500 clients/AP (peak bowl)</td><td>4–8 Mbps</td><td>Matches 5 Mbps QoS guarantee target</td></tr>
+  </table>
+
+  <h4>System aggregate goodput (10,000 APs)</h4>
+  <pre>Conservative (stadium-realistic):
+  10,000 APs × 2 Gbps average aggregate = 20 Tbps total WiFi capacity
+
+Peak busy-hour (500 clients/AP in bowl, 10% simultaneity):
+  4,000 bowl APs × 500 clients × 10% active simultaneously × 5 Mbps = 1 Tbps
+  6,000 other APs × 100 clients × 20% active × 8 Mbps = 960 Gbps
+  Total: ~2 Tbps real busy-hour demand
+
+Binding constraint: Internet uplink (200 Gbps) — not the WiFi system.</pre>
+
+  <div class="callout-green">
+    <p><strong>Apple vs Android mix:</strong> iPhone 16 Pro is WiFi-7 (802.11be) with 2×2 MIMO on 6 GHz. Samsung Galaxy S25 is WiFi-7 with 2×2 MIMO. Older iPhone 14/15 is WiFi-6E (max 6 GHz, MCS 11). Older Android (2 years+) may be WiFi-6 or WiFi-5 (5 GHz only). Assume 40% iOS / 60% Android in a stadium crowd; expect 30–40% of devices to be WiFi-7 capable by mid-2026. The 6 GHz "6 GHz First" architecture of AP5060 benefits the WiFi-7 clients directly; older devices fall back to 5 GHz cleanly.</p>
+  </div>
+
+  <h3>Load Testing Plan (2K Stadium APs)</h3>
+  <pre>Phase 1 (pre-event, -14 days): Instrument 2,000 stadium APs
+  → Deploy EN Packet Capture probes on sample APs (1 per 50)
+  → Run synthetic traffic generators: 100 client emulators per AP
+  → Metrics to capture: per-AP throughput, retransmission rate, channel utilization, SINR distribution
+
+Phase 2 (-7 days): Simulate match-day load
+  → Activate all 3 SSIDs
+  → CWP registration load test (target: 5,000 registrations/minute)
+  → POS transaction burst test: 200 concurrent transactions
+  → Video streaming: validate 5 Mbps guarantee holds under full load
+
+Phase 3 (-3 days): RF validation
+  → Adjust channel plan based on Phase 2 interference data
+  → Tune BSS Min Rate upward if spectrum is clean (try 24 Mbps)
+  → Validate 802.11k/v neighbor reports for seamless roaming</pre>
+</section>
+
+
+<!-- ── SECTION 9: AIOPS MONITORING ───────────────────────────────── -->
+<section id="aiops">
+  <h2>9. EP1 AIOps Monitoring &amp; Trouble Ticket Routing</h2>
+
+  <h3>Monitoring Architecture</h3>
+  <p>EP1's AIOps engine (ML Insights) monitors all 10,000 APs continuously. Relevant capabilities for this deployment:</p>
+  <ul>
+    <li><strong>Anomaly detection</strong>: Per-AP baseline + deviation alerting (throughput drop, client count spike, error rate surge)</li>
+    <li><strong>Client 360</strong>: Per-device association history, roaming trace, RSSI/SNR trends</li>
+    <li><strong>Network Health Score</strong>: Per-AP, per-floor, per-zone score; visible on NOC dashboard</li>
+    <li><strong>Digital Twin</strong>: Pre-event RF simulation — validate channel plan before deploying</li>
+  </ul>
+
+  <h3>Trouble Ticket Auto-Generation (1-Minute Rule)</h3>
+  <pre>EP1 → Monitor → Alerts → Alert Policies → Create Policy
+  Name: AP_Down_1Min
+  Trigger: AP offline &gt; 60 seconds
+  Severity: Critical
+  Action:
+    1. Send webhook to ServiceNow / GTAC ticketing system
+       POST https://[ticketing-system]/api/incident
+       Payload: {ap_serial, ap_name, location, zone, offline_since, last_clients_served}
+    2. Send SMS to NOC on-call: "CRITICAL: AP [name] in [zone] offline at [time]"
+    3. Log to EP1 alert stream (visible on NOC console)
+
+  Maintenance window exception:
+    Suppress ticket creation: 02:00–05:00 PST daily
+    During window: log only (no pages, no tickets)</pre>
+
+  <h3>SOC / NOC / GTAC Routing by Severity</h3>
+  <table>
+    <tr><th>Severity</th><th>Trigger</th><th>First Responder</th><th>Escalation</th><th>SLA</th></tr>
+    <tr><td>P1 — Critical</td><td>AP down &gt;1 min; internet uplink loss; Team VLAN outage; POS VLAN outage</td><td>NOC on-call (on-site)</td><td>GTAC within 15 min if not resolved</td><td>Acknowledge 5 min; resolve 30 min</td></tr>
+    <tr><td>P2 — High</td><td>&gt;10% APs down in zone; CWP unreachable; RADIUS auth failure rate &gt;5%</td><td>NOC Tier 2</td><td>GTAC within 30 min if not resolved</td><td>Acknowledge 15 min; resolve 2h</td></tr>
+    <tr><td>P3 — Medium</td><td>Single AP down; elevated retransmission on specific APs; client count anomaly</td><td>NOC Tier 1 (remote)</td><td>Tier 2 if not resolved in 2h</td><td>Acknowledge 30 min; resolve 4h</td></tr>
+    <tr><td>P4 — Low</td><td>Channel utilization &gt;80%; roaming event anomaly; rogue AP detected</td><td>Email to NOC queue</td><td>Addressed in maintenance window</td><td>Next maintenance window</td></tr>
+  </table>
+
+  <h3>SOC Location Recommendation</h3>
+  <p>Primary NOC: On-site at Lumen Field (ORCAS Level, IT operations room with direct physical access to distribution switch rooms). Secondary NOC: Remote (EP1 cloud console, VPN access). GTAC: EN 24×7 global TAC, activated via ServiceNow ticket escalation. SOC for cyber threats: co-located with NOC; EP1 AirDefense feeds rogue AP / evil-twin alerts directly to SOC console.</p>
+</section>
+
+
+<!-- ── SECTION 10: DISASTER RECOVERY ─────────────────────────────── -->
+<section id="dr">
+  <h2>10. Disaster Recovery &amp; Resilience</h2>
+
+  <h3>Failure Scenarios and Mitigations</h3>
+
+  <h4>Physical fiber cut (backhaul loss)</h4>
+  <ul>
+    <li>Primary: dual fiber paths into stadium from two physically diverse entry points (NFL stadium standard — confirm with facilities)</li>
+    <li>Failover: BGP pre-computed route; BFD detection &lt;1s; failover to secondary ISP &lt;3s</li>
+    <li>Emergency: SATCOM/Starlink activated for staff/POS VLANs; Guest internet service degraded gracefully</li>
+    <li>AP local mode: AP5060 supports <em>local switching</em> — if cloud connectivity to EP1 is lost, APs continue forwarding traffic using last-known policy. Clients already associated stay connected. New associations continue. Critical for match-day resilience.</li>
+  </ul>
+
+  <h4>PoE / power failure</h4>
+  <ul>
+    <li>UPS on all distribution switches: minimum 2-hour runtime (enough to cover a match)</li>
+    <li>Generator backup for stadium power: standard NFL/FIFA venue requirement</li>
+    <li>If a single access switch loses power: 24 APs go dark. EP1 AIOps detects within 60s and raises P1. Adjacent APs auto-increase transmit power (TPC) to partially compensate coverage gap.</li>
+    <li>AP5060 PoE++ (802.3bt) preferred over PoE+ for full radio performance — confirm switch PSU spec with infrastructure team.</li>
+  </ul>
+
+  <h4>Cyber threat / DDoS</h4>
+  <ul>
+    <li>EP1 AirDefense: always-on dedicated RF security radio — detects rogue APs, deauth floods, evil-twin attacks, RF jamming</li>
+    <li>Guest VLAN internet: upstream DDoS scrubbing via ISP (Lumen/CenturyLink has scrubbing services — activate for tournament window)</li>
+    <li>RADIUS server: rate-limit authentication attempts per source MAC (NPS connection request policy); lockout after 5 failed attempts</li>
+    <li>POS VLAN: isolated segment, no internet access, PCI-DSS compliant. Only reaches payment processor via dedicated route.</li>
+  </ul>
+
+  <h4>RF Interference (major stadium risk)</h4>
+  <ul>
+    <li>6 GHz band: no legacy devices, no cordless phones, no microwave ovens — cleanest option for high-density. AP5060 "6 GHz First" architecture is the right choice.</li>
+    <li>5 GHz: DFS channels required near stadiums (radar detection). Pre-configure DFS channel plan; expect occasional 60-second channel moves during match. Monitor via EP1 channel history.</li>
+    <li>2.4 GHz: Accept it will be saturated. Use for IoT / POS only or disable entirely on bowl APs.</li>
+    <li>Broadcast media RF: TV broadcast trucks use 5.8 GHz links. Coordinate with broadcast coordinator — their frequencies may overlap WiFi 5 GHz. Move sensitive APs to 6 GHz only.</li>
+    <li>Cellular: 5G mmWave base stations near bowl — physically harmless to WiFi but coordinate with carrier (AT&amp;T/Verizon) so they are not transmitting on frequencies that bleed into 6 GHz through harmonics.</li>
+  </ul>
+
+  <h3>Configuration Backup &amp; Restore</h3>
+  <pre>EP1 → Network Policies → [All Policies] → Export
+  → Backup to secure object storage (S3 or equivalent): daily automated + manual pre-event
+  → Retain 30-day history
+  → Restore procedure: EP1 → Import Policy → select backup → push to AP groups
+  → RTO target: full policy restore and push to 10K APs &lt; 30 minutes</pre>
+</section>
+
+
+<!-- ── SECTION 11: P5G / WIFI COEXISTENCE ────────────────────────── -->
+<section id="p5g">
+  <h2>11. P5G / 5G Coexistence &amp; Handset Fallback</h2>
+
+  <h3>The Problem</h3>
+  <p>Every fan with a cellular subscription carries a device that is simultaneously connected to both the stadium WiFi and the carrier 5G network. Modern handsets use <strong>traffic steering algorithms</strong> that continuously evaluate both interfaces and may route traffic to 5G even when WiFi is connected — or vice versa. In a dense stadium this creates two problems: (1) WiFi appears to perform well but much of the traffic is leaving via 5G anyway; (2) the P5G network inside the stadium (if EN is providing a private 5G overlay) must be coordinated with WiFi to avoid double-serving the same client.</p>
+
+  <h3>Handset Behaviour: iOS vs Android</h3>
+  <table>
+    <tr><th>Platform</th><th>Default behaviour</th><th>WiFi preference trigger</th></tr>
+    <tr><td>iOS (iPhone)</td><td>"WiFi Assist" — seamlessly uses cellular if WiFi is poor. Also uses "Multipath TCP" to bond both interfaces for some apps.</td><td>Prefers WiFi if RSSI &gt; -70 dBm and throughput is adequate. Strong WiFi signal = WiFi wins.</td></tr>
+    <tr><td>Android (varies by OEM)</td><td>Most Android will stay on WiFi once connected unless quality drops below a threshold. Samsung "Intelligent WiFi" uses ML-based switching.</td><td>Prefers the interface with higher estimated TCP throughput.</td></tr>
+  </table>
+
+  <h3>Fallback Mechanism Design</h3>
+  <p>The brief asks: <em>"what can be done to ensure there is a fallback mechanism?"</em> The answer operates at multiple layers:</p>
+
+  <ol>
+    <li><strong>WiFi quality above 5G threshold:</strong> If the WiFi network delivers &gt;5 Mbps reliably, handsets will prefer it. Maintaining BSS Min Rate at 18 Mbps and the goodput targets in Section 6 keeps WiFi competitive with 5G.</li>
+    <li><strong>802.11v BSS Transition Management:</strong> If an AP is overloaded, it sends a BSS Transition Request to the client suggesting a better AP — this keeps clients on WiFi rather than defecting to 5G.</li>
+    <li><strong>Hotspot 2.0 / Passpoint (802.11u):</strong> Enables authenticated WiFi offload from cellular. A carrier agreement with AT&amp;T/Verizon/T-Mobile lets their subscribers auto-authenticate to <code>WC_Guest</code> using their SIM credentials (EAP-SIM/AKA). No CWP required; seamless handoff from 5G to WiFi and back. This is the stadium-grade solution for cellular/WiFi coexistence.</li>
+    <li><strong>ANQP (802.11u query):</strong> Devices broadcast "what networks are here?" before associating. EP1 responds with venue info, including roaming consortium identifiers that let carrier subscribers self-authenticate. Configure: EP1 → SSID → Hotspot 2.0 → enable, add carrier ANQP profiles.</li>
+    <li><strong>Graceful degradation:</strong> If WiFi becomes congested, the BSS Min Rate admission control (18 Mbps) prevents the AP from admitting clients it cannot serve — those clients fall back to 5G cleanly rather than being admitted and getting 1 Mbps on WiFi.</li>
+  </ol>
+
+  <div class="callout-blue">
+    <p><strong>P5G coordination note for core engineers:</strong> If the stadium is deploying Extreme's Private 5G (P5G) alongside WiFi, the two systems must use a common policy plane. EP1 can manage both WiFi APs and P5G small cells from a single dashboard. The key decision: which clients are primary WiFi vs primary P5G? Recommendation: high-density fan areas → WiFi-7 primary (AP5060); outdoor perimeter / entry queues where AP density is lower → P5G primary. Flag this as an open architectural question for the EN pre-sales team at Lumen Field.</p>
+  </div>
+</section>
+
+
+<!-- ── SECTION 12: CORE ENGINEER REVIEW POINTS ───────────────────── -->
+<section id="review">
+  <h2>12. Points for Core Engineer Review</h2>
+
+  <p>The following items require architectural sign-off from the infrastructure / core team before this design is finalised:</p>
+
+  <table>
+    <tr><th>#</th><th>Item</th><th>Why it needs core review</th><th>Decision needed</th></tr>
+    <tr><td>1</td><td>Backhaul capacity augmentation</td><td>200 Gbps uplink vs 360 Gbps potential demand at full occupancy</td><td>Additional ISP circuits? CDN on-prem caching? Traffic shaping policy?</td></tr>
+    <tr><td>2</td><td>VOSS SPB fabric vs EXOS at distribution</td><td>If EN switches are used for distribution, SPB fabric provides multi-path loop-free forwarding without STP — critical at this scale</td><td>Confirm switch platform: VOSS (fabric) or EXOS (traditional L2/L3)?</td></tr>
+    <tr><td>3</td><td>OOB management network physical path</td><td>VLAN 99 management traffic must be reachable even during data-plane outage</td><td>Dedicated OOB management switch fabric or in-band with strict ACL?</td></tr>
+    <tr><td>4</td><td>Ticketing DB API rate limiting</td><td>CWP registration triggers API call per new client. At 72,000 fans connecting within 1 hour = 20 calls/second — ensure API can handle this</td><td>Confirm FIFA ticketing API throughput spec; implement local cache if needed</td></tr>
+    <tr><td>5</td><td>RADIUS server sizing</td><td>802.1X auth at match start: thousands of auths per minute as team staff connect simultaneously</td><td>NPS cluster or FreeRADIUS cluster? How many servers? Auth/sec capacity test?</td></tr>
+    <tr><td>6</td><td>PCI-DSS scope for POS VLAN</td><td>VLAN 50 carries card transaction data. Requires network segmentation validation and QSA review</td><td>Confirm VLAN 50 routing boundaries; schedule QSA review pre-event</td></tr>
+    <tr><td>7</td><td>Passpoint / Hotspot 2.0 carrier agreements</td><td>EAP-SIM/AKA offload requires bilateral agreement with AT&amp;T, Verizon, T-Mobile</td><td>Are carrier agreements in place or does this need to be initiated?</td></tr>
+    <tr><td>8</td><td>EP1 instance sizing for 10K APs</td><td>EP1 cloud management scales horizontally but 10K APs is at the high end of single-tenant deployments</td><td>Confirm with EN pre-sales: dedicated EP1 tenant instance or shared cloud?</td></tr>
+  </table>
+</section>
+
+
+<!-- ── SECTION 13: KARL LAB – 802.1X PRACTICE ────────────────────── -->
+<section id="karl">
+  <h2>13. Karl Lab — 802.1X Dynamic VLAN Practice Path</h2>
+
+  <p>You asked Karl for lab access specifically to practice <strong>802.1X with RADIUS assigning dynamic VLANs</strong>. Here is the exact sequence to request and the validation steps once you have access.</p>
+
+  <h3>What to Ask Karl For</h3>
+  <ul>
+    <li>One AP (any model) broadcasting a test SSID with 802.1X / WPA2-Enterprise</li>
+    <li>Access to Windows NPS (Network Policy Server) — or FreeRADIUS if Linux lab</li>
+    <li>Two test user accounts in AD (or FreeRADIUS users file): one for VLAN 10, one for VLAN 20</li>
+    <li>Two VLANs configured on the switch: VLAN 10 and VLAN 20</li>
+    <li>A client device (Windows laptop or Mac) to test with</li>
+  </ul>
+
+  <h3>NPS Configuration Steps (Windows Server)</h3>
+  <pre>1. NPS → RADIUS Clients → Add
+   Friendly name: Test_AP
+   Address: [AP management IP]
+   Shared Secret: [match what you enter in EP1/XIQ RADIUS profile]
+
+2. NPS → Network Policies → New
+   Name: WiFi_VLAN10_Policy
+   Conditions:
+     - Windows Groups: [Domain]\VLAN10_Users
+     - NAS Port Type: Wireless – IEEE 802.11
+   Authentication: EAP → PEAP → MSCHAPv2
+   Reply Attributes (THIS IS THE DYNAMIC VLAN PART):
+     - Tunnel-Type  (Tag=1) = VLAN (value: 13)
+     - Tunnel-Medium-Type (Tag=1) = IEEE-802 (value: 6)
+     - Tunnel-Private-Group-ID (Tag=1) = "10"
+
+3. Repeat for VLAN20_Policy:
+   Conditions: Windows Groups: VLAN20_Users
+   Reply Attributes: Tunnel-Private-Group-ID (Tag=1) = "20"</pre>
+
+  <div class="callout">
+    <p><strong>Common lab mistake:</strong> The Tag field on all three Tunnel attributes must match (both set to Tag=1). NPS UI calls this the "Tag" column in the Reply Attributes table. If they don't match, the AP gets conflicting or incomplete attributes and falls back to the SSID's static VLAN. This is the #1 reason dynamic VLAN fails in a first-time lab.</p>
+  </div>
+
+  <h3>Validation Checklist</h3>
+  <pre>On Windows client:
+  netsh wlan show interfaces → confirm SSID, Auth=WPA2-Enterprise
+  ipconfig /all → confirm IP address is in VLAN 10 subnet (if logged in as VLAN10_Users member)
+
+Switch verification:
+  show fdb ports [AP_port] → should show client MAC tagged to VLAN 10 or 20
+  show iparp vlan 10 → client IP should appear here
+
+RADIUS log (NPS Event Viewer → Security log):
+  Event 6272 = Access Granted
+  Event 6273 = Access Denied
+  Check event details for the Tunnel-Private-Group-ID value returned
+
+AP/EP1 log:
+  EP1 → Monitor → Clients → [client device] → Association Details
+  Look for "Dynamic VLAN: 10" in the auth details</pre>
+</section>
+
+
+<!-- ── SECTION 14: OPEN QUESTIONS ────────────────────────────────── -->
+<section id="open">
+  <h2>14. Open Questions for Next Session</h2>
+
+  <ol>
+    <li><strong>Ticketing DB enforcement policy:</strong> Advisory (log) or enforcing (block) when no valid ticket found? Security team must decide before CWP is built.</li>
+    <li><strong>Seattle Soccer House (Pacific Place) WiFi:</strong> Is this a separate EN deployment or extension of the Lumen Field contract? 27,000 sq ft, six zones — needs its own AP density plan.</li>
+    <li><strong>Visiting team VLAN reconfiguration:</strong> Australia vs USA is match 1. For subsequent matches, the "Visiting_Team" VLAN 20 serves a different team. Is the RADIUS group reconfigured per match or is there a generic <code>visiting_team_wifi</code> AD group that the visiting team's IT team populates? This is a process design question as much as a technical one.</li>
+    <li><strong>Karl lab access timeline:</strong> When can you get credentials? Set a target date so the 802.1X practice sprint can be scheduled.</li>
+    <li><strong>EN pre-sales engagement:</strong> The Lumen Field relationship exists. Has EN been formally briefed on the FIFA WiFi upgrade requirement? They may already have a solution brief / proposal in flight.</li>
+    <li><strong>CDN pre-positioning:</strong> Which CDN provider? FIFA+ runs on a custom CDN. Does EN's solution include an on-premises CDN appliance for venue deployments?</li>
+  </ol>
+</section>
+
+
+<footer>
+  <p>Session 2026-05-31 &nbsp;·&nbsp; FIFA World Cup 2026 Seattle WiFi Design &nbsp;·&nbsp; Draft v1.0</p>
+  <p>Sources: <a href="https://www.extremenetworks.com/resources/case-study/seattle-seahawks-achieve-operational-freedom">EN / Lumen Field Case Study</a> &nbsp;·&nbsp; <a href="https://www.extremenetworks.com/resources/blogs/stadium-wi-fi-7-redefining-high-density-connectivity-with-ap5060">EN AP5060 Stadium Blog</a> &nbsp;·&nbsp; <a href="https://www.seattlefwc26.org/destination/stadium">FIFA WC26 Seattle Stadium</a> &nbsp;·&nbsp; <a href="https://www.seattlefwc26.org/news/seattle-soccer-house-at-pacific-place-to-deliver-a-free-immersive-world-cup-experience-on-a-70-foot-screen">Seattle Soccer House</a> &nbsp;·&nbsp; RFC 3580 (802.1X + RADIUS VLAN) &nbsp;·&nbsp; RFC 8110 (OWE) &nbsp;·&nbsp; IEEE 802.11be (WiFi-7)</p>
+  <p>&copy; 2026 Khursheed Khan. All rights reserved.</p>
+</footer>
+
+</body>
+</html>
