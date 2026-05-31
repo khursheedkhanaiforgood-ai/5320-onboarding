@@ -224,6 +224,7 @@
   <a href="#journey">Architecture Journey</a>
   <a href="#sprint1">Sprint 1 — Local</a>
   <a href="#sprint2">Sprint 2 — AD</a>
+  <a href="#labstate">Lab State</a>
 </nav>
 
 
@@ -1208,9 +1209,103 @@ AD → open CN=TeamAUS → Remove Australian accounts → Add French player acco
 </section>
 
 
+<!-- ── SECTION 18: LAB BUILD — WHERE WE LEFT OFF ──────────────────── -->
+<section id="labstate">
+  <h2>18. Lab Build — Current State &amp; Next Session Checklist</h2>
+
+  <div class="callout-blue">
+    <p><strong>Session paused 2026-05-31.</strong> SW1 factory reset complete and reconnected to EP1. AP1 factory reset pending. EP1 Security build not started. Resume with "resume FIFA sprint."</p>
+  </div>
+
+  <h3>What Was Discovered This Session</h3>
+
+  <h4>EP1 Security Portal — Screenshots Analysed</h4>
+  <table>
+    <tr><th>File</th><th>Screen</th><th>Key Finding</th></tr>
+    <tr><td>EP1.docx</td><td>EP1 Apps launcher</td><td>9-dot menu reveals "Extreme Platform ONE Security" — this is ExtremeControl/NAC</td></tr>
+    <tr><td>EP1_SecurityPolicy.docx</td><td>Add Network Policy</td><td>Two policy types: Hybrid + Network. Network Policy = VLAN assignment + built-in firewall (Default DNS DHCP Allow / Default All Networks Deny)</td></tr>
+    <tr><td>EP1_Security_UsersGroups.docx</td><td>Users &amp; Devices</td><td>No users yet. Local user cap = 100. Add Local User = email + password only. User Groups = dual-panel picker.</td></tr>
+    <tr><td>RadiusServer.docx</td><td>Access Management → RADIUS tab</td><td><strong>RadSec confirmed:</strong> radius.oh-uz.extremecloudiq.com | 3.15.90.11 | Port 2083 | Secret: radsec | Region: Ohio US East. NOT port 1812/1813.</td></tr>
+  </table>
+
+  <h4>SW1 Config Backup Analysis</h4>
+  <p>Pre-reset backup revealed old lab state: VLAN5_Employee + VLAN10_Guest from previous PPSK sprint. Hostname still factory default. No IQAgent connection. Factory reset done via EP1 (cleaner than CLI — EP1 removes device from managed list automatically).</p>
+
+  <div class="callout">
+    <p><strong>EXOS filename gotcha:</strong> <code>save configuration SW1_backup.cfg</code> fails — no dots allowed in config names. Use <code>save configuration SW1_backup</code> (EXOS adds .cfg automatically).</p>
+  </div>
+
+  <h4>SCP from MacOS to EXOS — Flags Required</h4>
+  <pre># MacOS 14+ drops ssh-rsa by default. Required flags:
+scp -O -o HostKeyAlgorithms=+ssh-rsa -o PubkeyAcceptedAlgorithms=+ssh-rsa \
+  admin@192.168.0.28:/usr/local/cfg/SW1_backup.cfg ~/Downloads/SW1_backup.cfg
+
+# After factory reset always clear stale host key first:
+ssh-keygen -R 192.168.0.28</pre>
+
+  <h3>SW1 — Current State</h3>
+  <table>
+    <tr><th>Item</th><th>Status</th><th>Value</th></tr>
+    <tr><td>Hardware</td><td><span class="badge badge-done">confirmed</span></td><td>5320-16P-2MXT-2X-SwitchEngine, EXOS 33.6.1b14</td></tr>
+    <tr><td>Factory reset</td><td><span class="badge badge-done">done</span></td><td>Via EP1 Core → Reset to Factory Default</td></tr>
+    <tr><td>EP1 reconnected</td><td><span class="badge badge-done">done</span></td><td>IQAgent heartbeat green</td></tr>
+    <tr><td>Network Policy</td><td><span class="badge badge-wip">in progress</span></td><td>WC_Seattle-SW1 being created</td></tr>
+    <tr><td>Supplemental CLI</td><td><span class="badge badge-next">ready to push</span></td><td>5 VLANs + hostname + mgmt IP</td></tr>
+    <tr><td>AP uplink port tag</td><td><span class="badge badge-next">pending</span></td><td>Need AP1 port number first</td></tr>
+  </table>
+
+  <h4>Supplemental CLI — Ready to Push</h4>
+  <pre>configure snmp sysName "Kh_WC_Seattle-SW1"
+create vlan "TeamUSA" tag 10
+create vlan "TeamAUS" tag 20
+create vlan "Guest"   tag 30
+create vlan "VIP"     tag 40
+create vlan "POS"     tag 50
+configure vlan Default ipaddress 192.168.0.28/24
+enable ipforwarding vlan Default
+configure iproute add default 192.168.0.1</pre>
+  <p><em>Note: VLAN 99 (Mgmt) dropped — Default VLAN 1 serves as lab management. VLAN names are cosmetic on SW1; EP1 Security only uses the tag number.</em></p>
+
+  <h3>AP1 — Pending</h3>
+  <table>
+    <tr><th>Item</th><th>Status</th></tr>
+    <tr><td>Hardware</td><td>AP3000, IQ Engine OS</td></tr>
+    <tr><td>Factory reset</td><td><span class="badge badge-next">next action</span> — EP1 Core → Monitor → Devices → AP1 → Reset to Factory Default</td></tr>
+    <tr><td>Re-claim in EP1</td><td>After reset: EP1 Core → Add Device → enter serial number</td></tr>
+    <tr><td>Network Policy assign</td><td>Assign to WC_Seattle policy after claim</td></tr>
+  </table>
+
+  <h3>EP1 Security — Not Started</h3>
+  <table>
+    <tr><th>Step</th><th>Action</th><th>Status</th></tr>
+    <tr><td>1</td><td>Add 4 local users (testusa, testaus, testvip, teststaff)</td><td><span class="badge badge-next">pending</span></td></tr>
+    <tr><td>2</td><td>Create 4 User Groups (Lab_TeamUSA, Lab_TeamAUS, Lab_VIP, Lab_Staff)</td><td><span class="badge badge-next">pending</span></td></tr>
+    <tr><td>3</td><td>Build 6 Network Policies (VLAN 10/20/30/40/50 + Guest catch-all)</td><td><span class="badge badge-next">pending</span></td></tr>
+    <tr><td>4</td><td>EP1 Core: build WC_Secure SSID (WPA3-Enterprise, Dynamic VLAN ON, RADIUS port 2083)</td><td><span class="badge badge-next">pending</span></td></tr>
+    <tr><td>5</td><td>Connect MacBook → verify VLAN via show fdb on SW1</td><td><span class="badge badge-next">pending</span></td></tr>
+  </table>
+
+  <h3>RAG Ingestion — Blocked</h3>
+  <div class="callout-red">
+    <p><strong>OpenAI API key invalid (401).</strong> Three EP1 Security PDFs are chunked and ready (691 chunks total) but embedding is blocked. Fix: update <code>OPENAI_API_KEY</code> in <code>/Users/khukhan/xiq-ep1-intelligence-engine/.env</code>, then run:</p>
+  </div>
+  <pre>cd /Users/khukhan/xiq-ep1-intelligence-engine
+.venv/bin/python scripts/ingest_pdfs.py \
+  "/Users/khukhan/Downloads/Extreme_Platform_ONE_Security_25_6_0_User_Guide.pdf" \
+  "/Users/khukhan/Downloads/Extreme_Platform_ONE_Security_25_3_0_Alert_Reference_Guide.pdf" \
+  "/Users/khukhan/Downloads/Extreme_Platform_ONE_Security_25_6_0_Release_Notes.pdf"</pre>
+  <table>
+    <tr><th>PDF</th><th>Pages</th><th>Chunks</th><th>version_tag</th></tr>
+    <tr><td>User Guide 25.6.0</td><td>277</td><td>626</td><td>25.6.0</td></tr>
+    <tr><td>Alert Reference 25.3.0</td><td>19</td><td>27</td><td>25.3.0</td></tr>
+    <tr><td>Release Notes 25.6.0</td><td>16</td><td>38</td><td>25.6.0</td></tr>
+  </table>
+</section>
+
+
 <footer>
-  <p>Session 2026-05-31 &nbsp;·&nbsp; FIFA World Cup 2026 Seattle WiFi Design &nbsp;·&nbsp; Draft v1.1 (EP1 Security Architecture + Sprint 1/2 Build)</p>
-  <p>Sources: <a href="https://www.extremenetworks.com/resources/case-study/seattle-seahawks-achieve-operational-freedom">EN / Lumen Field Case Study</a> &nbsp;·&nbsp; <a href="https://www.extremenetworks.com/resources/blogs/stadium-wi-fi-7-redefining-high-density-connectivity-with-ap5060">EN AP5060 Stadium Blog</a> &nbsp;·&nbsp; <a href="https://www.seattlefwc26.org/destination/stadium">FIFA WC26 Seattle Stadium</a> &nbsp;·&nbsp; <a href="https://www.seattlefwc26.org/news/seattle-soccer-house-at-pacific-place-to-deliver-a-free-immersive-world-cup-experience-on-a-70-foot-screen">Seattle Soccer House</a> &nbsp;·&nbsp; RFC 3580 (802.1X + RADIUS VLAN) &nbsp;·&nbsp; RFC 8110 (OWE) &nbsp;·&nbsp; IEEE 802.11be (WiFi-7)</p>
+  <p>Session 2026-05-31 &nbsp;·&nbsp; FIFA World Cup 2026 Seattle WiFi Design &nbsp;·&nbsp; Draft v1.3 (Lab build state + RADIUS corrections)</p>
+  <p>Sources: <a href="https://www.extremenetworks.com/resources/case-study/seattle-seahawks-achieve-operational-freedom">EN / Lumen Field Case Study</a> &nbsp;·&nbsp; <a href="https://www.extremenetworks.com/resources/blogs/stadium-wi-fi-7-redefining-high-density-connectivity-with-ap5060">EN AP5060 Stadium Blog</a> &nbsp;·&nbsp; <a href="https://www.seattlefwc26.org/destination/stadium">FIFA WC26 Seattle Stadium</a> &nbsp;·&nbsp; <a href="https://www.seattlefwc26.org/news/seattle-soccer-house-at-pacific-place-to-deliver-a-free-immersive-world-cup-experience-on-a-70-foot-screen">Seattle Soccer House</a> &nbsp;·&nbsp; RFC 3580 (802.1X + RADIUS VLAN) &nbsp;·&nbsp; RFC 6614 (RadSec) &nbsp;·&nbsp; RFC 8110 (OWE) &nbsp;·&nbsp; IEEE 802.11be (WiFi-7)</p>
   <p>&copy; 2026 Khursheed Khan. All rights reserved.</p>
 </footer>
 
