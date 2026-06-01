@@ -1785,14 +1785,139 @@ WAN DEMAND (team/media priority):
     <p><strong>Rule of thumb for quick estimates:</strong> 1 access switch per 24 APs (PoE budget constrained); 1 distribution switch per 8–10 access switches; WAN circuits = (N_AP × 0.01 Gbps) × 1.5 safety factor. For 10K APs: 10,000 × 0.01 × 1.5 = 150 Gbps minimum WAN. Round up to 200 Gbps (2× 100G) as the floor.</p>
   </div>
 
-  <h3>Lab Scale (AP3000 + 5320 SW1 — Sprint 1)</h3>
-  <pre>N = 1 AP    b = 2.5 GbE (or 1 GbE on AP3000)    p = 16 ports (5320-16P)
-N_access = ⌈1/16⌉ = 1 switch  ✓
-U_actual = (1 × 1) / (2 × 10) = 0.05:1  (massively over-provisioned — correct for a lab)
-C_WAN = 1 × 1 × 0.10 = 0.1 Gbps = 100 Mbps  (your 192.168.0.x home network handles this fine)
+  <hr style="border:none; border-top:2px solid #1a1a1a; margin: 36px 0;">
 
-Lab conclusion: the 5320-16P is correct for the lab. The same equations scale from
-1 AP in Karl Lab to 10,000 APs at Lumen Field — only the numbers change.</pre>
+  <h3>Worked Example C — Karl Lab: AP3000 + 5320-16P-2MXT-2X (192.168.0.28)</h3>
+
+  <div class="callout-green">
+    <p><strong>This is your actual hardware.</strong> The closed-form equations applied to the exact switch and AP you are running.</p>
+  </div>
+
+  <h4>Switch Hardware — Confirmed Specs</h4>
+  <table>
+    <tr><th>Port Group</th><th>Count</th><th>Speed</th><th>PoE</th><th>Model suffix</th></tr>
+    <tr><td>RJ45 access ports</td><td>16</td><td>2.5 GbE</td><td>802.3at — 30W/port max, <strong>240W total PoE budget</strong></td><td>"16P"</td></tr>
+    <tr><td>SFP+ uplink</td><td>2</td><td>10 GbE</td><td>None</td><td>"2MXT"</td></tr>
+    <tr><td>SFP28 uplink</td><td>2</td><td>25 GbE</td><td>None</td><td>"2X"</td></tr>
+  </table>
+  <p><em>Use the 25G SFP28 pair (LAG) as the uplink for maximum headroom. The 10G SFP+ pair is a fallback or secondary path.</em></p>
+
+  <h4>AP Hardware — Confirmed Specs</h4>
+  <table>
+    <tr><th>Parameter</th><th>Value</th></tr>
+    <tr><td>Model</td><td>AP3000 (IQ Engine OS)</td></tr>
+    <tr><td>Standard</td><td>802.11ax (WiFi 6E), tri-band 2.4/5/6 GHz</td></tr>
+    <tr><td>Backhaul port</td><td>1× 2.5 GbE Ethernet (ETH0)</td></tr>
+    <tr><td>Power draw</td><td>802.3at (PoE+) — ~15W typical in lab config</td></tr>
+  </table>
+
+  <h4>Closed-Form Applied — Sprint 1 (1 AP)</h4>
+  <pre>─────────────────────────────────────────────────────────────────────
+INPUTS (Sprint 1 — Karl Lab)
+─────────────────────────────────────────────────────────────────────
+N    = 1 AP          (AP3000)
+b    = 2.5 Gbps      (AP3000 ETH0 backhaul)
+p    = 16 ports      (5320-16P)
+k    = 2 uplinks     (SFP28 pair in LAG)
+u    = 25 Gbps       (SFP28)
+η    = 0.10          (10% busy-hour efficiency)
+
+─────────────────────────────────────────────────────────────────────
+ACCESS LAYER
+─────────────────────────────────────────────────────────────────────
+N_access  = ⌈1 / 16⌉              = 1 switch  ✓
+
+U_actual  = (1 × 2.5) / (2 × 25)  = 2.5 / 50  = 0.05:1
+            Switch is 20× over-provisioned. Correct — lab has 1 AP,
+            switch designed for up to 16 APs.
+
+C_access_up = 1 × 2 × 25          = 50 Gbps available uplink capacity
+              (your home router is the bottleneck, not SW1)
+
+─────────────────────────────────────────────────────────────────────
+PoE BUDGET CHECK
+─────────────────────────────────────────────────────────────────────
+AP3000 draw:     1 × 15W = 15W   ≪ 240W budget  ✓  (1.6% of PoE budget used)
+
+Max APs at 15W:  240W / 15W = 16 APs  ← exactly fills all 16 ports  ✓
+                 Port count and PoE budget align perfectly for AP3000.
+
+─────────────────────────────────────────────────────────────────────
+WAN DEMAND (lab)
+─────────────────────────────────────────────────────────────────────
+C_WAN = 1 × 2.5 × 0.10            = 0.25 Gbps = 250 Mbps theoretical max
+Actual sprint 1 (1 client, video): ~ 5–25 Mbps
+Your 192.168.0.x home network:     typically 100–1000 Mbps  ✓  no constraint
+
+─────────────────────────────────────────────────────────────────────
+CONCLUSION
+─────────────────────────────────────────────────────────────────────
+The 5320-16P-2MXT-2X is correctly provisioned for this lab.
+Binding constraint is your home internet uplink (WAN), not SW1 or AP3000.
+The same equations scale linearly: replace N=1 with N=10,000 and the
+math produces the Lumen Field answer below.</pre>
+
+  <h4>Closed-Form Applied — Max Lab Scale (16 APs on one 5320)</h4>
+  <pre>─────────────────────────────────────────────────────────────────────
+INPUTS (max lab — 16× AP3000 all ports populated)
+─────────────────────────────────────────────────────────────────────
+N = 16    b = 2.5 Gbps    p = 16    k = 2    u = 25 Gbps    η = 0.10
+
+N_access  = ⌈16 / 16⌉               = 1 switch  ✓
+U_actual  = (16 × 2.5) / (2 × 25)   = 40 / 50  = 0.8:1  ✓ (under 1:1 = line rate)
+C_access  = 1 × 2 × 25              = 50 Gbps
+PoE check = 16 × 15W                = 240W = exactly at budget  ✓ (no headroom)
+C_WAN     = 16 × 2.5 × 0.10        = 4 Gbps   (your home ISP is the bottleneck)
+
+Result: 5320-16P is PoE-saturated at 16× AP3000. Port count = PoE limit — ideal match.
+For 17+ APs: need a second 5320-16P or upgrade to 5420-24P (740W budget).</pre>
+
+  <hr style="border:none; border-top:2px solid #1a1a1a; margin: 36px 0;">
+
+  <h3>Lumen Field — AP5060 + Switch TBD</h3>
+
+  <div class="callout">
+    <p><strong>Note — pending EN pre-sales engagement.</strong> We have the AP5060 spec sheet (22.9 Gbps aggregate, ETH0 = 2.5 GbE, 802.3bt = 25W typical / 30W max). The access switch model for Lumen Field is unknown — Extreme Networks has not disclosed the production stadium switch in public documentation. When the switch model is confirmed, plug into the formula:</p>
+  </div>
+
+  <pre>─────────────────────────────────────────────────────────────────────
+LUMEN FIELD — INPUTS CONFIRMED FROM AP5060 DATASHEET
+─────────────────────────────────────────────────────────────────────
+N    = 10,000 APs (full deployment)
+b    = 2.5 Gbps   (AP5060 ETH0 — standard backhaul)
+       10.0 Gbps  (AP5060 ETH1 — if dual-home or 10G uplink used)
+P_AP = 25W        (AP5060 802.3bt typical — use for PoE budget calc)
+η    = 0.10       (10% busy-hour efficiency)
+
+─────────────────────────────────────────────────────────────────────
+SWITCH MODEL TBD — PLUG IN WHEN CONFIRMED
+─────────────────────────────────────────────────────────────────────
+p    = ?   (PoE ports per stadium access switch)
+k    = ?   (uplinks per switch)
+u    = ?   (uplink speed, Gbps)
+PSU  = ?   (total PoE power budget, Watts)
+
+FORMULA TO APPLY:
+  N_access  = ⌈10,000 / min(p, PSU/25W)⌉    ← use PoE-limited port count
+  U_actual  = (p_PoE × 2.5) / (k × u)
+  C_access  = N_access × k × u
+  N_dist    = ⌈N_access / P_dist⌉
+  C_WAN_min = 10,000 × 2.5 × 0.10 = 2,500 Gbps theoretical
+              → with per-client 25 Mbps cap: realistic = ~150–200 Gbps
+              → minimum 2× 100G ISP circuits confirmed
+
+─────────────────────────────────────────────────────────────────────
+BEST ESTIMATE (EN 5420-24P assumed — most likely stadium access switch)
+─────────────────────────────────────────────────────────────────────
+p_PoE  = ⌊740W / 25W⌋ = 29 APs per switch  (PoE budget limit, not port count)
+N_access = ⌈10,000 / 29⌉                   = 345 switches
+U_actual = (29 × 2.5) / (2 × 25)           = 72.5 / 50 = 1.45:1  ✓
+C_access = 345 × 2 × 25                    = 17,250 Gbps
+N_dist   = ⌈345 / 8⌉                       = 44 distribution switches
+C_WAN    = 3 × 100G = 300 Gbps             (recommended minimum)
+
+⚠  This estimate uses 5420-24P as a proxy. Confirm with EN pre-sales before
+   finalising the BOM. Actual switch may differ — recalculate when confirmed.</pre>
 </section>
 
 
