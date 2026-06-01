@@ -248,9 +248,17 @@
     <tr><td>Standard</td><td>802.11be (WiFi-7)</td></tr>
     <tr><td>Bands</td><td>Tri-band: 2.4 GHz / 5 GHz / 6 GHz</td></tr>
     <tr><td>Max modulation</td><td>4096-QAM (MCS 13)</td></tr>
-    <tr><td>Architecture</td><td>"6 GHz First" — clean spectrum, no legacy interference</td></tr>
-    <tr><td>Radios</td><td>Software-defined; dynamic spectrum allocation across bands</td></tr>
-    <tr><td>Security sensor</td><td>Always-on tri-band, dedicated hardware (zero data radio trade-off)</td></tr>
+    <tr><td>Architecture</td><td>"6 GHz First" — clean spectrum, no legacy interference. <strong>Universal Hardware</strong> platform: OS changeable without a hardware swap.</td></tr>
+    <tr><td>Aggregate throughput</td><td><strong>22.9 Gbps</strong> (Dual 5G/6G mode) · 18.5 Gbps (standard tri-band mode)</td></tr>
+    <tr><td>Radios</td><td>Software-defined; dynamic spectrum allocation. Three operating modes: (1) 2.4G + 5G + 6G + scan sensor; (2) Dual 5G/6G + scan sensor; (3) 5G + Dual 6G + scan sensor</td></tr>
+    <tr><td>Security sensor</td><td><strong>Software-defined 2×2 scan radio</strong> — same silicon as the data radios, reconfigured in software. Zero data radio trade-off.</td></tr>
+    <tr><td>Max clients</td><td>512 per radio · 1,536 total</td></tr>
+    <tr><td>Ethernet</td><td>Dual: ETH0 + ETH1. ETH1 can operate as PoE PSE out (15.4W) when ETH0 powers the AP — daisy-chain IoT devices.</td></tr>
+    <tr><td>Power (802.3at)</td><td>21W typical · 25.5W max — sufficient for standard operation</td></tr>
+    <tr><td>Power (802.3bt)</td><td>25W typical · 30W max — required for full quad-radio / all IoT radios active</td></tr>
+    <tr><td>IoT radios</td><td>2× IoT radios: Thread, Zigbee, BLE 5.4, IEEE 802.15.4</td></tr>
+    <tr><td>GPS</td><td>L1 + L5 GPS — location services and precise timing</td></tr>
+    <tr><td>Cellular coexistence</td><td>Cellular Coexistence Filter (CCF) — reduces P5G/WiFi mutual interference at venues deploying both</td></tr>
     <tr><td>Form factors</td><td>AP5060U (under-seat bowl), AP5060D (directional — concourse, gates)</td></tr>
     <tr><td>Ruggedization</td><td>Weatherized; rated for spills, pressure washing, temp swings</td></tr>
   </table>
@@ -289,9 +297,9 @@
     <li>Client associates to <code>WC_Secure</code> SSID (WPA3-Enterprise or WPA2-Enterprise)</li>
     <li>AP (Authenticator) sends EAPOL-Start to client</li>
     <li>Client returns EAP-Response/Identity (username: <code>j.smith@teamusa.org</code>)</li>
-    <li>AP forwards RADIUS Access-Request to NPS/FreeRADIUS with username + EAP method</li>
-    <li>RADIUS checks AD group membership: <code>j.smith</code> → group <code>TeamUSA_WiFi</code></li>
-    <li>RADIUS sends Access-Accept with: <code>Tunnel-Type=VLAN</code>, <code>Tunnel-Medium-Type=IEEE-802</code>, <code>Tunnel-Private-Group-ID=10</code></li>
+    <li>AP forwards RADIUS Access-Request to <strong>EP1 Security</strong> via RadSec (TCP port 2083) with username + EAP method</li>
+    <li>EP1 Security evaluates Network Policies — matches <code>j.smith</code> to User Group <code>TeamUSA_WiFi</code> → Policy_TeamUSA → VLAN 10</li>
+    <li>EP1 Security sends Access-Accept with: <code>Tunnel-Type=VLAN</code>, <code>Tunnel-Medium-Type=IEEE-802</code>, <code>Tunnel-Private-Group-ID=10</code></li>
     <li>AP assigns client to <strong>VLAN 10</strong> and completes the 4-way WPA handshake</li>
     <li>A visiting team member (<code>a.jones@teamaus.com</code>) authenticates → group <code>TeamAUS_WiFi</code> → RADIUS returns VLAN 20 → complete isolation</li>
   </ol>
@@ -305,8 +313,13 @@
   </table>
   <p>At stadium density (hundreds of clients per AP), every microsecond of reclaimed airtime directly translates to throughput. Dynamic VLAN is not just elegant — it's a capacity design decision.</p>
 
-  <h3>What You Need on the RADIUS Server (NPS example)</h3>
-  <pre># Windows NPS — Network Policy Reply Attributes for group TeamUSA_WiFi
+  <h3>RADIUS Reply Attributes — What EP1 Security Returns (and How to Read the NPS Equivalent)</h3>
+  <div class="callout-blue">
+    <p><strong>In this deployment EP1 Security is the RADIUS server.</strong> You do not configure NPS or FreeRADIUS for wireless authentication — EP1 Security returns these attributes automatically based on which Network Policy matches. The NPS snippet below shows what those attributes look like under the hood; it is a reference for understanding the mechanism, not something you configure in this lab.</p>
+  </div>
+  <pre># Equivalent NPS reply attributes — shown for educational reference only
+# In practice EP1 Security returns these automatically via its Network Policy engine
+# Windows NPS — Network Policy Reply Attributes for group TeamUSA_WiFi
 Tunnel-Type         = VLAN         (Tag = 1, Value = 13)
 Tunnel-Medium-Type  = IEEE-802     (Tag = 1, Value = 6)
 Tunnel-Private-Group-ID = "10"    (Tag = 1, Value = string "10")
@@ -488,7 +501,7 @@ For clients below threshold:
     <tr><td>L3</td><td>Internet-only firewall</td><td>ACL blocking access to all internal VLANs</td></tr>
     <tr><td>L3</td><td>DHCP scope limits</td><td>10.30.0.0/20 = 4,094 IPs max; lease time 4h (prevents squatting)</td></tr>
     <tr><td>Application</td><td>CWP registration + ticketing DB</td><td>Webhook to FIFA ticketing API on first association</td></tr>
-    <tr><td>RF</td><td>AirDefense / rogue AP detection</td><td>EP1 always-on security sensor on AP5060 (dedicated tri-band radio)</td></tr>
+    <tr><td>RF</td><td>AirDefense / rogue AP detection</td><td>EP1 always-on security sensor on AP5060 (software-defined 2×2 scan radio — zero data radio trade-off)</td></tr>
     <tr><td>RF</td><td>Rogue containment</td><td>EP1 → AirDefense → auto-contain policy for evil-twin SSIDs</td></tr>
   </table>
 
@@ -557,7 +570,7 @@ EP1 → Network Policies → User Profiles → WC_Premium_Profile
   <h3>Bottleneck Analysis — Where the Math Breaks Down</h3>
 
   <h4>Scenario: 10,000 APs, busy-hour peak</h4>
-  <p>WiFi-7 per-AP theoretical aggregate: ~14.5 Gbps. Real-world stadium efficiency (overhead, contention, mixed clients): ~8–10% utilization → <strong>1–1.5 Gbps aggregate per AP</strong> at true peak.</p>
+  <p>AP5060 theoretical aggregate: <strong>22.9 Gbps</strong> (Dual 5G/6G mode) or 18.5 Gbps (standard tri-band). Real-world stadium efficiency (overhead, contention, mixed clients): ~8–10% utilization → <strong>1.5–2 Gbps aggregate per AP</strong> at true peak.</p>
   <p>10,000 APs × 1 Gbps average = <strong>10 Tbps theoretical aggregate</strong>. This does not exist as backhaul — nor does it need to. The internet uplinks are the binding constraint.</p>
 
   <div class="callout-red">
@@ -574,7 +587,7 @@ EP1 → Network Policies → User Profiles → WC_Premium_Profile
   <p>At 10 GbE access switch uplinks with 24 APs per switch (each AP at 2.5 GbE), you have 60 Gbps of AP capacity feeding a 10 GbE uplink — a 6:1 oversubscription ratio. Acceptable for fan WiFi where simultaneous full utilization is rare. For Team VLANs (lower contention, higher criticality), ensure those switches have 25 GbE uplinks and &lt;4:1 oversubscription.</p>
 
   <h3>PoE Budget</h3>
-  <p>AP5060 power consumption: approximately 30W (PoE+, 802.3at). At 10,000 APs: <strong>300 kW total PoE load</strong>. Each PoE switch must have adequate power budget provisioned — do not rely on "budget sharing" modes that throttle AP radio power. Work with the facilities/electrical team to confirm switch PSU capacity and UPS runtime for the stadium distribution layer.</p>
+  <p>AP5060 power: <strong>802.3at (PoE+)</strong> — 21W typical / 25.5W max (supports standard 2-radio operation). <strong>802.3bt (PoE++)</strong> — 25W typical / 30W max (required for full quad-radio + all IoT radios). At 10,000 APs on 802.3bt: <strong>up to 300 kW total PoE load</strong>. Each PoE switch must have adequate power budget provisioned — do not rely on "budget sharing" modes that throttle AP radio power. Specify 802.3bt-capable switches for the stadium deployment. Work with the facilities/electrical team to confirm switch PSU capacity and UPS runtime for the distribution layer.</p>
 </section>
 
 
@@ -712,7 +725,7 @@ Phase 3 (-3 days): RF validation
   <ul>
     <li>EP1 AirDefense: always-on dedicated RF security radio — detects rogue APs, deauth floods, evil-twin attacks, RF jamming</li>
     <li>Guest VLAN internet: upstream DDoS scrubbing via ISP (Lumen/CenturyLink has scrubbing services — activate for tournament window)</li>
-    <li>RADIUS server: rate-limit authentication attempts per source MAC (NPS connection request policy); lockout after 5 failed attempts</li>
+    <li>EP1 Security RADIUS: rate-limit authentication attempts per source MAC; lockout after 5 failed attempts (configured in EP1 Security → Policy → Network Policies → Advanced Auth settings)</li>
     <li>POS VLAN: isolated segment, no internet access, PCI-DSS compliant. Only reaches payment processor via dedicated route.</li>
   </ul>
 
@@ -777,7 +790,7 @@ Phase 3 (-3 days): RF validation
     <tr><td>2</td><td>VOSS SPB fabric vs EXOS at distribution</td><td>If EN switches are used for distribution, SPB fabric provides multi-path loop-free forwarding without STP — critical at this scale</td><td>Confirm switch platform: VOSS (fabric) or EXOS (traditional L2/L3)?</td></tr>
     <tr><td>3</td><td>OOB management network physical path</td><td>VLAN 99 management traffic must be reachable even during data-plane outage</td><td>Dedicated OOB management switch fabric or in-band with strict ACL?</td></tr>
     <tr><td>4</td><td>Ticketing DB API rate limiting</td><td>CWP registration triggers API call per new client. At 72,000 fans connecting within 1 hour = 20 calls/second — ensure API can handle this</td><td>Confirm FIFA ticketing API throughput spec; implement local cache if needed</td></tr>
-    <tr><td>5</td><td>RADIUS server sizing</td><td>802.1X auth at match start: thousands of auths per minute as team staff connect simultaneously</td><td>NPS cluster or FreeRADIUS cluster? How many servers? Auth/sec capacity test?</td></tr>
+    <tr><td>5</td><td>EP1 Security RADIUS sizing</td><td>802.1X auth at match start: thousands of auths per minute as team staff connect simultaneously. EP1 Security is cloud-HA by default — no on-prem RADIUS cluster to provision.</td><td>Confirm EP1 Security tenant capacity for peak auth/sec with EN pre-sales; request load test data for 10K-AP deployments.</td></tr>
     <tr><td>6</td><td>PCI-DSS scope for POS VLAN</td><td>VLAN 50 carries card transaction data. Requires network segmentation validation and QSA review</td><td>Confirm VLAN 50 routing boundaries; schedule QSA review pre-event</td></tr>
     <tr><td>7</td><td>Passpoint / Hotspot 2.0 carrier agreements</td><td>EAP-SIM/AKA offload requires bilateral agreement with AT&amp;T, Verizon, T-Mobile</td><td>Are carrier agreements in place or does this need to be initiated?</td></tr>
     <tr><td>8</td><td>EP1 instance sizing for 10K APs</td><td>EP1 cloud management scales horizontally but 10K APs is at the high end of single-tenant deployments</td><td>Confirm with EN pre-sales: dedicated EP1 tenant instance or shared cloud?</td></tr>
@@ -881,7 +894,7 @@ AP/EP1 log:
     <li><a href="#j4">Q: EP1_Security_UsersGroups.docx — what does Users &amp; Devices look like?</a> → <em>No users yet; Add Local User = email + password; hard cap of 100 local users; Create User Group = dual-panel picker</em></li>
     <li><a href="#j5">Q: 100 local users for now, but 72,000 fans need AD — how does that work?</a> → <em>Fans never touch AD (catch-all Guest policy); AD only for ~800 credentialed users (teams + VIP + staff)</em></li>
     <li><a href="#j6">Q: Six policies live in EP1 Security — but how do I assign them to SW1?</a> → <em>Policies are never assigned to SW1 directly; AP3000 is the RADIUS client; EP1 Security is the decision engine; 5320 just carries tagged VLANs</em></li>
-    <li><a href="#j7">Q: What about VLANs for Guest, POS, VIP?</a> → <em>Full set: VLAN 10/20/30/40/50/99 — six VLANs, six Network Policies, correct build order established</em></li>
+    <li><a href="#j7">Q: What about VLANs for Guest, POS, VIP?</a> → <em>Full set: VLAN 10/20/30/40/50 — five client VLANs (Default VLAN 1 = lab management), six Network Policies, correct build order established</em></li>
     <li><a href="#j8">Q: Let's wipe both SW1 and AP1 and build from scratch</a> → <em>Factory reset procedures for 5320 (EXOS) and AP3000 (IQ Engine); full re-onboarding sequence</em></li>
     <li><a href="#j9">Q: Is EP1 Security where the six policies reside, and does it validate what AP3000 sends to RADIUS and assign the VLAN?</a> → <em>Confirmed: AP3000 = bouncer, EP1 Security = guest list, 5320 = room</em></li>
   </ol>
@@ -943,7 +956,7 @@ AP/EP1 log:
     <tr><td>Team USA players</td><td>~50</td><td>802.1X</td><td>AD</td><td>10</td></tr>
     <tr><td>Team AUS players</td><td>~50</td><td>802.1X</td><td>AD</td><td>20</td></tr>
     <tr><td>VIP/Premium</td><td>~500</td><td>802.1X</td><td>AD</td><td>40</td></tr>
-    <tr><td>Event staff</td><td>~200</td><td>802.1X</td><td>AD</td><td>99</td></tr>
+    <tr><td>Event staff</td><td>~200</td><td>802.1X</td><td>AD</td><td>40 <em>(lab)</em> / dedicated VLAN in production</td></tr>
     <tr><td>POS terminals</td><td>~100</td><td>MAB</td><td>MAC database</td><td>50</td></tr>
   </table>
   <p>The 100-user local cap is sufficient for Karl Lab testing of the full dynamic VLAN flow. For production, only the ~800 credentialed users need AD — and the fans never touch it.</p>
@@ -976,7 +989,7 @@ AP3000  → [tags client traffic with VLAN 10] → 5320 SW1 (just needs VLAN 10 
     <tr><td>2</td><td>Policy_TeamUSA</td><td>Lab_TeamUSA</td><td>802.1X</td><td>10</td></tr>
     <tr><td>3</td><td>Policy_TeamAUS</td><td>Lab_TeamAUS</td><td>802.1X</td><td>20</td></tr>
     <tr><td>4</td><td>Policy_VIP</td><td>Lab_VIP</td><td>802.1X</td><td>40</td></tr>
-    <tr><td>5</td><td>Policy_Staff</td><td>Lab_Staff</td><td>802.1X</td><td>99</td></tr>
+    <tr><td>5</td><td>Policy_Staff</td><td>Lab_Staff</td><td>802.1X</td><td>40 <em>(lab: shared with VIP)</em></td></tr>
     <tr><td>6</td><td>Policy_Guest</td><td><em>none — catch-all</em></td><td>Any</td><td>30</td></tr>
   </table>
   <div class="callout">
@@ -992,7 +1005,7 @@ AP3000  → [tags client traffic with VLAN 10] → 5320 SW1 (just needs VLAN 10 
 # After reboot, clear stale SSH host key on your Mac:
 ssh-keygen -R &lt;SW1_IP&gt;</pre>
   <p><strong>AP1 (AP3000 IQ Engine):</strong> Via EP1 Core → Monitor → Devices → AP3000 → Actions → Reset to Factory Default. Or physical: hold reset pinhole 10+ seconds until LEDs cycle.</p>
-  <p><strong>After reset — SW1 rebuild order:</strong> hostname → VLANs (10/20/30/40/50/99) → tag AP uplink port for all client VLANs → optional DHCP per VLAN → IQAgent → save.</p>
+  <p><strong>After reset — SW1 rebuild order:</strong> hostname → VLANs (10/20/30/40/50; Default VLAN 1 = management, no VLAN 99 needed in lab) → tag AP uplink port for all client VLANs → optional DHCP per VLAN → IQAgent → save.</p>
 
   <hr style="border:none; border-top:1px solid #e0e0e0; margin: 32px 0;">
 
@@ -1026,13 +1039,12 @@ ssh-keygen -R &lt;SW1_IP&gt;             # clear stale host key on Mac
   <pre># Hostname
 configure snmp sysName "KhKLab-SW1"
 
-# All six FIFA lab VLANs
+# Five FIFA lab VLANs (Default VLAN 1 = lab management — no separate Mgmt VLAN needed)
 create vlan "TeamUSA"  tag 10
 create vlan "TeamAUS"  tag 20
 create vlan "Guest"    tag 30
 create vlan "VIP"      tag 40
 create vlan "POS"      tag 50
-create vlan "Mgmt"     tag 99
 
 # Tag AP3000 uplink port (replace 1 with your actual port number)
 configure vlan TeamUSA add ports 1 tagged
@@ -1101,7 +1113,7 @@ save configuration</pre>
     <tr><td>2</td><td>Policy_TeamUSA</td><td>Any User Group</td><td>Lab_TeamUSA</td><td>10</td><td>DNS/DHCP + Allow all (lab)</td></tr>
     <tr><td>3</td><td>Policy_TeamAUS</td><td>Any User Group</td><td>Lab_TeamAUS</td><td>20</td><td>DNS/DHCP + Allow all (lab)</td></tr>
     <tr><td>4</td><td>Policy_VIP</td><td>Any User Group</td><td>Lab_VIP</td><td>40</td><td>DNS/DHCP + Allow all (lab)</td></tr>
-    <tr><td>5</td><td>Policy_Staff</td><td>Any User Group</td><td>Lab_Staff</td><td>99</td><td>DNS/DHCP + Allow all (lab)</td></tr>
+    <tr><td>5</td><td>Policy_Staff</td><td>Any User Group</td><td>Lab_Staff</td><td>40 <em>(lab: shares VIP VLAN — production would use a dedicated VLAN)</em></td><td>DNS/DHCP + Allow all (lab)</td></tr>
     <tr><td>6</td><td>Policy_Guest</td><td><em>leave all checked</em></td><td><em>none — catch-all</em></td><td>30</td><td>DNS/DHCP + internet only</td></tr>
   </table>
   <div class="callout">
@@ -1401,7 +1413,7 @@ configure iproute add default 192.168.0.1</pre>
 
 
 <footer>
-  <p>Session 2026-05-31 &nbsp;·&nbsp; FIFA World Cup 2026 Seattle WiFi Design &nbsp;·&nbsp; Draft v1.4 (IdP dialogue + lab state)</p>
+  <p>Session 2026-05-31 &nbsp;·&nbsp; FIFA World Cup 2026 Seattle WiFi Design &nbsp;·&nbsp; Draft v1.5 (AP5060 datasheet corrections + EP1 accuracy audit)</p>
   <p>Sources: <a href="https://www.extremenetworks.com/resources/case-study/seattle-seahawks-achieve-operational-freedom">EN / Lumen Field Case Study</a> &nbsp;·&nbsp; <a href="https://www.extremenetworks.com/resources/blogs/stadium-wi-fi-7-redefining-high-density-connectivity-with-ap5060">EN AP5060 Stadium Blog</a> &nbsp;·&nbsp; <a href="https://www.seattlefwc26.org/destination/stadium">FIFA WC26 Seattle Stadium</a> &nbsp;·&nbsp; <a href="https://www.seattlefwc26.org/news/seattle-soccer-house-at-pacific-place-to-deliver-a-free-immersive-world-cup-experience-on-a-70-foot-screen">Seattle Soccer House</a> &nbsp;·&nbsp; RFC 3580 (802.1X + RADIUS VLAN) &nbsp;·&nbsp; RFC 6614 (RadSec) &nbsp;·&nbsp; RFC 8110 (OWE) &nbsp;·&nbsp; IEEE 802.11be (WiFi-7)</p>
   <p>&copy; 2026 Khursheed Khan. All rights reserved.</p>
 </footer>
