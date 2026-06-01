@@ -189,6 +189,18 @@
 
   footer { border-top: 1px solid #ccc; padding-top: 20px; font-size: 13px; color: #888; font-style: italic; margin-top: 60px; }
 
+  /* ── DOWNLOAD LINK ── */
+  .download-link {
+    display: inline-flex; align-items: center; gap: 10px;
+    background: #f0f7ff; border: 1px solid #b8d4f0; border-left: 4px solid #1a6fba;
+    padding: 12px 18px; border-radius: 3px; margin: 14px 0;
+    font-family: 'Source Code Pro', monospace; font-size: 13px; color: #1a6fba;
+    text-decoration: none; font-weight: 600;
+  }
+  .download-link:hover { background: #dceeff; }
+  .download-link .dl-icon { font-size: 18px; }
+  .download-link .dl-meta { font-size: 11px; color: #666; font-weight: 400; display: block; margin-top: 2px; font-family: 'Libre Baskerville', Georgia, serif; font-style: italic; }
+
   /* ── SCREENSHOTS ── */
   .screenshot-block { margin: 24px 0; }
   .screenshot-block img { width: 100%; border: 1px solid #ddd; border-radius: 3px; display: block; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
@@ -217,6 +229,7 @@
   <a href="#commands">Commands</a>
   <a href="#screenshots">Screenshots</a>
   <a href="#ad">AD Transition</a>
+  <a href="#guest-design">Guest Design</a>
   <a href="#files">Files</a>
   <a href="#pending">Next Sprint</a>
 </nav>
@@ -855,13 +868,107 @@ show fdb ports 3
 </section>
 
 
+<!-- ── GUEST DESIGN ──────────────────────────────────────────────── -->
+<section id="guest-design">
+  <h2>13. Guest WiFi Design — WC_Open (Second SSID)</h2>
+
+  <p>You asked the right question. Guest is fundamentally different from Teams/VIP/POS. Fans walking into Lumen Field don't have credentials — they can't authenticate via EAP. Forcing 72,000 fans through 802.1X is operationally impossible. The right answer is <strong>two SSIDs</strong>.</p>
+
+  <div class="milestone milestone-gold">
+    <div class="milestone-label">Two-SSID Architecture — Final Design</div>
+    <p>
+      <strong>WC_Secure</strong> — WPA3-Enterprise, 802.1X, dynamic VLAN. For: Team USA, Team AUS, VIP, POS, Media, Staff. All credentialed users. Fully proven today.<br><br>
+      <strong>WC_Open</strong> — OWE (Enhanced Open / Opportunistic Wireless Encryption), static VLAN 30, optional Captive Web Portal. For: General public fans. No credentials required. Traffic still encrypted at the radio layer.
+    </p>
+  </div>
+
+  <h3>Why Not Put Guest on WC_Secure?</h3>
+  <p>WC_Secure uses WPA3-Enterprise. Every client must authenticate with a username and password. Policy_Guest is the catch-all — but it only catches users who have credentials that don't match any specific group. An anonymous fan has no credentials at all. The AP will reject the association before EP1 Security is even consulted. You cannot have anonymous users on a WPA3-Enterprise SSID.</p>
+
+  <h3>WC_Open — How to Configure in EP1 Core</h3>
+  <ol>
+    <li><strong>EP1 Core → Network Policies → Add SSID</strong></li>
+    <li>Name: <code>WC_Open</code></li>
+    <li>Security: <strong>Enhanced Open (OWE)</strong> — this encrypts traffic per-client without a passphrase</li>
+    <li>User Profile: <strong>VLAN 30</strong> (Guest — already configured on SW1 with DHCP 10.30.0.100–200)</li>
+    <li>Enable Captive Web Portal (optional) — for Terms of Service acceptance, FIFA branding, or email registration</li>
+    <li>Apply to AP1 via the same Switch/AP Policy</li>
+  </ol>
+
+  <h3>How to Test Guest Security (WC_Open)</h3>
+  <table>
+    <tr><th>Test</th><th>How</th><th>Expected Result</th></tr>
+    <tr><td>Connect as fan (no credentials)</td><td>MacBook/iPhone → select WC_Open, no password</td><td>Auto-joins, gets 10.30.0.x IP</td></tr>
+    <tr><td>VLAN isolation from Teams</td><td>From 10.30.0.x, try to ping 10.10.0.1 (Team VLAN)</td><td>No response — VLANs are isolated at SW1</td></tr>
+    <tr><td>Internet access</td><td>Open browser from 10.30.0.x</td><td>Internet works (via Default VLAN gateway 192.168.0.1)</td></tr>
+    <tr><td>OWE encryption</td><td>Wireshark on AP1 uplink (port 3) — capture 802.11 frames</td><td>Data frames are encrypted even without a passphrase</td></tr>
+    <tr><td>FDB confirmation</td><td><code>show fdb ports 3</code></td><td>Fan MAC appears on Guest(0030)</td></tr>
+    <tr><td>WC_Secure isolation from WC_Open</td><td>From 10.30.0.x, try to ping 10.40.0.100 (VIP client)</td><td>No response — inter-VLAN routing blocked</td></tr>
+  </table>
+
+  <h3>OWE vs Open — Why OWE Matters at a Stadium</h3>
+  <div class="callout-blue">
+    <p><strong>Classic Open (no security):</strong> Every packet is sent in cleartext over the air. Anyone with a WiFi adapter can capture every fan's HTTP traffic, session tokens, and DNS queries. At 72,000 people this is a serious privacy risk and a FIFA reputational issue.</p>
+    <p><strong>OWE (Enhanced Open / 802.11ax):</strong> Each client gets a unique per-session encryption key negotiated silently during association. No passphrase, same seamless experience for fans — but all traffic is encrypted. Passive eavesdropping is eliminated. This is the correct choice for public stadium WiFi.</p>
+  </div>
+
+  <h3>Optional: Captive Web Portal (CWP) on WC_Open</h3>
+  <p>A CWP intercepts the fan's first HTTP request and redirects to a registration/terms page. EP1 Core supports CWP natively. Use cases for FIFA 2026:</p>
+  <ul>
+    <li>FIFA Terms of Service acceptance (legally required in many jurisdictions)</li>
+    <li>Optional email registration → upsell to FIFA app / match alerts</li>
+    <li>Age verification for alcohol-serving concession zones</li>
+    <li>Branded landing page: FIFA World Cup 2026 Seattle logo, match schedule, stadium map</li>
+  </ul>
+  <p>CWP does not break OWE encryption — it operates at Layer 7 after the encrypted Layer 2 association is established.</p>
+
+  <h3>Final SSID Architecture for WC Seattle Stadium</h3>
+  <table>
+    <tr><th>SSID</th><th>Security</th><th>VLAN</th><th>Users</th><th>Auth</th></tr>
+    <tr><td><code>WC_Secure</code></td><td>WPA3-Enterprise (802.1X)</td><td>Dynamic: 10/20/40/50</td><td>Teams, VIP, POS, Staff</td><td>EP1 Security (local now → AD Sprint 2)</td></tr>
+    <tr><td><code>WC_Open</code></td><td>OWE (Enhanced Open)</td><td>Static: 30</td><td>General public fans</td><td>None (optional CWP)</td></tr>
+  </table>
+  <p>Two SSIDs. Two beacons per AP. Clean separation. Teams never share airtime context with fans. POS is fully isolated. Guest gets internet without credentials. This is the production-ready architecture.</p>
+
+</section>
+
+
 <!-- ── FILES ────────────────────────────────────────────────────── -->
 <section id="files">
-  <h2>11. Files</h2>
+  <h2>14. Files &amp; Downloads</h2>
+
+  <h3>macOS 802.1X Profile — Download &amp; Install</h3>
+  <p>This profile forces EAP-TTLS/PAP on macOS for the WC_Secure SSID. AirDrop to any Apple device. Install via System Settings → General → VPN &amp; Device Management → trust it explicitly.</p>
+
+  <a class="download-link" href="WC_Secure_TeamUSA_20260601_1333.mobileconfig" download>
+    <span class="dl-icon">&#8659;</span>
+    <span>WC_Secure_TeamUSA_20260601_1333.mobileconfig
+      <span class="dl-meta">macOS 802.1X profile · EAP-TTLS/PAP · khursheedkhan@gmail.com · WCSeattle2026!! · Lab use only</span>
+    </span>
+  </a>
+
+  <h3>Profile Contents (key parameters)</h3>
+  <table>
+    <tr><th>Parameter</th><th>Value</th><th>Why</th></tr>
+    <tr><td>AcceptEAPTypes</td><td>21 (EAP-TTLS)</td><td>Force EAP-TTLS — bypass macOS UI restriction</td></tr>
+    <tr><td>TTLSInnerAuthentication</td><td>PAP</td><td>Required for EP1 Security local user accounts</td></tr>
+    <tr><td>UserName</td><td>khursheedkhan@gmail.com</td><td>Embedded — no manual entry on device</td></tr>
+    <tr><td>UserPassword</td><td>WCSeattle2026!!</td><td>Validated via EP1 Security policy evaluation</td></tr>
+    <tr><td>TLSTrustedServerNames</td><td>radius.oh-uz.extremecloudiq.com</td><td>Pin to EP1 RADIUS hostname — reject impostor certs</td></tr>
+    <tr><td>TLSAllowTrustExceptions</td><td>true</td><td>Allow trust dialog for unsigned profile on macOS Sonoma+</td></tr>
+    <tr><td>OuterIdentity</td><td>anonymous</td><td>Protect username in EAP-TTLS outer exchange</td></tr>
+    <tr><td>EncryptionType</td><td>WPA3</td><td>Match WPA3-Enterprise SSID</td></tr>
+    <tr><td>SSID_STR</td><td>WC_Secure</td><td>Auto-join this SSID only</td></tr>
+  </table>
+
+  <div class="callout-red">
+    <p><strong>Lab use only.</strong> This profile contains embedded credentials. Do not distribute beyond lab testing. For production (Sprint 2), users authenticate via AD credentials entered in the native OS UI — no profile needed.</p>
+  </div>
+
+  <h3>Other Files</h3>
   <table>
     <tr><th>File</th><th>Purpose</th></tr>
-    <tr><td><code>/Users/khukhan/Downloads/WC_Secure_TeamUSA_20260601_1333.mobileconfig</code></td><td>macOS 802.1X profile — EAP-TTLS/PAP, WCSeattle2026!!, TLSAllowTrustExceptions, OuterIdentity=anonymous</td></tr>
-    <tr><td><code>docs/session_summary_20260601_fifa_wc.html</code></td><td>This document</td></tr>
+    <tr><td><code>docs/session_summary_20260601_fifa_wc.html</code></td><td>This document — June 1 Lab Sprint 1 EOD</td></tr>
     <tr><td><code>docs/session_summary_20260531_fifa_wc.html</code></td><td>May 31 design document — architecture, AP5060 spec, SLA classes, simulator architecture</td></tr>
   </table>
 </section>
