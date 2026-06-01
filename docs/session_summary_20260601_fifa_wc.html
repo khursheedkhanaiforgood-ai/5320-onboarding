@@ -232,6 +232,7 @@
   <a href="#guest-design">Guest Design</a>
   <a href="#files">Files</a>
   <a href="#pending">Next Sprint</a>
+  <a href="#ppsk-reflection">PPSK vs 802.1X</a>
 </nav>
 
 
@@ -996,9 +997,57 @@ show fdb ports 3
 
 </section>
 
+<!-- ── CLOSING DIALOGUE — PPSK REFLECTION ────────────────────────── -->
+<section id="ppsk-reflection">
+  <h2>15. Closing Dialogue — PPSK vs 802.1X &amp; What Today Earned</h2>
+  <p><em>End-of-session exchange, verbatim. The sprint context for tomorrow.</em></p>
+
+  <div class="dialogue">
+
+    <div class="dialogue-exchange">
+      <div class="msg-user"><div class="speaker">Khursheed</div><p>We did not implement PCI-DSS yet for POS, put it on the sprint_tomorrow. As for PPSK, I want another sprint to do all this for today we did.</p></div>
+    </div>
+
+    <div class="dialogue-exchange">
+      <div class="msg-user"><div class="speaker">Khursheed</div><p>Do I need to change anything on SW1 to enable PPSK along the lines of what we had with EP1_Security_EAP?</p></div>
+      <div class="msg-ai"><div class="speaker">Claude</div><p>No. SW1 doesn't change at all. SW1 has no concept of authentication method. It only sees tagged frames arriving on port 3 from the AP. Whether the AP tagged that frame VLAN 10 because of a RADIUS Filter-Id from 802.1X, or because of a PPSK passphrase match — SW1 doesn't know and doesn't care. The trunk is already there. All of that is already done and stays unchanged. The entire PPSK sprint lives in EP1 Core only.</p></div>
+    </div>
+
+    <div class="dialogue-exchange">
+      <div class="msg-user"><div class="speaker">Khursheed</div><p>Wait, I don't agree with your table, for PPSK per user passphrase can be issued, meaning each user get's his/her own password?</p></div>
+      <div class="msg-ai"><div class="speaker">Claude</div><p>You're absolutely right. I oversimplified. PPSK = <em>Private</em> Pre-Shared Key. The "private" is the point. Each user gets their own unique passphrase — not a shared one per group. EP1 can generate thousands of individual PPSKs, each bound to a specific User Profile (VLAN). So revoking one player's passphrase doesn't touch anyone else. That's a real enterprise-grade capability.</p></div>
+    </div>
+
+    <div class="dialogue-exchange">
+      <div class="msg-user"><div class="speaker">Khursheed</div><p>So, our work today could have been done with PPSK. But the EAP exercise has primed me for the AD one?</p></div>
+      <div class="msg-ai"><div class="speaker">Claude</div><p>Exactly right on both counts.</p>
+      <p><strong>PPSK could have done everything today</strong> — per-user passphrases, dynamic VLAN per user, same SW1, same FDB proof. And it would have been faster — no mobileconfig, no EAP method debugging, no macOS PAP restrictions. Every Apple device connects natively.</p>
+      <p><strong>But the EAP exercise was not wasted.</strong> It earned you three things PPSK can never give you:</p>
+      <p><strong>1. AD readiness</strong> — Sprint 2 AD integration is a direct extension of exactly what you built today. Identity Provider swap, PEAP replaces EAP-TTLS, everything else stays. You understand every layer of that chain now because you fought through it.</p>
+      <p><strong>2. Filter-Id / assignment rule mechanics</strong> — you now know how EP1 Security returns RADIUS attributes and how EP1 Core maps them to VLANs. That knowledge applies to any RADIUS-based system — NPS, FreeRADIUS, Cisco ISE. PPSK never touches any of this.</p>
+      <p><strong>3. Debugging depth</strong> — RadSec Proxy, PAP restrictions, policy evaluation as pre-flight, assignment rule string vs integer. You'll never hit these blind again.</p>
+      <p><strong>The sequencing was actually correct:</strong> Sprint 1 (today) = 802.1X → primes you for AD. Sprint 3 = PPSK → faster, broader device coverage, POS/IoT use case. Sprint 2 AD = payoff of today's pain. PPSK is the easier path. You took the harder one first. That's the right order.</p></div>
+    </div>
+
+  </div>
+
+  <div class="milestone milestone-blue">
+    <div class="milestone-label">Sprint 3 — PPSK Dynamic VLAN (Next Lab Session)</div>
+    <p>Mirror of Sprint 1 using PPSK. One new SSID (<code>WC_PPSK</code>), 5 user passphrases, 5 User Profiles → 5 VLANs. No EAP, no mobileconfig, no RADIUS supplicant. Every device connects natively. Same FDB proof method.<br><br>
+    <strong>Reference:</strong> <em>Private-PreShared-Key-PPSK-Guide_v6 2 1 _ May 18 2026 KK Edits.pdf</em> (local OneDrive). VLAN group assignment via User Profile binding — follow the guide for EP1 PPSK pool configuration.</p>
+  </div>
+
+  <div class="milestone milestone-red">
+    <div class="milestone-label">Sprint 2 Tomorrow — PCI-DSS for POS</div>
+    <p>VLAN 50 POS segmentation proof. ACL locking VLAN 50 to payment processor IP only. No inter-VLAN routing from VLAN 50 to any other VLAN. Verified via ping isolation tests from 10.50.0.x → 10.10.0.x (must fail) and 10.50.0.x → payment processor (must pass).</p>
+  </div>
+
+</section>
+
 <footer>
   <p>Session: Monday 1 June 2026 · FIFA World Cup 2026 Seattle Lab Sprint 1 · Khursheed Khan</p>
   <p>Seven blockers. Seven fixes. One FDB line that proved it all: <code>74:a6:cd:8b:19:60 TeamUSA(0010) port 3</code>.</p>
+  <p>PPSK is the easier path. You took the harder one first. That's the right order.</p>
   <p>&copy; 2026 Khursheed Khan. All rights reserved.</p>
 </footer>
 
