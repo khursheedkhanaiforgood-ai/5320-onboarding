@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lumen Field WiFi Stability Simulator — Extreme Networks EP1</title>
+<style>
+  :root {
+    --bg: #0d0d0d; --surface: #161616; --border: #2a2a2a;
+    --green: #00c853; --yellow: #ffd600; --orange: #ff6d00; --red: #f44336;
+    --blue: #2196f3; --cyan: #00bcd4; --text: #e0e0e0; --muted: #757575;
+    --accent: #0078d7;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'SF Mono', 'Consolas', monospace; font-size: 13px; min-height: 100vh; }
+  header { background: #0a1628; border-bottom: 1px solid #1e3a5f; padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; }
+  header h1 { font-size: 15px; font-weight: 700; color: #fff; letter-spacing: 0.5px; }
+  header .subtitle { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  header .badge { background: #1e3a5f; border: 1px solid #2d5a9e; color: #7eb3f5; font-size: 10px; padding: 3px 8px; border-radius: 3px; }
+  .main-grid { display: grid; grid-template-columns: 280px 1fr 240px; grid-template-rows: auto auto; gap: 1px; background: var(--border); height: calc(100vh - 52px); }
+  .panel { background: var(--surface); padding: 16px; overflow-y: auto; }
+  .panel-title { font-size: 10px; font-weight: 700; color: var(--muted); letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 14px; border-bottom: 1px solid var(--border); padding-bottom: 6px; }
+
+  /* INPUT PANEL */
+  .knob-group { margin-bottom: 18px; }
+  .knob-label { display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 5px; }
+  .knob-label span { color: var(--cyan); font-weight: 600; }
+  input[type=range] { width: 100%; -webkit-appearance: none; height: 4px; border-radius: 2px; background: #2a2a2a; cursor: pointer; }
+  input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 14px; height: 14px; border-radius: 50%; background: var(--accent); cursor: pointer; }
+  .toggle-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+  .toggle { position: relative; width: 36px; height: 18px; flex-shrink: 0; }
+  .toggle input { opacity: 0; width: 0; height: 0; }
+  .slider-t { position: absolute; inset: 0; background: #2a2a2a; border-radius: 18px; cursor: pointer; transition: .2s; }
+  .slider-t:before { content: ''; position: absolute; left: 2px; top: 2px; width: 14px; height: 14px; background: #888; border-radius: 50%; transition: .2s; }
+  input:checked + .slider-t { background: var(--accent); }
+  input:checked + .slider-t:before { transform: translateX(18px); background: #fff; }
+  select { background: #1a1a1a; border: 1px solid var(--border); color: var(--text); padding: 5px 8px; border-radius: 3px; font-size: 11px; width: 100%; cursor: pointer; }
+  .section-sep { border: none; border-top: 1px solid var(--border); margin: 14px 0; }
+  .knob-desc { font-size: 10px; color: var(--muted); margin-top: 3px; }
+
+  /* METRICS PANEL */
+  .metrics-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 16px; }
+  .metric-card { background: #111; border: 1px solid var(--border); border-radius: 4px; padding: 10px 12px; }
+  .metric-card.full { grid-column: 1 / -1; }
+  .metric-name { font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
+  .metric-val { font-size: 22px; font-weight: 700; line-height: 1; }
+  .metric-unit { font-size: 10px; color: var(--muted); margin-top: 2px; }
+  .metric-bar { height: 4px; border-radius: 2px; background: #2a2a2a; margin-top: 6px; overflow: hidden; }
+  .metric-bar-fill { height: 100%; border-radius: 2px; transition: width 0.3s, background 0.3s; }
+  .green { color: var(--green); } .yellow { color: var(--yellow); } .orange { color: var(--orange); } .red { color: var(--red); }
+  .bg-green { background: var(--green); } .bg-yellow { background: var(--yellow); } .bg-orange { background: var(--orange); } .bg-red { background: var(--red); }
+
+  /* SLA STATUS BAR */
+  .sla-bar { grid-column: 1 / -1; background: var(--surface); border-top: 1px solid var(--border); padding: 10px 16px; display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+  .sla-chip { display: flex; align-items: center; gap: 6px; background: #111; border: 1px solid var(--border); border-radius: 3px; padding: 5px 10px; font-size: 10px; white-space: nowrap; }
+  .sla-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .sla-label { color: var(--muted); }
+  .sla-val { font-weight: 600; }
+
+  /* STABILITY GAUGE */
+  #gauge-panel { display: flex; flex-direction: column; align-items: center; padding-top: 20px; }
+  canvas#gauge { width: 200px; height: 120px; }
+  .stability-label { font-size: 18px; font-weight: 700; margin-top: 8px; letter-spacing: 1px; }
+  .stability-score { font-size: 11px; color: var(--muted); margin-top: 4px; }
+  .recovery-box { margin-top: 16px; width: 100%; }
+  .recovery-title { font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+  .recovery-action { font-size: 10px; padding: 5px 8px; border-radius: 3px; margin-bottom: 4px; border-left: 2px solid; line-height: 1.4; }
+  .ra-auto { background: #0a1628; border-color: var(--blue); color: #9ecfff; }
+  .ra-warn { background: #1a1200; border-color: var(--yellow); color: #ffe57a; }
+  .ra-alert { background: #1a0800; border-color: var(--red); color: #ff9a91; }
+  .ra-ok { background: #001a08; border-color: var(--green); color: #7cffa0; }
+
+  /* EVENT LOG */
+  .log-panel { grid-column: 1 / -1; background: #080808; border-top: 1px solid var(--border); padding: 8px 16px; height: 130px; overflow-y: auto; display: flex; flex-direction: column-reverse; }
+  .log-entry { font-size: 10px; padding: 2px 0; border-bottom: 1px solid #111; display: flex; gap: 10px; }
+  .log-time { color: var(--muted); flex-shrink: 0; width: 70px; }
+  .log-msg { }
+  .log-auto { color: var(--blue); } .log-warn { color: var(--yellow); } .log-alert { color: var(--red); } .log-ok { color: var(--green); }
+
+  /* Stability meter */
+  .stab-meter { width: 100%; height: 14px; background: #111; border-radius: 7px; margin-top: 14px; overflow: hidden; border: 1px solid var(--border); }
+  .stab-fill { height: 100%; border-radius: 7px; transition: width 0.4s, background 0.4s; }
+
+  .ap-grid { display: grid; grid-template-columns: repeat(8, 1fr); gap: 3px; margin-top: 10px; }
+  .ap-dot { width: 14px; height: 14px; border-radius: 2px; cursor: default; transition: background 0.3s; }
+
+  .copyright { text-align: center; font-size: 9px; color: var(--muted); padding: 4px; background: var(--surface); border-top: 1px solid var(--border); }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>Lumen Field WiFi Stability Simulator</h1>
+    <div class="subtitle">280× AP5060 · 5320/5420 Access · EP1 Security + AirDefense · 72K Fans</div>
+  </div>
+  <div style="display:flex;gap:8px;align-items:center;">
+    <div class="badge">EXTREME NETWORKS EP1</div>
+    <div class="badge">FIFA WC 2026 SEATTLE</div>
+    <div class="badge" style="color:#7cffa0;border-color:#003d12;background:#001a08;" id="status-badge">● STABLE</div>
+  </div>
+</header>
+
+<div class="main-grid">
+
+  <!-- INPUT PANEL -->
+  <div class="panel" id="input-panel">
+    <div class="panel-title">Input Knobs</div>
+
+    <div class="knob-group">
+      <div class="knob-label">RF Noise Floor <span id="noise-val">−95 dBm</span></div>
+      <input type="range" id="noise-floor" min="0" max="35" value="0" step="1">
+      <div class="knob-desc">0 = clean −95 dBm · 35 = jammer at −60 dBm</div>
+    </div>
+
+    <div class="knob-group">
+      <div class="knob-label">Concurrent Users <span id="users-val">100%</span></div>
+      <input type="range" id="user-load" min="0" max="200" value="100" step="5">
+      <div class="knob-desc">100% = 22,464 peak sessions · 200% = 44,928</div>
+    </div>
+
+    <div class="knob-group">
+      <div class="knob-label">Rogue Jammer Severity <span id="jammer-val">OFF</span></div>
+      <input type="range" id="jammer" min="0" max="5" value="0" step="1">
+      <div class="knob-desc">0 = none · 5 = broadband +25 dB noise burst</div>
+    </div>
+
+    <div class="knob-group">
+      <div class="knob-label">Bad Actor Deauth Rate <span id="deauth-val">0 f/s</span></div>
+      <input type="range" id="deauth-rate" min="0" max="100" value="0" step="5">
+      <div class="knob-desc">Frames/sec per AP · 802.11w PMF auto-counters</div>
+    </div>
+
+    <hr class="section-sep">
+
+    <div class="knob-group">
+      <div class="knob-label" style="margin-bottom:8px;">Cyber Attack Type</div>
+      <select id="cyber-attack">
+        <option value="none">None</option>
+        <option value="deauth_flood">Deauth Flood (Layer 2)</option>
+        <option value="evil_twin">Evil Twin / Rogue AP</option>
+        <option value="credential_storm">Credential Storm (RADIUS)</option>
+        <option value="arp_poison">ARP Poisoning (L3)</option>
+      </select>
+    </div>
+
+    <div class="knob-group">
+      <div class="knob-label" style="margin-bottom:8px;">BSS Min Rate (Admission)</div>
+      <select id="bss-min-rate">
+        <option value="6">6 Mbps (permissive)</option>
+        <option value="12">12 Mbps</option>
+        <option value="18" selected>18 Mbps (lab default)</option>
+        <option value="24">24 Mbps (stadium)</option>
+        <option value="36">36 Mbps (strict)</option>
+      </select>
+    </div>
+
+    <div class="knob-group">
+      <div class="knob-label" style="margin-bottom:8px;">Channel Width (5 GHz)</div>
+      <select id="chan-width">
+        <option value="20">20 MHz</option>
+        <option value="40">40 MHz</option>
+        <option value="80" selected>80 MHz (stadium)</option>
+        <option value="160">160 MHz</option>
+      </select>
+    </div>
+
+    <hr class="section-sep">
+
+    <div class="knob-group">
+      <div class="toggle-row">
+        <label class="toggle"><input type="checkbox" id="pmf-on" checked><span class="slider-t"></span></label>
+        <span style="font-size:11px;">802.11w PMF Required (WPA3)</span>
+      </div>
+      <div class="toggle-row">
+        <label class="toggle"><input type="checkbox" id="rrm-on" checked><span class="slider-t"></span></label>
+        <span style="font-size:11px;">RRM Auto-Channel + TPC</span>
+      </div>
+      <div class="toggle-row">
+        <label class="toggle"><input type="checkbox" id="proxy-arp-on" checked><span class="slider-t"></span></label>
+        <span style="font-size:11px;">Proxy ARP + MC→UC</span>
+      </div>
+      <div class="toggle-row">
+        <label class="toggle"><input type="checkbox" id="airdef-on" checked><span class="slider-t"></span></label>
+        <span style="font-size:11px;">EP1 AirDefense WIPS</span>
+      </div>
+    </div>
+
+    <button onclick="resetAll()" style="width:100%;background:#1a1a1a;border:1px solid var(--border);color:var(--muted);padding:7px;border-radius:3px;cursor:pointer;font-size:11px;margin-top:4px;">↺ Reset to Baseline</button>
+  </div>
+
+  <!-- METRICS PANEL -->
+  <div class="panel" id="metrics-panel">
+    <div class="panel-title">Live Metrics — Representative AP (Bowl Zone)</div>
+
+    <div class="metrics-grid">
+      <div class="metric-card">
+        <div class="metric-name">SNR</div>
+        <div class="metric-val" id="m-snr">33</div>
+        <div class="metric-unit">dB</div>
+        <div class="metric-bar"><div class="metric-bar-fill bg-green" id="bar-snr" style="width:66%"></div></div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-name">MCS Index</div>
+        <div class="metric-val" id="m-mcs">9</div>
+        <div class="metric-unit" id="m-mcs-rate">802 Mbps PHY (4SS/80)</div>
+        <div class="metric-bar"><div class="metric-bar-fill bg-green" id="bar-mcs" style="width:82%"></div></div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-name">Airtime Utilisation</div>
+        <div class="metric-val" id="m-air">38</div>
+        <div class="metric-unit">% of capacity</div>
+        <div class="metric-bar"><div class="metric-bar-fill bg-green" id="bar-air" style="width:38%"></div></div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-name">Latency (E2E)</div>
+        <div class="metric-val" id="m-lat">12</div>
+        <div class="metric-unit">ms round-trip</div>
+        <div class="metric-bar"><div class="metric-bar-fill bg-green" id="bar-lat" style="width:24%"></div></div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-name">Packet Loss</div>
+        <div class="metric-val" id="m-ploss">0.02</div>
+        <div class="metric-unit">%</div>
+        <div class="metric-bar"><div class="metric-bar-fill bg-green" id="bar-ploss" style="width:2%"></div></div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-name">Effective Throughput</div>
+        <div class="metric-val" id="m-tput">241</div>
+        <div class="metric-unit">Mbps per client avg</div>
+        <div class="metric-bar"><div class="metric-bar-fill bg-green" id="bar-tput" style="width:48%"></div></div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-name">Active Sessions</div>
+        <div class="metric-val" id="m-sess">22,464</div>
+        <div class="metric-unit">stadium-wide</div>
+        <div class="metric-bar"><div class="metric-bar-fill bg-green" id="bar-sess" style="width:50%"></div></div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-name">RADIUS Auth Load</div>
+        <div class="metric-val" id="m-radius">Normal</div>
+        <div class="metric-unit" id="m-radius-sub">EP1 Security · cloud-HA</div>
+        <div class="metric-bar"><div class="metric-bar-fill bg-green" id="bar-radius" style="width:20%"></div></div>
+      </div>
+      <div class="metric-card full">
+        <div class="metric-name">AP Array Status — 280 APs · 8 per access switch · 35 switches</div>
+        <div class="ap-grid" id="ap-grid"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STABILITY GAUGE + RECOVERY -->
+  <div class="panel" id="gauge-panel">
+    <div class="panel-title">Stability</div>
+    <canvas id="gauge" width="200" height="120"></canvas>
+    <div class="stability-label" id="stab-label">STABLE</div>
+    <div class="stability-score" id="stab-score">Score: 94 / 100</div>
+    <div class="stab-meter"><div class="stab-fill bg-green" id="stab-fill" style="width:94%"></div></div>
+
+    <div class="recovery-box">
+      <div class="recovery-title">Active Automations</div>
+      <div id="recovery-list"></div>
+    </div>
+  </div>
+
+  <!-- SLA BAR -->
+  <div class="sla-bar" id="sla-bar">
+    <span style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-right:4px;">SLA</span>
+    <!-- chips injected by JS -->
+  </div>
+
+</div>
+
+<!-- EVENT LOG -->
+<div class="log-panel" id="log-panel"></div>
+<div class="copyright">© 2026 Khursheed Khan · FIFA WC 2026 Seattle WiFi Design · Powered by Extreme Networks EP1 + AP5060</div>
+
+<script>
+// ─── MCS lookup (802.11ax HE, 4SS, given SNR dB) ───────────────────────────
+const MCS_TABLE = [
+  { snr: 42, idx: 11, label: 'MCS11', rates: { 20:302, 40:617, 80:1297, 160:2402 } },
+  { snr: 36, idx: 10, label: 'MCS10', rates: { 20:272, 40:556, 80:1167, 160:2160 } },
+  { snr: 30, idx:  9, label: 'MCS9',  rates: { 20:200, 40:400, 80:802,  160:1603 } },
+  { snr: 26, idx:  8, label: 'MCS8',  rates: { 20:173, 40:346, 80:722,  160:1443 } },
+  { snr: 22, idx:  7, label: 'MCS7',  rates: { 20:144, 40:288, 80:578,  160:1154 } },
+  { snr: 18, idx:  5, label: 'MCS5',  rates: { 20:86,  40:173, 80:347,  160:693  } },
+  { snr: 14, idx:  3, label: 'MCS3',  rates: { 20:58,  40:115, 80:231,  160:462  } },
+  { snr: 10, idx:  1, label: 'MCS1',  rates: { 20:28,  40:58,  80:116,  160:231  } },
+  { snr:  5, idx:  0, label: 'MCS0',  rates: { 20:14,  40:28,  80:58,   160:116  } },
+];
+
+function snrToMcs(snr) {
+  for (let m of MCS_TABLE) { if (snr >= m.snr) return m; }
+  return null; // no connection
+}
+
+// ─── SLA thresholds ─────────────────────────────────────────────────────────
+const SLA = {
+  snr:    { green: 25, yellow: 15 },
+  airtime:{ green: 75, yellow: 90 },
+  latency:{ green: 20, yellow: 50 },
+  ploss:  { green: 0.1, yellow: 1.0 },
+  tput:   { green: 5, yellow: 2 },    // Mbps per client (SLA floor)
+  radius: { green: 1, yellow: 2 },    // 1=normal, 2=elevated, 3=overload
+};
+
+function slaColor(metric, val) {
+  const t = SLA[metric];
+  if (metric === 'airtime' || metric === 'latency' || metric === 'ploss' || metric === 'radius') {
+    if (val <= t.green) return 'green';
+    if (val <= t.yellow) return 'yellow';
+    return 'red';
+  }
+  // higher is better
+  if (val >= t.green) return 'green';
+  if (val >= t.yellow) return 'yellow';
+  return 'red';
+}
+
+// ─── Event log ──────────────────────────────────────────────────────────────
+let logEntries = [];
+let prevState = {};
+
+function addLog(msg, type) {
+  const now = new Date();
+  const ts = now.toTimeString().slice(0,8);
+  logEntries.unshift({ ts, msg, type });
+  if (logEntries.length > 80) logEntries.pop();
+  renderLog();
+}
+
+function renderLog() {
+  const el = document.getElementById('log-panel');
+  el.innerHTML = logEntries.map(e =>
+    `<div class="log-entry"><span class="log-time">${e.ts}</span><span class="log-${e.type}">${e.msg}</span></div>`
+  ).join('');
+}
+
+// ─── AP grid ────────────────────────────────────────────────────────────────
+function buildApGrid() {
+  const g = document.getElementById('ap-grid');
+  g.innerHTML = '';
+  for (let i = 0; i < 280; i++) {
+    const d = document.createElement('div');
+    d.className = 'ap-dot';
+    d.id = `ap-${i}`;
+    d.title = `AP ${i+1}`;
+    g.appendChild(d);
+  }
+}
+
+function updateApGrid(score) {
+  const faultPct = score < 50 ? 0.6 : score < 70 ? 0.3 : score < 85 ? 0.1 : score < 95 ? 0.02 : 0;
+  const warnPct  = score < 70 ? 0.4 : score < 85 ? 0.25 : score < 95 ? 0.08 : 0;
+  for (let i = 0; i < 280; i++) {
+    const d = document.getElementById(`ap-${i}`);
+    const r = Math.random();
+    if (r < faultPct) d.style.background = 'var(--red)';
+    else if (r < faultPct + warnPct) d.style.background = 'var(--yellow)';
+    else d.style.background = 'var(--green)';
+  }
+}
+
+// ─── Gauge canvas ───────────────────────────────────────────────────────────
+function drawGauge(score) {
+  const c = document.getElementById('gauge');
+  const ctx = c.getContext('2d');
+  const w = c.width, h = c.height;
+  ctx.clearRect(0, 0, w, h);
+
+  const cx = w / 2, cy = h - 10, r = 90;
+  const startAngle = Math.PI, endAngle = 2 * Math.PI;
+
+  // Background arc
+  ctx.beginPath();
+  ctx.arc(cx, cy, r, startAngle, endAngle);
+  ctx.lineWidth = 16;
+  ctx.strokeStyle = '#222';
+  ctx.stroke();
+
+  // Colored fill arc
+  const fillAngle = startAngle + (score / 100) * Math.PI;
+  const grad = ctx.createLinearGradient(cx - r, cy, cx + r, cy);
+  grad.addColorStop(0,   '#f44336');
+  grad.addColorStop(0.4, '#ffd600');
+  grad.addColorStop(0.7, '#00c853');
+  grad.addColorStop(1,   '#00c853');
+  ctx.beginPath();
+  ctx.arc(cx, cy, r, startAngle, fillAngle);
+  ctx.lineWidth = 16;
+  ctx.strokeStyle = grad;
+  ctx.stroke();
+
+  // Needle
+  const needleAngle = startAngle + (score / 100) * Math.PI;
+  ctx.beginPath();
+  ctx.moveTo(cx, cy);
+  ctx.lineTo(cx + (r - 5) * Math.cos(needleAngle), cy + (r - 5) * Math.sin(needleAngle));
+  ctx.lineWidth = 2;
+  ctx.strokeStyle = '#fff';
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.arc(cx, cy, 6, 0, 2 * Math.PI);
+  ctx.fillStyle = '#fff';
+  ctx.fill();
+
+  // Score text
+  ctx.fillStyle = '#fff';
+  ctx.font = 'bold 24px monospace';
+  ctx.textAlign = 'center';
+  ctx.fillText(score, cx, cy - 14);
+  ctx.fillStyle = '#888';
+  ctx.font = '10px monospace';
+  ctx.fillText('/ 100', cx, cy - 2);
+}
+
+// ─── Main compute ────────────────────────────────────────────────────────────
+function compute() {
+  const noiseOffset  = +document.getElementById('noise-floor').value;
+  const userLoadPct  = +document.getElementById('user-load').value;
+  const jammerSev    = +document.getElementById('jammer').value;
+  const deauthRate   = +document.getElementById('deauth-rate').value;
+  const cyberAttack  = document.getElementById('cyber-attack').value;
+  const bssMinRate   = +document.getElementById('bss-min-rate').value;
+  const chanWidth    = +document.getElementById('chan-width').value;
+  const pmfOn        = document.getElementById('pmf-on').checked;
+  const rrmOn        = document.getElementById('rrm-on').checked;
+  const proxyArpOn   = document.getElementById('proxy-arp-on').checked;
+  const airdefOn     = document.getElementById('airdef-on').checked;
+
+  // RF model
+  const baseNoise = -95;
+  const jammerDelta = jammerSev * 5;           // 0..25 dB noise rise
+  const noiseDBm = baseNoise + noiseOffset + jammerDelta;
+
+  // Active clients per AP (design = 200 per bowl AP at 100% load)
+  const designClients = 200;
+  const activeClients = Math.round(designClients * userLoadPct / 100);
+
+  // RSSI: starts at -62, slight droop with extreme overload
+  const rssiDrop = Math.max(0, (activeClients - 250) * 0.04);
+  const rssiDBm  = -62 - rssiDrop;
+
+  // SNR
+  let snr = rssiDBm - noiseDBm;
+  if (rrmOn && snr < 15 && noiseOffset > 0) snr += Math.min(5, noiseOffset * 0.3); // TPC boost
+
+  // MCS
+  const mcsEntry = snrToMcs(snr);
+  const mcsIdx   = mcsEntry ? mcsEntry.idx : -1;
+  const phyRate  = mcsEntry ? (mcsEntry.rates[chanWidth] || mcsEntry.rates[80]) : 0;
+
+  // Airtime: per-client demand ~1.9 Mbps average
+  const perClientDemand = 1.9;
+  let airtimeUtil = phyRate > 0 ? (activeClients * perClientDemand) / phyRate : 1.5;
+  if (proxyArpOn) airtimeUtil *= 0.92;   // ~8% broadcast suppression benefit
+  const airtimePct = Math.min(150, Math.round(airtimeUtil * 100));
+
+  // Deauth flood effect
+  let deauthAirtimeAdd = 0;
+  if (deauthRate > 0) {
+    deauthAirtimeAdd = pmfOn ? deauthRate * 0.001 : deauthRate * 0.08; // PMF absorbs most
+  }
+  const finalAirtimePct = Math.min(150, airtimePct + Math.round(deauthAirtimeAdd * 100));
+
+  // Cyber attack effects
+  let cyberLatencyAdd = 0, cyberRadiusLoad = 1, cyberAirtimeAdd = 0;
+  switch (cyberAttack) {
+    case 'deauth_flood':
+      cyberAirtimeAdd = pmfOn ? 2 : 18;
+      cyberLatencyAdd = pmfOn ? 0 : 8;
+      break;
+    case 'evil_twin':
+      cyberAirtimeAdd = airdefOn ? 1 : 5;
+      cyberLatencyAdd = airdefOn ? 0 : 3;
+      break;
+    case 'credential_storm':
+      cyberRadiusLoad = 2.5;
+      cyberLatencyAdd = 4;
+      break;
+    case 'arp_poison':
+      cyberLatencyAdd = proxyArpOn ? 0 : 12;
+      cyberAirtimeAdd = proxyArpOn ? 0 : 8;
+      break;
+  }
+
+  const totalAirtimePct = Math.min(150, finalAirtimePct + cyberAirtimeAdd);
+
+  // Latency: M/M/1 queuing model + base 8ms (AP + distribution + WAN)
+  const u = Math.min(0.99, totalAirtimePct / 100);
+  const queueDelay = u < 0.05 ? 0.5 : (4 * u / (1 - u));
+  const latency = Math.round(8 + queueDelay + cyberLatencyAdd);
+
+  // Packet loss
+  const snrLoss  = mcsEntry ? 0 : 100;
+  const airtimeLoss = Math.max(0, (totalAirtimePct - 85) * 0.4);
+  const ploss = Math.max(0, +(snrLoss + airtimeLoss + (snr < 15 ? (15 - snr) * 0.3 : 0)).toFixed(2));
+
+  // Effective throughput per client
+  const goodputPct = mcsEntry ? 0.65 : 0; // 65% goodput ratio
+  const tput = phyRate > 0 && activeClients > 0 ?
+    Math.max(0, +(phyRate * goodputPct * (1 - u) / activeClients).toFixed(1)) : 0;
+
+  // Stadium sessions
+  const stadiumSessions = Math.round(22464 * userLoadPct / 100);
+
+  // Admission control: kick clients below BSS min rate threshold
+  const admissionNote = bssMinRate >= 24 && mcsIdx < 5 ? ' (admission control active)' : '';
+
+  // RADIUS load
+  const radiusLoad = Math.min(3, cyberRadiusLoad + (userLoadPct > 150 ? 1.5 : userLoadPct > 120 ? 0.8 : 0));
+
+  // Stability score (0-100)
+  let score = 100;
+  if (snr < 25) score -= Math.min(25, (25 - snr) * 1.5);
+  if (totalAirtimePct > 75) score -= Math.min(30, (totalAirtimePct - 75) * 1.2);
+  if (latency > 20) score -= Math.min(20, (latency - 20) * 0.4);
+  if (ploss > 0.1) score -= Math.min(20, ploss * 10);
+  if (radiusLoad > 1) score -= (radiusLoad - 1) * 8;
+  if (!pmfOn && deauthRate > 20) score -= 15;
+  score = Math.max(0, Math.round(score));
+
+  return {
+    snr, mcsIdx, phyRate, mcsLabel: mcsEntry ? mcsEntry.label : 'No Link',
+    airtime: totalAirtimePct, latency, ploss, tput, stadiumSessions,
+    radiusLoad, score, activeClients, chanWidth,
+    pmfOn, rrmOn, proxyArpOn, airdefOn,
+    cyberAttack, deauthRate, jammerSev, noiseOffset, userLoadPct,
+    admissionNote, bssMinRate
+  };
+}
+
+// ─── Render ──────────────────────────────────────────────────────────────────
+function colorClass(color) { return color; }
+
+function setMetric(id, val, unit, color) {
+  const el = document.getElementById(id);
+  if (el) { el.textContent = val; el.className = `metric-val ${color}`; }
+}
+
+function setBar(id, pct, color) {
+  const el = document.getElementById(id);
+  if (el) { el.style.width = Math.min(100, pct) + '%'; el.className = `metric-bar-fill bg-${color}`; }
+}
+
+function render(s) {
+  // Knob display labels
+  document.getElementById('noise-val').textContent = `${-(95 - s.noiseOffset - s.jammerSev * 5)} dBm`.replace('--', '-');
+  const nf = -95 + s.noiseOffset + s.jammerSev * 5;
+  document.getElementById('noise-val').textContent = `${nf} dBm`;
+  document.getElementById('users-val').textContent = s.userLoadPct + '%';
+  document.getElementById('jammer-val').textContent = s.jammerSev === 0 ? 'OFF' : `SEV ${s.jammerSev}`;
+  document.getElementById('deauth-val').textContent = s.deauthRate + ' f/s';
+
+  // SNR
+  const snrColor = slaColor('snr', s.snr);
+  setMetric('m-snr', Math.max(0, Math.round(s.snr)), 'dB', snrColor);
+  setBar('bar-snr', (s.snr / 50) * 100, snrColor);
+
+  // MCS
+  const mcsColor = s.mcsIdx >= 7 ? 'green' : s.mcsIdx >= 3 ? 'yellow' : 'red';
+  setMetric('m-mcs', s.mcsIdx >= 0 ? s.mcsIdx : '—', '', mcsColor);
+  document.getElementById('m-mcs-rate').textContent = s.phyRate > 0 ? `${s.phyRate} Mbps PHY (4SS/${s.chanWidth})` : 'No link';
+  setBar('bar-mcs', s.phyRate / 24 * 100, mcsColor);
+
+  // Airtime
+  const airColor = slaColor('airtime', s.airtime);
+  setMetric('m-air', Math.min(150, s.airtime), '%', airColor);
+  setBar('bar-air', s.airtime, airColor);
+
+  // Latency
+  const latColor = slaColor('latency', s.latency);
+  setMetric('m-lat', s.latency, 'ms', latColor);
+  setBar('bar-lat', (s.latency / 100) * 100, latColor);
+
+  // Packet loss
+  const plossColor = slaColor('ploss', s.ploss);
+  setMetric('m-ploss', s.ploss.toFixed(2), '%', plossColor);
+  setBar('bar-ploss', Math.min(100, s.ploss * 10), plossColor);
+
+  // Tput
+  const tputColor = slaColor('tput', s.tput);
+  setMetric('m-tput', s.tput.toFixed(1), 'Mbps/client', tputColor);
+  setBar('bar-tput', Math.min(100, s.tput / 10 * 100), tputColor);
+
+  // Sessions
+  const sessColor = s.userLoadPct <= 100 ? 'green' : s.userLoadPct <= 140 ? 'yellow' : 'red';
+  document.getElementById('m-sess').textContent = s.stadiumSessions.toLocaleString();
+  document.getElementById('m-sess').className = `metric-val ${sessColor}`;
+  setBar('bar-sess', Math.min(100, s.userLoadPct / 2), sessColor);
+
+  // RADIUS
+  const rColor = s.radiusLoad <= 1 ? 'green' : s.radiusLoad <= 2 ? 'yellow' : 'red';
+  const rLabel = s.radiusLoad <= 1 ? 'Normal' : s.radiusLoad <= 2 ? 'Elevated' : 'Overloaded';
+  document.getElementById('m-radius').textContent = rLabel;
+  document.getElementById('m-radius').className = `metric-val ${rColor}`;
+  setBar('bar-radius', s.radiusLoad / 3 * 100, rColor);
+
+  // Gauge + stability
+  drawGauge(s.score);
+  const stabLabel = s.score >= 85 ? 'STABLE' : s.score >= 65 ? 'DEGRADED' : s.score >= 40 ? 'WARNING' : 'CRITICAL';
+  const stabColor = s.score >= 85 ? '#00c853' : s.score >= 65 ? '#ffd600' : s.score >= 40 ? '#ff6d00' : '#f44336';
+  document.getElementById('stab-label').textContent = stabLabel;
+  document.getElementById('stab-label').style.color = stabColor;
+  document.getElementById('stab-score').textContent = `Score: ${s.score} / 100`;
+  const sf = document.getElementById('stab-fill');
+  sf.style.width = s.score + '%';
+  sf.className = `stab-fill bg-${s.score >= 85 ? 'green' : s.score >= 65 ? 'yellow' : s.score >= 40 ? 'orange' : 'red'}`;
+
+  // Status badge
+  const badge = document.getElementById('status-badge');
+  badge.textContent = `● ${stabLabel}`;
+  badge.style.color = stabColor;
+  badge.style.borderColor = stabColor + '44';
+  badge.style.background = stabColor + '11';
+
+  // Recovery actions
+  const recoveries = buildRecoveries(s);
+  document.getElementById('recovery-list').innerHTML = recoveries.map(r =>
+    `<div class="recovery-action ra-${r.type}">${r.msg}</div>`
+  ).join('');
+
+  // SLA chips
+  const slaChips = [
+    { name: 'SNR', val: `${Math.max(0,Math.round(s.snr))} dB`, threshold: '≥25', color: slaColor('snr', s.snr) },
+    { name: 'Airtime', val: `${s.airtime}%`, threshold: '≤75%', color: slaColor('airtime', s.airtime) },
+    { name: 'Latency', val: `${s.latency} ms`, threshold: '≤20ms', color: slaColor('latency', s.latency) },
+    { name: 'Pkt Loss', val: `${s.ploss.toFixed(2)}%`, threshold: '≤0.1%', color: slaColor('ploss', s.ploss) },
+    { name: 'Tput/Client', val: `${s.tput.toFixed(1)} Mbps`, threshold: '≥5M', color: slaColor('tput', s.tput) },
+    { name: 'RADIUS', val: rLabel, threshold: 'Normal', color: rColor },
+  ];
+  const colorMap = { green: '#00c853', yellow: '#ffd600', orange: '#ff6d00', red: '#f44336' };
+  document.getElementById('sla-bar').innerHTML =
+    `<span style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-right:4px;flex-shrink:0;">SLA</span>` +
+    slaChips.map(c =>
+      `<div class="sla-chip">
+        <div class="sla-dot" style="background:${colorMap[c.color]}"></div>
+        <span class="sla-label">${c.name}</span>
+        <span class="sla-val" style="color:${colorMap[c.color]}">${c.val}</span>
+        <span class="sla-label">${c.threshold}</span>
+      </div>`
+    ).join('');
+
+  // AP grid update (throttled)
+  if (Math.abs(s.score - (prevState.score||100)) > 5) {
+    updateApGrid(s.score);
+  }
+}
+
+// ─── Recovery action builder ─────────────────────────────────────────────────
+function buildRecoveries(s) {
+  const actions = [];
+  if (!s.rrmOn && s.snr < 20) {
+    actions.push({ type: 'warn', msg: '⚠ RRM is OFF — manual channel change needed' });
+  } else if (s.rrmOn && s.snr < 20) {
+    actions.push({ type: 'auto', msg: '⚙ RRM: Channel change triggered (DFS seed)' });
+  }
+  if (s.rrmOn && s.snr < 15) {
+    actions.push({ type: 'auto', msg: '⚙ TPC: Max TX boosted → 23 dBm' });
+  }
+  if (s.airtime > 85) {
+    actions.push({ type: 'auto', msg: `⚙ Admission: BSS Min Rate → ${Math.max(s.bssMinRate, 24)} Mbps` });
+  }
+  if (s.airtime > 95) {
+    actions.push({ type: 'alert', msg: '🚨 Capacity: New associations BLOCKED (max 150/radio)' });
+  }
+  if (s.jammerSev >= 3) {
+    actions.push({ type: 'alert', msg: '🚨 Jammer detected — EP1 AirDefense alert raised' });
+    if (s.rrmOn) actions.push({ type: 'auto', msg: '⚙ RRM: Emergency channel hop (non-DFS)' });
+  }
+  if (s.cyberAttack === 'deauth_flood') {
+    if (s.pmfOn) actions.push({ type: 'ok', msg: '✓ 802.11w PMF: Deauth flood absorbed' });
+    else actions.push({ type: 'alert', msg: '🚨 PMF OFF — deauth flood impacting clients' });
+  }
+  if (s.cyberAttack === 'evil_twin') {
+    if (s.airdefOn) actions.push({ type: 'ok', msg: '✓ AirDefense: Rogue AP contained + alert' });
+    else actions.push({ type: 'alert', msg: '🚨 AirDefense OFF — evil twin active on Ch 6' });
+  }
+  if (s.cyberAttack === 'credential_storm') {
+    actions.push({ type: 'warn', msg: '⚠ EP1 Security: Auth storm → rate-limit triggered' });
+  }
+  if (s.cyberAttack === 'arp_poison') {
+    if (s.proxyArpOn) actions.push({ type: 'ok', msg: '✓ Proxy ARP: ARP poisoning blocked' });
+    else actions.push({ type: 'alert', msg: '🚨 Proxy ARP OFF — ARP poisoning in progress' });
+  }
+  if (s.latency > 50) {
+    actions.push({ type: 'alert', msg: `🚨 SLA BREACH: Latency ${s.latency}ms > 50ms threshold` });
+  }
+  if (s.ploss > 1) {
+    actions.push({ type: 'alert', msg: `🚨 SLA BREACH: Packet loss ${s.ploss}% > 1%` });
+  }
+  if (s.userLoadPct > 130) {
+    actions.push({ type: 'warn', msg: `⚠ Overload: ${s.userLoadPct}% → 802.11v BSS Transition active` });
+  }
+  if (actions.length === 0) {
+    actions.push({ type: 'ok', msg: '✓ All systems nominal — no automations triggered' });
+  }
+  return actions;
+}
+
+// ─── Event log diff detection ────────────────────────────────────────────────
+function detectEvents(curr, prev) {
+  if (!prev.score) return;
+  const snrBand = s => s.snr >= 25 ? 'G' : s.snr >= 15 ? 'Y' : 'R';
+  const airBand = s => s.airtime <= 75 ? 'G' : s.airtime <= 90 ? 'Y' : 'R';
+  if (snrBand(curr) !== snrBand(prev)) addLog(`SNR ${snrBand(prev)}→${snrBand(curr)}: ${Math.round(curr.snr)} dB (noise ${-95+curr.noiseOffset+curr.jammerSev*5} dBm)`, snrBand(curr) === 'R' ? 'alert' : snrBand(curr) === 'Y' ? 'warn' : 'ok');
+  if (airBand(curr) !== airBand(prev)) addLog(`Airtime ${airBand(prev)}→${airBand(curr)}: ${curr.airtime}% utilisation`, airBand(curr) === 'R' ? 'alert' : airBand(curr) === 'Y' ? 'warn' : 'ok');
+  const scoreDrop = (prev.score || 100) - curr.score;
+  if (scoreDrop > 10) addLog(`Stability drop: ${prev.score}→${curr.score} (−${scoreDrop})`, 'warn');
+  if (scoreDrop < -8) addLog(`Stability recovery: ${prev.score}→${curr.score} (+${Math.abs(scoreDrop)})`, 'ok');
+  if (curr.cyberAttack !== prev.cyberAttack) {
+    if (curr.cyberAttack !== 'none') addLog(`Cyber attack: ${curr.cyberAttack.replace(/_/g,' ')} detected`, 'alert');
+    else addLog('Cyber attack: cleared', 'ok');
+  }
+  if (curr.jammerSev > 0 && curr.jammerSev !== prev.jammerSev) addLog(`Jammer SEV ${curr.jammerSev} — noise +${curr.jammerSev*5} dB`, 'alert');
+  if (curr.jammerSev === 0 && prev.jammerSev > 0) addLog('Jammer cleared — RRM stabilising', 'ok');
+}
+
+// ─── Main update loop ────────────────────────────────────────────────────────
+function update() {
+  const s = compute();
+  detectEvents(s, prevState);
+  render(s);
+  prevState = { ...s };
+}
+
+// ─── Reset ───────────────────────────────────────────────────────────────────
+function resetAll() {
+  document.getElementById('noise-floor').value = 0;
+  document.getElementById('user-load').value = 100;
+  document.getElementById('jammer').value = 0;
+  document.getElementById('deauth-rate').value = 0;
+  document.getElementById('cyber-attack').value = 'none';
+  document.getElementById('bss-min-rate').value = 18;
+  document.getElementById('chan-width').value = 80;
+  document.getElementById('pmf-on').checked = true;
+  document.getElementById('rrm-on').checked = true;
+  document.getElementById('proxy-arp-on').checked = true;
+  document.getElementById('airdef-on').checked = true;
+  addLog('System reset to baseline design parameters', 'ok');
+  update();
+}
+
+// ─── Wire events ─────────────────────────────────────────────────────────────
+document.querySelectorAll('input[type=range], select, input[type=checkbox]').forEach(el => {
+  el.addEventListener('input', update);
+});
+
+// ─── Init ─────────────────────────────────────────────────────────────────────
+buildApGrid();
+addLog('Simulator loaded — Lumen Field 280×AP5060 · design load 22,464 sessions', 'ok');
+addLog('SLA targets: SNR≥25dB · Airtime≤75% · Latency≤20ms · Loss≤0.1%', 'auto');
+update();
+</script>
+</body>
+</html>
