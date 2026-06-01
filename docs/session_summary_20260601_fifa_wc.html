@@ -188,6 +188,12 @@
   .timeline-detail { font-size: 15px; color: #444; }
 
   footer { border-top: 1px solid #ccc; padding-top: 20px; font-size: 13px; color: #888; font-style: italic; margin-top: 60px; }
+
+  /* ── SCREENSHOTS ── */
+  .screenshot-block { margin: 24px 0; }
+  .screenshot-block img { width: 100%; border: 1px solid #ddd; border-radius: 3px; display: block; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+  .screenshot-caption { font-family: 'Source Code Pro', monospace; font-size: 12px; color: #666; margin-top: 8px; padding-left: 4px; border-left: 3px solid #ddd; }
+  .screenshot-caption strong { color: #1a1a1a; }
 </style>
 </head>
 <body>
@@ -209,6 +215,8 @@
   <a href="#ep1sec">EP1 Security</a>
   <a href="#ep1core">EP1 Core</a>
   <a href="#commands">Commands</a>
+  <a href="#screenshots">Screenshots</a>
+  <a href="#ad">AD Transition</a>
   <a href="#files">Files</a>
   <a href="#pending">Next Sprint</a>
 </nav>
@@ -700,6 +708,150 @@ networksetup -listallnetworkservices
 # Run this FIRST before any physical client test
 # Success here = EP1 is correctly configured
 # If this fails, fix EP1 Security before touching the AP or client</pre>
+</section>
+
+
+<!-- ── SCREENSHOTS ───────────────────────────────────────────────── -->
+<section id="screenshots">
+  <h2>11. Screenshots — Evidence from the Session</h2>
+  <p><em>Every key state captured live. These tell the full story better than words.</em></p>
+
+  <h3>EP1 Security — The Wall of Rejections (Before)</h3>
+  <p>This is what the first two hours looked like. Every row is a <strong>Rejected</strong> authentication. The early entries show no policy name at all — the RadSec Proxy was swallowing the requests before EP1 Security could even evaluate them. The MAC-based entries (74a6cd8b1960) further down show the brief period where MAC Authentication was tried as a workaround — landing correctly on Policy_Guest but not the goal. The top entries show Policy_TeamUSA finally being matched but still Rejected — that was the password issue (Extreme01!!).</p>
+  <div class="screenshot-block">
+    <img src="screenshots/ep1_security_client_history_rejections.png" alt="EP1 Security client history showing Rejected authentications">
+    <div class="screenshot-caption"><strong>EP1 Security → Clients → History</strong> · Identity: khursheedkhan@gmail.com · MAC: 74:A6:CD:8B:19:60 · Timeline: 10:07–13:01 · The complete wall of Rejected entries before the breakthrough. Scroll down to see MAC auth period (Policy_Guest accepted) and the final Rejected→Accepted transition at top.</div>
+  </div>
+
+  <h3>EP1 Security — Accepted, Policy_TeamUSA (The Turning Point)</h3>
+  <p>This is the moment everything changed. <strong>Auth State: Accepted. Policy: Policy_TeamUSA.</strong> Same MAC, same user, same SSID — but now the mobileconfig EAP-TTLS/PAP is working and the RadSec Proxy is gone. IP shows 10.30.0.101 (still VLAN 30 at this point) because the assignment rule Value bug in EP1 Core hadn't been fixed yet. The server side was right. The AP wasn't listening.</p>
+  <div class="screenshot-block">
+    <img src="screenshots/ep1_security_accepted_policy_teamusa.png" alt="EP1 Security showing Accepted and Policy_TeamUSA matched">
+    <div class="screenshot-caption"><strong>EP1 Security → Clients → History</strong> · Auth State: Accepted · Policy: Policy_TeamUSA · IP: 10.30.0.101 · This confirmed EP1 Security was correctly configured — the remaining gap was in EP1 Core assignment rules. Note the Disconnected/Accepted cycling as the MacBook retried authentication.</div>
+  </div>
+
+  <h3>EP1 Core — Assignment Rules Broken (The Final Blocker)</h3>
+  <p>The "Ten" profile expanded — Value = <code>10</code>. This was the last blocker. EP1 Security returning <code>Filter-Id: Policy_TeamUSA</code> and the AP looking for <code>10</code>. No match. Default VLAN 30. No error message. Just silent fallback.</p>
+  <div class="screenshot-block">
+    <img src="screenshots/ep1_core_assignment_rules_broken.png" alt="EP1 Core assignment rules showing Value 10 instead of Policy_TeamUSA">
+    <div class="screenshot-caption"><strong>EP1 Core → Network Policies → WC_Secure → Assignment Rules</strong> · Ten profile expanded showing RADIUS Attribute Value = <strong>10</strong> — this was wrong. The AP was matching Filter-Id "Policy_TeamUSA" against "10" — no match, silent fallback to default VLAN 30.</div>
+  </div>
+
+  <h3>EP1 Core — Assignment Rules Fixed (The Fix)</h3>
+  <p>All five rules expanded simultaneously. Every Value field now contains the exact Filter-Id string that EP1 Security returns. <code>Policy_TeamUSA</code>, <code>Policy_TeamAUS</code>, <code>Policy_VIP</code>, <code>Policy_POS</code>, <code>Policy_Guest</code>. Save → push → <em>"I have landed... I got 10.10.0.100 haha."</em></p>
+  <div class="screenshot-block">
+    <img src="screenshots/ep1_core_assignment_rules_correct.png" alt="EP1 Core assignment rules showing correct Policy_TeamUSA values">
+    <div class="screenshot-caption"><strong>EP1 Core → Network Policies → WC_Secure → Assignment Rules</strong> · All 5 rules expanded · Filter-Id: 11_Filter-Id · Values: Policy_TeamUSA / Policy_TeamAUS / Policy_VIP / Policy_POS / Policy_Guest · This is the configuration that unlocked the end-to-end proof.</div>
+  </div>
+
+</section>
+
+
+<!-- ── AD TRANSITION ─────────────────────────────────────────────── -->
+<section id="ad">
+  <h2>12. Sprint 2 — Transitioning to Active Directory</h2>
+  <p>Sprint 1 proved dynamic VLAN with local EP1 Security users. Sprint 2 replaces those local users with Active Directory. <strong>Nothing changes in EP1 Core, SW1, or the SSID.</strong> Only EP1 Security gets an Identity Provider added and group mappings configured.</p>
+
+  <div class="milestone milestone-blue">
+    <div class="milestone-label">Why AD Changes Everything for Clients</div>
+    <p>Local EP1 users authenticate via EAP-TTLS/PAP — which requires a mobileconfig on every macOS/iOS device. AD users authenticate via <strong>PEAP-MSCHAPv2</strong> — which macOS, iOS, Windows, and Android all support natively in their UI, no profile required. Sprint 2 eliminates the mobileconfig entirely.</p>
+  </div>
+
+  <h3>What Changes vs What Stays the Same</h3>
+  <table>
+    <tr><th>Component</th><th>Sprint 1 (Local)</th><th>Sprint 2 (AD)</th></tr>
+    <tr><td>EP1 Security — Identity Source</td><td>Local user database</td><td>Active Directory via LDAP</td></tr>
+    <tr><td>EP1 Security — User Groups</td><td>Manual group assignment</td><td>AD group → EP1 group mapping</td></tr>
+    <tr><td>EAP Method</td><td>EAP-TTLS/PAP</td><td>PEAP-MSCHAPv2</td></tr>
+    <tr><td>macOS client config</td><td>mobileconfig required</td><td>Native UI — no profile needed</td></tr>
+    <tr><td>EP1 Security — Network Policies</td><td colspan="2" style="background:#f0fff4; font-weight:700;">UNCHANGED — zero rework</td></tr>
+    <tr><td>EP1 Core — SSID</td><td colspan="2" style="background:#f0fff4; font-weight:700;">UNCHANGED — zero rework</td></tr>
+    <tr><td>EP1 Core — Assignment Rules</td><td colspan="2" style="background:#f0fff4; font-weight:700;">UNCHANGED — zero rework</td></tr>
+    <tr><td>SW1 — VLANs + DHCP</td><td colspan="2" style="background:#f0fff4; font-weight:700;">UNCHANGED — zero rework</td></tr>
+    <tr><td>RADIUS/RadSec endpoint</td><td colspan="2" style="background:#f0fff4; font-weight:700;">UNCHANGED — same radius.oh-uz.extremecloudiq.com:2083</td></tr>
+  </table>
+
+  <h3>Prerequisites — What You Need from Your Boss</h3>
+  <table>
+    <tr><th>#</th><th>Item</th><th>Details to Request</th></tr>
+    <tr><td>1</td><td>AD Domain Name</td><td>e.g., <code>extremenetworks.com</code> or <code>corp.example.com</code></td></tr>
+    <tr><td>2</td><td>LDAP Server IP / Hostname</td><td>Domain Controller IP or AD FQDN</td></tr>
+    <tr><td>3</td><td>LDAP Port</td><td>389 (LDAP) or 636 (LDAPS — preferred)</td></tr>
+    <tr><td>4</td><td>Service Account</td><td>Read-only AD account for EP1 to bind and search — e.g., <code>svc_ep1_ldap@corp.example.com</code></td></tr>
+    <tr><td>5</td><td>Service Account Password</td><td>Stored in EP1 Security — not exposed to users</td></tr>
+    <tr><td>6</td><td>Base DN</td><td>e.g., <code>DC=corp,DC=example,DC=com</code></td></tr>
+    <tr><td>7</td><td>AD Security Groups</td><td>Group names for TeamUSA, TeamAUS, VIP, POS, Guest roles — e.g., <code>FIFA-TeamUSA</code></td></tr>
+    <tr><td>8</td><td>Firewall rule</td><td>EP1 cloud → AD DC on port 636 (or 389) — needs network team approval</td></tr>
+  </table>
+
+  <h3>Step-by-Step: Adding AD Identity Provider in EP1 Security</h3>
+  <ol>
+    <li><strong>EP1 Security → Administration &amp; Settings → Identity Providers → Add</strong></li>
+    <li>Select type: <strong>Active Directory / LDAP</strong></li>
+    <li>Enter:
+      <ul>
+        <li>Server: <code>&lt;AD Domain Controller IP or FQDN&gt;</code></li>
+        <li>Port: <code>636</code> (LDAPS) or <code>389</code> (LDAP)</li>
+        <li>Base DN: <code>DC=corp,DC=example,DC=com</code></li>
+        <li>Bind DN: <code>CN=svc_ep1_ldap,OU=ServiceAccounts,DC=corp,DC=example,DC=com</code></li>
+        <li>Bind Password: service account password</li>
+      </ul>
+    </li>
+    <li>Click <strong>Test Connection</strong> — confirm green</li>
+    <li>Save Identity Provider</li>
+  </ol>
+
+  <h3>Step-by-Step: Mapping AD Groups to EP1 User Groups</h3>
+  <ol>
+    <li><strong>EP1 Security → Policy → Users &amp; Devices → User Groups</strong></li>
+    <li>Edit each group → change membership source from <em>Local Users</em> to <em>AD Group</em></li>
+    <li>Map:
+      <ul>
+        <li>Group_TeamUSA → AD group <code>FIFA-TeamUSA</code></li>
+        <li>Group_TeamAUS → AD group <code>FIFA-TeamAUS</code></li>
+        <li>Group_VIP → AD group <code>FIFA-VIP</code></li>
+        <li>Group_POS → AD group <code>FIFA-POS</code></li>
+        <li>Group_Guest → AD group <code>FIFA-Guest</code> (or keep as catch-all)</li>
+      </ul>
+    </li>
+    <li>Save each group</li>
+  </ol>
+
+  <h3>Step-by-Step: Updating Network Security Policies for PEAP</h3>
+  <ol>
+    <li>Edit each Network Security Policy (Policy_TeamUSA through Policy_Guest)</li>
+    <li>Change EAP Method from <strong>EAP-TTLS</strong> to <strong>PEAP-MSCHAPv2</strong></li>
+    <li>User Group mapping and VLAN assignments stay identical — no changes needed</li>
+    <li>Save and push</li>
+  </ol>
+
+  <h3>Client-Side Experience After AD Migration</h3>
+  <div class="callout-green">
+    <p><strong>macOS:</strong> System Settings → Wi-Fi → WC_Secure → enter AD username + password. Done. No mobileconfig. No profile installation. No trust step.<br>
+    <strong>iOS:</strong> Settings → Wi-Fi → WC_Secure → enter AD username + password. Accept certificate prompt once. Done.<br>
+    <strong>Windows:</strong> Click WC_Secure → enter domain credentials. Windows handles PEAP-MSCHAPv2 natively.<br>
+    <strong>Android:</strong> Settings → Wi-Fi → WC_Secure → EAP: PEAP, Phase 2: MSCHAPv2 → enter credentials. Done.</p>
+  </div>
+
+  <h3>Verification After AD Cutover</h3>
+  <pre># 1. EP1 Security → Policy Evaluation:
+#    Username: jane.smith@corp.example.com (AD user in FIFA-TeamUSA group)
+#    Method: PEAP-MSCHAPv2
+#    Expected: Auth Success → Policy_TeamUSA → Filter-Id: Policy_TeamUSA
+
+# 2. Connect MacBook using AD credentials via native UI (no mobileconfig)
+# 3. Confirm IP in 10.10.0.x range
+
+# 4. SW1:
+show fdb ports 3
+# Expected: MAC → TeamUSA(0010)
+
+# 5. Test each AD group → confirm VLAN assignment</pre>
+
+  <div class="callout">
+    <p><strong>Zero rework guarantee:</strong> The five Network Security Policies, the Filter-Id RADIUS attribute, the five assignment rules, and SW1 are all unchanged between Sprint 1 and Sprint 2. The only changes are in EP1 Security's identity source and the EAP method per policy. The architecture you proved today scales directly to AD with no redesign.</p>
+  </div>
+
 </section>
 
 
