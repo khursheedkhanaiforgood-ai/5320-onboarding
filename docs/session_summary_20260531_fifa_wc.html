@@ -219,7 +219,7 @@
   <a href="#dr">Disaster Recovery</a>
   <a href="#p5g">P5G Coexistence</a>
   <a href="#review">Engineer Review</a>
-  <a href="#karl">Karl Lab</a>
+  <a href="#karl">Khursheed's Lab</a>
   <a href="#open">Open Questions</a>
   <a href="#journey">Architecture Journey</a>
   <a href="#sprint1">Sprint 1 — Local</a>
@@ -804,7 +804,7 @@ Phase 3 (-3 days): RF validation
 
 <!-- ── SECTION 13: KARL LAB – 802.1X PRACTICE ────────────────────── -->
 <section id="karl">
-  <h2>13. Karl Lab — 802.1X Dynamic VLAN Practice Path</h2>
+  <h2>13. Khursheed's Lab — 802.1X Dynamic VLAN Practice Path</h2>
 
   <p>You asked Karl for lab access specifically to practice <strong>802.1X with RADIUS assigning dynamic VLANs</strong>. Here is the exact sequence to request and the validation steps once you have access.</p>
 
@@ -873,7 +873,7 @@ AP/EP1 log:
     <li><strong>Ticketing DB enforcement policy:</strong> Advisory (log) or enforcing (block) when no valid ticket found? Security team must decide before CWP is built.</li>
     <li><strong>Seattle Soccer House (Pacific Place) WiFi:</strong> Is this a separate EN deployment or extension of the Lumen Field contract? 27,000 sq ft, six zones — needs its own AP density plan.</li>
     <li><strong>Visiting team VLAN reconfiguration:</strong> Australia vs USA is match 1. For subsequent matches, the "Visiting_Team" VLAN 20 serves a different team. Is the RADIUS group reconfigured per match or is there a generic <code>visiting_team_wifi</code> AD group that the visiting team's IT team populates? This is a process design question as much as a technical one.</li>
-    <li><strong>Karl lab access timeline:</strong> When can you get credentials? Set a target date so the 802.1X practice sprint can be scheduled.</li>
+    <li><strong>Khursheed's lab access timeline:</strong> When can you get credentials? Set a target date so the 802.1X practice sprint can be scheduled.</li>
     <li><strong>EN pre-sales engagement:</strong> The Lumen Field relationship exists. Has EN been formally briefed on the FIFA WiFi upgrade requirement? They may already have a solution brief / proposal in flight.</li>
     <li><strong>CDN pre-positioning:</strong> Which CDN provider? FIFA+ runs on a custom CDN. Does EN's solution include an on-premises CDN appliance for venue deployments?</li>
   </ol>
@@ -963,7 +963,7 @@ AP/EP1 log:
     <tr><td>Event staff</td><td>~200</td><td>802.1X</td><td>AD</td><td>40 <em>(lab)</em> / dedicated VLAN in production</td></tr>
     <tr><td>POS terminals</td><td>~100</td><td>MAB</td><td>MAC database</td><td>50</td></tr>
   </table>
-  <p>The 100-user local cap is sufficient for Karl Lab testing of the full dynamic VLAN flow. For production, only the ~800 credentialed users need AD — and the fans never touch it.</p>
+  <p>The 100-user local cap is sufficient for Khursheed's Lab testing of the full dynamic VLAN flow. For production, only the ~800 credentialed users need AD — and the fans never touch it.</p>
 
   <hr style="border:none; border-top:1px solid #e0e0e0; margin: 32px 0;">
 
@@ -1025,7 +1025,7 @@ EP1 Security = the guest list  (six policies live here, decision made here)
 
 <!-- ── SECTION 16: SPRINT 1 — LOCAL CLIENTS ──────────────────────── -->
 <section id="sprint1">
-  <h2>16. Sprint 1 — Karl Lab Build with Local Clients</h2>
+  <h2>16. Sprint 1 — Khursheed's Lab Build with Local Clients</h2>
 
   <div class="callout-green">
     <p><strong>Goal:</strong> Validate the complete dynamic VLAN flow end-to-end using local EP1 Security users — no AD, no external identity provider. AP3000 + 5320 SW1, factory-fresh. Up to 100 local users supported.</p>
@@ -1175,7 +1175,7 @@ Monitor → Clients → [MacBook] → Association Details
     <tr><td>4</td><td><strong>Base DN</strong></td><td>The LDAP distinguished name where users live. Example: <code>DC=wc2026,DC=local</code>. If users are in an OU: <code>OU=Teams,DC=wc2026,DC=local</code>.</td><td>AD admin</td></tr>
     <tr><td>5</td><td><strong>AD Security Groups</strong></td><td>One group per VLAN role: <code>CN=TeamUSA</code>, <code>CN=TeamAUS</code>, <code>CN=Premium</code>, <code>CN=Staff</code>. Users are members of the group, not the VLAN. Policy maps group → VLAN.</td><td>AD admin</td></tr>
     <tr><td>6</td><td><strong>User accounts in AD</strong></td><td>Each credentialed user (player, VIP, staff) needs an AD account with a UPN (<code>firstname.lastname@wc2026.local</code>) and group membership. For EAP-TLS: also needs a client certificate (MDM-pushed).</td><td>FIFA IT / EN onboarding team</td></tr>
-    <tr><td>7</td><td><strong>EAP method decision</strong></td><td>PEAP-MSCHAPv2 = username + password (simpler). EAP-TLS = client certificate (stronger, PCI required for POS). For Karl Lab Sprint 2: start with PEAP-MSCHAPv2.</td><td>Architecture decision</td></tr>
+    <tr><td>7</td><td><strong>EAP method decision</strong></td><td>PEAP-MSCHAPv2 = username + password (simpler). EAP-TLS = client certificate (stronger, PCI required for POS). For Khursheed's Lab Sprint 2: start with PEAP-MSCHAPv2.</td><td>Architecture decision</td></tr>
     <tr><td>8</td><td><strong>Client device supplicant config</strong></td><td>For PEAP-MSCHAPv2: Windows/Mac auto-prompt. For EAP-TLS: certificate must be pushed via MDM (Jamf/Intune) before the device connects. macOS and iOS handle 802.1X natively — no additional software.</td><td>Device management team</td></tr>
   </table>
 
@@ -1216,7 +1216,7 @@ AD → open CN=TeamAUS → Remove Australian accounts → Add French player acco
     <p><strong>Sprint 2 success criteria:</strong> A real AD user in <code>CN=TeamUSA</code> authenticates to <code>WC_Secure</code> with their AD credentials and lands on VLAN 10. A user added to <code>CN=TeamAUS</code> lands on VLAN 20. A user removed from all groups lands on VLAN 30 (Guest catch-all). Verified via <code>show fdb</code> on 5320 SW1. The system is production-ready.</p>
   </div>
 
-  <h3>Sprint 2 Open Item — Karl Lab AD Options</h3>
+  <h3>Sprint 2 Open Item — Khursheed's Lab AD Options</h3>
   <p>If you don't have a Windows AD server in the lab, three alternatives for Sprint 2 testing:</p>
   <ol>
     <li><strong>Windows Server VM</strong> — spin up a free 180-day eval in your EVE-NG lab, add AD DS role, create the five groups. Fastest path to a real LDAP endpoint.</li>
@@ -1386,8 +1386,8 @@ configure iproute add default 192.168.0.1</pre>
   <h3>AD vs No AD — Decision Point</h3>
   <table>
     <tr><th>Scenario</th><th>Credentialed users</th><th>Need AD?</th></tr>
-    <tr><td>Karl Lab Sprint 1</td><td>4 test accounts</td><td>No — local users sufficient</td></tr>
-    <tr><td>Karl Lab Sprint 2</td><td>4 test accounts + Windows Server VM</td><td>Optional — validates the integration</td></tr>
+    <tr><td>Khursheed's Lab Sprint 1</td><td>4 test accounts</td><td>No — local users sufficient</td></tr>
+    <tr><td>Khursheed's Lab Sprint 2</td><td>4 test accounts + Windows Server VM</td><td>Optional — validates the integration</td></tr>
     <tr><td>Real FIFA match (small staff)</td><td>&lt;100</td><td>No — local users sufficient</td></tr>
     <tr><td>Real FIFA match (full roster)</td><td>~160+ (teams + VIP + staff)</td><td>Yes — exceeds 100 cap</td></tr>
     <tr><td>72,000 fans</td><td>0 — catch-all Guest policy</td><td>Never — fans bypass IdP entirely</td></tr>
@@ -1574,7 +1574,7 @@ CWP registration: load hits the captive portal web server, not RADIUS.
   </div>
 
   <h3>Lab Scale Equivalent (AP3000 Sprint 1)</h3>
-  <p>Your Karl Lab has one AP3000, one SW1, and up to 4 test clients. The QoE settings and load model still apply — just at 1:10,000 scale. The validation target is identical:</p>
+  <p>Your Khursheed's Lab has one AP3000, one SW1, and up to 4 test clients. The QoE settings and load model still apply — just at 1:10,000 scale. The validation target is identical:</p>
   <table>
     <tr><th>Metric</th><th>Stadium goal</th><th>Lab equivalent</th><th>How to verify</th></tr>
     <tr><td>VLAN assignment correct</td><td>VLAN 10/20/30 by user group</td><td>VLAN 10/20/30 by test account</td><td><code>show fdb</code> on SW1</td></tr>
@@ -1711,7 +1711,7 @@ CHECK: oversubscription at each layer must satisfy U ≤ U_target
     <tr><td>Access — media/team</td><td><strong>ExtremeSwitching 5520-24X</strong></td><td>24 × 10G SFP+</td><td>4 × 100G QSFP28</td><td>—</td><td>Media tribune, team areas. 10G per AP5060D where max throughput needed.</td></tr>
     <tr><td>Distribution</td><td><strong>ExtremeSwitching X465-48P</strong></td><td>48 × 2.5G PoE (if needed)</td><td>8 × 25G + 2 × 100G</td><td>—</td><td>Aggregates 8–16 access switches per unit. Dual 100G uplinks to core.</td></tr>
     <tr><td>Core</td><td><strong>ExtremeSwitching X695-48Y-8C</strong></td><td>—</td><td>48 × 25G + 8 × 100G</td><td>—</td><td>Core switching fabric. 100G to ISP border routers.</td></tr>
-    <tr><td>Lab (SW1)</td><td><strong>ExtremeSwitching 5320-16P</strong></td><td>16 × 2.5G PoE+</td><td>2 × 10G SFP+ + 2 × 25G SFP28</td><td>240W</td><td>Karl Lab: 1 AP3000 + management. Not a stadium switch.</td></tr>
+    <tr><td>Lab (SW1)</td><td><strong>ExtremeSwitching 5320-16P</strong></td><td>16 × 2.5G PoE+</td><td>2 × 10G SFP+ + 2 × 25G SFP28</td><td>240W</td><td>Khursheed's Lab: 1 AP3000 + management. Not a stadium switch.</td></tr>
   </table>
 
   <h3>Worked Example A — Stadium Bowl (4,000 AP5060U at 2.5G)</h3>
@@ -1787,7 +1787,7 @@ WAN DEMAND (team/media priority):
 
   <hr style="border:none; border-top:2px solid #1a1a1a; margin: 36px 0;">
 
-  <h3>Worked Example C — Karl Lab: AP3000 + 5320-16P-2MXT-2X (192.168.0.28)</h3>
+  <h3>Worked Example C — Khursheed's Lab: AP3000 + 5320-16P-2MXT-2X (192.168.0.28)</h3>
 
   <div class="callout-green">
     <p><strong>This is your actual hardware.</strong> The closed-form equations applied to the exact switch and AP you are running.</p>
@@ -1813,7 +1813,7 @@ WAN DEMAND (team/media priority):
 
   <h4>Closed-Form Applied — Sprint 1 (1 AP)</h4>
   <pre>─────────────────────────────────────────────────────────────────────
-INPUTS (Sprint 1 — Karl Lab)
+INPUTS (Sprint 1 — Khursheed's Lab)
 ─────────────────────────────────────────────────────────────────────
 N    = 1 AP          (AP3000)
 b    = 2.5 Gbps      (AP3000 ETH0 backhaul)
@@ -1874,6 +1874,79 @@ For 17+ APs: need a second 5320-16P or upgrade to 5420-24P (740W budget).</pre>
 
   <hr style="border:none; border-top:2px solid #1a1a1a; margin: 36px 0;">
 
+  <h3>Side-by-Side: AP3000 + 5320 vs AP5060 + 5420-24P — What Changes?</h3>
+
+  <div class="callout-blue">
+    <p><strong>Read this as a delta.</strong> The closed-form equations are identical — only the hardware inputs change. Every number that shifts is highlighted. This is the exact question: what do you gain, and what new bottleneck appears, when you upgrade from Khursheed's Lab hardware to Lumen Field hardware?</p>
+  </div>
+
+  <h4>Hardware Input Comparison</h4>
+  <table>
+    <tr><th>Parameter</th><th>Symbol</th><th>AP3000 + 5320-16P<br>(Khursheed's Lab)</th><th>AP5060 + 5420-24P<br>(Lumen Field estimate)</th><th>Delta</th></tr>
+    <tr><td>WiFi standard</td><td>—</td><td>802.11ax (WiFi 6E)</td><td>802.11be (WiFi 7)</td><td>+1 generation</td></tr>
+    <tr><td>WiFi aggregate/AP</td><td>W</td><td>~4.2 Gbps</td><td><strong>22.9 Gbps</strong></td><td><strong>+5.5×</strong></td></tr>
+    <tr><td>AP backhaul (ETH0)</td><td>b</td><td>2.5 Gbps</td><td>2.5 Gbps</td><td><strong>No change</strong></td></tr>
+    <tr><td>Backhaul efficiency<br>(W ÷ b)</td><td>W/b</td><td>4.2 / 2.5 = <strong>1.7×</strong><br>(wire keeps up)</td><td>22.9 / 2.5 = <strong>9.2×</strong><br>(wire is the bottleneck)</td><td>Wire gap grows 5×</td></tr>
+    <tr><td>AP power draw</td><td>P_AP</td><td>15W (802.3at)</td><td><strong>25W (802.3bt)</strong></td><td>+67%</td></tr>
+    <tr><td>Switch PoE ports</td><td>p</td><td>16</td><td>24</td><td>+50%</td></tr>
+    <tr><td>Switch PoE budget</td><td>PSU</td><td>240W</td><td><strong>740W</strong></td><td>+208%</td></tr>
+    <tr><td>Max APs by ports</td><td>p</td><td>16</td><td>24</td><td>+8 APs</td></tr>
+    <tr><td>Max APs by PoE</td><td>⌊PSU/P_AP⌋</td><td>⌊240/15⌋ = <strong>16</strong></td><td>⌊740/25⌋ = <strong>29</strong></td><td>+13 APs</td></tr>
+    <tr><td><strong>Binding PoE limit</strong></td><td>min(p, ⌊PSU/P_AP⌋)</td><td><strong>16</strong> (ports = PoE — perfect match)</td><td><strong>24</strong> (ports &lt; PoE — ports win)</td><td>24 APs fully utilised, 5 PoE watts spare</td></tr>
+    <tr><td>Switch uplinks</td><td>k × u</td><td>2 × 25G = 50 Gbps</td><td>2 × 25G = 50 Gbps</td><td><strong>No change</strong></td></tr>
+  </table>
+
+  <h4>Closed-Form — Numbers Side by Side (per switch)</h4>
+  <pre>──────────────────────────────────────────────────────────────────────────────────
+                          AP3000 + 5320-16P         AP5060 + 5420-24P
+──────────────────────────────────────────────────────────────────────────────────
+APs per switch            16                        24  (port-limited)
+Total AP WiFi capacity    16 × 4.2  = 67.2 Gbps    24 × 22.9 = 549.6 Gbps
+Total AP backhaul         16 × 2.5  = 40 Gbps      24 × 2.5  = 60 Gbps
+Switch uplink (LAG 2×25G) 50 Gbps                  50 Gbps
+──────────────────────────────────────────────────────────────────────────────────
+U_actual (backhaul/uplink) 40/50 = 0.8:1 ✓         60/50 = 1.2:1 ✓  (acceptable)
+PoE load                  16 × 15W = 240W  ←budget  24 × 25W = 600W &lt; 740W ✓
+PoE headroom              0W  (exactly full)        140W spare
+──────────────────────────────────────────────────────────────────────────────────
+WiFi-to-backhaul ratio    67.2 / 40 = 1.7:1        549.6 / 60 = 9.2:1
+Bottleneck                Uplink (50G &lt; 67.2G WiFi) Backhaul wire (2.5G/AP)
+──────────────────────────────────────────────────────────────────────────────────</pre>
+
+  <div class="callout-red">
+    <p><strong>The critical finding: AP5060 at 2.5G backhaul is wire-limited, not radio-limited.</strong></p>
+    <p>AP3000 produces 4.2 Gbps of WiFi per AP — the 2.5G backhaul wire captures 60% of that. Acceptable.</p>
+    <p>AP5060 produces 22.9 Gbps of WiFi per AP — the same 2.5G wire captures only 11% of that. You are leaving 88% of the AP5060's radio capacity on the floor.</p>
+    <p><strong>To unlock AP5060's full capacity you need 10G backhaul per AP</strong> — and a switch with 10G PoE++ ports. That is the stadium-grade switch (e.g. ExtremeSwitching 5720 series or equivalent). At 2.5G backhaul the AP5060 is being used as a very expensive AP3000.</p>
+  </div>
+
+  <h4>What Changes at 10G Backhaul (full AP5060 scenario)</h4>
+  <pre>──────────────────────────────────────────────────────────────────────────────────
+                          AP5060 + 5420 (2.5G)     AP5060 + 10G PoE switch
+──────────────────────────────────────────────────────────────────────────────────
+b (backhaul/AP)           2.5 Gbps                 10 Gbps
+APs per switch            24 (port-limited)        24 (same)
+Total AP backhaul         24 × 2.5  = 60 Gbps      24 × 10  = 240 Gbps
+Switch uplink required    50 Gbps (2×25G)          240 Gbps → need 2×100G uplinks
+U_actual                  60/50   = 1.2:1 ✓        240/200 = 1.2:1 ✓  (2×100G LAG)
+WiFi-to-backhaul ratio    9.2:1  (wire-limited)    22.9/10 = 2.3:1  (acceptable)
+──────────────────────────────────────────────────────────────────────────────────
+Switch needed for 10G+PoE++ (802.3bt): e.g. EN 5720 series (10G PoE++, 90W/port)
+  — switch model TBD with EN pre-sales; confirms the Lumen Field switch is NOT 5420</pre>
+
+  <div class="callout-green">
+    <p><strong>Summary of what changes as you move from Khursheed's Lab to Lumen Field:</strong></p>
+    <ol>
+      <li><strong>APs per switch:</strong> 16 → 24 (port count); PoE budget increases more than port count, so ports become the binding limit — good design.</li>
+      <li><strong>WiFi capacity per switch:</strong> 67 Gbps → 550 Gbps (8×) — but only 60 Gbps gets off the switch at 2.5G backhaul.</li>
+      <li><strong>New bottleneck introduced:</strong> At 2.5G backhaul, the AP5060 is backhaul-limited from day one. The stadium upgrade from 2.5G → 10G backhaul is the single most important infrastructure decision.</li>
+      <li><strong>Switch uplink must grow:</strong> 2×25G (50G) sufficient at 2.5G backhaul; must become 2×100G (200G) to support 24 APs at 10G each.</li>
+      <li><strong>PoE budget:</strong> 5320 is exactly full at 16×AP3000 (240W). 5420-24P has 140W spare headroom at 24×AP5060 (802.3bt) — room to grow or run IoT devices.</li>
+    </ol>
+  </div>
+
+  <hr style="border:none; border-top:2px solid #1a1a1a; margin: 36px 0;">
+
   <h3>Lumen Field — AP5060 + Switch TBD</h3>
 
   <div class="callout">
@@ -1922,7 +1995,7 @@ C_WAN    = 3 × 100G = 300 Gbps             (recommended minimum)
 
 
 <footer>
-  <p>Session 2026-05-31 &nbsp;·&nbsp; FIFA World Cup 2026 Seattle WiFi Design &nbsp;·&nbsp; Draft v1.7 (Design Parameters Matrix + Closed-Form Capacity &amp; Switch Sizing)</p>
+  <p>Session 2026-05-31 &nbsp;·&nbsp; FIFA World Cup 2026 Seattle WiFi Design &nbsp;·&nbsp; Draft v1.9 (AP3000+5320 vs AP5060+5420 comparison; Karl Lab → Khursheed's Lab throughout)</p>
   <p>Sources: <a href="https://www.extremenetworks.com/resources/case-study/seattle-seahawks-achieve-operational-freedom">EN / Lumen Field Case Study</a> &nbsp;·&nbsp; <a href="https://www.extremenetworks.com/resources/blogs/stadium-wi-fi-7-redefining-high-density-connectivity-with-ap5060">EN AP5060 Stadium Blog</a> &nbsp;·&nbsp; <a href="https://www.seattlefwc26.org/destination/stadium">FIFA WC26 Seattle Stadium</a> &nbsp;·&nbsp; <a href="https://www.seattlefwc26.org/news/seattle-soccer-house-at-pacific-place-to-deliver-a-free-immersive-world-cup-experience-on-a-70-foot-screen">Seattle Soccer House</a> &nbsp;·&nbsp; RFC 3580 (802.1X + RADIUS VLAN) &nbsp;·&nbsp; RFC 6614 (RadSec) &nbsp;·&nbsp; RFC 8110 (OWE) &nbsp;·&nbsp; IEEE 802.11be (WiFi-7)</p>
   <p>&copy; 2026 Khursheed Khan. All rights reserved.</p>
 </footer>
