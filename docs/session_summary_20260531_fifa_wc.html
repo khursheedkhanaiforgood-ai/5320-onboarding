@@ -232,6 +232,9 @@
   <a href="#capacity">Capacity &amp; Switch Sizing</a>
   <a href="#sla">FIFA SLA</a>
   <a href="#apknobs">AP QoE Knobs</a>
+  <a href="#sprintplan">Sprint Plan</a>
+  <a href="#simarch">Simulator Architecture</a>
+  <a href="#slaclasses">SLA Classes</a>
 </nav>
 
 
@@ -2665,8 +2668,243 @@ Without CDN:
 </section>
 
 
+<!-- ── SECTION 26: SPRINT PLAN ────────────────────────────────────────── -->
+<section id="sprintplan">
+  <h2>26. Sprint Plan — June 2026</h2>
+
+  <p>Two independent tracks. The lab build deploys real configuration into EP1 against physical gear. The simulator is a standalone design and education tool — no EP1 dependency, models the physics to validate design decisions before and after lab work.</p>
+
+  <div class="callout-blue">
+    <p><strong>Naming convention locked (2026-05-31):</strong><br>
+    <strong>WiFi Simulator for Stadiums</strong> — stadium-specific tool: 4 service classes, match timeline, 72K fans, FIFA WC context. File: <code>docs/stadium_wifi_simulator.html</code><br>
+    <strong>General WiFi Digital Twin</strong> — all environments: home / campus / office / stadium / outdoor. Separate repo. Sprint 2 of simulator track.</p>
+  </div>
+
+  <h3>Track A — Lab Build</h3>
+  <table>
+    <tr><th>Sprint</th><th>Date</th><th>Scope</th><th>Success Criteria</th></tr>
+    <tr>
+      <td><strong>Lab Sprint 1</strong></td>
+      <td>June 1 2026 (AM)</td>
+      <td>
+        1. Push Supplemental CLI to SW1 → verify 5 VLANs<br>
+        2. Factory reset + re-claim AP1<br>
+        3. Tag AP1 uplink port (VLANs 10/20/30/40/50)<br>
+        4. EP1 Security: 4 local users + 4 User Groups + 6 Network Policies<br>
+        5. EP1 Core: WC_Secure SSID (WPA3-Enterprise, Dynamic VLAN ON, RadSec 2083)<br>
+        6. MacBook authenticates as each user class
+      </td>
+      <td><code>show fdb</code> on SW1 confirms MacBook lands on correct VLAN per user (VLAN 10/20/30/40/50)</td>
+    </tr>
+    <tr>
+      <td><strong>Lab Sprint 2</strong></td>
+      <td>After Lab Sprint 1</td>
+      <td>
+        Swap Identity Provider: local users → AD/LDAP<br>
+        EP1 Security → Administration &amp; Settings → Identity Providers → Add AD<br>
+        Group mapping replaces local users — <strong>zero policy rework required</strong><br>
+        Same 6 Network Policies, same RADIUS attributes, same VLANs
+      </td>
+      <td>AD users authenticated, same VLAN assignment confirmed via <code>show fdb</code></td>
+    </tr>
+  </table>
+
+  <div class="callout-green">
+    <p><strong>Identity Provider abstraction (key architectural point):</strong> EP1 Security decouples the <em>identity source</em> (local users, AD, LDAP, SAML) from the <em>policy</em> (VLAN assignment via RADIUS Tunnel attributes). Swapping from 100 local users to AD groups in Lab Sprint 2 requires zero changes to the 6 Network Policies or the WC_Secure SSID configuration. This is the production-grade pattern for FIFA WC deployment.</p>
+  </div>
+
+  <h3>Track B — Simulator Build</h3>
+  <table>
+    <tr><th>Sprint</th><th>Date</th><th>Scope</th><th>Purpose</th></tr>
+    <tr>
+      <td><strong>Simulator v1</strong><br><em>(built today)</em></td>
+      <td>2026-05-31</td>
+      <td>
+        Single-shot physics model: SNR → MCS → airtime → latency → packet loss<br>
+        Input knobs: noise floor, user load, jammer, deauth, cyber attack<br>
+        Toggles: PMF / RRM / Proxy ARP / AirDefense<br>
+        Stability gauge, SLA chips, AP health grid, event log<br>
+        Commits: <code>bea3107</code> (Section 25), <code>7b40d0e</code> (simulator)
+      </td>
+      <td>Proof of concept; single-band, single-shot. Intentionally simple.</td>
+    </tr>
+    <tr>
+      <td><strong>Simulator Sprint 1</strong><br><em>WiFi Simulator for Stadiums v2</em></td>
+      <td>June 1 2026 (PM)<br>validates Lab Sprint 1</td>
+      <td>
+        <strong>Per-radio model:</strong> 2.4 GHz / 5 GHz / 6 GHz independent airtime pools<br>
+        <strong>AP toggle:</strong> AP3000 (2-band) vs AP5060 (3-band + MLO)<br>
+        <strong>Hybrid AP:</strong> bowl AP (Guest + Teams shared) / dedicated AP (VIP suite + POS concourse)<br>
+        <strong>All 25 knobs</strong> wired into physics with real EP1 paths<br>
+        <strong>Demand inputs — Tier 1:</strong> fan count / device multiplier / WiFi attach / concurrency<br>
+        <strong>Demand inputs — Tier 2:</strong> app mix sliders (live video / social / video call / fan apps / messaging / POS) with DL+UL Mbps per app<br>
+        <strong>4 Service Class SLA dashboard:</strong> POS / VIP / Teams / Guest with differentiated thresholds<br>
+        <strong>Graceful degradation:</strong> Levels 0→4 replacing single stability score<br>
+        <strong>Preset scenarios (C):</strong> Normal Play / Halftime Rush / Goal Event / Post-Match / Jammer / Cyber Breach<br>
+        <strong>Match timeline scrubber:</strong> T−90 → T+120 min with events marked<br>
+        <strong>Knob recommendations</strong> firing with 5-min lead time before SLA breach
+      </td>
+      <td>Educational: understand all AP knobs and their real effect. Validation: confirm lab design choices scale to 280 APs / 22,464 sessions.</td>
+    </tr>
+    <tr>
+      <td><strong>Simulator Sprint 2</strong><br><em>General WiFi Digital Twin</em></td>
+      <td>June 2 2026+</td>
+      <td>
+        <strong>Agentic simulation framework — 6 agents:</strong><br>
+        Crowd_Agent: fan arrivals (Poisson λ by match phase), app mix transitions<br>
+        RF_Agent: channel conditions, co-channel load, weather attenuation<br>
+        Threat_Agent: jammer events, deauth floods (stochastic, not scripted)<br>
+        POS_Agent: concession rush patterns (correlated with halftime, not uniform)<br>
+        Lead_Agent: time-aligns all agents, advances discrete event clock<br>
+        Advisor_Agent: watches leading indicators, prescribes knob changes BEFORE breach<br>
+        <strong>Stochastic model:</strong> Monte Carlo runs → 95th-percentile design point<br>
+        <strong>Scope:</strong> all WiFi environments (not stadium-only)<br>
+        <strong>Stack:</strong> Python + LangGraph backend, FastAPI, browser UI
+      </td>
+      <td>Research-grade: "what is the 95th percentile airtime at halftime?" and "what is the probability of a POS SLA breach?" Answers questions no deterministic model can.</td>
+    </tr>
+  </table>
+
+  <div class="callout-blue">
+    <p><strong>Why Simulator Sprint 1 validates Lab Sprint 1:</strong> After the lab confirms that dynamic VLAN assignment works on 1 AP with a few test clients, the simulator asks: "given these same AP configuration choices (BSS Min Rate 18 Mbps, OFDMA ON, RadSec 2083), what does QoE look like at 280 APs and 22,464 sessions?" The knob values configured in EP1 on June 1 morning become the simulator inputs on June 1 afternoon.</p>
+  </div>
+</section>
+
+<!-- ── SECTION 27: SIMULATOR ARCHITECTURE ────────────────────────────── -->
+<section id="simarch">
+  <h2>27. Simulator Architecture — Input Taxonomy</h2>
+
+  <p>The v2 simulator has five input tiers that cascade: stadium demand → application mix → RF environment → AP configuration → threat model. All tiers feed a per-radio physics engine.</p>
+
+  <h3>Tier 1 — Stadium Demand</h3>
+  <table>
+    <tr><th>Input</th><th>Range</th><th>FIFA WC Baseline</th><th>Derived output</th></tr>
+    <tr><td>Fan count</td><td>0 – 72,000</td><td>72,000</td><td rowspan="4">Active sessions = fans × dev/fan × WiFi% × concurrency%<br><strong>= 72,000 × 1.2 × 65% × 40% = 22,464</strong></td></tr>
+    <tr><td>Devices per fan</td><td>1.0 – 2.0</td><td>1.2</td></tr>
+    <tr><td>WiFi attach rate</td><td>0 – 100%</td><td>65%</td></tr>
+    <tr><td>Peak concurrency</td><td>0 – 100%</td><td>40% (80% at halftime goal)</td></tr>
+  </table>
+
+  <h3>Tier 2 — Application Mix</h3>
+  <table>
+    <tr><th>App</th><th>% of sessions</th><th>DL Mbps/session</th><th>UL Mbps/session</th><th>QoS class</th><th>SLA constraint</th></tr>
+    <tr><td>Live video stream</td><td>28%</td><td>5.0</td><td>0.1</td><td>AC_VI</td><td>≥4 Mbps sustained</td></tr>
+    <tr><td>Social media (upload)</td><td>38%</td><td>1.0</td><td>5.0</td><td>AC_BE</td><td>UL = binding constraint</td></tr>
+    <tr><td>Video call (Zoom/Teams)</td><td>7%</td><td>2.5</td><td>2.5</td><td>AC_VO</td><td>RTT ≤ 20 ms, jitter ≤ 5 ms</td></tr>
+    <tr><td>Fan apps (stats/AR)</td><td>17%</td><td>1.5</td><td>0.3</td><td>AC_BE</td><td>≥1 Mbps</td></tr>
+    <tr><td>Messaging</td><td>10%</td><td>0.2</td><td>0.2</td><td>AC_BK</td><td>Delivery ≤ 2 s</td></tr>
+    <tr><td>POS / IoT (fixed count)</td><td>~300 terminals</td><td>0.5</td><td>0.1</td><td>AC_VO + TWT</td><td>0% loss, ≤20 ms</td></tr>
+  </table>
+  <p><em>DL demand = sessions × Σ(app% × DL Mbps) &nbsp;·&nbsp; UL demand = sessions × Σ(app% × UL Mbps) &nbsp;·&nbsp; DL:UL ratio drives OFDMA scheduling model</em></p>
+
+  <h3>Tier 3 — RF Environment (per band)</h3>
+  <table>
+    <tr><th>Band</th><th>Base noise</th><th>AP3000</th><th>AP5060</th><th>Why different</th></tr>
+    <tr><td>2.4 GHz</td><td>−92 dBm</td><td>✓</td><td>✓</td><td>Heavy legacy interference (Bluetooth, microwave, legacy 802.11b/g devices)</td></tr>
+    <tr><td>5 GHz</td><td>−95 dBm</td><td>✓</td><td>✓</td><td>Moderate interference; UNII-1/3 congested in dense venue</td></tr>
+    <tr><td>6 GHz</td><td>−98 dBm</td><td>✗ (not available)</td><td>✓</td><td>Clean spectrum — no legacy devices, no UNII overlap. AP5060's key differentiator</td></tr>
+  </table>
+
+  <h3>Tier 4 — AP Configuration (all 25 knobs)</h3>
+  <p>Each knob is wired into the physics engine — not a display-only label. Turning Proxy ARP OFF shows the broadcast overhead increase in real airtime numbers. Turning OFDMA OFF reduces per-client capacity by ~30%. See Section 25 for the full 25-knob reference table with EP1 paths.</p>
+
+  <h3>Tier 5 — Threat/Stress Inputs</h3>
+  <table>
+    <tr><th>Input</th><th>Countered by</th><th>If counter is OFF</th></tr>
+    <tr><td>Jammer (per-band, SEV 0–5)</td><td>RRM auto channel-hop</td><td>SNR collapses → MCS drops → airtime overloads</td></tr>
+    <tr><td>Deauth flood (f/s)</td><td>802.11w PMF Required</td><td>~8% airtime consumed by management flood; clients disconnect</td></tr>
+    <tr><td>Evil twin / rogue AP</td><td>EP1 AirDefense WIPS</td><td>Client association stolen; RADIUS auth bypassed</td></tr>
+    <tr><td>Credential storm (RADIUS)</td><td>EP1 rate-limiting</td><td>RADIUS latency rise → EAP timeout → auth failure cascade</td></tr>
+    <tr><td>ARP poisoning</td><td>Proxy ARP (L2 intercept)</td><td>+12 ms latency; gateway impersonation</td></tr>
+  </table>
+</section>
+
+<!-- ── SECTION 28: SLA CLASSES ────────────────────────────────────────── -->
+<section id="slaclasses">
+  <h2>28. Differentiated SLA — Four Service Classes</h2>
+
+  <p>A stadium WiFi SLA is not a single number. Four service classes with distinct failure modes, protection priorities, and graceful degradation behaviour. POS never degrades. Guest absorbs all surges first.</p>
+
+  <h3>Service Class Matrix</h3>
+  <table>
+    <tr><th>Class</th><th>VLAN</th><th>Availability</th><th>Latency target</th><th>Jitter</th><th>Packet loss</th><th>Throughput</th><th>QoS</th></tr>
+    <tr>
+      <td><strong>POS / Revenue</strong></td><td>50</td><td>99.99% (event hours)</td><td>≤20 ms</td><td>≤3 ms</td><td>0.00%</td>
+      <td>≥1 Mbps guaranteed (300 terminals)</td><td>AC_VO + TWT</td>
+    </tr>
+    <tr>
+      <td><strong>VIP</strong></td><td>40</td><td>99.9%</td><td>≤15 ms</td><td>≤5 ms</td><td>≤0.05%</td>
+      <td>≥25 Mbps/device (4K stream)</td><td>AC_VI + AC_VO</td>
+    </tr>
+    <tr>
+      <td><strong>Teams / Staff</strong></td><td>10, 20</td><td>99.9%</td><td>≤15 ms</td><td>≤5 ms</td><td>≤0.05%</td>
+      <td>≥10 Mbps/device</td><td>AC_VI</td>
+    </tr>
+    <tr>
+      <td><strong>Guest</strong></td><td>30</td><td>99.5% (98% surge)</td><td>≤30 ms (50 ms tolerated)</td><td>≤10 ms</td><td>≤0.1% (0.5% tolerated)</td>
+      <td>≥5 Mbps DL / ≥5 Mbps UL · cap 25/10</td><td>AC_BE</td>
+    </tr>
+  </table>
+
+  <h3>Graceful Degradation Stack</h3>
+  <p>When capacity is exceeded, degradation follows this order. POS at Level 0 = POS stays at Level 0 throughout — it never participates in degradation.</p>
+  <table>
+    <tr><th>Level</th><th>Trigger</th><th>Action</th><th>Classes affected</th></tr>
+    <tr>
+      <td><strong>0 — Stable</strong></td><td>Airtime ≤75%</td><td>None</td><td>All at target SLA</td>
+    </tr>
+    <tr>
+      <td><strong>1 — Managed</strong></td><td>Airtime 75–85%</td><td>Guest rate cap tightened: 25 → 15 Mbps DL</td><td>Guest only</td>
+    </tr>
+    <tr>
+      <td><strong>2 — Stressed</strong></td><td>Airtime 85–95%</td>
+      <td>BSS Min Rate: 18 → 24 Mbps (weak Guest clients kicked)<br>
+          Guest DTIM: 1 → 2 (reduces beacon overhead)<br>
+          Band steering pushes Guest to 2.4 GHz (frees 5G/6G for VIP)</td>
+      <td>Guest; VIP + Teams unaffected</td>
+    </tr>
+    <tr>
+      <td><strong>3 — Critical</strong></td><td>Airtime 95–100%</td>
+      <td>Guest new associations BLOCKED (admission control)<br>
+          Guest rate cap floor: 5 Mbps DL / 2 Mbps UL<br>
+          802.11v BSS Transition: actively roams weak Guest clients off<br>
+          VIP throttled: 25 → 10 Mbps if needed<br>
+          Teams throttled: 10 → 5 Mbps</td>
+      <td>Guest (primary); VIP + Teams (soft)</td>
+    </tr>
+    <tr>
+      <td><strong>4 — Failure</strong></td><td>Airtime &gt;100% or jammer/cyber breach</td>
+      <td>Guest SSID suspended (beacons stopped)<br>
+          POS emergency path: EP1 routes to wired fallback<br>
+          VIP: best-effort 5 Mbps<br>
+          Teams: operational minimum maintained</td>
+      <td>Guest suspended; VIP degraded; POS protected</td>
+    </tr>
+  </table>
+
+  <div class="callout-green">
+    <p><strong>Key insight:</strong> The QoS architecture (AC_VO for POS, AC_VI for VIP, AC_BE for Guest) enforces this degradation order at the radio level — no manual intervention required at Levels 1–2. Levels 3–4 require EP1 AIOps alerts and operator response. The simulator shows which level is active in real time and which automations have fired.</p>
+  </div>
+
+  <h3>Simulator v1 — Gap Analysis vs Full AP Parameter Set</h3>
+  <p>Completed architectural review (2026-05-31). The v1 simulator was single-band and modelled 6 of the 25 AP knobs. The v2 (Simulator Sprint 1, June 1 PM) addresses all identified gaps:</p>
+  <table>
+    <tr><th>Gap category</th><th>Missing in v1</th><th>v2 approach</th></tr>
+    <tr><td>Multi-band model</td><td>Single airtime pool — treated AP5060 as one radio</td><td>Independent 2.4G / 5G / 6G pools; band steering distributes clients</td></tr>
+    <tr><td>OFDMA</td><td>Not modelled</td><td>DL ×1.35 / UL ×1.20 capacity multiplier when ON</td></tr>
+    <tr><td>MU-MIMO</td><td>Not modelled</td><td>Spatial stream multiplier (up to ×4 DL, ×2 UL for AP5060)</td></tr>
+    <tr><td>BSS Coloring</td><td>Not modelled — co-channel ignored</td><td>Co-channel interference reduction factor (density input)</td></tr>
+    <tr><td>MLO (AP5060)</td><td>Not modelled</td><td>5G + 6G bonded for same client; latency = min(5G,6G)</td></tr>
+    <tr><td>Demand inputs</td><td>Hard-coded 22,464 sessions</td><td>Fan count × device mult × WiFi attach × concurrency sliders</td></tr>
+    <tr><td>App mix</td><td>Fixed 1.9 Mbps/client</td><td>Per-app DL/UL sliders; DL:UL ratio drives OFDMA scheduling</td></tr>
+    <tr><td>4 service classes</td><td>Single global SLA</td><td>POS / VIP / Teams / Guest with differentiated thresholds</td></tr>
+    <tr><td>Time model</td><td>Single-shot</td><td>Match timeline scrubber T−90 → T+120 min</td></tr>
+  </table>
+</section>
+
+
 <footer>
-  <p>Session 2026-05-31 &nbsp;·&nbsp; FIFA World Cup 2026 Seattle WiFi Design &nbsp;·&nbsp; Draft v2.1 (Section 25: AP QoE Knobs — 25 parameters across 7 groups with lab + stadium values)</p>
+  <p>Session 2026-05-31 &nbsp;·&nbsp; FIFA World Cup 2026 Seattle WiFi Design &nbsp;·&nbsp; Draft v2.2 (Sections 26–28: Sprint Plan, Simulator Architecture, 4 SLA Classes + Graceful Degradation)</p>
   <p>Sources: <a href="https://www.extremenetworks.com/resources/case-study/seattle-seahawks-achieve-operational-freedom">EN / Lumen Field Case Study</a> &nbsp;·&nbsp; <a href="https://www.extremenetworks.com/resources/blogs/stadium-wi-fi-7-redefining-high-density-connectivity-with-ap5060">EN AP5060 Stadium Blog</a> &nbsp;·&nbsp; <a href="https://www.seattlefwc26.org/destination/stadium">FIFA WC26 Seattle Stadium</a> &nbsp;·&nbsp; <a href="https://www.seattlefwc26.org/news/seattle-soccer-house-at-pacific-place-to-deliver-a-free-immersive-world-cup-experience-on-a-70-foot-screen">Seattle Soccer House</a> &nbsp;·&nbsp; RFC 3580 (802.1X + RADIUS VLAN) &nbsp;·&nbsp; RFC 6614 (RadSec) &nbsp;·&nbsp; RFC 8110 (OWE) &nbsp;·&nbsp; IEEE 802.11be (WiFi-7)</p>
   <p>&copy; 2026 Khursheed Khan. All rights reserved.</p>
 </footer>
