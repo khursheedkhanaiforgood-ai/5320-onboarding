@@ -564,6 +564,12 @@ configure vlan Default ipaddress 192.168.0.28/24
 enable ipforwarding vlan Default
 configure iproute add default 192.168.0.1</pre>
 
+  <div class="callout-red">
+    <p><strong>Pending — separate sprint:</strong> Guest VLAN 30 is currently configured as <code>10.30.0.1/24</code> with DHCP range <code>10.30.0.100–200</code> in the lab. For stadium scale (72,000 fans) this must be updated to <code>/16</code> with DHCP range <code>10.30.0.100–10.30.255.254</code>. SW1 CLI to run when ready:<br>
+    <code>configure vlan Guest ipaddress 10.30.0.1/16</code><br>
+    <code>configure vlan Guest dhcp-address-range 10.30.0.100 - 10.30.255.254</code></p>
+  </div>
+
   <div class="callout">
     <p><strong>Do NOT add <code>enable dhcp</code> or <code>enable ipforwarding vlan X</code> to Supplemental CLI.</strong> They are not idempotent — they hang XIQ at 15% on re-push. Run once manually after factory reset only.</p>
   </div>
@@ -571,7 +577,7 @@ configure iproute add default 192.168.0.1</pre>
   <h3>DHCP Server — Manual CLI (one-time, post factory reset)</h3>
   <pre>configure vlan TeamUSA ipaddress 10.10.0.1/24
 configure vlan TeamAUS ipaddress 10.20.0.1/24
-configure vlan Guest   ipaddress 10.30.0.1/16
+configure vlan Guest   ipaddress 10.30.0.1/16   &lt;-- PENDING: lab still at /24, update in separate sprint
 configure vlan VIP     ipaddress 10.40.0.1/24
 configure vlan POS     ipaddress 10.50.0.1/24
 
@@ -583,7 +589,7 @@ enable ipforwarding vlan POS
 
 configure vlan TeamUSA dhcp-address-range 10.10.0.100 - 10.10.0.200
 configure vlan TeamAUS dhcp-address-range 10.20.0.100 - 10.20.0.200
-configure vlan Guest   dhcp-address-range 10.30.0.100 - 10.30.255.254
+configure vlan Guest   dhcp-address-range 10.30.0.100 - 10.30.255.254   &lt;-- PENDING: lab still at .100-.200
 configure vlan VIP     dhcp-address-range 10.40.0.100 - 10.40.0.200
 configure vlan POS     dhcp-address-range 10.50.0.100 - 10.50.0.200
 
