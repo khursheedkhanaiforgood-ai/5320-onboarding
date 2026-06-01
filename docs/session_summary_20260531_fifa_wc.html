@@ -226,6 +226,8 @@
   <a href="#sprint2">Sprint 2 — AD</a>
   <a href="#labstate">Lab State</a>
   <a href="#idp">Identity Providers</a>
+  <a href="#qoe">QoE Radio Profile</a>
+  <a href="#gameday">Game Day Load Model</a>
 </nav>
 
 
@@ -1412,8 +1414,178 @@ configure iproute add default 192.168.0.1</pre>
 </section>
 
 
+<!-- ── SECTION 20: QoE RADIO PROFILE ──────────────────────────────── -->
+<section id="qoe">
+  <h2>20. QoE Optimisation — Radio Profile, Overhead Reduction &amp; Live Monitoring</h2>
+
+  <div class="callout-blue">
+    <p><strong>Objective:</strong> Maximise user-perceived quality (QoE) by eliminating overhead, forcing clients onto clean spectrum, and ensuring every microsecond of airtime carries useful data. These settings live in <code>EP1 Core → Network Policies → Radio Profiles</code> and are pushed to AP3000/AP5060 via the Network Policy.</p>
+  </div>
+
+  <h3>Radio Profile — QoE Settings Table</h3>
+  <table>
+    <tr><th>Setting</th><th>Recommended Value</th><th>Where in EP1</th><th>Why</th></tr>
+    <tr><td><strong>BSS Min Rate (data)</strong></td><td>18 Mbps</td><td>Radio Profile → Min Transmit Rate</td><td>Refuses association from legacy slow clients that would monopolise airtime. Single biggest QoE lever at stadium density.</td></tr>
+    <tr><td><strong>Management Frame Rate</strong></td><td>12 Mbps</td><td>Radio Profile → Management Frame Rate</td><td>Beacons/probes at 12 Mbps consume 12× less airtime than the 1 Mbps default. At 10K APs this reclaims hundreds of milliseconds of airtime per second.</td></tr>
+    <tr><td><strong>Airtime Fairness</strong></td><td>ON (per-client)</td><td>Radio Profile → Airtime Fairness</td><td>Each client gets equal airtime share regardless of PHY rate. Prevents a single iPhone 8 (MCS 4) from starving 50 iPhone 16 clients (MCS 11).</td></tr>
+    <tr><td><strong>Band Steering</strong></td><td>6 GHz → 5 GHz → 2.4 GHz last resort</td><td>Radio Profile → Band Steering</td><td>Pushes capable clients to clean 6 GHz spectrum. Older devices fall back to 5 GHz cleanly. 2.4 GHz reserved for IoT / POS only at stadium.</td></tr>
+    <tr><td><strong>OFDMA (DL + UL)</strong></td><td>ON</td><td>Radio Profile → OFDMA</td><td>WiFi 6/7 core feature: schedules up to 37 clients simultaneously in a single 160 MHz transmission. Eliminates the per-client contention overhead that was the root cause of dense WiFi failing before WiFi 6.</td></tr>
+    <tr><td><strong>MU-MIMO</strong></td><td>ON</td><td>Radio Profile → MU-MIMO</td><td>AP5060 = 4 spatial streams. Serves 4 clients in parallel on the downlink. At stadium density, MU-MIMO + OFDMA together drive effective throughput close to theoretical PHY rate.</td></tr>
+    <tr><td><strong>Proxy ARP</strong></td><td>ON</td><td>Network Policy → Firewall / ARP Proxy</td><td>AP answers ARP on behalf of already-associated clients. Eliminates the broadcast ARP storm: 72,000 devices × 1 ARP/60 sec = 1,200 broadcast frames/second flooding every AP — catastrophic without Proxy ARP.</td></tr>
+    <tr><td><strong>Multicast-to-Unicast</strong></td><td>ON</td><td>Network Policy → Multicast Optimization</td><td>Converts mDNS / video multicast to unicast delivery. At 72K clients a multicast frame is replicated 72K times — multicast-to-unicast makes it a targeted per-client delivery instead.</td></tr>
+    <tr><td><strong>Target Wake Time (TWT)</strong></td><td>ON for POS / IoT SSIDs</td><td>Radio Profile → TWT</td><td>WiFi 6/7 feature: POS terminals sleep between transactions on a negotiated schedule, freeing up the channel for fan devices between payment bursts.</td></tr>
+    <tr><td><strong>SSID count</strong></td><td>3 maximum</td><td>Network Policy → Wireless Networks</td><td>Each SSID = one beacon stream. 3 SSIDs = 3 × ~200µs every 100ms = 0.6% airtime overhead. More SSIDs = linear overhead increase. 3 is the optimised floor for this design.</td></tr>
+    <tr><td><strong>DHCP Lease Time</strong></td><td>4 hours</td><td>DHCP Server (SW1 or upstream)</td><td>Prevents 72,000 re-DHCP requests per hour. Clients keep their IP across brief disconnects — no re-auth flood on every stadium entrance/exit.</td></tr>
+    <tr><td><strong>RRM (Radio Resource Management)</strong></td><td>ON — auto channel + power</td><td>EP1 → Network Policies → Radio Profile → RRM</td><td>EP1 continuously adjusts channel and Tx power based on neighbour interference. At 10K APs this is not optional — manual channel plans cannot keep up with dynamic stadium RF.</td></tr>
+  </table>
+
+  <h3>Overhead Budget — Where Airtime Goes</h3>
+  <pre>Overhead source          Without optimisation      With optimisation
+─────────────────────────────────────────────────────────────────────
+Beacons (3 SSIDs)        ~2% airtime @ 1 Mbps      ~0.04% @ 12 Mbps mgmt rate
+ARP broadcasts           1,200 frames/sec flooding   0 — Proxy ARP absorbs all
+Multicast (mDNS, video)  72,000 replicas/frame       1 targeted unicast/client
+Legacy slow clients      1 MCS0 client = 10× airtime None — BSS Min Rate 18 Mbps rejects them
+Re-DHCP storm            1 req/client/hr = 20/sec    1 req/4hr per client
+─────────────────────────────────────────────────────────────────────
+Net result: 30–40% airtime reclaimed for actual data vs an unoptimised config</pre>
+
+  <div class="callout-green">
+    <p><strong>The two settings that matter most:</strong> (1) BSS Min Rate 18 Mbps — eliminates legacy device airtime monopolisation. (2) Proxy ARP ON — kills the broadcast storm before it starts. Everything else is additive improvement. If you can only configure two things, configure these two.</p>
+  </div>
+
+  <h3>EP1 Configuration Path — Radio Profile</h3>
+  <pre>EP1 Core → Network Policies → [WC_Seattle-SW1 policy]
+  → Radio Profiles → Add / Edit Profile
+    ├── 6 GHz Radio Profile
+    │     Min Data Rate:        18 Mbps
+    │     Mgmt Frame Rate:      12 Mbps
+    │     Airtime Fairness:     ON
+    │     OFDMA:                ON (DL + UL)
+    │     MU-MIMO:              ON
+    │     Band Steering:        6 GHz preferred
+    │     RRM:                  ON (channel + power auto)
+    │     TWT:                  ON
+    ├── 5 GHz Radio Profile     (same settings)
+    └── 2.4 GHz Radio Profile
+          Min Data Rate:        12 Mbps (legacy IoT may need lower than 18)
+          OFDMA:                ON
+          Use for IoT / POS only — disable WC_Guest + WC_Secure on 2.4 GHz</pre>
+
+  <h3>Live Monitoring — Three Views for Match Day</h3>
+  <table>
+    <tr><th>View</th><th>Path in EP1</th><th>What to Watch</th></tr>
+    <tr><td><strong>Network Health</strong></td><td>EP1 → Monitor → Network Health</td><td>Per-zone health score (0–100). Drill into any zone showing yellow/red. Tiles show AP count, client count, avg RSSI, avg throughput. This is the NOC wallboard view.</td></tr>
+    <tr><td><strong>Live AP View</strong></td><td>EP1 → Monitor → APs → [AP name] → Live</td><td>Real-time per-radio channel utilisation, retry rate, noise floor, associated client count. Channel utilisation &gt;70% = congestion threshold — trigger channel replan.</td></tr>
+    <tr><td><strong>Client 360</strong></td><td>EP1 → Monitor → Clients → [device]</td><td>Per-device: SSID, VLAN, RSSI, SNR, PHY rate, roaming history, DHCP state. Use to diagnose a single VIP/team member complaint without touching the AP.</td></tr>
+    <tr><td><strong>ML Insights</strong></td><td>EP1 → Monitor → ML Insights</td><td>Anomaly detection: throughput drop, client count spike, error rate surge vs historical baseline. Surfaces problems before users call the NOC.</td></tr>
+    <tr><td><strong>Alert Feed</strong></td><td>EP1 → Monitor → Alerts</td><td>Real-time event stream. Filter by severity (Critical first). AP Down &gt;1 min fires webhook to ServiceNow (Section 9 policy already designed).</td></tr>
+  </table>
+
+  <div class="callout">
+    <p><strong>Pre-match NOC checklist (T-30 minutes):</strong> All APs green in Network Health · Channel utilisation &lt;30% (stadium empty) · RADIUS auth success rate = 100% (test accounts) · DHCP pools &gt;80% available · Alert feed clear. If any of these fail before doors open, you have 30 minutes to fix without fan pressure.</p>
+  </div>
+</section>
+
+
+<!-- ── SECTION 21: GAME DAY LOAD MODEL ────────────────────────────── -->
+<section id="gameday">
+  <h2>21. Game Day Load Model — Peak-Hour Estimate &amp; Per-AP Expectations</h2>
+
+  <div class="callout-blue">
+    <p><strong>Purpose:</strong> Quantify what the network will face at kick-off so you can tune thresholds, provision correctly, and know what "normal" looks like before the first fan walks in. These numbers are the basis for your QoS guarantees and NOC alert thresholds.</p>
+  </div>
+
+  <h3>Device Count Model</h3>
+  <table>
+    <tr><th>Input</th><th>Value</th><th>Assumption</th></tr>
+    <tr><td>Venue capacity</td><td>72,000 fans</td><td>Lumen Field sold-out match</td></tr>
+    <tr><td>Devices per person</td><td>1.2</td><td>Phone + occasional tablet; mid-2026 crowd mix</td></tr>
+    <tr><td>Total devices in venue</td><td>86,400</td><td>72,000 × 1.2</td></tr>
+    <tr><td>WiFi preference rate</td><td>65%</td><td>Remaining 35% stay on 5G carrier network or data-off</td></tr>
+    <tr><td>WiFi-connected devices (peak)</td><td><strong>56,160</strong></td><td>86,400 × 65%</td></tr>
+    <tr><td>Simultaneously active (streaming/social)</td><td><strong>~17,000</strong></td><td>30% of connected devices active at any instant during match</td></tr>
+  </table>
+
+  <h3>Load by Zone</h3>
+  <table>
+    <tr><th>Zone</th><th>Fans</th><th>APs</th><th>Avg clients/AP</th><th>Peak clients/AP</th><th>Avg throughput/client</th></tr>
+    <tr><td>Bowl seating (AP5060U)</td><td>50,000</td><td>4,000</td><td>~10</td><td>200–500</td><td>4–8 Mbps</td></tr>
+    <tr><td>Concourse / gates (AP5060D)</td><td>15,000</td><td>2,000</td><td>~5</td><td>80–150</td><td>15–30 Mbps</td></tr>
+    <tr><td>Seattle Center fan hub</td><td>40,000+</td><td>3,000</td><td>~9</td><td>100–200</td><td>10–20 Mbps</td></tr>
+    <tr><td>Team areas (AP5060U)</td><td>~150 credentialed</td><td>500</td><td>&lt;1</td><td>5–20</td><td>100+ Mbps</td></tr>
+    <tr><td>Media / press</td><td>~500</td><td>500</td><td>~1</td><td>10–30</td><td>50–100 Mbps</td></tr>
+  </table>
+
+  <h3>Aggregate Demand Calculation</h3>
+  <pre>Scenario: Peak 15 minutes post kick-off (highest simultaneous streaming)
+
+Bowl (4,000 APs × 300 avg clients × 30% active × 5 Mbps):
+  4,000 × 300 × 0.30 × 5 Mbps  =  1,800 Gbps demand on bowl APs
+
+Concourse (2,000 APs × 100 avg clients × 25% active × 8 Mbps):
+  2,000 × 100 × 0.25 × 8 Mbps  =    400 Gbps demand on concourse APs
+
+Seattle Center (3,000 APs × 150 avg clients × 25% active × 6 Mbps):
+  3,000 × 150 × 0.25 × 6 Mbps  =    675 Gbps demand at fan hub
+
+  Total WiFi aggregate demand: ~2,875 Gbps ≈ 2.9 Tbps
+
+  Internet uplink capacity:    200 Gbps (2× 100 GbE)
+  ──────────────────────────────────────────────────
+  Binding constraint: Internet uplink, NOT the APs.
+  Per-client cap at 25 Mbps reduces realistic demand to:
+    17,000 active × 2 Mbps avg actual = 34 Gbps — well within 200 Gbps budget.
+    (Users average 2 Mbps even with a 25 Mbps cap — video buffers, pauses, bursty not sustained)</pre>
+
+  <div class="callout-green">
+    <p><strong>The math shows:</strong> The WiFi system has far more capacity than the internet uplink. Your design constraint is not AP density — it is CDN placement and uplink provisioning. CDN pre-caching of FIFA+ video content at a local PoP is the single highest-leverage action to reduce WAN demand.</p>
+  </div>
+
+  <h3>Authentication Storm — Kick-Off Peak</h3>
+  <pre>802.1X authenticated users (teams + VIP + staff): ~800 accounts
+These all connect within a 10-minute window before kick-off:
+  800 auths ÷ 600 seconds = ~1.3 auths/second to EP1 Security
+
+Guest SSID (CWP self-registration): 72,000 fans connecting over 2 hours (doors open):
+  72,000 ÷ 7,200 seconds = 10 CWP registrations/second peak
+  (CWP is browser-based, not 802.1X — no RADIUS load from fans)
+
+EP1 Security RADIUS capacity (cloud, HA): handles 1.3 auths/sec easily.
+CWP registration: load hits the captive portal web server, not RADIUS.
+  → Confirm FIFA ticketing API can sustain 10 calls/sec (see Section 12, item 4)</pre>
+
+  <h3>What "Normal" Looks Like in EP1 Live View</h3>
+  <table>
+    <tr><th>Metric</th><th>Pre-match (empty)</th><th>Half-time peak</th><th>Alert threshold</th></tr>
+    <tr><td>Clients/AP (bowl)</td><td>0–5</td><td>200–500</td><td>&gt;600 → P3 alert</td></tr>
+    <tr><td>Channel utilisation</td><td>&lt;10%</td><td>40–70%</td><td>&gt;80% → P3, adjust channel width or power</td></tr>
+    <tr><td>Retry rate</td><td>&lt;5%</td><td>10–20%</td><td>&gt;30% → investigate RF interference</td></tr>
+    <tr><td>RADIUS auth success</td><td>100%</td><td>100%</td><td>&lt;95% → P1 (EP1 Security issue)</td></tr>
+    <tr><td>DHCP pool used</td><td>&lt;5%</td><td>70–85%</td><td>&gt;90% → expand scope or reduce lease</td></tr>
+    <tr><td>CWP response time</td><td>&lt;500ms</td><td>&lt;2s</td><td>&gt;5s → P2 (captive portal server overload)</td></tr>
+    <tr><td>WAN utilisation</td><td>&lt;1 Gbps</td><td>80–150 Gbps</td><td>&gt;180 Gbps → P1, activate CDN fallback</td></tr>
+  </table>
+
+  <div class="callout">
+    <p><strong>Retry rate is the leading indicator.</strong> Before throughput drops and before users complain, retry rate climbs. In EP1 live view, a bowl section going from 15% retries to 35% retries signals an RF problem (interference, hidden node, or AP failure). You have a 5–10 minute window to act before users notice. Set a P3 alert on retry rate &gt;30% per AP with a 2-minute sustained trigger.</p>
+  </div>
+
+  <h3>Lab Scale Equivalent (AP3000 Sprint 1)</h3>
+  <p>Your Karl Lab has one AP3000, one SW1, and up to 4 test clients. The QoE settings and load model still apply — just at 1:10,000 scale. The validation target is identical:</p>
+  <table>
+    <tr><th>Metric</th><th>Stadium goal</th><th>Lab equivalent</th><th>How to verify</th></tr>
+    <tr><td>VLAN assignment correct</td><td>VLAN 10/20/30 by user group</td><td>VLAN 10/20/30 by test account</td><td><code>show fdb</code> on SW1</td></tr>
+    <tr><td>Dynamic VLAN working</td><td>RADIUS returns VLAN per policy</td><td>Same — EP1 Security Network Policy</td><td>EP1 → Monitor → Clients → [device] → Dynamic VLAN field</td></tr>
+    <tr><td>Guest catch-all</td><td>Unauthenticated → VLAN 30</td><td>No-credential connect → VLAN 30</td><td><code>show fdb</code> → default VLAN for unauthenticated client</td></tr>
+    <tr><td>Live view active</td><td>EP1 live per-AP telemetry</td><td>AP3000 visible in EP1 Monitor</td><td>EP1 → Monitor → APs → AP3000 → Live tab</td></tr>
+    <tr><td>Alert fires</td><td>AP down &gt;1 min → webhook</td><td>Unplug AP → EP1 alert fires</td><td>EP1 → Monitor → Alerts → verify Critical alert appears</td></tr>
+  </table>
+</section>
+
+
 <footer>
-  <p>Session 2026-05-31 &nbsp;·&nbsp; FIFA World Cup 2026 Seattle WiFi Design &nbsp;·&nbsp; Draft v1.5 (AP5060 datasheet corrections + EP1 accuracy audit)</p>
+  <p>Session 2026-05-31 &nbsp;·&nbsp; FIFA World Cup 2026 Seattle WiFi Design &nbsp;·&nbsp; Draft v1.6 (QoE Radio Profile + Game Day Load Model)</p>
   <p>Sources: <a href="https://www.extremenetworks.com/resources/case-study/seattle-seahawks-achieve-operational-freedom">EN / Lumen Field Case Study</a> &nbsp;·&nbsp; <a href="https://www.extremenetworks.com/resources/blogs/stadium-wi-fi-7-redefining-high-density-connectivity-with-ap5060">EN AP5060 Stadium Blog</a> &nbsp;·&nbsp; <a href="https://www.seattlefwc26.org/destination/stadium">FIFA WC26 Seattle Stadium</a> &nbsp;·&nbsp; <a href="https://www.seattlefwc26.org/news/seattle-soccer-house-at-pacific-place-to-deliver-a-free-immersive-world-cup-experience-on-a-70-foot-screen">Seattle Soccer House</a> &nbsp;·&nbsp; RFC 3580 (802.1X + RADIUS VLAN) &nbsp;·&nbsp; RFC 6614 (RadSec) &nbsp;·&nbsp; RFC 8110 (OWE) &nbsp;·&nbsp; IEEE 802.11be (WiFi-7)</p>
   <p>&copy; 2026 Khursheed Khan. All rights reserved.</p>
 </footer>
