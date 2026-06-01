@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FIFA WC 2026 Seattle — Lab Sprint 1 · June 1 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Source+Code+Pro:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Libre Baskerville', Georgia, serif;
+    background: #fff;
+    color: #1a1a1a;
+    font-size: 17px;
+    line-height: 1.75;
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 48px 32px 120px;
+  }
+  header { border-bottom: 3px solid #1a1a1a; padding-bottom: 20px; margin-bottom: 12px; }
+  .dateline { font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: #666; margin-bottom: 8px; }
+  h1 { font-size: 2.3rem; font-weight: 700; line-height: 1.15; margin-bottom: 10px; }
+  .deck { font-size: 1.1rem; font-style: italic; color: #444; border-left: 3px solid #1a1a1a; padding-left: 16px; margin-top: 10px; }
+  nav#toc {
+    position: sticky; top: 0; background: #fff; border-bottom: 1px solid #ddd;
+    padding: 10px 0; margin: 20px 0 40px; z-index: 100;
+    font-size: 12px; letter-spacing: 0.05em; display: flex; flex-wrap: wrap; gap: 4px 0;
+  }
+  nav#toc a { color: #1a1a1a; text-decoration: none; margin-right: 16px; text-transform: uppercase; font-weight: 700; border-bottom: 2px solid transparent; padding-bottom: 2px; transition: border-color 0.15s; }
+  nav#toc a:hover { border-color: #1a1a1a; }
+  section { margin-bottom: 56px; }
+  h2 { font-size: 1.05rem; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 700; border-top: 2px solid #1a1a1a; padding-top: 14px; margin-bottom: 20px; color: #1a1a1a; }
+  h3 { font-size: 1rem; font-weight: 700; margin: 28px 0 8px; }
+  h4 { font-size: 0.95rem; font-weight: 700; font-style: italic; margin: 18px 0 6px; color: #333; }
+  p { margin-bottom: 14px; }
+  ul, ol { margin: 10px 0 16px 24px; }
+  li { margin-bottom: 6px; }
+  .badge { display: inline-block; font-family: 'Source Code Pro', monospace; font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; padding: 2px 8px; border-radius: 3px; margin-right: 6px; vertical-align: middle; }
+  .badge-done   { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+  .badge-block  { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+  .badge-wip    { background: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
+  .badge-next   { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+  .badge-warn   { background: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
+  .badge-ref    { background: #e2e3e5; color: #383d41; border: 1px solid #d6d8db; }
+  code { font-family: 'Source Code Pro', monospace; font-size: 14px; background: #f5f5f5; padding: 1px 5px; border-radius: 3px; color: #c7254e; }
+  pre { font-family: 'Source Code Pro', monospace; font-size: 13px; background: #f8f8f8; border: 1px solid #e0e0e0; border-left: 4px solid #1a1a1a; padding: 16px 18px; overflow-x: auto; margin: 14px 0 20px; line-height: 1.55; }
+  .callout { background: #fffbf0; border: 1px solid #e8d5a3; border-left: 5px solid #c9973a; padding: 16px 20px; margin: 18px 0; border-radius: 2px; }
+  .callout-red { background: #fff5f5; border: 1px solid #f5c6cb; border-left: 5px solid #c0392b; padding: 16px 20px; margin: 18px 0; border-radius: 2px; }
+  .callout-blue { background: #f0f7ff; border: 1px solid #b8d4f0; border-left: 5px solid #1a6fba; padding: 16px 20px; margin: 18px 0; border-radius: 2px; }
+  .callout-green { background: #f0fff4; border: 1px solid #a8dfb8; border-left: 5px solid #1a7a3a; padding: 16px 20px; margin: 18px 0; border-radius: 2px; }
+  .callout p:last-child, .callout-red p:last-child, .callout-blue p:last-child, .callout-green p:last-child { margin-bottom: 0; }
+  table { width: 100%; border-collapse: collapse; margin: 16px 0 24px; font-size: 14.5px; }
+  th { background: #1a1a1a; color: #fff; text-align: left; padding: 9px 12px; font-size: 12px; letter-spacing: 0.07em; text-transform: uppercase; }
+  td { padding: 9px 12px; border-bottom: 1px solid #e8e8e8; vertical-align: top; }
+  tr:nth-child(even) td { background: #fafafa; }
+  footer { border-top: 1px solid #ccc; padding-top: 20px; font-size: 13px; color: #888; font-style: italic; margin-top: 60px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="dateline">Monday, 1 June 2026 &nbsp;·&nbsp; FIFA World Cup 2026 Seattle &nbsp;·&nbsp; Lab Sprint 1</div>
+  <h1>Dynamic VLAN Lab Sprint 1 — EP1 Security + SW1</h1>
+  <p class="deck">Full-day lab sprint: 5-VLAN EXOS switch build, EP1 Security policy engine configuration, RADIUS/RadSec endpoint validation, and end-to-end 802.1X authentication test. Policy evaluation confirmed. Client VLAN assignment blocked by macOS EAP-TTLS/PAP restriction.</p>
+</header>
+
+<nav id="toc">
+  <a href="#summary">Summary</a>
+  <a href="#sw1">SW1 Build</a>
+  <a href="#ep1sec">EP1 Security</a>
+  <a href="#ep1core">EP1 Core</a>
+  <a href="#auth">Auth Test</a>
+  <a href="#blockers">Blockers</a>
+  <a href="#commands">Commands</a>
+  <a href="#files">Files</a>
+  <a href="#credentials">Credentials</a>
+  <a href="#pending">Pending</a>
+</nav>
+
+
+<!-- ── SECTION 1: SUMMARY ─────────────────────────────────────────── -->
+<section id="summary">
+  <h2>1. Session Summary</h2>
+
+  <h3>What Was Proven</h3>
+  <div class="callout-green">
+    <p><strong>EP1 Security Policy Evaluation: Authentication Status = SUCCESS.</strong> User <code>khursheedkhan@gmail.com</code> with password <code>WCSeattle2026!!</code> — EAP-TTLS — matched <code>Policy_TeamUSA</code>. The server-side policy engine, RADIUS attribute return (Filter-Id), and assignment rules are correctly configured end-to-end.</p>
+  </div>
+
+  <table>
+    <tr><th>Component</th><th>Status</th><th>Notes</th></tr>
+    <tr><td>SW1 — 5 VLANs</td><td><span class="badge badge-done">Done</span></td><td>VLANs 10/20/30/40/50 + Default confirmed via <code>show vlan</code></td></tr>
+    <tr><td>SW1 — DHCP server</td><td><span class="badge badge-done">Done</span></td><td>All 5 pools confirmed via <code>show dhcp-server</code></td></tr>
+    <tr><td>EP1 Security — Users + Groups</td><td><span class="badge badge-done">Done</span></td><td>4 local users, 4 User Groups, catch-all Group_Guest</td></tr>
+    <tr><td>EP1 Security — Network Policies</td><td><span class="badge badge-done">Done</span></td><td>5 policies, correct order, Policy_Guest last (catch-all)</td></tr>
+    <tr><td>EP1 Security — RADIUS attributes</td><td><span class="badge badge-done">Done</span></td><td>Filter-Id (Attr 11) returns Policy_TeamUSA etc.</td></tr>
+    <tr><td>EP1 Security — Policy Evaluation</td><td><span class="badge badge-done">Done</span></td><td>Auth Status: Success for khursheedkhan@gmail.com + WCSeattle2026!!</td></tr>
+    <tr><td>EP1 Core — WC_Secure SSID</td><td><span class="badge badge-done">Done</span></td><td>WPA3-Enterprise, Filter-Id attribute, 5 assignment rules</td></tr>
+    <tr><td>RadSec endpoint</td><td><span class="badge badge-done">Done</span></td><td>radius.oh-uz.extremecloudiq.com:2083, secret radsec</td></tr>
+    <tr><td>Client — VLAN 10 confirmed via FDB</td><td><span class="badge badge-block">Blocked</span></td><td>macOS EAP-TTLS/PAP — mobileconfig not activating correctly</td></tr>
+  </table>
+
+  <h3>What Was Not Proven</h3>
+  <div class="callout-red">
+    <p>A physical client device landing on <strong>VLAN 10</strong> (10.10.0.x) and confirmed via <code>show fdb ports 3</code> on SW1. The MacBook remained on VLAN 30 (10.30.0.x) throughout all trials. The EP1 Security side is correct — the gap is entirely on the client authentication path.</p>
+  </div>
+</section>
+
+
+<!-- ── SECTION 2: SW1 BUILD ───────────────────────────────────────── -->
+<section id="sw1">
+  <h2>2. SW1 — EXOS Configuration</h2>
+
+  <h3>Supplemental CLI (pushed via EP1 Core policy)</h3>
+  <pre>configure snmp sysName "Kh_WC_Seattle-SW1"
+create vlan "TeamUSA" tag 10
+create vlan "TeamAUS" tag 20
+create vlan "Guest"   tag 30
+create vlan "VIP"     tag 40
+create vlan "POS"     tag 50
+configure vlan Default ipaddress 192.168.0.28/24
+enable ipforwarding vlan Default
+configure iproute add default 192.168.0.1</pre>
+
+  <h3>DHCP Server — Manual CLI (post-factory-reset, NOT in Supplemental)</h3>
+  <div class="callout">
+    <p><code>enable dhcp</code> and <code>enable ipforwarding vlan &lt;name&gt;</code> are NOT idempotent on EXOS — they hang XIQ at 15% on re-push. Run manually once after factory reset only.</p>
+  </div>
+  <pre>configure vlan TeamUSA ipaddress 10.10.0.1/24
+configure vlan TeamAUS ipaddress 10.20.0.1/24
+configure vlan Guest   ipaddress 10.30.0.1/24
+configure vlan VIP     ipaddress 10.40.0.1/24
+configure vlan POS     ipaddress 10.50.0.1/24
+
+enable ipforwarding vlan TeamUSA
+enable ipforwarding vlan TeamAUS
+enable ipforwarding vlan Guest
+enable ipforwarding vlan VIP
+enable ipforwarding vlan POS
+
+configure vlan TeamUSA dhcp-address-range 10.10.0.100 - 10.10.0.200
+configure vlan TeamAUS dhcp-address-range 10.20.0.100 - 10.20.0.200
+configure vlan Guest   dhcp-address-range 10.30.0.100 - 10.30.0.200
+configure vlan VIP     dhcp-address-range 10.40.0.100 - 10.40.0.200
+configure vlan POS     dhcp-address-range 10.50.0.100 - 10.50.0.200
+
+configure vlan TeamUSA dhcp-options default-gateway 10.10.0.1
+configure vlan TeamAUS dhcp-options default-gateway 10.20.0.1
+configure vlan Guest   dhcp-options default-gateway 10.30.0.1
+configure vlan VIP     dhcp-options default-gateway 10.40.0.1
+configure vlan POS     dhcp-options default-gateway 10.50.0.1
+
+configure vlan TeamUSA dhcp-options dns-server primary 8.8.8.8 secondary 8.8.4.4
+configure vlan TeamAUS dhcp-options dns-server primary 8.8.8.8 secondary 8.8.4.4
+configure vlan Guest   dhcp-options dns-server primary 8.8.8.8 secondary 8.8.4.4
+configure vlan VIP     dhcp-options dns-server primary 8.8.8.8 secondary 8.8.4.4
+configure vlan POS     dhcp-options dns-server primary 8.8.8.8 secondary 8.8.4.4
+
+configure vlan TeamUSA dhcp-lease-timer 86400
+configure vlan TeamAUS dhcp-lease-timer 86400
+configure vlan Guest   dhcp-lease-timer 86400
+configure vlan VIP     dhcp-lease-timer 86400
+configure vlan POS     dhcp-lease-timer 86400
+
+enable dhcp vlan TeamUSA
+enable dhcp vlan TeamAUS
+enable dhcp vlan Guest
+enable dhcp vlan VIP
+enable dhcp vlan POS</pre>
+
+  <h3>AP1 Uplink — Trunk Port (Port 3)</h3>
+  <pre>configure vlan TeamUSA add ports 3 tagged
+configure vlan TeamAUS add ports 3 tagged
+configure vlan Guest   add ports 3 tagged
+configure vlan VIP     add ports 3 tagged
+configure vlan POS     add ports 3 tagged</pre>
+
+  <h3>Verification</h3>
+  <pre>show vlan          # 5 VLANs + Default confirmed
+show dhcp-server   # All 5 pools confirmed
+show fdb ports 3   # Use after client test to confirm VLAN assignment</pre>
+</section>
+
+
+<!-- ── SECTION 3: EP1 SECURITY ───────────────────────────────────── -->
+<section id="ep1sec">
+  <h2>3. EP1 Security — Policy Engine</h2>
+
+  <h3>Local Users</h3>
+  <table>
+    <tr><th>Username (email)</th><th>Password</th><th>User Group</th></tr>
+    <tr><td>khursheedkhan@gmail.com</td><td>WCSeattle2026!!</td><td>Group_TeamUSA</td></tr>
+    <tr><td>teamaus@wcseattle.com</td><td>WCSeattle2026!!</td><td>Group_TeamAUS</td></tr>
+    <tr><td>vip@wcseattle.com</td><td>WCSeattle2026!!</td><td>Group_VIP</td></tr>
+    <tr><td>pos@wcseattle.com</td><td>WCSeattle2026!!</td><td>Group_POS</td></tr>
+  </table>
+
+  <div class="callout">
+    <p><strong>Warning:</strong> <code>khursheedkhan@gmail.com</code> was added to multiple groups during debugging. Verify it belongs to <strong>Group_TeamUSA only</strong> before the next test. Multiple group membership causes unpredictable policy matching.</p>
+  </div>
+
+  <h3>Network Security Policies — Order Matters</h3>
+  <table>
+    <tr><th>Order</th><th>Policy Name</th><th>EAP Method</th><th>User Group</th><th>VLAN</th><th>Filter-Id Return</th></tr>
+    <tr><td>1</td><td>Policy_TeamUSA</td><td>EAP-TTLS</td><td>Group_TeamUSA</td><td>10</td><td>Policy_TeamUSA</td></tr>
+    <tr><td>2</td><td>Policy_TeamAUS</td><td>EAP-TTLS</td><td>Group_TeamAUS</td><td>20</td><td>Policy_TeamAUS</td></tr>
+    <tr><td>3</td><td>Policy_VIP</td><td>EAP-TTLS</td><td>Group_VIP</td><td>40</td><td>Policy_VIP</td></tr>
+    <tr><td>4</td><td>Policy_POS</td><td>EAP-TTLS</td><td>Group_POS</td><td>50</td><td>Policy_POS</td></tr>
+    <tr><td>5</td><td>Policy_Guest</td><td>Any</td><td>Any</td><td>30</td><td>Policy_Guest</td></tr>
+  </table>
+
+  <p>Policy_Guest is the catch-all — <strong>must be last</strong>. Any user not matched by policies 1–4 lands here on VLAN 30.</p>
+
+  <h3>RADIUS Attribute</h3>
+  <p>EP1 Security returns <strong>Attribute 11 — Filter-Id</strong> with the policy name as the value (e.g., <code>Policy_TeamUSA</code>). It does NOT return Tunnel-Type/Tunnel-Medium/Tunnel-PVT-Group-ID directly. EP1 Core maps the Filter-Id string to a VLAN via assignment rules.</p>
+
+  <h3>RadSec Proxy — Critical Finding</h3>
+  <div class="callout-red">
+    <p>A <strong>RadSec Proxy (Local Survivability)</strong> entry was present in EP1 Security → Security Services → RADIUS. This proxy intercepted all authentication requests and returned: <em>"local survivability is enabled but cloud support is not enabled for local user."</em> All authentications failed until this proxy was <strong>deleted</strong>. Do not re-add unless intentionally configuring local survivability.</p>
+  </div>
+</section>
+
+
+<!-- ── SECTION 4: EP1 CORE ────────────────────────────────────────── -->
+<section id="ep1core">
+  <h2>4. EP1 Core — WC_Secure SSID</h2>
+
+  <h3>SSID Configuration</h3>
+  <table>
+    <tr><th>Parameter</th><th>Value</th></tr>
+    <tr><td>SSID Name</td><td>WC_Secure</td></tr>
+    <tr><td>Security</td><td>WPA3-Enterprise (WPA3-802.1X)</td></tr>
+    <tr><td>Encryption</td><td>CCMP AES</td></tr>
+    <tr><td>802.11w (PMF)</td><td>Mandatory</td></tr>
+    <tr><td>Authentication Server</td><td>EP1 Security (internal)</td></tr>
+    <tr><td>Dynamic VLAN</td><td>ON</td></tr>
+    <tr><td>Standard RADIUS Attribute</td><td>11 — Filter-Id</td></tr>
+    <tr><td>Default User Profile</td><td>VLAN 30 (Guest)</td></tr>
+  </table>
+
+  <h3>Assignment Rules</h3>
+  <table>
+    <tr><th>User Profile Name</th><th>VLAN ID</th><th>Filter-Id Match Value</th></tr>
+    <tr><td>Ten</td><td>10</td><td>Policy_TeamUSA</td></tr>
+    <tr><td>Twenty</td><td>20</td><td>Policy_TeamAUS</td></tr>
+    <tr><td>Forty</td><td>40</td><td>Policy_VIP</td></tr>
+    <tr><td>Fifty</td><td>50</td><td>Policy_POS</td></tr>
+    <tr><td>Thirty</td><td>30</td><td>Policy_Guest</td></tr>
+  </table>
+
+  <h3>RadSec Endpoint</h3>
+  <table>
+    <tr><th>Parameter</th><th>Value</th></tr>
+    <tr><td>Hostname</td><td>radius.oh-uz.extremecloudiq.com</td></tr>
+    <tr><td>IP</td><td>3.15.90.11</td></tr>
+    <tr><td>Port</td><td>2083</td></tr>
+    <tr><td>Secret</td><td>radsec</td></tr>
+    <tr><td>Protocol</td><td>RadSec (TLS over TCP)</td></tr>
+  </table>
+</section>
+
+
+<!-- ── SECTION 5: AUTH TEST ──────────────────────────────────────── -->
+<section id="auth">
+  <h2>5. Authentication Test Results</h2>
+
+  <h3>EP1 Security Policy Evaluation — Confirmed</h3>
+  <div class="callout-green">
+    <p><strong>Authentication Status: Success</strong><br>
+    User: <code>khursheedkhan@gmail.com</code> · Password: <code>WCSeattle2026!!</code> · Method: EAP-TTLS<br>
+    Policy matched: <code>Policy_TeamUSA</code> · Filter-Id returned: <code>Policy_TeamUSA</code><br>
+    This confirms the EP1 Security engine is correctly configured.</p>
+  </div>
+
+  <h3>Client Device Tests</h3>
+  <table>
+    <tr><th>Device</th><th>Method Attempted</th><th>Result</th><th>Root Cause</th></tr>
+    <tr><td>MacBook (work)</td><td>EAP-TTLS/PAP — UI</td><td>Failed</td><td>macOS Ventura+ removed PAP from UI — no option available</td></tr>
+    <tr><td>iPhone</td><td>EAP-TTLS/PAP — UI</td><td>Failed</td><td>iOS also removed PAP inner auth from UI</td></tr>
+    <tr><td>MacBook (personal)</td><td>mobileconfig — EAP-TTLS/PAP</td><td>Failed</td><td>Mobileconfig installed but not activated — landed on VLAN 30</td></tr>
+    <tr><td>MacBook (personal)</td><td>mobileconfig v2 (TLSAllowTrustExceptions)</td><td>Failed</td><td>Still VLAN 30 — profile trust step or macOS 15 restriction</td></tr>
+  </table>
+
+  <h3>What the FDB Showed</h3>
+  <pre>KhKLab-SW1.1 # show fdb ports 3
+# Result: MacBook MAC 74:a6:cd:8b:19:60 on VLAN Default (untagged)
+# Never moved to VLAN 10 — EP1 RADIUS attributes never reached the AP
+# for a completed EAP authentication</pre>
+
+  <h3>Confirmed Working: MAC Authentication via EP1</h3>
+  <p>During testing, MAC Authentication was briefly enabled on WC_Secure. EP1 Security Policy Evaluation showed: <strong>MAC-AUTH Success → Policy_Guest matched</strong>. This confirms EP1 is reachable and responding. The issue is exclusively in the EAP-TTLS/PAP client authentication path on macOS/iOS.</p>
+</section>
+
+
+<!-- ── SECTION 6: BLOCKERS ───────────────────────────────────────── -->
+<section id="blockers">
+  <h2>6. Blockers &amp; Root Cause Analysis</h2>
+
+  <h3>Primary Blocker — macOS EAP-TTLS/PAP</h3>
+  <div class="callout-red">
+    <p><strong>Root cause:</strong> Apple removed EAP-TTLS/PAP inner authentication from the macOS and iOS UI starting with Ventura (macOS 13) and iOS 17. The protocol still works over 802.1X — but only when forced via a signed MDM/mobileconfig profile. An unsigned profile installs but requires explicit user trust under <em>System Settings → General → VPN &amp; Device Management</em> before it activates.</p>
+    <p><strong>Impact:</strong> Cannot manually join WPA3-Enterprise with EAP-TTLS/PAP on any modern Apple device without a mobileconfig. The mobileconfig approach requires either MDM signing or manual trust activation.</p>
+  </div>
+
+  <h3>Why EAP-TTLS Was Chosen (and Why It Created Problems)</h3>
+  <p>EP1 Security local accounts use password-based auth. The supported EAP methods for password auth are EAP-TTLS and PEAP. PEAP-MSCHAPv2 requires an Active Directory backend — EP1 Security local accounts do not support it. EAP-TTLS/PAP was the only viable path for local user auth. Had this constraint been flagged earlier, the lab would have been designed around Android or Windows clients from the start.</p>
+
+  <h3>Solutions for Next Session</h3>
+  <table>
+    <tr><th>Option</th><th>Effort</th><th>Confidence</th><th>Notes</th></tr>
+    <tr><td>Test from Android device</td><td>Low</td><td>High</td><td>Android supports EAP-TTLS/PAP natively in Settings</td></tr>
+    <tr><td>Test from Windows 10/11</td><td>Low</td><td>High</td><td>Windows 802.1X supplicant supports EAP-TTLS/PAP</td></tr>
+    <tr><td>Sign the mobileconfig</td><td>Medium</td><td>High</td><td>Requires Apple Developer cert or MDM (Jamf/Mosyle)</td></tr>
+    <tr><td>Trust mobileconfig manually</td><td>Low</td><td>Medium</td><td>System Settings → VPN &amp; Device Management → Install</td></tr>
+    <tr><td>Switch to AD + PEAP</td><td>High</td><td>High</td><td>Sprint 2 path — AD integration replaces local users</td></tr>
+  </table>
+
+  <h3>Other Issues Found and Fixed Today</h3>
+  <table>
+    <tr><th>Issue</th><th>Fix</th></tr>
+    <tr><td>EP1 Core using Tunnel-PVT-Group-ID instead of Filter-Id</td><td>Changed RADIUS attribute to 11_Filter-Id; updated assignment rules to policy name strings</td></tr>
+    <tr><td>Assignment rules missing — EP1 Core blocked save</td><td>Added 5 explicit rules mapping Filter-Id values to VLAN IDs</td></tr>
+    <tr><td>WPA3-802.1X 192-bit Suite B selected</td><td>Changed to standard WPA3-802.1X (Suite B requires EAP-TLS certs)</td></tr>
+    <tr><td>Policy_Guest catch-all in wrong order</td><td>Moved to last position — must be below all specific policies</td></tr>
+    <tr><td>RadSec Proxy blocking all cloud auth</td><td>Deleted the proxy from EP1 Security → Security Services → RADIUS</td></tr>
+    <tr><td>Password Extreme01!! invalid</td><td>Reset to WCSeattle2026!! — confirmed via EP1 policy evaluation</td></tr>
+    <tr><td>create vlan conflict in Supplemental CLI</td><td>EP1 base config auto-generates create vlan — removed duplicates from Supplemental CLI</td></tr>
+  </table>
+</section>
+
+
+<!-- ── SECTION 7: COMMANDS ───────────────────────────────────────── -->
+<section id="commands">
+  <h2>7. Key Commands</h2>
+
+  <h3>EXOS — SW1 Verification</h3>
+  <pre>show vlan                    # Confirm 5 VLANs + Default
+show vlan detail             # IP addresses per VLAN
+show dhcp-server             # All 5 DHCP pools
+show fdb ports 3             # VLAN assignment for AP1 uplink port
+show fdb                     # All learned MACs
+show iparp                   # ARP table
+ping 10.10.0.1 vr VR-Default # Test VLAN routing</pre>
+
+  <h3>EP1 Security — Policy Evaluation</h3>
+  <pre># EP1 Security → Policy Evaluation &amp; Troubleshooting
+# Input: Username + Password + EAP Method
+# Output: Authentication Status (Success/Failed) + Policy matched + VLAN assigned
+# Use this to validate credentials BEFORE testing physical client</pre>
+
+  <h3>macOS — Network Diagnostics</h3>
+  <pre>ifconfig en0 | grep inet     # Current IP + confirm VLAN
+networksetup -listallnetworkservices
+system_profiler SPNetworkDataType | grep -A5 "WC_Secure"</pre>
+</section>
+
+
+<!-- ── SECTION 8: FILES ──────────────────────────────────────────── -->
+<section id="files">
+  <h2>8. Files Created This Session</h2>
+
+  <table>
+    <tr><th>File</th><th>Purpose</th><th>Status</th></tr>
+    <tr><td><code>/Users/khukhan/Downloads/WC_Secure_TeamUSA_20260601_1333.mobileconfig</code></td><td>macOS 802.1X profile — EAP-TTLS/PAP, khursheedkhan@gmail.com, WCSeattle2026!!</td><td><span class="badge badge-wip">Untested</span></td></tr>
+    <tr><td><code>/Users/khukhan/Downloads/WC_Secure_TeamUSA_20260601_v2.mobileconfig</code></td><td>Earlier v2 — same content, superseded by _1333</td><td><span class="badge badge-ref">Superseded</span></td></tr>
+    <tr><td><code>docs/session_summary_20260601_fifa_wc.html</code></td><td>This EOD document</td><td><span class="badge badge-done">Done</span></td></tr>
+  </table>
+
+  <h3>mobileconfig — Final Version Content</h3>
+  <p>Key parameters in <code>WC_Secure_TeamUSA_20260601_1333.mobileconfig</code>:</p>
+  <table>
+    <tr><th>Key</th><th>Value</th><th>Purpose</th></tr>
+    <tr><td>AcceptEAPTypes</td><td>21 (EAP-TTLS)</td><td>Force EAP-TTLS only</td></tr>
+    <tr><td>TTLSInnerAuthentication</td><td>PAP</td><td>Inner method for EP1 Security local users</td></tr>
+    <tr><td>UserName</td><td>khursheedkhan@gmail.com</td><td>Embedded credential</td></tr>
+    <tr><td>UserPassword</td><td>WCSeattle2026!!</td><td>Validated in EP1 policy eval</td></tr>
+    <tr><td>TLSTrustedServerNames</td><td>radius.oh-uz.extremecloudiq.com</td><td>Pin to EP1 RADIUS hostname</td></tr>
+    <tr><td>TLSAllowTrustExceptions</td><td>true</td><td>Allow trust dialog for unsigned profile</td></tr>
+    <tr><td>OuterIdentity</td><td>anonymous</td><td>Protect username in EAP-TTLS outer exchange</td></tr>
+    <tr><td>EncryptionType</td><td>WPA3</td><td>Match WPA3-Enterprise SSID</td></tr>
+  </table>
+</section>
+
+
+<!-- ── SECTION 9: CREDENTIALS ───────────────────────────────────── -->
+<section id="credentials">
+  <h2>9. Credentials &amp; Endpoints</h2>
+
+  <table>
+    <tr><th>System</th><th>Detail</th></tr>
+    <tr><td>SW1 Management IP</td><td>192.168.0.28 (Default VLAN)</td></tr>
+    <tr><td>SW1 Default Gateway</td><td>192.168.0.1</td></tr>
+    <tr><td>AP1 Uplink Port</td><td>Port 3</td></tr>
+    <tr><td>EP1 Security test user</td><td>khursheedkhan@gmail.com / WCSeattle2026!!</td></tr>
+    <tr><td>MacBook hardware MAC</td><td>74:a6:cd:8b:19:60</td></tr>
+    <tr><td>RadSec endpoint</td><td>radius.oh-uz.extremecloudiq.com:2083</td></tr>
+    <tr><td>RadSec secret</td><td>radsec</td></tr>
+    <tr><td>VLAN 10 DHCP range</td><td>10.10.0.100 – 10.10.0.200 · GW 10.10.0.1</td></tr>
+    <tr><td>VLAN 30 DHCP range</td><td>10.30.0.100 – 10.30.0.200 · GW 10.30.0.1</td></tr>
+  </table>
+</section>
+
+
+<!-- ── SECTION 10: PENDING ───────────────────────────────────────── -->
+<section id="pending">
+  <h2>10. Pending — Next Session</h2>
+
+  <h3><span class="badge badge-next">Sprint 1 — Close the Gap</span></h3>
+  <ol>
+    <li><strong>Fix user group overlap</strong> — ensure <code>khursheedkhan@gmail.com</code> is in Group_TeamUSA ONLY</li>
+    <li><strong>Test from Android or Windows</strong> — both support EAP-TTLS/PAP natively without profiles. Android: Settings → Wi-Fi → WC_Secure → EAP-TTLS → PAP → enter email + password. This is the fastest path to proving VLAN assignment.</li>
+    <li><strong>Run <code>show fdb ports 3</code></strong> after successful Android auth — confirm MAC on VLAN 10</li>
+    <li><strong>OR: Trust the mobileconfig on personal MacBook</strong> — System Settings → General → VPN &amp; Device Management → "WC Seattle WiFi - TeamUSA" → Install → enter Mac password</li>
+  </ol>
+
+  <h3><span class="badge badge-next">Sprint 2 — AD Integration</span></h3>
+  <ul>
+    <li>EP1 Security → Administration &amp; Settings → Identity Providers → Add AD/LDAP</li>
+    <li>Group mapping replaces local users — same 5 Network Policies, same RADIUS attributes</li>
+    <li>Enables PEAP-MSCHAPv2 on any macOS/iOS device without profiles</li>
+  </ul>
+
+  <h3><span class="badge badge-next">Simulator Sprint 1</span></h3>
+  <ul>
+    <li>WiFi Simulator for Stadiums v2 — full rebuild per gap analysis in Section 28 of May 31 EOD</li>
+    <li>Per-radio airtime pools, all 25 knobs wired, 4 SLA classes, match timeline scrubber</li>
+    <li>File: <code>docs/stadium_wifi_simulator_v2.html</code></li>
+  </ul>
+</section>
+
+<footer>
+  <p>Session: Monday 1 June 2026 · FIFA World Cup 2026 Seattle Lab Sprint 1 · Khursheed Khan · EP1 / EXOS / AP3000</p>
+  <p>Next: Sprint 1 gap close (Android EAP-TTLS test) + Simulator Sprint 1 rebuild.</p>
+  <p>&copy; 2026 Khursheed Khan. All rights reserved.</p>
+</footer>
+
+</body>
+</html>
