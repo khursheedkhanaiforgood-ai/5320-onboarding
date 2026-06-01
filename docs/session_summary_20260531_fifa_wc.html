@@ -231,6 +231,7 @@
   <a href="#kpi">Design Parameters</a>
   <a href="#capacity">Capacity &amp; Switch Sizing</a>
   <a href="#sla">FIFA SLA</a>
+  <a href="#apknobs">AP QoE Knobs</a>
 </nav>
 
 
@@ -2240,8 +2241,432 @@ Without CDN:
 </section>
 
 
+<!-- ── SECTION 25: AP QoE CONFIGURATION — ALL KNOBS ──────────────── -->
+<section id="apknobs">
+  <h2>25. AP QoE Configuration — Every Knob, Every Value, Every Reason</h2>
+
+  <div class="callout-blue">
+    <p><strong>How to read this section.</strong> Every knob maps to one or more QoE SLA lines from Section 24. The configuration lives in EP1 Core → Network Policies → [Policy Name]. Some knobs are in the Radio Profile (per radio — 2.4G/5G/6G), some in the SSID Profile (per SSID), some in the Network Policy itself. The EP1 path is given for each. Settings marked <span class="badge badge-done">AP3000</span> apply to your lab AP; <span class="badge badge-deploy">AP5060</span> marks stadium-only features.</p>
+  </div>
+
+  <!-- ── GROUP 1 ── -->
+  <h3>Group 1 — Airtime Efficiency: Eliminate Overhead, Maximise Data</h3>
+  <p><em>These are the highest-leverage knobs. Collectively they reclaim 30–40% of wasted airtime in a dense deployment.</em></p>
+
+  <table>
+    <tr><th>Knob</th><th>EP1 Path</th><th>Lab Value<br>(AP3000)</th><th>Stadium Value<br>(AP5060)</th><th>What it does</th><th>SLA line</th></tr>
+    <tr>
+      <td><strong>BSS Minimum Rate</strong><br>(Min Basic Rate)</td>
+      <td>Radio Profile → Transmit Rates → Min Basic Rate</td>
+      <td>12 Mbps</td>
+      <td><strong>18 Mbps</strong></td>
+      <td>Rejects any client whose PHY rate is below this value. A client at MCS 0 (6 Mbps) burns 3× more airtime than one at MCS 4 (18 Mbps) to send the same byte count. One slow client at 1 Mbps can stall 50 fast clients waiting for the channel. Lab: 12 Mbps to allow older test devices; stadium: 18 Mbps.</td>
+      <td>Video 5 Mbps guarantee; Social 5 Mbps UL</td>
+    </tr>
+    <tr>
+      <td><strong>Management Frame Rate</strong><br>(Beacon / Probe rate)</td>
+      <td>Radio Profile → Transmit Rates → Mgmt Frame Rate</td>
+      <td>6 Mbps</td>
+      <td><strong>12 Mbps</strong></td>
+      <td>Beacons, probe responses, and deauth frames are sent at this rate. Default is 1 Mbps — at 10K APs, beacons alone consume 2% of all airtime. At 12 Mbps, the same beacon uses 1/12th the air. Never set below 6 Mbps.</td>
+      <td>Baseline airtime budget</td>
+    </tr>
+    <tr>
+      <td><strong>Supported Rate Set</strong><br>(Disable legacy rates)</td>
+      <td>Radio Profile → Transmit Rates → Supported Rates</td>
+      <td>Disable: 1, 2, 5.5, 11 Mbps (802.11b)</td>
+      <td><strong>Disable: 1, 2, 5.5, 6, 9, 11 Mbps</strong></td>
+      <td>If 802.11b rates (1/2/5.5/11) are in the supported set, any device can negotiate them — even if BSS Min Rate is 18 Mbps. Disabling them from the rate set removes the option entirely. Stadium: also disable 6 and 9 Mbps — nothing below 12 Mbps should exist on the AP.</td>
+      <td>Airtime efficiency</td>
+    </tr>
+    <tr>
+      <td><strong>Airtime Fairness</strong></td>
+      <td>Radio Profile → Airtime Fairness → Enable</td>
+      <td><strong>ON — per client</strong></td>
+      <td><strong>ON — per client</strong></td>
+      <td>Default scheduler gives each <em>packet</em> equal access. A slow client (MCS 1) sends small packets frequently and hogs airtime. Per-client fairness gives each <em>device</em> equal airtime — a WiFi 7 client gets the same share as an older device, but completes its work in far less time. Net effect: 30–50% throughput improvement at mixed-client density.</td>
+      <td>Per-client goodput SLA; video/social equality</td>
+    </tr>
+    <tr>
+      <td><strong>OFDMA</strong><br>(DL + UL)</td>
+      <td>Radio Profile → Advanced → OFDMA Downlink / Uplink</td>
+      <td><strong>DL: ON, UL: ON</strong></td>
+      <td><strong>DL: ON, UL: ON</strong></td>
+      <td>WiFi 6/7 core feature. Divides a 160 MHz channel into up to 37 sub-channels (Resource Units). AP schedules multiple clients in a single transmission rather than one client at a time. At 200 clients/AP, OFDMA means 37 clients are served per TX slot instead of 1 — multiplying effective throughput 10–30×. UL OFDMA allows clients to transmit simultaneously (social uploads, video call audio).</td>
+      <td>Social 5 Mbps UL; Video call symmetry; per-AP demand stays within 2.5G backhaul</td>
+    </tr>
+    <tr>
+      <td><strong>MU-MIMO</strong><br>(DL + UL)</td>
+      <td>Radio Profile → Advanced → MU-MIMO</td>
+      <td><strong>ON</strong> (2SS AP3000)</td>
+      <td><strong>ON</strong> (4SS AP5060)</td>
+      <td>Transmits independent streams to multiple clients simultaneously using spatial multiplexing. AP5060 (4SS): serves 4 clients at once on the downlink. AP3000 (2SS): serves 2 clients. Works alongside OFDMA — OFDMA splits frequency, MU-MIMO splits space. Together they are the primary reason WiFi 6/7 handles density that WiFi 5 could not.</td>
+      <td>Per-client goodput; bowl density (500 clients/AP)</td>
+    </tr>
+    <tr>
+      <td><strong>Beacon Interval</strong></td>
+      <td>Radio Profile → Advanced → Beacon Interval</td>
+      <td>100 ms</td>
+      <td>100 ms</td>
+      <td>How often the AP broadcasts its beacon (SSID announcement, capabilities, TIM). 100 ms is the 802.11 default and should not be changed. Increasing it saves a tiny amount of airtime but breaks roaming (clients need beacons to discover APs) and increases T_connect. Leave at 100 ms.</td>
+      <td>T_connect ≤ 5 s SLA; roaming T_roam ≤ 50 ms</td>
+    </tr>
+    <tr>
+      <td><strong>DTIM Period</strong></td>
+      <td>Radio Profile → Advanced → DTIM Period</td>
+      <td>1</td>
+      <td><strong>1 (interactive zones); 2 (IoT/POS zones)</strong></td>
+      <td>Delivery Traffic Indication Map — how many beacon intervals between multicast/broadcast deliveries. DTIM=1 means every beacon (100 ms). DTIM=2 means every 200 ms. For video and video calls: DTIM=1 (lowest latency). For POS/IoT where devices sleep between transactions: DTIM=2 or 3 to let devices sleep longer and save battery without impacting transaction speed.</td>
+      <td>Video jitter &lt; 30 ms; POS latency &lt; 500 ms</td>
+    </tr>
+  </table>
+
+  <!-- ── GROUP 2 ── -->
+  <h3>Group 2 — Spectrum &amp; Channel: Maximum Capacity Per AP</h3>
+
+  <table>
+    <tr><th>Knob</th><th>EP1 Path</th><th>Lab Value</th><th>Stadium Value</th><th>What it does</th><th>SLA line</th></tr>
+    <tr>
+      <td><strong>Channel Width — 6 GHz</strong></td>
+      <td>Radio Profile → 6 GHz Radio → Channel Width</td>
+      <td>80 MHz</td>
+      <td><strong>160 MHz</strong></td>
+      <td>Wider channel = higher throughput per client, but fewer non-overlapping channels (3× 160 MHz vs 7× 80 MHz in U-NII-5 alone). Stadium: 160 MHz because 6 GHz has 1,200 MHz of clean spectrum — enough for many 160 MHz non-overlapping channels across 4,000 APs with careful RRM planning. Lab: 80 MHz (only 1 AP so co-channel interference is irrelevant).</td>
+      <td>Per-client goodput; video 5 Mbps at 500 clients/AP</td>
+    </tr>
+    <tr>
+      <td><strong>Channel Width — 5 GHz</strong></td>
+      <td>Radio Profile → 5 GHz Radio → Channel Width</td>
+      <td>40 MHz</td>
+      <td><strong>80 MHz</strong></td>
+      <td>5 GHz has ~500 MHz of spectrum (24 non-overlapping 20 MHz channels). At 80 MHz you have 6 non-overlapping channels — reuse is tight in a 4,000-AP deployment. 160 MHz on 5 GHz is not viable at stadium density (only 2 non-overlapping channels, severe co-channel interference). Stadium: 80 MHz with careful channel plan; fall back to 40 MHz in bowl sections if CU% &gt; 70%.</td>
+      <td>Concourse capacity; 5G fallback for non-6G clients</td>
+    </tr>
+    <tr>
+      <td><strong>Channel Width — 2.4 GHz</strong></td>
+      <td>Radio Profile → 2.4 GHz Radio → Channel Width</td>
+      <td>20 MHz</td>
+      <td><strong>20 MHz only</strong></td>
+      <td>2.4 GHz has only 3 non-overlapping 20 MHz channels (1, 6, 11). 40 MHz mode uses 2 of them simultaneously — unacceptable at stadium density. Lock to 20 MHz. Ideally: disable 2.4 GHz on bowl APs entirely and use it only for IoT/POS where 6/5 GHz device support is absent.</td>
+      <td>Interference control; reserve for IoT/POS</td>
+    </tr>
+    <tr>
+      <td><strong>Channel Selection (RRM)</strong></td>
+      <td>Radio Profile → RRM → Auto Channel</td>
+      <td>Auto</td>
+      <td><strong>Auto — with locked seed channels per zone</strong></td>
+      <td>RRM auto-selects channels based on neighbour RSSI and channel utilisation. Stadium: seed each zone with a starting channel plan (locker rooms on 6 GHz Ch 1, bowl sector A on Ch 37, etc.) and let RRM tune from there. Never let RRM start fully blind across 4,000 APs — it will converge eventually but slowly. Pre-load the channel plan from the RF survey.</td>
+      <td>SNR ≥ 25 dB; SINR ≥ 20 dB</td>
+    </tr>
+    <tr>
+      <td><strong>Transmit Power (TPC)</strong></td>
+      <td>Radio Profile → RRM → Auto Power</td>
+      <td>Auto (or fixed 15 dBm lab)</td>
+      <td><strong>Auto — min 5 dBm, max 17 dBm</strong></td>
+      <td>Under-seat APs in a bowl operate at low power (8–12 dBm) — they are 1–3 metres from the fan's pocket. High Tx power causes co-channel interference with the AP three rows away. Cap max at 17 dBm for bowl; allow up to 23 dBm for concourse and fan zone APs where coverage distance is greater. RRM adjusts dynamically — set bounds, not fixed values.</td>
+      <td>RSSI ≥ −65 dBm; co-channel SINR ≥ 20 dB</td>
+    </tr>
+    <tr>
+      <td><strong>BSS Coloring</strong><br>(WiFi 6/7)</td>
+      <td>Radio Profile → Advanced → BSS Color</td>
+      <td><strong>Auto</strong></td>
+      <td><strong>Auto</strong></td>
+      <td>WiFi 6/7 assigns each BSS a 6-bit colour (1–63). When a client hears a signal with a different colour, it knows it is from a different network (not a hidden node) and may transmit immediately instead of deferring. Dramatically reduces unnecessary CSMA/CA deferrals in dense deployments. EP1 assigns colours automatically; ensure no two adjacent APs share the same colour.</td>
+      <td>Channel utilisation &lt; 70%; airtime efficiency</td>
+    </tr>
+    <tr>
+      <td><strong>Spatial Reuse</strong></td>
+      <td>Radio Profile → Advanced → Spatial Reuse</td>
+      <td>ON</td>
+      <td><strong>ON</strong></td>
+      <td>Works with BSS Coloring. When a client detects an OBSS (Overlapping BSS) frame below a threshold power, it treats the channel as clear and transmits anyway (instead of deferring). Combined with low Tx power on bowl APs, spatial reuse is the mechanism that makes 4,000 co-located APs viable without continuous co-channel starvation.</td>
+      <td>Per-AP goodput; channel utilisation</td>
+    </tr>
+    <tr>
+      <td><strong>DFS (Dynamic Frequency Selection)</strong><br>5 GHz only</td>
+      <td>Radio Profile → 5 GHz → Enable DFS Channels</td>
+      <td>ON (enables channels 52–144)</td>
+      <td><strong>ON — with pre-populated radar-free channels</strong></td>
+      <td>DFS channels (52–144) triple the available 5 GHz spectrum. When radar is detected, the AP must vacate the channel within 10 seconds and wait 30 minutes before returning — during which clients on that AP re-associate. Stadium: pre-test all DFS channels before the event and remove those with recurring radar. Channels 149–165 (non-DFS) are safe fallbacks.</td>
+      <td>5 GHz capacity; AP availability 99.5%</td>
+    </tr>
+  </table>
+
+  <!-- ── GROUP 3 ── -->
+  <h3>Group 3 — Client Admission &amp; Steering: Right Client on Right Band and AP</h3>
+
+  <table>
+    <tr><th>Knob</th><th>EP1 Path</th><th>Lab Value</th><th>Stadium Value</th><th>What it does</th><th>SLA line</th></tr>
+    <tr>
+      <td><strong>Band Steering</strong></td>
+      <td>Radio Profile → Band Steering → Enable</td>
+      <td>ON → 5G preferred</td>
+      <td><strong>ON → 6G first → 5G → 2.4G last resort</strong></td>
+      <td>When a dual/tri-band capable client sends a probe on 2.4 GHz, the AP suppresses its 2.4 GHz probe response and forces the client to discover the 5/6 GHz BSS instead. Keeps 2.4 GHz clear for legacy devices. At stadium: 6 GHz is the primary band — steer all WiFi 6E/7 clients there immediately.</td>
+      <td>6 GHz utilisation; video goodput</td>
+    </tr>
+    <tr>
+      <td><strong>Probe Response RSSI Threshold</strong></td>
+      <td>Radio Profile → Advanced → Min RSSI for Probe Response</td>
+      <td>−80 dBm</td>
+      <td><strong>−75 dBm</strong></td>
+      <td>If a client's probe request arrives below this RSSI, the AP does not respond. Prevents a client in row 40 from associating to an under-seat AP in row 3 when a closer AP is available. Raises effective "cell edge" — clients associate to the AP closest to them, reducing co-channel interference and improving average MCS.</td>
+      <td>RSSI ≥ −65 dBm SLA; average MCS improvement</td>
+    </tr>
+    <tr>
+      <td><strong>Client Load Balancing</strong></td>
+      <td>Radio Profile → Load Balancing → Enable<br>Max Clients: [value]</td>
+      <td>ON — max 50 clients/radio</td>
+      <td><strong>ON — max 150 clients/radio (6 GHz)<br>max 80 clients/radio (5 GHz)</strong></td>
+      <td>When an AP radio reaches the max client threshold, it delays or ignores new association requests, steering new clients to a less-loaded adjacent AP. Prevents any single radio from being overwhelmed while neighbours are underutilised. Stadium: tune max to ~150 for 6 GHz (more spectrum, more capacity) and 80 for 5 GHz.</td>
+      <td>Per-client goodput; fair capacity distribution</td>
+    </tr>
+    <tr>
+      <td><strong>802.11v BSS Transition Management</strong></td>
+      <td>Radio Profile → 802.11k/v/r → 802.11v Enable</td>
+      <td>ON</td>
+      <td><strong>ON</strong></td>
+      <td>When an AP is overloaded or a client's signal weakens, the AP sends a BSS Transition Request suggesting a better AP. Clients that support 802.11v (all modern iOS/Android) will roam proactively rather than clinging to a degraded connection. Without this, clients stay on a congested AP until the connection becomes unusable.</td>
+      <td>T_roam ≤ 50 ms; per-AP client cap</td>
+    </tr>
+    <tr>
+      <td><strong>802.11k Neighbour Reports</strong></td>
+      <td>Radio Profile → 802.11k/v/r → 802.11k Enable</td>
+      <td>ON</td>
+      <td><strong>ON</strong></td>
+      <td>AP maintains a list of neighbour APs and shares it with clients on request. Client uses this to pre-scan candidate APs for roaming without performing a full scan (which takes 200–400 ms and interrupts traffic). With 802.11k, a client can roam in &lt;50 ms by going directly to the pre-known neighbour instead of scanning every channel.</td>
+      <td>T_roam ≤ 50 ms; video/call continuity during movement</td>
+    </tr>
+    <tr>
+      <td><strong>Pre-Association Signal Quality Filter</strong><br>(Minimum RSSI to Associate)</td>
+      <td>Radio Profile → Advanced → Min Association RSSI</td>
+      <td>−80 dBm</td>
+      <td><strong>−72 dBm</strong></td>
+      <td>Separate from probe response threshold. Even if the AP responds to a probe, it can still reject the association if the client's RSSI is below this value. More aggressive than probe suppression — the client is actively told "go find a better AP." Use −72 dBm in bowl; −78 dBm in concourse where client density is lower.</td>
+      <td>Average MCS ≥ 9; video 5 Mbps sustained</td>
+    </tr>
+  </table>
+
+  <!-- ── GROUP 4 ── -->
+  <h3>Group 4 — Roaming &amp; Latency: Video Calls and Mobile Fans</h3>
+
+  <table>
+    <tr><th>Knob</th><th>EP1 Path</th><th>Lab Value</th><th>Stadium Value</th><th>What it does</th><th>SLA line</th></tr>
+    <tr>
+      <td><strong>802.11r Fast BSS Transition (FT)</strong></td>
+      <td>Radio Profile → 802.11k/v/r → 802.11r Enable<br>Mode: Over-the-DS</td>
+      <td>ON</td>
+      <td><strong>ON — Over-the-DS</strong></td>
+      <td>Standard roam (without 802.11r): full re-authentication = 300–800 ms → VoIP drops, video stutters. 802.11r pre-negotiates keys with the target AP before the client moves, reducing roam time to &lt;50 ms. Over-the-DS (via the wired distribution system) is more reliable than Over-the-Air in high-density deployments. Mandatory for video call continuity as fans move through the stadium.</td>
+      <td>T_roam ≤ 50 ms; video call jitter ≤ 20 ms</td>
+    </tr>
+    <tr>
+      <td><strong>OKC (Opportunistic Key Caching)</strong></td>
+      <td>SSID Profile → Security → Opportunistic Key Caching</td>
+      <td>ON</td>
+      <td><strong>ON</strong></td>
+      <td>Fallback for clients that don't support 802.11r. Caches the PMK (Pairwise Master Key) from a prior AP association and reuses it at a new AP without re-running the full 802.1X EAP exchange. Reduces roam from 800 ms to ~150 ms for non-802.11r clients. All modern iOS/Android support 802.11r; OKC covers older devices.</td>
+      <td>T_roam for legacy devices</td>
+    </tr>
+    <tr>
+      <td><strong>WMM UAPSD</strong><br>(Unscheduled Automatic Power Save Delivery)</td>
+      <td>SSID Profile → Advanced → UAPSD</td>
+      <td>ON</td>
+      <td><strong>ON</strong></td>
+      <td>Allows a client in power-save mode to request buffered frames from the AP at any time (instead of waiting for the next DTIM beacon). Critical for VoIP and video calls: the app sends a packet (trigger), AP immediately delivers any buffered DL packets. Reduces latency by up to 50 ms for interactive apps. Without UAPSD, power-save clients introduce one full DTIM interval (100 ms) of additional latency per voice packet.</td>
+      <td>Video call RTT ≤ 150 ms; jitter ≤ 20 ms</td>
+    </tr>
+    <tr>
+      <td><strong>RTS/CTS Threshold</strong></td>
+      <td>Radio Profile → Advanced → RTS Threshold</td>
+      <td>2346 (disabled)</td>
+      <td><strong>2346 (disabled) for most zones;<br>500 bytes for dense bowl sections</strong></td>
+      <td>RTS/CTS adds a handshake before large frames — prevents hidden-node collisions in very dense environments. Disabled by default because the overhead typically exceeds the benefit. In bowl sections at 500 clients/AP where hidden nodes are likely (fans on opposite sides of an AP can't hear each other), setting RTS threshold to 500 bytes can reduce retransmissions. Monitor retry rate — if &gt; 20%, enable it.</td>
+      <td>Retry rate &lt; 10%; packet loss &lt; 0.5%</td>
+    </tr>
+    <tr>
+      <td><strong>Guard Interval</strong></td>
+      <td>Radio Profile → Advanced → Guard Interval</td>
+      <td>Auto</td>
+      <td><strong>Auto</strong></td>
+      <td>Short GI (400 ns) vs Long GI (800 ns). Short GI adds ~11% throughput but is sensitive to multipath reflections — in a stadium with metal structure, concrete, and thousands of reflective surfaces, multipath is severe. Auto lets the AP negotiate per-client based on measured channel conditions. Never force Short GI in a stadium.</td>
+      <td>Packet loss &lt; 0.5%; video stream stability</td>
+    </tr>
+    <tr>
+      <td><strong>MLO — Multi-Link Operation</strong><br><span class="badge badge-deploy">AP5060 only</span></td>
+      <td>Radio Profile → Advanced → MLO → Enable</td>
+      <td>N/A (AP3000 = WiFi 6E, no MLO)</td>
+      <td><strong>ON — STR mode (Simultaneous TX/RX)</strong></td>
+      <td>WiFi 7 exclusive. A single client simultaneously uses two links (e.g., 5 GHz + 6 GHz) bonded at the MAC layer. The AP aggregates throughput and load-balances retransmissions across links. Key QoE benefit: if a burst of interference hits 5 GHz, the 6 GHz link continues without interruption — zero retransmission latency spike. For video calls (latency-sensitive), MLO eliminates the latency tail caused by single-link retransmissions. Requires WiFi 7 client (iPhone 16+, Galaxy S24+).</td>
+      <td>Video call jitter ≤ 20 ms; packet loss &lt; 0.1% for team/VIP</td>
+    </tr>
+  </table>
+
+  <!-- ── GROUP 5 ── -->
+  <h3>Group 5 — Application Differentiation: QoS and Traffic Marking</h3>
+
+  <table>
+    <tr><th>Knob</th><th>EP1 Path</th><th>Lab Value</th><th>Stadium Value</th><th>What it does</th><th>SLA line</th></tr>
+    <tr>
+      <td><strong>WMM (Wi-Fi Multimedia)</strong></td>
+      <td>SSID Profile → QoS → WMM Enable</td>
+      <td>ON (all SSIDs)</td>
+      <td><strong>ON (all SSIDs)</strong></td>
+      <td>Enables four priority queues: AC_VO (voice), AC_VI (video), AC_BE (best effort), AC_BK (background). Without WMM, a video stream and a file download compete equally for the channel. With WMM, voice/video frames are transmitted before bulk data. Mandatory — never disable.</td>
+      <td>All application SLOs</td>
+    </tr>
+    <tr>
+      <td><strong>DSCP → WMM AC Mapping</strong></td>
+      <td>Network Policy → QoS → DSCP Mapping</td>
+      <td>Default mapping</td>
+      <td><strong>Custom:<br>EF(46)→AC_VO: VoIP, video calls<br>AF41(34)→AC_VI: live streaming<br>AF21(18)→AC_BE: social media<br>CS1(8)→AC_BK: bulk transfer</strong></td>
+      <td>Maps IP-layer DSCP markings to WiFi WMM queues. Video call apps (Zoom, FaceTime) mark their packets EF — the AP maps EF to AC_VO and transmits them before any other traffic. Live streaming apps typically mark AF41. Without custom mapping, streaming and voice compete in the same AC_BE queue.</td>
+      <td>Video call RTT ≤ 150 ms; live stream no-rebuffering</td>
+    </tr>
+    <tr>
+      <td><strong>Application QoS / DPI</strong><br>(Deep Packet Inspection)</td>
+      <td>Network Policy → Application QoS → Rules</td>
+      <td>OFF (lab — not needed)</td>
+      <td><strong>ON:<br>FIFA+, ESPN → DSCP AF41<br>Zoom, FaceTime → DSCP EF<br>Instagram, TikTok upload → DSCP AF21<br>BitTorrent, bulk → DSCP CS1</strong></td>
+      <td>AP identifies application by DPI (layer 7) and re-marks DSCP regardless of what the client marks. Prevents clients from self-marking everything as EF (voice priority) to get better service. DPI is the enforcement mechanism for the DSCP policy — without it, any client can claim voice priority.</td>
+      <td>QoS enforcement per application SLA tier</td>
+    </tr>
+    <tr>
+      <td><strong>Per-Client Rate Limiting</strong></td>
+      <td>Network Policy → User Profiles → Rate Limiting</td>
+      <td>OFF (lab — no need to cap 1 test client)</td>
+      <td><strong>WC_Guest: 25 Mbps DL / 10 Mbps UL<br>WC_Staff/VIP: 50 Mbps DL / 25 Mbps UL<br>Team: Unlimited (VLAN 10/20)</strong></td>
+      <td>Caps any single client's throughput. Without rate limiting, one client with a fast device and no contention can saturate a backhaul link. The per-client cap ensures the 5 Mbps video guarantee is achievable for all 200 active sessions — if one client could take 2.5 Gbps, every other client gets zero. Set to 5× the SLA minimum to allow burst.</td>
+      <td>5 Mbps video guarantee; 5 Mbps social UL</td>
+    </tr>
+    <tr>
+      <td><strong>Target Wake Time (TWT)</strong></td>
+      <td>Radio Profile → Advanced → TWT Enable<br>Mode: Individual / Broadcast</td>
+      <td>ON (Individual)</td>
+      <td><strong>ON — Individual for POS/IoT;<br>OFF for fan SSIDs</strong></td>
+      <td>AP schedules when each client wakes to transmit/receive. POS terminals between transactions can sleep for hundreds of milliseconds, freeing the channel entirely for fan devices. For fan SSIDs (WC_Guest): TWT OFF — fans are interactive (scrolling social feeds, watching video) and need the channel continuously. For WC_Staff where POS terminals live: TWT ON.</td>
+      <td>POS latency ≤ 500 ms; fan channel availability</td>
+    </tr>
+  </table>
+
+  <!-- ── GROUP 6 ── -->
+  <h3>Group 6 — Multicast &amp; Broadcast Control: Kill the Broadcast Storm</h3>
+
+  <table>
+    <tr><th>Knob</th><th>EP1 Path</th><th>Lab Value</th><th>Stadium Value</th><th>What it does</th><th>SLA line</th></tr>
+    <tr>
+      <td><strong>Proxy ARP</strong></td>
+      <td>Network Policy → Advanced → Proxy ARP</td>
+      <td>ON</td>
+      <td><strong>ON — mandatory</strong></td>
+      <td>The AP intercepts ARP requests and replies on behalf of clients it already knows. Without this: a fan's phone sends "who has 10.30.5.17?" as a broadcast — replicated to all 56,000 connected devices. With Proxy ARP: the AP answers from its local ARP cache without touching the air. At 72K clients, ARP alone generates ~1,200 broadcasts/second without Proxy ARP — this is a network-killing flood.</td>
+      <td>ARP% &lt; 0.5%; airtime budget</td>
+    </tr>
+    <tr>
+      <td><strong>Multicast-to-Unicast Conversion</strong></td>
+      <td>Network Policy → Advanced → Multicast Optimization</td>
+      <td>ON</td>
+      <td><strong>ON — mandatory</strong></td>
+      <td>Multicast frames (mDNS service discovery, some video protocols) are normally sent at the lowest basic rate as a broadcast — replicated to every associated client. At 72K devices, one mDNS packet = 72,000 air transmissions. Multicast-to-unicast converts these to individually addressed unicast frames sent only to subscribed clients at their negotiated PHY rate. Eliminates the multicast "tax" entirely.</td>
+      <td>Management frame overhead &lt; 2%</td>
+    </tr>
+    <tr>
+      <td><strong>IGMP Snooping</strong></td>
+      <td>Network Policy → Advanced → IGMP Snooping</td>
+      <td>ON</td>
+      <td><strong>ON</strong></td>
+      <td>AP tracks which clients have joined which multicast groups (via IGMP join/leave messages). Only forwards multicast to group members, not all clients. Works alongside multicast-to-unicast: IGMP snooping identifies <em>who wants the stream</em>; multicast-to-unicast converts it to <em>targeted delivery</em>.</td>
+      <td>Multicast overhead; video streaming efficiency</td>
+    </tr>
+    <tr>
+      <td><strong>Broadcast / Multicast Rate Limiting</strong></td>
+      <td>Radio Profile → Advanced → Broadcast Rate Limit</td>
+      <td>500 pps</td>
+      <td><strong>200 pps per radio</strong></td>
+      <td>Hard cap on broadcast/multicast packets per second per radio. Even with Proxy ARP and IGMP snooping, some broadcasts reach the air (DHCP offers, some service discovery). This rate limit is the last line of defence. 200 pps = 200 × 1,500 bytes × 8 = 2.4 Mbps maximum broadcast rate — acceptable overhead.</td>
+      <td>Broadcast % &lt; 0.5%</td>
+    </tr>
+    <tr>
+      <td><strong>Client Isolation</strong></td>
+      <td>SSID Profile → Security → Client Isolation</td>
+      <td>ON (Guest SSID)</td>
+      <td><strong>ON — WC_Guest;<br>OFF — WC_Secure, WC_Staff</strong></td>
+      <td>Prevents clients on the same SSID from sending packets directly to each other (L2 isolation). On WC_Guest: isolate fans from each other (security + reduces L2 broadcast scope). On WC_Secure: OFF — team medical, coaches, and staff may need device-to-device communication (Bonjour, AirDrop for media sharing). On WC_Staff: team decision.</td>
+      <td>Security; reduced intra-VLAN broadcast</td>
+    </tr>
+  </table>
+
+  <!-- ── GROUP 7 ── -->
+  <h3>Group 7 — Security Knobs That Affect QoE</h3>
+
+  <table>
+    <tr><th>Knob</th><th>EP1 Path</th><th>Lab Value</th><th>Stadium Value</th><th>What it does</th><th>QoE impact</th></tr>
+    <tr>
+      <td><strong>PMF — Protected Management Frames</strong></td>
+      <td>SSID Profile → Security → PMF</td>
+      <td>Required (WPA3-Enterprise)</td>
+      <td><strong>Required (WC_Secure, WC_Staff)<br>Optional (WC_Guest — OWE)</strong></td>
+      <td>Encrypts deauthentication and disassociation frames. Without PMF: any attacker can send a spoofed deauth frame and disconnect every client from an AP (deauth flood attack). In a 72K-fan stadium this is a credible DoS vector. With PMF: deauth frames that aren't cryptographically signed are ignored. WPA3-Enterprise mandates PMF — it is not optional for WC_Secure.</td>
+      <td>SSID availability 99.9% SLA; protects against deauth DoS</td>
+    </tr>
+    <tr>
+      <td><strong>802.11w Disassociation Timer</strong></td>
+      <td>SSID Profile → Security → SA Query Timeout</td>
+      <td>200 ms</td>
+      <td><strong>500 ms</strong></td>
+      <td>After detecting a possible deauth attack, the AP sends an SA (Security Association) Query to the client to confirm it is still legitimately connected before disassociating. The timer defines how long to wait for a reply. Stadium: 500 ms gives clients in momentary poor coverage time to reply without false-disassociating a valid client.</td>
+      <td>False disassociation rate; availability SLA</td>
+    </tr>
+    <tr>
+      <td><strong>Max Authentication Failures</strong></td>
+      <td>EP1 Security → Policy → Auth Failure Rate Limit</td>
+      <td>5 failures → 60 s lockout</td>
+      <td><strong>5 failures → 60 s lockout</strong></td>
+      <td>Rate-limits brute-force 802.1X authentication attempts per source MAC. At a stadium, a credential-stuffing attack during the auth storm at kick-off could delay legitimate team member logins. The lockout applies per-MAC per-AP — a locked-out attacker cannot retry immediately.</td>
+      <td>Auth success rate 99.95% SLA; team/VIP connect time</td>
+    </tr>
+  </table>
+
+  <!-- ── MASTER SUMMARY ── -->
+  <h3>Master QoE Knob Summary — EP1 Configuration Checklist</h3>
+  <p>Apply in this order. Earlier groups have higher leverage on QoE than later groups.</p>
+  <table>
+    <tr><th>#</th><th>Knob</th><th>Value (Stadium)</th><th>EP1 Location</th><th>Priority</th></tr>
+    <tr><td>1</td><td>BSS Min Rate</td><td>18 Mbps</td><td>Radio Profile → Min Basic Rate</td><td class="badge badge-done">P1 — Highest</td></tr>
+    <tr><td>2</td><td>Proxy ARP</td><td>ON</td><td>Network Policy → Advanced</td><td class="badge badge-done">P1 — Highest</td></tr>
+    <tr><td>3</td><td>Airtime Fairness</td><td>ON — per client</td><td>Radio Profile → Airtime Fairness</td><td class="badge badge-done">P1 — Highest</td></tr>
+    <tr><td>4</td><td>OFDMA (DL + UL)</td><td>ON</td><td>Radio Profile → Advanced</td><td class="badge badge-done">P1 — Highest</td></tr>
+    <tr><td>5</td><td>MU-MIMO (DL + UL)</td><td>ON</td><td>Radio Profile → Advanced</td><td class="badge badge-done">P1 — Highest</td></tr>
+    <tr><td>6</td><td>802.11r Fast BSS Transition</td><td>ON — Over-the-DS</td><td>Radio Profile → 802.11k/v/r</td><td class="badge badge-wip">P2 — High</td></tr>
+    <tr><td>7</td><td>802.11k Neighbour Reports</td><td>ON</td><td>Radio Profile → 802.11k/v/r</td><td class="badge badge-wip">P2 — High</td></tr>
+    <tr><td>8</td><td>802.11v BSS Transition Mgmt</td><td>ON</td><td>Radio Profile → 802.11k/v/r</td><td class="badge badge-wip">P2 — High</td></tr>
+    <tr><td>9</td><td>Band Steering (6G first)</td><td>ON</td><td>Radio Profile → Band Steering</td><td class="badge badge-wip">P2 — High</td></tr>
+    <tr><td>10</td><td>Management Frame Rate</td><td>12 Mbps</td><td>Radio Profile → Mgmt Frame Rate</td><td class="badge badge-wip">P2 — High</td></tr>
+    <tr><td>11</td><td>Multicast-to-Unicast</td><td>ON</td><td>Network Policy → Multicast Optimization</td><td class="badge badge-wip">P2 — High</td></tr>
+    <tr><td>12</td><td>DSCP → WMM Mapping</td><td>Custom (EF→AC_VO, AF41→AC_VI)</td><td>Network Policy → QoS → DSCP Mapping</td><td class="badge badge-wip">P2 — High</td></tr>
+    <tr><td>13</td><td>Per-Client Rate Limiting</td><td>25/10 Mbps (Guest)</td><td>Network Policy → User Profiles</td><td class="badge badge-next">P3 — Medium</td></tr>
+    <tr><td>14</td><td>BSS Coloring</td><td>Auto</td><td>Radio Profile → Advanced</td><td class="badge badge-next">P3 — Medium</td></tr>
+    <tr><td>15</td><td>Spatial Reuse</td><td>ON</td><td>Radio Profile → Advanced</td><td class="badge badge-next">P3 — Medium</td></tr>
+    <tr><td>16</td><td>Client Load Balancing</td><td>ON — max 150/radio (6G)</td><td>Radio Profile → Load Balancing</td><td class="badge badge-next">P3 — Medium</td></tr>
+    <tr><td>17</td><td>Probe Response RSSI Threshold</td><td>−75 dBm</td><td>Radio Profile → Advanced</td><td class="badge badge-next">P3 — Medium</td></tr>
+    <tr><td>18</td><td>Disable legacy rates (&lt;12 Mbps)</td><td>Disabled</td><td>Radio Profile → Supported Rates</td><td class="badge badge-next">P3 — Medium</td></tr>
+    <tr><td>19</td><td>IGMP Snooping</td><td>ON</td><td>Network Policy → Advanced</td><td class="badge badge-next">P3 — Medium</td></tr>
+    <tr><td>20</td><td>Application QoS (DPI)</td><td>ON — per app rules</td><td>Network Policy → App QoS</td><td class="badge badge-next">P3 — Medium</td></tr>
+    <tr><td>21</td><td>TWT (POS/IoT SSIDs only)</td><td>ON — Individual</td><td>Radio Profile → Advanced → TWT</td><td class="badge badge-ref">P4 — Low</td></tr>
+    <tr><td>22</td><td>MLO (AP5060 + WiFi 7 clients)</td><td>ON — STR mode</td><td>Radio Profile → Advanced → MLO</td><td class="badge badge-ref">P4 — Low (WiFi 7 clients only)</td></tr>
+    <tr><td>23</td><td>PMF (Protected Mgmt Frames)</td><td>Required (WPA3)</td><td>SSID Profile → Security → PMF</td><td class="badge badge-done">P1 — Security mandatory</td></tr>
+    <tr><td>24</td><td>Channel Width (6 GHz)</td><td>160 MHz</td><td>Radio Profile → 6 GHz → Channel Width</td><td class="badge badge-wip">P2 — High</td></tr>
+    <tr><td>25</td><td>RRM Auto Channel + Power</td><td>ON — with bounds</td><td>Radio Profile → RRM</td><td class="badge badge-wip">P2 — High</td></tr>
+  </table>
+
+  <div class="callout-green">
+    <p><strong>For Khursheed's Lab (AP3000 + Sprint 1):</strong> Configure knobs 1–12 in EP1 Core Radio Profile before pushing to AP3000. You won't have 500 clients to stress-test, but you <em>can</em> verify: (1) BSS Min Rate is applied — connect an old 802.11n device and confirm it is rejected; (2) 802.11k/v/r active — confirm in EP1 Monitor → Clients → [device] → Capabilities; (3) WMM queues active — run a video stream and check EP1 Live AP view → per-AC queue utilisation. These three checks confirm the QoE stack is configured correctly before Lumen Field scale.</p>
+  </div>
+</section>
+
+
 <footer>
-  <p>Session 2026-05-31 &nbsp;·&nbsp; FIFA World Cup 2026 Seattle WiFi Design &nbsp;·&nbsp; Draft v2.0 (FIFA Seattle SLA — fan demand model + application SLOs + infrastructure derivation)</p>
+  <p>Session 2026-05-31 &nbsp;·&nbsp; FIFA World Cup 2026 Seattle WiFi Design &nbsp;·&nbsp; Draft v2.1 (Section 25: AP QoE Knobs — 25 parameters across 7 groups with lab + stadium values)</p>
   <p>Sources: <a href="https://www.extremenetworks.com/resources/case-study/seattle-seahawks-achieve-operational-freedom">EN / Lumen Field Case Study</a> &nbsp;·&nbsp; <a href="https://www.extremenetworks.com/resources/blogs/stadium-wi-fi-7-redefining-high-density-connectivity-with-ap5060">EN AP5060 Stadium Blog</a> &nbsp;·&nbsp; <a href="https://www.seattlefwc26.org/destination/stadium">FIFA WC26 Seattle Stadium</a> &nbsp;·&nbsp; <a href="https://www.seattlefwc26.org/news/seattle-soccer-house-at-pacific-place-to-deliver-a-free-immersive-world-cup-experience-on-a-70-foot-screen">Seattle Soccer House</a> &nbsp;·&nbsp; RFC 3580 (802.1X + RADIUS VLAN) &nbsp;·&nbsp; RFC 6614 (RadSec) &nbsp;·&nbsp; RFC 8110 (OWE) &nbsp;·&nbsp; IEEE 802.11be (WiFi-7)</p>
   <p>&copy; 2026 Khursheed Khan. All rights reserved.</p>
 </footer>
