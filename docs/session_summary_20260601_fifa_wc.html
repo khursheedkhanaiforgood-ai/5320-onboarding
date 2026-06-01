@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FIFA WC 2026 Seattle — Lab Sprint 1 COMPLETE · June 1 2026</title>
+<title>FIFA WC 2026 Seattle — Lab Sprint 1 + Sprint 3 COMPLETE · June 1 2026</title>
 <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Source+Code+Pro:wght@400;600&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -211,9 +211,9 @@
 <body>
 
 <header>
-  <div class="dateline">Monday, 1 June 2026 &nbsp;·&nbsp; FIFA World Cup 2026 Seattle &nbsp;·&nbsp; Lab Sprint 1 — Complete</div>
-  <h1>Dynamic VLAN Proven End-to-End</h1>
-  <p class="deck">One SSID. Five VLANs. One full day of real engineering — seven blockers, seven fixes, and one unforgettable FDB output that made it all worth it. This is the full account of how EP1 Security + EXOS SW1 + AP3000 were wired together to deliver dynamic VLAN assignment for the FIFA World Cup 2026 Seattle deployment.</p>
+  <div class="dateline">Monday, 1 June 2026 &nbsp;·&nbsp; FIFA World Cup 2026 Seattle &nbsp;·&nbsp; Lab Sprint 1 + Sprint 3 — Complete</div>
+  <h1>Dynamic VLAN Proven Two Ways</h1>
+  <p class="deck">Two sprints. Two auth methods. One FDB truth. Sprint 1: WPA3-Enterprise 802.1X + EP1 Security RADIUS → Filter-Id → dynamic VLAN. Sprint 3: PPSK per-user passphrases → dynamic VLAN. Same switch. Same AP. Same FDB proof. No RADIUS needed for Sprint 3. Both proven on the same day.</p>
 </header>
 
 <nav id="toc">
@@ -232,6 +232,7 @@
   <a href="#guest-design">Guest Design</a>
   <a href="#files">Files</a>
   <a href="#pending">Next Sprint</a>
+  <a href="#ppsk-sprint3">PPSK Sprint 3</a>
   <a href="#ppsk-reflection">PPSK vs 802.1X</a>
 </nav>
 
@@ -264,6 +265,29 @@ Same MAC. Same SSID. Different group → Different VLAN.
     Same user, same SSID — group changed to Group_VIP in EP1 Security only. No AP reconfiguration. No new SSID. DHCP: 10.40.0.100. SW1 FDB: <code>74:a6:cd:8b:19:60 VIP(0040) port 3</code>. The design is proven.</p>
   </div>
 
+  <div class="victory-banner" style="background:#0a2a4a; border-color:#1a6fba; margin-top:32px;">
+    <div class="vb-label" style="color:#7dc8ff;">Lab Sprint 3 — Complete · June 1 2026</div>
+    <h2>PPSK Dynamic VLAN Proven</h2>
+    <p class="vb-sub" style="color:#a8d8f0;">No RADIUS. No EAP. No mobileconfig. One passphrase per user → correct VLAN.</p>
+    <div class="vb-fdb" style="border-color:rgba(255,255,255,0.2);">
+b6:1c:de:e9:1e:92    TeamUSA(0010)  0000  d mi  3  &lt;-- VLAN 10 ✓  10.10.0.101
+b6:1c:de:e9:1e:92    TeamAUS(0020)  0000  d mi  3  &lt;-- VLAN 20 ✓
+
+Same iPhone. Same SSID. Different passphrase → Different VLAN.
+Zero infrastructure change on SW1.
+    </div>
+  </div>
+
+  <div class="milestone milestone-green">
+    <div class="milestone-label">PPSK Proof Point 1 — VLAN 10</div>
+    <p>iPhone → <code>WC_Seattle-PPSK</code> with TeamUSA passphrase → WC_TeamUSA user group → User Profile Ten → <strong>VLAN 10</strong> → DHCP 10.10.0.101. SW1 FDB: <code>b6:1c:de:e9:1e:92 TeamUSA(0010) port 3</code>. No RADIUS exchange. No EAP handshake.</p>
+  </div>
+
+  <div class="milestone milestone-green">
+    <div class="milestone-label">PPSK Proof Point 2 — VLAN 20</div>
+    <p>Same iPhone, same SSID — reconnected with TeamAUS passphrase → WC_TeamAUS user group → User Profile Twenty → <strong>VLAN 20</strong>. SW1 FDB: <code>b6:1c:de:e9:1e:92 TeamAUS(0020) port 3</code>. Stale VLAN 10 entry ages out in 300s. Both entries visible simultaneously during transition — expected EXOS behaviour.</p>
+  </div>
+
   <h3>What This Means at FIFA Scale</h3>
   <p>At 10,000 APs across Lumen Field and Seattle Center, this single proof validates the entire architecture. One SSID (<code>WC_Secure</code>) handles Team USA players, Team Australia players, VIP guests, POS terminals, and media — each landing on a completely isolated VLAN determined entirely by their identity in EP1 Security. No SSID proliferation. No beacon overhead multiplication. No per-role AP configuration.</p>
   <p>Change a player's group in EP1 Security and their next association lands on a different VLAN. No AP touch. No network reconfiguration. At World Cup scale, that is operationally transformative.</p>
@@ -285,6 +309,11 @@ Same MAC. Same SSID. Different group → Different VLAN.
     <tr><td>macOS Client</td><td>mobileconfig forcing EAP-TTLS/PAP with embedded credentials</td><td><span class="badge badge-win">Done</span></td></tr>
     <tr><td>End-to-end VLAN 10</td><td>MacBook → WC_Secure → EAP-TTLS → EP1 → Policy_TeamUSA → VLAN 10 → 10.10.0.100</td><td><span class="badge badge-win">Proven</span></td></tr>
     <tr><td>End-to-end VLAN 40</td><td>Group change only → same flow → VLAN 40 → 10.40.0.100</td><td><span class="badge badge-win">Proven</span></td></tr>
+    <tr><td colspan="3" style="background:#f0f7ff; font-family:'Source Code Pro',monospace; font-size:11px; letter-spacing:0.1em; text-transform:uppercase; font-weight:700; color:#1a6fba;">Sprint 3 — PPSK Dynamic VLAN</td></tr>
+    <tr><td>EP1 Core — PPSK SSID</td><td>WC_Seattle-PPSK: WPA2-PSK + PPSK enabled, PPSK Classification=SERVICE, 3 user groups, 3 assignment rules</td><td><span class="badge badge-win">Done</span></td></tr>
+    <tr><td>PPSK User Groups</td><td>WC_TeamUSA → VLAN 10 · WC_TeamAUS → VLAN 20 · WC_Seattle_Guest_1 → VLAN 30 (default)</td><td><span class="badge badge-win">Done</span></td></tr>
+    <tr><td>PPSK VLAN 10 (TeamUSA)</td><td>iPhone → WC_Seattle-PPSK (TeamUSA passphrase) → VLAN 10 → 10.10.0.101</td><td><span class="badge badge-win">Proven</span></td></tr>
+    <tr><td>PPSK VLAN 20 (TeamAUS)</td><td>Same iPhone, TeamAUS passphrase → VLAN 20. FDB shows both entries during transition.</td><td><span class="badge badge-win">Proven</span></td></tr>
   </table>
 
 </section>
@@ -1003,6 +1032,80 @@ show fdb ports 3
 
 </section>
 
+<!-- ── PPSK SPRINT 3 ───────────────────────────────────────────────── -->
+<section id="ppsk-sprint3">
+  <h2>16. Sprint 3 — PPSK Dynamic VLAN (Complete)</h2>
+
+  <h3>What We Built</h3>
+  <table>
+    <tr><th>Component</th><th>Value</th></tr>
+    <tr><td>SSID</td><td><code>WC_Seattle-PPSK</code></td></tr>
+    <tr><td>Security</td><td>WPA2-PSK + PPSK enabled</td></tr>
+    <tr><td>PPSK Classification</td><td>SERVICE (must match between User Group and SSID)</td></tr>
+    <tr><td>Network Policy</td><td>PPSK-PSK-Open_AP1_June1</td></tr>
+    <tr><td>User Groups</td><td>WC_TeamUSA · WC_TeamAUS · WC_Seattle_Guest_1</td></tr>
+    <tr><td>Assignment Rules</td><td>WC_TeamUSA → VLAN 10 · WC_TeamAUS → VLAN 20 · WC_Seattle_Guest_1 → VLAN 30</td></tr>
+    <tr><td>Default User Profile</td><td>VLAN 30 (Guest)</td></tr>
+    <tr><td>SW1 changes</td><td><strong>None.</strong> Trunk on port 3 already serves PPSK equally.</td></tr>
+  </table>
+
+  <h3>The One Blocker — PPSK Classification Mismatch</h3>
+  <div class="callout-red">
+    <p><strong>Error:</strong> "PPSK Classification use field of user group 'TeamUSA' does not match PPSK Classification of SSID."</p>
+    <p><strong>Root cause:</strong> PPSK Classification must match between the User Group definition and the SSID definition. The original groups had a different classification than the SSID.</p>
+    <p><strong>Fix:</strong> Recreated user groups with PPSK Classification = SERVICE to match the SSID. This is a hard constraint — EP1 will reject any group/SSID combination where the classification fields differ.</p>
+  </div>
+
+  <h3>FDB Proof</h3>
+  <pre class="win">
+KhKLab-SW1 # show fdb ports 3
+
+b6:1c:de:e9:1e:92    TeamUSA(0010)   0000  d mi   3   &lt;-- iPhone, TeamUSA passphrase, VLAN 10
+b6:1c:de:e9:1e:92    TeamAUS(0020)   0000  d mi   3   &lt;-- same iPhone, TeamAUS passphrase, VLAN 20
+
+&lt;-- stale VLAN 10 entry ages out at 300s. Both visible during passphrase switch — normal EXOS FDB behavior.
+  </pre>
+
+  <h3>PPSK vs 802.1X — Side by Side</h3>
+  <table>
+    <tr><th>Dimension</th><th>802.1X (Sprint 1)</th><th>PPSK (Sprint 3)</th></tr>
+    <tr><td>Auth mechanism</td><td>EAP-TTLS/PAP → RADIUS → Filter-Id</td><td>Passphrase match → User Profile → VLAN</td></tr>
+    <tr><td>RADIUS required</td><td>Yes (EP1 Security, RadSec)</td><td>No</td></tr>
+    <tr><td>macOS supplicant</td><td>mobileconfig required (PAP removed from UI)</td><td>Native — no profile needed</td></tr>
+    <tr><td>iPhone</td><td>Native WPA3-Enterprise — works without profile</td><td>Native WPA2-PSK — works natively</td></tr>
+    <tr><td>Per-user revocation</td><td>Delete user from EP1 Security</td><td>Delete/rotate that user's passphrase only</td></tr>
+    <tr><td>IoT / POS devices</td><td>Requires EAP supplicant — often not available</td><td>Any WPA2 device — no supplicant needed</td></tr>
+    <tr><td>AD readiness</td><td>Direct — PEAP-MSCHAPv2 replaces EAP-TTLS</td><td>N/A — PPSK is EP1-local, not AD-federated</td></tr>
+    <tr><td>Individual accountability</td><td>Full — per-user identity in RADIUS logs</td><td>Passphrase-level — still per-user if 1 PPSK/user</td></tr>
+    <tr><td>SW1 changes</td><td>None</td><td>None</td></tr>
+    <tr><td>Complexity</td><td>High (EAP, RADIUS attrs, assignment rules)</td><td>Low (PPSK pool, user groups, VLAN binding)</td></tr>
+  </table>
+
+  <div class="callout-green">
+    <p><strong>Recommendation for FIFA WC Seattle deployment:</strong> Use 802.1X (WC_Secure) for Teams, VIP, and Media — individual accountability and AD federation matter there. Use PPSK for POS terminals and IoT devices — no EAP supplicant available on those endpoints. Both methods proven today on the same AP and switch.</p>
+  </div>
+
+  <h3>Key Learning — PPSK Classification Is a Hard Constraint</h3>
+  <div class="learning-card">
+    <div class="lc-number">Sprint 3 · Learning 1</div>
+    <h4>PPSK Classification must match between User Group and SSID</h4>
+    <p>EP1 enforces this at save time — you cannot push a policy where a User Group's PPSK Classification differs from the SSID's PPSK Classification. Fix: set both to the same value (SERVICE for cloud-managed passphrases). The error message names the mismatched group — start there.</p>
+  </div>
+
+  <div class="learning-card">
+    <div class="lc-number">Sprint 3 · Learning 2</div>
+    <h4>SW1 is auth-method agnostic — trunk serves both 802.1X and PPSK unchanged</h4>
+    <p>SW1 sees only tagged Ethernet frames arriving on port 3. Whether the AP tagged a frame VLAN 10 because of a RADIUS Filter-Id from 802.1X, or because of a PPSK passphrase match — SW1 doesn't know and doesn't care. Zero SW1 changes for Sprint 3.</p>
+  </div>
+
+  <div class="learning-card">
+    <div class="lc-number">Sprint 3 · Learning 3</div>
+    <h4>Dual-MAC FDB entries during passphrase switch = normal</h4>
+    <p>When the same device reconnects with a different PPSK passphrase, the old VLAN entry stays in the FDB until the 300-second aging timer expires. Both entries are visible simultaneously. VLAN 20 (age 0000) is the live one. VLAN 10 (aging) is the stale one. No action needed.</p>
+  </div>
+
+</section>
+
 <!-- ── CLOSING DIALOGUE — PPSK REFLECTION ────────────────────────── -->
 <section id="ppsk-reflection">
   <h2>15. Closing Dialogue — PPSK vs 802.1X &amp; What Today Earned</h2>
@@ -1037,10 +1140,9 @@ show fdb ports 3
 
   </div>
 
-  <div class="milestone milestone-blue">
-    <div class="milestone-label">Sprint 3 — PPSK Dynamic VLAN (Next Lab Session)</div>
-    <p>Mirror of Sprint 1 using PPSK. One new SSID (<code>WC_PPSK</code>), 5 user passphrases, 5 User Profiles → 5 VLANs. No EAP, no mobileconfig, no RADIUS supplicant. Every device connects natively. Same FDB proof method.<br><br>
-    <strong>Reference:</strong> <em>Private-PreShared-Key-PPSK-Guide_v6 2 1 _ May 18 2026 KK Edits.pdf</em> (local OneDrive). VLAN group assignment via User Profile binding — follow the guide for EP1 PPSK pool configuration.</p>
+  <div class="milestone milestone-green">
+    <div class="milestone-label">Sprint 3 — PPSK Dynamic VLAN — COMPLETE ✓</div>
+    <p>SSID <code>WC_Seattle-PPSK</code> built and proven same session. iPhone confirmed VLAN 10 (TeamUSA passphrase) and VLAN 20 (TeamAUS passphrase) via FDB. No RADIUS, no EAP, no mobileconfig. Full detail in <a href="#ppsk-sprint3">Section 16</a>. VIP (VLAN 40) and POS (VLAN 50) passphrases to be added in a follow-up sprint.</p>
   </div>
 
   <div class="milestone milestone-red">
@@ -1051,9 +1153,10 @@ show fdb ports 3
 </section>
 
 <footer>
-  <p>Session: Monday 1 June 2026 · FIFA World Cup 2026 Seattle Lab Sprint 1 · Khursheed Khan</p>
-  <p>Seven blockers. Seven fixes. One FDB line that proved it all: <code>74:a6:cd:8b:19:60 TeamUSA(0010) port 3</code>.</p>
-  <p>PPSK is the easier path. You took the harder one first. That's the right order.</p>
+  <p>Session: Monday 1 June 2026 · FIFA World Cup 2026 Seattle · Lab Sprint 1 + Sprint 3 · Khursheed Khan</p>
+  <p>Sprint 1: Seven blockers. Seven fixes. <code>74:a6:cd:8b:19:60 TeamUSA(0010) port 3</code>.</p>
+  <p>Sprint 3: One blocker (PPSK Classification). One fix. <code>b6:1c:de:e9:1e:92 TeamAUS(0020) port 3</code>.</p>
+  <p>Two auth methods. Two VLANs each. One switch. One AP. Same FDB truth.</p>
   <p>&copy; 2026 Khursheed Khan. All rights reserved.</p>
 </footer>
 
