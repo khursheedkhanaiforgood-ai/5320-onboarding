@@ -228,6 +228,8 @@
   <a href="#idp">Identity Providers</a>
   <a href="#qoe">QoE Radio Profile</a>
   <a href="#gameday">Game Day Load Model</a>
+  <a href="#kpi">Design Parameters</a>
+  <a href="#capacity">Capacity &amp; Switch Sizing</a>
 </nav>
 
 
@@ -1584,8 +1586,218 @@ CWP registration: load hits the captive portal web server, not RADIUS.
 </section>
 
 
+<!-- ── SECTION 22: DESIGN PARAMETERS MATRIX ───────────────────────── -->
+<section id="kpi">
+  <h2>22. Design Parameters Matrix — Variables, Targets &amp; Alert Thresholds</h2>
+
+  <div class="callout-blue">
+    <p><strong>These are the measurable quantities that define whether the network is performing.</strong> They split into two types: <em>design inputs</em> (what you specify during planning — you set these by choice) and <em>operational variables</em> (what you monitor during the event — you react to these). Both are listed so the same table serves the design phase and the NOC wall.</p>
+  </div>
+
+  <h3>Layer 1 — RF Quality (design inputs; set by AP placement &amp; power)</h3>
+  <table>
+    <tr><th>Variable</th><th>Symbol</th><th>Target</th><th>NOC Alert Threshold</th><th>Why it matters</th></tr>
+    <tr><td>Received Signal Strength</td><td>RSSI</td><td>≥ −65 dBm (MCS 9+)</td><td>&lt; −75 dBm = coverage gap</td><td>Below −75 dBm MCS drops to 5 or lower — client throughput falls off a cliff</td></tr>
+    <tr><td>Signal-to-Noise Ratio</td><td>SNR</td><td>≥ 25 dB</td><td>&lt; 20 dB</td><td>256-QAM requires 25 dB minimum; below this MCS ceiling drops. 4096-QAM (WiFi-7 MCS 13) needs ≥ 35 dB.</td></tr>
+    <tr><td>Noise Floor</td><td>N₀</td><td>≤ −95 dBm</td><td>&gt; −85 dBm</td><td>Rising noise floor = interference source active (microwave, 5G harmonic, rogue transmitter). Investigate before match.</td></tr>
+    <tr><td>SINR (Signal vs all interference)</td><td>SINR</td><td>≥ 20 dB</td><td>&lt; 15 dB</td><td>OFDMA subcarrier scheduling degrades rapidly below 15 dB SINR — throughput drops even with strong RSSI</td></tr>
+    <tr><td>Coverage overlap %</td><td>—</td><td>15–20% overlap between adjacent APs</td><td>&lt; 10% = coverage hole; &gt; 30% = co-channel interference</td><td>Target: every point covered by ≥ 2 APs at −65 dBm for seamless roaming</td></tr>
+  </table>
+
+  <h3>Layer 2 — Channel / Airtime (operational; set by config + RRM)</h3>
+  <table>
+    <tr><th>Variable</th><th>Symbol</th><th>Target</th><th>NOC Alert Threshold</th><th>Why it matters</th></tr>
+    <tr><td>Channel utilisation</td><td>CU%</td><td>&lt; 70%</td><td>&gt; 80%</td><td>Above 80% the channel is saturated — contention causes exponential latency growth. Trigger RRM power reduction or channel reassignment.</td></tr>
+    <tr><td>Retransmission rate</td><td>Retry%</td><td>&lt; 10%</td><td>&gt; 30%</td><td>Leading indicator of RF problems — rises 5–10 min before throughput drops or users call the NOC. Your earliest warning signal.</td></tr>
+    <tr><td>Beacon airtime %</td><td>B%</td><td>&lt; 0.05% (12 Mbps mgmt rate)</td><td>&gt; 1%</td><td>If management frame rate is left at 1 Mbps default, beacons alone consume 2% airtime. 12 Mbps reduces this 12×.</td></tr>
+    <tr><td>ARP / broadcast %</td><td>ARP%</td><td>&lt; 0.5% (Proxy ARP ON)</td><td>&gt; 3%</td><td>72K devices × 1 ARP/60 sec = 1,200 broadcasts/sec without Proxy ARP. Each broadcast is replicated to every associated client — catastrophic overhead.</td></tr>
+    <tr><td>Airtime fairness index</td><td>AFI</td><td>≥ 0.95 (Jain's index, per client)</td><td>&lt; 0.85</td><td>Without Airtime Fairness ON, one slow legacy client (MCS 1) can consume 10× its fair share. Low AFI = one client starving the rest.</td></tr>
+    <tr><td>Management frame overhead %</td><td>MF%</td><td>&lt; 2%</td><td>&gt; 5%</td><td>Includes probe responses, association/deassociation frames. High value at match entry = probe storm (thousands of phones scanning simultaneously)</td></tr>
+  </table>
+
+  <h3>Layer 3 — Transport (operational; reflects end-to-end path quality)</h3>
+  <table>
+    <tr><th>Variable</th><th>Symbol</th><th>Target</th><th>Alert Threshold</th><th>Application impact</th></tr>
+    <tr><td>Per-client goodput</td><td>G_c</td><td>≥ 5 Mbps (bowl); ≥ 15 Mbps (concourse)</td><td>&lt; 2 Mbps = complaints imminent</td><td>5 Mbps = 1080p video stream minimum. Below 2 Mbps = buffering.</td></tr>
+    <tr><td>WiFi (L2) latency</td><td>RTT_L2</td><td>&lt; 5 ms</td><td>&gt; 15 ms</td><td>L2 latency reflects AP congestion. Above 15 ms = channel too busy or hidden-node collision.</td></tr>
+    <tr><td>LAN (L3) latency</td><td>RTT_L3</td><td>&lt; 10 ms</td><td>&gt; 30 ms</td><td>Switch forwarding should be sub-millisecond. 30 ms+ indicates a routing loop, overloaded distribution, or VLAN misconfiguration.</td></tr>
+    <tr><td>WAN / internet latency</td><td>RTT_WAN</td><td>&lt; 50 ms</td><td>&gt; 100 ms</td><td>Drives application response time. CDN pre-caching reduces dependence on WAN latency for FIFA+ video.</td></tr>
+    <tr><td>Video jitter (end-to-end)</td><td>J_video</td><td>&lt; 30 ms</td><td>&gt; 50 ms</td><td>Above 50 ms jitter → video decoder buffer under-runs → rebuffering events. Target &lt; 30 ms for stutter-free playback.</td></tr>
+    <tr><td>VoIP jitter</td><td>J_voip</td><td>&lt; 20 ms</td><td>&gt; 30 ms</td><td>Affects team radio / media comms apps using VoIP. Encoded at 64 Kbps — very low bandwidth, but jitter-sensitive.</td></tr>
+    <tr><td>Packet loss %</td><td>PL%</td><td>&lt; 0.5% (video); &lt; 0.01% (POS)</td><td>&gt; 1% video; &gt; 0.1% POS</td><td>Video TCP recovers from &lt;1% loss. POS transactions are 100% loss-intolerant — a lost packet can abort a £50 transaction.</td></tr>
+  </table>
+
+  <h3>Layer 4 — Connection / Auth (operational; reflects EP1 Security health)</h3>
+  <table>
+    <tr><th>Variable</th><th>Symbol</th><th>Target</th><th>Alert Threshold</th><th>Impact</th></tr>
+    <tr><td>802.1X auth success rate</td><td>ASR%</td><td>100%</td><td>&lt; 95% → P1</td><td>Auth failures → team members/VIP/staff can't connect. Any drop from 100% is an incident, not a metric.</td></tr>
+    <tr><td>DHCP success rate</td><td>DHCP%</td><td>100%</td><td>&lt; 98% → P2</td><td>DHCP failure = client associated but no IP = zero connectivity. Caused by pool exhaustion or server unreachable.</td></tr>
+    <tr><td>Time to first data (assoc → IP)</td><td>T_connect</td><td>&lt; 3 s</td><td>&gt; 8 s → P3</td><td>Perceived "slowness on connect" — even if throughput is fine afterwards. Driven by EAP round-trips + DHCP + CWP load time.</td></tr>
+    <tr><td>Roaming reassociation time</td><td>T_roam</td><td>&lt; 50 ms (802.11r)</td><td>&gt; 200 ms → P3</td><td>Without 802.11r: full re-auth on every AP handoff = 300–800 ms → VoIP drops, video stutters mid-roam. 802.11r mandatory at this AP density.</td></tr>
+    <tr><td>DHCP pool utilisation %</td><td>Pool%</td><td>&lt; 85%</td><td>&gt; 90% → P2</td><td>At 100%: new clients can't get IPs. 4-hour lease time keeps this manageable; monitor at half-time when pool recycles.</td></tr>
+  </table>
+
+  <h3>Layer 5 — Application (what users actually experience)</h3>
+  <table>
+    <tr><th>Variable</th><th>Symbol</th><th>Target</th><th>Alert Threshold</th><th>Measurement</th></tr>
+    <tr><td>Video rebuffering events / hour</td><td>RBE</td><td>0 per user</td><td>&gt; 2/hr = transport failing</td><td>EP1 ML Insights application visibility or synthetic probe on FIFA+ stream</td></tr>
+    <tr><td>POS transaction time</td><td>T_POS</td><td>&lt; 500 ms</td><td>&gt; 2 s → P1</td><td>Test at load: 200 concurrent transactions in Phase 2 load test</td></tr>
+    <tr><td>CWP registration page load</td><td>T_CWP</td><td>&lt; 3 s</td><td>&gt; 8 s → P2</td><td>EP1 CWP server response time — peak at stadium opening when 20K fans connect within 30 minutes</td></tr>
+    <tr><td>WAN link utilisation %</td><td>WAN%</td><td>&lt; 75% (150 Gbps of 200 Gbps)</td><td>&gt; 90% → P1</td><td>BGP flow stats at core router. At 90%+ activate CDN fallback and traffic shaping.</td></tr>
+  </table>
+
+  <div class="callout-green">
+    <p><strong>Priority order for game day:</strong> (1) ASR% — auth must work; (2) Retry% — your earliest RF warning; (3) J_video — fan-visible quality; (4) T_connect — first impression on entry; (5) Pool% — silent killer that surfaces late. These five tell you 90% of what you need to know.</p>
+  </div>
+</section>
+
+
+<!-- ── SECTION 23: CLOSED-FORM CAPACITY & SWITCH SIZING ───────────── -->
+<section id="capacity">
+  <h2>23. Closed-Form Capacity &amp; EN Switch Sizing</h2>
+
+  <div class="callout-blue">
+    <p><strong>Objective:</strong> Given N APs and a target oversubscription ratio, derive the exact number of access switches, distribution switches, aggregate uplink bandwidth, and WAN capacity required. Uses EN switch models as concrete anchors.</p>
+  </div>
+
+  <h3>Variable Definitions</h3>
+  <table>
+    <tr><th>Symbol</th><th>Definition</th><th>Units</th></tr>
+    <tr><td><strong>N</strong></td><td>Total number of APs</td><td>count</td></tr>
+    <tr><td><strong>b</strong></td><td>Per-AP backhaul port speed</td><td>Gbps (2.5 or 10)</td></tr>
+    <tr><td><strong>p</strong></td><td>PoE ports per access switch</td><td>count</td></tr>
+    <tr><td><strong>k</strong></td><td>Uplink ports per access switch (used in LAG)</td><td>count</td></tr>
+    <tr><td><strong>u</strong></td><td>Speed of each uplink port</td><td>Gbps</td></tr>
+    <tr><td><strong>U_target</strong></td><td>Acceptable oversubscription ratio at access</td><td>ratio (e.g. 4:1)</td></tr>
+    <tr><td><strong>P_dist</strong></td><td>Number of access uplinks a distribution switch can terminate</td><td>count</td></tr>
+    <tr><td><strong>η</strong></td><td>Busy-hour efficiency factor (what % of N×b actually hits the WAN)</td><td>fraction (0.08–0.15)</td></tr>
+  </table>
+
+  <h3>Closed-Form Equations</h3>
+  <pre>─────────────────────────────────────────────────────────────────────
+ACCESS LAYER
+─────────────────────────────────────────────────────────────────────
+N_access      = ⌈N / p⌉                   # number of access switches
+
+U_actual      = (p × b) / (k × u)          # actual oversubscription ratio
+                                            # (must be ≤ U_target, typically 3–6:1)
+
+C_access_up   = N_access × k × u           # total access→distribution bandwidth (Gbps)
+
+─────────────────────────────────────────────────────────────────────
+DISTRIBUTION LAYER
+─────────────────────────────────────────────────────────────────────
+N_dist        = ⌈N_access / P_dist⌉        # number of distribution switches
+
+C_dist_up     = N_dist × C_dist_uplink     # total distribution→core bandwidth (Gbps)
+
+─────────────────────────────────────────────────────────────────────
+WAN (INTERNET UPLINK)
+─────────────────────────────────────────────────────────────────────
+C_WAN_demand  = N × b × η                  # busy-hour aggregate WAN demand (Gbps)
+C_WAN_min     = C_WAN_demand / n_ISP       # per-circuit minimum (n_ISP = number of ISP circuits)
+
+─────────────────────────────────────────────────────────────────────
+CHECK: oversubscription at each layer must satisfy U ≤ U_target
+  Access:       (p × b) / (k × u)          ≤ U_target (typ. 4–6:1 for fan WiFi)
+  Distribution: C_access_up / C_dist_cap   ≤ 3:1
+  Core→WAN:     C_WAN_demand / C_WAN_cap   ≤ 0.75 (75% util headroom)
+─────────────────────────────────────────────────────────────────────</pre>
+
+  <h3>EN Switch Reference Models</h3>
+  <table>
+    <tr><th>Layer</th><th>EN Model</th><th>PoE Ports (b)</th><th>Uplink Ports (k × u)</th><th>PoE Budget</th><th>Use Case</th></tr>
+    <tr><td>Access — bowl</td><td><strong>ExtremeSwitching 5420-48P</strong></td><td>48 × 2.5 GbE PoE+</td><td>4 × 25G SFP28</td><td>740W</td><td>Bowl seating, under-seat APs. 2.5G per AP5060U.</td></tr>
+    <tr><td>Access — media/team</td><td><strong>ExtremeSwitching 5520-24X</strong></td><td>24 × 10G SFP+</td><td>4 × 100G QSFP28</td><td>—</td><td>Media tribune, team areas. 10G per AP5060D where max throughput needed.</td></tr>
+    <tr><td>Distribution</td><td><strong>ExtremeSwitching X465-48P</strong></td><td>48 × 2.5G PoE (if needed)</td><td>8 × 25G + 2 × 100G</td><td>—</td><td>Aggregates 8–16 access switches per unit. Dual 100G uplinks to core.</td></tr>
+    <tr><td>Core</td><td><strong>ExtremeSwitching X695-48Y-8C</strong></td><td>—</td><td>48 × 25G + 8 × 100G</td><td>—</td><td>Core switching fabric. 100G to ISP border routers.</td></tr>
+    <tr><td>Lab (SW1)</td><td><strong>ExtremeSwitching 5320-16P</strong></td><td>16 × 2.5G PoE+</td><td>2 × 10G SFP+ + 2 × 25G SFP28</td><td>240W</td><td>Karl Lab: 1 AP3000 + management. Not a stadium switch.</td></tr>
+  </table>
+
+  <h3>Worked Example A — Stadium Bowl (4,000 AP5060U at 2.5G)</h3>
+  <pre>Inputs:
+  N = 4,000 APs      b = 2.5 Gbps     p = 48 ports/switch (5420-48P)
+  k = 2 uplinks (LAG pair)    u = 25 Gbps    U_target = 4:1
+  P_dist = 8 access switches per distribution    η = 0.10
+
+ACCESS LAYER:
+  N_access = ⌈4,000 / 48⌉              = 84 switches (5420-48P)
+  U_actual = (48 × 2.5) / (2 × 25)    = 120 / 50 = 2.4:1  ✓ (target was 4:1, actual is better)
+  C_access_up = 84 × 2 × 25           = 4,200 Gbps uplink capacity
+
+DISTRIBUTION LAYER:
+  N_dist = ⌈84 / 8⌉                    = 11 distribution switches (X465)
+  Each X465 uplinks: 2 × 100G to core  = 200 Gbps per dist switch
+  C_dist_up = 11 × 200                 = 2,200 Gbps to core
+
+WAN DEMAND:
+  C_WAN = 4,000 × 2.5 × 0.10          = 1,000 Gbps theoretical bowl peak
+  Per-client cap at 25 Mbps reduces to:
+  4,000 APs × ~10 active clients/AP × 5 Mbps avg = 200 Gbps actual peak
+  Two 100 Gbps ISP circuits = 200 Gbps total  →  at capacity during peak.
+  Recommendation: 3× 100G circuits for bowl-only WAN demand.
+
+PoE BUDGET:
+  84 switches × 740W PoE budget = 62,160W total PoE available
+  4,000 APs × 25W (802.3bt) = 100,000W required
+  ⚠ Each 5420-48P at 48 APs × 25W = 1,200W per switch, exceeds 740W budget!
+  FIX: Reduce to 24 APs per switch (half-populated) OR use 802.3at (21W) mode:
+    24 APs × 25W = 600W &lt; 740W ✓   →  N_access = ⌈4,000/24⌉ = 167 switches
+    OR: 48 APs × 21W = 1,008W → still over 740W for PoE++ mode
+  Production decision: use 5420-24P (24-port) for AP5060U bowl to stay in budget.</pre>
+
+  <div class="callout-red">
+    <p><strong>PoE budget is the hidden gotcha.</strong> The switch port count tells you one number; the PoE power budget tells you a different (often lower) one. Always calculate both and use the smaller result for N_access. For AP5060 at 25W each, a 48-port switch maxes out its PoE budget at 29–30 APs (740W ÷ 25W), not 48.</p>
+  </div>
+
+  <h3>Worked Example B — Media/Team Areas (500 AP5060D at 10G)</h3>
+  <pre>Inputs:
+  N = 500 APs    b = 10 Gbps    p = 24 ports/switch (5520-24X, SFP+ per AP)
+  k = 2 uplinks  u = 100 Gbps   P_dist = 6    η = 0.08
+
+ACCESS LAYER:
+  N_access = ⌈500 / 24⌉           = 21 switches (5520-24X)
+  U_actual = (24 × 10) / (2 × 100) = 240 / 200 = 1.2:1  ✓ near line rate
+  C_access_up = 21 × 2 × 100      = 4,200 Gbps
+
+DISTRIBUTION:
+  N_dist = ⌈21 / 6⌉               = 4 distribution switches (X695)
+  C_dist_up = 4 × 2 × 100G        = 800 Gbps to core
+
+WAN DEMAND (team/media priority):
+  C_WAN = 500 × 10 × 0.08         = 400 Gbps theoretical
+  Actual: 500 APs × 20 clients/AP × 50 Mbps = 500 Gbps
+  These VLANs get QoS priority — carve 20 Gbps guaranteed from the 200 Gbps WAN budget.</pre>
+
+  <h3>Consolidated Summary — Full 10,000 AP Deployment</h3>
+  <table>
+    <tr><th>Layer</th><th>Count</th><th>EN Model</th><th>Total Bandwidth</th></tr>
+    <tr><td>Bowl access (4K APs)</td><td>~167 switches (24-port PoE budget constraint)</td><td>5420-24P</td><td>167 × 50G LAG = 8.35 Tbps uplink</td></tr>
+    <tr><td>Concourse access (2K APs)</td><td>84 switches</td><td>5420-48P</td><td>84 × 50G = 4.2 Tbps</td></tr>
+    <tr><td>Seattle Center (3K APs)</td><td>125 switches</td><td>5420-24P</td><td>125 × 50G = 6.25 Tbps</td></tr>
+    <tr><td>Media/Team (500 APs)</td><td>21 switches</td><td>5520-24X</td><td>21 × 200G = 4.2 Tbps</td></tr>
+    <tr><td><strong>Total access switches</strong></td><td><strong>~400</strong></td><td>Mix 5420 + 5520</td><td>~22 Tbps total access capacity</td></tr>
+    <tr><td>Distribution</td><td>~50 switches</td><td>X465 / X695</td><td>50 × 200G = 10 Tbps to core</td></tr>
+    <tr><td>WAN circuits</td><td>3 × 100G (minimum)</td><td>BGP multi-home</td><td>300 Gbps internet capacity</td></tr>
+  </table>
+
+  <div class="callout-green">
+    <p><strong>Rule of thumb for quick estimates:</strong> 1 access switch per 24 APs (PoE budget constrained); 1 distribution switch per 8–10 access switches; WAN circuits = (N_AP × 0.01 Gbps) × 1.5 safety factor. For 10K APs: 10,000 × 0.01 × 1.5 = 150 Gbps minimum WAN. Round up to 200 Gbps (2× 100G) as the floor.</p>
+  </div>
+
+  <h3>Lab Scale (AP3000 + 5320 SW1 — Sprint 1)</h3>
+  <pre>N = 1 AP    b = 2.5 GbE (or 1 GbE on AP3000)    p = 16 ports (5320-16P)
+N_access = ⌈1/16⌉ = 1 switch  ✓
+U_actual = (1 × 1) / (2 × 10) = 0.05:1  (massively over-provisioned — correct for a lab)
+C_WAN = 1 × 1 × 0.10 = 0.1 Gbps = 100 Mbps  (your 192.168.0.x home network handles this fine)
+
+Lab conclusion: the 5320-16P is correct for the lab. The same equations scale from
+1 AP in Karl Lab to 10,000 APs at Lumen Field — only the numbers change.</pre>
+</section>
+
+
 <footer>
-  <p>Session 2026-05-31 &nbsp;·&nbsp; FIFA World Cup 2026 Seattle WiFi Design &nbsp;·&nbsp; Draft v1.6 (QoE Radio Profile + Game Day Load Model)</p>
+  <p>Session 2026-05-31 &nbsp;·&nbsp; FIFA World Cup 2026 Seattle WiFi Design &nbsp;·&nbsp; Draft v1.7 (Design Parameters Matrix + Closed-Form Capacity &amp; Switch Sizing)</p>
   <p>Sources: <a href="https://www.extremenetworks.com/resources/case-study/seattle-seahawks-achieve-operational-freedom">EN / Lumen Field Case Study</a> &nbsp;·&nbsp; <a href="https://www.extremenetworks.com/resources/blogs/stadium-wi-fi-7-redefining-high-density-connectivity-with-ap5060">EN AP5060 Stadium Blog</a> &nbsp;·&nbsp; <a href="https://www.seattlefwc26.org/destination/stadium">FIFA WC26 Seattle Stadium</a> &nbsp;·&nbsp; <a href="https://www.seattlefwc26.org/news/seattle-soccer-house-at-pacific-place-to-deliver-a-free-immersive-world-cup-experience-on-a-70-foot-screen">Seattle Soccer House</a> &nbsp;·&nbsp; RFC 3580 (802.1X + RADIUS VLAN) &nbsp;·&nbsp; RFC 6614 (RadSec) &nbsp;·&nbsp; RFC 8110 (OWE) &nbsp;·&nbsp; IEEE 802.11be (WiFi-7)</p>
   <p>&copy; 2026 Khursheed Khan. All rights reserved.</p>
 </footer>
