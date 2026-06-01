@@ -571,7 +571,7 @@ configure iproute add default 192.168.0.1</pre>
   <h3>DHCP Server — Manual CLI (one-time, post factory reset)</h3>
   <pre>configure vlan TeamUSA ipaddress 10.10.0.1/24
 configure vlan TeamAUS ipaddress 10.20.0.1/24
-configure vlan Guest   ipaddress 10.30.0.1/24
+configure vlan Guest   ipaddress 10.30.0.1/16
 configure vlan VIP     ipaddress 10.40.0.1/24
 configure vlan POS     ipaddress 10.50.0.1/24
 
@@ -583,7 +583,7 @@ enable ipforwarding vlan POS
 
 configure vlan TeamUSA dhcp-address-range 10.10.0.100 - 10.10.0.200
 configure vlan TeamAUS dhcp-address-range 10.20.0.100 - 10.20.0.200
-configure vlan Guest   dhcp-address-range 10.30.0.100 - 10.30.0.200
+configure vlan Guest   dhcp-address-range 10.30.0.100 - 10.30.255.254
 configure vlan VIP     dhcp-address-range 10.40.0.100 - 10.40.0.200
 configure vlan POS     dhcp-address-range 10.50.0.100 - 10.50.0.200
 
@@ -891,7 +891,7 @@ show fdb ports 3
     <li><strong>EP1 Core → Network Policies → Add SSID</strong></li>
     <li>Name: <code>WC_Open</code></li>
     <li>Security: <strong>Enhanced Open (OWE)</strong> — this encrypts traffic per-client without a passphrase</li>
-    <li>User Profile: <strong>VLAN 30</strong> (Guest — already configured on SW1 with DHCP 10.30.0.100–200)</li>
+    <li>User Profile: <strong>VLAN 30</strong> (Guest — already configured on SW1 with DHCP 10.30.0.100–10.30.255.254, /16 for 72K fans)</li>
     <li>Enable Captive Web Portal (optional) — for Terms of Service acceptance, FIFA branding, or email registration</li>
     <li>Apply to AP1 via the same Switch/AP Policy</li>
   </ol>
