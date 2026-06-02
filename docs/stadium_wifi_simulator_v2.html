@@ -3,1171 +3,980 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Lumen Field Stadium WiFi Simulator v2 — FIFA WC 2026 Seattle</title>
+<title>Lumen Field Stadium WiFi Simulator v2 — Phase 1</title>
 <style>
-:root {
-  --bg:#0b0d0f; --surface:#131618; --surface2:#191c1f; --border:#232830;
-  --green:#00d97e; --yellow:#ffc107; --orange:#ff6d2d; --red:#f4455a;
-  --blue:#3a9de0; --cyan:#00c8d4; --purple:#9b7aff; --teal:#00bfa5;
-  --text:#dde3ea; --muted:#5a6270; --muted2:#7a8494;
-  --accent:#0078d7; --gold:#d4a017;
-}
+:root{--bg:#0b0d0f;--sf:#131618;--sf2:#191c1f;--bd:#232830;--green:#00d97e;--yel:#ffc107;--org:#ff6d2d;--red:#f4455a;--blue:#3a9de0;--cyan:#00c8d4;--pur:#9b7aff;--text:#dde3ea;--mut:#5a6270;--mut2:#7a8494;--acc:#0078d7;--gold:#d4a017}
 *{box-sizing:border-box;margin:0;padding:0}
-body{background:var(--bg);color:var(--text);font-family:'SF Mono','Consolas','Fira Code',monospace;font-size:12px;min-height:100vh;overflow:hidden}
-
-/* ── HEADER ── */
-header{background:#080c14;border-bottom:1px solid #1a2535;padding:10px 20px;display:flex;align-items:center;justify-content:space-between;height:48px}
-header h1{font-size:13px;font-weight:700;color:#fff;letter-spacing:.4px}
-header .sub{font-size:10px;color:var(--muted2);margin-top:2px}
-.badge{display:inline-flex;align-items:center;gap:5px;background:#0d1928;border:1px solid #1a3250;color:#6aabf7;font-size:9px;padding:3px 8px;border-radius:2px;white-space:nowrap}
-.badge.v2{border-color:#d4a017;background:#1a1200;color:#ffd54f}
-.badge.ap-badge{border-color:#9b7aff55;background:#16102a;color:#b59aff;cursor:pointer;transition:.15s}
-.badge.ap-badge:hover{border-color:#9b7aff;background:#1e1640}
-.badge-row{display:flex;gap:6px;align-items:center}
-
-/* ── LAYOUT ── */
-.layout{display:grid;grid-template-columns:270px 1fr 220px;grid-template-rows:1fr auto;height:calc(100vh - 48px - 36px - 88px);gap:1px;background:var(--border)}
-.panel{background:var(--surface);overflow-y:auto;padding:14px}
-.ptitle{font-size:9px;font-weight:700;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;border-bottom:1px solid var(--border);padding-bottom:6px;margin-bottom:12px}
-
-/* ── INPUT PANEL ── */
-.knob-group{margin-bottom:14px}
-.knob-lbl{display:flex;justify-content:space-between;align-items:center;font-size:10px;margin-bottom:4px}
-.knob-lbl span{color:var(--cyan);font-weight:600;font-size:11px}
-.knob-desc{font-size:9px;color:var(--muted);margin-top:2px;line-height:1.4}
-input[type=range]{width:100%;-webkit-appearance:none;height:3px;border-radius:2px;background:#222;cursor:pointer;margin:2px 0}
-input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:12px;height:12px;border-radius:50%;background:var(--accent);cursor:pointer;border:1px solid #1a5090}
-.sep{border:none;border-top:1px solid var(--border);margin:12px 0}
-select{background:#111;border:1px solid var(--border);color:var(--text);padding:4px 7px;border-radius:2px;font-size:10px;width:100%;cursor:pointer;font-family:inherit}
-.toggle-row{display:flex;align-items:center;gap:8px;margin-bottom:6px}
-.tog{position:relative;width:32px;height:16px;flex-shrink:0}
+body{background:var(--bg);color:var(--text);font-family:'SF Mono','Consolas',monospace;font-size:12px;min-height:100vh;overflow:hidden}
+header{background:#080c14;border-bottom:1px solid #1a2535;padding:8px 16px;display:flex;align-items:center;justify-content:space-between;height:44px}
+header h1{font-size:12px;font-weight:700;color:#fff}
+.brow{display:flex;gap:5px;align-items:center;flex-wrap:wrap}
+.b{display:inline-flex;align-items:center;gap:4px;background:#0d1928;border:1px solid #1a3250;color:#6aabf7;font-size:9px;padding:3px 7px;border-radius:2px;white-space:nowrap}
+.b.v2{border-color:var(--gold);background:#1a1200;color:#ffd54f}
+.b.clk{cursor:pointer;transition:.15s}.b.clk:hover{border-color:var(--pur);color:var(--pur)}
+.b.opt{border-color:#00501a;background:#001a08;color:#5aff9a;cursor:pointer}
+.layout{display:grid;grid-template-columns:300px 1fr 220px;height:calc(100vh - 44px - 34px - 80px);gap:1px;background:var(--bd)}
+.panel{background:var(--sf);overflow-y:auto;padding:12px}
+/* collapsible sections */
+details{border-bottom:1px solid var(--bd);margin-bottom:2px}
+summary{cursor:pointer;padding:7px 0 5px;font-size:9px;font-weight:700;color:var(--mut);letter-spacing:1.4px;text-transform:uppercase;list-style:none;display:flex;justify-content:space-between;align-items:center;user-select:none}
+summary::-webkit-details-marker{display:none}
+summary::after{content:'▸';color:var(--mut);transition:.2s}
+details[open] summary::after{content:'▾'}
+.sbody{padding:6px 0 10px}
+/* knobs */
+.kg{margin-bottom:11px}
+.kl{display:flex;justify-content:space-between;font-size:10px;margin-bottom:3px}
+.kl span{color:var(--cyan);font-weight:600;font-size:11px}
+.kd{font-size:9px;color:var(--mut);margin-top:2px;line-height:1.35}
+input[type=range]{width:100%;-webkit-appearance:none;height:3px;border-radius:2px;background:#222;cursor:pointer}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:11px;height:11px;border-radius:50%;background:var(--acc);cursor:pointer}
+.sep{border:none;border-top:1px solid var(--bd);margin:8px 0}
+select{background:#111;border:1px solid var(--bd);color:var(--text);padding:4px 6px;border-radius:2px;font-size:10px;width:100%;cursor:pointer;font-family:inherit}
+.trow{display:flex;align-items:center;gap:7px;margin-bottom:5px}
+.tog{position:relative;width:30px;height:15px;flex-shrink:0}
 .tog input{opacity:0;width:0;height:0}
-.tog-sl{position:absolute;inset:0;background:#1e2228;border:1px solid var(--border);border-radius:16px;cursor:pointer;transition:.15s}
-.tog-sl:before{content:'';position:absolute;left:2px;top:2px;width:10px;height:10px;background:#444;border-radius:50%;transition:.15s}
-input:checked+.tog-sl{background:var(--accent);border-color:#1a60b0}
-input:checked+.tog-sl:before{transform:translateX(16px);background:#fff}
-.tog-lbl{font-size:10px;color:var(--text)}
-.tog-lbl.off{color:var(--muted)}
-.tog-val{font-size:9px;color:var(--muted2);margin-left:auto}
-
-.preset-grid{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-bottom:10px}
-.preset-btn{background:#131618;border:1px solid var(--border);color:var(--muted2);padding:5px 4px;border-radius:2px;cursor:pointer;font-size:9px;font-family:inherit;text-align:center;transition:.15s;line-height:1.3}
-.preset-btn:hover{border-color:var(--blue);color:var(--blue)}
-.preset-btn.active{border-color:var(--gold);background:#1a1200;color:var(--gold)}
-.tline-wrap{margin-bottom:10px}
-.tline-lbl{display:flex;justify-content:space-between;font-size:9px;color:var(--muted);margin-bottom:3px}
-.tline-lbl b{color:var(--yellow);font-size:10px}
-input#t-scrub{width:100%;accent-color:var(--yellow)}
-
-/* ── METRICS PANEL ── */
-.band-tabs{display:flex;gap:1px;margin-bottom:10px}
-.btab{flex:1;padding:5px 4px;text-align:center;background:var(--surface2);border:1px solid var(--border);font-size:9px;cursor:pointer;transition:.15s;color:var(--muted)}
-.btab:hover{color:var(--text)}
-.btab.active{color:var(--text);border-bottom:2px solid var(--cyan)}
-.btab.active.g2{border-bottom-color:#ff9800}
-.btab.active.g5{border-bottom-color:#3a9de0}
-.btab.active.g6{border-bottom-color:#9b7aff}
-.btab.active.agg{border-bottom-color:var(--green)}
-.band-panel{display:none}
-.band-panel.visible{display:block}
-
-.mcard-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px}
-.mcard{background:#0d0f12;border:1px solid var(--border);border-radius:3px;padding:8px 10px}
-.mcard.full{grid-column:1/-1}
-.mcard.wide{grid-column:1/-1}
-.mname{font-size:8px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:3px}
-.mval{font-size:20px;font-weight:700;line-height:1.1}
-.munit{font-size:9px;color:var(--muted2);margin-top:1px}
-.mbar{height:3px;border-radius:2px;background:#1a1e25;margin-top:5px;overflow:hidden}
-.mbf{height:100%;border-radius:2px;transition:width .3s,background .3s}
-.green{color:var(--green)} .yellow{color:var(--yellow)} .orange{color:var(--orange)} .red{color:var(--red)}
-.bg-green{background:var(--green)} .bg-yellow{background:var(--yellow)} .bg-orange{background:var(--orange)} .bg-red{background:var(--red)}
-.bg-blue{background:var(--blue)} .bg-purple{background:var(--purple)}
-
-.mlo-card{background:linear-gradient(135deg,#0d1a2a,#160e2a);border:1px solid #2a3060;border-radius:3px;padding:8px 10px;margin-bottom:8px;display:none}
-.mlo-card.visible{display:block}
-.mlo-title{font-size:9px;color:#9b7aff;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}
-.mlo-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}
-.mlo-stat{text-align:center}
-.mlo-val{font-size:16px;font-weight:700;color:#b59aff}
-.mlo-lbl{font-size:8px;color:var(--muted)}
-
-.app-mix-bar{height:8px;border-radius:2px;display:flex;overflow:hidden;margin:6px 0}
-.amix-seg{height:100%;transition:width .4s}
-
-.svc-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-top:8px}
-.svc-card{background:#0d0f12;border:1px solid var(--border);border-radius:3px;padding:7px 8px;text-align:center}
-.svc-name{font-size:8px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:4px}
-.svc-status{font-size:11px;font-weight:700}
-.svc-detail{font-size:8px;color:var(--muted2);margin-top:3px;line-height:1.3}
-
-.deg-bar{display:flex;gap:3px;align-items:center;margin:8px 0}
-.deg-seg{flex:1;height:10px;border-radius:1px;background:#1a1e25;transition:.3s}
-.deg-seg.active-0{background:var(--green)}
-.deg-seg.active-1{background:var(--yellow)}
-.deg-seg.active-2{background:var(--orange)}
-.deg-seg.active-3{background:var(--red)}
-.deg-seg.active-4{background:#8B0000}
-.deg-label{font-size:9px;color:var(--muted);text-align:center;margin-top:3px}
-
-/* ── RIGHT PANEL ── */
-#gauge-panel{display:flex;flex-direction:column;align-items:center}
-canvas#gauge2{width:180px;height:108px}
-.stab-lbl{font-size:15px;font-weight:700;margin-top:6px;letter-spacing:.5px}
-.stab-score{font-size:10px;color:var(--muted);margin-top:2px}
-.stab-meter{width:100%;height:10px;background:#111;border-radius:5px;overflow:hidden;margin-top:8px;border:1px solid var(--border)}
-.stab-fill{height:100%;border-radius:5px;transition:width .4s,background .4s}
-
-.ap-grid{display:grid;grid-template-columns:repeat(8,1fr);gap:2px;margin-top:8px}
-.ap-dot{width:12px;height:12px;border-radius:2px;transition:background .3s}
-
-.rec-box{margin-top:12px;width:100%}
-.rec-title{font-size:8px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:5px}
-.ra{font-size:9px;padding:4px 7px;border-radius:2px;margin-bottom:3px;border-left:2px solid;line-height:1.4}
+.ts{position:absolute;inset:0;background:#1e2228;border:1px solid var(--bd);border-radius:15px;cursor:pointer;transition:.15s}
+.ts:before{content:'';position:absolute;left:2px;top:2px;width:9px;height:9px;background:#444;border-radius:50%;transition:.15s}
+input:checked+.ts{background:var(--acc);border-color:#1a60b0}
+input:checked+.ts:before{transform:translateX(15px);background:#fff}
+.tl{font-size:10px}.tv{font-size:9px;color:var(--mut2);margin-left:auto}
+/* 2-col grid for toggles */
+.tog-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 6px}
+/* presets */
+.pgrid{display:grid;grid-template-columns:1fr 1fr;gap:3px;margin-bottom:8px}
+.pb{background:#131618;border:1px solid var(--bd);color:var(--mut2);padding:4px 3px;border-radius:2px;cursor:pointer;font-size:9px;font-family:inherit;text-align:center;line-height:1.3;transition:.15s}
+.pb:hover{border-color:var(--blue);color:var(--blue)}
+.pb.act{border-color:var(--gold);background:#1a1200;color:var(--gold)}
+.tline{display:flex;justify-content:space-between;font-size:8px;color:var(--mut);margin-bottom:2px}
+/* metrics */
+.btabs{display:flex;gap:1px;margin-bottom:8px}
+.bt{flex:1;padding:4px;text-align:center;background:var(--sf2);border:1px solid var(--bd);font-size:9px;cursor:pointer;color:var(--mut);transition:.1s}
+.bt.act{color:var(--text)}
+.bt.act.g2{border-bottom:2px solid #ff9800}
+.bt.act.g5{border-bottom:2px solid var(--blue)}
+.bt.act.g6{border-bottom:2px solid var(--pur)}
+.bt.act.agg{border-bottom:2px solid var(--green)}
+.bt.act.gap{border-bottom:2px solid var(--gold)}
+.bp{display:none}.bp.vis{display:block}
+.mg{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:8px}
+.mc{background:#0d0f12;border:1px solid var(--bd);border-radius:2px;padding:7px 9px}
+.mc.full{grid-column:1/-1}
+.mn{font-size:8px;color:var(--mut);text-transform:uppercase;letter-spacing:1px;margin-bottom:2px}
+.mv{font-size:18px;font-weight:700;line-height:1.1}
+.mu{font-size:8px;color:var(--mut2);margin-top:1px}
+.mb{height:3px;border-radius:2px;background:#1a1e25;margin-top:4px;overflow:hidden}
+.mbf{height:100%;border-radius:2px;transition:width .3s}
+.green{color:var(--green)}.yellow{color:var(--yel)}.orange{color:var(--org)}.red{color:var(--red)}
+.bg-green{background:var(--green)}.bg-yellow{background:var(--yel)}.bg-orange{background:var(--org)}.bg-red{background:var(--red)}
+/* mlo card */
+.mloc{background:linear-gradient(135deg,#0d1a2a,#160e2a);border:1px solid #2a3060;border-radius:2px;padding:7px 9px;margin-bottom:7px;display:none}
+.mloc.vis{display:block}
+.mlot{font-size:9px;color:var(--pur);text-transform:uppercase;letter-spacing:1px;margin-bottom:5px}
+.mlos{display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px}
+.mlostat{text-align:center}
+.mlov{font-size:15px;font-weight:700;color:#b59aff}
+.mlol{font-size:8px;color:var(--mut)}
+/* svc */
+.sg{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin-top:7px}
+.sc{background:#0d0f12;border:1px solid var(--bd);border-radius:2px;padding:6px 7px;text-align:center}
+.sn{font-size:8px;color:var(--mut);text-transform:uppercase;letter-spacing:.8px;margin-bottom:3px}
+.ss2{font-size:10px;font-weight:700}
+.sd{font-size:8px;color:var(--mut2);margin-top:2px;line-height:1.3}
+/* gap table */
+.gtable{width:100%;border-collapse:collapse;font-size:9px;margin-top:6px}
+.gtable th{font-size:8px;color:var(--mut);text-transform:uppercase;letter-spacing:.8px;padding:4px 6px;border-bottom:1px solid var(--bd);text-align:left}
+.gtable td{padding:4px 6px;border-bottom:1px solid #0d0f12}
+.gtable tr:last-child td{border-bottom:none}
+.gok{color:var(--green)}.gwarn{color:var(--yel)}.gbad{color:var(--red)}
+/* deg bar */
+.dbar{display:flex;gap:2px;margin:6px 0}
+.ds{flex:1;height:8px;border-radius:1px;background:#1a1e25;transition:.3s}
+.d0{background:var(--green)}.d1{background:var(--yel)}.d2{background:var(--org)}.d3{background:var(--red)}.d4{background:#8B0000}
+/* right panel */
+.bpfind{margin-top:10px;border:1px solid var(--bd);border-radius:2px;padding:8px;background:#0d0f12}
+.bpft{font-size:9px;color:var(--gold);text-transform:uppercase;letter-spacing:1px;margin-bottom:7px}
+.bpbtn{width:100%;margin-top:6px;background:#0d1928;border:1px solid var(--blue);color:var(--blue);padding:5px;border-radius:2px;cursor:pointer;font-size:9px;font-family:inherit;transition:.15s}
+.bpbtn:hover{background:#1a2840;color:#fff}
+.bpres{font-size:9px;margin-top:6px;padding:5px;border-radius:2px;line-height:1.5;min-height:24px}
+.bpres.ok{background:#001a08;border:1px solid var(--green);color:#7cffaa}
+.bpres.warn{background:#1a1000;border:1px solid var(--yel);color:#ffe07a}
+.bpres.na{background:#0d0f12;border:1px solid var(--bd);color:var(--mut)}
+/* gauge */
+.stlbl{font-size:14px;font-weight:700;margin-top:5px;letter-spacing:.5px}
+.stscore{font-size:10px;color:var(--mut);margin-top:2px}
+.stmeter{width:100%;height:9px;background:#111;border-radius:5px;overflow:hidden;margin-top:7px;border:1px solid var(--bd)}
+.stfill{height:100%;border-radius:5px;transition:width .4s}
+.apg{display:grid;grid-template-columns:repeat(8,1fr);gap:2px;margin-top:6px}
+.ap{width:11px;height:11px;border-radius:2px;transition:background .3s}
+/* recovery */
+.ral{margin-top:10px}
+.ralt{font-size:8px;color:var(--mut);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px}
+.ra{font-size:9px;padding:3px 6px;border-radius:2px;margin-bottom:2px;border-left:2px solid;line-height:1.4}
 .ra-ok{background:#001a0a;border-color:var(--green);color:#7cffaa}
 .ra-auto{background:#001428;border-color:var(--blue);color:#7abfff}
-.ra-warn{background:#1a1000;border-color:var(--yellow);color:#ffe07a}
+.ra-warn{background:#1a1000;border-color:var(--yel);color:#ffe07a}
 .ra-alert{background:#1a0010;border-color:var(--red);color:#ff8a9a}
-.ra-info{background:#0a0820;border-color:var(--purple);color:#c0a8ff}
-
-/* ── SLA BAR ── */
-.sla-bar{background:var(--surface);border-top:1px solid var(--border);padding:7px 16px;display:flex;gap:5px;align-items:center;flex-wrap:wrap;min-height:36px}
-.sla-chip{display:flex;align-items:center;gap:5px;background:#0d0f12;border:1px solid var(--border);border-radius:2px;padding:4px 8px;font-size:9px;white-space:nowrap}
-.sla-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
-.sla-lbl{color:var(--muted)}
-.sla-v{font-weight:600}
-
-/* ── LOG ── */
-.log-wrap{height:88px;background:#070809;border-top:1px solid var(--border);overflow-y:auto;display:flex;flex-direction:column-reverse;padding:4px 16px}
-.log-e{font-size:9px;padding:2px 0;border-bottom:1px solid #0d0f12;display:flex;gap:10px}
-.log-t{color:var(--muted);flex-shrink:0;width:65px}
-.log-ok{color:var(--green)} .log-auto{color:var(--blue)} .log-warn{color:var(--yellow)} .log-alert{color:var(--red)} .log-info{color:var(--purple)}
-
-/* ── FOOTER ── */
-.footer{text-align:center;font-size:8px;color:var(--muted);padding:3px;background:var(--surface);border-top:1px solid var(--border)}
-
-/* ── CAPACITY CHART ── */
-.cap-chart{width:100%;height:60px;position:relative;margin:6px 0}
-.cap-chart canvas{width:100%;height:100%}
-
-/* scrollbar */
-::-webkit-scrollbar{width:4px} ::-webkit-scrollbar-track{background:transparent} ::-webkit-scrollbar-thumb{background:#333;border-radius:2px}
+.ra-info{background:#0a0820;border-color:var(--pur);color:#c0a8ff}
+/* sla bar */
+.slabar{background:var(--sf);border-top:1px solid var(--bd);padding:6px 14px;display:flex;gap:4px;flex-wrap:wrap;align-items:center;min-height:34px}
+.slac{display:flex;align-items:center;gap:4px;background:#0d0f12;border:1px solid var(--bd);border-radius:2px;padding:3px 7px;font-size:9px;white-space:nowrap}
+.slad{width:5px;height:5px;border-radius:50%;flex-shrink:0}
+.slal{color:var(--mut)}.slav{font-weight:600}
+/* log */
+.logw{height:80px;background:#070809;border-top:1px solid var(--bd);overflow-y:auto;display:flex;flex-direction:column-reverse;padding:3px 14px}
+.le{font-size:9px;padding:2px 0;border-bottom:1px solid #0d0f12;display:flex;gap:8px}
+.lt{color:var(--mut);flex-shrink:0;width:62px}
+.lok{color:var(--green)}.lau{color:var(--blue)}.lwa{color:var(--yel)}.lal{color:var(--red)}.lin{color:var(--pur)}
+.footer{text-align:center;font-size:8px;color:var(--mut);padding:3px;background:var(--sf);border-top:1px solid var(--bd)}
+::-webkit-scrollbar{width:3px}::-webkit-scrollbar-thumb{background:#333;border-radius:2px}
 </style>
 </head>
 <body>
-
 <header>
   <div>
-    <h1>Lumen Field Stadium WiFi Simulator <span style="color:var(--gold)">v2</span></h1>
-    <div class="sub" id="hdr-sub">AP5060 · Multi-Band · WiFi 7 · MLO · 72K Fans · FIFA WC 2026 Seattle</div>
+    <div style="display:flex;align-items:center;gap:8px">
+      <h1>Lumen Field WiFi Simulator <span style="color:var(--gold)">v2 · Phase 1</span></h1>
+      <span id="hdr-ap" style="font-size:9px;color:var(--pur)">AP5060 · WiFi 7 EHT</span>
+    </div>
+    <div style="font-size:9px;color:var(--mut2);margin-top:1px" id="hdr-sub">280 APs · Multi-band · MLO · 72K Fans · FIFA WC 2026</div>
   </div>
-  <div class="badge-row">
-    <div class="badge v2">▲ v2 · EHT</div>
-    <div class="badge ap-badge" id="ap-toggle-badge" onclick="toggleAP()" title="Click to switch AP type">AP5060 ⇄</div>
-    <div class="badge" style="color:#5aff9a;border-color:#00501a;background:#001a08" id="status-badge">● STABLE</div>
-    <button onclick="resetAll()" style="background:#0d1020;border:1px solid var(--border);color:var(--muted2);padding:3px 10px;border-radius:2px;cursor:pointer;font-size:9px;font-family:inherit">↺ Reset</button>
+  <div class="brow">
+    <div class="b v2">v2 Phase 1</div>
+    <div class="b clk" onclick="toggleAP()" title="Click to switch">AP5060 ⇄ AP3000</div>
+    <button class="b opt" onclick="applyOptimal()">★ Stadium Optimal</button>
+    <div class="b" style="color:#5aff9a;border-color:#00501a;background:#001a08" id="stbadge">● STABLE</div>
+    <button onclick="resetAll()" style="background:#0d1020;border:1px solid var(--bd);color:var(--mut2);padding:3px 9px;border-radius:2px;cursor:pointer;font-size:9px;font-family:inherit">↺ Reset</button>
   </div>
 </header>
 
 <div class="layout">
+<!-- ══ LEFT PANEL ══ -->
+<div class="panel">
 
-  <!-- ═══ INPUT PANEL ═══ -->
-  <div class="panel" id="input-panel">
-    <div class="ptitle">Demand &amp; Configuration</div>
+<details open>
+<summary>Demand Model</summary>
+<div class="sbody">
+  <div class="kg">
+    <div class="kl">AP Type <span id="lv-ap">AP5060 · WiFi 7</span></div>
+    <select id="ap-type" onchange="update()">
+      <option value="AP5060" selected>AP5060 — WiFi 7 EHT · 4×4 MIMO · 2.4+5+6GHz · MLO</option>
+      <option value="AP3000">AP3000 — WiFi 6 HE · 2×2 MIMO · 2.4+5GHz only</option>
+    </select>
+  </div>
+  <div class="kg">
+    <div class="kl">Match Timeline <b id="lv-t" style="color:var(--yel)">T+0 Kickoff</b></div>
+    <div class="tline"><span>T−90</span><span>KO</span><span>HT</span><span>T+120</span></div>
+    <input type="range" id="t-scrub" min="-90" max="120" value="0" step="5">
+    <div class="pgrid" style="margin-top:5px">
+      <button class="pb" data-t="-90" onclick="setP(-90,0.12)">Pre-Match<br><small style="color:var(--mut)">T−90</small></button>
+      <button class="pb" data-t="-30" onclick="setP(-30,0.45)">Arrival<br><small style="color:var(--mut)">T−30</small></button>
+      <button class="pb act" data-t="0" onclick="setP(0,0.55)">Kickoff<br><small style="color:var(--mut)">T+0</small></button>
+      <button class="pb" data-t="48" onclick="setP(48,0.65)">Half-Time<br><small style="color:var(--mut)">T+48</small></button>
+      <button class="pb" data-t="90" onclick="setP(90,0.58)">Full-Time<br><small style="color:var(--mut)">T+90</small></button>
+      <button class="pb" data-t="110" onclick="setP(110,0.28)">Post-Match<br><small style="color:var(--mut)">T+110</small></button>
+    </div>
+    <div class="kd" id="pnote">Peak load — 55% concurrency</div>
+  </div>
+  <div class="kg"><div class="kl">Fan Count <span id="lv-fans">72,000</span></div><input type="range" id="fan-count" min="20000" max="72000" value="72000" step="1000"><div class="kd">Lumen Field capacity: 72,000</div></div>
+  <div class="kg"><div class="kl">Devices / Fan <span id="lv-dev">1.4×</span></div><input type="range" id="dev-mult" min="10" max="25" value="14" step="1"></div>
+  <div class="kg"><div class="kl">WiFi Attach % <span id="lv-att">75%</span></div><input type="range" id="wifi-att" min="20" max="100" value="75" step="5"></div>
+  <div class="kg"><div class="kl">Concurrency % <span id="lv-con">55%</span></div><input type="range" id="concur" min="10" max="100" value="55" step="5"><div class="kd">% simultaneously transferring data</div></div>
+  <div class="kg">
+    <div class="kl" style="margin-bottom:5px">App Mix <span id="lv-dem" style="color:var(--cyan)">— Mbps/client</span></div>
+    <div class="kg"><div class="kl" style="font-size:9px">4K Video <span id="lv-vid" style="font-size:10px">25%</span></div><input type="range" id="mx-vid" min="0" max="100" value="25" step="5"></div>
+    <div class="kg"><div class="kl" style="font-size:9px">Teams / Video Call <span id="lv-tea" style="font-size:10px">10%</span></div><input type="range" id="mx-tea" min="0" max="100" value="10" step="5"></div>
+    <div class="kg"><div class="kl" style="font-size:9px">Social / Upload <span id="lv-soc" style="font-size:10px">40%</span></div><input type="range" id="mx-soc" min="0" max="100" value="40" step="5"></div>
+    <div class="kg"><div class="kl" style="font-size:9px">Browse / Stream <span id="lv-bro" style="font-size:10px">20%</span></div><input type="range" id="mx-bro" min="0" max="100" value="20" step="5"></div>
+    <div class="kg"><div class="kl" style="font-size:9px">POS / Payment <span id="lv-pos" style="font-size:10px">5%</span></div><input type="range" id="mx-pos" min="0" max="30" value="5" step="1"></div>
+  </div>
+</div>
+</details>
 
-    <!-- AP Type -->
-    <div class="knob-group">
-      <div class="knob-lbl" style="margin-bottom:6px">AP Type <span id="ap-gen-badge" style="color:#9b7aff">WiFi 7 · AP5060</span></div>
-      <select id="ap-type" onchange="update()">
-        <option value="AP5060" selected>AP5060 — WiFi 7 (EHT) · 4×4 MIMO · 2.4+5+6GHz · MLO</option>
-        <option value="AP3000">AP3000 — WiFi 6 (HE) · 2×2 MIMO · 2.4+5GHz only</option>
-      </select>
-      <div class="knob-desc">AP count: 280 at Lumen Field · 8 per access switch</div>
-    </div>
+<details open>
+<summary>PHY Layer</summary>
+<div class="sbody">
+  <div class="kg"><div class="kl">TX Power <span id="lv-txp">17 dBm</span></div><input type="range" id="tx-pwr" min="7" max="23" value="17" step="1"><div class="kd">WLANPros targets: 7 fill · 13 std · 16 edge · 17 AP5060 max</div></div>
+  <div class="kg"><div class="kl">5GHz Channel Width <span id="lv-bw5">160 MHz</span></div><select id="bw5g" onchange="update()"><option value="80">80 MHz</option><option value="160" selected>160 MHz (stadium)</option></select></div>
+  <div class="kg" id="bw6g-grp"><div class="kl">6GHz Channel Width <span id="lv-bw6">320 MHz</span></div><select id="bw6g" onchange="update()"><option value="160">160 MHz</option><option value="320" selected>320 MHz (WiFi 7)</option></select></div>
+  <div class="kg"><div class="kl">Guard Interval <span id="lv-gi">1600 ns</span></div><select id="guard-int" onchange="update()"><option value="800">800 ns (high mobility)</option><option value="1600" selected>1600 ns (WiFi 7 default)</option><option value="3200">3200 ns (stable indoor)</option></select></div>
+  <div class="kg"><div class="kl">Min Basic Rate (MBR) <span id="lv-mbr">24 Mbps</span></div><select id="mbr" onchange="update()"><option value="6">6 Mbps (legacy permissive)</option><option value="12">12 Mbps</option><option value="24" selected>24 Mbps (stadium optimal)</option></select><div class="kd">Beacon/mgmt rate → cell admission + overhead. 24M = −18% airtime overhead.</div></div>
+  <div class="kg"><div class="kl">RX-SOP Threshold <span id="lv-rxsop">−75 dBm</span></div><select id="rx-sop" onchange="update()"><option value="-85">−85 dBm (permissive)</option><option value="-75" selected>−75 dBm (high density)</option><option value="-65">−65 dBm (aggressive)</option></select><div class="kd">AP ignores Tx below threshold → reduces CCI in dense deploy.</div></div>
+  <div class="kg"><div class="kl">MCS Floor (Admission) <span id="lv-mcsf">MCS 4</span></div><input type="range" id="mcs-floor" min="0" max="13" value="4" step="1"><div class="kd">Reject clients below this MCS at association</div></div>
+  <div class="kg"><div class="kl">Noise Floor Offset <span id="lv-nf">0 dB</span></div><input type="range" id="noise-fl" min="0" max="30" value="0" step="1"></div>
+  <div class="trow" id="punct-row"><label class="tog"><input type="checkbox" id="tog-punct" onchange="update()"><span class="ts"></span></label><span class="tl">Preamble Puncturing</span><span class="tv">320MHz resilience</span></div>
+</div>
+</details>
 
-    <hr class="sep">
+<details>
+<summary>MAC / EDCA / Features</summary>
+<div class="sbody">
+  <div class="tog-grid">
+    <div class="trow"><label class="tog"><input type="checkbox" id="tog-ofdma-dl" checked onchange="update()"><span class="ts"></span></label><span class="tl">OFDMA DL</span><span class="tv">×1.35</span></div>
+    <div class="trow"><label class="tog"><input type="checkbox" id="tog-ofdma-ul" checked onchange="update()"><span class="ts"></span></label><span class="tl">OFDMA UL</span><span class="tv">×1.20</span></div>
+    <div class="trow"><label class="tog"><input type="checkbox" id="tog-mumimo" checked onchange="update()"><span class="ts"></span></label><span class="tl">MU-MIMO</span><span class="tv">DL×2.2</span></div>
+    <div class="trow"><label class="tog"><input type="checkbox" id="tog-bsscolor" checked onchange="update()"><span class="ts"></span></label><span class="tl">BSS Color</span><span class="tv">CCI×0.85</span></div>
+    <div class="trow" id="rtwt-row"><label class="tog"><input type="checkbox" id="tog-rtwt" checked onchange="update()"><span class="ts"></span></label><span class="tl">rTWT</span><span class="tv">POS≤2ms</span></div>
+    <div class="trow"><label class="tog"><input type="checkbox" id="tog-multiru" checked onchange="update()"><span class="ts"></span></label><span class="tl">Multi-RU</span><span class="tv">+8%</span></div>
+    <div class="trow" id="mlo-row"><label class="tog"><input type="checkbox" id="tog-mlo" checked onchange="update()"><span class="ts"></span></label><span class="tl">MLO</span><span class="tv">5G+6G</span></div>
+    <div class="trow"><label class="tog"><input type="checkbox" id="tog-r80211" checked onchange="update()"><span class="ts"></span></label><span class="tl">802.11r FT</span><span class="tv">Fast roam</span></div>
+    <div class="trow"><label class="tog"><input type="checkbox" id="tog-kv" checked onchange="update()"><span class="ts"></span></label><span class="tl">802.11k/v</span><span class="tv">Steer</span></div>
+    <div class="trow"><label class="tog"><input type="checkbox" id="tog-dcslock" onchange="update()"><span class="ts"></span></label><span class="tl">DCS Lock</span><span class="tv">Match</span></div>
+  </div>
+  <hr class="sep">
+  <div class="kg"><div class="kl" style="font-size:9px">MLO Mode <span id="lv-mlom" style="font-size:10px">STR</span></div><select id="mlo-mode" onchange="update()"><option value="STR" selected>STR — Simultaneous TX/RX (×1.90)</option><option value="Enhanced">Enhanced STR (×1.55)</option><option value="NSTR">NSTR — Time-division (×1.20)</option></select><div class="kd">STR requires 5+6GHz band separation · AP5060 only</div></div>
+  <div class="kg"><div class="kl" style="font-size:9px">WMM TXOP AC_VO <span id="lv-txop" style="font-size:10px">1504 µs</span></div><select id="txop-vo" onchange="update()"><option value="0">0 µs (disabled)</option><option value="1504" selected>1504 µs (voice default)</option><option value="3008">3008 µs (high priority)</option></select><div class="kd">Voice/POS queue burst time → reduces latency jitter</div></div>
+  <div class="kg"><div class="kl" style="font-size:9px">WMM TXOP AC_BE <span id="lv-txop-be" style="font-size:10px">3008 µs</span></div><select id="txop-be" onchange="update()"><option value="0">0 µs (no burst)</option><option value="1504">1504 µs</option><option value="3008" selected>3008 µs (IPQ9574 stadium)</option></select><div class="kd">Best-effort queue burst. Higher = better bulk tput; brief POS risk when rTWT OFF.</div></div>
+  <div class="kg"><div class="kl" style="font-size:9px">EDCA CWmin AC_BE <span id="lv-cwbe" style="font-size:10px">15 slots</span></div><select id="cw-be" onchange="update()"><option value="7">7 slots (aggressive — collision storm >70%)</option><option value="15" selected>15 slots (IPQ9574 optimal)</option><option value="31">31 slots (conservative)</option><option value="63">63 slots (max backoff)</option></select><div class="kd">Min contention window for best-effort. CW=7 causes 3× more collisions at >70% airtime.</div></div>
+  <div class="kg"><div class="kl" style="font-size:9px">RTS/CTS Threshold <span id="lv-rts" style="font-size:10px">1500 B</span></div><select id="rts-thr" onchange="update()"><option value="65535">65535 B (disabled)</option><option value="2347">2347 B (802.11 default)</option><option value="1500" selected>1500 B (IPQ9574 stadium)</option></select><div class="kd">Frames above threshold use RTS/CTS → mitigates hidden terminal in dense stadium.</div></div>
+  <div class="kg"><div class="kl" style="font-size:9px">MU-MIMO DL Streams <span id="lv-mustm" style="font-size:10px">8 streams</span></div><select id="mu-streams" onchange="update()"><option value="1">1 stream (SISO)</option><option value="2">2 streams (2×2)</option><option value="4">4 streams (WiFi 6 / AP3000)</option><option value="8" selected>8 streams (IPQ9574 WiFi 7)</option></select><div class="kd">IPQ9574 supports 8-stream DL MU-MIMO. AP3000 hardware max = 2.</div></div>
+  <div class="trow"><label class="tog"><input type="checkbox" id="tog-qam4k" checked onchange="update()"><span class="ts"></span></label><span class="tl">4K-QAM (MCS 12/13)</span><span class="tv">SNR≥42dB</span></div>
+  <hr class="sep">
+  <div class="kg" style="margin-top:4px"><div class="kl" style="font-size:9px">MLO Active Links <span id="lv-mlolnk" style="font-size:10px">2 links</span></div><select id="mlo-links" onchange="update()"><option value="1">1 link (single-band, no MLO)</option><option value="2" selected>2 links — 5G + 6G (IPQ9574)</option><option value="3">3 links — 2.4 + 5 + 6G (tri-band)</option></select><div class="kd">IPQ9574: STR 2-link. 3-link tri-band MLO = future WiFi 7 extension.</div></div>
+  <div class="kg"><div class="kl" style="font-size:9px">MLO Traffic Steering <span id="lv-mlosteer" style="font-size:10px">AI-driven</span></div><select id="mlo-steer" onchange="update()"><option value="wmm">WMM-QoS (standard priority)</option><option value="ai" selected>AI-driven (EP1 RRM continuous)</option></select><div class="kd">AI-driven = EP1 RRM re-balances per-link load continuously. +4% capacity vs WMM.</div></div>
+</div>
+</details>
 
-    <!-- Timeline -->
-    <div class="knob-group">
-      <div class="knob-lbl">Match Timeline <b id="t-label" style="color:var(--yellow)">T+0 Kickoff</b></div>
-      <div class="tline-wrap">
-        <div class="tline-lbl"><span>T−90</span><span>KO</span><span>HT</span><span>FT</span><span>T+120</span></div>
-        <input type="range" id="t-scrub" min="-90" max="120" value="0" step="5">
-      </div>
-      <div class="preset-grid">
-        <button class="preset-btn" onclick="setPreset(-90)">Pre-Match<br><small style="color:var(--muted)">Gates open</small></button>
-        <button class="preset-btn" onclick="setPreset(-30)">Arrival<br><small style="color:var(--muted)">Rush T−30</small></button>
-        <button class="preset-btn active" onclick="setPreset(0)">Kickoff<br><small style="color:var(--muted)">Peak load</small></button>
-        <button class="preset-btn" onclick="setPreset(48)">Half-Time<br><small style="color:var(--muted)">Social surge</small></button>
-        <button class="preset-btn" onclick="setPreset(90)">Full-Time<br><small style="color:var(--muted)">Celebrations</small></button>
-        <button class="preset-btn" onclick="setPreset(110)">Post-Match<br><small style="color:var(--muted)">Draining</small></button>
-      </div>
-      <div class="knob-desc" id="preset-note">Peak load — 92% of 72,000 fans active</div>
-    </div>
+<details open>
+<summary>Admission &amp; Steering</summary>
+<div class="sbody">
+  <div class="kg"><div class="kl">Max Clients / Radio (Policy) <span id="lv-maxc">100</span></div><select id="max-cli" onchange="update()"><option value="50">50 (strict)</option><option value="100" selected>100 (EP1 default)</option><option value="150">150</option><option value="200">200</option><option value="512">512 (hardware max)</option></select><div class="kd">EP1 policy cap per radio — hardware ceiling is 512</div></div>
+  <div class="kg"><div class="kl">Min RSSI Admission <span id="lv-rssi">−70 dBm</span></div><select id="min-rssi" onchange="update()"><option value="-80">−80 dBm (permissive)</option><option value="-75">−75 dBm</option><option value="-70" selected>−70 dBm (stadium optimal)</option></select><div class="kd">Rejects clients below threshold at association → raises avg MCS</div></div>
+  <div class="kg"><div class="kl">Airtime Fairness <span id="lv-af" style="color:var(--green)">Strict</span></div><select id="at-fair" onchange="update()"><option value="off">OFF — No fairness (old phones steal)</option><option value="adaptive">Adaptive — Balanced</option><option value="strict" selected>Strict — Equalise all clients</option></select><div class="kd">Critical in stadium: 1 MCS0 phone consumes 32× airtime of MCS11. Strict AF = +38% aggregate tput.</div></div>
+  <div class="kg"><div class="kl">Band Steering <span id="lv-bs">Active</span></div><select id="bs-mode" onchange="update()"><option value="none">None — Client chooses</option><option value="passive">Passive — Suggest only</option><option value="active" selected>Active — Push to 5/6GHz</option></select><div class="kd">Active = 42% on 6GHz (AP5060). None = only 20%.</div></div>
+</div>
+</details>
 
-    <hr class="sep">
+<details>
+<summary>SSID &amp; Network Settings</summary>
+<div class="sbody">
+  <div class="tog-grid">
+    <div class="trow"><label class="tog"><input type="checkbox" id="tog-bcf" checked onchange="update()"><span class="ts"></span></label><span class="tl">BC Filter</span><span class="tv">+15%</span></div>
+    <div class="trow"><label class="tog"><input type="checkbox" id="tog-mc2uc" checked onchange="update()"><span class="ts"></span></label><span class="tl">MC→UC</span><span class="tv">+10%</span></div>
+    <div class="trow"><label class="tog"><input type="checkbox" id="tog-proxyarp" checked onchange="update()"><span class="ts"></span></label><span class="tl">Proxy ARP</span><span class="tv">+7%</span></div>
+    <div class="trow"><label class="tog"><input type="checkbox" id="tog-cliiso" onchange="update()"><span class="ts"></span></label><span class="tl">Client Iso</span><span class="tv">+2%</span></div>
+    <div class="trow"><label class="tog"><input type="checkbox" id="tog-enhrnr" checked onchange="update()"><span class="ts"></span></label><span class="tl">Enh RNR</span><span class="tv">6GHz disc</span></div>
+    <div class="trow"><label class="tog"><input type="checkbox" id="tog-pmf" checked onchange="update()"><span class="ts"></span></label><span class="tl">PMF Req</span><span class="tv">WPA3</span></div>
+    <div class="trow"><label class="tog"><input type="checkbox" id="tog-airdef" checked onchange="update()"><span class="ts"></span></label><span class="tl">AirDefense</span><span class="tv">WIPS</span></div>
+  </div>
+  <hr class="sep">
+  <div class="kg"><div class="kl">DTIM Period <span id="lv-dtim">2</span></div><select id="dtim" onchange="update()"><option value="1">1 — Frequent (100ms, low latency)</option><option value="2" selected>2 — Default WiFi 7 (200ms)</option><option value="4">4 — Power save (400ms)</option><option value="10">10 — IoT (1000ms)</option></select><div class="kd">Power-save delivery interval. DTIM=2 adds ~8ms latency for buffered frames vs DTIM=1.</div></div>
+</div>
+</details>
 
-    <!-- Fan demand -->
-    <div class="knob-group">
-      <div class="knob-lbl">Fan Count <span id="fan-val">72,000</span></div>
-      <input type="range" id="fan-count" min="20000" max="72000" value="72000" step="1000">
-      <div class="knob-desc">Lumen Field capacity: 72,000</div>
-    </div>
-    <div class="knob-group">
-      <div class="knob-lbl">Devices/Fan <span id="dev-val">1.4×</span></div>
-      <input type="range" id="dev-mult" min="10" max="25" value="14" step="1">
-      <div class="knob-desc">Avg devices per attending fan</div>
-    </div>
-    <div class="knob-group">
-      <div class="knob-lbl">WiFi Attach % <span id="attach-val">75%</span></div>
-      <input type="range" id="wifi-attach" min="20" max="100" value="75" step="5">
-      <div class="knob-desc">% of devices actively on WiFi</div>
-    </div>
-    <div class="knob-group">
-      <div class="knob-lbl">Concurrency % <span id="conc-val">55%</span></div>
-      <input type="range" id="concurrency" min="10" max="100" value="55" step="5">
-      <div class="knob-desc">% simultaneously transferring data</div>
-    </div>
+<details>
+<summary>Degradation &amp; Threats</summary>
+<div class="sbody">
+  <div class="kg"><div class="kl" style="margin-bottom:5px">Level <span id="lv-deg" style="color:var(--green)">0 — Nominal</span></div><select id="deg-lvl" onchange="update()"><option value="0">Level 0 — All nominal</option><option value="1">Level 1 — 5GHz CCI congestion</option><option value="2">Level 2 — Two bands degraded</option><option value="3">Level 3 — Jammer + auth storm</option><option value="4">Level 4 — Critical failure</option></select></div>
+  <div class="kg"><div class="kl" style="margin-bottom:5px">Cyber Attack</div><select id="cyber" onchange="update()"><option value="none">None</option><option value="deauth">Deauth Flood (L2)</option><option value="evil_twin">Evil Twin / Rogue AP</option><option value="cred_storm">Credential Storm (RADIUS)</option><option value="arp">ARP Poisoning</option></select></div>
+</div>
+</details>
 
-    <hr class="sep">
-
-    <!-- App mix -->
-    <div class="ptitle" style="margin-top:2px">App Mix (demand/client)</div>
-    <div class="knob-group">
-      <div class="knob-lbl">4K Video / Live Replay <span id="vid-val">25%</span></div>
-      <input type="range" id="mix-video" min="0" max="100" value="25" step="5">
-      <div class="knob-desc">15 Mbps DL · 0.5 Mbps UL</div>
-    </div>
-    <div class="knob-group">
-      <div class="knob-lbl">Teams / Video Calls <span id="teams-val">10%</span></div>
-      <input type="range" id="mix-teams" min="0" max="100" value="10" step="5">
-      <div class="knob-desc">3 Mbps DL · 3 Mbps UL (symmetric)</div>
-    </div>
-    <div class="knob-group">
-      <div class="knob-lbl">Social / Upload <span id="social-val">40%</span></div>
-      <input type="range" id="mix-social" min="0" max="100" value="40" step="5">
-      <div class="knob-desc">1 Mbps DL · 4 Mbps UL (UL heavy)</div>
-    </div>
-    <div class="knob-group">
-      <div class="knob-lbl">Browse / Stream <span id="browse-val">20%</span></div>
-      <input type="range" id="mix-browse" min="0" max="100" value="20" step="5">
-      <div class="knob-desc">2 Mbps DL · 0.1 Mbps UL</div>
-    </div>
-    <div class="knob-group">
-      <div class="knob-lbl">POS / Payment <span id="pos-val">5%</span></div>
-      <input type="range" id="mix-pos" min="0" max="30" value="5" step="1">
-      <div class="knob-desc">0.1 Mbps · latency critical ≤10ms</div>
-    </div>
-    <div class="app-mix-bar" id="app-mix-bar">
-      <div class="amix-seg" id="amix-vid" style="background:#3a9de0;width:25%"></div>
-      <div class="amix-seg" id="amix-teams" style="background:#9b7aff;width:10%"></div>
-      <div class="amix-seg" id="amix-social" style="background:#ffc107;width:40%"></div>
-      <div class="amix-seg" id="amix-browse" style="background:#00d97e;width:20%"></div>
-      <div class="amix-seg" id="amix-pos" style="background:#f4455a;width:5%"></div>
-    </div>
-
-    <hr class="sep">
-
-    <!-- RF config -->
-    <div class="ptitle" style="margin-top:2px">RF Configuration</div>
-    <div class="knob-group">
-      <div class="knob-lbl">5GHz Channel Width <span id="bw5-val">160 MHz</span></div>
-      <select id="bw-5g" onchange="update()">
-        <option value="80">80 MHz (~6 channels)</option>
-        <option value="160" selected>160 MHz (~3 channels)</option>
-      </select>
-    </div>
-    <div class="knob-group" id="bw6-group">
-      <div class="knob-lbl">6GHz Channel Width <span id="bw6-val">320 MHz</span></div>
-      <select id="bw-6g" onchange="update()">
-        <option value="160">160 MHz (7 channels)</option>
-        <option value="320" selected>320 MHz (3-4 channels)</option>
-      </select>
-    </div>
-    <div class="knob-group">
-      <div class="knob-lbl">Guard Interval <span id="gi-val">1600 ns</span></div>
-      <select id="guard-int" onchange="update()">
-        <option value="800">800 ns (high mobility)</option>
-        <option value="1600" selected>1600 ns (default WiFi 7)</option>
-        <option value="3200">3200 ns (stable indoor)</option>
-      </select>
-    </div>
-    <div class="knob-group">
-      <div class="knob-lbl">Noise Floor Offset <span id="noise-val">0 dB</span></div>
-      <input type="range" id="noise-floor" min="0" max="30" value="0" step="1">
-      <div class="knob-desc">0 = clean −95 dBm · 30 = congested +30 dB</div>
-    </div>
-    <div class="knob-group">
-      <div class="knob-lbl">TX Power <span id="txpwr-val">17 dBm</span></div>
-      <input type="range" id="tx-power" min="7" max="23" value="17" step="1">
-      <div class="knob-desc">WLANPros targets: 7/13/16 dBm fill/std/edge</div>
-    </div>
-    <div class="knob-group">
-      <div class="knob-lbl">MCS Floor <span id="mcsfloor-val">MCS 4</span></div>
-      <input type="range" id="mcs-floor" min="0" max="13" value="4" step="1">
-      <div class="knob-desc">Admission control — clients below this MCS rejected</div>
-    </div>
-
-    <hr class="sep">
-
-    <!-- Toggles -->
-    <div class="ptitle" style="margin-top:2px">WiFi 7 Features</div>
-    <div class="toggle-row">
-      <label class="tog"><input type="checkbox" id="tog-ofdma-dl" checked onchange="update()"><span class="tog-sl"></span></label>
-      <span class="tog-lbl">OFDMA DL</span><span class="tog-val">×1.35 capacity</span>
-    </div>
-    <div class="toggle-row">
-      <label class="tog"><input type="checkbox" id="tog-ofdma-ul" checked onchange="update()"><span class="tog-sl"></span></label>
-      <span class="tog-lbl">OFDMA UL</span><span class="tog-val">×1.20 capacity</span>
-    </div>
-    <div class="toggle-row">
-      <label class="tog"><input type="checkbox" id="tog-mumimo" checked onchange="update()"><span class="tog-sl"></span></label>
-      <span class="tog-lbl">MU-MIMO</span><span class="tog-val">DL×4 / UL×2</span>
-    </div>
-    <div class="toggle-row">
-      <label class="tog"><input type="checkbox" id="tog-bsscolor" checked onchange="update()"><span class="tog-sl"></span></label>
-      <span class="tog-lbl">BSS Coloring</span><span class="tog-val">CCI ×0.80</span>
-    </div>
-    <div class="toggle-row" id="mlo-row">
-      <label class="tog"><input type="checkbox" id="tog-mlo" checked onchange="update()"><span class="tog-sl"></span></label>
-      <span class="tog-lbl">MLO (5G+6G)</span><span class="tog-val">AP5060 only</span>
-    </div>
-    <div class="toggle-row">
-      <label class="tog"><input type="checkbox" id="tog-11kv" checked onchange="update()"><span class="tog-sl"></span></label>
-      <span class="tog-lbl">802.11k/v Roaming</span><span class="tog-val">500→50ms</span>
-    </div>
-    <div class="toggle-row">
-      <label class="tog"><input type="checkbox" id="tog-pmf" checked onchange="update()"><span class="tog-sl"></span></label>
-      <span class="tog-lbl">PMF Required</span><span class="tog-val">WPA3</span>
-    </div>
-    <div class="toggle-row">
-      <label class="tog"><input type="checkbox" id="tog-airdef" checked onchange="update()"><span class="tog-sl"></span></label>
-      <span class="tog-lbl">AirDefense WIPS</span><span class="tog-val">Rogue detect</span>
-    </div>
-    <div class="toggle-row">
-      <label class="tog"><input type="checkbox" id="tog-dcslock" onchange="update()"><span class="tog-sl"></span></label>
-      <span class="tog-lbl">DCS Lock</span><span class="tog-val">Match mode</span>
-    </div>
-
-    <hr class="sep">
-
-    <!-- Degradation -->
-    <div class="ptitle" style="margin-top:2px">Degradation &amp; Threats</div>
-    <div class="knob-group">
-      <div class="knob-lbl" style="margin-bottom:6px">Degradation Level <span id="deg-lbl-val" style="color:var(--green)">0 — Nominal</span></div>
-      <select id="deg-level" onchange="update()">
-        <option value="0">Level 0 — All systems nominal</option>
-        <option value="1">Level 1 — 5GHz CCI congestion</option>
-        <option value="2">Level 2 — Two bands degraded</option>
-        <option value="3">Level 3 — RF jammer + auth storm</option>
-        <option value="4">Level 4 — Critical failure</option>
-      </select>
-    </div>
-    <div class="knob-group">
-      <div class="knob-lbl" style="margin-bottom:6px">Cyber Attack</div>
-      <select id="cyber-attack" onchange="update()">
-        <option value="none">None</option>
-        <option value="deauth">Deauth Flood (L2)</option>
-        <option value="evil_twin">Evil Twin / Rogue AP</option>
-        <option value="cred_storm">Credential Storm (RADIUS)</option>
-        <option value="arp_poison">ARP Poisoning (L3)</option>
-      </select>
+</div>
+<!-- ══ CENTER PANEL ══ -->
+<div class="panel">
+  <div style="font-size:9px;color:var(--mut);margin-bottom:6px" id="ctr-sub">—</div>
+  <div class="btabs">
+    <div class="bt g2 act" id="tb-2g" onclick="showB('2g')">2.4 GHz</div>
+    <div class="bt g5" id="tb-5g" onclick="showB('5g')">5 GHz</div>
+    <div class="bt g6" id="tb-6g" onclick="showB('6g')">6 GHz</div>
+    <div class="bt agg" id="tb-agg" onclick="showB('agg')">Aggregate</div>
+    <div class="bt gap" id="tb-gap" onclick="showB('gap')">Gap Analysis</div>
+  </div>
+  <div class="mloc" id="mloc">
+    <div class="mlot">⚡ MLO Active — 5GHz + 6GHz Bonded</div>
+    <div class="mlos">
+      <div class="mlostat"><div class="mlov" id="mlo-tput">—</div><div class="mlol">Mbps/client</div></div>
+      <div class="mlostat"><div class="mlov" id="mlo-lat">—</div><div class="mlol">ms latency</div></div>
+      <div class="mlostat"><div class="mlov" id="mlo-gain">—</div><div class="mlol">× gain</div></div>
     </div>
   </div>
 
-  <!-- ═══ METRICS PANEL ═══ -->
-  <div class="panel" id="metrics-panel">
-    <div class="ptitle">Live Metrics</div>
+  <!-- per-band panels -->
+  <div class="bp vis" id="bp-2g"><div class="mg">
+    <div class="mc"><div class="mn">SNR (2.4G)</div><div class="mv" id="v-snr2g">—</div><div class="mu">dB</div><div class="mb"><div class="mbf" id="b-snr2g"></div></div></div>
+    <div class="mc"><div class="mn">MCS (2.4G)</div><div class="mv" id="v-mcs2g">—</div><div class="mu" id="u-mcs2g">—</div><div class="mb"><div class="mbf" id="b-mcs2g"></div></div></div>
+    <div class="mc"><div class="mn">Airtime (2.4G)</div><div class="mv" id="v-air2g">—</div><div class="mu">%</div><div class="mb"><div class="mbf" id="b-air2g"></div></div></div>
+    <div class="mc"><div class="mn">Clients/AP (2.4G)</div><div class="mv" id="v-cli2g">—</div><div class="mu">of <span id="u-cli2g">—</span> total</div><div class="mb"><div class="mbf" id="b-cli2g" style="background:var(--blue)"></div></div></div>
+    <div class="mc full"><div class="mn">Tput/Client (2.4G)</div><div class="mv" id="v-tp2g">—</div><div class="mu">Mbps effective goodput</div><div class="mb"><div class="mbf" id="b-tp2g" style="background:var(--cyan)"></div></div></div>
+  </div></div>
 
-    <!-- Band tabs -->
-    <div class="band-tabs">
-      <div class="btab g2 active" id="tab-2g" onclick="showBand('2g')">2.4 GHz</div>
-      <div class="btab g5" id="tab-5g" onclick="showBand('5g')">5 GHz</div>
-      <div class="btab g6" id="tab-6g" onclick="showBand('6g')">6 GHz</div>
-      <div class="btab agg" id="tab-agg" onclick="showBand('agg')">Aggregate</div>
-    </div>
+  <div class="bp" id="bp-5g"><div class="mg">
+    <div class="mc"><div class="mn">SNR (5G)</div><div class="mv" id="v-snr5g">—</div><div class="mu">dB</div><div class="mb"><div class="mbf" id="b-snr5g"></div></div></div>
+    <div class="mc"><div class="mn">MCS (5G)</div><div class="mv" id="v-mcs5g">—</div><div class="mu" id="u-mcs5g">—</div><div class="mb"><div class="mbf" id="b-mcs5g"></div></div></div>
+    <div class="mc"><div class="mn">Airtime (5G)</div><div class="mv" id="v-air5g">—</div><div class="mu">%</div><div class="mb"><div class="mbf" id="b-air5g"></div></div></div>
+    <div class="mc"><div class="mn">Clients/AP (5G)</div><div class="mv" id="v-cli5g">—</div><div class="mu">of <span id="u-cli5g">—</span> total</div><div class="mb"><div class="mbf" id="b-cli5g" style="background:var(--blue)"></div></div></div>
+    <div class="mc full"><div class="mn">Tput/Client (5G)</div><div class="mv" id="v-tp5g">—</div><div class="mu">Mbps effective goodput</div><div class="mb"><div class="mbf" id="b-tp5g" style="background:var(--cyan)"></div></div></div>
+  </div></div>
 
-    <!-- MLO card (AP5060 + MLO only) -->
-    <div class="mlo-card" id="mlo-card">
-      <div class="mlo-title">⚡ MLO Active — 5GHz + 6GHz Bonded (STR)</div>
-      <div class="mlo-stats">
-        <div class="mlo-stat"><div class="mlo-val" id="mlo-tput">—</div><div class="mlo-lbl">Mbps aggregate</div></div>
-        <div class="mlo-stat"><div class="mlo-val" id="mlo-lat">—</div><div class="mlo-lbl">ms latency (min)</div></div>
-        <div class="mlo-stat"><div class="mlo-val" id="mlo-gain">—</div><div class="mlo-lbl">× vs single-band</div></div>
-      </div>
-    </div>
+  <div class="bp" id="bp-6g"><div class="mg">
+    <div class="mc"><div class="mn">SNR (6G)</div><div class="mv" id="v-snr6g">—</div><div class="mu">dB</div><div class="mb"><div class="mbf" id="b-snr6g"></div></div></div>
+    <div class="mc"><div class="mn">MCS (6G)</div><div class="mv" id="v-mcs6g">—</div><div class="mu" id="u-mcs6g">—</div><div class="mb"><div class="mbf" id="b-mcs6g"></div></div></div>
+    <div class="mc"><div class="mn">Airtime (6G)</div><div class="mv" id="v-air6g">—</div><div class="mu">%</div><div class="mb"><div class="mbf" id="b-air6g"></div></div></div>
+    <div class="mc"><div class="mn">Clients/AP (6G)</div><div class="mv" id="v-cli6g">—</div><div class="mu">of <span id="u-cli6g">—</span> total</div><div class="mb"><div class="mbf" id="b-cli6g" style="background:var(--pur)"></div></div></div>
+    <div class="mc full"><div class="mn">Tput/Client (6G)</div><div class="mv" id="v-tp6g">—</div><div class="mu">Mbps effective goodput</div><div class="mb"><div class="mbf" id="b-tp6g" style="background:var(--cyan)"></div></div></div>
+  </div></div>
 
-    <!-- Band panels -->
-    <div class="band-panel visible" id="bp-2g">
-      <div class="mcard-grid">
-        <div class="mcard"><div class="mname">SNR (2.4G)</div><div class="mval" id="snr-2g">—</div><div class="munit">dB</div><div class="mbar"><div class="mbf" id="bar-snr-2g"></div></div></div>
-        <div class="mcard"><div class="mname">MCS (2.4G)</div><div class="mval" id="mcs-2g">—</div><div class="munit" id="mcs-2g-rate">—</div><div class="mbar"><div class="mbf" id="bar-mcs-2g"></div></div></div>
-        <div class="mcard"><div class="mname">Airtime (2.4G)</div><div class="mval" id="air-2g">—</div><div class="munit">%</div><div class="mbar"><div class="mbf" id="bar-air-2g"></div></div></div>
-        <div class="mcard"><div class="mname">Clients (2.4G)</div><div class="mval" id="cli-2g">—</div><div class="munit">per AP</div><div class="mbar"><div class="mbf" id="bar-cli-2g" style="background:var(--blue)"></div></div></div>
-        <div class="mcard full"><div class="mname">Throughput / Client (2.4G)</div><div class="mval" id="tput-2g">—</div><div class="munit">Mbps effective</div><div class="mbar"><div class="mbf" id="bar-tput-2g" style="background:var(--cyan)"></div></div></div>
-      </div>
-      <div style="font-size:9px;color:var(--muted);padding:4px 0">2.4GHz: 20MHz channel · 2SS · HE/WiFi 6 · 15% of clients (band steering away)</div>
-    </div>
+  <div class="bp" id="bp-agg"><div class="mg">
+    <div class="mc"><div class="mn">Total Sessions</div><div class="mv" id="v-sess">—</div><div class="mu">stadium-wide</div><div class="mb"><div class="mbf" id="b-sess" style="background:var(--green)"></div></div></div>
+    <div class="mc"><div class="mn">Active Transfers</div><div class="mv" id="v-act">—</div><div class="mu">concurrent</div><div class="mb"><div class="mbf" id="b-act" style="background:var(--blue)"></div></div></div>
+    <div class="mc"><div class="mn">Aggregate Demand</div><div class="mv" id="v-dem">—</div><div class="mu">Gbps stadium</div><div class="mb"><div class="mbf" id="b-dem" style="background:var(--cyan)"></div></div></div>
+    <div class="mc"><div class="mn">Aggregate Capacity</div><div class="mv" id="v-cap">—</div><div class="mu">Gbps stadium</div><div class="mb"><div class="mbf" id="b-cap" style="background:var(--pur)"></div></div></div>
+    <div class="mc"><div class="mn">E2E Latency</div><div class="mv" id="v-lat">—</div><div class="mu">ms worst-band</div><div class="mb"><div class="mbf" id="b-lat"></div></div></div>
+    <div class="mc"><div class="mn">Packet Loss</div><div class="mv" id="v-ploss">—</div><div class="mu">%</div><div class="mb"><div class="mbf" id="b-ploss"></div></div></div>
+    <div class="mc"><div class="mn">DL per Client</div><div class="mv" id="v-dl">—</div><div class="mu">Mbps demand</div><div class="mb"><div class="mbf" id="b-dl" style="background:var(--blue)"></div></div></div>
+    <div class="mc"><div class="mn">UL per Client</div><div class="mv" id="v-ul">—</div><div class="mu">Mbps demand</div><div class="mb"><div class="mbf" id="b-ul" style="background:var(--org)"></div></div></div>
+  </div></div>
 
-    <div class="band-panel" id="bp-5g">
-      <div class="mcard-grid">
-        <div class="mcard"><div class="mname">SNR (5G)</div><div class="mval" id="snr-5g">—</div><div class="munit">dB</div><div class="mbar"><div class="mbf" id="bar-snr-5g"></div></div></div>
-        <div class="mcard"><div class="mname">MCS (5G)</div><div class="mval" id="mcs-5g">—</div><div class="munit" id="mcs-5g-rate">—</div><div class="mbar"><div class="mbf" id="bar-mcs-5g"></div></div></div>
-        <div class="mcard"><div class="mname">Airtime (5G)</div><div class="mval" id="air-5g">—</div><div class="munit">%</div><div class="mbar"><div class="mbf" id="bar-air-5g"></div></div></div>
-        <div class="mcard"><div class="mname">Clients (5G)</div><div class="mval" id="cli-5g">—</div><div class="munit">per AP</div><div class="mbar"><div class="mbf" id="bar-cli-5g" style="background:var(--blue)"></div></div></div>
-        <div class="mcard full"><div class="mname">Throughput / Client (5G)</div><div class="mval" id="tput-5g">—</div><div class="munit">Mbps effective</div><div class="mbar"><div class="mbf" id="bar-tput-5g" style="background:var(--cyan)"></div></div></div>
-      </div>
-      <div style="font-size:9px;color:var(--muted);padding:4px 0" id="note-5g">5GHz: 160MHz · 4SS AP5060 · 50% of clients</div>
-    </div>
-
-    <div class="band-panel" id="bp-6g">
-      <div class="mcard-grid">
-        <div class="mcard"><div class="mname">SNR (6G)</div><div class="mval" id="snr-6g">—</div><div class="munit">dB</div><div class="mbar"><div class="mbf" id="bar-snr-6g"></div></div></div>
-        <div class="mcard"><div class="mname">MCS (6G)</div><div class="mval" id="mcs-6g">—</div><div class="munit" id="mcs-6g-rate">—</div><div class="mbar"><div class="mbf" id="bar-mcs-6g"></div></div></div>
-        <div class="mcard"><div class="mname">Airtime (6G)</div><div class="mval" id="air-6g">—</div><div class="munit">%</div><div class="mbar"><div class="mbf" id="bar-air-6g"></div></div></div>
-        <div class="mcard"><div class="mname">Clients (6G)</div><div class="mval" id="cli-6g">—</div><div class="munit">per AP</div><div class="mbar"><div class="mbf" id="bar-cli-6g" style="background:var(--purple)"></div></div></div>
-        <div class="mcard full"><div class="mname">Throughput / Client (6G)</div><div class="mval" id="tput-6g">—</div><div class="munit">Mbps effective</div><div class="mbar"><div class="mbf" id="bar-tput-6g" style="background:var(--cyan)"></div></div></div>
-      </div>
-      <div style="font-size:9px;color:var(--muted);padding:4px 0" id="note-6g">6GHz: 320MHz · 4SS AP5060 (WiFi 7 only) · 35% of clients · LPI mode</div>
-    </div>
-
-    <div class="band-panel" id="bp-agg">
-      <div class="mcard-grid">
-        <div class="mcard"><div class="mname">Total Sessions</div><div class="mval" id="agg-sess">—</div><div class="munit">stadium-wide</div><div class="mbar"><div class="mbf" id="bar-agg-sess" style="background:var(--green)"></div></div></div>
-        <div class="mcard"><div class="mname">Active Transfers</div><div class="mval" id="agg-active">—</div><div class="munit">concurrent</div><div class="mbar"><div class="mbf" id="bar-agg-active" style="background:var(--blue)"></div></div></div>
-        <div class="mcard"><div class="mname">Aggregate Demand</div><div class="mval" id="agg-demand">—</div><div class="munit">Gbps stadium</div><div class="mbar"><div class="mbf" id="bar-agg-demand" style="background:var(--cyan)"></div></div></div>
-        <div class="mcard"><div class="mname">Aggregate Capacity</div><div class="mval" id="agg-cap">—</div><div class="munit">Gbps stadium</div><div class="mbar"><div class="mbf" id="bar-agg-cap" style="background:var(--purple)"></div></div></div>
-        <div class="mcard"><div class="mname">E2E Latency</div><div class="mval" id="agg-lat">—</div><div class="munit">ms round-trip</div><div class="mbar"><div class="mbf" id="bar-agg-lat"></div></div></div>
-        <div class="mcard"><div class="mname">Packet Loss</div><div class="mval" id="agg-ploss">—</div><div class="munit">%</div><div class="mbar"><div class="mbf" id="bar-agg-ploss"></div></div></div>
-        <div class="mcard"><div class="mname">Avg DL Demand</div><div class="mval" id="agg-dl">—</div><div class="munit">Mbps/client</div><div class="mbar"><div class="mbf" id="bar-agg-dl" style="background:var(--blue)"></div></div></div>
-        <div class="mcard"><div class="mname">Avg UL Demand</div><div class="mval" id="agg-ul">—</div><div class="munit">Mbps/client</div><div class="mbar"><div class="mbf" id="bar-agg-ul" style="background:var(--orange)"></div></div></div>
-      </div>
-    </div>
-
-    <!-- App mix visual -->
-    <div style="margin-top:10px">
-      <div style="display:flex;justify-content:space-between;font-size:8px;color:var(--muted);margin-bottom:4px">
-        <span>App Demand Mix</span>
-        <span id="demand-per-client" style="color:var(--cyan)">—</span>
-      </div>
-      <div class="app-mix-bar" id="live-mix-bar" style="height:10px">
-        <div class="amix-seg" id="lmix-vid" style="background:#3a9de0"></div>
-        <div class="amix-seg" id="lmix-teams" style="background:#9b7aff"></div>
-        <div class="amix-seg" id="lmix-social" style="background:#ffc107"></div>
-        <div class="amix-seg" id="lmix-browse" style="background:#00d97e"></div>
-        <div class="amix-seg" id="lmix-pos" style="background:#f4455a"></div>
-      </div>
-      <div style="display:flex;gap:10px;font-size:8px;color:var(--muted);margin-top:4px;flex-wrap:wrap">
-        <span><span style="color:#3a9de0">■</span> Video</span>
-        <span><span style="color:#9b7aff">■</span> Teams</span>
-        <span><span style="color:#ffc107">■</span> Social</span>
-        <span><span style="color:#00d97e">■</span> Browse</span>
-        <span><span style="color:#f4455a">■</span> POS</span>
-        <span style="margin-left:auto;color:var(--muted2)" id="ul-dl-ratio">DL:UL —</span>
-      </div>
-    </div>
-
-    <!-- Service class SLAs -->
-    <div style="margin-top:12px">
-      <div class="ptitle">Service Class SLAs</div>
-      <div class="svc-grid">
-        <div class="svc-card"><div class="svc-name">POS / VLAN50</div><div class="svc-status" id="svc-pos">—</div><div class="svc-detail" id="svc-pos-d">Lat ≤10ms</div></div>
-        <div class="svc-card"><div class="svc-name">VIP / VLAN40</div><div class="svc-status" id="svc-vip">—</div><div class="svc-detail" id="svc-vip-d">≥25 Mbps</div></div>
-        <div class="svc-card"><div class="svc-name">Teams / VLAN10</div><div class="svc-status" id="svc-teams">—</div><div class="svc-detail" id="svc-teams-d">≥5 Mbps</div></div>
-        <div class="svc-card"><div class="svc-name">Guest / VLAN30</div><div class="svc-status" id="svc-guest">—</div><div class="svc-detail" id="svc-guest-d">Best effort</div></div>
-      </div>
-    </div>
-
-    <!-- Degradation indicator -->
-    <div style="margin-top:12px">
-      <div style="display:flex;justify-content:space-between;font-size:9px;color:var(--muted);margin-bottom:4px">
-        <span>Degradation Level</span><span id="deg-inline" style="color:var(--green)">Level 0</span>
-      </div>
-      <div class="deg-bar">
-        <div class="deg-seg" id="ds-0"></div>
-        <div class="deg-seg" id="ds-1"></div>
-        <div class="deg-seg" id="ds-2"></div>
-        <div class="deg-seg" id="ds-3"></div>
-        <div class="deg-seg" id="ds-4"></div>
-      </div>
-    </div>
+  <div class="bp" id="bp-gap">
+    <div style="font-size:9px;color:var(--mut2);margin-bottom:6px">Comparing current settings to Stadium Optimal — parameters that cost you QoE</div>
+    <table class="gtable" id="gap-table">
+      <thead><tr><th>Parameter</th><th>Current</th><th>Optimal</th><th>QoE Cost</th></tr></thead>
+      <tbody id="gap-body"></tbody>
+    </table>
+    <div id="gap-none" style="display:none;font-size:9px;color:var(--green);padding:12px;text-align:center">✓ All parameters match Stadium Optimal — maximum QoE</div>
   </div>
 
-  <!-- ═══ RIGHT PANEL ═══ -->
-  <div class="panel" id="gauge-panel">
-    <div class="ptitle">Stability</div>
-    <canvas id="gauge2" width="180" height="108"></canvas>
-    <div class="stab-lbl" id="stab-lbl">STABLE</div>
-    <div class="stab-score" id="stab-score">Score: 96 / 100</div>
-    <div class="stab-meter"><div class="stab-fill bg-green" id="stab-fill" style="width:96%"></div></div>
-
-    <div style="margin-top:12px">
-      <div class="ptitle">AP Array — 280 APs</div>
-      <div class="ap-grid" id="ap-grid2"></div>
-    </div>
-
-    <div class="rec-box">
-      <div class="rec-title">Active Automations</div>
-      <div id="rec-list"></div>
+  <!-- Service class SLAs -->
+  <div style="margin-top:10px">
+    <div style="font-size:9px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:1.2px;margin-bottom:4px">Service Class SLAs</div>
+    <div class="sg">
+      <div class="sc"><div class="sn">POS / VLAN50</div><div class="ss2" id="svc-pos">—</div><div class="sd" id="svc-pos-d">≤10ms</div></div>
+      <div class="sc"><div class="sn">VIP / VLAN40</div><div class="ss2" id="svc-vip">—</div><div class="sd" id="svc-vip-d">≥25M</div></div>
+      <div class="sc"><div class="sn">Teams / VLAN10</div><div class="ss2" id="svc-tea">—</div><div class="sd" id="svc-tea-d">≥5M</div></div>
+      <div class="sc"><div class="sn">Guest / VLAN30</div><div class="ss2" id="svc-gst">—</div><div class="sd" id="svc-gst-d">Best effort</div></div>
     </div>
   </div>
+  <!-- Degradation indicator -->
+  <div style="margin-top:10px">
+    <div style="display:flex;justify-content:space-between;font-size:9px;color:var(--mut);margin-bottom:3px"><span>Degradation Level</span><span id="deg-inline" style="color:var(--green)">Level 0 — Nominal</span></div>
+    <div class="dbar"><div class="ds" id="ds0"></div><div class="ds" id="ds1"></div><div class="ds" id="ds2"></div><div class="ds" id="ds3"></div><div class="ds" id="ds4"></div></div>
+  </div>
+</div>
 
+<!-- ══ RIGHT PANEL ══ -->
+<div class="panel" style="display:flex;flex-direction:column;align-items:center">
+  <div style="font-size:9px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:1.2px;margin-bottom:8px;align-self:flex-start">Stability</div>
+  <canvas id="gauge" width="180" height="108"></canvas>
+  <div class="stlbl" id="stlbl">STABLE</div>
+  <div class="stscore" id="stscore">96 / 100</div>
+  <div class="stmeter" style="width:100%"><div class="stfill bg-green" id="stfill" style="width:96%"></div></div>
+  <div style="width:100%;margin-top:10px">
+    <div style="font-size:9px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:1.2px;margin-bottom:4px">AP Array — 280 APs</div>
+    <div class="apg" id="apg"></div>
+  </div>
+  <div class="ral" style="width:100%">
+    <div class="ralt">Active Automations</div>
+    <div id="reclist"></div>
+  </div>
+  <!-- Breaking Point Finder -->
+  <div class="bpfind" style="width:100%">
+    <div class="bpft">⚡ Breaking Point Finder</div>
+    <select id="bp-param" style="margin-bottom:4px;font-size:9px"><option value="concur">Concurrency %</option><option value="fan-count">Fan Count</option><option value="noise-fl">Noise Floor (dB)</option><option value="max-cli">Max Clients/Radio</option><option value="tx-pwr">TX Power (dBm)</option><option value="mcs-floor">MCS Floor</option></select>
+    <select id="bp-sla" style="font-size:9px"><option value="air">Airtime > 70%</option><option value="lat">Latency > 20ms</option><option value="tput">Tput < 5 Mbps</option><option value="pos">POS Lat > 10ms</option><option value="ploss">Loss > 0.1%</option></select>
+    <button class="bpbtn" onclick="findBreak()">Find Threshold →</button>
+    <div class="bpres na" id="bpres">Select parameter + SLA target above</div>
+  </div>
+</div>
 </div><!-- /layout -->
 
-<!-- SLA bar -->
-<div class="sla-bar" id="sla-bar2"></div>
-
-<!-- Event log -->
-<div class="log-wrap" id="log-wrap"></div>
-<div class="footer">© 2026 Khursheed Khan · Stadium WiFi Simulator v2 · FIFA WC 2026 Seattle · Lumen Field · 280×AP5060 · EP1 Security + AirDefense · <a href="stadium_simulator_v2_spec.html" style="color:var(--muted2)">v2 I/O Spec</a> · <a href="stadium_wifi_simulator.html" style="color:var(--muted2)">v1</a></div>
+<div class="slabar" id="slabar"></div>
+<div class="logw" id="logw"></div>
+<div class="footer">© 2026 Khursheed Khan · Stadium WiFi Simulator v2 Phase 1 · FIFA WC 2026 Seattle · EP1 Security + AirDefense · <a href="stadium_simulator_v2_spec.html" style="color:var(--mut2)">I/O Spec ↗</a> · <a href="stadium_wifi_simulator.html" style="color:var(--mut2)">v1 ↗</a></div>
 
 <script>
-// ═══════════════════════════════════════════════════════════════════════
-// CONSTANTS
-// ═══════════════════════════════════════════════════════════════════════
+// ═══ CONSTANTS ═══
+const APC={AP5060:{ss2g:2,ss5g:4,ss6g:4,has6g:true,mlo:true,wifiGen:'WiFi 7 EHT',txMax:17},AP3000:{ss2g:2,ss5g:2,ss6g:0,has6g:false,mlo:false,wifiGen:'WiFi 6 HE',txMax:17}};
+const BS_SPLITS={AP5060:{none:{g2:.22,g5:.55,g6:.23},passive:{g2:.14,g5:.52,g6:.34},active:{g2:.08,g5:.50,g6:.42}},AP3000:{none:{g2:.30,g5:.70,g6:0},passive:{g2:.20,g5:.80,g6:0},active:{g2:.12,g5:.88,g6:0}}};
+const MLO_GAIN={STR:1.90,Enhanced:1.55,NSTR:1.20};
+const APP={video:{dl:15,ul:.5},teams:{dl:3,ul:3},social:{dl:1,ul:4},browse:{dl:2,ul:.1},pos:{dl:.1,ul:.1}};
+// PHY 1SS rates [bw][mcs0..13]
+const PHY1SS={20:[8.6,17.2,25.8,34.4,51.6,68.8,77.4,86,103.2,114.7,129,143.4,162,180],40:[17.2,34.4,51.6,68.8,103.2,137.6,154.9,172.1,206.5,229.4,258.1,286.8,324,360],80:[36,72.1,108.1,144.1,216.2,288.2,324.3,360.3,432.4,480.4,540.4,600.5,675,750],160:[72.1,144.1,216.2,288.2,432.4,576.5,648.5,720.6,864.7,960.8,1080.9,1201,1350,1500],320:[144.1,288.2,432.4,576.5,864.7,1152.9,1297,1441.2,1729.4,1921.6,2161.8,2402,2700,3000]};
+const GI_EFF={800:1.05,1600:1.0,3200:.93};
+const SLA_OPT={mbr:24,rxSop:-75,atFair:'strict',maxCli:100,minRSSI:-70,bcf:true,mc2uc:true,proxyArp:true,clientIso:false,dtim:2,rtwt:true,txopVO:1504,bsMode:'active',mloMode:'STR',punct:true,r80211:true,kv:true,ofdmaDL:true,ofdmaUL:true,muMimo:true,bssColor:true,mlo:true,pmf:true,airdef:true,dcsLock:false};
 
-const AP_CONFIGS = {
-  AP5060: { ss2g:2, ss5g:4, ss6g:4, has6g:true,  mlo:true,  maxCli:512, wifiGen:'WiFi 7 (EHT)', txPwrMax:17 },
-  AP3000: { ss2g:2, ss5g:2, ss6g:0,  has6g:false, mlo:false, maxCli:512, wifiGen:'WiFi 6 (HE)',  txPwrMax:17 },
-};
+function snrToMcs(snr,gen,floor){
+  const t=gen==='be'?[50,46,42,38,34,30,26,22,18,15,12,9,6,3]:[44,40,36,32,28,24,20,17,14,11,9,6,-99,-99];
+  for(let i=0;i<t.length;i++){if(snr>=t[i])return Math.max(floor,t.length-1-i);}
+  return -1;
+}
+function phyR(ss,bw,mcs,gi){if(mcs<0||!PHY1SS[bw])return 0;return Math.round(PHY1SS[bw][Math.min(mcs,13)]*ss*(GI_EFF[gi]||1));}
 
-// Band steering split: [2g%, 5g%, 6g%]
-const BAND_SPLIT = {
-  AP5060: [0.12, 0.50, 0.38],
-  AP3000: [0.20, 0.80, 0.00],
-};
-
-// PHY rate per 1SS (Mbps) indexed by [bwMhz][mcsIdx 0..13]
-const PHY_1SS = {
-  20:  [8.6,17.2,25.8,34.4,51.6,68.8,77.4,86.0,103.2,114.7,129.0,143.4,162.0,180.0],
-  40:  [17.2,34.4,51.6,68.8,103.2,137.6,154.9,172.1,206.5,229.4,258.1,286.8,324.0,360.0],
-  80:  [36.0,72.1,108.1,144.1,216.2,288.2,324.3,360.3,432.4,480.4,540.4,600.5,675.0,750.0],
-  160: [72.1,144.1,216.2,288.2,432.4,576.5,648.5,720.6,864.7,960.8,1080.9,1201.0,1350.0,1500.0],
-  320: [144.1,288.2,432.4,576.5,864.7,1152.9,1297.0,1441.2,1729.4,1921.6,2161.8,2402.0,2700.0,3000.0],
-};
-
-// GI efficiency factor
-const GI_EFF = { 800:1.05, 1600:1.0, 3200:0.93 };
-
-// SNR → MCS index (802.11ax/be)
-function snrToMcs(snr, gen, mcsFloor) {
-  const thresholds = gen === 'be'
-    ? [50,46,42,38,34,30,26,22,18,15,12, 9, 6, 3]  // MCS13..MCS0 (WiFi 7 EHT)
-    : [44,40,36,32,28,24,20,17,14,11, 9, 6, -99, -99]; // MCS11..MCS0 (WiFi 6 HE, no 12/13)
-  for (let i=0; i<thresholds.length; i++) {
-    if (snr >= thresholds[i]) {
-      const mcsIdx = thresholds.length - 1 - i;
-      return Math.max(mcsFloor, mcsIdx);
-    }
-  }
-  return -1; // no link
+// Capacity multiplier from overhead-reduction parameters
+function capMult(p){
+  let m=1;
+  m*=p.ofdmaDL?1.35:1;
+  m*=p.bssColor?1.15:1;
+  m*=({6:1,12:1.10,24:1.18}[p.mbr]||1);
+  m*=p.bcf?1.15:1;
+  m*=p.mc2uc?1.10:1;
+  m*=p.proxyArp?1.07:1;
+  m*=p.clientIso?1.02:1;
+  m*=({off:1,adaptive:1.22,strict:1.38}[p.atFair]||1);
+  m*=p.multiRU?1.08:1;
+  m*=({65535:1.0,2347:1.02,1500:1.04}[p.rtsThr]||1.0);
+  m*=p.txopBe>=3008?1.05:p.txopBe>=1504?1.03:1.0;
+  m*=p.mloSteer==='ai'?1.04:1.0;
+  return m;
 }
 
-function phyRate(ss, bw, mcsIdx, gi) {
-  if (mcsIdx < 0 || !PHY_1SS[bw]) return 0;
-  const idx = Math.min(mcsIdx, 13);
-  return Math.round(PHY_1SS[bw][idx] * ss * (GI_EFF[gi] || 1.0));
-}
+let logE=[],prev={},activeBand='2g';
 
-// Timeline presets
-const PRESETS = [
-  { t:-90, concPct:0.12, label:'T−90 Pre-Match', note:'Gates open, 12% concurrency' },
-  { t:-30, concPct:0.45, label:'T−30 Arrival Rush', note:'Active arrival, 45% concurrency' },
-  { t:0,   concPct:0.55, label:'T+0 Kickoff', note:'Peak load, 55% concurrency' },
-  { t:48,  concPct:0.65, label:'T+48 Half-Time', note:'Social media surge, 65% concurrency' },
-  { t:90,  concPct:0.58, label:'T+90 Full-Time', note:'Celebrations, 58% concurrency' },
-  { t:110, concPct:0.28, label:'T+110 Post-Match', note:'Draining, 28% concurrency' },
-];
-
-// App demand (Mbps DL, Mbps UL)
-const APP_DEMAND = {
-  video:  { dl:15.0, ul:0.5 },
-  teams:  { dl:3.0,  ul:3.0 },
-  social: { dl:1.0,  ul:4.0 },
-  browse: { dl:2.0,  ul:0.1 },
-  pos:    { dl:0.1,  ul:0.1 },
-};
-
-const SLA = {
-  snr:    { green:25, yellow:15 },
-  air:    { green:70, yellow:85 },
-  lat:    { green:20, yellow:50 },
-  ploss:  { green:0.1, yellow:1.0 },
-  tput:   { green:5, yellow:2 },
-};
-
-function slaC(metric, val) {
-  const t = SLA[metric];
-  const higher = (metric === 'snr' || metric === 'tput');
-  if (higher) { return val>=t.green?'green':val>=t.yellow?'yellow':'red'; }
-  return val<=t.green?'green':val<=t.yellow?'yellow':'red';
-}
-
-// ═══════════════════════════════════════════════════════════════════════
-// STATE
-// ═══════════════════════════════════════════════════════════════════════
-let logEntries = [];
-let prevState = {};
-let activeBand = '2g';
-
-// ═══════════════════════════════════════════════════════════════════════
-// COMPUTE
-// ═══════════════════════════════════════════════════════════════════════
-function compute() {
-  const apType     = document.getElementById('ap-type').value;
-  const ap         = AP_CONFIGS[apType];
-  const tScrub     = +document.getElementById('t-scrub').value;
-  const fanCount   = +document.getElementById('fan-count').value;
-  const devMult    = +document.getElementById('dev-mult').value / 10;
-  const wifiAttach = +document.getElementById('wifi-attach').value / 100;
-  const concPct    = +document.getElementById('concurrency').value / 100;
-  const bw5g       = +document.getElementById('bw-5g').value;
-  const bw6g       = +document.getElementById('bw-6g').value;
-  const gi         = +document.getElementById('guard-int').value;
-  const noiseOff   = +document.getElementById('noise-floor').value;
-  const txPwr      = +document.getElementById('tx-power').value;
-  const mcsFloor   = +document.getElementById('mcs-floor').value;
-
-  const ofdmaDL  = document.getElementById('tog-ofdma-dl').checked;
-  const ofdmaUL  = document.getElementById('tog-ofdma-ul').checked;
-  const muMimo   = document.getElementById('tog-mumimo').checked;
-  const bssColor = document.getElementById('tog-bsscolor').checked;
-  const mloOn    = document.getElementById('tog-mlo').checked && ap.mlo;
-  const kv11     = document.getElementById('tog-11kv').checked;
-  const pmfOn    = document.getElementById('tog-pmf').checked;
-  const airdefOn = document.getElementById('tog-airdef').checked;
-  const dcsLock  = document.getElementById('tog-dcslock').checked;
-  const degLvl   = +document.getElementById('deg-level').value;
-  const cyber    = document.getElementById('cyber-attack').value;
-
-  // App mix weights (normalize to sum=100)
-  const vidW  = +document.getElementById('mix-video').value;
-  const teaW  = +document.getElementById('mix-teams').value;
-  const socW  = +document.getElementById('mix-social').value;
-  const broW  = +document.getElementById('mix-browse').value;
-  const posW  = +document.getElementById('mix-pos').value;
-  const totalW = vidW + teaW + socW + broW + posW || 1;
-  const mix = { vid:vidW/totalW, teams:teaW/totalW, soc:socW/totalW, bro:broW/totalW, pos:posW/totalW };
-
-  // Weighted demand per active client
-  const demDL = mix.vid*APP_DEMAND.video.dl + mix.teams*APP_DEMAND.teams.dl +
-                mix.soc*APP_DEMAND.social.dl + mix.bro*APP_DEMAND.browse.dl +
-                mix.pos*APP_DEMAND.pos.dl;
-  const demUL = mix.vid*APP_DEMAND.video.ul + mix.teams*APP_DEMAND.teams.ul +
-                mix.soc*APP_DEMAND.social.ul + mix.bro*APP_DEMAND.browse.ul +
-                mix.pos*APP_DEMAND.pos.ul;
-  const demTotal = demDL + demUL;
-
-  // Total sessions
-  const totalSessions = Math.round(fanCount * devMult * wifiAttach);
-  const activeClients  = Math.round(totalSessions * concPct);
-  const perAP          = Math.round(activeClients / 280);
-
-  // Band split
-  const bsplit = BAND_SPLIT[apType];
-  const cli2g  = Math.round(perAP * bsplit[0]);
-  const cli5g  = Math.round(perAP * bsplit[1]);
-  const cli6g  = Math.round(perAP * bsplit[2]);
-
-  // RF model per band: RSSI starts at -62, noise = -95 + noiseOff
-  const baseRSSI = -62 + (txPwr - 17) * 0.5;
-  const noiseDeg = [0, 4, 8, 18, 30][degLvl];
-  const noiseDBm = -95 + noiseOff + noiseDeg;
-  const baseSNR  = baseRSSI - noiseDBm;
-
-  // Band-specific SNR modifiers
-  const snrMod = { '2g': -3, '5g': 0, '6g': +4 }; // 6GHz: better due to 320MHz clean spectrum + no legacy devices
-
-  // OFDMA / MU-MIMO / BSS Color capacity multipliers
-  const ofdmaDLMult = ofdmaDL ? 1.35 : 1.0;
-  const ofdmaULMult = ofdmaUL ? 1.20 : 1.0;
-  const mimoMult    = muMimo  ? { dl: ap.ss5g >= 4 ? 4 : 2, ul: 2 } : { dl: 1, ul: 1 };
-  const bssMult     = bssColor ? 0.80 : 1.0; // CCI reduction = less interference = more capacity → treat as /0.80 on interference
-  const capMult     = ofdmaDLMult * (bssColor ? 1.20 : 1.0); // BSS Color boosts capacity ~20%
-
-  function computeBand(bandKey, ss, bw, clients) {
-    if (!ap.has6g && bandKey === '6g') return null;
-    const snr   = baseSNR + snrMod[bandKey] + (dcsLock ? 2 : 0);
-    const gen   = (apType === 'AP5060' && (bandKey === '5g' || bandKey === '6g')) ? 'be' : 'ax';
-    const mcsI  = snrToMcs(snr, gen, mcsFloor);
-    const phy   = phyRate(ss, bw, mcsI, gi);
-    const effPhy = phy * capMult * (muMimo ? mimoMult.dl : 1.0);
-    const demand = clients * demTotal;
-    const rawAir = effPhy > 0 ? demand / effPhy : 1.5;
-    const air    = Math.min(150, Math.round(rawAir * 100));
-    const u      = Math.min(0.98, rawAir);
-    const qDly   = u < 0.05 ? 0.5 : (5 * u / (1 - u));
-    const lat    = Math.round(8 + qDly + (kv11 ? 0 : 10));
-    const airtimeLoss = Math.max(0, (air - 85) * 0.5);
-    const snrLoss = mcsI < 0 ? 50 : mcsI < 3 ? 2 : 0;
-    const ploss  = +(airtimeLoss + snrLoss).toFixed(2);
-    const goodput = phy > 0 && clients > 0 ? Math.max(0, +(phy * 0.65 * (1-u) / clients).toFixed(1)) : 0;
-    return { snr:Math.round(snr), mcsI, phy, air, lat, ploss, goodput, clients, bw, gen };
-  }
-
-  const b2g = computeBand('2g', ap.ss2g, 20, cli2g);
-  const b5g = computeBand('5g', ap.ss5g, bw5g, cli5g);
-  const b6g = computeBand('6g', ap.ss6g, bw6g, cli6g);
-
-  // Degradation overrides
-  if (degLvl >= 1 && b5g) { b5g.air = Math.min(150, b5g.air + 30); }
-  if (degLvl >= 2 && b2g) { b2g.air = Math.min(150, b2g.air + 25); }
-  if (degLvl >= 3) {
-    if (b5g) b5g.snr -= 12;
-    if (b2g) b2g.snr -= 8;
-  }
-  if (degLvl >= 4) {
-    if (b5g) { b5g.mcsI = 0; b5g.air = 130; b5g.ploss = 8; }
-    if (b2g) { b2g.mcsI = 0; b2g.air = 120; b2g.ploss = 5; }
-    if (b6g) { b6g.air  = 80; }
-  }
-
-  // Cyber attack effects
-  let cyberLatAdd = 0, cyberAirAdd = 0;
-  if (cyber === 'deauth')      { cyberAirAdd = pmfOn ? 1 : 15; cyberLatAdd = pmfOn ? 0 : 8; }
-  if (cyber === 'evil_twin')   { cyberAirAdd = airdefOn ? 0 : 5; cyberLatAdd = airdefOn ? 0 : 3; }
-  if (cyber === 'cred_storm')  { cyberLatAdd = 6; }
-  if (cyber === 'arp_poison')  { cyberLatAdd = 6; cyberAirAdd = 5; }
-  if (b5g) { b5g.air = Math.min(150, b5g.air + cyberAirAdd); b5g.lat += cyberLatAdd; }
-
-  // MLO (AP5060, 5G+6G bonded STR)
-  let mlo = null;
-  if (mloOn && b5g && b6g) {
-    const mloTput = Math.round((b5g.goodput + b6g.goodput) * 0.9); // 90% efficiency for STR
-    const mloLat  = Math.min(b5g.lat, b6g.lat);
-    const singleBandTput = Math.max(b5g.goodput, b6g.goodput) || 1;
-    mlo = { tput: mloTput, lat: mloLat, gain: +(mloTput / singleBandTput).toFixed(1) };
-  }
-
-  // Aggregate
-  const activeBands = [b2g, b5g, b6g].filter(Boolean);
-  const capTotal = activeBands.reduce((s, b) => s + phyRate(b5g === b ? ap.ss5g : b6g === b ? ap.ss6g : ap.ss2g, b.bw, b.mcsI, gi) * capMult / 1000, 0) * 280; // Gbps stadium
-  const demandTotal = activeClients * demTotal / 1000; // Gbps
-  const worstAir = Math.max(...activeBands.map(b=>b.air));
-  const worstLat = mloOn && mlo ? mlo.lat : Math.max(...activeBands.map(b=>b.lat));
-  const worstPloss = Math.max(...activeBands.map(b=>b.ploss));
-  const bestTput = mloOn && mlo ? mlo.tput : (b6g || b5g || b2g)?.goodput || 0;
-
-  // Stability score
-  let score = 100;
-  const refBand = b5g || b2g;
-  if (refBand) {
-    if (refBand.snr < 25) score -= Math.min(20, (25-refBand.snr)*1.2);
-    if (worstAir > 70) score -= Math.min(25, (worstAir-70)*1.0);
-  }
-  if (worstLat > 20) score -= Math.min(20, (worstLat-20)*0.4);
-  if (worstPloss > 0.1) score -= Math.min(20, worstPloss*10);
-  if (degLvl > 0) score -= degLvl * 12;
-  if (cyber !== 'none') score -= 8;
-  if (!pmfOn && cyber === 'deauth') score -= 10;
-  score = Math.max(0, Math.round(score));
-
-  // Service class SLAs
-  const posOk    = worstLat <= 10 && worstPloss < 0.5;
-  const vipOk    = bestTput >= 25;
-  const teamsOk  = bestTput >= 5;
-  const guestOk  = score >= 50;
-
-  return {
-    apType, ap, b2g, b5g, b6g, mlo, mloOn,
-    totalSessions, activeClients, perAP,
-    demDL, demUL, demTotal, mix,
-    capTotal: +capTotal.toFixed(1), demandTotal: +demandTotal.toFixed(1),
-    worstAir, worstLat, worstPloss, bestTput,
-    score, degLvl, cyber, pmfOn, airdefOn, kv11, dcsLock,
-    posOk, vipOk, teamsOk, guestOk,
-    noiseOff, txPwr, gi, bw5g, bw6g, mcsFloor, bssColor, ofdmaDL, ofdmaUL, muMimo
+// ═══ COMPUTE ═══
+function readInputs(){
+  return{
+    apType:g('ap-type').value,
+    t:+g('t-scrub').value,
+    fans:+g('fan-count').value,
+    devMult:+g('dev-mult').value/10,
+    wifiAtt:+g('wifi-att').value/100,
+    concur:+g('concur').value/100,
+    vidW:+g('mx-vid').value,teaW:+g('mx-tea').value,socW:+g('mx-soc').value,broW:+g('mx-bro').value,posW:+g('mx-pos').value,
+    txPwr:+g('tx-pwr').value,
+    bw5g:+g('bw5g').value,
+    bw6g:+g('bw6g').value,
+    gi:+g('guard-int').value,
+    mbr:+g('mbr').value,
+    rxSop:+g('rx-sop').value,
+    mcsFloor:+g('mcs-floor').value,
+    nf:+g('noise-fl').value,
+    punct:g('tog-punct').checked,
+    ofdmaDL:g('tog-ofdma-dl').checked,
+    ofdmaUL:g('tog-ofdma-ul').checked,
+    muMimo:g('tog-mumimo').checked,
+    bssColor:g('tog-bsscolor').checked,
+    rtwt:g('tog-rtwt').checked,
+    multiRU:g('tog-multiru').checked,
+    mloOn:g('tog-mlo').checked,
+    r80211:g('tog-r80211').checked,
+    kv:g('tog-kv').checked,
+    dcsLock:g('tog-dcslock').checked,
+    mloMode:g('mlo-mode').value,
+    txopVO:+g('txop-vo').value,
+    maxCli:+g('max-cli').value,
+    minRSSI:+g('min-rssi').value,
+    atFair:g('at-fair').value,
+    bsMode:g('bs-mode').value,
+    bcf:g('tog-bcf').checked,
+    mc2uc:g('tog-mc2uc').checked,
+    proxyArp:g('tog-proxyarp').checked,
+    clientIso:g('tog-cliiso').checked,
+    enhRNR:g('tog-enhrnr').checked,
+    pmf:g('tog-pmf').checked,
+    airdef:g('tog-airdef').checked,
+    dtim:+g('dtim').value,
+    deg:+g('deg-lvl').value,
+    cyber:g('cyber').value,
+    txopBe:+g('txop-be').value,
+    cwBe:+g('cw-be').value,
+    rtsThr:+g('rts-thr').value,
+    muStreams:+g('mu-streams').value,
+    qam4k:g('tog-qam4k').checked,
+    mloLinks:+g('mlo-links').value,
+    mloSteer:g('mlo-steer').value,
   };
 }
 
-// ═══════════════════════════════════════════════════════════════════════
-// RENDER
-// ═══════════════════════════════════════════════════════════════════════
-const CM = { green:'var(--green)', yellow:'var(--yellow)', orange:'var(--orange)', red:'var(--red)' };
+function compute(ov){
+  const p=Object.assign(readInputs(),ov||{});
+  const ap=APC[p.apType];
+  const tw=p.vidW+p.teaW+p.socW+p.broW+p.posW||1;
+  const mix={vid:p.vidW/tw,tea:p.teaW/tw,soc:p.socW/tw,bro:p.broW/tw,pos:p.posW/tw};
+  const demDL=mix.vid*15+mix.tea*3+mix.soc*1+mix.bro*2+mix.pos*.1;
+  const demUL=mix.vid*.5+mix.tea*3+mix.soc*4+mix.bro*.1+mix.pos*.1;
+  const demTot=demDL+demUL;
+  const totalSess=Math.round(p.fans*p.devMult*p.wifiAtt);
+  const active=Math.round(totalSess*p.concur);
+  const perAP=Math.round(active/280);
+  const bssplit=BS_SPLITS[p.apType][p.bsMode]||{g2:.15,g5:.50,g6:.35};
+  // enhance RNR boosts 6GHz attach by 10% when active
+  const g6boost=p.enhRNR&&ap.has6g?1.10:1;
+  const split2g=bssplit.g2,split5g=bssplit.g5,split6g=bssplit.g6*g6boost;
+  const cli2g=Math.min(Math.round(perAP*split2g),p.maxCli);
+  const cli5g=Math.min(Math.round(perAP*split5g),p.maxCli);
+  const cli6g=ap.has6g?Math.min(Math.round(perAP*split6g),p.maxCli):0;
+  const rxSopBoost={'-85':0,'-75':3,'-65':6}[p.rxSop]||0;
+  const rssiMCSBoost={'-80':0,'-75':1,'-70':2}[p.minRSSI]||0;
+  const effMCSFloor=Math.max(0,p.mcsFloor+rssiMCSBoost);
+  const degNoise=[0,5,10,20,35][p.deg]||0;
+  const baseRSSI=-62+(p.txPwr-17)*.5;
+  const noiseDBm=-95+p.nf+degNoise;
+  const baseSNR=baseRSSI-noiseDBm+rxSopBoost;
+  const snrMod={g2:-3,g5:0,g6:4};
+  const cm=capMult(p);
+  // MU-MIMO boosts PHY aggregate (not per-client PHY but total concurrent throughput)
+  const muStreamGain={1:1.0,2:1.3,4:2.0,8:2.8};
+  const muF=p.muMimo?(ap.ss5g>=4?(muStreamGain[p.muStreams]||2.0):1.6):1.0;
 
-function setV(id, val) { const e=document.getElementById(id); if(e) e.textContent=val; }
-function setC(id, c)   { const e=document.getElementById(id); if(e) e.className=`mval ${c}`; }
-function setBF(id, pct, c) { const e=document.getElementById(id); if(e){e.style.width=Math.min(100,Math.max(0,pct))+'%';if(c)e.className='mbf '+c;} }
+  function band(key,ss,bw,clients){
+    if(clients<=0||(!ap.has6g&&key==='g6'))return null;
+    const snr=baseSNR+snrMod[key]+(p.dcsLock?2:0)+([0,0,-5,-12,-20][p.deg]||0)*(key==='g5'?1:key==='g2'?.7:.3);
+    const gen=p.apType==='AP5060'&&(key==='g5'||key==='g6')?'be':'ax';
+    let mcs=snrToMcs(snr,gen,effMCSFloor);
+    if(!p.qam4k&&gen==='be')mcs=Math.min(mcs,11); // gate MCS12/13 on 4K-QAM toggle
+    const phy=phyR(ss,bw,mcs,p.gi);
+    const effPHY=phy*muF;
+    const effCap=effPHY*cm;
+    const demand=clients*demTot;
+    const u=effCap>0?Math.min(.98,demand/effCap):1;
+    const qd=u<.05?.5:(6*u/(1-u));
+    let lat=8+qd;
+    if(!p.kv)lat+=10;
+    if(!p.r80211&&p.deg>=1)lat+=8;
+    if(p.txopVO>0)lat-=4;
+    lat+=(p.dtim-1)*8;
+    if(p.cwBe===7&&u>0.7)lat+=3;   // aggressive CWmin → collision burst at >70% airtime
+    if((p.cwBe||15)>=31)lat-=1;    // conservative CWmin marginal benefit
+    lat=Math.max(2,Math.round(lat));
+    const airLoss=Math.max(0,(Math.min(150,Math.round(u*100))-85)*.5);
+    const snrLoss=mcs<0?50:mcs<2?3:0;
+    const ploss=+(airLoss+snrLoss).toFixed(2);
+    const gp=phy>0&&clients>0?Math.max(0,+(phy*.65*(1-u)/clients).toFixed(1)):0;
+    const air=Math.min(150,Math.round(u*100));
+    return{snr:Math.round(snr),mcs,phy,air,lat,ploss,gp,clients,bw,gen,effPHY,effCap};
+  }
 
-function renderBand(b, key) {
-  if (!b) { document.getElementById(`bp-${key}`).style.opacity='0.3'; return; }
-  document.getElementById(`bp-${key}`).style.opacity='1';
-  const sc = slaC('snr', b.snr);
-  setV(`snr-${key}`, b.snr); setC(`snr-${key}`, sc);
-  setBF(`bar-snr-${key}`, (b.snr/50)*100, `bg-${sc}`);
-  const mc = b.mcsI >= 8?'green':b.mcsI>=4?'yellow':b.mcsI>=0?'orange':'red';
-  const maxMcs = b.gen==='be' ? 13 : 11;
-  setV(`mcs-${key}`, b.mcsI>=0?b.mcsI:'—'); setC(`mcs-${key}`, mc);
-  setV(`mcs-${key}-rate`, b.phy>0?`${b.phy.toLocaleString()} Mbps PHY (${b.gen.toUpperCase()}, ${b.clients} cli)`:'No link');
-  setBF(`bar-mcs-${key}`, b.mcsI>=0?(b.mcsI/maxMcs)*100:0, `bg-${mc}`);
-  const ac = slaC('air', b.air);
-  setV(`air-${key}`, b.air); setC(`air-${key}`, ac); setBF(`bar-air-${key}`, b.air, `bg-${ac}`);
-  setV(`cli-${key}`, b.clients); setBF(`bar-cli-${key}`, (b.clients/100)*100, null);
-  const tc = slaC('tput', b.goodput);
-  setV(`tput-${key}`, b.goodput.toFixed(1)); setC(`tput-${key}`, tc);
-  setBF(`bar-tput-${key}`, Math.min(100, b.goodput/20*100), null);
+  // Preamble Puncturing: maintain 320MHz even at deg≥1
+  const eff6gBW=(!p.punct&&p.deg>=1&&p.bw6g===320)?160:p.bw6g;
+
+  let b2=band('g2',ap.ss2g,20,cli2g);
+  let b5=band('g5',ap.ss5g,p.bw5g,cli5g);
+  let b6=band('g6',ap.ss6g,eff6gBW,cli6g);
+
+  // Cyber attack effects
+  const cyberAdd={none:{air:0,lat:0},deauth:{air:p.pmf?1:15,lat:p.pmf?0:8},evil_twin:{air:p.airdef?0:5,lat:p.airdef?0:3},cred_storm:{air:0,lat:6},arp:{air:p.proxyArp?0:6,lat:p.proxyArp?0:4}};
+  const cy=cyberAdd[p.cyber]||{air:0,lat:0};
+  if(b5){b5.air=Math.min(150,b5.air+cy.air);b5.lat+=cy.lat;}
+
+  // MLO
+  let mlo=null;
+  const mloActive=p.mloOn&&ap.mlo&&b5&&b6&&(p.mloLinks||2)>1;
+  if(mloActive){
+    const gf=MLO_GAIN[p.mloMode]||1.9;
+    const triLink=(p.mloLinks===3&&b2)?1.12:1.0; // 3-link adds 2.4G channel (+12%)
+    const base=Math.max(b5.gp,b6.gp)||1;
+    const tp=Math.round((b5.gp+b6.gp)*gf*.85*triLink);
+    mlo={tput:tp,lat:Math.min(b5.lat,b6.lat),gain:+(tp/base).toFixed(1)};
+  }
+
+  // rTWT: hardware-enforced POS latency
+  const posLatBase=p.rtwt&&ap.mlo?Math.max(1,Math.min((b5||b2||{lat:10}).lat*.12,3)):((b5||b2||{lat:15}).lat);
+  const posLat=(!p.rtwt&&p.txopBe===3008)?posLatBase+1:posLatBase; // TXOP_BE can briefly block AC_VO when rTWT OFF
+
+  const bands=[b2,b5,b6].filter(Boolean);
+  const wAir=Math.max(...bands.map(b=>b.air));
+  const wLat=mloActive&&mlo?mlo.lat:Math.max(...bands.map(b=>b.lat));
+  const wPloss=Math.max(...bands.map(b=>b.ploss));
+  const bestTP=mloActive&&mlo?mlo.tput:(b6||b5||b2||{gp:0}).gp;
+
+  // Stadium capacity
+  const capGbps=bands.reduce((s,b)=>s+b.effCap/1000,0)*280;
+  const demGbps=active*demTot/1000;
+
+  // Score
+  let score=100;
+  const ref=b5||b2;
+  if(ref&&ref.snr<25)score-=Math.min(20,(25-ref.snr)*1.2);
+  if(wAir>70)score-=Math.min(25,(wAir-70)*1.0);
+  if(wLat>20)score-=Math.min(20,(wLat-20)*.4);
+  if(wPloss>.1)score-=Math.min(20,wPloss*10);
+  if(p.deg>0)score-=p.deg*12;
+  if(p.cyber!=='none')score-=8;
+  if(!p.pmf&&p.cyber==='deauth')score-=10;
+  score=Math.max(0,Math.round(score));
+
+  const posPass=posLat<=10&&wPloss<.3;
+  const vipPass=bestTP>=25;
+  const teaPass=bestTP>=5;
+  const gstPass=score>=50;
+
+  return{p,ap,b2,b5,b6,mlo,mloActive,totalSess,active,perAP,demDL,demUL,demTot,mix,capGbps:+capGbps.toFixed(1),demGbps:+demGbps.toFixed(1),wAir,wLat,wPloss,bestTP,posLat,score,posPass,vipPass,teaPass,gstPass,eff6gBW};
 }
 
-function render(s) {
-  // Update band panels
-  renderBand(s.b2g, '2g');
-  renderBand(s.b5g, '5g');
-  renderBand(s.b6g, '6g');
+// ═══ RENDER ═══
+const CM={green:'var(--green)',yellow:'var(--yel)',orange:'var(--org)',red:'var(--red)'};
+function g(id){return document.getElementById(id);}
+function sv(id,v){const e=g(id);if(e)e.textContent=v;}
+function sc(id,c){const e=g(id);if(e)e.className=`mv ${c}`;}
+function sbf(id,pct,cl){const e=g(id);if(e){e.style.width=Math.min(100,Math.max(0,pct))+'%';if(cl)e.className='mbf '+cl;}}
+function slaC(m,v){
+  const t={snr:{g:25,y:15},air:{g:70,y:85},lat:{g:20,y:50},ploss:{g:.1,y:1},tput:{g:5,y:2}};
+  const up=(m==='snr'||m==='tput');
+  if(up)return v>=t[m].g?'green':v>=t[m].y?'yellow':'red';
+  return v<=t[m].g?'green':v<=t[m].y?'yellow':'red';
+}
 
-  // 6G band tab visibility
-  document.getElementById('tab-6g').style.opacity = s.ap.has6g ? '1' : '0.35';
-  document.getElementById('bp-6g').innerHTML = s.b6g ? document.getElementById('bp-6g').innerHTML : '<div style="color:var(--muted);font-size:10px;padding:20px;text-align:center">6GHz not available on AP3000</div>';
-  if (!s.b6g) renderBand(null, '6g');
-  else renderBand(s.b6g, '6g');
+function renderBand(b,key){
+  const p=`bp-${key}`;
+  if(!b){g(p)&&(g(p).style.opacity='.25');return;}
+  g(p)&&(g(p).style.opacity='1');
+  const sc2=slaC('snr',b.snr);
+  sv(`v-snr${key}`,b.snr);sc(`v-snr${key}`,sc2);sbf(`b-snr${key}`,(b.snr/50)*100,'bg-'+sc2);
+  const mc=b.mcs>=8?'green':b.mcs>=4?'yellow':b.mcs>=0?'orange':'red';
+  const maxM=b.gen==='be'?13:11;
+  sv(`v-mcs${key}`,b.mcs>=0?b.mcs:'—');sc(`v-mcs${key}`,mc);
+  sv(`u-mcs${key}`,b.phy>0?`${b.phy.toLocaleString()}M PHY (${b.gen.toUpperCase()},${b.clients}cli)`:'No link');
+  sbf(`b-mcs${key}`,b.mcs>=0?(b.mcs/maxM)*100:0,'bg-'+mc);
+  const ac=slaC('air',b.air);sv(`v-air${key}`,b.air);sc(`v-air${key}`,ac);sbf(`b-air${key}`,b.air,'bg-'+ac);
+  sv(`v-cli${key}`,b.clients);sv(`u-cli${key}`,Math.round(b.clients/0.5));sbf(`b-cli${key}`,(b.clients/150)*100,null);
+  const tc=slaC('tput',b.gp);sv(`v-tp${key}`,b.gp.toFixed(1));sc(`v-tp${key}`,tc);sbf(`b-tp${key}`,Math.min(100,b.gp/20*100),null);
+}
 
-  // MLO card
-  const mloCard = document.getElementById('mlo-card');
-  if (s.mlo && s.mloOn) {
-    mloCard.classList.add('visible');
-    setV('mlo-tput', s.mlo.tput.toFixed(0));
-    setV('mlo-lat', s.mlo.lat);
-    setV('mlo-gain', s.mlo.gain + '×');
-  } else {
-    mloCard.classList.remove('visible');
-  }
+function renderGapTable(s){
+  const p=s.p;
+  const rows=[];
+  if(!p.bcf)            rows.push({n:'Broadcast Filter',cur:'OFF',opt:'ON',cost:'−15% capacity',cls:'gbad'});
+  if(p.atFair==='off')  rows.push({n:'Airtime Fairness',cur:'OFF',opt:'Strict',cost:'−38% fair tput',cls:'gbad'});
+  if(p.atFair==='adaptive') rows.push({n:'Airtime Fairness',cur:'Adaptive',opt:'Strict',cost:'−16% fair tput',cls:'gwarn'});
+  if(p.mbr<24)          rows.push({n:'Min Basic Rate',cur:p.mbr+'M',opt:'24M',cost:'−'+(p.mbr===6?18:8)+'% efficiency',cls:p.mbr===6?'gbad':'gwarn'});
+  if(!p.mc2uc)          rows.push({n:'MC→UC',cur:'OFF',opt:'ON',cost:'−10% capacity',cls:'gwarn'});
+  if(!p.proxyArp)       rows.push({n:'Proxy ARP',cur:'OFF',opt:'ON',cost:'−7% capacity',cls:'gwarn'});
+  if(p.rtwt===false&&s.ap.mlo) rows.push({n:'rTWT',cur:'OFF',opt:'ON',cost:'POS lat unguaranteed',cls:'gbad'});
+  if(!p.r80211)         rows.push({n:'802.11r FT',cur:'OFF',opt:'ON',cost:`+${s.p.deg>=1?16:0}ms roam lat`,cls:'gwarn'});
+  if(p.minRSSI<-70)     rows.push({n:'Min RSSI Admission',cur:p.minRSSI+'dBm',opt:'−70dBm',cost:'Lower avg MCS',cls:'gwarn'});
+  if(p.bsMode==='none') rows.push({n:'Band Steering',cur:'None',opt:'Active',cost:'23% stuck on 2.4G',cls:'gbad'});
+  if(p.bsMode==='passive') rows.push({n:'Band Steering',cur:'Passive',opt:'Active',cost:'14% stuck on 2.4G',cls:'gwarn'});
+  if(p.dtim>2)          rows.push({n:'DTIM',cur:String(p.dtim),opt:'2',cost:`+${(p.dtim-2)*8}ms PS latency`,cls:'gwarn'});
+  if(!p.kv)             rows.push({n:'802.11k/v',cur:'OFF',opt:'ON',cost:'+10ms overhead',cls:'gwarn'});
+  if(p.rxSop<-75)       rows.push({n:'RX-SOP',cur:p.rxSop+'dBm',opt:'−75dBm',cost:'Higher CCI impact',cls:'gwarn'});
+  if(!p.punct&&s.ap.mlo&&p.bw6g===320) rows.push({n:'Preamble Punct',cur:'OFF',opt:'ON',cost:'320MHz degrades at Level 1+',cls:'gwarn'});
+  if(p.mloMode!=='STR'&&s.ap.mlo) rows.push({n:'MLO Mode',cur:p.mloMode,opt:'STR',cost:`×${(MLO_GAIN.STR/MLO_GAIN[p.mloMode]).toFixed(1)} throughput gap`,cls:'gwarn'});
+  if((p.mloLinks||2)<2&&s.ap.mlo) rows.push({n:'MLO Active Links',cur:(p.mloLinks||1)+' link',opt:'2 links',cost:'No 5G+6G bonding — MLO disabled',cls:'gbad'});
+  if(p.mloSteer!=='ai'&&s.ap.mlo) rows.push({n:'MLO Traffic Steering',cur:'WMM-QoS',opt:'AI-driven',cost:'−4% EP1 RRM efficiency',cls:'gwarn'});
+  if(!p.qam4k) rows.push({n:'4K-QAM (MCS 12/13)',cur:'OFF',opt:'ON',cost:'Peak MCS capped at 11 (−25% peak PHY rate)',cls:'gwarn'});
+  if(p.cwBe!==15) rows.push({n:'EDCA CWmin AC_BE',cur:p.cwBe+' slots',opt:'15',cost:p.cwBe<15?'+3ms collision burst at >70% load':'Higher BE latency',cls:p.cwBe<15?'gbad':'gwarn'});
+  if(p.rtsThr>1500) rows.push({n:'RTS/CTS Threshold',cur:p.rtsThr+'B',opt:'1500B',cost:'Hidden terminal collisions unmitigated',cls:'gwarn'});
+  if(!p.muMimo||p.muStreams<8){const sg={1:0,2:30,4:100,8:180};const cur=p.muMimo?(sg[p.muStreams]||100):0;rows.push({n:'MU-MIMO DL Streams',cur:p.muMimo?p.muStreams+' streams':'OFF',opt:'8 streams',cost:`−${180-cur}% DL-MU capacity`,cls:cur<100?'gbad':'gwarn'});}
+  if(p.txopBe<3008) rows.push({n:'TXOP AC_BE',cur:p.txopBe+'µs',opt:'3008µs',cost:'Lower bulk throughput for video/social',cls:'gwarn'});
 
-  // Aggregate band
-  setV('agg-sess', s.totalSessions.toLocaleString());
-  setBF('bar-agg-sess', (s.totalSessions/100000)*100, null);
-  setV('agg-active', s.activeClients.toLocaleString());
-  setBF('bar-agg-active', (s.activeClients/50000)*100, null);
-  const dc = s.demandTotal > s.capTotal*0.85 ? 'orange' : 'green';
-  setV('agg-demand', s.demandTotal); setBF('bar-agg-demand', (s.demandTotal/s.capTotal)*80, null);
-  setV('agg-cap', s.capTotal); setBF('bar-agg-cap', 70, null);
-  const latC = slaC('lat', s.worstLat);
-  setV('agg-lat', s.worstLat); setC('agg-lat', latC); setBF('bar-agg-lat', (s.worstLat/100)*100, `bg-${latC}`);
-  const plC = slaC('ploss', s.worstPloss);
-  setV('agg-ploss', s.worstPloss.toFixed(2)); setC('agg-ploss', plC);
-  setBF('bar-agg-ploss', Math.min(100,s.worstPloss*20), `bg-${plC}`);
-  setV('agg-dl', s.demDL.toFixed(1)); setBF('bar-agg-dl', Math.min(100,s.demDL/15*100), null);
-  setV('agg-ul', s.demUL.toFixed(1)); setBF('bar-agg-ul', Math.min(100,s.demUL/5*100), null);
-  const dlUlRatio = s.demUL > 0 ? (s.demDL/s.demUL).toFixed(1) : '—';
-  setV('ul-dl-ratio', `DL:UL = ${dlUlRatio}:1`);
+  const tb=g('gap-body');const gn=g('gap-none');
+  if(rows.length===0){if(tb)tb.innerHTML='';if(gn)gn.style.display='block';}
+  else{if(gn)gn.style.display='none';if(tb)tb.innerHTML=rows.map(r=>`<tr><td>${r.n}</td><td class="${r.cls}">${r.cur}</td><td class="gok">${r.opt}</td><td class="${r.cls}">${r.cost}</td></tr>`).join('');}
+}
 
-  // App mix bar
-  const total = s.mix.vid + s.mix.teams + s.mix.soc + s.mix.bro + s.mix.pos || 1;
-  ['vid','teams','soc','bro','pos'].forEach((k,i) => {
-    const keys = ['vid','teams','soc','bro','pos'];
-    const mixKeys = ['vid','teams','soc','bro','pos'];
-    const el = document.getElementById(`lmix-${k==='vid'?'vid':k==='teams'?'teams':k==='soc'?'social':k==='bro'?'browse':'pos'}`);
-    if(el) el.style.width = (s.mix[k]*100).toFixed(0)+'%';
-  });
-  setV('demand-per-client', `${s.demTotal.toFixed(1)} Mbps/client (DL+UL)`);
+function render(s){
+  const{p,b2,b5,b6,mlo,mloActive}=s;
+  // band notes
+  sv('note-5g',`5GHz: ${p.bw5g}MHz · ${s.ap.ss5g}SS ${s.ap.wifiGen}`);
+  sv('note-6g',`6GHz: ${s.eff6gBW}MHz · ${s.ap.ss6g}SS · LPI${p.punct?' · Punct ON':''}`);
 
-  // Service class SLAs
-  function svcStatus(ok, svc) {
-    const e = document.getElementById(`svc-${svc}`);
-    if (e) { e.textContent = ok ? '✓ PASS' : '✗ FAIL'; e.style.color = ok ? CM.green : CM.red; }
-  }
-  svcStatus(s.posOk, 'pos'); svcStatus(s.vipOk, 'vip'); svcStatus(s.teamsOk, 'teams'); svcStatus(s.guestOk, 'guest');
-  setV('svc-pos-d', `Lat: ${s.worstLat}ms (≤10ms)`);
-  setV('svc-vip-d', `${s.bestTput.toFixed(0)} Mbps (≥25)`);
-  setV('svc-teams-d', `${s.bestTput.toFixed(0)} Mbps (≥5)`);
-  setV('svc-guest-d', `Score: ${s.score}/100`);
+  renderBand(b2,'2g');renderBand(b5,'5g');renderBand(b6,'6g');
+  g('tb-6g').style.opacity=s.ap.has6g?'1':'.4';
 
-  // Degradation bar
-  const degColors = ['active-0','active-1','active-2','active-3','active-4'];
-  for (let i=0;i<5;i++) {
-    const seg = document.getElementById(`ds-${i}`);
-    if (seg) seg.className = 'deg-seg' + (i<=s.degLvl ? ` ${degColors[Math.min(s.degLvl,4)]}` : '');
-  }
-  const degLabels = ['0 — Nominal','1 — 5G CCI','2 — Dual Degrade','3 — Jammer+Auth','4 — Critical'];
-  const degColors2 = [CM.green, CM.yellow, CM.orange, CM.red, '#ff0000'];
-  setV('deg-inline', degLabels[s.degLvl]);
-  const degInline = document.getElementById('deg-inline');
-  if (degInline) degInline.style.color = degColors2[s.degLvl];
-  setV('deg-lbl-val', degLabels[s.degLvl]);
-  const degLblVal = document.getElementById('deg-lbl-val');
-  if (degLblVal) degLblVal.style.color = degColors2[s.degLvl];
+  // MLO
+  const mloc=g('mloc');
+  if(mloActive&&mlo){mloc.classList.add('vis');sv('mlo-tput',mlo.tput.toFixed(0));sv('mlo-lat',mlo.lat);sv('mlo-gain',mlo.gain+'×');}
+  else mloc.classList.remove('vis');
 
-  // Stability gauge
-  drawGauge2(s.score);
-  const stabLabels = ['STABLE','STABLE','DEGRADED','WARNING','CRITICAL'];
-  const stabColors = [CM.green, CM.green, CM.yellow, CM.orange, CM.red];
-  const stabLevel = s.score>=85?0:s.score>=70?1:s.score>=50?2:s.score>=30?3:4;
-  setV('stab-lbl', s.score>=85?'STABLE':s.score>=70?'DEGRADED':s.score>=50?'WARNING':'CRITICAL');
-  const stLbl = document.getElementById('stab-lbl');
-  if(stLbl) stLbl.style.color = stabColors[stabLevel];
-  setV('stab-score', `Score: ${s.score} / 100`);
-  const sf = document.getElementById('stab-fill');
-  if(sf) { sf.style.width=s.score+'%'; sf.className=`stab-fill bg-${s.score>=85?'green':s.score>=65?'yellow':s.score>=40?'orange':'red'}`; }
+  // Aggregate
+  sv('v-sess',s.totalSess.toLocaleString());sbf('b-sess',(s.totalSess/100000)*100,null);
+  sv('v-act',s.active.toLocaleString());sbf('b-act',(s.active/50000)*100,null);
+  sv('v-dem',s.demGbps);sbf('b-dem',(s.demGbps/s.capGbps)*80,null);
+  sv('v-cap',s.capGbps);sbf('b-cap',70,null);
+  const lc=slaC('lat',s.wLat);sv('v-lat',s.wLat);sc('v-lat',lc);sbf('b-lat',(s.wLat/100)*100,'bg-'+lc);
+  const pc=slaC('ploss',s.wPloss);sv('v-ploss',s.wPloss.toFixed(2));sc('v-ploss',pc);sbf('b-ploss',Math.min(100,s.wPloss*20),'bg-'+pc);
+  sv('v-dl',s.demDL.toFixed(1));sbf('b-dl',Math.min(100,s.demDL/15*100),null);
+  sv('v-ul',s.demUL.toFixed(1));sbf('b-ul',Math.min(100,s.demUL/5*100),null);
+
+  // SVC SLAs
+  function svc(id,dd,ok,detail){const e=g(id);if(e){e.textContent=ok?'✓ PASS':'✗ FAIL';e.style.color=ok?CM.green:CM.red;}sv(dd,detail);}
+  svc('svc-pos','svc-pos-d',s.posPass,`${s.posLat.toFixed(1)}ms (≤10ms)`);
+  svc('svc-vip','svc-vip-d',s.vipPass,`${s.bestTP.toFixed(0)}M (≥25M)`);
+  svc('svc-tea','svc-tea-d',s.teaPass,`${s.bestTP.toFixed(0)}M (≥5M)`);
+  svc('svc-gst','svc-gst-d',s.gstPass,`Score ${s.score}/100`);
+
+  // Deg bar
+  const dcls=['d0','d1','d2','d3','d4'];
+  for(let i=0;i<5;i++){const e=g(`ds${i}`);if(e)e.className=`ds${i<=p.deg?' '+dcls[Math.min(p.deg,4)]:''}`;}
+  const dlbls=['Level 0 — Nominal','Level 1 — 5G CCI','Level 2 — Dual Degrade','Level 3 — Jammer+Auth','Level 4 — Critical'];
+  const dcols=[CM.green,CM.yellow,CM.orange,CM.red,'#ff0000'];
+  sv('deg-inline',dlbls[p.deg]);const di=g('deg-inline');if(di)di.style.color=dcols[p.deg];
+  sv('lv-deg',dlbls[p.deg]);const ld=g('lv-deg');if(ld)ld.style.color=dcols[p.deg];
+
+  // Gap analysis
+  renderGapTable(s);
+
+  // Stability
+  drawGauge(s.score);
+  const sl=s.score>=85?'STABLE':s.score>=70?'DEGRADED':s.score>=50?'WARNING':'CRITICAL';
+  const sc3=s.score>=85?CM.green:s.score>=70?CM.yellow:s.score>=50?CM.orange:CM.red;
+  sv('stlbl',sl);const stl=g('stlbl');if(stl)stl.style.color=sc3;
+  sv('stscore',`${s.score} / 100`);
+  const sf=g('stfill');if(sf){sf.style.width=s.score+'%';sf.className=`stfill bg-${s.score>=85?'green':s.score>=65?'yellow':s.score>=40?'orange':'red'}`;}
 
   // Status badge
-  const badge = document.getElementById('status-badge');
-  if (badge) {
-    const sl = s.score>=85?'STABLE':s.score>=65?'DEGRADED':s.score>=40?'WARNING':'CRITICAL';
-    const sc2 = s.score>=85?'#00d97e':s.score>=65?'#ffc107':s.score>=40?'#ff6d2d':'#f4455a';
-    badge.textContent = `● ${sl}`;
-    badge.style.color = sc2;
-    badge.style.borderColor = sc2+'44';
-    badge.style.background  = sc2+'11';
-  }
+  const sb=g('stbadge');if(sb){sb.textContent=`● ${sl}`;sb.style.color=sc3;sb.style.borderColor=sc3+'44';sb.style.background=sc3+'11';}
 
-  // Header sub
-  const refB = s.b5g || s.b2g;
-  setV('hdr-sub', `${s.apType} · ${s.ap.wifiGen} · ${s.totalSessions.toLocaleString()} sessions · ${s.activeClients.toLocaleString()} active · ${s.demandTotal} Gbps demand · ${s.capTotal} Gbps capacity`);
+  // Header
+  sv('hdr-ap',`${p.apType} · ${s.ap.wifiGen}`);
+  const hap=g('hdr-ap');if(hap)hap.style.color=p.apType==='AP5060'?'var(--pur)':'var(--blue)';
+  sv('hdr-sub',`${s.totalSess.toLocaleString()} sessions · ${s.active.toLocaleString()} active · ${s.demGbps}Gbps demand / ${s.capGbps}Gbps capacity`);
+  sv('ctr-sub',`${p.apType} · ${p.bw5g}MHz 5G · ${s.ap.has6g?p.bw6g+'MHz 6G':'no 6G'} · ${p.gi}ns GI · MBR ${p.mbr}M · RX-SOP ${p.rxSop}dBm · AF:${p.atFair}`);
 
-  // AP type badge
-  const apBadge = document.getElementById('ap-gen-badge');
-  if (apBadge) { apBadge.textContent = s.ap.wifiGen; apBadge.style.color = s.apType==='AP5060'?'#9b7aff':'#3a9de0'; }
-  const apTogBadge = document.getElementById('ap-toggle-badge');
-  if (apTogBadge) apTogBadge.textContent = `${s.apType} ⇄`;
-
-  // MLO toggle enabled only for AP5060
-  const mloRow = document.getElementById('mlo-row');
-  if (mloRow) mloRow.style.opacity = s.ap.mlo ? '1' : '0.35';
-  const bw6grp = document.getElementById('bw6-group');
-  if (bw6grp) bw6grp.style.opacity = s.ap.has6g ? '1' : '0.35';
+  // AP-type-specific UI
+  const has6g=s.ap.has6g;
+  ['bw6g-grp','rtwt-row','mlo-row','punct-row'].forEach(id=>{const e=g(id);if(e)e.style.opacity=has6g?'1':'.4';});
 
   // AP grid
-  updateApGrid2(s.score);
+  updateAPG(s.score);
 
-  // Recovery actions
-  const recs = buildRecs(s);
-  const recList = document.getElementById('rec-list');
-  if (recList) recList.innerHTML = recs.map(r=>`<div class="ra ra-${r.t}">${r.m}</div>`).join('');
+  // Recovery list
+  const recs=buildRecs(s);
+  sv('reclist','');const rl=g('reclist');
+  if(rl)rl.innerHTML=recs.map(r=>`<div class="ra ra-${r.t}">${r.m}</div>`).join('');
 
   // SLA bar
-  const slaData = [
-    { name:'Latency', val:`${s.worstLat}ms`, thr:'≤20ms', c:slaC('lat',s.worstLat) },
-    { name:'Airtime', val:`${s.worstAir}%`,  thr:'≤70%',  c:slaC('air',s.worstAir) },
-    { name:'Loss',    val:`${s.worstPloss.toFixed(2)}%`, thr:'≤0.1%', c:slaC('ploss',s.worstPloss) },
-    { name:'Tput',    val:`${s.bestTput.toFixed(0)}M`,   thr:'≥5M',  c:slaC('tput',s.bestTput) },
-    { name:'Sessions',val:s.totalSessions.toLocaleString(), thr:'—', c:'blue' },
-    { name:'Demand',  val:`${s.demandTotal}G`,  thr:s.capTotal+'G', c: s.demandTotal<s.capTotal*0.85?'green':'orange' },
-    { name:'POS',     val:s.posOk?'PASS':'FAIL', thr:'≤10ms', c:s.posOk?'green':'red' },
-    { name:'MLO',     val:s.mlo?`×${s.mlo.gain}`:'—', thr:'5G+6G', c:s.mlo?'purple':'muted' },
+  const slaData=[
+    {n:'Latency',v:`${s.wLat}ms`,t:'≤20ms',c:slaC('lat',s.wLat)},
+    {n:'Airtime',v:`${s.wAir}%`,t:'≤70%',c:slaC('air',s.wAir)},
+    {n:'Loss',v:`${s.wPloss.toFixed(2)}%`,t:'≤0.1%',c:slaC('ploss',s.wPloss)},
+    {n:'Tput',v:`${s.bestTP.toFixed(0)}M`,t:'≥5M',c:slaC('tput',s.bestTP)},
+    {n:'POS',v:s.posPass?'PASS':'FAIL',t:'≤10ms',c:s.posPass?'green':'red'},
+    {n:'MLO',v:mloActive&&mlo?`×${mlo.gain}`:'—',t:p.mloMode,c:mloActive?'green':'muted'},
+    {n:'Sessions',v:s.totalSess.toLocaleString(),t:'—',c:'blue'},
+    {n:'D/C',v:`${s.demGbps}G/${s.capGbps}G`,t:'dem/cap',c:s.demGbps<s.capGbps*.85?'green':'orange'},
+    {n:'AF',v:p.atFair,t:'strict=opt',c:p.atFair==='strict'?'green':p.atFair==='adaptive'?'yellow':'red'},
+    {n:'Gaps',v:countGaps(s)+'',t:'params',c:countGaps(s)===0?'green':countGaps(s)<=3?'yellow':'red'},
   ];
-  const cMap = { green:CM.green, yellow:CM.yellow, orange:CM.orange, red:CM.red, blue:'var(--blue)', purple:'var(--purple)', muted:'var(--muted)' };
-  const slaBar = document.getElementById('sla-bar2');
-  if (slaBar) slaBar.innerHTML =
-    `<span style="font-size:8px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-right:3px;flex-shrink:0">SLA</span>` +
-    slaData.map(c=>`<div class="sla-chip"><div class="sla-dot" style="background:${cMap[c.c]||cMap.muted}"></div><span class="sla-lbl">${c.name}</span><span class="sla-v" style="color:${cMap[c.c]||cMap.muted}">${c.val}</span><span class="sla-lbl">${c.thr}</span></div>`).join('');
+  const cmap={green:CM.green,yellow:CM.yel||'var(--yel)',orange:CM.orange,red:CM.red,blue:'var(--blue)',purple:'var(--pur)',muted:'var(--mut)'};
+  const sb2=g('slabar');
+  if(sb2)sb2.innerHTML=`<span style="font-size:8px;color:var(--mut);text-transform:uppercase;letter-spacing:1px;margin-right:3px;flex-shrink:0">SLA</span>`+slaData.map(c=>`<div class="slac"><div class="slad" style="background:${cmap[c.c]||CM.green}"></div><span class="slal">${c.n}</span><span class="slav" style="color:${cmap[c.c]||CM.green}">${c.v}</span><span class="slal">${c.t}</span></div>`).join('');
 }
 
-// ═══════════════════════════════════════════════════════════════════════
-// GAUGE
-// ═══════════════════════════════════════════════════════════════════════
-function drawGauge2(score) {
-  const c = document.getElementById('gauge2');
-  if (!c) return;
-  const ctx = c.getContext('2d');
-  const w=c.width, h=c.height, cx=w/2, cy=h-8, r=82;
+function countGaps(s){
+  const p=s.p;let n=0;
+  if(!p.bcf)n++;if(p.atFair==='off')n++;if(p.atFair==='adaptive')n++;
+  if(p.mbr<24)n++;if(!p.mc2uc)n++;if(!p.proxyArp)n++;
+  if(!p.rtwt&&s.ap.mlo)n++;if(!p.r80211)n++;
+  if(p.minRSSI<-70)n++;if(p.bsMode==='none')n++;
+  if((p.mloLinks||2)<2&&s.ap.mlo)n++;if(!p.qam4k)n++;
+  if(p.cwBe!==15)n++;if(p.rtsThr>1500)n++;
+  if(!p.muMimo||p.muStreams<8)n++;
+  return n;
+}
+
+function buildRecs(s){
+  const{p}=s;const recs=[];
+  const ref=s.b5||s.b2;
+  if(ref&&ref.snr<15){recs.push({t:'auto',m:'⚙ TPC: TX power boosted to max'});}
+  if(s.wAir>85)recs.push({t:'auto',m:`⚙ Admission: MCS floor raised → MCS ${Math.max(p.mcsFloor,6)}`});
+  if(s.wAir>95)recs.push({t:'alert',m:'🚨 Capacity: New assoc BLOCKED'});
+  if(p.deg>=3)recs.push({t:'alert',m:'🚨 Jammer SEV3 — AirDefense alert raised'});
+  if(p.cyber==='deauth')recs.push(p.pmf?{t:'ok',m:'✓ 802.11w PMF: Deauth flood absorbed'}:{t:'alert',m:'🚨 PMF OFF — deauth flood active'});
+  if(p.cyber==='evil_twin')recs.push(p.airdef?{t:'ok',m:'✓ AirDefense: Rogue contained'}:{t:'alert',m:'🚨 AirDefense OFF — evil twin active'});
+  if(s.mloActive&&s.mlo)recs.push({t:'info',m:`⚡ MLO ${p.mloMode}: 5G+6G bonded → ×${s.mlo.gain} tput`});
+  if(p.rtwt&&s.ap.mlo)recs.push({t:'info',m:`🔒 rTWT: POS SP ≤${s.posLat.toFixed(1)}ms guaranteed`});
+  if(!p.bcf)recs.push({t:'warn',m:'⚠ BC Filter OFF — stadium broadcast storm'});
+  if(p.atFair==='off')recs.push({t:'warn',m:'⚠ No Airtime Fairness — old phones stealing 32× airtime'});
+  if(s.wLat>50)recs.push({t:'alert',m:`🚨 SLA BREACH: Latency ${s.wLat}ms > 50ms`});
+  if(s.wPloss>1)recs.push({t:'alert',m:`🚨 SLA BREACH: Loss ${s.wPloss}% > 1%`});
+  if(p.dcsLock)recs.push({t:'info',m:'🔒 DCS Lock: Channel plan frozen for match'});
+  if(recs.length===0)recs.push({t:'ok',m:'✓ All systems nominal'});
+  return recs.slice(0,7);
+}
+
+// ═══ GAUGE ═══
+function drawGauge(score){
+  const c=g('gauge');if(!c)return;
+  const ctx=c.getContext('2d');const w=c.width,h=c.height,cx=w/2,cy=h-8,r=82;
   ctx.clearRect(0,0,w,h);
-  ctx.beginPath(); ctx.arc(cx,cy,r,Math.PI,2*Math.PI); ctx.lineWidth=14; ctx.strokeStyle='#1a1e25'; ctx.stroke();
+  ctx.beginPath();ctx.arc(cx,cy,r,Math.PI,2*Math.PI);ctx.lineWidth=14;ctx.strokeStyle='#1a1e25';ctx.stroke();
   const fill=Math.PI+(score/100)*Math.PI;
-  const g=ctx.createLinearGradient(cx-r,cy,cx+r,cy);
-  g.addColorStop(0,'#f4455a'); g.addColorStop(.4,'#ffc107'); g.addColorStop(.75,'#00d97e'); g.addColorStop(1,'#00d97e');
-  ctx.beginPath(); ctx.arc(cx,cy,r,Math.PI,fill); ctx.lineWidth=14; ctx.strokeStyle=g; ctx.stroke();
+  const grd=ctx.createLinearGradient(cx-r,cy,cx+r,cy);
+  grd.addColorStop(0,'#f4455a');grd.addColorStop(.4,'#ffc107');grd.addColorStop(.75,'#00d97e');grd.addColorStop(1,'#00d97e');
+  ctx.beginPath();ctx.arc(cx,cy,r,Math.PI,fill);ctx.lineWidth=14;ctx.strokeStyle=grd;ctx.stroke();
   const na=Math.PI+(score/100)*Math.PI;
-  ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(cx+(r-6)*Math.cos(na),cy+(r-6)*Math.sin(na));
-  ctx.lineWidth=2; ctx.strokeStyle='#fff'; ctx.stroke();
-  ctx.beginPath(); ctx.arc(cx,cy,5,0,2*Math.PI); ctx.fillStyle='#fff'; ctx.fill();
-  ctx.fillStyle='#fff'; ctx.font='bold 20px monospace'; ctx.textAlign='center'; ctx.fillText(score,cx,cy-12);
-  ctx.fillStyle='#5a6270'; ctx.font='9px monospace'; ctx.fillText('/100',cx,cy-1);
+  ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(cx+(r-5)*Math.cos(na),cy+(r-5)*Math.sin(na));ctx.lineWidth=2;ctx.strokeStyle='#fff';ctx.stroke();
+  ctx.beginPath();ctx.arc(cx,cy,5,0,2*Math.PI);ctx.fillStyle='#fff';ctx.fill();
+  ctx.fillStyle='#fff';ctx.font='bold 20px monospace';ctx.textAlign='center';ctx.fillText(score,cx,cy-12);
+  ctx.fillStyle='#5a6270';ctx.font='9px monospace';ctx.fillText('/100',cx,cy-2);
 }
 
-// ═══════════════════════════════════════════════════════════════════════
-// AP GRID
-// ═══════════════════════════════════════════════════════════════════════
-function buildApGrid2() {
-  const g = document.getElementById('ap-grid2');
-  if (!g) return;
-  g.innerHTML = '';
-  for (let i=0;i<280;i++) {
-    const d=document.createElement('div'); d.className='ap-dot'; d.id=`ap2-${i}`; d.title=`AP${i+1}`; g.appendChild(d);
-  }
+// ═══ AP GRID ═══
+function buildAPG(){const ag=g('apg');if(!ag)return;ag.innerHTML='';for(let i=0;i<280;i++){const d=document.createElement('div');d.className='ap';d.id=`ap2-${i}`;ag.appendChild(d);}}
+function updateAPG(score){
+  const fa=score<50?.55:score<65?.25:score<80?.08:score<92?.02:0;
+  const wa=score<65?.35:score<80?.20:score<92?.07:0;
+  for(let i=0;i<280;i++){const d=g(`ap2-${i}`);if(!d)continue;const r=Math.random();d.style.background=r<fa?CM.red:r<fa+wa?CM.yellow:'var(--green)';}
 }
 
-function updateApGrid2(score) {
-  const fault = score<50?.55:score<65?.25:score<80?.08:score<92?.02:0;
-  const warn  = score<65?.35:score<80?.20:score<92?.07:0;
-  for (let i=0;i<280;i++) {
-    const d=document.getElementById(`ap2-${i}`);
-    if (!d) continue;
-    const r=Math.random();
-    d.style.background = r<fault?CM.red:r<fault+warn?CM.yellow:'var(--green)';
-  }
+// ═══ LOG ═══
+function addLog(msg,type){const ts=new Date().toTimeString().slice(0,8);logE.unshift({ts,msg,type});if(logE.length>60)logE.pop();const lw=g('logw');if(lw)lw.innerHTML=logE.map(e=>`<div class="le"><span class="lt">${e.ts}</span><span class="l${e.type.slice(0,2)}">${e.msg}</span></div>`).join('');}
+
+function detectEvents(c,p2){
+  if(!p2.score)return;
+  const drop=(p2.score||100)-c.score;
+  if(drop>10)addLog(`Stability drop ${p2.score}→${c.score} (−${drop})`,'warn');
+  if(drop<-8)addLog(`Recovery ${p2.score}→${c.score} (+${Math.abs(drop)})`,'ok');
+  if(c.p.deg!==p2.deg)addLog(`Degradation Level ${p2.deg||0}→${c.p.deg}`,c.p.deg>0?'warn':'ok');
+  if(c.p.cyber!==p2.cyber)c.p.cyber!=='none'?addLog(`Cyber: ${c.p.cyber.replace(/_/g,' ')}`,'alert'):addLog('Cyber attack cleared','ok');
+  if(c.mloActive&&!p2.mloActive)addLog(`MLO enabled: ${c.p.mloMode} — ×${c.mlo?.gain||'—'} tput`,'info');
 }
 
-// ═══════════════════════════════════════════════════════════════════════
-// RECOVERY ACTIONS
-// ═══════════════════════════════════════════════════════════════════════
-function buildRecs(s) {
-  const recs = [];
-  const refB = s.b5g || s.b2g;
-  if (refB && refB.snr < 15) recs.push({t:'auto', m:'⚙ TPC: TX power boosted to max'});
-  if (refB && refB.snr < 15 && !s.dcsLock) recs.push({t:'auto', m:'⚙ DCS: Emergency channel hop initiated'});
-  if (s.worstAir > 85) recs.push({t:'auto', m:`⚙ Admission: MCS floor raised → MCS ${Math.max(s.mcsFloor,6)}`});
-  if (s.worstAir > 95) recs.push({t:'alert', m:'🚨 Capacity: New assoc BLOCKED (radio full)'});
-  if (s.degLvl >= 3) recs.push({t:'alert', m:'🚨 Jammer SEV3 — EP1 AirDefense alert raised'});
-  if (s.degLvl >= 3 && !s.dcsLock) recs.push({t:'auto', m:'⚙ DCS: Emergency hop (non-DFS seed)'});
-  if (s.cyber === 'deauth') recs.push(s.pmfOn ? {t:'ok', m:'✓ 802.11w PMF: Deauth flood absorbed'} : {t:'alert', m:'🚨 PMF OFF — deauth flood impacting clients'});
-  if (s.cyber === 'evil_twin') recs.push(s.airdefOn ? {t:'ok', m:'✓ AirDefense: Rogue AP contained'} : {t:'alert', m:'🚨 AirDefense OFF — evil twin active'});
-  if (s.cyber === 'cred_storm') recs.push({t:'warn', m:'⚠ EP1 Security: Auth storm → rate-limit'});
-  if (s.mloOn && s.mlo) recs.push({t:'info', m:`⚡ MLO: 5G+6G bonded STR → ×${s.mlo.gain} throughput`});
-  if (!s.kv11 && s.worstAir > 60) recs.push({t:'warn', m:'⚠ 802.11k/v OFF — slow roaming (500ms)'});
-  if (s.worstLat > 50) recs.push({t:'alert', m:`🚨 SLA BREACH: Latency ${s.worstLat}ms > 50ms`});
-  if (s.worstPloss > 1) recs.push({t:'alert', m:`🚨 SLA BREACH: Packet loss ${s.worstPloss}% > 1%`});
-  if (s.dcsLock) recs.push({t:'info', m:'🔒 DCS Lock: Channel plan frozen for match'});
-  if (recs.length === 0) recs.push({t:'ok', m:'✓ All systems nominal'});
-  return recs.slice(0,8);
-}
-
-// ═══════════════════════════════════════════════════════════════════════
-// LOG
-// ═══════════════════════════════════════════════════════════════════════
-function addLog(msg, type) {
-  const now = new Date();
-  const ts = now.toTimeString().slice(0,8);
-  logEntries.unshift({ts,msg,type});
-  if (logEntries.length > 60) logEntries.pop();
-  const el = document.getElementById('log-wrap');
-  if (el) el.innerHTML = logEntries.map(e=>`<div class="log-e"><span class="log-t">${e.ts}</span><span class="log-${e.type}">${e.msg}</span></div>`).join('');
-}
-
-function detectEvents(curr, prev) {
-  if (!prev.score) return;
-  const drop = (prev.score||100) - curr.score;
-  if (drop > 10) addLog(`Stability drop ${prev.score}→${curr.score} (−${drop})`, 'warn');
-  if (drop < -8) addLog(`Stability recovery ${prev.score}→${curr.score} (+${Math.abs(drop)})`, 'ok');
-  if (curr.degLvl !== prev.degLvl) addLog(`Degradation Level ${prev.degLvl||0}→${curr.degLvl}: ${['Nominal','5G CCI','Dual Degrade','Jammer+Auth','Critical'][curr.degLvl]}`, curr.degLvl>0?'warn':'ok');
-  if (curr.cyber !== prev.cyber) curr.cyber!=='none' ? addLog(`Cyber attack: ${curr.cyber.replace(/_/g,' ')}`, 'alert') : addLog('Cyber attack cleared', 'ok');
-  if (curr.mloOn && !prev.mloOn) addLog('MLO enabled: 5G+6G bonded STR active', 'info');
-  if (!curr.mloOn && prev.mloOn) addLog('MLO disabled: single-band mode', 'warn');
-  if (curr.totalSessions !== prev.totalSessions && Math.abs(curr.totalSessions-(prev.totalSessions||0))>500) {
-    addLog(`Sessions: ${(prev.totalSessions||0).toLocaleString()}→${curr.totalSessions.toLocaleString()} (${curr.activeClients.toLocaleString()} active)`, 'auto');
-  }
-}
-
-// ═══════════════════════════════════════════════════════════════════════
-// MAIN UPDATE
-// ═══════════════════════════════════════════════════════════════════════
-function update() {
+// ═══ MAIN UPDATE ═══
+function update(){
   // Update display labels
-  const apType = document.getElementById('ap-type').value;
-  const tVal = +document.getElementById('t-scrub').value;
-  const tLabel = tVal < 0 ? `T−${Math.abs(tVal)} min` : tVal === 0 ? 'T+0 Kickoff' : `T+${tVal} min`;
-  setV('t-label', tLabel);
+  sv('lv-ap',g('ap-type').value+' · '+APC[g('ap-type').value].wifiGen);
+  const tv=+g('t-scrub').value;sv('lv-t',tv<0?`T−${Math.abs(tv)} min`:tv===0?'T+0 Kickoff':`T+${tv} min`);
+  sv('lv-fans',(+g('fan-count').value).toLocaleString());
+  sv('lv-dev',(+g('dev-mult').value/10).toFixed(1)+'×');
+  sv('lv-att',g('wifi-att').value+'%');
+  sv('lv-con',g('concur').value+'%');
+  sv('lv-vid',g('mx-vid').value+'%');sv('lv-tea',g('mx-tea').value+'%');sv('lv-soc',g('mx-soc').value+'%');sv('lv-bro',g('mx-bro').value+'%');sv('lv-pos',g('mx-pos').value+'%');
+  sv('lv-txp',g('tx-pwr').value+' dBm');
+  sv('lv-bw5',g('bw5g').value+' MHz');sv('lv-bw6',g('bw6g').value+' MHz');
+  sv('lv-gi',g('guard-int').value+' ns');
+  sv('lv-mbr',g('mbr').value+' Mbps');sv('lv-rxsop',g('rx-sop').value+' dBm');
+  sv('lv-mcsf','MCS '+g('mcs-floor').value);sv('lv-nf',g('noise-fl').value+' dB');
+  sv('lv-maxc',g('max-cli').value);sv('lv-rssi',g('min-rssi').value+' dBm');
+  sv('lv-af',g('at-fair').value);const afe=g('lv-af');if(afe)afe.style.color=g('at-fair').value==='strict'?CM.green:g('at-fair').value==='adaptive'?CM.yellow:CM.red;
+  sv('lv-bs',g('bs-mode').value);sv('lv-mlom',g('mlo-mode').value);sv('lv-txop',g('txop-vo').value+' µs');sv('lv-dtim',g('dtim').value);
+  sv('lv-txop-be',g('txop-be').value+' µs');
+  sv('lv-cwbe',g('cw-be').value+' slots');
+  sv('lv-rts',g('rts-thr').value+' B');
+  sv('lv-mustm',g('mu-streams').value+' streams');
+  sv('lv-mlolnk',g('mlo-links').value+' links');
+  sv('lv-mlosteer',g('mlo-steer').value==='ai'?'AI-driven':'WMM-QoS');
 
-  // Find active preset
-  const preset = PRESETS.find(p=>p.t===tVal);
-  setV('preset-note', preset ? preset.note : (tVal<0?'Pre-match period':'Post-match period'));
+  // Highlight active preset
+  const tv2=+g('t-scrub').value;
+  document.querySelectorAll('.pb').forEach(b=>b.classList.toggle('act',+b.getAttribute('data-t')===tv2));
 
-  // Highlight active preset button
-  document.querySelectorAll('.preset-btn').forEach(b => {
-    const t = parseInt(b.getAttribute('data-t'));
-    b.classList.toggle('active', t===tVal);
-  });
+  // Weighted app demand
+  const tw=+g('mx-vid').value+ +g('mx-tea').value+ +g('mx-soc').value+ +g('mx-bro').value+ +g('mx-pos').value||1;
+  const demDL=(+g('mx-vid').value/tw)*15+(+g('mx-tea').value/tw)*3+(+g('mx-soc').value/tw)*1+(+g('mx-bro').value/tw)*2+(+g('mx-pos').value/tw)*.1;
+  const demUL=(+g('mx-vid').value/tw)*.5+(+g('mx-tea').value/tw)*3+(+g('mx-soc').value/tw)*4+(+g('mx-bro').value/tw)*.1+(+g('mx-pos').value/tw)*.1;
+  sv('lv-dem',`${(demDL+demUL).toFixed(1)} Mbps/client`);
 
-  setV('fan-val', (+document.getElementById('fan-count').value).toLocaleString());
-  setV('dev-val', (+document.getElementById('dev-mult').value/10).toFixed(1)+'×');
-  setV('attach-val', document.getElementById('wifi-attach').value+'%');
-  setV('conc-val', document.getElementById('concurrency').value+'%');
-  setV('bw5-val', document.getElementById('bw-5g').value+' MHz');
-  setV('bw6-val', document.getElementById('bw-6g').value+' MHz');
-  setV('gi-val', document.getElementById('guard-int').value+' ns');
-  setV('noise-val', document.getElementById('noise-floor').value+' dB');
-  setV('txpwr-val', document.getElementById('tx-power').value+' dBm');
-  setV('mcsfloor-val', 'MCS '+document.getElementById('mcs-floor').value);
-  setV('vid-val', document.getElementById('mix-video').value+'%');
-  setV('teams-val', document.getElementById('mix-teams').value+'%');
-  setV('social-val', document.getElementById('mix-social').value+'%');
-  setV('browse-val', document.getElementById('mix-browse').value+'%');
-  setV('pos-val', document.getElementById('mix-pos').value+'%');
-
-  const s = compute();
-  detectEvents(s, prevState);
+  const s=compute();
+  detectEvents(s,prev);
   render(s);
-  prevState = {...s};
+  prev={...s,deg:s.p.deg,cyber:s.p.cyber,mloActive:s.mloActive};
 }
 
-// ═══════════════════════════════════════════════════════════════════════
-// CONTROLS
-// ═══════════════════════════════════════════════════════════════════════
-function setPreset(t) {
-  document.getElementById('t-scrub').value = t;
-  const preset = PRESETS.find(p=>p.t===t);
-  if (preset) {
-    document.getElementById('concurrency').value = Math.round(preset.concPct * 100);
+// ═══ BAND TAB ═══
+function showB(b){
+  activeBand=b;
+  ['2g','5g','6g','agg','gap'].forEach(k=>{g(`tb-${k}`)?.classList.remove('act');g(`bp-${k}`)?.classList.remove('vis');});
+  g(`tb-${b}`)?.classList.add('act');g(`bp-${b}`)?.classList.add('vis');
+}
+
+// ═══ BREAKING POINT FINDER ═══
+function findBreak(){
+  const paramId=g('bp-param').value;
+  const slaKey=g('bp-sla').value;
+  const el=g(paramId);if(!el)return;
+  const isRange=el.type==='range';
+  const isSelect=el.tagName==='SELECT';
+  const origVal=el.value;
+  let breakVal=null;
+
+  function checkSLA(s){
+    switch(slaKey){
+      case 'air':   return s.wAir>70;
+      case 'lat':   return s.wLat>20;
+      case 'tput':  return s.bestTP<5;
+      case 'pos':   return s.posLat>10;
+      case 'ploss': return s.wPloss>.1;
+    }return false;
+  }
+
+  if(isRange){
+    const min=+el.min,max=+el.max,step=+el.step||1;
+    for(let v=min;v<=max;v+=step){
+      el.value=v;
+      const ov={};ov[paramId.replace(/-/g,'')]=v; // simplified override
+      const s=compute();
+      if(checkSLA(s)){breakVal=v;break;}
+    }
+  } else if(isSelect){
+    const opts=Array.from(el.options);
+    for(const opt of opts){
+      el.value=opt.value;
+      const s=compute();
+      if(checkSLA(s)){breakVal=opt.value;break;}
+    }
+  }
+
+  el.value=origVal;
+  const res=g('bpres');
+  const slaLabel={air:'Airtime > 70%',lat:'Latency > 20ms',tput:'Tput < 5M',pos:'POS Lat > 10ms',ploss:'Loss > 0.1%'};
+  if(breakVal!==null){
+    if(res){res.className='bpres warn';res.textContent=`⚡ Breaks at: ${paramId} = ${breakVal}\n${slaLabel[slaKey]} threshold crossed`;}
+    addLog(`Breaking point: ${paramId}=${breakVal} → ${slaLabel[slaKey]}`,'warn');
+  } else {
+    if(res){res.className='bpres ok';res.textContent=`✓ SLA "${slaLabel[slaKey]}" holds across full range of ${paramId}`;}
   }
   update();
 }
 
-function showBand(band) {
-  activeBand = band;
-  ['2g','5g','6g','agg'].forEach(b => {
-    document.getElementById(`tab-${b}`)?.classList.remove('active');
-    document.getElementById(`bp-${b}`)?.classList.remove('visible');
-  });
-  document.getElementById(`tab-${band}`)?.classList.add('active');
-  document.getElementById(`bp-${band}`)?.classList.add('visible');
-}
-
-function toggleAP() {
-  const sel = document.getElementById('ap-type');
-  sel.value = sel.value === 'AP5060' ? 'AP3000' : 'AP5060';
-  addLog(`AP type switched to ${sel.value} — ${AP_CONFIGS[sel.value].wifiGen}`, 'auto');
+// ═══ PRESETS ═══
+function setP(t,concPct){
+  g('t-scrub').value=t;
+  g('concur').value=Math.round(concPct*100);
+  const notes={'-90':'Gates open, 12% concurrency','-30':'Active arrival, 45% concurrency','0':'Peak load, 55% concurrency','48':'Social surge, 65% concurrency','90':'Goal celebrations, 58% concurrency','110':'Draining, 28% concurrency'};
+  sv('pnote',notes[t]||'');
   update();
 }
 
-function resetAll() {
-  document.getElementById('ap-type').value = 'AP5060';
-  document.getElementById('t-scrub').value = 0;
-  document.getElementById('fan-count').value = 72000;
-  document.getElementById('dev-mult').value = 14;
-  document.getElementById('wifi-attach').value = 75;
-  document.getElementById('concurrency').value = 55;
-  document.getElementById('bw-5g').value = 160;
-  document.getElementById('bw-6g').value = 320;
-  document.getElementById('guard-int').value = 1600;
-  document.getElementById('noise-floor').value = 0;
-  document.getElementById('tx-power').value = 17;
-  document.getElementById('mcs-floor').value = 4;
-  document.getElementById('mix-video').value = 25;
-  document.getElementById('mix-teams').value = 10;
-  document.getElementById('mix-social').value = 40;
-  document.getElementById('mix-browse').value = 20;
-  document.getElementById('mix-pos').value = 5;
-  document.getElementById('tog-ofdma-dl').checked = true;
-  document.getElementById('tog-ofdma-ul').checked = true;
-  document.getElementById('tog-mumimo').checked = true;
-  document.getElementById('tog-bsscolor').checked = true;
-  document.getElementById('tog-mlo').checked = true;
-  document.getElementById('tog-11kv').checked = true;
-  document.getElementById('tog-pmf').checked = true;
-  document.getElementById('tog-airdef').checked = true;
-  document.getElementById('tog-dcslock').checked = false;
-  document.getElementById('deg-level').value = 0;
-  document.getElementById('cyber-attack').value = 'none';
-  addLog('Reset to Lumen Field baseline — AP5060, T+0 Kickoff, 72K fans', 'ok');
+function toggleAP(){
+  const sel=g('ap-type');sel.value=sel.value==='AP5060'?'AP3000':'AP5060';
+  addLog(`AP switched to ${sel.value} — ${APC[sel.value].wifiGen}`,'auto');update();
+}
+
+// ═══ STADIUM OPTIMAL ═══
+function applyOptimal(){
+  g('ap-type').value='AP5060';
+  g('tx-pwr').value=17;g('bw5g').value=160;g('bw6g').value=320;g('guard-int').value=1600;
+  g('mbr').value=24;g('rx-sop').value=-75;g('mcs-floor').value=4;g('noise-fl').value=0;
+  g('tog-punct').checked=true;g('tog-ofdma-dl').checked=true;g('tog-ofdma-ul').checked=true;
+  g('tog-mumimo').checked=true;g('tog-bsscolor').checked=true;g('tog-rtwt').checked=true;
+  g('tog-multiru').checked=true;g('tog-mlo').checked=true;g('tog-r80211').checked=true;
+  g('tog-kv').checked=true;g('tog-dcslock').checked=false;
+  g('mlo-mode').value='STR';g('txop-vo').value=1504;
+  g('max-cli').value=100;g('min-rssi').value=-70;g('at-fair').value='strict';g('bs-mode').value='active';
+  g('tog-bcf').checked=true;g('tog-mc2uc').checked=true;g('tog-proxyarp').checked=true;
+  g('tog-cliiso').checked=false;g('tog-enhrnr').checked=true;g('tog-pmf').checked=true;g('tog-airdef').checked=true;
+  g('dtim').value=2;g('deg-lvl').value=0;g('cyber').value='none';
+  g('txop-be').value=3008;g('cw-be').value=15;g('rts-thr').value=1500;
+  g('mu-streams').value=8;g('tog-qam4k').checked=true;
+  g('mlo-links').value=2;g('mlo-steer').value='ai';
+  addLog('★ Stadium Optimal applied — all parameters at Lumen Field target','ok');
+  addLog('IPQ9574: 8-stream MU-MIMO · 4K-QAM · CWmin-BE=15 · RTS=1500 · TXOP-BE=3008µs','info');
+  addLog('MBR 24M · RX-SOP −75 · Airtime Fairness Strict · Active Band Steering','info');
+  addLog('BC Filter + MC→UC + Proxy ARP ON · rTWT ON · MLO STR · 802.11r ON','info');
   update();
 }
 
-// ═══════════════════════════════════════════════════════════════════════
-// WIRE EVENTS + INIT
-// ═══════════════════════════════════════════════════════════════════════
-document.querySelectorAll('input[type=range], select').forEach(el => {
-  el.addEventListener('input', update);
-});
+function resetAll(){
+  g('ap-type').value='AP5060';g('t-scrub').value=0;g('fan-count').value=72000;g('dev-mult').value=14;
+  g('wifi-att').value=75;g('concur').value=55;
+  g('mx-vid').value=25;g('mx-tea').value=10;g('mx-soc').value=40;g('mx-bro').value=20;g('mx-pos').value=5;
+  g('tx-pwr').value=17;g('bw5g').value=160;g('bw6g').value=320;g('guard-int').value=1600;
+  g('mbr').value=12;g('rx-sop').value=-85;g('mcs-floor').value=0;g('noise-fl').value=0;
+  g('tog-punct').checked=false;g('tog-ofdma-dl').checked=false;g('tog-ofdma-ul').checked=false;
+  g('tog-mumimo').checked=false;g('tog-bsscolor').checked=false;g('tog-rtwt').checked=false;
+  g('tog-multiru').checked=false;g('tog-mlo').checked=false;g('tog-r80211').checked=false;
+  g('tog-kv').checked=false;g('tog-dcslock').checked=false;
+  g('mlo-mode').value='NSTR';g('txop-vo').value=0;
+  g('max-cli').value=512;g('min-rssi').value=-80;g('at-fair').value='off';g('bs-mode').value='none';
+  g('tog-bcf').checked=false;g('tog-mc2uc').checked=false;g('tog-proxyarp').checked=false;
+  g('tog-cliiso').checked=false;g('tog-enhrnr').checked=false;g('tog-pmf').checked=false;g('tog-airdef').checked=false;
+  g('dtim').value=1;g('deg-lvl').value=0;g('cyber').value='none';
+  g('txop-be').value=0;g('cw-be').value=63;g('rts-thr').value=65535;
+  g('mu-streams').value=1;g('tog-qam4k').checked=false;
+  g('mlo-links').value=1;g('mlo-steer').value='wmm';
+  addLog('Reset to WORST CASE — all features OFF · compare with ★ Optimal','warn');
+  update();
+}
 
-// Wire preset button data-t
-document.querySelectorAll('.preset-btn').forEach((btn, i) => {
-  const ts = [-90,-30,0,48,90,110];
-  btn.setAttribute('data-t', ts[i]);
-});
-
-buildApGrid2();
-addLog('Stadium WiFi Simulator v2 loaded — 280×AP5060 · WiFi 7 EHT · Multi-band · MLO', 'ok');
-addLog('Bands: 2.4GHz (20MHz/2SS) · 5GHz (160MHz/4SS) · 6GHz (320MHz/4SS)', 'auto');
-addLog('Features: OFDMA DL×1.35 UL×1.20 · MU-MIMO ×4 DL · BSS Color CCI×0.80 · MLO STR', 'info');
-addLog('SLAs: SNR≥25dB · Airtime≤70% · Latency≤20ms · Loss≤0.1% · POS≤10ms', 'auto');
-setPreset(0);
+// ═══ WIRE EVENTS + INIT ═══
+document.querySelectorAll('input[type=range],select').forEach(el=>el.addEventListener('input',update));
+buildAPG();
+addLog('v2 Phase 1 loaded — 39 tunable parameters · IPQ9574 chip params added','ok');
+addLog('Click ★ Stadium Optimal to apply Lumen Field target config','info');
+addLog('Click ↺ Reset to see WORST CASE — then tune to see each parameter\'s impact','warn');
+applyOptimal();
 </script>
 </body>
 </html>
