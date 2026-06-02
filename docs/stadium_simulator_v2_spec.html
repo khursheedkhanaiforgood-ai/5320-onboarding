@@ -115,6 +115,7 @@
   <a href="#qoe">QoE Outputs</a>
   <a href="#stadium-deltas">Stadium Deltas</a>
   <a href="#master-table">Master Table</a>
+  <a href="#optional-settings">Optional Settings</a>
 </nav>
 
 <!-- ── I/O MODEL ── -->
@@ -478,6 +479,145 @@
   <div class="callout-blue">
     <p><strong>Branch:</strong> <code>feature/simulator-v2</code> &nbsp;·&nbsp; <strong>File:</strong> <code>docs/stadium_wifi_simulator_v2.html</code> &nbsp;·&nbsp; <strong>v1 FROZEN:</strong> <code>docs/stadium_wifi_simulator.html</code> on <code>main</code> — do not modify.</p>
   </div>
+</section>
+
+<!-- ── SECTION 8 — OPTIONAL SETTINGS ── -->
+<section id="optional-settings">
+  <h2>8. Optional Settings — SSID-Level Parameters</h2>
+  <p>These are SSID-level settings from the EP1 Optional Settings panel, separate from the radio profile. They govern legacy rate compatibility, security policy, roaming assistance, QoS enforcement, multicast handling, and client timers. All defaults shown as found in EP1.</p>
+
+  <!-- ── 8.1 RADIO AND RATES ── -->
+  <h3 id="opt-rates">8.1 — Radio and Rates (Legacy Mode Compatibility)</h3>
+  <p>Controls which legacy 802.11 protocol generations are allowed to associate. Disabling older modes raises the minimum data rate floor and frees airtime currently consumed by legacy beacon/management frames.</p>
+  <table>
+    <tr><th>Band</th><th>Modes Available</th><th>EP1 Default</th><th>Stadium Target</th><th>Rationale</th></tr>
+    <tr><td>2.4 GHz</td><td>802.11b / 802.11g</td><td>Both enabled</td><td class="warning">Disable 802.11b</td><td>802.11b devices lock the AP into 1–11 Mbps protection mode for all clients. Zero 802.11b devices expected at Lumen Field.</td></tr>
+    <tr><td>5 GHz / 6 GHz</td><td>802.11a</td><td>Enabled</td><td class="warning">Disable 802.11a</td><td>802.11a is 20 MHz / 54 Mbps max. No modern device needs it — enabling it only adds OFDM legacy preamble overhead.</td></tr>
+    <tr><td>2.4 GHz / 5 GHz</td><td>802.11n / 802.11ac / 802.11ax</td><td>All enabled</td><td class="optimal">All enabled</td><td>Keep all HT/VHT/HE generations. Disabling 802.11n would orphan older iPhones/Android still common in fan crowds.</td></tr>
+  </table>
+  <div class="callout-red">
+    <p><strong>Simulator impact:</strong> Disabling 802.11b removes legacy protection overhead — models as airtime efficiency +8–15% on 2.4 GHz. Add a "Legacy Mode" toggle to v2 that enables/disables 802.11b/g and shows the airtime delta.</p>
+  </div>
+
+  <!-- ── 8.2 DoS PREVENTION ── -->
+  <h3 id="opt-dos">8.2 — DoS Prevention</h3>
+  <table>
+    <tr><th>Setting</th><th>Scope</th><th>EP1 Default</th><th>Stadium Target</th><th>Notes</th></tr>
+    <tr><td><strong>MAC-Based DoS Prevention</strong></td><td>SSID / Client</td><td>Off</td><td class="optimal">On — Client scope</td><td>Rate-limits association floods from a single MAC. Critical at Lumen Field: 72K fans powering on devices simultaneously = association storm risk.</td></tr>
+    <tr><td><strong>IP-Based DoS Prevention</strong></td><td>SSID</td><td>Off</td><td class="optimal">On</td><td>Blocks UDP/ICMP flood from compromised device. Protects POS VLAN from guest-side attack.</td></tr>
+    <tr><td><strong>MAC-Based Filters</strong></td><td>SSID</td><td>Off</td><td>Off (Guest) · On (POS/VIP)</td><td>Guest SSID: leave off — 72K fans can't be pre-provisioned. POS SSID: allowlist terminal MACs only.</td></tr>
+    <tr><td><strong>Default Action</strong></td><td>Filter fallthrough</td><td>Permit / Permit / Deny</td><td>Permit / Permit / Deny (keep)</td><td>Permit = allow unmatched. Deny = block unmatched. Keep defaults — MAC filter logic handles POS; Guest is open by design.</td></tr>
+  </table>
+
+  <!-- ── 8.3 TRAFFIC FILTERS ── -->
+  <h3 id="opt-traffic">8.3 — Traffic Filters</h3>
+  <p>Control management-plane access from wireless clients to Extreme Networks infrastructure. These are security boundaries — not capacity parameters — but wrong settings expose AP/switch management to fan devices.</p>
+  <table>
+    <tr><th>Filter</th><th>EP1 Default</th><th>Stadium Target</th><th>Rationale</th></tr>
+    <tr><td><strong>Enable SSH</strong></td><td>On</td><td class="warning">Off (Guest/Fan SSIDs)</td><td>Fans must never reach AP/SW management SSH. Off on WC_Guest_CWP, WC_Seattle-PPSK. Keep on Staff SSID only.</td></tr>
+    <tr><td><strong>Enable Telnet</strong></td><td>On</td><td class="warning">Off (all SSIDs)</td><td>Telnet is cleartext. Disable universally — use SSH on Staff only.</td></tr>
+    <tr><td><strong>Enable Ping</strong></td><td>On</td><td class="warning">Off (Guest/Fan)</td><td>Ping to infrastructure from fan devices exposes AP IPs. Disable on all fan-facing SSIDs.</td></tr>
+    <tr><td><strong>Enable SNMP</strong></td><td>On</td><td class="warning">Off (all SSIDs)</td><td>SNMP from wireless clients is always wrong. Disable universally.</td></tr>
+    <tr><td><strong>Enable Inter-station Traffic</strong></td><td>On</td><td class="warning">Off (Guest/Fan)</td><td>Blocks client-to-client traffic within the same SSID. Prevents fan device lateral movement. Critical for POS isolation. Keep On for Teams/Staff for device sharing.</td></tr>
+  </table>
+  <div class="callout-red">
+    <p><strong>Security posture:</strong> Default is too permissive — SSH, Telnet, Ping, and SNMP all enabled on all SSIDs. For Lumen Field: WC_Guest_CWP and WC_Seattle-PPSK should have all four disabled. WC_Secure (Staff/Teams) keeps SSH only. POS SSID disables all five plus Inter-station.</p>
+  </div>
+
+  <!-- ── 8.4 USER PROFILE APPLICATION SEQUENCE ── -->
+  <h3 id="opt-sequence">8.4 — User Profile Application Sequence</h3>
+  <p>Defines the order EP1 evaluates authentication methods to assign a User Profile (VLAN). The first match wins.</p>
+  <table>
+    <tr><th>Method</th><th>Stadium Use</th></tr>
+    <tr><td><strong>MAC Authentication</strong></td><td>POS terminals — pre-provisioned MAC list → VLAN 50 direct, no CWP intercept.</td></tr>
+    <tr><td><strong>SSID</strong></td><td>Default fallback profile assignment — used when no other method matches. Sets Guest VLAN 30 as default on WC_Guest_CWP.</td></tr>
+    <tr><td><strong>Captive Web Portal</strong></td><td>WC_Guest_CWP — triggers CWP self-registration flow → PPSK email/QR delivery.</td></tr>
+    <tr><td><strong>Voice Enterprise / Custom</strong></td><td>Teams/Comms SSID — custom sequence for voice-prioritised clients.</td></tr>
+  </table>
+
+  <!-- ── 8.5 802.11k/v ── -->
+  <h3 id="opt-kv">8.5 — 802.11k / 802.11v (Roaming Assistance)</h3>
+  <div class="callout-green">
+    <p><strong>These two are mandatory ON for any stadium deployment.</strong> They are the software layer that makes physical roaming work at Lumen Field density. 802.11k + 802.11v together reduce roaming time from ~500 ms (blind scan) to &lt;50 ms (assisted transition).</p>
+  </div>
+  <table>
+    <tr><th>Protocol</th><th>EP1 Default</th><th>Stadium Target</th><th>What It Does</th><th>Simulator Impact</th></tr>
+    <tr><td><strong>802.11k — Neighbor Reports</strong></td><td>Off</td><td class="optimal">On</td><td>AP sends client a ranked list of nearby APs (RSSI, channel, load). Client uses the list to pre-scan roam candidates instead of scanning all channels blind. Eliminates the 200–400 ms blind scan phase.</td><td>Roaming latency model: blind scan 400 ms → assisted 50 ms. Feeds the degradation level timeline at kick-off when 72K devices associate simultaneously.</td></tr>
+    <tr><td><strong>802.11v — BSS Transition Mgmt</strong></td><td>Off</td><td class="optimal">On</td><td>AP can proactively <em>request</em> a client to roam to a less-loaded AP (BSS Transition Request). Enables load-based steering from the network side — not just client-side RSSI triggering. Works with the Max Clients/Radio slider.</td><td>When a radio hits Max Clients ceiling, 802.11v triggers BTM Request to steer excess clients. Without 802.11v, new clients are simply rejected — no graceful overflow. Feeds load-balancing model.</td></tr>
+  </table>
+
+  <!-- ── 8.6 WMM ── -->
+  <h3 id="opt-wmm">8.6 — WMM &amp; U-APSD</h3>
+  <table>
+    <tr><th>Setting</th><th>EP1 Default</th><th>Stadium Target</th><th>Notes</th></tr>
+    <tr><td><strong>Enable WMM</strong></td><td>On</td><td class="optimal">On (keep)</td><td>Wi-Fi Multimedia QoS — mandatory for voice/video differentiation. Disabling it collapses all traffic to best-effort. Never disable.</td></tr>
+    <tr><td><strong>Enforce WMM-AC for Voice</strong></td><td>Off</td><td class="optimal">On (Teams/Comms SSID)</td><td>Admission control for AC_VO — AP rejects new voice streams when voice airtime is saturated. Protects existing calls. Enable only on Teams/Comms SSID where voice is the primary application.</td></tr>
+    <tr><td><strong>Enforce WMM-AC for Video</strong></td><td>Off</td><td>Optional (VIP SSID)</td><td>Same as above for AC_VI. Consider enabling on VIP SSID where 4K replay/broadcast streams run. Risk: may reject fan video uploads if AC_VI is also used for upload traffic.</td></tr>
+    <tr><td><strong>U-APSD (Unscheduled APSD)</strong></td><td>Off</td><td class="optimal">On</td><td>Power-save delivery enhancement — allows battery-powered devices (phones, tablets) to request buffered frames on demand rather than waiting for DTIM. Reduces power consumption for 72K fan devices. Pairs with DTIM setting below.</td></tr>
+  </table>
+
+  <!-- ── 8.7 BROADCAST & MULTICAST ── -->
+  <h3 id="opt-multicast">8.7 — Broadcast &amp; Multicast Handling</h3>
+  <p>At 72,000 fans, broadcast and multicast storms are a primary capacity killer. These settings are critical.</p>
+  <table>
+    <tr><th>Setting</th><th>EP1 Default</th><th>Stadium Target</th><th>Simulator Impact</th></tr>
+    <tr><td><strong>Convert IP Multicast to Unicast</strong></td><td>Auto</td><td class="optimal">Always</td><td>Multicast frames sent at the lowest common MCS (often BPSK/QPSK) to reach all clients — at 72K devices this consumes enormous airtime. Converting to unicast lets each frame use the client's negotiated MCS. <strong>Airtime savings: 60–80% on multicast-heavy traffic.</strong></td></tr>
+    <tr><td><strong>Channel Utilisation Threshold</strong></td><td>60</td><td class="warning">40</td><td>Triggers multicast-to-unicast conversion when channel utilisation exceeds this %. Lower threshold = earlier conversion. At stadium density, channel is often above 60% — set 40 to ensure conversion kicks in during build-up phase, not just peak.</td></tr>
+    <tr><td><strong>Membership Count Threshold</strong></td><td>10</td><td>10 (keep)</td><td>Min group members before multicast-to-unicast triggers. 10 is appropriate — below this, native multicast is fine.</td></tr>
+    <tr><td><strong>Non-Essential Broadcast Filtering</strong></td><td>Off</td><td class="optimal">On</td><td>Drops non-essential broadcast frames (NetBIOS, SSDP, mDNS floods) before they hit the air. At 72K clients, each broadcast is replicated to every client — filtering eliminates the tail of control-plane noise. Feeds broadcast overhead constant in simulator.</td></tr>
+    <tr><td><strong>Enable Multicast Drop</strong></td><td>Off</td><td>Selective</td><td>Drops all multicast if enabled. Too aggressive for stadium (breaks mDNS needed for AirPlay/Chromecast on VIP). Use Non-Essential Broadcast Filtering instead. Only enable Multicast Drop on POS SSID where multicast is never needed.</td></tr>
+  </table>
+
+  <!-- ── 8.8 CLIENT NETWORK SETTINGS ── -->
+  <h3 id="opt-client">8.8 — Client Related Network Settings</h3>
+  <table>
+    <tr><th>Parameter</th><th>Default</th><th>Range</th><th>Stadium Target</th><th>Simulator Input</th></tr>
+    <tr><td><strong>Maximum Client Limit</strong></td><td>100</td><td>1–255</td><td class="warning">50–75</td><td>Matches Slider 4 in the radio profile parameter set. Hard ceiling enforced here at SSID level — AP rejects associations beyond this. Feed same value to both SSID and radio profile sliders.</td></tr>
+    <tr><td><strong>RTS Threshold (bytes)</strong></td><td>2346</td><td>1–2346</td><td class="warning">512–1024</td><td>2346 = RTS/CTS effectively disabled. At stadium density, hidden-node collisions between APs in overlapping cells are significant. Lowering to 512–1024 enables RTS/CTS for large frames — reduces collisions at cost of ~5% overhead. Add as an advanced slider in v2.</td></tr>
+    <tr><td><strong>Fragment Threshold (bytes)</strong></td><td>2346</td><td>256–2346</td><td>2346 (keep)</td><td>Fragmentation disabled is correct for modern networks — fragmentation adds overhead and is only useful in extremely high-interference environments. Keep at default.</td></tr>
+    <tr><td><strong>DTIM Settings</strong></td><td>1</td><td>1–255</td><td class="warning">2–3</td><td>DTIM period — how many beacon intervals between Delivery Traffic Indication Messages. DTIM=1 wakes every sleeping device every beacon (102.4 ms). DTIM=2 halves wake-up frequency, doubles battery life for 72K sleeping devices. Reduces multicast paging storm. Pairs with U-APSD.</td></tr>
+    <tr><td><strong>Inactive Client Ageout</strong></td><td>5 min</td><td>1–30 min</td><td class="warning">2 min</td><td>How long before an idle client is de-associated. At 72K fans, idle sessions at 5 min hold association table slots — reducing to 2 min frees capacity faster during half-time exodus. Feeds association table churn model in simulator.</td></tr>
+    <tr><td><strong>Roaming Cache Update Interval</strong></td><td>60 s</td><td>10–36000 s</td><td class="warning">20 s</td><td>How often EP1 refreshes the 802.11k neighbor cache for each client. 60 s is too slow for a moving fan. 20 s keeps neighbor lists fresh for active roamers. Feeds roaming latency model.</td></tr>
+    <tr><td><strong>Roaming Cache Ageout</strong></td><td>60</td><td>1–1000</td><td class="warning">30</td><td>How long a cached roaming entry is kept before expiry. 30 is sufficient for stadium dwell times — fans move within a section, not across the stadium, so cache entries stay valid for several minutes.</td></tr>
+  </table>
+
+  <!-- ── 8.9 OTHER OPTIONS ── -->
+  <h3 id="opt-other">8.9 — Other Options</h3>
+  <table>
+    <tr><th>Option</th><th>EP1 Default</th><th>Stadium Target</th><th>Notes</th></tr>
+    <tr><td><strong>Ignore Broadcast Probe Request</strong></td><td>Off</td><td class="optimal">On (all SSIDs)</td><td>AP ignores broadcast probe requests (devices scanning with no specific SSID). Forces clients to send directed probes — reduces management frame overhead at 72K devices significantly. Pairs well with 802.11k neighbor reports so clients know which SSID to probe for.</td></tr>
+    <tr><td><strong>Hide SSID (Stealth Mode)</strong></td><td>Off</td><td>Off (keep)</td><td>Hidden SSID provides no real security, breaks iOS/Android auto-join, and increases probe traffic. Leave visible on all stadium SSIDs.</td></tr>
+    <tr><td><strong>FTM (802.11mc) Responder Support</strong></td><td>Off</td><td>Optional — future</td><td>Fine Timing Measurement — enables sub-meter indoor positioning. Not required for v2 simulator capacity model. Future sprint: if Lumen Field deploys location services for fan wayfinding or POS density maps.</td></tr>
+    <tr><td><strong>Enable Enhanced RNR</strong></td><td>Off</td><td class="optimal">On (all SSIDs with 6 GHz)</td><td>Reduced Neighbor Report — 6 GHz band discovery mechanism. Without RNR, devices on 2.4/5 GHz don't know 6 GHz APs exist. Enabling Enhanced RNR allows seamless 6 GHz discovery. <strong>Mandatory for any WiFi 6E/7 deployment.</strong></td></tr>
+  </table>
+
+  <!-- ── OPTIONAL SETTINGS SUMMARY TABLE ── -->
+  <h3 id="opt-summary">Summary — Optional Settings Stadium Delta</h3>
+  <div class="callout-blue">
+    <p>These are the SSID-level changes to make on top of the radio profile tuning. Together with the 10 radio profile deltas from Section 7, this gives the complete Lumen Field configuration target.</p>
+  </div>
+  <table>
+    <tr><th>#</th><th>Setting</th><th>Default</th><th>Lumen Field Target</th><th>Priority</th></tr>
+    <tr><td>1</td><td>802.11v BSS Transition Mgmt</td><td class="warning">Off</td><td class="optimal">On</td><td><strong>CRITICAL</strong> — load-based steering</td></tr>
+    <tr><td>2</td><td>802.11k Neighbor Reports</td><td class="warning">Off</td><td class="optimal">On</td><td><strong>CRITICAL</strong> — roaming assistance</td></tr>
+    <tr><td>3</td><td>Inter-station Traffic (Guest/POS)</td><td class="warning">On</td><td class="optimal">Off</td><td><strong>CRITICAL</strong> — lateral movement prevention</td></tr>
+    <tr><td>4</td><td>Telnet / SNMP / Ping (all SSIDs)</td><td class="warning">On</td><td class="optimal">Off</td><td><strong>CRITICAL</strong> — management plane protection</td></tr>
+    <tr><td>5</td><td>SSH (Guest/Fan SSIDs)</td><td class="warning">On</td><td class="optimal">Off</td><td><strong>CRITICAL</strong> — management plane protection</td></tr>
+    <tr><td>6</td><td>Enhanced RNR</td><td class="warning">Off</td><td class="optimal">On</td><td><strong>HIGH</strong> — 6 GHz discovery mandatory</td></tr>
+    <tr><td>7</td><td>Non-Essential Broadcast Filtering</td><td class="warning">Off</td><td class="optimal">On</td><td><strong>HIGH</strong> — broadcast storm prevention</td></tr>
+    <tr><td>8</td><td>Multicast → Unicast</td><td>Auto</td><td class="optimal">Always</td><td><strong>HIGH</strong> — airtime recovery 60–80%</td></tr>
+    <tr><td>9</td><td>U-APSD</td><td class="warning">Off</td><td class="optimal">On</td><td><strong>HIGH</strong> — 72K battery devices</td></tr>
+    <tr><td>10</td><td>Ignore Broadcast Probe Request</td><td class="warning">Off</td><td class="optimal">On</td><td><strong>HIGH</strong> — management frame reduction</td></tr>
+    <tr><td>11</td><td>Disable 802.11b</td><td class="warning">On</td><td class="optimal">Off</td><td><strong>HIGH</strong> — airtime +8–15% on 2.4G</td></tr>
+    <tr><td>12</td><td>Channel Utilisation Threshold</td><td>60</td><td class="warning">40</td><td>MEDIUM — earlier multicast conversion</td></tr>
+    <tr><td>13</td><td>Inactive Client Ageout</td><td>5 min</td><td class="warning">2 min</td><td>MEDIUM — faster slot recycling</td></tr>
+    <tr><td>14</td><td>DTIM Period</td><td>1</td><td class="warning">2–3</td><td>MEDIUM — battery + paging storm</td></tr>
+    <tr><td>15</td><td>Roaming Cache Update</td><td>60 s</td><td class="warning">20 s</td><td>MEDIUM — fresher 802.11k lists</td></tr>
+    <tr><td>16</td><td>RTS Threshold</td><td>2346 (off)</td><td class="warning">512–1024</td><td>LOW — hidden-node at density</td></tr>
+    <tr><td>17</td><td>WMM-AC Voice Enforcement</td><td>Off</td><td class="optimal">On (Teams SSID only)</td><td>LOW — voice protection when needed</td></tr>
+    <tr><td>18</td><td>MAC-Based DoS Prevention</td><td>Off</td><td class="optimal">On (Client scope)</td><td>LOW — association storm guard</td></tr>
+  </table>
+
 </section>
 
 <footer>
