@@ -116,6 +116,8 @@
   <a href="#stadium-deltas">Stadium Deltas</a>
   <a href="#master-table">Master Table</a>
   <a href="#optional-settings">Optional Settings</a>
+  <a href="#power-channel">Power &amp; Channel</a>
+  <a href="#broadcom">Broadcom Layer</a>
 </nav>
 
 <!-- ── I/O MODEL ── -->
@@ -664,6 +666,199 @@
     <tr><td>16</td><td>RTS Threshold</td><td>2346 (off)</td><td class="warning">512–1024</td><td>LOW — hidden-node at density</td></tr>
     <tr><td>17</td><td>WMM-AC Voice Enforcement</td><td>Off</td><td class="optimal">On (Teams SSID only)</td><td>LOW — voice protection when needed</td></tr>
     <tr><td>18</td><td>MAC-Based DoS Prevention</td><td>Off</td><td class="optimal">On (Client scope)</td><td>LOW — association storm guard</td></tr>
+  </table>
+
+</section>
+
+<!-- ── SECTION 9 — POWER CONTROL & CHANNEL SELECTION ── -->
+<section id="power-channel">
+  <h2>9. Power Control &amp; Channel Selection</h2>
+  <p>These are the two most consequential RF planning parameters — they determine cell size, co-channel interference, and spatial reuse. Separate from the EP1 Optional Settings panel: these are set in the Radio Profile (TPC) and in the AP Network Policy (channel plan).</p>
+
+  <!-- ── 9.1 TRANSMIT POWER CONTROL ── -->
+  <h3 id="pc-tpc">9.1 — Transmit Power Control (TPC)</h3>
+  <p>EP1 exposes both a manual max power and an automated TPC (Transmit Power Control) mode. For stadium density, both matter: manual max sets the upper bound; TPC algorithm steps down from there based on neighbour signal levels.</p>
+
+  <table>
+    <tr><th>Parameter</th><th>EP1 Location</th><th>Range</th><th>Default</th><th>Stadium Target</th><th>Effect</th></tr>
+    <tr>
+      <td><strong>Max TX Power (dBm)</strong></td>
+      <td>Radio Profile → Power &amp; TPC</td>
+      <td>3–30 dBm (band-limited by regulatory domain)</td>
+      <td>20 dBm (2.4G) · 23 dBm (5G/6G)</td>
+      <td class="warning">17–20 dBm (5G/6G) · 14–17 dBm (2.4G)</td>
+      <td>Hard upper ceiling — TPC cannot exceed this. Reducing shrinks cell radius, increases spatial reuse, reduces co-channel interference reach.</td>
+    </tr>
+    <tr>
+      <td><strong>Min TX Power / TPC Floor (dBm)</strong></td>
+      <td>Radio Profile → Power &amp; TPC</td>
+      <td>3–20 dBm</td>
+      <td>3 dBm</td>
+      <td class="warning">5–8 dBm</td>
+      <td>Prevents TPC from stepping down so far that coverage holes open. At Lumen Field, TPC floor must guarantee at least −67 dBm RSSI at each seat row boundary.</td>
+    </tr>
+    <tr>
+      <td><strong>TPC Algorithm Mode</strong></td>
+      <td>Radio Profile → Power &amp; TPC</td>
+      <td>Manual · Auto (TPC)</td>
+      <td>Auto</td>
+      <td class="optimal">Auto (TPC enabled)</td>
+      <td>Auto TPC steps down TX power when strong neighbours are detected — reduces unnecessary interference. Manual is only appropriate for fixed-infrastructure or temporary override.</td>
+    </tr>
+  </table>
+
+  <div class="callout">
+    <p><strong>WLANPros TPC target values (from WLPC corpus):</strong> Stadium/dense venue target TX power levels: <strong>7 dBm (low-power fill APs)</strong> · <strong>13 dBm (standard coverage APs)</strong> · <strong>16 dBm (edge/concourse APs)</strong>. These are post-TPC convergence targets, not EP1 slider settings. Set EP1 max accordingly: if target convergence is 13 dBm, set EP1 max to 17 dBm to give TPC 4 dB headroom.</p>
+  </div>
+
+  <h4 style="font-size:0.9rem;font-weight:700;margin:20px 0 8px;color:#333">TX Power → Simulator Impact Chain</h4>
+  <table>
+    <tr><th>TX Power Setting</th><th>Cell Radius (approx, open floor)</th><th>RSSI at 15m</th><th>Max Concurrent APs Same Channel</th></tr>
+    <tr><td>23 dBm (default)</td><td>~30–40 m</td><td>~−55 dBm</td><td>Low — large overlapping cells</td></tr>
+    <tr><td>20 dBm</td><td>~20–25 m</td><td>~−58 dBm</td><td>Medium</td></tr>
+    <tr><td>17 dBm</td><td>~15–18 m</td><td>~−62 dBm</td><td>High — tighter cells, more reuse</td></tr>
+    <tr><td>13 dBm (WLANPros target)</td><td>~10–12 m</td><td>~−67 dBm</td><td>Very high — stadium dense AP spacing</td></tr>
+    <tr><td>7 dBm (fill AP)</td><td>~5–7 m</td><td>~−72 dBm</td><td>Maximum reuse — under-seat / railing APs</td></tr>
+  </table>
+  <p style="font-size:13px;color:#666;font-style:italic">Approximate free-space values. Stadium uses directional antennas and high-gain sector mounts — actual values require site-specific link budget with path loss model for seating bowl geometry.</p>
+
+  <!-- ── 9.2 CHANNEL SELECTION ── -->
+  <h3 id="pc-channel">9.2 — Channel Selection &amp; Planning</h3>
+  <p>Channel assignment is set per-AP radio, either manually or via EP1's AutoRF DCS (Dynamic Channel Selection). For a 72K-seat stadium, the channel plan is as important as AP placement — a poor channel plan causes co-channel interference that no amount of TX power tuning can fix.</p>
+
+  <table>
+    <tr><th>Band</th><th>Mode</th><th>Available Channels</th><th>Non-Overlapping at Width</th><th>Stadium Strategy</th></tr>
+    <tr>
+      <td><strong>2.4 GHz</strong></td>
+      <td>Manual (stadium)</td>
+      <td>1–13 (region-dependent)</td>
+      <td>3 at 20 MHz (1 / 6 / 11)</td>
+      <td>Fix channels 1/6/11. Never use 40 MHz on 2.4G (leaves only 1 non-overlapping channel). Assign adjacent APs strictly to different channels. 2.4G is primarily legacy/IoT fallback at Lumen Field.</td>
+    </tr>
+    <tr>
+      <td><strong>5 GHz</strong></td>
+      <td>DCS with manual seed</td>
+      <td>UNII-1/2A/2C/3: ~36 channels at 20 MHz</td>
+      <td>~6 at 80 MHz · ~3 at 160 MHz</td>
+      <td>Enable DFS for UNII-2A/2C — more than doubles available channels (25 no-DFS → 45 with DFS). Use 80 MHz for stadium inner bowl; 160 MHz for outer concourse where AP density is lower. Seed DCS with a pre-planned starting assignment.</td>
+    </tr>
+    <tr>
+      <td><strong>6 GHz</strong></td>
+      <td>DCS + PSC prioritisation</td>
+      <td>59 × 20 MHz channels (UNII-5 through UNII-8)</td>
+      <td>7 at 160 MHz · 3–4 at 320 MHz</td>
+      <td>LPI (Low Power Indoor) mode — no AFC, no DFS. Prioritise PSC (Preferred Scanning Channels: 5, 21, 37, 53, 69, 85, 101, 117, 133, 149, 165, 181, 197, 213, 229) for AP discovery. At 320 MHz (WiFi 7), plan for 3–4 reuse groups across the bowl.</td>
+    </tr>
+  </table>
+
+  <h4 style="font-size:0.9rem;font-weight:700;margin:20px 0 8px;color:#333">DCS (Dynamic Channel Selection) — AutoRF Inputs &amp; Triggers</h4>
+  <p>EP1 AutoRF uses Broadcom's DCS algorithm. Understanding the trigger thresholds is critical — misconfigured thresholds cause channel oscillation where APs flip channels back and forth every few minutes, worse than a bad static plan.</p>
+  <table>
+    <tr><th>DCS Input</th><th>What It Measures</th><th>Trigger Threshold (WLANPros)</th><th>Simulator Role</th></tr>
+    <tr><td><strong>CCI threshold</strong></td><td>Co-channel AP signal strength on current channel</td><td>&gt; −85 dBm → consider channel change</td><td>Co-channel interference factor in capacity model</td></tr>
+    <tr><td><strong>Retry rate threshold</strong></td><td>% of frames requiring retry on current channel</td><td>&gt; 10% → trigger channel evaluation</td><td>Channel quality degradation signal — feeds degradation level</td></tr>
+    <tr><td><strong>Channel utilisation %</strong></td><td>Tx + Rx + busy time on channel</td><td>&gt; 70% sustained → evaluate alternatives</td><td>Airtime utilisation output in simulator</td></tr>
+    <tr><td><strong>Neighbour AP RSSI scan</strong></td><td>Background scan of all neighbour APs per channel</td><td>Continuous, 60 s interval typical</td><td>Feeds channel assignment convergence prediction</td></tr>
+    <tr><td><strong>Noise floor</strong></td><td>Non-802.11 interference measured on idle radio</td><td>&lt; −95 dBm clean · &gt; −85 dBm problematic</td><td>Noise floor constant in SNR calculation</td></tr>
+  </table>
+
+  <div class="callout-red">
+    <p><strong>Oscillation risk:</strong> If the CCI and retry thresholds are set too close to the ambient values, DCS will continuously trigger channel changes that find marginally better channels — then the neighbour AP's DCS triggers in response, causing a chain reaction. For stadium density, <strong>disable DCS during match time</strong> (lock channels via manual override) and run DCS only during off-hours maintenance windows. Add a "DCS Lock" toggle to the simulator that freezes channel assignments.</p>
+  </div>
+
+  <h4 style="font-size:0.9rem;font-weight:700;margin:20px 0 8px;color:#333">Channel Plan Parameters → Simulator v2 Inputs</h4>
+  <table>
+    <tr><th>#</th><th>Parameter</th><th>Type</th><th>Default</th><th>Stadium Target</th><th>Simulator Input</th></tr>
+    <tr><td>PC-1</td><td><strong>Max TX Power per band (dBm)</strong></td><td><span class="badge badge-slider">Slider</span></td><td>20–23 dBm</td><td class="warning">13–20 dBm</td><td>Cell radius → RSSI contour → spatial reuse count (already Slider 5 — link here)</td></tr>
+    <tr><td>PC-2</td><td><strong>TPC Floor per band (dBm)</strong></td><td><span class="badge badge-slider">Slider</span></td><td>3 dBm</td><td class="warning">5–8 dBm</td><td>Coverage floor guarantee (already Slider 6 — link here)</td></tr>
+    <tr><td>PC-3</td><td><strong>Channel Width per band</strong></td><td><span class="badge badge-slider">Slider</span></td><td>80 MHz (5G) · 80 MHz (6G)</td><td class="warning">160 MHz (5G) · 320 MHz (6G WiFi 7)</td><td>PHY rate lookup table input (already Slider 9 — link here)</td></tr>
+    <tr><td>PC-4</td><td><strong>DCS Mode</strong></td><td><span class="badge badge-toggle">Toggle</span></td><td>Auto (DCS on)</td><td class="warning">Lock during match / Auto during off-hours</td><td>New v2 input: DCS Lock toggle — freezes channel plan for match-time stability</td></tr>
+    <tr><td>PC-5</td><td><strong>DCS CCI Threshold (dBm)</strong></td><td><span class="badge badge-slider">Slider</span></td><td>−85 dBm</td><td>−85 dBm (keep)</td><td>New v2 input: Co-channel trigger sensitivity — feeds oscillation risk flag</td></tr>
+    <tr><td>PC-6</td><td><strong>DCS Retry Threshold (%)</strong></td><td><span class="badge badge-slider">Slider</span></td><td>10%</td><td>10% (keep)</td><td>New v2 input: Channel quality degradation trigger</td></tr>
+    <tr><td>PC-7</td><td><strong>Non-overlapping channel count</strong></td><td><span class="badge badge-const">Constant</span></td><td>Derived from width</td><td>Derived from width</td><td>Computed from BW selection: 2.4G/20MHz=3, 5G/80MHz=6, 6G/160MHz=7, 6G/320MHz=3</td></tr>
+  </table>
+
+</section>
+
+<!-- ── SECTION 10 — BROADCOM CHIPSET LAYER ── -->
+<section id="broadcom">
+  <h2>10. Broadcom Chipset Layer — Configurable vs Fixed</h2>
+  <p>The AP3000 and AP5060 use Broadcom chipsets. Understanding which parameters are user-configurable vs chipset-managed is essential for the simulator: configurable params are sliders/toggles; fixed params are constants or observable outputs only.</p>
+
+  <div class="callout-blue">
+    <p><strong>Source:</strong> Broadcom AutoRF / DCS / TPC architecture from the WiFi Digital Twin design session (May 2026). Validated against WLPC corpus and 802.11be-2024 standard. The simulator's RRM layer mirrors Broadcom AutoRF behaviour: DCS (channel) + TPC (power) + BSS Color + Multi-AP Coordination (WiFi 7).</p>
+  </div>
+
+  <!-- ── 10.1 CONFIGURABLE ── -->
+  <h3 id="bc-config">10.1 — Configurable via EP1 (User-Tunable)</h3>
+  <p>These 13 parameters are exposed in EP1 and map directly to simulator inputs. They are the complete set of Broadcom RRM knobs available to the operator.</p>
+  <table>
+    <tr><th>#</th><th>Parameter</th><th>EP1 Setting</th><th>RRM / Simulator Role</th><th>Spec Section</th></tr>
+    <tr><td>1</td><td><strong>TX Power min/max (dBm)</strong></td><td>dBm slider</td><td>TPC bounds — sets the envelope within which AutoRF steps power up/down</td><td><a href="#pc-tpc">§9.1</a> · Sliders 5+6</td></tr>
+    <tr><td>2</td><td><strong>Channel</strong></td><td>Manual or DCS</td><td>DCS seed — AutoRF starts from this channel then optimises</td><td><a href="#pc-channel">§9.2</a> · PC-4</td></tr>
+    <tr><td>3</td><td><strong>Channel Width (MHz)</strong></td><td>20/40/80/160/320 MHz</td><td>DCS + capacity — wider = higher PHY rate but fewer non-overlapping channels</td><td><a href="#opt-rates">§8.1</a> · Slider 9</td></tr>
+    <tr><td>4</td><td><strong>OFDMA</strong></td><td>Enable/disable UL+DL</td><td>Airtime efficiency — DL ×1.35 / UL ×1.20 capacity multiplier</td><td><a href="#toggles">§Toggles</a> · Toggle 1</td></tr>
+    <tr><td>5</td><td><strong>MBR (Minimum Basic Rate)</strong></td><td>6/12/24 Mbps</td><td>Cell size control — raising MBR shrinks cell boundary (clients below MBR de-associate). Primary tool for density tuning beyond TX power.</td><td>New v2 input — not yet in spec</td></tr>
+    <tr><td>6</td><td><strong>RX-SOP (Receive Start of Packet)</strong></td><td>dBm threshold (e.g. −82 dBm)</td><td>CCI rejection — AP ignores frames from far-away clients/APs below this RSSI. Raises the effective noise floor intentionally to reduce hidden-node CCI. Critical for dense venues.</td><td>New v2 input — not yet in spec</td></tr>
+    <tr><td>7</td><td><strong>Association Limit</strong></td><td>Max clients/radio (1–255)</td><td>Load threshold for load balancing — when hit, AP sends 802.11v BTM requests</td><td><a href="#sliders">§Sliders</a> · Slider 4</td></tr>
+    <tr><td>8</td><td><strong>802.11r (Fast BSS Transition)</strong></td><td>Enable/disable</td><td>Roaming optimisation — eliminates full re-auth on roam (reduces handoff from ~500 ms to ~50 ms)</td><td>New v2 input — add to roaming model</td></tr>
+    <tr><td>9</td><td><strong>SDR Band Mode</strong></td><td>Dual-5G or Dual-6G (AP5020/AP5060)</td><td>Spectrum allocation — AP5020/AP5060 can run two 5G radios OR two 6G radios. Dual-6G doubles 6G capacity at cost of 5G coverage.</td><td>New v2 input — AP hardware toggle</td></tr>
+    <tr><td>10</td><td><strong>Preamble Puncturing</strong></td><td>Enable/disable</td><td>WiFi 7 (802.11be) only — allows AP to use a 320 MHz channel with a "punctured" 20/40 MHz sub-channel occupied by a radar or incumbent, rather than dropping to a smaller channel entirely. Improves 6G spectrum utilisation.</td><td>New v2 input — WiFi 7 only toggle</td></tr>
+    <tr><td>11</td><td><strong>Multi-AP Coordination</strong></td><td>Enable/disable</td><td>WiFi 7 CoMP equivalent — coordinated null-steering between AP5020/AP5060 pairs reduces inter-AP interference. AP5020/AP5060 hardware only.</td><td>New v2 input — WiFi 7 only toggle</td></tr>
+    <tr><td>12</td><td><strong>AutoRF CCI Threshold (dBm)</strong></td><td>dBm</td><td>DCS trigger — when a co-channel AP exceeds this RSSI on the current channel, DCS evaluates a channel change</td><td><a href="#pc-channel">§9.2</a> · PC-5</td></tr>
+    <tr><td>13</td><td><strong>AutoRF Retry Threshold (%)</strong></td><td>%</td><td>Channel change trigger — when retry rate exceeds this %, DCS evaluates alternatives</td><td><a href="#pc-channel">§9.2</a> · PC-6</td></tr>
+  </table>
+
+  <div class="callout">
+    <p><strong>Two new high-value parameters not yet in the spec:</strong><br>
+    <strong>MBR (Min Basic Rate):</strong> Raising from 6 Mbps → 24 Mbps is one of the most effective density tools — it physically shrinks the cell by refusing to serve weak clients. Simulator effect: adjusts effective cell radius independently of TX power.<br>
+    <strong>RX-SOP:</strong> Sets the AP's CCI rejection floor. Default is typically −82 dBm. For high-density, drop to −75 dBm — AP ignores any frame from a source weaker than that, preventing far-away interference from triggering backoff. Simulator effect: adjusts co-channel interference correction factor.</p>
+  </div>
+
+  <!-- ── 10.2 FIXED / CHIPSET-MANAGED ── -->
+  <h3 id="bc-fixed">10.2 — Fixed / Chipset-Managed (Broadcom — Not User-Tunable)</h3>
+  <p>These parameters are managed autonomously by the Broadcom chipset. They are not exposed in EP1 as inputs — but their effects <em>are</em> observable as telemetry outputs. In the simulator, these are fixed constants loaded from the AP hardware SKU.</p>
+  <table>
+    <tr><th>Parameter</th><th>Behavior</th><th>Observable via EP1</th><th>Simulator Treatment</th></tr>
+    <tr><td><strong>Spatial Streams (NSS)</strong></td><td>Hardware-fixed: 2×2 AP3000 · 4×4 AP5060 series</td><td>PHY rate reports (confirms NSS in use)</td><td>Fixed constant per AP SKU — NSS multiplier in PHY rate table</td></tr>
+    <tr><td><strong>MCS Index Selection</strong></td><td>Auto-selected per client SNR — chipset picks highest MCS the SNR supports</td><td>Per-client MCS distribution stats</td><td>Modelled via SNR→MCS lookup table; SNR threshold slider (Slider 3) is the input</td></tr>
+    <tr><td><strong>4K-QAM Activation</strong></td><td>Auto when SNR ≥ ~36 dB — enables MCS 12/13 (WiFi 7 only)</td><td>MCS 12/13 usage % in stats</td><td>Computed output: show % of clients achieving 4K-QAM at given SNR distribution</td></tr>
+    <tr><td><strong>TWT Interval Scheduling</strong></td><td>Negotiated per client — chipset handles TWT session management</td><td>TWT session count + wake interval logs</td><td>Fixed when TWT toggle is ON — number of TWT sessions = POS + IoT device count</td></tr>
+    <tr><td><strong>OFDMA RU Sizes</strong></td><td>Auto-allocated by chipset scheduler based on queue depth</td><td>RU utilisation stats (26/52/106/242/484/996 RU sizes)</td><td>Fixed efficiency constant when OFDMA toggle is ON — DL ×1.35 / UL ×1.20</td></tr>
+    <tr><td><strong>BSS Color Value (1–63)</strong></td><td>Auto-assigned by chipset, conflict detected and re-assigned</td><td>Color conflict events per AP</td><td>Fixed when BSS Color toggle is ON — CCI reduction factor ×0.80</td></tr>
+    <tr><td><strong>HARQ Retransmission</strong></td><td>WiFi 7 only — chipset-managed hybrid ARQ retry reduction</td><td>Retry rate reduction vs non-HARQ baseline</td><td>Optional efficiency bonus constant for WiFi 7 profiles (be-5G / be-6G)</td></tr>
+    <tr><td><strong>MLO Link Preference</strong></td><td>AP + client negotiation — chipset selects which 5G/6G link is primary</td><td>MLO link stats (per-link throughput split)</td><td>Not yet modelled in v2 — future sprint: MLO bonded throughput = min(5G latency, 6G latency)</td></tr>
+    <tr><td><strong>Beamforming Weights</strong></td><td>Per-client, per-packet — chipset calculates steering weights via sounding</td><td>Beam SNR improvement per client</td><td>Implicit in MU-MIMO toggle multiplier — not modelled separately</td></tr>
+  </table>
+
+  <!-- ── 10.3 AUTORF INPUTS ── -->
+  <h3 id="bc-autoRF">10.3 — Broadcom AutoRF Input Feed (from chipset diagnostics via EP1)</h3>
+  <p>These are the live measurements the Broadcom DCS/TPC algorithm reads continuously. In the simulator, these become the "current state" inputs that feed the RRM convergence model.</p>
+  <table>
+    <tr><th>AutoRF Input</th><th>What It Measures</th><th>Simulator Use</th></tr>
+    <tr><td>Per-channel noise floor</td><td>Non-802.11 interference measured on idle radio</td><td>Noise floor constant in SNR → MCS calculation</td></tr>
+    <tr><td>Neighbour AP RSSI per channel</td><td>Background scan — RSSI of each visible AP per channel</td><td>Co-channel interference map; feeds DCS channel score</td></tr>
+    <tr><td>Channel utilisation %</td><td>Tx + Rx + busy time on current channel</td><td>Airtime utilisation output; DCS trigger input</td></tr>
+    <tr><td>Retry rate per radio</td><td>% of frames requiring one or more retransmissions</td><td>Channel quality degradation signal; DCS trigger</td></tr>
+    <tr><td>BSS Load IE</td><td>Client count + channel utilisation (broadcast in beacons)</td><td>Load-based steering input for 802.11v BTM model</td></tr>
+    <tr><td>CRC error rate</td><td>Frames received with CRC errors (corrupted frames)</td><td>Physical layer error rate → feeds degradation level</td></tr>
+    <tr><td>Roaming event frequency</td><td>Association / de-association events per AP per minute</td><td>Roaming model: validates anchor period and 802.11k/v settings</td></tr>
+  </table>
+
+  <!-- ── COMPLETE NEW INPUT LIST ── -->
+  <h3 id="bc-newinputs">10.4 — New Simulator v2 Inputs Identified (This Section)</h3>
+  <div class="callout-green">
+    <p>These parameters were not in the original 16-parameter master table. They are now confirmed as required inputs for a complete Lumen Field simulator.</p>
+  </div>
+  <table>
+    <tr><th>#</th><th>Parameter</th><th>Type</th><th>Default</th><th>Stadium Target</th><th>Simulator Effect</th></tr>
+    <tr><td>N-1</td><td><strong>MBR — Min Basic Rate (Mbps)</strong></td><td><span class="badge badge-slider">Slider</span></td><td>6 Mbps</td><td class="warning">24 Mbps</td><td>Shrinks cell boundary by refusing weak clients. More effective than TX power reduction alone because it acts on client-side SNR, not AP-side power. Simulator: adjusts effective cell radius and clients-per-AP curve.</td></tr>
+    <tr><td>N-2</td><td><strong>RX-SOP (dBm)</strong></td><td><span class="badge badge-slider">Slider</span></td><td>−82 dBm</td><td class="warning">−75 dBm</td><td>CCI rejection floor — AP ignores far-field interference below this threshold. Simulator: adjusts co-channel interference correction factor (complements BSS Color toggle).</td></tr>
+    <tr><td>N-3</td><td><strong>DCS Lock (match-time)</strong></td><td><span class="badge badge-toggle">Toggle</span></td><td>Auto (DCS on)</td><td class="warning">Locked during match</td><td>Prevents channel oscillation during 90-minute match window. Simulator: freeze channel plan, disable DCS convergence model during T−0 to T+90.</td></tr>
+    <tr><td>N-4</td><td><strong>802.11r Fast BSS Transition</strong></td><td><span class="badge badge-toggle">Toggle</span></td><td>Off</td><td class="optimal">On</td><td>Reduces roaming handoff time from ~500 ms to ~50 ms. Feeds roaming latency model — critical for moving fans and half-time mass roaming events.</td></tr>
+    <tr><td>N-5</td><td><strong>SDR Band Mode (AP5060)</strong></td><td><span class="badge badge-toggle">Toggle</span></td><td>Dual-5G</td><td>Dual-6G (inner bowl)</td><td>AP5060 can allocate both radios to 6G instead of one 5G + one 6G. Doubles 6G capacity at cost of 5G. Simulator: adjusts band distribution model for AP5060 APs.</td></tr>
+    <tr><td>N-6</td><td><strong>Preamble Puncturing (WiFi 7)</strong></td><td><span class="badge badge-toggle">Toggle</span></td><td>Off</td><td class="optimal">On (be profiles)</td><td>Allows 320 MHz channels to operate with a punctured sub-channel. Improves 6G spectrum efficiency when incumbents occupy narrow sub-bands. WiFi 7 only.</td></tr>
+    <tr><td>N-7</td><td><strong>Legacy Mode (disable 802.11b)</strong></td><td><span class="badge badge-toggle">Toggle</span></td><td>On (b enabled)</td><td class="warning">Off (b disabled)</td><td>Removes protection overhead on 2.4G. Airtime efficiency +8–15% on 2.4 GHz band. (From §8.1)</td></tr>
   </table>
 
 </section>
