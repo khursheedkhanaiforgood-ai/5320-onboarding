@@ -234,6 +234,7 @@
   <a href="#pending">Next Sprint</a>
   <a href="#ppsk-sprint3">PPSK Sprint 3</a>
   <a href="#ppsk-reflection">PPSK vs 802.1X</a>
+  <a href="#radio-profiles">Radio Profiles</a>
 </nav>
 
 
@@ -1148,6 +1149,134 @@ b6:1c:de:e9:1e:92    TeamAUS(0020)   0000  d mi   3   &lt;-- same iPhone, TeamAU
   <div class="milestone milestone-red">
     <div class="milestone-label">Sprint 2 Tomorrow — PCI-DSS for POS</div>
     <p>VLAN 50 POS segmentation proof. ACL locking VLAN 50 to payment processor IP only. No inter-VLAN routing from VLAN 50 to any other VLAN. Verified via ping isolation tests from 10.50.0.x → 10.10.0.x (must fail) and 10.50.0.x → payment processor (must pass).</p>
+  </div>
+
+</section>
+
+<!-- ── SECTION 17 — RADIO PROFILE PARAMETER MAP ───────────────────── -->
+<section id="radio-profiles">
+  <h2>17. Radio Profile Parameter Map — EP1 → Stadium Simulator</h2>
+  <p>All seven default EP1 radio profiles studied June 2, 2026. Parameters mapped to Stadium Simulator v2 inputs. Every WiFi 6/7 differentiating feature is <strong>OFF</strong> in the defaults — these are the dials to turn on for Lumen Field.</p>
+
+  <h3>Jump to sub-section</h3>
+  <ul>
+    <li><a href="#rad-inventory">1 — Profile Inventory (all 7 profiles)</a></li>
+    <li><a href="#rad-features">2 — WiFi 6/7 Feature Status (OFDMA · BSS Color · MU-MIMO · TWT)</a></li>
+    <li><a href="#rad-power">3 — Power, TPC &amp; Admission Control</a></li>
+    <li><a href="#rad-clients">4 — Client Management (Band Steering · Anchor · A-MPDU · Short GI)</a></li>
+    <li><a href="#rad-phy">5 — PHY Efficiency &amp; WMM QoS</a></li>
+    <li><a href="#rad-stadium">6 — Stadium Action List (what to change from defaults)</a></li>
+    <li><a href="#rad-simmap">7 — Simulator v2 Input Map (16 tunable EP1 parameters)</a></li>
+  </ul>
+
+  <!-- ── 1 — PROFILE INVENTORY ── -->
+  <h3 id="rad-inventory">1 — Profile Inventory</h3>
+  <table>
+    <tr><th>Profile Name</th><th>Standard</th><th>Band</th><th>Max Channel Width</th><th>Key Feature</th></tr>
+    <tr><td><code>AP150W-11ac-Profile</code></td><td>802.11ac (WiFi 5)</td><td>5 GHz</td><td>80 MHz</td><td>Legacy VHT baseline</td></tr>
+    <tr><td><code>radio_ng_11ax-2g</code></td><td>802.11ax (WiFi 6)</td><td>2.4 GHz</td><td>40 MHz</td><td>HE on legacy band</td></tr>
+    <tr><td><code>radio_ng_11ax-5g</code></td><td>802.11ax (WiFi 6)</td><td>5 GHz</td><td>80 MHz</td><td>HE + High Density mode</td></tr>
+    <tr><td><code>radio_ng_11ax-6g</code></td><td>802.11ax (WiFi 6E)</td><td>6 GHz</td><td>160 MHz</td><td>6 GHz clean spectrum — <em>missing High Density mode</em></td></tr>
+    <tr><td><code>radio_11be-2g</code></td><td>802.11be (WiFi 7)</td><td>2.4 GHz</td><td>40 MHz</td><td>EHT on legacy band</td></tr>
+    <tr><td><code>radio_11be-5g</code></td><td>802.11be (WiFi 7)</td><td>5 GHz</td><td>160 MHz</td><td>EHT + MU-MIMO (AP5020/AP4020)</td></tr>
+    <tr><td><code>radio_11be-6g</code></td><td>802.11be (WiFi 7)</td><td>6 GHz</td><td>320 MHz (two variants)</td><td>EHT + High Density + 320MHz — widest pipe</td></tr>
+  </table>
+  <div class="callout-blue"><p><strong>320 MHz variants in be-6G:</strong> <code>320MHz-1</code> uses the lower 6 GHz block (5945–6265 MHz), <code>320MHz-2</code> uses the upper block (6265–6585 MHz). WiFi 7 exclusive — 4× the PHY rate vs 80 MHz. Requires LPI (Low Power Indoor) mode at Lumen Field — no AFC needed indoors.</p></div>
+
+  <!-- ── 2 — WiFi 6/7 FEATURE STATUS ── -->
+  <h3 id="rad-features">2 — WiFi 6/7 Feature Status</h3>
+  <div class="callout-red"><p><strong>Finding: Every WiFi 6/7 differentiating feature is OFF by default across all 7 profiles.</strong> OFDMA, BSS Coloring, and TWT are disabled universally. Enabling these is the single highest-leverage tuning action for stadium density.</p></div>
+  <table>
+    <tr><th>Feature</th><th>ac</th><th>ax-2.4G</th><th>ax-5G</th><th>ax-6G</th><th>be-2.4G</th><th>be-5G</th><th>be-6G</th><th>Stadium Impact</th></tr>
+    <tr><td><strong>OFDMA</strong></td><td>N/A</td><td>OFF</td><td>OFF</td><td>OFF</td><td>OFF</td><td>OFF</td><td>OFF</td><td>DL ×1.35 / UL ×1.20 when ON</td></tr>
+    <tr><td><strong>BSS Coloring</strong></td><td>N/A</td><td>OFF</td><td>OFF</td><td>OFF</td><td>OFF</td><td>OFF</td><td>OFF</td><td>~20% co-channel interference reduction</td></tr>
+    <tr><td><strong>TWT</strong></td><td>N/A</td><td>OFF</td><td>OFF</td><td>OFF</td><td>OFF</td><td>OFF</td><td>OFF</td><td>IoT/POS orderly channel access</td></tr>
+    <tr><td><strong>MU-MIMO DL</strong></td><td>ON (ac)</td><td>—</td><td>ON</td><td>—</td><td>—</td><td>ON*</td><td>ON*</td><td>×4 DL spatial streams (AP5060)</td></tr>
+    <tr><td><strong>MU-MIMO UL</strong></td><td>N/A</td><td>—</td><td>ON</td><td>—</td><td>—</td><td>ON*</td><td>ON*</td><td>×2 UL spatial streams</td></tr>
+    <tr><td><strong>High Density</strong></td><td>—</td><td>—</td><td>ON</td><td><strong>MISSING</strong></td><td>—</td><td>ON</td><td>ON</td><td>Probe suppression + rate floor</td></tr>
+    <tr><td><strong>MLO</strong></td><td>N/A</td><td>N/A</td><td>N/A</td><td>N/A</td><td>N/A</td><td>—</td><td>—</td><td>Not exposed in any profile — auto-negotiated at firmware</td></tr>
+  </table>
+  <p><em>* MU-MIMO in be-5G / be-6G profiles: listed for AP5020/AP4020/AP4020X only. AP3000 and AP5060 not listed — verify with AP hardware spec before enabling.</em></p>
+  <div class="callout"><p><strong>ax-6G inconsistency:</strong> The 6 GHz band (cleanest spectrum, widest channels) is missing High Density mode in the ax-6G profile. be-6G has it. For stadium density on WiFi 6E APs, audit whether ax-6G probe suppression can be manually enabled — or upgrade profile to be-6G.</p></div>
+
+  <!-- ── 3 — POWER & ADMISSION CONTROL ── -->
+  <h3 id="rad-power">3 — Power, TPC &amp; Admission Control</h3>
+  <table>
+    <tr><th>Parameter</th><th>ac</th><th>ax-2.4G</th><th>ax-5G</th><th>ax-6G</th><th>be-2.4G</th><th>be-5G</th><th>be-6G</th><th>Stadium-Optimal</th></tr>
+    <tr><td><strong>Max TX Power (dBm)</strong></td><td>20</td><td>20</td><td>23</td><td>23</td><td>20</td><td>23</td><td>23</td><td>Lower (17–20 dBm) for denser cells — reduces co-channel reach</td></tr>
+    <tr><td><strong>Min TX Power / Floor (dBm)</strong></td><td>3</td><td>3</td><td>3</td><td>3</td><td>3</td><td>3</td><td>3</td><td>5–8 dBm — prevents TPC from going too low and losing cell</td></tr>
+    <tr><td><strong>SNR Threshold (dB)</strong></td><td>20</td><td>15</td><td>15</td><td>15</td><td>15</td><td>15</td><td>15</td><td>25 dB — tighter boundary forces roaming at cell edge</td></tr>
+    <tr><td><strong>Max Clients/Radio</strong></td><td>100</td><td>100</td><td>100</td><td>100</td><td>100</td><td>100</td><td>100</td><td>Reduce to 50–75 for stadium density — forces earlier roaming</td></tr>
+    <tr><td><strong>Airtime/Client (%)</strong></td><td>0 (off)</td><td>0 (off)</td><td>0 (off)</td><td>0 (off)</td><td>0 (off)</td><td>0 (off)</td><td>0 (off)</td><td>5–10% — enables airtime fairness, prevents single hog</td></tr>
+  </table>
+  <div class="callout-red"><p><strong>SNR threshold regression:</strong> ac profile = 20 dB. All ax/be profiles = 15 dB. This is the <em>wrong direction</em> for stadium density — 15 dB is too permissive. Stadium target is 25 dB to enforce tighter cell boundaries and earlier roaming handoff.</p></div>
+
+  <!-- ── 4 — CLIENT MANAGEMENT ── -->
+  <h3 id="rad-clients">4 — Client Management</h3>
+  <table>
+    <tr><th>Parameter</th><th>Default (all profiles)</th><th>Stadium-Optimal</th><th>Rationale</th></tr>
+    <tr><td><strong>Band Steering</strong></td><td>80/20 Balanced</td><td>Encourage 5GHz</td><td>80/20 allows 80% of clients on 2.4 GHz — kills capacity. Encourage 5GHz aggressively steers capable clients upband.</td></tr>
+    <tr><td><strong>Anchor Period (s)</strong></td><td>60</td><td>30</td><td>Shorter anchor = faster roam trigger for moving fans. 60s too slow for dense venue transitions.</td></tr>
+    <tr><td><strong>Channel Switch Threshold</strong></td><td>0</td><td>Disabled / leave at 0</td><td>Value 0 = channel optimizer never switches when any client connected. In stadium with 50K fans always connected, this effectively locks channels. Set RRM to handle channel via scheduled optimization instead.</td></tr>
+  </table>
+
+  <!-- ── 5 — PHY EFFICIENCY & WMM ── -->
+  <h3 id="rad-phy">5 — PHY Efficiency &amp; WMM QoS</h3>
+  <table>
+    <tr><th>Parameter</th><th>Default</th><th>Stadium Note</th></tr>
+    <tr><td><strong>Short Guard Interval (GI)</strong></td><td>ON (all profiles)</td><td>Keep ON — ~11% throughput gain in clean indoor stadium RF environment</td></tr>
+    <tr><td><strong>A-MPDU Aggregation</strong></td><td>ON (all profiles)</td><td>Keep ON — 60–80% MAC overhead reduction, critical for high-density</td></tr>
+    <tr><td><strong>Beacon Period</strong></td><td>100 TUs (all profiles)</td><td>Keep default — reducing to 50 TUs doubles mgmt overhead. 100 TUs = 102.4ms adequate for stadium.</td></tr>
+  </table>
+  <h4>WMM QoS — Identical IEEE 802.11e Defaults Across All 7 Profiles</h4>
+  <table>
+    <tr><th>Access Category</th><th>CWmin</th><th>CWmax</th><th>AIFS</th><th>TXOP (µs)</th><th>Stadium Note</th></tr>
+    <tr><td>Voice (AC_VO)</td><td>2</td><td>3</td><td>1</td><td>1504</td><td>Protect for Teams/Comms SSID — assign voice-tagged traffic only</td></tr>
+    <tr><td>Video (AC_VI)</td><td>3</td><td>7</td><td>2</td><td>3008</td><td>Fan broadcast / video replay feeds</td></tr>
+    <tr><td>Best Effort (AC_BE)</td><td>4</td><td>15</td><td>3</td><td>0</td><td>General fan traffic baseline</td></tr>
+    <tr><td>Background (AC_BK)</td><td>4</td><td>15</td><td>7</td><td>0</td><td>Lowest priority — OS telemetry, app updates</td></tr>
+  </table>
+
+  <!-- ── 6 — STADIUM ACTION LIST ── -->
+  <h3 id="rad-stadium">6 — Stadium Action List (changes from defaults)</h3>
+  <ol>
+    <li><strong>OFDMA ON</strong> — ax-5G, ax-6G, be-5G, be-6G profiles. DL ×1.35, UL ×1.20 capacity multiplier.</li>
+    <li><strong>BSS Coloring ON</strong> — all ax/be profiles. ~20% co-channel interference reduction. Critical for overlapping cells at Lumen Field density.</li>
+    <li><strong>TWT ON</strong> — be profiles. IoT/POS devices schedule channel access — eliminates contention from non-data wakeups.</li>
+    <li><strong>SNR threshold → 25 dB</strong> — all ax/be profiles (currently 15 dB). Tighter cell boundary = earlier roaming handoff = higher average MCS.</li>
+    <li><strong>Max clients/radio → 50–75</strong> — all profiles (currently 100). Hard ceiling forces load-based roaming earlier.</li>
+    <li><strong>Band Steering → "Encourage 5GHz"</strong> — all profiles (currently 80/20 Balanced which pushes 80% to 2.4 GHz).</li>
+    <li><strong>Airtime fairness → 5–10%</strong> — all profiles (currently 0/off). Prevents legacy client from hogging airtime.</li>
+    <li><strong>Anchor period → 30 s</strong> — all profiles (currently 60 s). Faster roam trigger for moving fans.</li>
+    <li><strong>Max TX Power → 17–20 dBm</strong> — reduce from 23 dBm on 5/6 GHz. Smaller cells = lower co-channel interference = more simultaneous spatial reuse.</li>
+    <li><strong>Add High Density mode to ax-6G</strong> — currently missing (inconsistency vs all other ax/be profiles). Enables probe suppression + high-data-rate admission floor on cleanest band.</li>
+  </ol>
+
+  <!-- ── 7 — SIMULATOR v2 INPUT MAP ── -->
+  <h3 id="rad-simmap">7 — Simulator v2 Input Map — 16 Tunable EP1 Parameters</h3>
+  <p>These are the radio profile parameters that directly drive simulation outputs. Each becomes a slider, toggle, or dropdown in <code>docs/stadium_wifi_simulator_v2.html</code>.</p>
+  <table>
+    <tr><th>#</th><th>EP1 Parameter</th><th>EP1 Location</th><th>Default</th><th>Stadium-Optimal</th><th>Simulator v2 Input</th></tr>
+    <tr><td>1</td><td><strong>OFDMA</strong></td><td>WiFi 6/7 Features tab</td><td>OFF</td><td>ON</td><td>Capacity multiplier toggle: DL ×1.35 / UL ×1.20</td></tr>
+    <tr><td>2</td><td><strong>BSS Coloring</strong></td><td>WiFi 6/7 Features tab</td><td>OFF</td><td>ON</td><td>Co-channel interference reduction factor (~0.80)</td></tr>
+    <tr><td>3</td><td><strong>MU-MIMO (DL/UL)</strong></td><td>WiFi 6/7 Features tab</td><td>ON (5G only)</td><td>ON all bands</td><td>Spatial stream multiplier: DL ×4, UL ×2 (AP5060)</td></tr>
+    <tr><td>4</td><td><strong>TWT</strong></td><td>WiFi 6/7 Features tab</td><td>OFF</td><td>ON (be profiles)</td><td>IoT/POS traffic isolation toggle — removes contention from scheduled devices</td></tr>
+    <tr><td>5</td><td><strong>Max TX Power (dBm)</strong></td><td>Power &amp; TPC</td><td>20–23 dBm</td><td>17–20 dBm</td><td>Cell radius slider → RSSI contour → coverage overlap %</td></tr>
+    <tr><td>6</td><td><strong>Min TX Power / Floor (dBm)</strong></td><td>Power &amp; TPC</td><td>3 dBm</td><td>5–8 dBm</td><td>TPC floor — minimum cell edge guarantee</td></tr>
+    <tr><td>7</td><td><strong>SNR Threshold (dB)</strong></td><td>Admission Control</td><td>15–20 dB</td><td>25 dB</td><td>Admission boundary slider → effective cell radius → clients per AP at given density</td></tr>
+    <tr><td>8</td><td><strong>Max Clients/Radio</strong></td><td>Admission Control</td><td>100</td><td>50–75</td><td>Hard capacity ceiling per radio — hard limit in per-AP load calculation</td></tr>
+    <tr><td>9</td><td><strong>Channel Width (MHz)</strong></td><td>Spectrum / Channel</td><td>80 MHz (5G) · 160 MHz (6G)</td><td>160 MHz (5G) · 320 MHz (6G WiFi 7)</td><td>Raw PHY rate lookup table input (MCS × NSS × BW)</td></tr>
+    <tr><td>10</td><td><strong>Band Steering Mode</strong></td><td>Client Management</td><td>80/20 Balanced</td><td>Encourage 5GHz</td><td>2.4G / 5G / 6G client distribution ratio slider</td></tr>
+    <tr><td>11</td><td><strong>Airtime/Client Threshold (%)</strong></td><td>Admission Control</td><td>0 (off)</td><td>5–10%</td><td>Fairness enforcement toggle — adjusts per-client throughput floor vs ceiling model</td></tr>
+    <tr><td>12</td><td><strong>Anchor Period (s)</strong></td><td>Client Management</td><td>60 s</td><td>30 s</td><td>Roaming aggressiveness → average RSSI distribution (tighter = higher MCS average)</td></tr>
+    <tr><td>13</td><td><strong>Beacon Period (TUs)</strong></td><td>PHY / Timing</td><td>100 TUs</td><td>100 TUs (keep)</td><td>Management frame overhead % of airtime</td></tr>
+    <tr><td>14</td><td><strong>Short Guard Interval</strong></td><td>PHY Efficiency</td><td>ON</td><td>ON (keep)</td><td>GI efficiency multiplier — ~1.11× throughput vs long GI</td></tr>
+    <tr><td>15</td><td><strong>A-MPDU Aggregation</strong></td><td>PHY Efficiency</td><td>ON</td><td>ON (keep)</td><td>Aggregation efficiency factor — 60–80% MAC overhead reduction</td></tr>
+    <tr><td>16</td><td><strong>WMM TXOP per AC (µs)</strong></td><td>WMM QoS</td><td>VO=1504, VI=3008, BE=0, BK=0</td><td>Stadium: VO raised for Teams SSID</td><td>Per-service-class channel hold time → differentiates POS/VIP/Teams/Guest throughput model</td></tr>
+  </table>
+
+  <div class="callout-green">
+    <p><strong>Simulator v2 build note:</strong> Parameters 1–4 (OFDMA, BSS Color, MU-MIMO, TWT) are <em>ON/OFF toggles</em> that apply multiplicative corrections to the base airtime model. Parameters 5–12 are <em>continuous sliders</em> that reshape the capacity curve. Parameters 13–16 are <em>fixed efficiency constants</em> loaded from the selected radio profile. Branch: <code>feature/simulator-v2</code> · File: <code>docs/stadium_wifi_simulator_v2.html</code>.</p>
   </div>
 
 </section>
