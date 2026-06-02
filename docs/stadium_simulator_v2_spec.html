@@ -487,16 +487,64 @@
   <p>These are SSID-level settings from the EP1 Optional Settings panel, separate from the radio profile. They govern legacy rate compatibility, security policy, roaming assistance, QoS enforcement, multicast handling, and client timers. All defaults shown as found in EP1.</p>
 
   <!-- ── 8.1 RADIO AND RATES ── -->
-  <h3 id="opt-rates">8.1 — Radio and Rates (Legacy Mode Compatibility)</h3>
-  <p>Controls which legacy 802.11 protocol generations are allowed to associate. Disabling older modes raises the minimum data rate floor and frees airtime currently consumed by legacy beacon/management frames.</p>
+  <h3 id="opt-rates">8.1 — Radio and Rates (Protocol Generations + Channel Bandwidth)</h3>
+  <p>Two distinct controls in this panel: which legacy 802.11 protocol generations are permitted to associate, and the channel bandwidth per band. Both directly feed the PHY rate lookup table in the simulator.</p>
+
+  <h4 style="font-size:0.9rem;font-weight:700;margin:18px 0 8px;color:#333">Protocol Generation Selection</h4>
   <table>
     <tr><th>Band</th><th>Modes Available</th><th>EP1 Default</th><th>Stadium Target</th><th>Rationale</th></tr>
-    <tr><td>2.4 GHz</td><td>802.11b / 802.11g</td><td>Both enabled</td><td class="warning">Disable 802.11b</td><td>802.11b devices lock the AP into 1–11 Mbps protection mode for all clients. Zero 802.11b devices expected at Lumen Field.</td></tr>
-    <tr><td>5 GHz / 6 GHz</td><td>802.11a</td><td>Enabled</td><td class="warning">Disable 802.11a</td><td>802.11a is 20 MHz / 54 Mbps max. No modern device needs it — enabling it only adds OFDM legacy preamble overhead.</td></tr>
-    <tr><td>2.4 GHz / 5 GHz</td><td>802.11n / 802.11ac / 802.11ax</td><td>All enabled</td><td class="optimal">All enabled</td><td>Keep all HT/VHT/HE generations. Disabling 802.11n would orphan older iPhones/Android still common in fan crowds.</td></tr>
+    <tr><td>2.4 GHz</td><td>802.11b / 802.11g</td><td>Both enabled</td><td class="warning">Disable 802.11b</td><td>802.11b locks AP into 1–11 Mbps protection mode for all clients. Zero 802.11b devices expected at Lumen Field.</td></tr>
+    <tr><td>5 GHz / 6 GHz</td><td>802.11a</td><td>Enabled</td><td class="warning">Disable 802.11a</td><td>802.11a = 20 MHz / 54 Mbps max. No modern device needs it — adds OFDM legacy preamble overhead only.</td></tr>
+    <tr><td>2.4 GHz / 5 GHz</td><td>802.11n / 802.11ac / 802.11ax</td><td>All enabled</td><td class="optimal">All enabled</td><td>Keep all HT/VHT/HE generations. Disabling 802.11n would orphan older iPhones/Android common in fan crowds.</td></tr>
   </table>
+
+  <h4 style="font-size:0.9rem;font-weight:700;margin:22px 0 8px;color:#333">Channel Bandwidth Selection</h4>
+  <p>Set per band in the Radio and Rates panel. Controls the maximum channel width the AP will use — directly sets the PHY rate ceiling. Narrower width = more non-overlapping channels available but lower peak throughput per channel.</p>
+  <table>
+    <tr><th>Band</th><th>Widths Available</th><th>EP1 Default</th><th>Stadium Target</th><th>PHY Rate Impact</th><th>Non-Overlapping Channels</th></tr>
+    <tr>
+      <td><strong>2.4 GHz</strong></td>
+      <td>20 MHz · 40 MHz</td>
+      <td>20 MHz</td>
+      <td class="optimal">20 MHz (keep)</td>
+      <td>40 MHz doubles PHY rate but leaves only 1 non-overlapping channel in 2.4 GHz — causes massive co-channel at Lumen Field density. 20 MHz gives 3 channels (1/6/11).</td>
+      <td>20 MHz = 3 · 40 MHz = 1</td>
+    </tr>
+    <tr>
+      <td><strong>5 GHz</strong></td>
+      <td>20 · 40 · 80 · 160 MHz</td>
+      <td>80 MHz</td>
+      <td class="warning">160 MHz (WiFi 6/7 APs)</td>
+      <td>160 MHz = 2× PHY rate vs 80 MHz. 5 GHz has 25 × 20 MHz channels (U-NII-1/2/2e/3) — enough non-overlapping 160 MHz channels for dense AP deployment with careful planning.</td>
+      <td>80 MHz ≈ 6 · 160 MHz ≈ 3</td>
+    </tr>
+    <tr>
+      <td><strong>6 GHz</strong></td>
+      <td>20 · 40 · 80 · 160 · 320 MHz</td>
+      <td>80 MHz</td>
+      <td class="warning">320 MHz (WiFi 7) · 160 MHz (WiFi 6E)</td>
+      <td>6 GHz has 59 × 20 MHz channels (U-NII-5 through U-NII-8) — the widest clean spectrum. 320 MHz = 4× PHY rate vs 80 MHz. 7 non-overlapping 320 MHz channels available — viable for stadium with 100+ APs sharing the band.</td>
+      <td>160 MHz = 7 · 320 MHz = 3–4</td>
+    </tr>
+  </table>
+
+  <div class="callout">
+    <p><strong>PHY rate lookup — how bandwidth feeds the simulator:</strong> PHY rate (Mbps) = MCS index × spatial streams × coding rate × subcarrier count × bandwidth multiplier. The channel width selection here is the bandwidth multiplier input. Example: MCS 11, 4 SS, 160 MHz, ax-5G = 4804 Mbps PHY rate (theoretical ceiling before airtime sharing).</p>
+  </div>
+
+  <h4 style="font-size:0.9rem;font-weight:700;margin:22px 0 8px;color:#333">Bandwidth × PHY Rate Reference (per spatial stream, 802.11ax/be)</h4>
+  <table>
+    <tr><th>Channel Width</th><th>MCS 7 (256-QAM 5/6)</th><th>MCS 9 (1024-QAM 5/6)</th><th>MCS 11 (1024-QAM 5/6 2×GI)</th><th>MCS 13 (4096-QAM — WiFi 7 only)</th></tr>
+    <tr><td><strong>20 MHz</strong></td><td>72.1 Mbps</td><td>96.1 Mbps</td><td>143.4 Mbps</td><td>172.1 Mbps</td></tr>
+    <tr><td><strong>40 MHz</strong></td><td>150 Mbps</td><td>200 Mbps</td><td>286.8 Mbps</td><td>344.3 Mbps</td></tr>
+    <tr><td><strong>80 MHz</strong></td><td>325.0 Mbps</td><td>433.3 Mbps</td><td>600.4 Mbps</td><td>720.6 Mbps</td></tr>
+    <tr><td><strong>160 MHz</strong></td><td>650.0 Mbps</td><td>866.7 Mbps</td><td>1200.9 Mbps</td><td>1441.2 Mbps</td></tr>
+    <tr><td><strong>320 MHz</strong></td><td>1300.0 Mbps</td><td>1733.4 Mbps</td><td>2401.8 Mbps</td><td>2882.4 Mbps</td></tr>
+  </table>
+  <p style="font-size:13px;color:#666;font-style:italic">Per stream (NSS=1), short GI. Multiply by NSS count. These are PHY rate ceilings — divide by ~2.5–3× for real throughput after airtime contention, CSMA overhead, and retransmissions.</p>
+
   <div class="callout-red">
-    <p><strong>Simulator impact:</strong> Disabling 802.11b removes legacy protection overhead — models as airtime efficiency +8–15% on 2.4 GHz. Add a "Legacy Mode" toggle to v2 that enables/disables 802.11b/g and shows the airtime delta.</p>
+    <p><strong>Simulator impact — two new inputs:</strong> (1) <strong>Legacy Mode toggle</strong> — disabling 802.11b models as +8–15% airtime efficiency on 2.4 GHz. (2) <strong>Channel Width selector per band</strong> — drives the PHY rate lookup table. Both are missing from Simulator v1 and must be in v2.</p>
   </div>
 
   <!-- ── 8.2 DoS PREVENTION ── -->
