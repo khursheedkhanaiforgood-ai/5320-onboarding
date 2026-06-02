@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stadium Simulator v2 — I/O Spec · EP1 Radio Profile Parameter Map</title>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Source+Code+Pro:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Libre Baskerville', Georgia, serif;
+    background: #fff;
+    color: #1a1a1a;
+    font-size: 17px;
+    line-height: 1.75;
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 48px 32px 120px;
+  }
+  header { border-bottom: 3px solid #1a1a1a; padding-bottom: 20px; margin-bottom: 12px; }
+  .dateline { font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: #666; margin-bottom: 8px; }
+  h1 { font-size: 2.2rem; font-weight: 700; line-height: 1.15; margin-bottom: 10px; }
+  .deck { font-size: 1.05rem; font-style: italic; color: #444; border-left: 3px solid #1a1a1a; padding-left: 16px; margin-top: 10px; }
+
+  nav#toc {
+    position: sticky; top: 0; background: #fff; border-bottom: 1px solid #ddd;
+    padding: 10px 0; margin: 20px 0 40px; z-index: 100;
+    font-size: 12px; letter-spacing: 0.05em; display: flex; flex-wrap: wrap; gap: 4px 0;
+  }
+  nav#toc a { color: #1a1a1a; text-decoration: none; margin-right: 16px; text-transform: uppercase; font-weight: 700; border-bottom: 2px solid transparent; padding-bottom: 2px; transition: border-color 0.15s; }
+  nav#toc a:hover { border-color: #1a1a1a; }
+
+  section { margin-bottom: 56px; }
+  h2 { font-size: 1.05rem; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 700; border-top: 2px solid #1a1a1a; padding-top: 14px; margin-bottom: 20px; }
+  h3 { font-size: 1rem; font-weight: 700; margin: 28px 0 10px; }
+  p { margin-bottom: 14px; }
+  ul, ol { margin: 10px 0 16px 24px; }
+  li { margin-bottom: 6px; }
+
+  code { font-family: 'Source Code Pro', monospace; font-size: 14px; background: #f5f5f5; padding: 1px 5px; border-radius: 3px; color: #c7254e; }
+  pre { font-family: 'Source Code Pro', monospace; font-size: 13px; background: #f8f8f8; border: 1px solid #e0e0e0; border-left: 4px solid #1a1a1a; padding: 16px 18px; overflow-x: auto; margin: 14px 0 20px; line-height: 1.55; }
+
+  table { width: 100%; border-collapse: collapse; margin: 16px 0 24px; font-size: 14px; }
+  th { background: #1a1a1a; color: #fff; text-align: left; padding: 9px 12px; font-size: 11px; letter-spacing: 0.07em; text-transform: uppercase; }
+  td { padding: 9px 12px; border-bottom: 1px solid #e8e8e8; vertical-align: top; }
+  tr:nth-child(even) td { background: #fafafa; }
+  td.param { font-family: 'Source Code Pro', monospace; font-size: 13px; color: #1a1a1a; font-weight: 600; }
+  td.optimal { color: #155724; font-weight: 700; }
+  td.warning { color: #721c24; font-weight: 700; }
+
+  .callout { background: #fffbf0; border: 1px solid #e8d5a3; border-left: 5px solid #c9973a; padding: 16px 20px; margin: 18px 0; border-radius: 2px; }
+  .callout-red { background: #fff5f5; border: 1px solid #f5c6cb; border-left: 5px solid #c0392b; padding: 16px 20px; margin: 18px 0; border-radius: 2px; }
+  .callout-blue { background: #f0f7ff; border: 1px solid #b8d4f0; border-left: 5px solid #1a6fba; padding: 16px 20px; margin: 18px 0; border-radius: 2px; }
+  .callout-green { background: #f0fff4; border: 1px solid #a8dfb8; border-left: 5px solid #1a7a3a; padding: 16px 20px; margin: 18px 0; border-radius: 2px; }
+  .callout p:last-child, .callout-red p:last-child, .callout-blue p:last-child, .callout-green p:last-child { margin-bottom: 0; }
+
+  .badge { display: inline-block; font-family: 'Source Code Pro', monospace; font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; padding: 2px 8px; border-radius: 3px; margin-right: 4px; vertical-align: middle; }
+  .badge-toggle { background: #dbeafe; color: #1e40af; border: 1px solid #93c5fd; }
+  .badge-slider { background: #dcfce7; color: #166534; border: 1px solid #86efac; }
+  .badge-const  { background: #f3f4f6; color: #374151; border: 1px solid #d1d5db; }
+  .badge-off    { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
+  .badge-on     { background: #d1fae5; color: #065f46; border: 1px solid #6ee7b7; }
+
+  /* ── KNOB CARDS ── */
+  .knob-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 20px 0; }
+  .knob-card {
+    border: 1px solid #e0e0e0;
+    border-left: 5px solid #b45309;
+    padding: 16px 20px;
+    border-radius: 2px;
+    background: #fffbf0;
+  }
+  .knob-card.toggle  { border-left-color: #1d4ed8; background: #eff6ff; }
+  .knob-card.slider  { border-left-color: #059669; background: #f0fdf4; }
+  .knob-card.const   { border-left-color: #6b7280; background: #f9fafb; }
+  .knob-number { font-family: 'Source Code Pro', monospace; font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #888; margin-bottom: 4px; }
+  .knob-name { font-weight: 700; font-size: 1rem; margin-bottom: 4px; }
+  .knob-default { font-family: 'Source Code Pro', monospace; font-size: 12px; color: #666; margin-bottom: 4px; }
+  .knob-target { font-family: 'Source Code Pro', monospace; font-size: 12px; color: #155724; font-weight: 600; margin-bottom: 6px; }
+  .knob-effect { font-size: 14px; color: #333; }
+
+  .io-banner {
+    background: #1a1a1a;
+    color: #fff;
+    padding: 28px 32px;
+    margin: 32px 0;
+    border-radius: 4px;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 20px;
+    align-items: center;
+  }
+  .io-banner .io-col { }
+  .io-banner .io-label { font-family: 'Source Code Pro', monospace; font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: #888; margin-bottom: 8px; }
+  .io-banner .io-items { font-size: 14px; line-height: 2; }
+  .io-banner .io-arrow { font-size: 2.5rem; color: #b45309; text-align: center; }
+
+  footer { border-top: 1px solid #ccc; padding-top: 20px; font-size: 13px; color: #888; font-style: italic; margin-top: 60px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="dateline">June 2, 2026 &nbsp;·&nbsp; FIFA World Cup 2026 Seattle &nbsp;·&nbsp; Stadium WiFi Simulator v2 Design Specification</div>
+  <h1>Stadium Simulator v2 — I/O Spec</h1>
+  <p class="deck">16 tunable EP1 radio profile parameters. 7 profiles across 5 bands. Every knob that drives capacity, coverage, and QoE at Lumen Field — mapped from EP1 to Simulator v2 inputs. This is the authoritative design spec for <code>docs/stadium_wifi_simulator_v2.html</code>.</p>
+</header>
+
+<nav id="toc">
+  <a href="#io-model">I/O Model</a>
+  <a href="#profiles">7 Profiles</a>
+  <a href="#toggles">Toggles (4)</a>
+  <a href="#sliders">Sliders (8)</a>
+  <a href="#constants">Constants (4)</a>
+  <a href="#qoe">QoE Outputs</a>
+  <a href="#stadium-deltas">Stadium Deltas</a>
+  <a href="#master-table">Master Table</a>
+</nav>
+
+<!-- ── I/O MODEL ── -->
+<section id="io-model">
+  <h2>I/O Model — What Goes In, What Comes Out</h2>
+
+  <div class="io-banner">
+    <div class="io-col">
+      <div class="io-label">Inputs — EP1 Radio Profile Parameters</div>
+      <div class="io-items">
+        4 Feature Toggles (OFDMA, BSS Color, MU-MIMO, TWT)<br>
+        8 Continuous Sliders (Power, SNR, Clients, BW, ...)<br>
+        4 Efficiency Constants (GI, A-MPDU, Beacon, WMM)<br>
+        Fan count · App mix · Service class · Time scrubber
+      </div>
+    </div>
+    <div class="io-arrow">→</div>
+    <div class="io-col">
+      <div class="io-label">Outputs — QoE at Lumen Field</div>
+      <div class="io-items">
+        Throughput per client (Mbps) by service class<br>
+        Capacity ceiling (concurrent sessions)<br>
+        Airtime utilisation % per band<br>
+        Cell coverage contour / RSSI heatmap<br>
+        Degradation level (0–4) under load<br>
+        SLA pass/fail per class (POS / VIP / Teams / Guest)
+      </div>
+    </div>
+  </div>
+
+  <div class="callout-blue">
+    <p><strong>Three input tiers:</strong> <span class="badge badge-toggle">Toggle</span> parameters apply a multiplicative correction factor to the base airtime model. <span class="badge badge-slider">Slider</span> parameters reshape the capacity curve continuously. <span class="badge badge-const">Constant</span> parameters are fixed efficiency multipliers loaded from the selected radio profile — change them only when swapping AP hardware.</p>
+  </div>
+</section>
+
+<!-- ── 7 PROFILES ── -->
+<section id="profiles">
+  <h2>The 7 EP1 Radio Profiles</h2>
+  <p>Source: EP1 Radio Configuration tab, studied June 2 2026. All profiles are defaults — every WiFi 6/7 differentiating feature is <strong>OFF</strong> out of the box.</p>
+
+  <table>
+    <tr><th>#</th><th>Profile Name</th><th>Standard</th><th>Band</th><th>Max BW</th><th>Simulator Role</th></tr>
+    <tr><td>1</td><td class="param">AP150W-11ac-Profile</td><td>802.11ac (WiFi 5)</td><td>5 GHz</td><td>80 MHz</td><td>Legacy baseline — no OFDMA/BSS Color</td></tr>
+    <tr><td>2</td><td class="param">radio_ng_11ax-2g</td><td>802.11ax (WiFi 6)</td><td>2.4 GHz</td><td>40 MHz</td><td>HE on legacy band — low-rate fallback</td></tr>
+    <tr><td>3</td><td class="param">radio_ng_11ax-5g</td><td>802.11ax (WiFi 6)</td><td>5 GHz</td><td>80 MHz</td><td>Primary capacity band — OFDMA + MU-MIMO</td></tr>
+    <tr><td>4</td><td class="param">radio_ng_11ax-6g</td><td>802.11ax (WiFi 6E)</td><td>6 GHz</td><td>160 MHz</td><td>Clean spectrum — High Density mode missing (gap)</td></tr>
+    <tr><td>5</td><td class="param">radio_11be-2g</td><td>802.11be (WiFi 7)</td><td>2.4 GHz</td><td>40 MHz</td><td>EHT legacy band — IoT/POS fallback with TWT</td></tr>
+    <tr><td>6</td><td class="param">radio_11be-5g</td><td>802.11be (WiFi 7)</td><td>5 GHz</td><td>160 MHz</td><td>High-density 5 GHz — EHT MU-MIMO + MLO leg</td></tr>
+    <tr><td>7</td><td class="param">radio_11be-6g</td><td>802.11be (WiFi 7)</td><td>6 GHz</td><td>320 MHz</td><td>Maximum throughput — 320MHz-1 or 320MHz-2 variant</td></tr>
+  </table>
+
+  <div class="callout">
+    <p><strong>320 MHz (be-6G only):</strong> Two channel variants — <code>320MHz-1</code> lower 6 GHz block (5945–6265 MHz) and <code>320MHz-2</code> upper block (6265–6585 MHz). WiFi 7 only. 4× the PHY rate vs 80 MHz. Requires LPI (Low Power Indoor) — correct for Lumen Field, no AFC needed.</p>
+  </div>
+
+  <div class="callout-red">
+    <p><strong>Critical gap — ax-6G missing High Density mode:</strong> ax-5G, be-5G, and be-6G all have High Density mode (probe suppression + rate floor). ax-6G does not. 6 GHz is the cleanest band at Lumen Field. Audit whether probe suppression can be manually enabled on ax-6G, or migrate to be-6G profile.</p>
+  </div>
+</section>
+
+<!-- ── TOGGLES ── -->
+<section id="toggles">
+  <h2>Toggles — 4 Multiplicative Correction Factors</h2>
+  <p>Each toggle is ON/OFF in EP1. When ON, it applies a multiplier to the base airtime calculation in the simulator.</p>
+
+  <div class="knob-grid">
+
+    <div class="knob-card toggle">
+      <div class="knob-number">Toggle 1</div>
+      <div class="knob-name">OFDMA</div>
+      <div class="knob-default">Default: <span class="badge badge-off">OFF</span> — all 6 ax/be profiles</div>
+      <div class="knob-target">Stadium: ON</div>
+      <div class="knob-effect">Simulator multiplier: <strong>DL ×1.35 / UL ×1.20</strong>. Orthogonal Frequency Division Multiple Access — lets one AP serve multiple clients per TXOP by splitting subcarriers. Most impactful single toggle for dense uplink (fan photo/video uploads).</div>
+    </div>
+
+    <div class="knob-card toggle">
+      <div class="knob-number">Toggle 2</div>
+      <div class="knob-name">BSS Coloring</div>
+      <div class="knob-default">Default: <span class="badge badge-off">OFF</span> — all 6 ax/be profiles</div>
+      <div class="knob-target">Stadium: ON</div>
+      <div class="knob-effect">Simulator multiplier: <strong>co-channel interference ×0.80</strong> (20% reduction). Each AP marks frames with a colour ID — overlapping-cell clients suppress CCA deferral on other-colour transmissions. Critical for Lumen Field where 100+ APs share the same channels.</div>
+    </div>
+
+    <div class="knob-card toggle">
+      <div class="knob-number">Toggle 3</div>
+      <div class="knob-name">MU-MIMO (DL + UL)</div>
+      <div class="knob-default">Default: DL ON (5G only) / UL ON (5G only)</div>
+      <div class="knob-target">Stadium: ON all bands (verify AP SKU)</div>
+      <div class="knob-effect">Simulator multiplier: <strong>DL ×4 / UL ×2 spatial streams</strong> (AP5060). Multi-User MIMO — AP transmits to multiple clients simultaneously via beamforming. be-5G/be-6G support listed for AP5020/AP4020/AP4020X only — confirm AP5060 SKU support before enabling.</div>
+    </div>
+
+    <div class="knob-card toggle">
+      <div class="knob-number">Toggle 4</div>
+      <div class="knob-name">TWT (Target Wake Time)</div>
+      <div class="knob-default">Default: <span class="badge badge-off">OFF</span> — all 6 ax/be profiles</div>
+      <div class="knob-target">Stadium: ON (be profiles, POS/IoT SSIDs)</div>
+      <div class="knob-effect">Simulator effect: <strong>removes POS/IoT contention from shared airtime pool</strong>. AP schedules wake windows for POS terminals and IoT sensors — they only contend for the channel at their assigned slot. Frees unscheduled airtime for fan traffic.</div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ── SLIDERS ── -->
+<section id="sliders">
+  <h2>Sliders — 8 Continuous Parameters</h2>
+  <p>These reshape the capacity curve. Each becomes a range slider in the simulator UI, with a live recalculation on every drag.</p>
+
+  <div class="knob-grid">
+
+    <div class="knob-card slider">
+      <div class="knob-number">Slider 1</div>
+      <div class="knob-name">Max TX Power (dBm)</div>
+      <div class="knob-default">Default: 20 dBm (2.4G) · 23 dBm (5G/6G)</div>
+      <div class="knob-target">Stadium: 17–20 dBm on 5/6 GHz</div>
+      <div class="knob-effect">Drives <strong>cell radius → RSSI contour → spatial reuse count</strong>. Reducing TX power shrinks cells, enables more simultaneous non-interfering transmissions. Primary lever for per-AP client density. Range: 3–30 dBm.</div>
+    </div>
+
+    <div class="knob-card slider">
+      <div class="knob-number">Slider 2</div>
+      <div class="knob-name">Min TX Power / TPC Floor (dBm)</div>
+      <div class="knob-default">Default: 3 dBm</div>
+      <div class="knob-target">Stadium: 5–8 dBm</div>
+      <div class="knob-effect">Prevents TPC from collapsing the cell below minimum coverage. Sets the <strong>guaranteed coverage floor</strong> in the simulator's link budget calculation. Range: 3–20 dBm.</div>
+    </div>
+
+    <div class="knob-card slider">
+      <div class="knob-number">Slider 3</div>
+      <div class="knob-name">SNR Threshold (dB)</div>
+      <div class="knob-default">Default: <span style="color:#721c24;font-weight:700">15 dB (ax/be) · 20 dB (ac)</span></div>
+      <div class="knob-target">Stadium: 25 dB</div>
+      <div class="knob-effect">Admission control boundary — clients below this SNR are rejected. Drives <strong>effective cell size and average MCS index</strong> in the simulator. Raising from 15 → 25 dB forces earlier roaming, raises average MCS, increases per-client throughput at the cost of tighter coverage. Range: 10–35 dB.</div>
+    </div>
+
+    <div class="knob-card slider">
+      <div class="knob-number">Slider 4</div>
+      <div class="knob-name">Max Clients per Radio</div>
+      <div class="knob-default">Default: 100</div>
+      <div class="knob-target">Stadium: 50–75</div>
+      <div class="knob-effect">Hard capacity ceiling. When reached, AP rejects new associations — forces load-based roaming. <strong>Primary input to per-AP load calculation and system-wide capacity ceiling</strong>. Range: 10–200.</div>
+    </div>
+
+    <div class="knob-card slider">
+      <div class="knob-number">Slider 5</div>
+      <div class="knob-name">Channel Width (MHz)</div>
+      <div class="knob-default">Default: 80 MHz (5G) · 160 MHz (6G)</div>
+      <div class="knob-target">Stadium: 160 MHz (5G) · 320 MHz (6G, WiFi 7)</div>
+      <div class="knob-effect">Input to the <strong>raw PHY rate lookup table</strong> (MCS × NSS × BW). 160 MHz doubles PHY rate vs 80 MHz. 320 MHz doubles again — WiFi 7 only on be-6G. Wider channels also mean fewer non-overlapping channels available; simulator must account for channel reuse penalty.</div>
+    </div>
+
+    <div class="knob-card slider">
+      <div class="knob-number">Slider 6</div>
+      <div class="knob-name">Band Steering Mode</div>
+      <div class="knob-default">Default: 80/20 Balanced (80% to 2.4 GHz)</div>
+      <div class="knob-target">Stadium: Encourage 5 GHz</div>
+      <div class="knob-effect">Controls <strong>2.4G / 5G / 6G client distribution ratio</strong> — the three independent airtime pools in the multi-band model. 80/20 Balanced is catastrophic for capacity: it steers 80% of clients to the lowest-capacity band. Encourage 5GHz inverts that ratio.</div>
+    </div>
+
+    <div class="knob-card slider">
+      <div class="knob-number">Slider 7</div>
+      <div class="knob-name">Airtime per Client Threshold (%)</div>
+      <div class="knob-default">Default: 0 (disabled)</div>
+      <div class="knob-target">Stadium: 5–10%</div>
+      <div class="knob-effect">Airtime fairness enforcement. When enabled, no single client can consume more than this % of total radio airtime — prevents legacy 802.11g clients from hogging shared airtime. <strong>Adjusts per-client floor vs ceiling model</strong> in the simulator. Range: 0–50%.</div>
+    </div>
+
+    <div class="knob-card slider">
+      <div class="knob-number">Slider 8</div>
+      <div class="knob-name">Anchor Period (s)</div>
+      <div class="knob-default">Default: 60 s</div>
+      <div class="knob-target">Stadium: 30 s</div>
+      <div class="knob-effect">Roaming aggressiveness — how long a client can stay associated before being steered. Shorter anchor = <strong>tighter RSSI distribution across the cell</strong> = higher average MCS index. Feeds the MCS distribution curve in the simulator. Range: 5–300 s.</div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ── CONSTANTS ── -->
+<section id="constants">
+  <h2>Constants — 4 Efficiency Multipliers</h2>
+  <p>These are identical across all 7 profiles (or have one recommended setting). Load them from the profile at simulator startup — change only when swapping AP hardware.</p>
+
+  <table>
+    <tr><th>#</th><th>Parameter</th><th>Value (all profiles)</th><th>Simulator Effect</th><th>Action</th></tr>
+    <tr>
+      <td>C1</td>
+      <td class="param">Short Guard Interval (GI)</td>
+      <td><span class="badge badge-on">ON</span></td>
+      <td>GI efficiency multiplier <strong>×1.111</strong> vs long GI (~11% throughput gain). Indoor stadium RF has low delay spread — short GI is always valid.</td>
+      <td>Keep ON. Fixed constant in model.</td>
+    </tr>
+    <tr>
+      <td>C2</td>
+      <td class="param">A-MPDU Aggregation</td>
+      <td><span class="badge badge-on">ON</span></td>
+      <td>Aggregation efficiency factor — reduces MAC overhead by <strong>60–80%</strong>. Single most impactful PHY efficiency parameter for bulk data. Critical at stadium density.</td>
+      <td>Keep ON. Fixed constant in model.</td>
+    </tr>
+    <tr>
+      <td>C3</td>
+      <td class="param">Beacon Period (TUs)</td>
+      <td>100 TUs = 102.4 ms</td>
+      <td>Management frame overhead as % of airtime. 100 TUs ≈ 0.5–1% overhead at stadium density — acceptable. Reducing to 50 TUs doubles overhead. Keep at default.</td>
+      <td>Keep at 100 TUs. Fixed constant in model.</td>
+    </tr>
+    <tr>
+      <td>C4</td>
+      <td class="param">WMM TXOP per AC (µs)</td>
+      <td>VO=1504 · VI=3008 · BE=0 · BK=0</td>
+      <td>Per-service-class channel hold time — differentiates POS / VIP / Teams / Guest throughput model. Voice TXOP (1504 µs) protects Teams/Comms SSID. Raise VO for stadium comms if Teams traffic degrades.</td>
+      <td>Load from profile. Raise VO on Teams SSID.</td>
+    </tr>
+  </table>
+</section>
+
+<!-- ── QoE OUTPUTS ── -->
+<section id="qoe">
+  <h2>QoE Outputs — What the Simulator Must Compute</h2>
+  <p>Each output is computed from the input parameter set above. This is the definitive output contract for v2.</p>
+
+  <table>
+    <tr><th>Output</th><th>Unit</th><th>Primary Inputs That Drive It</th><th>SLA Target (Stadium)</th></tr>
+    <tr><td><strong>Throughput per client</strong></td><td>Mbps</td><td>OFDMA, MU-MIMO, Channel Width, SNR threshold, A-MPDU, Short GI</td><td>POS ≥10 · VIP ≥25 · Teams ≥5 · Guest ≥2 Mbps</td></tr>
+    <tr><td><strong>Capacity ceiling</strong></td><td>Concurrent sessions</td><td>Max Clients/Radio, AP count, Band Steering, Max TX Power</td><td>≥22,464 simultaneous (30% of 72K fans × 1 device)</td></tr>
+    <tr><td><strong>Airtime utilisation %</strong></td><td>% per band</td><td>OFDMA, Max Clients, Airtime/Client threshold, Beacon period, WMM TXOP</td><td>&lt;70% sustained; &lt;85% peak (kick-off)</td></tr>
+    <tr><td><strong>Average RSSI at cell edge</strong></td><td>dBm</td><td>Max TX Power, Min TX Power, SNR threshold, Anchor period</td><td>≥ −67 dBm at seating edge</td></tr>
+    <tr><td><strong>Average MCS index</strong></td><td>MCS 0–13</td><td>SNR threshold, Anchor period, Band Steering, BSS Coloring</td><td>MCS ≥ 7 average across all clients</td></tr>
+    <tr><td><strong>Degradation level</strong></td><td>Level 0–4</td><td>Capacity ceiling vs concurrent sessions at time T</td><td>Level 0–1 during normal play; Level 2 max at kick-off burst</td></tr>
+    <tr><td><strong>SLA pass/fail per class</strong></td><td>Pass / Warn / Fail</td><td>Throughput per client vs SLA target above</td><td>POS must be Pass at all times (payment critical)</td></tr>
+  </table>
+
+  <div class="callout-green">
+    <p><strong>Service class differentiation:</strong> POS terminals (VLAN 50) and VIP (VLAN 40) must maintain SLA even at degradation Level 3. The simulator should model WMM QoS priority and PPSK/802.1X VLAN segmentation as separate airtime pools — not a single shared pool — to show how segmentation protects critical traffic under load.</p>
+  </div>
+</section>
+
+<!-- ── STADIUM DELTAS ── -->
+<section id="stadium-deltas">
+  <h2>Stadium Deltas — Default vs Lumen Field Target</h2>
+  <p>These are the 10 changes from EP1 defaults to stadium-optimal. The simulator should show a "Default" preset and a "Lumen Field" preset that applies all of these simultaneously.</p>
+
+  <table>
+    <tr><th>#</th><th>Parameter</th><th>EP1 Default</th><th>Lumen Field Target</th><th>Capacity Impact</th></tr>
+    <tr><td>1</td><td>OFDMA</td><td class="warning">OFF</td><td class="optimal">ON</td><td>DL ×1.35 / UL ×1.20</td></tr>
+    <tr><td>2</td><td>BSS Coloring</td><td class="warning">OFF</td><td class="optimal">ON</td><td>CCI −20%</td></tr>
+    <tr><td>3</td><td>TWT</td><td class="warning">OFF</td><td class="optimal">ON (be profiles)</td><td>POS/IoT airtime freed</td></tr>
+    <tr><td>4</td><td>SNR Threshold</td><td class="warning">15 dB (ax/be)</td><td class="optimal">25 dB</td><td>MCS avg +2–3, tighter cell</td></tr>
+    <tr><td>5</td><td>Max Clients/Radio</td><td class="warning">100</td><td class="optimal">50–75</td><td>Earlier roaming, load balance</td></tr>
+    <tr><td>6</td><td>Band Steering</td><td class="warning">80/20 Balanced</td><td class="optimal">Encourage 5 GHz</td><td>5G/6G utilisation +60%</td></tr>
+    <tr><td>7</td><td>Airtime Fairness</td><td class="warning">0% (off)</td><td class="optimal">5–10%</td><td>Legacy client hog prevented</td></tr>
+    <tr><td>8</td><td>Anchor Period</td><td class="warning">60 s</td><td class="optimal">30 s</td><td>RSSI tighter, MCS +1 avg</td></tr>
+    <tr><td>9</td><td>Max TX Power (5/6G)</td><td class="warning">23 dBm</td><td class="optimal">17–20 dBm</td><td>Spatial reuse +30–40%</td></tr>
+    <tr><td>10</td><td>ax-6G High Density</td><td class="warning">MISSING</td><td class="optimal">Add (gap fix)</td><td>Probe suppression on cleanest band</td></tr>
+  </table>
+</section>
+
+<!-- ── MASTER TABLE ── -->
+<section id="master-table">
+  <h2>Master Table — All 16 Parameters</h2>
+  <p>The complete reference. Every row is an input in the simulator. Type column determines the UI control type in v2.</p>
+
+  <table>
+    <tr><th>#</th><th>Parameter</th><th>Type</th><th>EP1 Location</th><th>Default</th><th>Stadium Target</th><th>Simulator v2 Input</th></tr>
+    <tr>
+      <td>1</td><td class="param">OFDMA</td>
+      <td><span class="badge badge-toggle">Toggle</span></td>
+      <td>WiFi 6/7 Features</td><td>OFF</td><td class="optimal">ON</td>
+      <td>Capacity multiplier: DL ×1.35 / UL ×1.20</td>
+    </tr>
+    <tr>
+      <td>2</td><td class="param">BSS Coloring</td>
+      <td><span class="badge badge-toggle">Toggle</span></td>
+      <td>WiFi 6/7 Features</td><td>OFF</td><td class="optimal">ON</td>
+      <td>CCI reduction factor ×0.80</td>
+    </tr>
+    <tr>
+      <td>3</td><td class="param">MU-MIMO DL/UL</td>
+      <td><span class="badge badge-toggle">Toggle</span></td>
+      <td>WiFi 6/7 Features</td><td>ON (5G only)</td><td class="optimal">ON all bands</td>
+      <td>Spatial stream multiplier: DL ×4, UL ×2</td>
+    </tr>
+    <tr>
+      <td>4</td><td class="param">TWT</td>
+      <td><span class="badge badge-toggle">Toggle</span></td>
+      <td>WiFi 6/7 Features</td><td>OFF</td><td class="optimal">ON (be)</td>
+      <td>POS/IoT airtime isolation toggle</td>
+    </tr>
+    <tr>
+      <td>5</td><td class="param">Max TX Power (dBm)</td>
+      <td><span class="badge badge-slider">Slider</span></td>
+      <td>Power &amp; TPC</td><td>20–23 dBm</td><td class="optimal">17–20 dBm</td>
+      <td>Cell radius → RSSI contour → spatial reuse count</td>
+    </tr>
+    <tr>
+      <td>6</td><td class="param">Min TX Power (dBm)</td>
+      <td><span class="badge badge-slider">Slider</span></td>
+      <td>Power &amp; TPC</td><td>3 dBm</td><td class="optimal">5–8 dBm</td>
+      <td>TPC floor — guaranteed coverage minimum</td>
+    </tr>
+    <tr>
+      <td>7</td><td class="param">SNR Threshold (dB)</td>
+      <td><span class="badge badge-slider">Slider</span></td>
+      <td>Admission Control</td><td class="warning">15 dB (ax/be)</td><td class="optimal">25 dB</td>
+      <td>Cell boundary slider → clients/AP → average MCS</td>
+    </tr>
+    <tr>
+      <td>8</td><td class="param">Max Clients/Radio</td>
+      <td><span class="badge badge-slider">Slider</span></td>
+      <td>Admission Control</td><td>100</td><td class="optimal">50–75</td>
+      <td>Hard capacity ceiling per radio</td>
+    </tr>
+    <tr>
+      <td>9</td><td class="param">Channel Width (MHz)</td>
+      <td><span class="badge badge-slider">Slider</span></td>
+      <td>Spectrum / Channel</td><td>80 (5G) · 160 (6G)</td><td class="optimal">160 (5G) · 320 (6G)</td>
+      <td>PHY rate lookup (MCS × NSS × BW table)</td>
+    </tr>
+    <tr>
+      <td>10</td><td class="param">Band Steering Mode</td>
+      <td><span class="badge badge-slider">Slider</span></td>
+      <td>Client Management</td><td class="warning">80/20 Balanced</td><td class="optimal">Encourage 5G</td>
+      <td>2.4G / 5G / 6G client distribution ratio</td>
+    </tr>
+    <tr>
+      <td>11</td><td class="param">Airtime/Client (%)</td>
+      <td><span class="badge badge-slider">Slider</span></td>
+      <td>Admission Control</td><td>0 (off)</td><td class="optimal">5–10%</td>
+      <td>Fairness enforcement → per-client floor/ceiling</td>
+    </tr>
+    <tr>
+      <td>12</td><td class="param">Anchor Period (s)</td>
+      <td><span class="badge badge-slider">Slider</span></td>
+      <td>Client Management</td><td>60 s</td><td class="optimal">30 s</td>
+      <td>Roaming aggressiveness → RSSI distribution → MCS avg</td>
+    </tr>
+    <tr>
+      <td>13</td><td class="param">Beacon Period (TUs)</td>
+      <td><span class="badge badge-const">Constant</span></td>
+      <td>PHY / Timing</td><td>100 TUs</td><td>100 TUs (keep)</td>
+      <td>Management frame overhead % of airtime</td>
+    </tr>
+    <tr>
+      <td>14</td><td class="param">Short Guard Interval</td>
+      <td><span class="badge badge-const">Constant</span></td>
+      <td>PHY Efficiency</td><td>ON</td><td>ON (keep)</td>
+      <td>GI efficiency ×1.111 vs long GI</td>
+    </tr>
+    <tr>
+      <td>15</td><td class="param">A-MPDU Aggregation</td>
+      <td><span class="badge badge-const">Constant</span></td>
+      <td>PHY Efficiency</td><td>ON</td><td>ON (keep)</td>
+      <td>MAC aggregation efficiency: −60–80% overhead</td>
+    </tr>
+    <tr>
+      <td>16</td><td class="param">WMM TXOP per AC (µs)</td>
+      <td><span class="badge badge-const">Constant</span></td>
+      <td>WMM QoS</td><td>VO=1504 VI=3008 BE=0 BK=0</td><td>Raise VO for Teams SSID</td>
+      <td>Per-class channel hold time → service differentiation</td>
+    </tr>
+  </table>
+
+  <div class="callout-blue">
+    <p><strong>Branch:</strong> <code>feature/simulator-v2</code> &nbsp;·&nbsp; <strong>File:</strong> <code>docs/stadium_wifi_simulator_v2.html</code> &nbsp;·&nbsp; <strong>v1 FROZEN:</strong> <code>docs/stadium_wifi_simulator.html</code> on <code>main</code> — do not modify.</p>
+  </div>
+</section>
+
+<footer>
+  <p>FIFA World Cup 2026 Seattle · Stadium WiFi Simulator v2 Design Specification · June 2 2026 · Khursheed Khan</p>
+  <p>Source: EP1 Radio Configuration profiles studied June 2 2026. Full session log: <a href="session_summary_20260601_fifa_wc.html#radio-profiles">June 1 EOD Section 17</a>.</p>
+  <p>&copy; 2026 Khursheed Khan. All rights reserved.</p>
+</footer>
+
+</body>
+</html>
