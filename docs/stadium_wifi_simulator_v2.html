@@ -1,0 +1,1173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lumen Field Stadium WiFi Simulator v2 — FIFA WC 2026 Seattle</title>
+<style>
+:root {
+  --bg:#0b0d0f; --surface:#131618; --surface2:#191c1f; --border:#232830;
+  --green:#00d97e; --yellow:#ffc107; --orange:#ff6d2d; --red:#f4455a;
+  --blue:#3a9de0; --cyan:#00c8d4; --purple:#9b7aff; --teal:#00bfa5;
+  --text:#dde3ea; --muted:#5a6270; --muted2:#7a8494;
+  --accent:#0078d7; --gold:#d4a017;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:'SF Mono','Consolas','Fira Code',monospace;font-size:12px;min-height:100vh;overflow:hidden}
+
+/* ── HEADER ── */
+header{background:#080c14;border-bottom:1px solid #1a2535;padding:10px 20px;display:flex;align-items:center;justify-content:space-between;height:48px}
+header h1{font-size:13px;font-weight:700;color:#fff;letter-spacing:.4px}
+header .sub{font-size:10px;color:var(--muted2);margin-top:2px}
+.badge{display:inline-flex;align-items:center;gap:5px;background:#0d1928;border:1px solid #1a3250;color:#6aabf7;font-size:9px;padding:3px 8px;border-radius:2px;white-space:nowrap}
+.badge.v2{border-color:#d4a017;background:#1a1200;color:#ffd54f}
+.badge.ap-badge{border-color:#9b7aff55;background:#16102a;color:#b59aff;cursor:pointer;transition:.15s}
+.badge.ap-badge:hover{border-color:#9b7aff;background:#1e1640}
+.badge-row{display:flex;gap:6px;align-items:center}
+
+/* ── LAYOUT ── */
+.layout{display:grid;grid-template-columns:270px 1fr 220px;grid-template-rows:1fr auto;height:calc(100vh - 48px - 36px - 88px);gap:1px;background:var(--border)}
+.panel{background:var(--surface);overflow-y:auto;padding:14px}
+.ptitle{font-size:9px;font-weight:700;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;border-bottom:1px solid var(--border);padding-bottom:6px;margin-bottom:12px}
+
+/* ── INPUT PANEL ── */
+.knob-group{margin-bottom:14px}
+.knob-lbl{display:flex;justify-content:space-between;align-items:center;font-size:10px;margin-bottom:4px}
+.knob-lbl span{color:var(--cyan);font-weight:600;font-size:11px}
+.knob-desc{font-size:9px;color:var(--muted);margin-top:2px;line-height:1.4}
+input[type=range]{width:100%;-webkit-appearance:none;height:3px;border-radius:2px;background:#222;cursor:pointer;margin:2px 0}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:12px;height:12px;border-radius:50%;background:var(--accent);cursor:pointer;border:1px solid #1a5090}
+.sep{border:none;border-top:1px solid var(--border);margin:12px 0}
+select{background:#111;border:1px solid var(--border);color:var(--text);padding:4px 7px;border-radius:2px;font-size:10px;width:100%;cursor:pointer;font-family:inherit}
+.toggle-row{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.tog{position:relative;width:32px;height:16px;flex-shrink:0}
+.tog input{opacity:0;width:0;height:0}
+.tog-sl{position:absolute;inset:0;background:#1e2228;border:1px solid var(--border);border-radius:16px;cursor:pointer;transition:.15s}
+.tog-sl:before{content:'';position:absolute;left:2px;top:2px;width:10px;height:10px;background:#444;border-radius:50%;transition:.15s}
+input:checked+.tog-sl{background:var(--accent);border-color:#1a60b0}
+input:checked+.tog-sl:before{transform:translateX(16px);background:#fff}
+.tog-lbl{font-size:10px;color:var(--text)}
+.tog-lbl.off{color:var(--muted)}
+.tog-val{font-size:9px;color:var(--muted2);margin-left:auto}
+
+.preset-grid{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-bottom:10px}
+.preset-btn{background:#131618;border:1px solid var(--border);color:var(--muted2);padding:5px 4px;border-radius:2px;cursor:pointer;font-size:9px;font-family:inherit;text-align:center;transition:.15s;line-height:1.3}
+.preset-btn:hover{border-color:var(--blue);color:var(--blue)}
+.preset-btn.active{border-color:var(--gold);background:#1a1200;color:var(--gold)}
+.tline-wrap{margin-bottom:10px}
+.tline-lbl{display:flex;justify-content:space-between;font-size:9px;color:var(--muted);margin-bottom:3px}
+.tline-lbl b{color:var(--yellow);font-size:10px}
+input#t-scrub{width:100%;accent-color:var(--yellow)}
+
+/* ── METRICS PANEL ── */
+.band-tabs{display:flex;gap:1px;margin-bottom:10px}
+.btab{flex:1;padding:5px 4px;text-align:center;background:var(--surface2);border:1px solid var(--border);font-size:9px;cursor:pointer;transition:.15s;color:var(--muted)}
+.btab:hover{color:var(--text)}
+.btab.active{color:var(--text);border-bottom:2px solid var(--cyan)}
+.btab.active.g2{border-bottom-color:#ff9800}
+.btab.active.g5{border-bottom-color:#3a9de0}
+.btab.active.g6{border-bottom-color:#9b7aff}
+.btab.active.agg{border-bottom-color:var(--green)}
+.band-panel{display:none}
+.band-panel.visible{display:block}
+
+.mcard-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px}
+.mcard{background:#0d0f12;border:1px solid var(--border);border-radius:3px;padding:8px 10px}
+.mcard.full{grid-column:1/-1}
+.mcard.wide{grid-column:1/-1}
+.mname{font-size:8px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:3px}
+.mval{font-size:20px;font-weight:700;line-height:1.1}
+.munit{font-size:9px;color:var(--muted2);margin-top:1px}
+.mbar{height:3px;border-radius:2px;background:#1a1e25;margin-top:5px;overflow:hidden}
+.mbf{height:100%;border-radius:2px;transition:width .3s,background .3s}
+.green{color:var(--green)} .yellow{color:var(--yellow)} .orange{color:var(--orange)} .red{color:var(--red)}
+.bg-green{background:var(--green)} .bg-yellow{background:var(--yellow)} .bg-orange{background:var(--orange)} .bg-red{background:var(--red)}
+.bg-blue{background:var(--blue)} .bg-purple{background:var(--purple)}
+
+.mlo-card{background:linear-gradient(135deg,#0d1a2a,#160e2a);border:1px solid #2a3060;border-radius:3px;padding:8px 10px;margin-bottom:8px;display:none}
+.mlo-card.visible{display:block}
+.mlo-title{font-size:9px;color:#9b7aff;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}
+.mlo-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}
+.mlo-stat{text-align:center}
+.mlo-val{font-size:16px;font-weight:700;color:#b59aff}
+.mlo-lbl{font-size:8px;color:var(--muted)}
+
+.app-mix-bar{height:8px;border-radius:2px;display:flex;overflow:hidden;margin:6px 0}
+.amix-seg{height:100%;transition:width .4s}
+
+.svc-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-top:8px}
+.svc-card{background:#0d0f12;border:1px solid var(--border);border-radius:3px;padding:7px 8px;text-align:center}
+.svc-name{font-size:8px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:4px}
+.svc-status{font-size:11px;font-weight:700}
+.svc-detail{font-size:8px;color:var(--muted2);margin-top:3px;line-height:1.3}
+
+.deg-bar{display:flex;gap:3px;align-items:center;margin:8px 0}
+.deg-seg{flex:1;height:10px;border-radius:1px;background:#1a1e25;transition:.3s}
+.deg-seg.active-0{background:var(--green)}
+.deg-seg.active-1{background:var(--yellow)}
+.deg-seg.active-2{background:var(--orange)}
+.deg-seg.active-3{background:var(--red)}
+.deg-seg.active-4{background:#8B0000}
+.deg-label{font-size:9px;color:var(--muted);text-align:center;margin-top:3px}
+
+/* ── RIGHT PANEL ── */
+#gauge-panel{display:flex;flex-direction:column;align-items:center}
+canvas#gauge2{width:180px;height:108px}
+.stab-lbl{font-size:15px;font-weight:700;margin-top:6px;letter-spacing:.5px}
+.stab-score{font-size:10px;color:var(--muted);margin-top:2px}
+.stab-meter{width:100%;height:10px;background:#111;border-radius:5px;overflow:hidden;margin-top:8px;border:1px solid var(--border)}
+.stab-fill{height:100%;border-radius:5px;transition:width .4s,background .4s}
+
+.ap-grid{display:grid;grid-template-columns:repeat(8,1fr);gap:2px;margin-top:8px}
+.ap-dot{width:12px;height:12px;border-radius:2px;transition:background .3s}
+
+.rec-box{margin-top:12px;width:100%}
+.rec-title{font-size:8px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:5px}
+.ra{font-size:9px;padding:4px 7px;border-radius:2px;margin-bottom:3px;border-left:2px solid;line-height:1.4}
+.ra-ok{background:#001a0a;border-color:var(--green);color:#7cffaa}
+.ra-auto{background:#001428;border-color:var(--blue);color:#7abfff}
+.ra-warn{background:#1a1000;border-color:var(--yellow);color:#ffe07a}
+.ra-alert{background:#1a0010;border-color:var(--red);color:#ff8a9a}
+.ra-info{background:#0a0820;border-color:var(--purple);color:#c0a8ff}
+
+/* ── SLA BAR ── */
+.sla-bar{background:var(--surface);border-top:1px solid var(--border);padding:7px 16px;display:flex;gap:5px;align-items:center;flex-wrap:wrap;min-height:36px}
+.sla-chip{display:flex;align-items:center;gap:5px;background:#0d0f12;border:1px solid var(--border);border-radius:2px;padding:4px 8px;font-size:9px;white-space:nowrap}
+.sla-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.sla-lbl{color:var(--muted)}
+.sla-v{font-weight:600}
+
+/* ── LOG ── */
+.log-wrap{height:88px;background:#070809;border-top:1px solid var(--border);overflow-y:auto;display:flex;flex-direction:column-reverse;padding:4px 16px}
+.log-e{font-size:9px;padding:2px 0;border-bottom:1px solid #0d0f12;display:flex;gap:10px}
+.log-t{color:var(--muted);flex-shrink:0;width:65px}
+.log-ok{color:var(--green)} .log-auto{color:var(--blue)} .log-warn{color:var(--yellow)} .log-alert{color:var(--red)} .log-info{color:var(--purple)}
+
+/* ── FOOTER ── */
+.footer{text-align:center;font-size:8px;color:var(--muted);padding:3px;background:var(--surface);border-top:1px solid var(--border)}
+
+/* ── CAPACITY CHART ── */
+.cap-chart{width:100%;height:60px;position:relative;margin:6px 0}
+.cap-chart canvas{width:100%;height:100%}
+
+/* scrollbar */
+::-webkit-scrollbar{width:4px} ::-webkit-scrollbar-track{background:transparent} ::-webkit-scrollbar-thumb{background:#333;border-radius:2px}
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>Lumen Field Stadium WiFi Simulator <span style="color:var(--gold)">v2</span></h1>
+    <div class="sub" id="hdr-sub">AP5060 · Multi-Band · WiFi 7 · MLO · 72K Fans · FIFA WC 2026 Seattle</div>
+  </div>
+  <div class="badge-row">
+    <div class="badge v2">▲ v2 · EHT</div>
+    <div class="badge ap-badge" id="ap-toggle-badge" onclick="toggleAP()" title="Click to switch AP type">AP5060 ⇄</div>
+    <div class="badge" style="color:#5aff9a;border-color:#00501a;background:#001a08" id="status-badge">● STABLE</div>
+    <button onclick="resetAll()" style="background:#0d1020;border:1px solid var(--border);color:var(--muted2);padding:3px 10px;border-radius:2px;cursor:pointer;font-size:9px;font-family:inherit">↺ Reset</button>
+  </div>
+</header>
+
+<div class="layout">
+
+  <!-- ═══ INPUT PANEL ═══ -->
+  <div class="panel" id="input-panel">
+    <div class="ptitle">Demand &amp; Configuration</div>
+
+    <!-- AP Type -->
+    <div class="knob-group">
+      <div class="knob-lbl" style="margin-bottom:6px">AP Type <span id="ap-gen-badge" style="color:#9b7aff">WiFi 7 · AP5060</span></div>
+      <select id="ap-type" onchange="update()">
+        <option value="AP5060" selected>AP5060 — WiFi 7 (EHT) · 4×4 MIMO · 2.4+5+6GHz · MLO</option>
+        <option value="AP3000">AP3000 — WiFi 6 (HE) · 2×2 MIMO · 2.4+5GHz only</option>
+      </select>
+      <div class="knob-desc">AP count: 280 at Lumen Field · 8 per access switch</div>
+    </div>
+
+    <hr class="sep">
+
+    <!-- Timeline -->
+    <div class="knob-group">
+      <div class="knob-lbl">Match Timeline <b id="t-label" style="color:var(--yellow)">T+0 Kickoff</b></div>
+      <div class="tline-wrap">
+        <div class="tline-lbl"><span>T−90</span><span>KO</span><span>HT</span><span>FT</span><span>T+120</span></div>
+        <input type="range" id="t-scrub" min="-90" max="120" value="0" step="5">
+      </div>
+      <div class="preset-grid">
+        <button class="preset-btn" onclick="setPreset(-90)">Pre-Match<br><small style="color:var(--muted)">Gates open</small></button>
+        <button class="preset-btn" onclick="setPreset(-30)">Arrival<br><small style="color:var(--muted)">Rush T−30</small></button>
+        <button class="preset-btn active" onclick="setPreset(0)">Kickoff<br><small style="color:var(--muted)">Peak load</small></button>
+        <button class="preset-btn" onclick="setPreset(48)">Half-Time<br><small style="color:var(--muted)">Social surge</small></button>
+        <button class="preset-btn" onclick="setPreset(90)">Full-Time<br><small style="color:var(--muted)">Celebrations</small></button>
+        <button class="preset-btn" onclick="setPreset(110)">Post-Match<br><small style="color:var(--muted)">Draining</small></button>
+      </div>
+      <div class="knob-desc" id="preset-note">Peak load — 92% of 72,000 fans active</div>
+    </div>
+
+    <hr class="sep">
+
+    <!-- Fan demand -->
+    <div class="knob-group">
+      <div class="knob-lbl">Fan Count <span id="fan-val">72,000</span></div>
+      <input type="range" id="fan-count" min="20000" max="72000" value="72000" step="1000">
+      <div class="knob-desc">Lumen Field capacity: 72,000</div>
+    </div>
+    <div class="knob-group">
+      <div class="knob-lbl">Devices/Fan <span id="dev-val">1.4×</span></div>
+      <input type="range" id="dev-mult" min="10" max="25" value="14" step="1">
+      <div class="knob-desc">Avg devices per attending fan</div>
+    </div>
+    <div class="knob-group">
+      <div class="knob-lbl">WiFi Attach % <span id="attach-val">75%</span></div>
+      <input type="range" id="wifi-attach" min="20" max="100" value="75" step="5">
+      <div class="knob-desc">% of devices actively on WiFi</div>
+    </div>
+    <div class="knob-group">
+      <div class="knob-lbl">Concurrency % <span id="conc-val">55%</span></div>
+      <input type="range" id="concurrency" min="10" max="100" value="55" step="5">
+      <div class="knob-desc">% simultaneously transferring data</div>
+    </div>
+
+    <hr class="sep">
+
+    <!-- App mix -->
+    <div class="ptitle" style="margin-top:2px">App Mix (demand/client)</div>
+    <div class="knob-group">
+      <div class="knob-lbl">4K Video / Live Replay <span id="vid-val">25%</span></div>
+      <input type="range" id="mix-video" min="0" max="100" value="25" step="5">
+      <div class="knob-desc">15 Mbps DL · 0.5 Mbps UL</div>
+    </div>
+    <div class="knob-group">
+      <div class="knob-lbl">Teams / Video Calls <span id="teams-val">10%</span></div>
+      <input type="range" id="mix-teams" min="0" max="100" value="10" step="5">
+      <div class="knob-desc">3 Mbps DL · 3 Mbps UL (symmetric)</div>
+    </div>
+    <div class="knob-group">
+      <div class="knob-lbl">Social / Upload <span id="social-val">40%</span></div>
+      <input type="range" id="mix-social" min="0" max="100" value="40" step="5">
+      <div class="knob-desc">1 Mbps DL · 4 Mbps UL (UL heavy)</div>
+    </div>
+    <div class="knob-group">
+      <div class="knob-lbl">Browse / Stream <span id="browse-val">20%</span></div>
+      <input type="range" id="mix-browse" min="0" max="100" value="20" step="5">
+      <div class="knob-desc">2 Mbps DL · 0.1 Mbps UL</div>
+    </div>
+    <div class="knob-group">
+      <div class="knob-lbl">POS / Payment <span id="pos-val">5%</span></div>
+      <input type="range" id="mix-pos" min="0" max="30" value="5" step="1">
+      <div class="knob-desc">0.1 Mbps · latency critical ≤10ms</div>
+    </div>
+    <div class="app-mix-bar" id="app-mix-bar">
+      <div class="amix-seg" id="amix-vid" style="background:#3a9de0;width:25%"></div>
+      <div class="amix-seg" id="amix-teams" style="background:#9b7aff;width:10%"></div>
+      <div class="amix-seg" id="amix-social" style="background:#ffc107;width:40%"></div>
+      <div class="amix-seg" id="amix-browse" style="background:#00d97e;width:20%"></div>
+      <div class="amix-seg" id="amix-pos" style="background:#f4455a;width:5%"></div>
+    </div>
+
+    <hr class="sep">
+
+    <!-- RF config -->
+    <div class="ptitle" style="margin-top:2px">RF Configuration</div>
+    <div class="knob-group">
+      <div class="knob-lbl">5GHz Channel Width <span id="bw5-val">160 MHz</span></div>
+      <select id="bw-5g" onchange="update()">
+        <option value="80">80 MHz (~6 channels)</option>
+        <option value="160" selected>160 MHz (~3 channels)</option>
+      </select>
+    </div>
+    <div class="knob-group" id="bw6-group">
+      <div class="knob-lbl">6GHz Channel Width <span id="bw6-val">320 MHz</span></div>
+      <select id="bw-6g" onchange="update()">
+        <option value="160">160 MHz (7 channels)</option>
+        <option value="320" selected>320 MHz (3-4 channels)</option>
+      </select>
+    </div>
+    <div class="knob-group">
+      <div class="knob-lbl">Guard Interval <span id="gi-val">1600 ns</span></div>
+      <select id="guard-int" onchange="update()">
+        <option value="800">800 ns (high mobility)</option>
+        <option value="1600" selected>1600 ns (default WiFi 7)</option>
+        <option value="3200">3200 ns (stable indoor)</option>
+      </select>
+    </div>
+    <div class="knob-group">
+      <div class="knob-lbl">Noise Floor Offset <span id="noise-val">0 dB</span></div>
+      <input type="range" id="noise-floor" min="0" max="30" value="0" step="1">
+      <div class="knob-desc">0 = clean −95 dBm · 30 = congested +30 dB</div>
+    </div>
+    <div class="knob-group">
+      <div class="knob-lbl">TX Power <span id="txpwr-val">17 dBm</span></div>
+      <input type="range" id="tx-power" min="7" max="23" value="17" step="1">
+      <div class="knob-desc">WLANPros targets: 7/13/16 dBm fill/std/edge</div>
+    </div>
+    <div class="knob-group">
+      <div class="knob-lbl">MCS Floor <span id="mcsfloor-val">MCS 4</span></div>
+      <input type="range" id="mcs-floor" min="0" max="13" value="4" step="1">
+      <div class="knob-desc">Admission control — clients below this MCS rejected</div>
+    </div>
+
+    <hr class="sep">
+
+    <!-- Toggles -->
+    <div class="ptitle" style="margin-top:2px">WiFi 7 Features</div>
+    <div class="toggle-row">
+      <label class="tog"><input type="checkbox" id="tog-ofdma-dl" checked onchange="update()"><span class="tog-sl"></span></label>
+      <span class="tog-lbl">OFDMA DL</span><span class="tog-val">×1.35 capacity</span>
+    </div>
+    <div class="toggle-row">
+      <label class="tog"><input type="checkbox" id="tog-ofdma-ul" checked onchange="update()"><span class="tog-sl"></span></label>
+      <span class="tog-lbl">OFDMA UL</span><span class="tog-val">×1.20 capacity</span>
+    </div>
+    <div class="toggle-row">
+      <label class="tog"><input type="checkbox" id="tog-mumimo" checked onchange="update()"><span class="tog-sl"></span></label>
+      <span class="tog-lbl">MU-MIMO</span><span class="tog-val">DL×4 / UL×2</span>
+    </div>
+    <div class="toggle-row">
+      <label class="tog"><input type="checkbox" id="tog-bsscolor" checked onchange="update()"><span class="tog-sl"></span></label>
+      <span class="tog-lbl">BSS Coloring</span><span class="tog-val">CCI ×0.80</span>
+    </div>
+    <div class="toggle-row" id="mlo-row">
+      <label class="tog"><input type="checkbox" id="tog-mlo" checked onchange="update()"><span class="tog-sl"></span></label>
+      <span class="tog-lbl">MLO (5G+6G)</span><span class="tog-val">AP5060 only</span>
+    </div>
+    <div class="toggle-row">
+      <label class="tog"><input type="checkbox" id="tog-11kv" checked onchange="update()"><span class="tog-sl"></span></label>
+      <span class="tog-lbl">802.11k/v Roaming</span><span class="tog-val">500→50ms</span>
+    </div>
+    <div class="toggle-row">
+      <label class="tog"><input type="checkbox" id="tog-pmf" checked onchange="update()"><span class="tog-sl"></span></label>
+      <span class="tog-lbl">PMF Required</span><span class="tog-val">WPA3</span>
+    </div>
+    <div class="toggle-row">
+      <label class="tog"><input type="checkbox" id="tog-airdef" checked onchange="update()"><span class="tog-sl"></span></label>
+      <span class="tog-lbl">AirDefense WIPS</span><span class="tog-val">Rogue detect</span>
+    </div>
+    <div class="toggle-row">
+      <label class="tog"><input type="checkbox" id="tog-dcslock" onchange="update()"><span class="tog-sl"></span></label>
+      <span class="tog-lbl">DCS Lock</span><span class="tog-val">Match mode</span>
+    </div>
+
+    <hr class="sep">
+
+    <!-- Degradation -->
+    <div class="ptitle" style="margin-top:2px">Degradation &amp; Threats</div>
+    <div class="knob-group">
+      <div class="knob-lbl" style="margin-bottom:6px">Degradation Level <span id="deg-lbl-val" style="color:var(--green)">0 — Nominal</span></div>
+      <select id="deg-level" onchange="update()">
+        <option value="0">Level 0 — All systems nominal</option>
+        <option value="1">Level 1 — 5GHz CCI congestion</option>
+        <option value="2">Level 2 — Two bands degraded</option>
+        <option value="3">Level 3 — RF jammer + auth storm</option>
+        <option value="4">Level 4 — Critical failure</option>
+      </select>
+    </div>
+    <div class="knob-group">
+      <div class="knob-lbl" style="margin-bottom:6px">Cyber Attack</div>
+      <select id="cyber-attack" onchange="update()">
+        <option value="none">None</option>
+        <option value="deauth">Deauth Flood (L2)</option>
+        <option value="evil_twin">Evil Twin / Rogue AP</option>
+        <option value="cred_storm">Credential Storm (RADIUS)</option>
+        <option value="arp_poison">ARP Poisoning (L3)</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- ═══ METRICS PANEL ═══ -->
+  <div class="panel" id="metrics-panel">
+    <div class="ptitle">Live Metrics</div>
+
+    <!-- Band tabs -->
+    <div class="band-tabs">
+      <div class="btab g2 active" id="tab-2g" onclick="showBand('2g')">2.4 GHz</div>
+      <div class="btab g5" id="tab-5g" onclick="showBand('5g')">5 GHz</div>
+      <div class="btab g6" id="tab-6g" onclick="showBand('6g')">6 GHz</div>
+      <div class="btab agg" id="tab-agg" onclick="showBand('agg')">Aggregate</div>
+    </div>
+
+    <!-- MLO card (AP5060 + MLO only) -->
+    <div class="mlo-card" id="mlo-card">
+      <div class="mlo-title">⚡ MLO Active — 5GHz + 6GHz Bonded (STR)</div>
+      <div class="mlo-stats">
+        <div class="mlo-stat"><div class="mlo-val" id="mlo-tput">—</div><div class="mlo-lbl">Mbps aggregate</div></div>
+        <div class="mlo-stat"><div class="mlo-val" id="mlo-lat">—</div><div class="mlo-lbl">ms latency (min)</div></div>
+        <div class="mlo-stat"><div class="mlo-val" id="mlo-gain">—</div><div class="mlo-lbl">× vs single-band</div></div>
+      </div>
+    </div>
+
+    <!-- Band panels -->
+    <div class="band-panel visible" id="bp-2g">
+      <div class="mcard-grid">
+        <div class="mcard"><div class="mname">SNR (2.4G)</div><div class="mval" id="snr-2g">—</div><div class="munit">dB</div><div class="mbar"><div class="mbf" id="bar-snr-2g"></div></div></div>
+        <div class="mcard"><div class="mname">MCS (2.4G)</div><div class="mval" id="mcs-2g">—</div><div class="munit" id="mcs-2g-rate">—</div><div class="mbar"><div class="mbf" id="bar-mcs-2g"></div></div></div>
+        <div class="mcard"><div class="mname">Airtime (2.4G)</div><div class="mval" id="air-2g">—</div><div class="munit">%</div><div class="mbar"><div class="mbf" id="bar-air-2g"></div></div></div>
+        <div class="mcard"><div class="mname">Clients (2.4G)</div><div class="mval" id="cli-2g">—</div><div class="munit">per AP</div><div class="mbar"><div class="mbf" id="bar-cli-2g" style="background:var(--blue)"></div></div></div>
+        <div class="mcard full"><div class="mname">Throughput / Client (2.4G)</div><div class="mval" id="tput-2g">—</div><div class="munit">Mbps effective</div><div class="mbar"><div class="mbf" id="bar-tput-2g" style="background:var(--cyan)"></div></div></div>
+      </div>
+      <div style="font-size:9px;color:var(--muted);padding:4px 0">2.4GHz: 20MHz channel · 2SS · HE/WiFi 6 · 15% of clients (band steering away)</div>
+    </div>
+
+    <div class="band-panel" id="bp-5g">
+      <div class="mcard-grid">
+        <div class="mcard"><div class="mname">SNR (5G)</div><div class="mval" id="snr-5g">—</div><div class="munit">dB</div><div class="mbar"><div class="mbf" id="bar-snr-5g"></div></div></div>
+        <div class="mcard"><div class="mname">MCS (5G)</div><div class="mval" id="mcs-5g">—</div><div class="munit" id="mcs-5g-rate">—</div><div class="mbar"><div class="mbf" id="bar-mcs-5g"></div></div></div>
+        <div class="mcard"><div class="mname">Airtime (5G)</div><div class="mval" id="air-5g">—</div><div class="munit">%</div><div class="mbar"><div class="mbf" id="bar-air-5g"></div></div></div>
+        <div class="mcard"><div class="mname">Clients (5G)</div><div class="mval" id="cli-5g">—</div><div class="munit">per AP</div><div class="mbar"><div class="mbf" id="bar-cli-5g" style="background:var(--blue)"></div></div></div>
+        <div class="mcard full"><div class="mname">Throughput / Client (5G)</div><div class="mval" id="tput-5g">—</div><div class="munit">Mbps effective</div><div class="mbar"><div class="mbf" id="bar-tput-5g" style="background:var(--cyan)"></div></div></div>
+      </div>
+      <div style="font-size:9px;color:var(--muted);padding:4px 0" id="note-5g">5GHz: 160MHz · 4SS AP5060 · 50% of clients</div>
+    </div>
+
+    <div class="band-panel" id="bp-6g">
+      <div class="mcard-grid">
+        <div class="mcard"><div class="mname">SNR (6G)</div><div class="mval" id="snr-6g">—</div><div class="munit">dB</div><div class="mbar"><div class="mbf" id="bar-snr-6g"></div></div></div>
+        <div class="mcard"><div class="mname">MCS (6G)</div><div class="mval" id="mcs-6g">—</div><div class="munit" id="mcs-6g-rate">—</div><div class="mbar"><div class="mbf" id="bar-mcs-6g"></div></div></div>
+        <div class="mcard"><div class="mname">Airtime (6G)</div><div class="mval" id="air-6g">—</div><div class="munit">%</div><div class="mbar"><div class="mbf" id="bar-air-6g"></div></div></div>
+        <div class="mcard"><div class="mname">Clients (6G)</div><div class="mval" id="cli-6g">—</div><div class="munit">per AP</div><div class="mbar"><div class="mbf" id="bar-cli-6g" style="background:var(--purple)"></div></div></div>
+        <div class="mcard full"><div class="mname">Throughput / Client (6G)</div><div class="mval" id="tput-6g">—</div><div class="munit">Mbps effective</div><div class="mbar"><div class="mbf" id="bar-tput-6g" style="background:var(--cyan)"></div></div></div>
+      </div>
+      <div style="font-size:9px;color:var(--muted);padding:4px 0" id="note-6g">6GHz: 320MHz · 4SS AP5060 (WiFi 7 only) · 35% of clients · LPI mode</div>
+    </div>
+
+    <div class="band-panel" id="bp-agg">
+      <div class="mcard-grid">
+        <div class="mcard"><div class="mname">Total Sessions</div><div class="mval" id="agg-sess">—</div><div class="munit">stadium-wide</div><div class="mbar"><div class="mbf" id="bar-agg-sess" style="background:var(--green)"></div></div></div>
+        <div class="mcard"><div class="mname">Active Transfers</div><div class="mval" id="agg-active">—</div><div class="munit">concurrent</div><div class="mbar"><div class="mbf" id="bar-agg-active" style="background:var(--blue)"></div></div></div>
+        <div class="mcard"><div class="mname">Aggregate Demand</div><div class="mval" id="agg-demand">—</div><div class="munit">Gbps stadium</div><div class="mbar"><div class="mbf" id="bar-agg-demand" style="background:var(--cyan)"></div></div></div>
+        <div class="mcard"><div class="mname">Aggregate Capacity</div><div class="mval" id="agg-cap">—</div><div class="munit">Gbps stadium</div><div class="mbar"><div class="mbf" id="bar-agg-cap" style="background:var(--purple)"></div></div></div>
+        <div class="mcard"><div class="mname">E2E Latency</div><div class="mval" id="agg-lat">—</div><div class="munit">ms round-trip</div><div class="mbar"><div class="mbf" id="bar-agg-lat"></div></div></div>
+        <div class="mcard"><div class="mname">Packet Loss</div><div class="mval" id="agg-ploss">—</div><div class="munit">%</div><div class="mbar"><div class="mbf" id="bar-agg-ploss"></div></div></div>
+        <div class="mcard"><div class="mname">Avg DL Demand</div><div class="mval" id="agg-dl">—</div><div class="munit">Mbps/client</div><div class="mbar"><div class="mbf" id="bar-agg-dl" style="background:var(--blue)"></div></div></div>
+        <div class="mcard"><div class="mname">Avg UL Demand</div><div class="mval" id="agg-ul">—</div><div class="munit">Mbps/client</div><div class="mbar"><div class="mbf" id="bar-agg-ul" style="background:var(--orange)"></div></div></div>
+      </div>
+    </div>
+
+    <!-- App mix visual -->
+    <div style="margin-top:10px">
+      <div style="display:flex;justify-content:space-between;font-size:8px;color:var(--muted);margin-bottom:4px">
+        <span>App Demand Mix</span>
+        <span id="demand-per-client" style="color:var(--cyan)">—</span>
+      </div>
+      <div class="app-mix-bar" id="live-mix-bar" style="height:10px">
+        <div class="amix-seg" id="lmix-vid" style="background:#3a9de0"></div>
+        <div class="amix-seg" id="lmix-teams" style="background:#9b7aff"></div>
+        <div class="amix-seg" id="lmix-social" style="background:#ffc107"></div>
+        <div class="amix-seg" id="lmix-browse" style="background:#00d97e"></div>
+        <div class="amix-seg" id="lmix-pos" style="background:#f4455a"></div>
+      </div>
+      <div style="display:flex;gap:10px;font-size:8px;color:var(--muted);margin-top:4px;flex-wrap:wrap">
+        <span><span style="color:#3a9de0">■</span> Video</span>
+        <span><span style="color:#9b7aff">■</span> Teams</span>
+        <span><span style="color:#ffc107">■</span> Social</span>
+        <span><span style="color:#00d97e">■</span> Browse</span>
+        <span><span style="color:#f4455a">■</span> POS</span>
+        <span style="margin-left:auto;color:var(--muted2)" id="ul-dl-ratio">DL:UL —</span>
+      </div>
+    </div>
+
+    <!-- Service class SLAs -->
+    <div style="margin-top:12px">
+      <div class="ptitle">Service Class SLAs</div>
+      <div class="svc-grid">
+        <div class="svc-card"><div class="svc-name">POS / VLAN50</div><div class="svc-status" id="svc-pos">—</div><div class="svc-detail" id="svc-pos-d">Lat ≤10ms</div></div>
+        <div class="svc-card"><div class="svc-name">VIP / VLAN40</div><div class="svc-status" id="svc-vip">—</div><div class="svc-detail" id="svc-vip-d">≥25 Mbps</div></div>
+        <div class="svc-card"><div class="svc-name">Teams / VLAN10</div><div class="svc-status" id="svc-teams">—</div><div class="svc-detail" id="svc-teams-d">≥5 Mbps</div></div>
+        <div class="svc-card"><div class="svc-name">Guest / VLAN30</div><div class="svc-status" id="svc-guest">—</div><div class="svc-detail" id="svc-guest-d">Best effort</div></div>
+      </div>
+    </div>
+
+    <!-- Degradation indicator -->
+    <div style="margin-top:12px">
+      <div style="display:flex;justify-content:space-between;font-size:9px;color:var(--muted);margin-bottom:4px">
+        <span>Degradation Level</span><span id="deg-inline" style="color:var(--green)">Level 0</span>
+      </div>
+      <div class="deg-bar">
+        <div class="deg-seg" id="ds-0"></div>
+        <div class="deg-seg" id="ds-1"></div>
+        <div class="deg-seg" id="ds-2"></div>
+        <div class="deg-seg" id="ds-3"></div>
+        <div class="deg-seg" id="ds-4"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ RIGHT PANEL ═══ -->
+  <div class="panel" id="gauge-panel">
+    <div class="ptitle">Stability</div>
+    <canvas id="gauge2" width="180" height="108"></canvas>
+    <div class="stab-lbl" id="stab-lbl">STABLE</div>
+    <div class="stab-score" id="stab-score">Score: 96 / 100</div>
+    <div class="stab-meter"><div class="stab-fill bg-green" id="stab-fill" style="width:96%"></div></div>
+
+    <div style="margin-top:12px">
+      <div class="ptitle">AP Array — 280 APs</div>
+      <div class="ap-grid" id="ap-grid2"></div>
+    </div>
+
+    <div class="rec-box">
+      <div class="rec-title">Active Automations</div>
+      <div id="rec-list"></div>
+    </div>
+  </div>
+
+</div><!-- /layout -->
+
+<!-- SLA bar -->
+<div class="sla-bar" id="sla-bar2"></div>
+
+<!-- Event log -->
+<div class="log-wrap" id="log-wrap"></div>
+<div class="footer">© 2026 Khursheed Khan · Stadium WiFi Simulator v2 · FIFA WC 2026 Seattle · Lumen Field · 280×AP5060 · EP1 Security + AirDefense · <a href="stadium_simulator_v2_spec.html" style="color:var(--muted2)">v2 I/O Spec</a> · <a href="stadium_wifi_simulator.html" style="color:var(--muted2)">v1</a></div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════════════
+// CONSTANTS
+// ═══════════════════════════════════════════════════════════════════════
+
+const AP_CONFIGS = {
+  AP5060: { ss2g:2, ss5g:4, ss6g:4, has6g:true,  mlo:true,  maxCli:512, wifiGen:'WiFi 7 (EHT)', txPwrMax:17 },
+  AP3000: { ss2g:2, ss5g:2, ss6g:0,  has6g:false, mlo:false, maxCli:512, wifiGen:'WiFi 6 (HE)',  txPwrMax:17 },
+};
+
+// Band steering split: [2g%, 5g%, 6g%]
+const BAND_SPLIT = {
+  AP5060: [0.12, 0.50, 0.38],
+  AP3000: [0.20, 0.80, 0.00],
+};
+
+// PHY rate per 1SS (Mbps) indexed by [bwMhz][mcsIdx 0..13]
+const PHY_1SS = {
+  20:  [8.6,17.2,25.8,34.4,51.6,68.8,77.4,86.0,103.2,114.7,129.0,143.4,162.0,180.0],
+  40:  [17.2,34.4,51.6,68.8,103.2,137.6,154.9,172.1,206.5,229.4,258.1,286.8,324.0,360.0],
+  80:  [36.0,72.1,108.1,144.1,216.2,288.2,324.3,360.3,432.4,480.4,540.4,600.5,675.0,750.0],
+  160: [72.1,144.1,216.2,288.2,432.4,576.5,648.5,720.6,864.7,960.8,1080.9,1201.0,1350.0,1500.0],
+  320: [144.1,288.2,432.4,576.5,864.7,1152.9,1297.0,1441.2,1729.4,1921.6,2161.8,2402.0,2700.0,3000.0],
+};
+
+// GI efficiency factor
+const GI_EFF = { 800:1.05, 1600:1.0, 3200:0.93 };
+
+// SNR → MCS index (802.11ax/be)
+function snrToMcs(snr, gen, mcsFloor) {
+  const thresholds = gen === 'be'
+    ? [50,46,42,38,34,30,26,22,18,15,12, 9, 6, 3]  // MCS13..MCS0 (WiFi 7 EHT)
+    : [44,40,36,32,28,24,20,17,14,11, 9, 6, -99, -99]; // MCS11..MCS0 (WiFi 6 HE, no 12/13)
+  for (let i=0; i<thresholds.length; i++) {
+    if (snr >= thresholds[i]) {
+      const mcsIdx = thresholds.length - 1 - i;
+      return Math.max(mcsFloor, mcsIdx);
+    }
+  }
+  return -1; // no link
+}
+
+function phyRate(ss, bw, mcsIdx, gi) {
+  if (mcsIdx < 0 || !PHY_1SS[bw]) return 0;
+  const idx = Math.min(mcsIdx, 13);
+  return Math.round(PHY_1SS[bw][idx] * ss * (GI_EFF[gi] || 1.0));
+}
+
+// Timeline presets
+const PRESETS = [
+  { t:-90, concPct:0.12, label:'T−90 Pre-Match', note:'Gates open, 12% concurrency' },
+  { t:-30, concPct:0.45, label:'T−30 Arrival Rush', note:'Active arrival, 45% concurrency' },
+  { t:0,   concPct:0.55, label:'T+0 Kickoff', note:'Peak load, 55% concurrency' },
+  { t:48,  concPct:0.65, label:'T+48 Half-Time', note:'Social media surge, 65% concurrency' },
+  { t:90,  concPct:0.58, label:'T+90 Full-Time', note:'Celebrations, 58% concurrency' },
+  { t:110, concPct:0.28, label:'T+110 Post-Match', note:'Draining, 28% concurrency' },
+];
+
+// App demand (Mbps DL, Mbps UL)
+const APP_DEMAND = {
+  video:  { dl:15.0, ul:0.5 },
+  teams:  { dl:3.0,  ul:3.0 },
+  social: { dl:1.0,  ul:4.0 },
+  browse: { dl:2.0,  ul:0.1 },
+  pos:    { dl:0.1,  ul:0.1 },
+};
+
+const SLA = {
+  snr:    { green:25, yellow:15 },
+  air:    { green:70, yellow:85 },
+  lat:    { green:20, yellow:50 },
+  ploss:  { green:0.1, yellow:1.0 },
+  tput:   { green:5, yellow:2 },
+};
+
+function slaC(metric, val) {
+  const t = SLA[metric];
+  const higher = (metric === 'snr' || metric === 'tput');
+  if (higher) { return val>=t.green?'green':val>=t.yellow?'yellow':'red'; }
+  return val<=t.green?'green':val<=t.yellow?'yellow':'red';
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════════════════
+let logEntries = [];
+let prevState = {};
+let activeBand = '2g';
+
+// ═══════════════════════════════════════════════════════════════════════
+// COMPUTE
+// ═══════════════════════════════════════════════════════════════════════
+function compute() {
+  const apType     = document.getElementById('ap-type').value;
+  const ap         = AP_CONFIGS[apType];
+  const tScrub     = +document.getElementById('t-scrub').value;
+  const fanCount   = +document.getElementById('fan-count').value;
+  const devMult    = +document.getElementById('dev-mult').value / 10;
+  const wifiAttach = +document.getElementById('wifi-attach').value / 100;
+  const concPct    = +document.getElementById('concurrency').value / 100;
+  const bw5g       = +document.getElementById('bw-5g').value;
+  const bw6g       = +document.getElementById('bw-6g').value;
+  const gi         = +document.getElementById('guard-int').value;
+  const noiseOff   = +document.getElementById('noise-floor').value;
+  const txPwr      = +document.getElementById('tx-power').value;
+  const mcsFloor   = +document.getElementById('mcs-floor').value;
+
+  const ofdmaDL  = document.getElementById('tog-ofdma-dl').checked;
+  const ofdmaUL  = document.getElementById('tog-ofdma-ul').checked;
+  const muMimo   = document.getElementById('tog-mumimo').checked;
+  const bssColor = document.getElementById('tog-bsscolor').checked;
+  const mloOn    = document.getElementById('tog-mlo').checked && ap.mlo;
+  const kv11     = document.getElementById('tog-11kv').checked;
+  const pmfOn    = document.getElementById('tog-pmf').checked;
+  const airdefOn = document.getElementById('tog-airdef').checked;
+  const dcsLock  = document.getElementById('tog-dcslock').checked;
+  const degLvl   = +document.getElementById('deg-level').value;
+  const cyber    = document.getElementById('cyber-attack').value;
+
+  // App mix weights (normalize to sum=100)
+  const vidW  = +document.getElementById('mix-video').value;
+  const teaW  = +document.getElementById('mix-teams').value;
+  const socW  = +document.getElementById('mix-social').value;
+  const broW  = +document.getElementById('mix-browse').value;
+  const posW  = +document.getElementById('mix-pos').value;
+  const totalW = vidW + teaW + socW + broW + posW || 1;
+  const mix = { vid:vidW/totalW, teams:teaW/totalW, soc:socW/totalW, bro:broW/totalW, pos:posW/totalW };
+
+  // Weighted demand per active client
+  const demDL = mix.vid*APP_DEMAND.video.dl + mix.teams*APP_DEMAND.teams.dl +
+                mix.soc*APP_DEMAND.social.dl + mix.bro*APP_DEMAND.browse.dl +
+                mix.pos*APP_DEMAND.pos.dl;
+  const demUL = mix.vid*APP_DEMAND.video.ul + mix.teams*APP_DEMAND.teams.ul +
+                mix.soc*APP_DEMAND.social.ul + mix.bro*APP_DEMAND.browse.ul +
+                mix.pos*APP_DEMAND.pos.ul;
+  const demTotal = demDL + demUL;
+
+  // Total sessions
+  const totalSessions = Math.round(fanCount * devMult * wifiAttach);
+  const activeClients  = Math.round(totalSessions * concPct);
+  const perAP          = Math.round(activeClients / 280);
+
+  // Band split
+  const bsplit = BAND_SPLIT[apType];
+  const cli2g  = Math.round(perAP * bsplit[0]);
+  const cli5g  = Math.round(perAP * bsplit[1]);
+  const cli6g  = Math.round(perAP * bsplit[2]);
+
+  // RF model per band: RSSI starts at -62, noise = -95 + noiseOff
+  const baseRSSI = -62 + (txPwr - 17) * 0.5;
+  const noiseDeg = [0, 4, 8, 18, 30][degLvl];
+  const noiseDBm = -95 + noiseOff + noiseDeg;
+  const baseSNR  = baseRSSI - noiseDBm;
+
+  // Band-specific SNR modifiers
+  const snrMod = { '2g': -3, '5g': 0, '6g': +4 }; // 6GHz: better due to 320MHz clean spectrum + no legacy devices
+
+  // OFDMA / MU-MIMO / BSS Color capacity multipliers
+  const ofdmaDLMult = ofdmaDL ? 1.35 : 1.0;
+  const ofdmaULMult = ofdmaUL ? 1.20 : 1.0;
+  const mimoMult    = muMimo  ? { dl: ap.ss5g >= 4 ? 4 : 2, ul: 2 } : { dl: 1, ul: 1 };
+  const bssMult     = bssColor ? 0.80 : 1.0; // CCI reduction = less interference = more capacity → treat as /0.80 on interference
+  const capMult     = ofdmaDLMult * (bssColor ? 1.20 : 1.0); // BSS Color boosts capacity ~20%
+
+  function computeBand(bandKey, ss, bw, clients) {
+    if (!ap.has6g && bandKey === '6g') return null;
+    const snr   = baseSNR + snrMod[bandKey] + (dcsLock ? 2 : 0);
+    const gen   = (apType === 'AP5060' && (bandKey === '5g' || bandKey === '6g')) ? 'be' : 'ax';
+    const mcsI  = snrToMcs(snr, gen, mcsFloor);
+    const phy   = phyRate(ss, bw, mcsI, gi);
+    const effPhy = phy * capMult * (muMimo ? mimoMult.dl : 1.0);
+    const demand = clients * demTotal;
+    const rawAir = effPhy > 0 ? demand / effPhy : 1.5;
+    const air    = Math.min(150, Math.round(rawAir * 100));
+    const u      = Math.min(0.98, rawAir);
+    const qDly   = u < 0.05 ? 0.5 : (5 * u / (1 - u));
+    const lat    = Math.round(8 + qDly + (kv11 ? 0 : 10));
+    const airtimeLoss = Math.max(0, (air - 85) * 0.5);
+    const snrLoss = mcsI < 0 ? 50 : mcsI < 3 ? 2 : 0;
+    const ploss  = +(airtimeLoss + snrLoss).toFixed(2);
+    const goodput = phy > 0 && clients > 0 ? Math.max(0, +(phy * 0.65 * (1-u) / clients).toFixed(1)) : 0;
+    return { snr:Math.round(snr), mcsI, phy, air, lat, ploss, goodput, clients, bw, gen };
+  }
+
+  const b2g = computeBand('2g', ap.ss2g, 20, cli2g);
+  const b5g = computeBand('5g', ap.ss5g, bw5g, cli5g);
+  const b6g = computeBand('6g', ap.ss6g, bw6g, cli6g);
+
+  // Degradation overrides
+  if (degLvl >= 1 && b5g) { b5g.air = Math.min(150, b5g.air + 30); }
+  if (degLvl >= 2 && b2g) { b2g.air = Math.min(150, b2g.air + 25); }
+  if (degLvl >= 3) {
+    if (b5g) b5g.snr -= 12;
+    if (b2g) b2g.snr -= 8;
+  }
+  if (degLvl >= 4) {
+    if (b5g) { b5g.mcsI = 0; b5g.air = 130; b5g.ploss = 8; }
+    if (b2g) { b2g.mcsI = 0; b2g.air = 120; b2g.ploss = 5; }
+    if (b6g) { b6g.air  = 80; }
+  }
+
+  // Cyber attack effects
+  let cyberLatAdd = 0, cyberAirAdd = 0;
+  if (cyber === 'deauth')      { cyberAirAdd = pmfOn ? 1 : 15; cyberLatAdd = pmfOn ? 0 : 8; }
+  if (cyber === 'evil_twin')   { cyberAirAdd = airdefOn ? 0 : 5; cyberLatAdd = airdefOn ? 0 : 3; }
+  if (cyber === 'cred_storm')  { cyberLatAdd = 6; }
+  if (cyber === 'arp_poison')  { cyberLatAdd = 6; cyberAirAdd = 5; }
+  if (b5g) { b5g.air = Math.min(150, b5g.air + cyberAirAdd); b5g.lat += cyberLatAdd; }
+
+  // MLO (AP5060, 5G+6G bonded STR)
+  let mlo = null;
+  if (mloOn && b5g && b6g) {
+    const mloTput = Math.round((b5g.goodput + b6g.goodput) * 0.9); // 90% efficiency for STR
+    const mloLat  = Math.min(b5g.lat, b6g.lat);
+    const singleBandTput = Math.max(b5g.goodput, b6g.goodput) || 1;
+    mlo = { tput: mloTput, lat: mloLat, gain: +(mloTput / singleBandTput).toFixed(1) };
+  }
+
+  // Aggregate
+  const activeBands = [b2g, b5g, b6g].filter(Boolean);
+  const capTotal = activeBands.reduce((s, b) => s + phyRate(b5g === b ? ap.ss5g : b6g === b ? ap.ss6g : ap.ss2g, b.bw, b.mcsI, gi) * capMult / 1000, 0) * 280; // Gbps stadium
+  const demandTotal = activeClients * demTotal / 1000; // Gbps
+  const worstAir = Math.max(...activeBands.map(b=>b.air));
+  const worstLat = mloOn && mlo ? mlo.lat : Math.max(...activeBands.map(b=>b.lat));
+  const worstPloss = Math.max(...activeBands.map(b=>b.ploss));
+  const bestTput = mloOn && mlo ? mlo.tput : (b6g || b5g || b2g)?.goodput || 0;
+
+  // Stability score
+  let score = 100;
+  const refBand = b5g || b2g;
+  if (refBand) {
+    if (refBand.snr < 25) score -= Math.min(20, (25-refBand.snr)*1.2);
+    if (worstAir > 70) score -= Math.min(25, (worstAir-70)*1.0);
+  }
+  if (worstLat > 20) score -= Math.min(20, (worstLat-20)*0.4);
+  if (worstPloss > 0.1) score -= Math.min(20, worstPloss*10);
+  if (degLvl > 0) score -= degLvl * 12;
+  if (cyber !== 'none') score -= 8;
+  if (!pmfOn && cyber === 'deauth') score -= 10;
+  score = Math.max(0, Math.round(score));
+
+  // Service class SLAs
+  const posOk    = worstLat <= 10 && worstPloss < 0.5;
+  const vipOk    = bestTput >= 25;
+  const teamsOk  = bestTput >= 5;
+  const guestOk  = score >= 50;
+
+  return {
+    apType, ap, b2g, b5g, b6g, mlo, mloOn,
+    totalSessions, activeClients, perAP,
+    demDL, demUL, demTotal, mix,
+    capTotal: +capTotal.toFixed(1), demandTotal: +demandTotal.toFixed(1),
+    worstAir, worstLat, worstPloss, bestTput,
+    score, degLvl, cyber, pmfOn, airdefOn, kv11, dcsLock,
+    posOk, vipOk, teamsOk, guestOk,
+    noiseOff, txPwr, gi, bw5g, bw6g, mcsFloor, bssColor, ofdmaDL, ofdmaUL, muMimo
+  };
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// RENDER
+// ═══════════════════════════════════════════════════════════════════════
+const CM = { green:'var(--green)', yellow:'var(--yellow)', orange:'var(--orange)', red:'var(--red)' };
+
+function setV(id, val) { const e=document.getElementById(id); if(e) e.textContent=val; }
+function setC(id, c)   { const e=document.getElementById(id); if(e) e.className=`mval ${c}`; }
+function setBF(id, pct, c) { const e=document.getElementById(id); if(e){e.style.width=Math.min(100,Math.max(0,pct))+'%';if(c)e.className='mbf '+c;} }
+
+function renderBand(b, key) {
+  if (!b) { document.getElementById(`bp-${key}`).style.opacity='0.3'; return; }
+  document.getElementById(`bp-${key}`).style.opacity='1';
+  const sc = slaC('snr', b.snr);
+  setV(`snr-${key}`, b.snr); setC(`snr-${key}`, sc);
+  setBF(`bar-snr-${key}`, (b.snr/50)*100, `bg-${sc}`);
+  const mc = b.mcsI >= 8?'green':b.mcsI>=4?'yellow':b.mcsI>=0?'orange':'red';
+  const maxMcs = b.gen==='be' ? 13 : 11;
+  setV(`mcs-${key}`, b.mcsI>=0?b.mcsI:'—'); setC(`mcs-${key}`, mc);
+  setV(`mcs-${key}-rate`, b.phy>0?`${b.phy.toLocaleString()} Mbps PHY (${b.gen.toUpperCase()}, ${b.clients} cli)`:'No link');
+  setBF(`bar-mcs-${key}`, b.mcsI>=0?(b.mcsI/maxMcs)*100:0, `bg-${mc}`);
+  const ac = slaC('air', b.air);
+  setV(`air-${key}`, b.air); setC(`air-${key}`, ac); setBF(`bar-air-${key}`, b.air, `bg-${ac}`);
+  setV(`cli-${key}`, b.clients); setBF(`bar-cli-${key}`, (b.clients/100)*100, null);
+  const tc = slaC('tput', b.goodput);
+  setV(`tput-${key}`, b.goodput.toFixed(1)); setC(`tput-${key}`, tc);
+  setBF(`bar-tput-${key}`, Math.min(100, b.goodput/20*100), null);
+}
+
+function render(s) {
+  // Update band panels
+  renderBand(s.b2g, '2g');
+  renderBand(s.b5g, '5g');
+  renderBand(s.b6g, '6g');
+
+  // 6G band tab visibility
+  document.getElementById('tab-6g').style.opacity = s.ap.has6g ? '1' : '0.35';
+  document.getElementById('bp-6g').innerHTML = s.b6g ? document.getElementById('bp-6g').innerHTML : '<div style="color:var(--muted);font-size:10px;padding:20px;text-align:center">6GHz not available on AP3000</div>';
+  if (!s.b6g) renderBand(null, '6g');
+  else renderBand(s.b6g, '6g');
+
+  // MLO card
+  const mloCard = document.getElementById('mlo-card');
+  if (s.mlo && s.mloOn) {
+    mloCard.classList.add('visible');
+    setV('mlo-tput', s.mlo.tput.toFixed(0));
+    setV('mlo-lat', s.mlo.lat);
+    setV('mlo-gain', s.mlo.gain + '×');
+  } else {
+    mloCard.classList.remove('visible');
+  }
+
+  // Aggregate band
+  setV('agg-sess', s.totalSessions.toLocaleString());
+  setBF('bar-agg-sess', (s.totalSessions/100000)*100, null);
+  setV('agg-active', s.activeClients.toLocaleString());
+  setBF('bar-agg-active', (s.activeClients/50000)*100, null);
+  const dc = s.demandTotal > s.capTotal*0.85 ? 'orange' : 'green';
+  setV('agg-demand', s.demandTotal); setBF('bar-agg-demand', (s.demandTotal/s.capTotal)*80, null);
+  setV('agg-cap', s.capTotal); setBF('bar-agg-cap', 70, null);
+  const latC = slaC('lat', s.worstLat);
+  setV('agg-lat', s.worstLat); setC('agg-lat', latC); setBF('bar-agg-lat', (s.worstLat/100)*100, `bg-${latC}`);
+  const plC = slaC('ploss', s.worstPloss);
+  setV('agg-ploss', s.worstPloss.toFixed(2)); setC('agg-ploss', plC);
+  setBF('bar-agg-ploss', Math.min(100,s.worstPloss*20), `bg-${plC}`);
+  setV('agg-dl', s.demDL.toFixed(1)); setBF('bar-agg-dl', Math.min(100,s.demDL/15*100), null);
+  setV('agg-ul', s.demUL.toFixed(1)); setBF('bar-agg-ul', Math.min(100,s.demUL/5*100), null);
+  const dlUlRatio = s.demUL > 0 ? (s.demDL/s.demUL).toFixed(1) : '—';
+  setV('ul-dl-ratio', `DL:UL = ${dlUlRatio}:1`);
+
+  // App mix bar
+  const total = s.mix.vid + s.mix.teams + s.mix.soc + s.mix.bro + s.mix.pos || 1;
+  ['vid','teams','soc','bro','pos'].forEach((k,i) => {
+    const keys = ['vid','teams','soc','bro','pos'];
+    const mixKeys = ['vid','teams','soc','bro','pos'];
+    const el = document.getElementById(`lmix-${k==='vid'?'vid':k==='teams'?'teams':k==='soc'?'social':k==='bro'?'browse':'pos'}`);
+    if(el) el.style.width = (s.mix[k]*100).toFixed(0)+'%';
+  });
+  setV('demand-per-client', `${s.demTotal.toFixed(1)} Mbps/client (DL+UL)`);
+
+  // Service class SLAs
+  function svcStatus(ok, svc) {
+    const e = document.getElementById(`svc-${svc}`);
+    if (e) { e.textContent = ok ? '✓ PASS' : '✗ FAIL'; e.style.color = ok ? CM.green : CM.red; }
+  }
+  svcStatus(s.posOk, 'pos'); svcStatus(s.vipOk, 'vip'); svcStatus(s.teamsOk, 'teams'); svcStatus(s.guestOk, 'guest');
+  setV('svc-pos-d', `Lat: ${s.worstLat}ms (≤10ms)`);
+  setV('svc-vip-d', `${s.bestTput.toFixed(0)} Mbps (≥25)`);
+  setV('svc-teams-d', `${s.bestTput.toFixed(0)} Mbps (≥5)`);
+  setV('svc-guest-d', `Score: ${s.score}/100`);
+
+  // Degradation bar
+  const degColors = ['active-0','active-1','active-2','active-3','active-4'];
+  for (let i=0;i<5;i++) {
+    const seg = document.getElementById(`ds-${i}`);
+    if (seg) seg.className = 'deg-seg' + (i<=s.degLvl ? ` ${degColors[Math.min(s.degLvl,4)]}` : '');
+  }
+  const degLabels = ['0 — Nominal','1 — 5G CCI','2 — Dual Degrade','3 — Jammer+Auth','4 — Critical'];
+  const degColors2 = [CM.green, CM.yellow, CM.orange, CM.red, '#ff0000'];
+  setV('deg-inline', degLabels[s.degLvl]);
+  const degInline = document.getElementById('deg-inline');
+  if (degInline) degInline.style.color = degColors2[s.degLvl];
+  setV('deg-lbl-val', degLabels[s.degLvl]);
+  const degLblVal = document.getElementById('deg-lbl-val');
+  if (degLblVal) degLblVal.style.color = degColors2[s.degLvl];
+
+  // Stability gauge
+  drawGauge2(s.score);
+  const stabLabels = ['STABLE','STABLE','DEGRADED','WARNING','CRITICAL'];
+  const stabColors = [CM.green, CM.green, CM.yellow, CM.orange, CM.red];
+  const stabLevel = s.score>=85?0:s.score>=70?1:s.score>=50?2:s.score>=30?3:4;
+  setV('stab-lbl', s.score>=85?'STABLE':s.score>=70?'DEGRADED':s.score>=50?'WARNING':'CRITICAL');
+  const stLbl = document.getElementById('stab-lbl');
+  if(stLbl) stLbl.style.color = stabColors[stabLevel];
+  setV('stab-score', `Score: ${s.score} / 100`);
+  const sf = document.getElementById('stab-fill');
+  if(sf) { sf.style.width=s.score+'%'; sf.className=`stab-fill bg-${s.score>=85?'green':s.score>=65?'yellow':s.score>=40?'orange':'red'}`; }
+
+  // Status badge
+  const badge = document.getElementById('status-badge');
+  if (badge) {
+    const sl = s.score>=85?'STABLE':s.score>=65?'DEGRADED':s.score>=40?'WARNING':'CRITICAL';
+    const sc2 = s.score>=85?'#00d97e':s.score>=65?'#ffc107':s.score>=40?'#ff6d2d':'#f4455a';
+    badge.textContent = `● ${sl}`;
+    badge.style.color = sc2;
+    badge.style.borderColor = sc2+'44';
+    badge.style.background  = sc2+'11';
+  }
+
+  // Header sub
+  const refB = s.b5g || s.b2g;
+  setV('hdr-sub', `${s.apType} · ${s.ap.wifiGen} · ${s.totalSessions.toLocaleString()} sessions · ${s.activeClients.toLocaleString()} active · ${s.demandTotal} Gbps demand · ${s.capTotal} Gbps capacity`);
+
+  // AP type badge
+  const apBadge = document.getElementById('ap-gen-badge');
+  if (apBadge) { apBadge.textContent = s.ap.wifiGen; apBadge.style.color = s.apType==='AP5060'?'#9b7aff':'#3a9de0'; }
+  const apTogBadge = document.getElementById('ap-toggle-badge');
+  if (apTogBadge) apTogBadge.textContent = `${s.apType} ⇄`;
+
+  // MLO toggle enabled only for AP5060
+  const mloRow = document.getElementById('mlo-row');
+  if (mloRow) mloRow.style.opacity = s.ap.mlo ? '1' : '0.35';
+  const bw6grp = document.getElementById('bw6-group');
+  if (bw6grp) bw6grp.style.opacity = s.ap.has6g ? '1' : '0.35';
+
+  // AP grid
+  updateApGrid2(s.score);
+
+  // Recovery actions
+  const recs = buildRecs(s);
+  const recList = document.getElementById('rec-list');
+  if (recList) recList.innerHTML = recs.map(r=>`<div class="ra ra-${r.t}">${r.m}</div>`).join('');
+
+  // SLA bar
+  const slaData = [
+    { name:'Latency', val:`${s.worstLat}ms`, thr:'≤20ms', c:slaC('lat',s.worstLat) },
+    { name:'Airtime', val:`${s.worstAir}%`,  thr:'≤70%',  c:slaC('air',s.worstAir) },
+    { name:'Loss',    val:`${s.worstPloss.toFixed(2)}%`, thr:'≤0.1%', c:slaC('ploss',s.worstPloss) },
+    { name:'Tput',    val:`${s.bestTput.toFixed(0)}M`,   thr:'≥5M',  c:slaC('tput',s.bestTput) },
+    { name:'Sessions',val:s.totalSessions.toLocaleString(), thr:'—', c:'blue' },
+    { name:'Demand',  val:`${s.demandTotal}G`,  thr:s.capTotal+'G', c: s.demandTotal<s.capTotal*0.85?'green':'orange' },
+    { name:'POS',     val:s.posOk?'PASS':'FAIL', thr:'≤10ms', c:s.posOk?'green':'red' },
+    { name:'MLO',     val:s.mlo?`×${s.mlo.gain}`:'—', thr:'5G+6G', c:s.mlo?'purple':'muted' },
+  ];
+  const cMap = { green:CM.green, yellow:CM.yellow, orange:CM.orange, red:CM.red, blue:'var(--blue)', purple:'var(--purple)', muted:'var(--muted)' };
+  const slaBar = document.getElementById('sla-bar2');
+  if (slaBar) slaBar.innerHTML =
+    `<span style="font-size:8px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-right:3px;flex-shrink:0">SLA</span>` +
+    slaData.map(c=>`<div class="sla-chip"><div class="sla-dot" style="background:${cMap[c.c]||cMap.muted}"></div><span class="sla-lbl">${c.name}</span><span class="sla-v" style="color:${cMap[c.c]||cMap.muted}">${c.val}</span><span class="sla-lbl">${c.thr}</span></div>`).join('');
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// GAUGE
+// ═══════════════════════════════════════════════════════════════════════
+function drawGauge2(score) {
+  const c = document.getElementById('gauge2');
+  if (!c) return;
+  const ctx = c.getContext('2d');
+  const w=c.width, h=c.height, cx=w/2, cy=h-8, r=82;
+  ctx.clearRect(0,0,w,h);
+  ctx.beginPath(); ctx.arc(cx,cy,r,Math.PI,2*Math.PI); ctx.lineWidth=14; ctx.strokeStyle='#1a1e25'; ctx.stroke();
+  const fill=Math.PI+(score/100)*Math.PI;
+  const g=ctx.createLinearGradient(cx-r,cy,cx+r,cy);
+  g.addColorStop(0,'#f4455a'); g.addColorStop(.4,'#ffc107'); g.addColorStop(.75,'#00d97e'); g.addColorStop(1,'#00d97e');
+  ctx.beginPath(); ctx.arc(cx,cy,r,Math.PI,fill); ctx.lineWidth=14; ctx.strokeStyle=g; ctx.stroke();
+  const na=Math.PI+(score/100)*Math.PI;
+  ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(cx+(r-6)*Math.cos(na),cy+(r-6)*Math.sin(na));
+  ctx.lineWidth=2; ctx.strokeStyle='#fff'; ctx.stroke();
+  ctx.beginPath(); ctx.arc(cx,cy,5,0,2*Math.PI); ctx.fillStyle='#fff'; ctx.fill();
+  ctx.fillStyle='#fff'; ctx.font='bold 20px monospace'; ctx.textAlign='center'; ctx.fillText(score,cx,cy-12);
+  ctx.fillStyle='#5a6270'; ctx.font='9px monospace'; ctx.fillText('/100',cx,cy-1);
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// AP GRID
+// ═══════════════════════════════════════════════════════════════════════
+function buildApGrid2() {
+  const g = document.getElementById('ap-grid2');
+  if (!g) return;
+  g.innerHTML = '';
+  for (let i=0;i<280;i++) {
+    const d=document.createElement('div'); d.className='ap-dot'; d.id=`ap2-${i}`; d.title=`AP${i+1}`; g.appendChild(d);
+  }
+}
+
+function updateApGrid2(score) {
+  const fault = score<50?.55:score<65?.25:score<80?.08:score<92?.02:0;
+  const warn  = score<65?.35:score<80?.20:score<92?.07:0;
+  for (let i=0;i<280;i++) {
+    const d=document.getElementById(`ap2-${i}`);
+    if (!d) continue;
+    const r=Math.random();
+    d.style.background = r<fault?CM.red:r<fault+warn?CM.yellow:'var(--green)';
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// RECOVERY ACTIONS
+// ═══════════════════════════════════════════════════════════════════════
+function buildRecs(s) {
+  const recs = [];
+  const refB = s.b5g || s.b2g;
+  if (refB && refB.snr < 15) recs.push({t:'auto', m:'⚙ TPC: TX power boosted to max'});
+  if (refB && refB.snr < 15 && !s.dcsLock) recs.push({t:'auto', m:'⚙ DCS: Emergency channel hop initiated'});
+  if (s.worstAir > 85) recs.push({t:'auto', m:`⚙ Admission: MCS floor raised → MCS ${Math.max(s.mcsFloor,6)}`});
+  if (s.worstAir > 95) recs.push({t:'alert', m:'🚨 Capacity: New assoc BLOCKED (radio full)'});
+  if (s.degLvl >= 3) recs.push({t:'alert', m:'🚨 Jammer SEV3 — EP1 AirDefense alert raised'});
+  if (s.degLvl >= 3 && !s.dcsLock) recs.push({t:'auto', m:'⚙ DCS: Emergency hop (non-DFS seed)'});
+  if (s.cyber === 'deauth') recs.push(s.pmfOn ? {t:'ok', m:'✓ 802.11w PMF: Deauth flood absorbed'} : {t:'alert', m:'🚨 PMF OFF — deauth flood impacting clients'});
+  if (s.cyber === 'evil_twin') recs.push(s.airdefOn ? {t:'ok', m:'✓ AirDefense: Rogue AP contained'} : {t:'alert', m:'🚨 AirDefense OFF — evil twin active'});
+  if (s.cyber === 'cred_storm') recs.push({t:'warn', m:'⚠ EP1 Security: Auth storm → rate-limit'});
+  if (s.mloOn && s.mlo) recs.push({t:'info', m:`⚡ MLO: 5G+6G bonded STR → ×${s.mlo.gain} throughput`});
+  if (!s.kv11 && s.worstAir > 60) recs.push({t:'warn', m:'⚠ 802.11k/v OFF — slow roaming (500ms)'});
+  if (s.worstLat > 50) recs.push({t:'alert', m:`🚨 SLA BREACH: Latency ${s.worstLat}ms > 50ms`});
+  if (s.worstPloss > 1) recs.push({t:'alert', m:`🚨 SLA BREACH: Packet loss ${s.worstPloss}% > 1%`});
+  if (s.dcsLock) recs.push({t:'info', m:'🔒 DCS Lock: Channel plan frozen for match'});
+  if (recs.length === 0) recs.push({t:'ok', m:'✓ All systems nominal'});
+  return recs.slice(0,8);
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// LOG
+// ═══════════════════════════════════════════════════════════════════════
+function addLog(msg, type) {
+  const now = new Date();
+  const ts = now.toTimeString().slice(0,8);
+  logEntries.unshift({ts,msg,type});
+  if (logEntries.length > 60) logEntries.pop();
+  const el = document.getElementById('log-wrap');
+  if (el) el.innerHTML = logEntries.map(e=>`<div class="log-e"><span class="log-t">${e.ts}</span><span class="log-${e.type}">${e.msg}</span></div>`).join('');
+}
+
+function detectEvents(curr, prev) {
+  if (!prev.score) return;
+  const drop = (prev.score||100) - curr.score;
+  if (drop > 10) addLog(`Stability drop ${prev.score}→${curr.score} (−${drop})`, 'warn');
+  if (drop < -8) addLog(`Stability recovery ${prev.score}→${curr.score} (+${Math.abs(drop)})`, 'ok');
+  if (curr.degLvl !== prev.degLvl) addLog(`Degradation Level ${prev.degLvl||0}→${curr.degLvl}: ${['Nominal','5G CCI','Dual Degrade','Jammer+Auth','Critical'][curr.degLvl]}`, curr.degLvl>0?'warn':'ok');
+  if (curr.cyber !== prev.cyber) curr.cyber!=='none' ? addLog(`Cyber attack: ${curr.cyber.replace(/_/g,' ')}`, 'alert') : addLog('Cyber attack cleared', 'ok');
+  if (curr.mloOn && !prev.mloOn) addLog('MLO enabled: 5G+6G bonded STR active', 'info');
+  if (!curr.mloOn && prev.mloOn) addLog('MLO disabled: single-band mode', 'warn');
+  if (curr.totalSessions !== prev.totalSessions && Math.abs(curr.totalSessions-(prev.totalSessions||0))>500) {
+    addLog(`Sessions: ${(prev.totalSessions||0).toLocaleString()}→${curr.totalSessions.toLocaleString()} (${curr.activeClients.toLocaleString()} active)`, 'auto');
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// MAIN UPDATE
+// ═══════════════════════════════════════════════════════════════════════
+function update() {
+  // Update display labels
+  const apType = document.getElementById('ap-type').value;
+  const tVal = +document.getElementById('t-scrub').value;
+  const tLabel = tVal < 0 ? `T−${Math.abs(tVal)} min` : tVal === 0 ? 'T+0 Kickoff' : `T+${tVal} min`;
+  setV('t-label', tLabel);
+
+  // Find active preset
+  const preset = PRESETS.find(p=>p.t===tVal);
+  setV('preset-note', preset ? preset.note : (tVal<0?'Pre-match period':'Post-match period'));
+
+  // Highlight active preset button
+  document.querySelectorAll('.preset-btn').forEach(b => {
+    const t = parseInt(b.getAttribute('data-t'));
+    b.classList.toggle('active', t===tVal);
+  });
+
+  setV('fan-val', (+document.getElementById('fan-count').value).toLocaleString());
+  setV('dev-val', (+document.getElementById('dev-mult').value/10).toFixed(1)+'×');
+  setV('attach-val', document.getElementById('wifi-attach').value+'%');
+  setV('conc-val', document.getElementById('concurrency').value+'%');
+  setV('bw5-val', document.getElementById('bw-5g').value+' MHz');
+  setV('bw6-val', document.getElementById('bw-6g').value+' MHz');
+  setV('gi-val', document.getElementById('guard-int').value+' ns');
+  setV('noise-val', document.getElementById('noise-floor').value+' dB');
+  setV('txpwr-val', document.getElementById('tx-power').value+' dBm');
+  setV('mcsfloor-val', 'MCS '+document.getElementById('mcs-floor').value);
+  setV('vid-val', document.getElementById('mix-video').value+'%');
+  setV('teams-val', document.getElementById('mix-teams').value+'%');
+  setV('social-val', document.getElementById('mix-social').value+'%');
+  setV('browse-val', document.getElementById('mix-browse').value+'%');
+  setV('pos-val', document.getElementById('mix-pos').value+'%');
+
+  const s = compute();
+  detectEvents(s, prevState);
+  render(s);
+  prevState = {...s};
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// CONTROLS
+// ═══════════════════════════════════════════════════════════════════════
+function setPreset(t) {
+  document.getElementById('t-scrub').value = t;
+  const preset = PRESETS.find(p=>p.t===t);
+  if (preset) {
+    document.getElementById('concurrency').value = Math.round(preset.concPct * 100);
+  }
+  update();
+}
+
+function showBand(band) {
+  activeBand = band;
+  ['2g','5g','6g','agg'].forEach(b => {
+    document.getElementById(`tab-${b}`)?.classList.remove('active');
+    document.getElementById(`bp-${b}`)?.classList.remove('visible');
+  });
+  document.getElementById(`tab-${band}`)?.classList.add('active');
+  document.getElementById(`bp-${band}`)?.classList.add('visible');
+}
+
+function toggleAP() {
+  const sel = document.getElementById('ap-type');
+  sel.value = sel.value === 'AP5060' ? 'AP3000' : 'AP5060';
+  addLog(`AP type switched to ${sel.value} — ${AP_CONFIGS[sel.value].wifiGen}`, 'auto');
+  update();
+}
+
+function resetAll() {
+  document.getElementById('ap-type').value = 'AP5060';
+  document.getElementById('t-scrub').value = 0;
+  document.getElementById('fan-count').value = 72000;
+  document.getElementById('dev-mult').value = 14;
+  document.getElementById('wifi-attach').value = 75;
+  document.getElementById('concurrency').value = 55;
+  document.getElementById('bw-5g').value = 160;
+  document.getElementById('bw-6g').value = 320;
+  document.getElementById('guard-int').value = 1600;
+  document.getElementById('noise-floor').value = 0;
+  document.getElementById('tx-power').value = 17;
+  document.getElementById('mcs-floor').value = 4;
+  document.getElementById('mix-video').value = 25;
+  document.getElementById('mix-teams').value = 10;
+  document.getElementById('mix-social').value = 40;
+  document.getElementById('mix-browse').value = 20;
+  document.getElementById('mix-pos').value = 5;
+  document.getElementById('tog-ofdma-dl').checked = true;
+  document.getElementById('tog-ofdma-ul').checked = true;
+  document.getElementById('tog-mumimo').checked = true;
+  document.getElementById('tog-bsscolor').checked = true;
+  document.getElementById('tog-mlo').checked = true;
+  document.getElementById('tog-11kv').checked = true;
+  document.getElementById('tog-pmf').checked = true;
+  document.getElementById('tog-airdef').checked = true;
+  document.getElementById('tog-dcslock').checked = false;
+  document.getElementById('deg-level').value = 0;
+  document.getElementById('cyber-attack').value = 'none';
+  addLog('Reset to Lumen Field baseline — AP5060, T+0 Kickoff, 72K fans', 'ok');
+  update();
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// WIRE EVENTS + INIT
+// ═══════════════════════════════════════════════════════════════════════
+document.querySelectorAll('input[type=range], select').forEach(el => {
+  el.addEventListener('input', update);
+});
+
+// Wire preset button data-t
+document.querySelectorAll('.preset-btn').forEach((btn, i) => {
+  const ts = [-90,-30,0,48,90,110];
+  btn.setAttribute('data-t', ts[i]);
+});
+
+buildApGrid2();
+addLog('Stadium WiFi Simulator v2 loaded — 280×AP5060 · WiFi 7 EHT · Multi-band · MLO', 'ok');
+addLog('Bands: 2.4GHz (20MHz/2SS) · 5GHz (160MHz/4SS) · 6GHz (320MHz/4SS)', 'auto');
+addLog('Features: OFDMA DL×1.35 UL×1.20 · MU-MIMO ×4 DL · BSS Color CCI×0.80 · MLO STR', 'info');
+addLog('SLAs: SNR≥25dB · Airtime≤70% · Latency≤20ms · Loss≤0.1% · POS≤10ms', 'auto');
+setPreset(0);
+</script>
+</body>
+</html>
