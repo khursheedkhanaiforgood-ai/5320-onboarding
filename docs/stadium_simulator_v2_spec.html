@@ -118,6 +118,7 @@
   <a href="#optional-settings">Optional Settings</a>
   <a href="#power-channel">Power &amp; Channel</a>
   <a href="#broadcom">Broadcom Layer</a>
+  <a href="#simulator-params">From The Simulators</a>
 </nav>
 
 <!-- ── I/O MODEL ── -->
@@ -859,6 +860,223 @@
     <tr><td>N-5</td><td><strong>SDR Band Mode (AP5060)</strong></td><td><span class="badge badge-toggle">Toggle</span></td><td>Dual-5G</td><td>Dual-6G (inner bowl)</td><td>AP5060 can allocate both radios to 6G instead of one 5G + one 6G. Doubles 6G capacity at cost of 5G. Simulator: adjusts band distribution model for AP5060 APs.</td></tr>
     <tr><td>N-6</td><td><strong>Preamble Puncturing (WiFi 7)</strong></td><td><span class="badge badge-toggle">Toggle</span></td><td>Off</td><td class="optimal">On (be profiles)</td><td>Allows 320 MHz channels to operate with a punctured sub-channel. Improves 6G spectrum efficiency when incumbents occupy narrow sub-bands. WiFi 7 only.</td></tr>
     <tr><td>N-7</td><td><strong>Legacy Mode (disable 802.11b)</strong></td><td><span class="badge badge-toggle">Toggle</span></td><td>On (b enabled)</td><td class="warning">Off (b disabled)</td><td>Removes protection overhead on 2.4G. Airtime efficiency +8–15% on 2.4 GHz band. (From §8.1)</td></tr>
+  </table>
+
+</section>
+
+<!-- ── SECTION 11 — FROM THE SIMULATORS ── -->
+<section id="simulator-params">
+  <h2>11. From The Simulators — Complete 27-Parameter Set</h2>
+  <p>Sources: the <strong>802.11be End-to-End WiFi Simulator</strong> (AP5060 × MacBook Pro M4) and the <strong>WiFi 7 AP Design Tool</strong> (Extreme AP5010 / Cisco Catalyst 9178 / Juniper Mist AP45 — all on Qualcomm IPQ9574). These two simulators were built April 22 2026 and contain the definitive parameter set for 802.11be deployments.</p>
+
+  <div class="callout-red">
+    <p><strong>Guard Interval correction to Section 5 (Constants):</strong> The Constants section states "Short GI = ON" as the spec. This is wrong for 802.11be. WiFi 7 (802.11be) does <strong>not use 400ns SGI</strong>. Guard Interval options are <strong>800ns / 1600ns / 3200ns only</strong>. Default is <strong>1600ns</strong> (Long GI for the 12.8μs EHT symbol). 800ns is available for pristine indoor RF. 400ns SGI exists only in WiFi 4 (802.11n) and WiFi 5 (802.11ac). Treat GI as a new Slider, not a fixed constant.</p>
+  </div>
+
+  <!-- ── 11.1 — 27 PARAMETERS ── -->
+  <h3 id="sim-27">11.1 — The 27 Configurable Parameters (from WiFi 7 AP Design Tool)</h3>
+  <p>These are all parameters exposed in the tool across 7 tabs. Vendor CLI path shown for Extreme AP5010 / XIQ. All three vendors (Cisco/Extreme/Juniper) converge on identical values when configured to the same spec — confirming these are standard 802.11be parameters, not vendor-specific.</p>
+
+  <h4 style="font-size:0.9rem;font-weight:700;margin:18px 0 8px;color:#1a6fba">PHY — 5 parameters</h4>
+  <table>
+    <tr><th>#</th><th>Parameter</th><th>Options</th><th>Default (AP Design Tool)</th><th>Stadium Target</th><th>XIQ Path</th><th>Simulator Type</th></tr>
+    <tr>
+      <td>P1</td><td><strong>Channel Width</strong></td>
+      <td>20 / 40 / 80 / 160 / 320 MHz</td>
+      <td>160 MHz</td><td class="warning">320 MHz (6G, WiFi 7)</td>
+      <td>XIQ → RF Profiles → Radio → Channel Width</td>
+      <td><span class="badge badge-slider">Slider</span></td>
+    </tr>
+    <tr>
+      <td>P2</td><td><strong>Guard Interval</strong></td>
+      <td>800ns / 1600ns / 3200ns <em>(no 400ns in 802.11be)</em></td>
+      <td>1600ns</td><td class="optimal">800ns (indoor stadium)</td>
+      <td>XIQ → RF Profiles → PHY Settings → GI</td>
+      <td><span class="badge badge-slider">Slider</span></td>
+    </tr>
+    <tr>
+      <td>P3</td><td><strong>TX Power (dBm)</strong></td>
+      <td>1–30 dBm (LPI: max ~17–20 dBm; SP with AFC: up to 30 dBm)</td>
+      <td>20 dBm</td><td class="warning">17 dBm (AP5060 datasheet max)</td>
+      <td>XIQ → Radio Profiles → TX Power</td>
+      <td><span class="badge badge-slider">Slider</span></td>
+    </tr>
+    <tr>
+      <td>P4</td><td><strong>MCS Floor (Min Rate)</strong></td>
+      <td>EHT-MCS 0–13 (HE 0–11 for ax profiles)</td>
+      <td>MCS 3</td><td class="warning">MCS 5–7 (stadium density)</td>
+      <td>XIQ → SSIDs → Advanced → Min Rate</td>
+      <td><span class="badge badge-slider">Slider</span></td>
+    </tr>
+    <tr>
+      <td>P5</td><td><strong>4K-QAM (EHT-MCS 12/13)</strong></td>
+      <td>Disabled / Enabled</td>
+      <td>Enabled</td><td class="optimal">Enabled (inner bowl only — needs ≥45 dB SNR)</td>
+      <td>XIQ → RF Profiles → 802.11be → 4K-QAM</td>
+      <td><span class="badge badge-toggle">Toggle</span></td>
+    </tr>
+  </table>
+  <div class="callout">
+    <p><strong>MCS Floor vs MBR vs SNR threshold:</strong> Three separate controls that all affect cell size. MCS Floor = minimum MCS index AP will use (ejects clients below MCS 3). MBR (Min Basic Rate in Mbps) = minimum legacy rate. SNR Threshold = admission control boundary. For stadium: set all three together. MCS Floor MCS 5–7 at Lumen Field forces high-quality connections only — weak clients roam rather than degrading the whole AP.</p>
+  </div>
+
+  <h4 style="font-size:0.9rem;font-weight:700;margin:22px 0 8px;color:#1a6fba">MAC/EDCA — 5 parameters</h4>
+  <table>
+    <tr><th>#</th><th>Parameter</th><th>Default</th><th>Stadium Target</th><th>Notes</th></tr>
+    <tr><td>M1</td><td><strong>CWmin AC_VO (Voice)</strong></td><td>3 slots</td><td class="optimal">3 (keep)</td><td>Contention window minimum for voice. Smaller CW = more aggressive channel access. Standard IEEE 802.11e value.</td></tr>
+    <tr><td>M2</td><td><strong>CWmin AC_BE (Best Effort)</strong></td><td>15 slots</td><td class="optimal">15 (keep)</td><td>Larger CW for BE traffic yields to VO/VI. Standard value.</td></tr>
+    <tr><td>M3</td><td><strong>TXOP AC_VO (µs)</strong></td><td>1504 µs</td><td class="warning">Raise to 3008 µs on Teams SSID</td><td>Channel hold time for voice. Higher = longer uninterrupted voice burst. On Teams/Comms SSID only.</td></tr>
+    <tr><td>M4</td><td><strong>TXOP AC_BE (µs)</strong></td><td>3008 µs</td><td class="optimal">3008 (keep)</td><td><strong>Correction from Section 5:</strong> EP1 default shows 0 but AP Design Tool baseline is 3008 µs for BE. Verify against actual EP1 profile export.</td></tr>
+    <tr><td>M5</td><td><strong>RTS/CTS Threshold (bytes)</strong></td><td>2347 bytes (off)</td><td class="warning">1500 bytes (dense venue)</td><td>Enable RTS/CTS for frames &gt;1500 bytes. Reduces hidden-node collisions in dense stadium environment. ~5% overhead cost.</td></tr>
+  </table>
+
+  <h4 style="font-size:0.9rem;font-weight:700;margin:22px 0 8px;color:#1a6fba">OFDMA/MU — 5 parameters</h4>
+  <table>
+    <tr><th>#</th><th>Parameter</th><th>Default</th><th>Stadium Target</th><th>Simulator Effect</th></tr>
+    <tr><td>O1</td><td><strong>DL-OFDMA</strong></td><td>Enabled</td><td class="optimal">On</td><td>DL capacity multiplier ×1.35. Separate from UL-OFDMA — both must be on. Maps to Toggle 1 in existing spec.</td></tr>
+    <tr><td>O2</td><td><strong>UL-OFDMA (Trigger Frame)</strong></td><td>Enabled</td><td class="optimal">On</td><td>UL capacity multiplier ×1.20. AP sends Trigger Frame to schedule simultaneous UL transmissions. Critical for 72K fan uploads.</td></tr>
+    <tr><td>O3</td><td><strong>MU-MIMO Streams</strong></td><td>8 streams</td><td class="optimal">8 streams (AP5060 maximum)</td><td>Spatial stream multiplier. AP5060 = 4×4:4 = 4 spatial streams per radio. 8 streams = 2 radios combined. Maps to Toggle 3.</td></tr>
+    <tr><td>O4</td><td><strong>Multi-RU Assignment</strong></td><td>Enabled</td><td class="optimal">On (WiFi 7 only)</td><td><strong>New parameter.</strong> 802.11be allows assigning multiple non-contiguous Resource Units to a single client in one TXOP. Improves throughput for high-demand clients (4K video). Not available in ax profiles.</td></tr>
+    <tr><td>O5</td><td><strong>BSS Color</strong></td><td>5 (or Auto)</td><td class="optimal">Auto</td><td>1–63 color ID. Auto = chipset detects conflicts and reassigns. Maps to Toggle 2. The color value itself is chipset-managed; the enable/disable is the user control.</td></tr>
+  </table>
+
+  <h4 style="font-size:0.9rem;font-weight:700;margin:22px 0 8px;color:#1a6fba">MLO — 4 parameters</h4>
+  <table>
+    <tr><th>#</th><th>Parameter</th><th>Options</th><th>Default</th><th>Stadium Target</th><th>Notes</th></tr>
+    <tr>
+      <td>L1</td><td><strong>MLO Mode</strong></td>
+      <td>STR / NSTR</td><td>STR</td><td class="optimal">STR</td>
+      <td><strong>STR (Simultaneous TX/RX):</strong> both 5G and 6G radios active simultaneously — full aggregate throughput. Requires sufficient frequency separation so 5G TX doesn't desensitise 6G RX. IPQ9574 STR engine in silicon. <strong>NSTR:</strong> time-division, ~60% of STR throughput, simpler RF design, common in client devices.</td>
+    </tr>
+    <tr>
+      <td>L2</td><td><strong>MLO Active Links</strong></td>
+      <td>1 / 2 / 3</td><td>2</td><td class="optimal">2 (5G + 6G)</td>
+      <td>Number of simultaneous links. 2 = 5G + 6G bonded. 3 = 2.4G + 5G + 6G (requires tri-radio client, rare in 2026). Simulator: MLO throughput = sum of per-link throughput when STR, min-latency = minimum of per-link latency.</td>
+    </tr>
+    <tr>
+      <td>L3</td><td><strong>MLO Traffic Steering</strong></td>
+      <td>QoS-based / Load-based / Latency-based</td><td>QoS-based</td><td class="optimal">QoS-based</td>
+      <td>Determines how traffic is split across MLO links. QoS-based: VO/VI → lower-latency link, BE/BK → higher-throughput link. Firmware-layer decision (not silicon). Mist AI uses ML-based dynamic steering instead of static QoS mapping.</td>
+    </tr>
+    <tr>
+      <td>L4</td><td><strong>Restricted TWT (rTWT)</strong></td>
+      <td>Disabled / Enabled</td><td>Enabled</td><td class="optimal">Enabled (POS/IoT SSIDs)</td>
+      <td><strong>rTWT is fundamentally different from basic TWT.</strong> rTWT creates hardware-enforced Service Periods where CSMA/CA is completely suspended — only scheduled devices transmit. AP hardware timer (IPQ9574 MAC) enforces SP boundaries at microsecond precision. Equivalent to an LTE subframe for scheduled traffic. Basic TWT only schedules individual device wake windows — CSMA/CA still runs. For POS: rTWT guarantees transaction latency during peak fan traffic.</td>
+    </tr>
+  </table>
+
+  <h4 style="font-size:0.9rem;font-weight:700;margin:22px 0 8px;color:#1a6fba">Beacon/Mgmt — 2 parameters</h4>
+  <table>
+    <tr><th>#</th><th>Parameter</th><th>Default</th><th>Stadium Target</th><th>Notes</th></tr>
+    <tr><td>B1</td><td><strong>Beacon Interval</strong></td><td>100 TU (102.4 ms)</td><td class="optimal">100 TU (keep)</td><td>Consistent with EP1 defaults and existing spec. Do not reduce — doubles management overhead.</td></tr>
+    <tr><td>B2</td><td><strong>DTIM Period</strong></td><td>2 beacons</td><td class="optimal">2 (AP Design Tool default)</td><td><strong>Correction from Section 8:</strong> EP1 default is DTIM=1. AP Design Tool baseline is DTIM=2. DTIM=2 halves multicast paging frequency, reduces broadcast storm from 72K sleeping devices. Use 2 as the stadium baseline.</td></tr>
+  </table>
+
+  <h4 style="font-size:0.9rem;font-weight:700;margin:22px 0 8px;color:#1a6fba">Roaming — 3 parameters</h4>
+  <table>
+    <tr><th>#</th><th>Parameter</th><th>Default</th><th>Stadium Target</th><th>Notes</th></tr>
+    <tr><td>R1</td><td><strong>802.11r Fast BSS Transition</strong></td><td>Enabled (MLO-Aware)</td><td class="optimal">On (MLO-Aware mode)</td><td>MLO-Aware 802.11r allows fast roaming per-link while maintaining the other MLO link active. Roaming on the 6G link while 5G link stays connected = zero service interruption. Maps to N-4 in Section 10.</td></tr>
+    <tr><td>R2</td><td><strong>Min RSSI Admission</strong></td><td>−70 dBm</td><td class="warning">−67 dBm (tighter)</td><td>Alternative expression of admission control: AP rejects clients below this RSSI (vs SNR threshold which is relative to noise floor). −70 dBm ≈ SNR 20–25 dB in typical indoor environment. −67 dBm = stadium coverage target (MCS 7 reliable). Feeds same cell boundary slider as Slider 3.</td></tr>
+    <tr><td>R3</td><td><strong>802.11k Neighbour Reports</strong></td><td>Enabled</td><td class="optimal">On</td><td>Already in Section 8.5 as critical. Confirmed mandatory here. Reduces roaming scan from 400 ms (blind) to ~50 ms (assisted).</td></tr>
+  </table>
+
+  <h4 style="font-size:0.9rem;font-weight:700;margin:22px 0 8px;color:#1a6fba">Security — 3 parameters</h4>
+  <table>
+    <tr><th>#</th><th>Parameter</th><th>Default</th><th>Stadium Target</th><th>Notes</th></tr>
+    <tr><td>S1</td><td><strong>Security Mode</strong></td><td>WPA3-SAE</td><td class="optimal">WPA3-SAE (Personal) · WPA3-Enterprise (Staff/POS)</td><td>WPA3-SAE for guest/fan SSIDs. WPA3-Enterprise (802.1X) for Staff/Teams/POS as proven in Sprint 1.</td></tr>
+    <tr><td>S2</td><td><strong>Management Frame Protection (PMF)</strong></td><td>Required</td><td class="optimal">Required</td><td>PMF = 802.11w. Required for WPA3 — cannot disable. Encrypts deauth/disassoc frames. Prevents deauth attack on 72K fans.</td></tr>
+    <tr><td>S3</td><td><strong>SAE PWE Method</strong></td><td>H2E (Hash-to-Element)</td><td class="optimal">H2E</td><td>H2E (Hash-to-Element) is more secure than the older Hunt-and-Peck method — resistant to timing side-channel attacks. Required for WPA3-R2 (post-2020 certification). Use H2E for all WPA3-SAE SSIDs at Lumen Field.</td></tr>
+  </table>
+
+  <!-- ── 11.2 — SILICON ARCHITECTURE MAP ── -->
+  <h3 id="sim-silicon">11.2 — Silicon Architecture Map — IPQ9574 / BCM6756</h3>
+  <p>From the Silicon tab of the WiFi 7 AP Design Tool. Three layers of control: silicon-fixed (cannot configure), firmware-layer (vendor proprietary, auto), and controller-exposed (user-configurable).</p>
+
+  <h4 style="font-size:0.9rem;font-weight:700;margin:18px 0 8px;color:#333">Silicon-Fixed — Qualcomm IPQ9574 (Extreme AP5010 chipset)</h4>
+  <table>
+    <tr><th>Parameter</th><th>Value</th><th>Standard</th><th>Simulator Treatment</th></tr>
+    <tr><td>SIFS</td><td>16 µs (5/6 GHz) · 10 µs (2.4 GHz)</td><td>802.11-2020</td><td>Fixed constant in MAC timing model</td></tr>
+    <tr><td>Slot time (σ)</td><td>9 µs (5/6 GHz) · 20 µs (2.4 GHz)</td><td>802.11-2020</td><td>Fixed constant in CSMA/CA backoff model</td></tr>
+    <tr><td>DIFS = SIFS + 2σ</td><td>34 µs (5/6 GHz)</td><td>Derived</td><td>Fixed constant — minimum idle time before transmit</td></tr>
+    <tr><td>OFDM subcarrier spacing</td><td>78.125 kHz (EHT/HE)</td><td>802.11be/ax</td><td>Fixed — used in OFDMA RU size calculation</td></tr>
+    <tr><td>Symbol duration (useful)</td><td>12.8 µs</td><td>802.11be/ax</td><td>Fixed — EHT symbol. OFDM efficiency = 12.8/(12.8+GI)</td></tr>
+    <tr><td>EHT-SIG preamble engine</td><td>HW state machine</td><td>802.11be</td><td>Fixed overhead in per-frame timing model</td></tr>
+    <tr><td>320 MHz FFT</td><td>4096-point in silicon</td><td>802.11be</td><td>Fixed — enables 320 MHz channel width option</td></tr>
+    <tr><td>4K-QAM constellation</td><td>HW mapper/demapper</td><td>802.11be</td><td>Fixed — enabled/disabled via policy toggle (P5)</td></tr>
+    <tr><td>MLO MAC coordinator</td><td>Cross-link HW scheduler in silicon</td><td>802.11be</td><td>Fixed — enables MLO Mode parameter (L1)</td></tr>
+    <tr><td>Multi-RU assignment engine</td><td>Non-contiguous RU HW engine</td><td>802.11be</td><td>Fixed — enables Multi-RU toggle (O4)</td></tr>
+    <tr><td>LDPC FEC</td><td>HW encode/decode (up to 4096 bits)</td><td>802.11be</td><td>Fixed efficiency constant — included in PHY rate model</td></tr>
+    <tr><td>Beamforming precoding matrix</td><td>Applied at PHY clock rate</td><td>802.11be</td><td>Fixed — implicit in MU-MIMO spatial stream multiplier</td></tr>
+    <tr><td>Restricted TWT HW timer</td><td>Microsecond-precision HW enforcement</td><td>802.11be</td><td>Fixed — enables rTWT toggle (L4)</td></tr>
+  </table>
+
+  <h4 style="font-size:0.9rem;font-weight:700;margin:22px 0 8px;color:#333">Firmware-Layer — Auto (Not User-Configurable)</h4>
+  <table>
+    <tr><th>Parameter</th><th>Behavior</th><th>Observable As</th></tr>
+    <tr><td>MCS rate adaptation</td><td>Proprietary ML algorithm — selects MCS per client per packet</td><td>Per-client MCS distribution in EP1 stats</td></tr>
+    <tr><td>GI selection per client</td><td>Auto selects 800/1600/3200ns per client delay spread measurement</td><td>GI histogram in AP radio stats</td></tr>
+    <tr><td>OFDMA RU size heuristics</td><td>Assigns 26/52/106/242/484/996 RU sizes based on queue depth</td><td>RU utilisation breakdown</td></tr>
+    <tr><td>MLO traffic steering policy</td><td>QoS-based (Cisco/Extreme) or AI-driven (Mist)</td><td>Per-link throughput split</td></tr>
+    <tr><td>Sounding schedule &amp; CSI staleness</td><td>Controls beamforming weight update frequency</td><td>Beam SNR improvement stats</td></tr>
+    <tr><td>A-MPDU packing &amp; density</td><td>Decides how many MPDUs to aggregate per A-MPDU</td><td>A-MPDU size histogram</td></tr>
+    <tr><td>BSS Color collision detection</td><td>Monitors for Color conflicts with neighbours, triggers re-assignment</td><td>Color conflict events per AP</td></tr>
+    <tr><td>rTWT SP management</td><td>Manages Service Period scheduling and client TWT negotiation</td><td>TWT session count and SP duration logs</td></tr>
+  </table>
+
+  <div class="callout-blue">
+    <p><strong>Mist AI distinction:</strong> Juniper Mist AI replaces most firmware-layer heuristics with cloud ML models: dynamic RTS threshold per client, AI-driven MLO traffic steering, automatic Min-RSSI tuning per AP load, dynamic BSS Color via cloud ML, Marvis anomaly detection. Cisco and Extreme use static policy (QoS mapping for MLO steering; fixed RF profile thresholds). For Lumen Field on Extreme AP5060, the firmware heuristics apply — not Mist AI.</p>
+  </div>
+
+  <!-- ── 11.3 — CORRECTIONS SUMMARY ── -->
+  <h3 id="sim-corrections">11.3 — Corrections to Earlier Sections</h3>
+  <table>
+    <tr><th>Section</th><th>What Was Stated</th><th>Correction</th><th>Source</th></tr>
+    <tr>
+      <td>§5 Constants — Short GI</td>
+      <td>"Short Guard Interval = ON (all profiles)"</td>
+      <td class="warning">802.11be has NO 400ns SGI. GI options are 800/1600/3200 ns. Default = 1600ns. Treat GI as Slider P2, not a fixed constant. Stadium target: 800ns (pristine indoor). This adds GI as a new simulator input.</td>
+      <td>WiFi 7 AP Design Tool — PHY tab note: "No 400ns SGI in 802.11be"</td>
+    </tr>
+    <tr>
+      <td>§5 Constants — WMM TXOP AC_BE</td>
+      <td>"BE=0" (EP1 default)</td>
+      <td class="warning">AP Design Tool shows AC_BE TXOP = 3008 µs as the correct WiFi 7 default. EP1 profile may default to 0 (unlimited) — verify against actual EP1 export. Use 3008 µs as stadium baseline.</td>
+      <td>CLI export from WiFi 7 AP Design Tool: "TXOP AC_BE: 3008µs"</td>
+    </tr>
+    <tr>
+      <td>§8.8 Client Settings — DTIM</td>
+      <td>"EP1 Default = 1, Stadium Target = 2–3"</td>
+      <td class="optimal">AP Design Tool uses DTIM=2 as the WiFi 7 baseline (not 1). Stadium target confirmed as 2. No change to recommendation, but default should be noted as 2 for be profiles.</td>
+      <td>WiFi 7 AP Design Tool — Beacon/Mgmt tab</td>
+    </tr>
+    <tr>
+      <td>§10 Broadcom — Max Users/Radio</td>
+      <td>Not stated (EP1 slider max = 100 per EP1 Optional Settings)</td>
+      <td class="optimal">AP5060 hardware ceiling: 512 users per radio / 1536 total (3 radios). EP1's 100-client slider is a software policy limit, not a hardware limit. The AP can physically handle 512. This distinguishes policy ceiling (Slider 4, set to 50–75) from hardware ceiling (512).</td>
+      <td>802.11be E2E Simulator — AP5060 CONFIG panel: "Max: 512/1536"</td>
+    </tr>
+    <tr>
+      <td>§9.1 TX Power</td>
+      <td>"AP5060 max = 17–20 dBm (estimated)"</td>
+      <td class="optimal">AP5060 datasheet max TX power: <strong>17 dBm</strong> confirmed. LPI (Low Power Indoor) mode applies at Lumen Field — no AFC. 6GHz Standard Power (SP) requires AFC and allows up to 30 dBm EIRP.</td>
+      <td>802.11be E2E Simulator — Datasheet: 17 dBm</td>
+    </tr>
+  </table>
+
+  <!-- ── 11.4 — COMPLETE NEW INPUT LIST ── -->
+  <h3 id="sim-new-inputs">11.4 — Complete New Simulator v2 Inputs from This Section</h3>
+  <table>
+    <tr><th>#</th><th>Parameter</th><th>Type</th><th>From Section</th><th>Simulator Effect</th></tr>
+    <tr><td>S11-1</td><td><strong>Guard Interval (800/1600/3200 ns)</strong></td><td><span class="badge badge-slider">Slider</span></td><td>P2</td><td>Replaces "Short GI constant." GI efficiency = 12.8/(12.8+GI). At 800ns: 94.1% efficiency. At 1600ns: 88.9%. At 3200ns: 80.0%. Drives PHY rate calculation.</td></tr>
+    <tr><td>S11-2</td><td><strong>MCS Floor (EHT-MCS 0–13)</strong></td><td><span class="badge badge-slider">Slider</span></td><td>P4</td><td>Sets minimum MCS. Clients below this MCS de-associate (forced roam). Shrinks effective cell — complements TX power and SNR threshold as a third cell-size control.</td></tr>
+    <tr><td>S11-3</td><td><strong>MLO Mode (STR / NSTR)</strong></td><td><span class="badge badge-toggle">Toggle</span></td><td>L1</td><td>STR: aggregate throughput = sum of both links. NSTR: ~60% of STR. Feeds MLO throughput model for AP5060 dual-radio configuration.</td></tr>
+    <tr><td>S11-4</td><td><strong>MLO Active Links (1/2/3)</strong></td><td><span class="badge badge-slider">Slider</span></td><td>L2</td><td>Number of bonded links. 2 = 5G + 6G. Each link contributes to aggregate throughput and latency minimum.</td></tr>
+    <tr><td>S11-5</td><td><strong>Multi-RU Assignment</strong></td><td><span class="badge badge-toggle">Toggle</span></td><td>O4</td><td>WiFi 7 only. Allows AP to assign non-contiguous RUs to a single high-demand client in one TXOP. Improves peak per-client throughput for 4K video clients on VIP SSID.</td></tr>
+    <tr><td>S11-6</td><td><strong>rTWT (Restricted TWT)</strong></td><td><span class="badge badge-toggle">Toggle</span></td><td>L4</td><td>Replaces basic TWT toggle. rTWT = hardware-enforced TDMA service periods, CSMA suspended. For POS: guarantees transaction latency. For IoT: eliminates contention during SP. More powerful than basic TWT.</td></tr>
+    <tr><td>S11-7</td><td><strong>Min RSSI Admission (dBm)</strong></td><td><span class="badge badge-slider">Slider</span></td><td>R2</td><td>Admission control expressed as absolute RSSI. Complements SNR Threshold (Slider 3). Set to −67 dBm for Lumen Field (ensures MCS 7 minimum at cell edge). Same underlying mechanism, different input form.</td></tr>
+    <tr><td>S11-8</td><td><strong>SAE PWE Method (H2E / H&P)</strong></td><td><span class="badge badge-toggle">Toggle</span></td><td>S3</td><td>Security-only. H2E required for WPA3-R2. No capacity impact. Add as read-only config confirmation in simulator security panel.</td></tr>
+    <tr><td>S11-9</td><td><strong>4K-QAM Enable/Disable</strong></td><td><span class="badge badge-toggle">Toggle</span></td><td>P5</td><td>EHT-MCS 12/13. Requires ≥45 dB SNR — only viable &lt;3m in pristine RF. Enable for inner-bowl VIP APs only. At stadium density majority of clients won't achieve 4K-QAM, so disabling prevents wasted retransmission airtime.</td></tr>
+    <tr><td>S11-10</td><td><strong>AFC Mode (LPI vs SP)</strong></td><td><span class="badge badge-toggle">Toggle</span></td><td>P3</td><td>LPI = Low Power Indoor, max ~17–20 dBm EIRP, no AFC required. SP = Standard Power, up to 30 dBm EIRP, requires AFC registration. Lumen Field = LPI. Simulator: LPI caps TX power ceiling; SP unlocks higher power with AFC registration confirmation.</td></tr>
   </table>
 
 </section>
