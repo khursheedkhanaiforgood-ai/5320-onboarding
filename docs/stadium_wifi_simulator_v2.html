@@ -1365,25 +1365,55 @@ function copyCfg(){
   const t=g('cfg-overlay').dataset.text||'';
   navigator.clipboard.writeText(t).then(()=>addLog('Config copied to clipboard','ok')).catch(()=>addLog('Copy failed — use Ctrl+A in export panel','warn'));
 }
-function _triggerDownload(t){
-  if(!t){addLog('Nothing to download — run optimizer first or open Full Config','warn');return;}
-  const blob=new Blob([t],{type:'text/plain'});
+function downloadCfg(){
+  const t=g('cfg-overlay').dataset.text||'';
+  if(!t){addLog('Open Full Config first, then Download','warn');return;}
   const a=document.createElement('a');
-  a.href=URL.createObjectURL(blob);
+  a.href='data:text/plain;charset=utf-8,'+encodeURIComponent(t);
   a.download='stadium-wifi-config.txt';
-  document.body.appendChild(a);a.click();document.body.removeChild(a);
-  URL.revokeObjectURL(a.href);
+  a.click();
   addLog('⬇ Downloaded stadium-wifi-config.txt','ok');
 }
-function downloadCfg(){
-  _triggerDownload(g('cfg-overlay').dataset.text||'');
-}
 function directDownload(){
-  // populate config text silently (without showing modal), then download
-  showCfg();
-  const t=g('cfg-overlay').dataset.text||'';
-  closeCfg();
-  _triggerDownload(t);
+  try{
+    const s=compute();const p=readInputs();
+    const kFmt={atFair:v=>v,txPwr:v=>v+' dBm',minRSSI:v=>v+' dBm',rxSop:v=>v+' dBm',cwBe:v=>String(v),maxCli:v=>String(v),mcsFloor:v=>'MCS '+v,bw5g:v=>v+' MHz',fragThr:v=>v+' B',dtim:v=>String(v),rtsThr:v=>v+' B',txopBe:v=>v+' µs'};
+    const optPar=optResult?optResult.params:null;
+    const selPct=(+(g('mc-pct')||{value:50}).value)||50;
+    const lines=[
+      'OUTDOOR STADIUM WIFI SIMULATOR v2 — CONFIG EXPORT',
+      new Date().toLocaleString(),'='.repeat(54),'',
+      '── COMPUTED OUTPUTS ──',
+      '  Score:           '+s.score+'/100',
+      '  POS Latency:     '+s.posLat.toFixed(1)+'ms  '+(s.posPass?'PASS':'FAIL'),
+      '  Airtime:         '+s.wAir+'%',
+      '  Tput/Client:     '+s.bestTP.toFixed(1)+' Mbps',
+      '  Active Sessions: '+s.active.toLocaleString(),
+      '  Demand/Capacity: '+s.demGbps+'G / '+s.capGbps+'G','',
+      '── 12 SEARCH KNOBS'+(optPar?' — P'+selPct+' OPTIMAL (Optimizer result)':' — static priors; run Optimizer for your exact scenario')+' ──',
+      '  Parameter                    Current           Optimal'+(optPar?'':'(prior)'),
+      '  '+'-'.repeat(62),
+    ];
+    Object.entries(OPT_SEARCH).forEach(([k])=>{
+      const fmt=kFmt[k]||(v=>String(v));
+      const cur=fmt(p[k]);const opt=optPar?fmt(optPar[k]):fmt((({atFair:'strict',txPwr:17,minRSSI:-70,rxSop:-75,cwBe:15,maxCli:100,mcsFloor:4,bw5g:160,fragThr:2346,dtim:2,rtsThr:1500,txopBe:3008})[k]));
+      const changed=String(p[k])!==String(optPar?optPar[k]:(({atFair:'strict',txPwr:17,minRSSI:-70,rxSop:-75,cwBe:15,maxCli:100,mcsFloor:4,bw5g:160,fragThr:2346,dtim:2,rtsThr:1500,txopBe:3008})[k]));
+      lines.push('  '+(OPT_KNOB_LABELS[k]||k).padEnd(28)+cur.padEnd(18)+opt+(changed?' <-- CHANGE':' (optimal)'));
+    });
+    lines.push('','── 48 LOCKED PARAMS (gate / monotone / context-modulated) ──');
+    Object.entries(OPT_LOCK).forEach(([k,v])=>lines.push('  '+k.padEnd(28)+String(v)));
+    lines.push('','── SCENARIO INPUTS ──',
+      '  AP Type:     '+p.apType,'  Fans:        '+(+p.fans||0).toLocaleString(),
+      '  Devices/Fan: '+p.devMult+'x','  WiFi Attach: '+Math.round(p.wifiAtt*100)+'%',
+      '  Concurrency: '+Math.round(p.concur*100)+'%',
+      '  App Mix:     Video '+Math.round(p.vidW)+'% / Teams '+Math.round(p.teaW)+'% / Social '+Math.round(p.socW)+'% / Browse '+Math.round(p.broW)+'% / POS '+Math.round(p.posW)+'%'
+    );
+    const a=document.createElement('a');
+    a.href='data:text/plain;charset=utf-8,'+encodeURIComponent(lines.join('\n'));
+    a.download='stadium-wifi-config.txt';
+    a.click();
+    addLog('Downloaded stadium-wifi-config.txt — check Downloads folder','ok');
+  }catch(e){addLog('Download error: '+e.message,'warn');}
 }
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeCfg();});
 
