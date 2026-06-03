@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>802.11 Authentication, Association &amp; Roaming — PSK / EAP-PEAP / EAP-TLS · June 2 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Source+Code+Pro:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Libre Baskerville', Georgia, serif;
+    background: #fff;
+    color: #1a1a1a;
+    font-size: 17px;
+    line-height: 1.75;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 48px 32px 120px;
+  }
+  header { border-bottom: 3px solid #1a1a1a; padding-bottom: 20px; margin-bottom: 12px; }
+  .dateline { font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: #666; margin-bottom: 8px; }
+  h1 { font-size: 2.4rem; font-weight: 700; line-height: 1.15; margin-bottom: 10px; }
+  .deck { font-size: 1.1rem; font-style: italic; color: #444; border-left: 3px solid #1a1a1a; padding-left: 16px; margin-top: 10px; }
+  nav#toc {
+    position: sticky; top: 0; background: #fff; border-bottom: 1px solid #ddd;
+    padding: 10px 0; margin: 20px 0 40px; z-index: 100;
+    font-size: 12px; letter-spacing: 0.05em; display: flex; flex-wrap: wrap; gap: 4px 0;
+  }
+  nav#toc a { color: #1a1a1a; text-decoration: none; margin-right: 16px; text-transform: uppercase; font-weight: 700; border-bottom: 2px solid transparent; padding-bottom: 2px; transition: border-color 0.15s; }
+  nav#toc a:hover { border-color: #1a1a1a; }
+  section { margin-bottom: 56px; }
+  h2 { font-size: 1.05rem; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 700; border-top: 2px solid #1a1a1a; padding-top: 14px; margin-bottom: 20px; color: #1a1a1a; }
+  h3 { font-size: 1rem; font-weight: 700; margin: 28px 0 8px; }
+  h4 { font-size: 0.95rem; font-weight: 700; font-style: italic; margin: 18px 0 6px; color: #333; }
+  p { margin-bottom: 14px; }
+  ul, ol { margin: 10px 0 16px 24px; }
+  li { margin-bottom: 6px; }
+
+  .milestone { border: 2px solid #1a1a1a; padding: 20px 24px; margin: 24px 0; position: relative; }
+  .milestone-label { position: absolute; top: -11px; left: 16px; background: #fff; padding: 0 8px; font-family: 'Source Code Pro', monospace; font-size: 11px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: #1a1a1a; }
+  .milestone-green  { border-color: #1a7a3a; }
+  .milestone-green .milestone-label { color: #1a7a3a; }
+  .milestone-blue   { border-color: #1a6fba; }
+  .milestone-blue .milestone-label { color: #1a6fba; }
+  .milestone-gold   { border-color: #b8860b; }
+  .milestone-gold .milestone-label { color: #b8860b; }
+
+  .callout { background: #fffbf0; border: 1px solid #e8d5a3; border-left: 5px solid #c9973a; padding: 16px 20px; margin: 18px 0; border-radius: 2px; }
+  .callout-blue { background: #f0f7ff; border: 1px solid #b8d4f0; border-left: 5px solid #1a6fba; padding: 16px 20px; margin: 18px 0; border-radius: 2px; }
+  .callout-green { background: #f0fff4; border: 1px solid #a8dfb8; border-left: 5px solid #1a7a3a; padding: 16px 20px; margin: 18px 0; border-radius: 2px; }
+  .callout p:last-child, .callout-blue p:last-child, .callout-green p:last-child { margin-bottom: 0; }
+
+  code { font-family: 'Source Code Pro', monospace; font-size: 14px; background: #f5f5f5; padding: 1px 5px; border-radius: 3px; color: #c7254e; }
+  pre { font-family: 'Source Code Pro', monospace; font-size: 13px; background: #f8f8f8; border: 1px solid #e0e0e0; border-left: 4px solid #1a1a1a; padding: 16px 18px; overflow-x: auto; margin: 14px 0 20px; line-height: 1.55; }
+  pre.green { border-left-color: #1a7a3a; background: #f0fff4; }
+  pre.blue  { border-left-color: #1a6fba; background: #f0f7ff; }
+
+  table { width: 100%; border-collapse: collapse; margin: 16px 0 24px; font-size: 0.9rem; }
+  th { background: #1a1a1a; color: #fff; padding: 8px 12px; text-align: left; font-family: 'Source Code Pro', monospace; font-size: 0.75rem; letter-spacing: 0.06em; text-transform: uppercase; }
+  td { padding: 8px 12px; border-bottom: 1px solid #e0e0e0; vertical-align: top; }
+  tr:nth-child(even) td { background: #fafafa; }
+
+  /* pcap card */
+  .pcap-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 20px 0; }
+  @media(max-width:600px){ .pcap-grid { grid-template-columns: 1fr; } }
+  .pcap-card { border: 1px solid #ddd; border-left: 4px solid #1a6fba; padding: 16px 18px; border-radius: 2px; }
+  .pcap-card .pcap-label { font-family: 'Source Code Pro', monospace; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #1a6fba; margin-bottom: 6px; }
+  .pcap-card h4 { font-style: normal; margin: 0 0 6px; font-size: 0.9rem; }
+  .pcap-card p { font-size: 0.82rem; color: #555; margin-bottom: 10px; }
+  .pcap-card a { display: inline-block; font-family: 'Source Code Pro', monospace; font-size: 12px; font-weight: 700; color: #1a6fba; text-decoration: none; border: 1px solid #1a6fba; padding: 4px 12px; border-radius: 3px; }
+  .pcap-card a:hover { background: #1a6fba; color: #fff; }
+  .pcap-card.gold { border-left-color: #b8860b; }
+  .pcap-card.gold .pcap-label { color: #b8860b; }
+  .pcap-card.gold a { color: #b8860b; border-color: #b8860b; }
+  .pcap-card.gold a:hover { background: #b8860b; color: #fff; }
+  .pcap-card.green { border-left-color: #1a7a3a; }
+  .pcap-card.green .pcap-label { color: #1a7a3a; }
+  .pcap-card.green a { color: #1a7a3a; border-color: #1a7a3a; }
+  .pcap-card.green a:hover { background: #1a7a3a; color: #fff; }
+
+  footer { border-top: 1px solid #ddd; padding-top: 20px; font-size: 13px; color: #888; margin-top: 60px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="dateline">Monday, June 2, 2026 &nbsp;&bull;&nbsp; Khursheed Khan &nbsp;&bull;&nbsp; Extreme Networks 5320 Lab</div>
+  <h1>802.11 Authentication, Association &amp; Roaming</h1>
+  <div class="deck">A deep-dive session on PSK, EAP-PEAP, EAP-TLS, the 4-way handshake, and 802.11r Fast Transition — studied through live Wireshark captures.</div>
+</header>
+
+<nav id="toc">
+  <a href="#capture-setup">§1 Capture Setup</a>
+  <a href="#open-auth">§2 Open Auth &amp; Assoc</a>
+  <a href="#4way">§3 4-Way Handshake</a>
+  <a href="#psk-vs-eap">§4 PSK vs EAP</a>
+  <a href="#eap-deep">§5 EAP Deep Dive</a>
+  <a href="#roaming">§6 Roaming &amp; 802.11r</a>
+  <a href="#pcap-library">§7 pcap Library</a>
+</nav>
+
+<!-- ══ §1 CAPTURE SETUP ══ -->
+<section id="capture-setup">
+  <h2>§1 — Packet Capture Setup</h2>
+
+  <p>Two shell aliases live in <code>~/.zshrc</code> for fast Mac-side captures on <code>en0</code> (Wi-Fi, confirmed via <code>networksetup -listallhardwareports</code>):</p>
+
+  <pre>function wcap() { /Applications/Wireshark.app/Contents/MacOS/dumpcap -i en0 -a duration:$1 -w ~/Desktop/$2.pcapng && open ~/Desktop/$2.pcapng; }
+# Usage: wcap 30 mycapture  →  captures 30s, saves to Desktop, opens Wireshark
+
+alias wscan="/Applications/Wireshark.app/Contents/MacOS/dumpcap -i en0 -w - | \
+  /Applications/Wireshark.app/Contents/MacOS/wireshark -k -i -"
+# Usage: wscan  →  live stream directly into Wireshark, no file</pre>
+
+  <div class="callout">
+    <p><strong>Limitation:</strong> Both capture at the <strong>Ethernet layer</strong> — no 802.11 radio headers, RSSI, MCS, or channel info. Monitor mode requires admin/sudo rights (not available on work Mac). For 802.11 frames use the AP remote sniffer or Wireless Diagnostics on a personal Mac.</p>
+  </div>
+
+  <h3>AP Remote Sniffer (802.11 frames with radiotap)</h3>
+  <p>The AP3000 (IQ Engine) has a built-in remote sniffer. On AP CLI:</p>
+  <pre>exec capture remote-sniffer interface Wifi1 host-allowed 192.168.0.24 local-port 2002 promiscuous
+show capture remote-sniffer   # confirm Status: Enabled + connected host</pre>
+  <p>Then on Mac:</p>
+  <pre>/Applications/Wireshark.app/Contents/MacOS/wireshark -k -i TCP@192.168.0.12:2002</pre>
+
+  <h3>Wireless Diagnostics (personal Mac — no sudo)</h3>
+  <p>Open Wireless Diagnostics → <strong>Window → Sniffer</strong> → pick channel + width → Start. Saves <code>.pcap</code> to <code>/var/tmp/</code>. Captures in monitor mode; Mac disconnects from Wi-Fi during the capture. Must select the right channel:</p>
+  <table>
+    <tr><th>Radio</th><th>Channel</th><th>Band</th></tr>
+    <tr><td>Wifi0 (AP1)</td><td>11</td><td>2.4 GHz</td></tr>
+    <tr><td>Wifi1 (AP1)</td><td>40</td><td>5 GHz</td></tr>
+  </table>
+</section>
+
+<!-- ══ §2 OPEN AUTH & ASSOC ══ -->
+<section id="open-auth">
+  <h2>§2 — 802.11 Open Authentication &amp; Association</h2>
+
+  <h3>Authentication (not real security)</h3>
+  <p>Despite the name, 802.11 Open Authentication is a two-frame formality — no credentials exchanged. Real identity proof happens in EAP or the 4-way handshake.</p>
+  <pre>Client → AP: Authentication Request   (algorithm=Open, seq=1)
+AP → Client: Authentication Response  (algorithm=Open, seq=2, status=Success)</pre>
+
+  <h3>Association — capability negotiation</h3>
+  <p>The client announces what it supports; the AP assigns it a logical seat.</p>
+  <pre>Client → AP: Association Request
+  ├── SSID name
+  ├── Supported rates (MCS, bands)
+  ├── RSN IE  (WPA2/WPA3, CCMP, PMF)
+  └── HT/VHT/HE capabilities (WiFi 4/5/6)
+
+AP → Client: Association Response
+  ├── Status (accept/reject)
+  ├── Association ID (AID)  ← client's slot on the AP
+  └── AP capabilities confirmed</pre>
+
+  <div class="callout-blue">
+    <p>After Association, the client has a <strong>logical connection but no encryption keys</strong>. No data can flow securely yet — that happens after the 4-way handshake.</p>
+  </div>
+
+  <p>On a <strong>roam</strong> to a second AP, the client sends a <strong>Reassociation Request</strong> (not Association). This is how you identify a roam in a pcap — look for the Reassoc frame type, not Assoc.</p>
+</section>
+
+<!-- ══ §3 4-WAY HANDSHAKE ══ -->
+<section id="4way">
+  <h2>§3 — The 4-Way Handshake (EAPOL)</h2>
+
+  <p>The 4-way handshake is <strong>mandatory in WPA2 and WPA3</strong> regardless of authentication method. Its job: derive a per-session encryption key (PTK) from the PMK without ever transmitting the key over the air.</p>
+
+  <pre>AP  → Client: EAPOL Key (Message 1 of 4) — ANonce (AP random number)
+Client → AP:  EAPOL Key (Message 2 of 4) — SNonce + MIC
+AP  → Client: EAPOL Key (Message 3 of 4) — GTK (encrypted) + MIC
+Client → AP:  EAPOL Key (Message 4 of 4) — Ack + MIC</pre>
+
+  <h3>What happens inside each message</h3>
+  <table>
+    <tr><th>Message</th><th>What happens</th></tr>
+    <tr><td>M1 — ANonce</td><td>AP sends its random nonce. Client now has both nonces.</td></tr>
+    <tr><td>Client derives PTK</td><td><code>PTK = PRF(PMK + ANonce + SNonce + AP_MAC + Client_MAC)</code> — computed locally, never sent.</td></tr>
+    <tr><td>M2 — SNonce + MIC</td><td>Client sends its nonce + a Message Integrity Code proving it knows the PMK.</td></tr>
+    <tr><td>AP derives PTK</td><td>AP runs the same formula — both sides now have identical PTK.</td></tr>
+    <tr><td>M3 — GTK + MIC</td><td>AP sends the Group Temporal Key (for broadcast/multicast), encrypted with PTK. MIC proves AP knows PMK.</td></tr>
+    <tr><td>M4 — Ack</td><td>Client confirms keys installed. Encryption starts.</td></tr>
+  </table>
+
+  <div class="callout-green">
+    <p><strong>Key insight:</strong> The PTK is never sent over the air. Both sides independently compute the same key. This is why WPA2 is secure even when the 4-way frames are captured.</p>
+  </div>
+</section>
+
+<!-- ══ §4 PSK vs EAP ══ -->
+<section id="psk-vs-eap">
+  <h2>§4 — PSK vs EAP (802.1X)</h2>
+
+  <p>The 4-way handshake always appears. The difference is how the PMK is derived <em>before</em> it:</p>
+
+  <pre class="green">PSK:
+  Auth → Assoc → 4-way handshake (PMK derived from shared password)
+
+EAP-PEAP (802.1X):
+  Auth → Assoc → EAP Identity → PEAP/TLS tunnel → EAP Success → 4-way handshake
+
+EAP-TLS (802.1X):
+  Auth → Assoc → EAP Identity → mutual TLS (both certs) → EAP Success → 4-way handshake</pre>
+
+  <table>
+    <tr><th>Method</th><th>EAP needed?</th><th>RADIUS needed?</th><th>Certs needed?</th><th>4-way?</th></tr>
+    <tr><td>PSK</td><td>No</td><td>No</td><td>No</td><td>Always</td></tr>
+    <tr><td>EAP-PEAP</td><td>Yes</td><td>Yes</td><td>Server only</td><td>Always</td></tr>
+    <tr><td>EAP-TLS</td><td>Yes</td><td>Yes</td><td>Both sides</td><td>Always</td></tr>
+  </table>
+
+  <p><strong>Can a client roam to a different SSID without disconnecting?</strong> No. SSID change always requires a full deauth → fresh probe → auth → assoc → 4-way. 802.11r only skips the 4-way when roaming <em>within</em> the same SSID/ESS.</p>
+</section>
+
+<!-- ══ §5 EAP DEEP DIVE ══ -->
+<section id="eap-deep">
+  <h2>§5 — EAP Deep Dive</h2>
+
+  <p>EAP (Extensible Authentication Protocol) is a <strong>framework</strong>, not a single method. It has an outer shell that carries an inner method.</p>
+
+  <h3>Outer EAP shell (always the same)</h3>
+  <pre>AP  → Client: EAP Request/Identity
+Client → AP:  EAP Response/Identity  (username)
+AP  → Client: EAP Request/&lt;method&gt;
+... inner method exchange ...
+AP  → Client: EAP Success / Failure</pre>
+
+  <h3>EAP-PEAP — most common enterprise deployment</h3>
+  <pre class="blue">1. TLS tunnel established using server certificate only
+2. Inside the encrypted tunnel:
+     Client → RADIUS: MSCHAPv2 username
+     Client → RADIUS: MSCHAPv2 password hash
+     RADIUS validates against Active Directory
+3. EAP Success → PMK derived → 4-way handshake</pre>
+  <p>The AP is a <strong>passthrough</strong> — it forwards EAP between client and RADIUS (UDP port 1812). The AP never sees the password.</p>
+
+  <h3>EAP-TLS — high security environments</h3>
+  <pre>1. EAP Request/Identity (x3 retransmits visible in pcap)
+2. TLS tunnel — server sends cert, client sends cert (mutual)
+3. Server issues Certificate Request → client must prove identity with its own cert
+4. EAP Success → PMK derived → 4-way handshake</pre>
+
+  <h3>EAP-PEAP vs EAP-TLS decision</h3>
+  <table>
+    <tr><th></th><th>EAP-PEAP</th><th>EAP-TLS</th></tr>
+    <tr><td>Client cert required</td><td>No</td><td>Yes</td></tr>
+    <tr><td>PKI required</td><td>No</td><td>Yes — every device</td></tr>
+    <tr><td>Credentials</td><td>Username + password</td><td>Certificate</td></tr>
+    <tr><td>AD/LDAP integration</td><td>Native</td><td>Possible but complex</td></tr>
+    <tr><td>Typical use</td><td>Corporate 802.1X, NPS</td><td>Banking, government, healthcare</td></tr>
+  </table>
+</section>
+
+<!-- ══ §6 ROAMING ══ -->
+<section id="roaming">
+  <h2>§6 — Roaming &amp; 802.11r Fast Transition</h2>
+
+  <h3>Standard roaming (no 802.11r)</h3>
+  <pre>Probe → Auth → Reassoc → full 4-way handshake (new PTK)</pre>
+
+  <h3>802.11r Fast Transition</h3>
+  <pre class="green">FT Auth (keys pre-negotiated here) → Reassociation Request/Response → data resumes</pre>
+  <p>No EAPOL on the roam. The FT Auth frames carry the key material. By the time Reassoc completes, keys are already installed.</p>
+
+  <h3>Proof from wpa2-ft-psk.pcapng</h3>
+  <table>
+    <tr><th>Frame</th><th>Time</th><th>Event</th><th>AP</th></tr>
+    <tr><td>5–6</td><td>0.19s</td><td>Authentication</td><td>AP1 <code>02:00:00:00:00:00</code></td></tr>
+    <tr><td>7–8</td><td>0.20s</td><td>Association Request/Response</td><td>AP1</td></tr>
+    <tr><td>9–12</td><td>0.20s</td><td>EAPOL 4-way (keys 1→2→3→4)</td><td>AP1</td></tr>
+    <tr><td>13–23</td><td>14–32s</td><td>Data flowing</td><td>AP1</td></tr>
+    <tr><td>24–25</td><td>62.8s</td><td><strong>FT Auth → AP2 (roam)</strong></td><td>AP2 <code>02:00:00:00:01:00</code></td></tr>
+    <tr><td>26–27</td><td>62.8s</td><td><strong>Reassociation — no EAPOL</strong></td><td>AP2</td></tr>
+    <tr><td>28–33</td><td>63s+</td><td>Data continues on AP2</td><td>AP2</td></tr>
+  </table>
+
+  <div class="callout-green">
+    <p><strong>Smoking gun:</strong> Frame 26 is a <em>Reassociation Request</em>, not an Association Request. And there is no EAPOL between frame 12 and the end of the capture. That is 802.11r working as designed — the roam took under 20ms.</p>
+  </div>
+
+  <h3>Mental model — complete picture</h3>
+  <pre>PSK:      Auth → Assoc → EAPOL 4-way → data
+                                    ↓ roam (802.11r)
+                          FT Auth → Reassoc → data (no EAPOL)
+
+EAP-PEAP: Auth → Assoc → EAP/PEAP → EAPOL 4-way → data
+                                    ↓ roam (802.11r)
+                          FT Auth → Reassoc → data (no EAPOL)
+
+EAP-TLS:  Auth → Assoc → EAP/TLS (mutual certs) → EAPOL 4-way → data
+                                    ↓ roam (802.11r)
+                          FT Auth → Reassoc → data (no EAPOL)</pre>
+</section>
+
+<!-- ══ §7 pcap LIBRARY ══ -->
+<section id="pcap-library">
+  <h2>§7 — pcap Library</h2>
+  <p>All files are from the <a href="https://github.com/wireshark/wireshark/tree/master/test/captures" target="_blank">Wireshark test suite</a> and <a href="https://github.com/vanhoefm/wifi-example-captures" target="_blank">vanhoefm/wifi-example-captures</a>. Download and open directly in Wireshark.</p>
+
+  <div class="pcap-grid">
+
+    <div class="pcap-card green">
+      <div class="pcap-label">Best for roaming</div>
+      <h4>WPA2 FT PSK — 802.11r Roam</h4>
+      <p>Complete story: Auth → Assoc → 4-way → data → FT Auth → Reassoc (no EAPOL). SSID: <code>wireshark-ft-psk</code>. Roam at frame 24, t=62.8s. AP1→AP2.</p>
+      <a href="data/pcaps/wpa2-ft-psk.pcapng" download>Download wpa2-ft-psk.pcapng</a>
+    </div>
+
+    <div class="pcap-card">
+      <div class="pcap-label">EAP + roaming</div>
+      <h4>WPA2 FT EAP — PEAP + 802.11r</h4>
+      <p>802.1X EAP-PEAP (TLS tunnel + MSCHAPv2) followed by 4-way handshake. 802.11r FT roaming structure. SSID: <code>wireshark-ft-eap</code>.</p>
+      <a href="data/pcaps/wpa2-ft-eap.pcapng" download>Download wpa2-ft-eap.pcapng</a>
+    </div>
+
+    <div class="pcap-card gold">
+      <div class="pcap-label">EAP-TLS mutual auth</div>
+      <h4>EAP-TLS Full Exchange</h4>
+      <p>EAP Identity → TLS tunnel (mutual certs — server AND client) → Certificate Request → EAP Success → EAPOL 4-way (frames 22–25). AP: <code>Buffalo</code>, Client: <code>Intel</code>.</p>
+      <a href="data/pcaps/wpa-eap-tls-dot1x.pcap" download>Download wpa-eap-tls-dot1x.pcap</a>
+    </div>
+
+    <div class="pcap-card">
+      <div class="pcap-label">4-way handshake only</div>
+      <h4>WPA2 PSK — Clean 4-Way</h4>
+      <p>Straightforward WPA2-Personal capture. Use Wireshark filter <code>eapol</code> to isolate the 4 key messages. Good reference for EAPOL Key structure.</p>
+      <a href="data/pcaps/wpa-4way-handshake.pcap" download>Download wpa-4way-handshake.pcap</a>
+    </div>
+
+    <div class="pcap-card" style="border-left-color:#888">
+      <div class="pcap-label" style="color:#888">Limited — beacons only</div>
+      <h4>WPA3 FT — Beacon/Probe Only</h4>
+      <p>AP advertising WPA3-FT support in beacons. Client probes but never connects. No association or roam. Useful only to see WPA3 RSN IE in beacon frames.</p>
+      <a href="data/pcaps/wpa3-ft-roaming.pcapng" download>Download wpa3-ft-roaming.pcapng</a>
+    </div>
+
+  </div>
+
+  <h3>Useful Wireshark display filters</h3>
+  <pre>eapol              # isolate 4-way handshake messages
+eap                # isolate EAP identity + method exchange
+wlan.fc.type == 0  # management frames only (auth, assoc, deauth)
+wlan.fc.type_subtype == 0x0b  # authentication frames
+wlan.fc.type_subtype == 0x02  # reassociation requests (roam events)
+wlan.fc.type_subtype == 0x0c  # deauthentication</pre>
+</section>
+
+<footer>
+  <p>Khursheed Khan &nbsp;&bull;&nbsp; June 2, 2026 &nbsp;&bull;&nbsp; Extreme Networks 5320 Lab &nbsp;&bull;&nbsp; Session: 802.11 Auth/Assoc/Roaming deep-dive</p>
+  <p style="margin-top:6px">&copy; 2026 Khursheed Khan. Lab notes and pcap analysis for professional development.</p>
+</footer>
+
+</body>
+</html>
