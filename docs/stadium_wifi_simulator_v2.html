@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Lumen Field Stadium WiFi Simulator v2 — Phase 1</title>
+<title>Outdoor Stadium WiFi Simulator v2 — AP5060 · WiFi 7</title>
 <style>
 :root{--bg:#0b0d0f;--sf:#131618;--sf2:#191c1f;--bd:#232830;--green:#00d97e;--yel:#ffc107;--org:#ff6d2d;--red:#f4455a;--blue:#3a9de0;--cyan:#00c8d4;--pur:#9b7aff;--text:#dde3ea;--mut:#5a6270;--mut2:#7a8494;--acc:#0078d7;--gold:#d4a017}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -15,7 +15,7 @@ header h1{font-size:12px;font-weight:700;color:#fff}
 .b.v2{border-color:var(--gold);background:#1a1200;color:#ffd54f}
 .b.clk{cursor:pointer;transition:.15s}.b.clk:hover{border-color:var(--pur);color:var(--pur)}
 .b.opt{border-color:#00501a;background:#001a08;color:#5aff9a;cursor:pointer}
-.layout{display:grid;grid-template-columns:300px 1fr 220px;height:calc(100vh - 44px - 34px - 80px);gap:1px;background:var(--bd)}
+.layout{display:grid;grid-template-columns:300px 1fr 220px;height:calc(100vh - 44px - 48px - 60px);gap:1px;background:var(--bd)}
 .panel{background:var(--sf);overflow-y:auto;padding:12px}
 /* collapsible sections */
 details{border-bottom:1px solid var(--bd);margin-bottom:2px}
@@ -130,14 +130,14 @@ input:checked+.ts:before{transform:translateX(15px);background:#fff}
 .ra-alert{background:#1a0010;border-color:var(--red);color:#ff8a9a}
 .ra-info{background:#0a0820;border-color:var(--pur);color:#c0a8ff}
 /* sla bar */
-.slabar{background:var(--sf);border-top:1px solid var(--bd);padding:6px 14px;display:flex;gap:4px;flex-wrap:wrap;align-items:center;min-height:34px}
-.slac{display:flex;align-items:center;gap:4px;background:#0d0f12;border:1px solid var(--bd);border-radius:2px;padding:3px 7px;font-size:9px;white-space:nowrap}
+.slabar{background:var(--sf);border-top:1px solid var(--bd);padding:8px 14px;display:flex;gap:4px;flex-wrap:wrap;align-items:center;min-height:48px}
+.slac{display:flex;align-items:center;gap:4px;background:#0d0f12;border:1px solid var(--bd);border-radius:2px;padding:5px 11px;font-size:11px;white-space:nowrap}
 .slad{width:5px;height:5px;border-radius:50%;flex-shrink:0}
-.slal{color:var(--mut)}.slav{font-weight:600}
+.slal{color:var(--mut);font-size:11px}.slav{font-weight:600;font-size:11px}
 /* log */
-.logw{height:80px;background:#070809;border-top:1px solid var(--bd);overflow-y:auto;display:flex;flex-direction:column-reverse;padding:3px 14px}
-.le{font-size:9px;padding:2px 0;border-bottom:1px solid #0d0f12;display:flex;gap:8px}
-.lt{color:var(--mut);flex-shrink:0;width:62px}
+.logw{height:60px;background:#070809;border-top:1px solid var(--bd);overflow-y:auto;display:flex;flex-direction:column-reverse;padding:3px 14px}
+.le{font-size:10.5px;padding:2px 0;border-bottom:1px solid #0d0f12;display:flex;gap:8px}
+.lt{color:var(--mut);flex-shrink:0;font-size:10px;min-width:68px}
 .lok{color:var(--green)}.lau{color:var(--blue)}.lwa{color:var(--yel)}.lal{color:var(--red)}.lin{color:var(--pur)}
 .footer{text-align:center;font-size:8px;color:var(--mut);padding:3px;background:var(--sf);border-top:1px solid var(--bd)}
 ::-webkit-scrollbar{width:3px}::-webkit-scrollbar-thumb{background:#333;border-radius:2px}
@@ -147,7 +147,7 @@ input:checked+.ts:before{transform:translateX(15px);background:#fff}
 <header>
   <div>
     <div style="display:flex;align-items:center;gap:8px">
-      <h1>Lumen Field WiFi Simulator <span style="color:var(--gold)">v2 · Phase 1</span></h1>
+      <h1>Outdoor Stadium WiFi Simulator <span style="color:var(--gold)">v2 · Phase 1</span></h1>
       <span id="hdr-ap" style="font-size:9px;color:var(--pur)">AP5060 · WiFi 7 EHT</span>
     </div>
     <div style="font-size:9px;color:var(--mut2);margin-top:1px" id="hdr-sub">280 APs · Multi-band · MLO · 72K Fans · FIFA WC 2026</div>
@@ -156,7 +156,7 @@ input:checked+.ts:before{transform:translateX(15px);background:#fff}
     <div class="b v2">v2 Phase 1</div>
     <div class="b clk" onclick="toggleAP()" title="Click to switch">AP5060 ⇄ AP3000</div>
     <button class="b opt" onclick="applyOptimal()">★ Stadium Optimal</button>
-    <button onclick="showCfg()" style="background:#0a1a00;border:1px solid var(--gold);color:var(--gold);padding:3px 9px;border-radius:2px;cursor:pointer;font-size:9px;font-family:inherit">📋 Full Output</button>
+    <button onclick="showCfg()" style="background:#0a1a00;border:1px solid var(--gold);color:var(--gold);padding:3px 9px;border-radius:2px;cursor:pointer;font-size:9px;font-family:inherit" title="📋 Full Config — Outputs · 12 Knobs · All 60 Params">📋 Full Config</button>
     <div class="b" style="color:#5aff9a;border-color:#00501a;background:#001a08" id="stbadge">● STABLE</div>
     <button onclick="resetAll()" style="background:#0d1020;border:1px solid var(--bd);color:var(--mut2);padding:3px 9px;border-radius:2px;cursor:pointer;font-size:9px;font-family:inherit">↺ Reset</button>
   </div>
@@ -165,6 +165,20 @@ input:checked+.ts:before{transform:translateX(15px);background:#fff}
 <div class="layout">
 <!-- ══ LEFT PANEL ══ -->
 <div class="panel">
+
+<div style="background:#080e1c;border:1px solid #1a3050;border-radius:2px;padding:8px 10px;margin-bottom:8px">
+  <div style="color:var(--gold);font-size:9px;font-weight:700;letter-spacing:1px;margin-bottom:5px">▶ HOW TO USE</div>
+  <div style="font-size:9px;color:var(--mut2);line-height:1.6">
+    <span style="color:var(--cyan)">①</span> Set <b style="color:var(--text)">Demand</b> — fans, timeline, app mix<br>
+    <span style="color:var(--cyan)">②</span> Watch metrics update live in <b style="color:var(--text)">centre tabs</b><br>
+    <span style="color:var(--cyan)">③</span> Check <b style="color:var(--gold)">Gap Analysis</b> tab to see what costs QoE<br>
+    <span style="color:var(--cyan)">④</span> <b style="color:var(--cyan)">Monte Carlo</b> → stress-test demand variance<br>
+    <span style="color:var(--org)">⑤</span> <b style="color:var(--org)">Optimizer</b> → find the 12 best AP settings
+  </div>
+  <div style="margin-top:5px;font-size:8px;color:var(--mut);border-top:1px solid var(--bd);padding-top:4px">
+    All <b style="color:var(--text)">60 params</b> are modelled · Optimizer searches the <b style="color:var(--text)">12 non-trivial knobs</b>
+  </div>
+</div>
 
 <details open>
 <summary>Demand Model</summary>
@@ -190,7 +204,7 @@ input:checked+.ts:before{transform:translateX(15px);background:#fff}
     </div>
     <div class="kd" id="pnote">Peak load — 55% concurrency</div>
   </div>
-  <div class="kg"><div class="kl">Fan Count <span id="lv-fans">72,000</span></div><input type="range" id="fan-count" min="20000" max="72000" value="72000" step="1000"><div class="kd">Lumen Field capacity: 72,000</div></div>
+  <div class="kg"><div class="kl">Fan Count <span id="lv-fans">72,000</span></div><input type="range" id="fan-count" min="20000" max="72000" value="72000" step="1000"><div class="kd">Large outdoor stadium: 72,000 · Arena: 20,000–40,000</div></div>
   <div class="kg"><div class="kl">Devices / Fan <span id="lv-dev">1.4×</span></div><input type="range" id="dev-mult" min="10" max="25" value="14" step="1"></div>
   <div class="kg"><div class="kl">WiFi Attach % <span id="lv-att">75%</span></div><input type="range" id="wifi-att" min="20" max="100" value="75" step="5"></div>
   <div class="kg"><div class="kl">Concurrency % <span id="lv-con">55%</span></div><input type="range" id="concur" min="10" max="100" value="55" step="5"><div class="kd">% simultaneously transferring data</div></div>
@@ -301,7 +315,7 @@ input:checked+.ts:before{transform:translateX(15px);background:#fff}
 
 </div>
 <!-- ══ CENTER PANEL ══ -->
-<div class="panel">
+<div class="panel" style="display:flex;flex-direction:column;">
   <div style="font-size:9px;color:var(--mut);margin-bottom:6px" id="ctr-sub">—</div>
   <div class="btabs">
     <div class="bt g2 act" id="tb-2g" onclick="showB('2g')">2.4 GHz</div>
@@ -368,8 +382,11 @@ input:checked+.ts:before{transform:translateX(15px);background:#fff}
 
   <!-- MONTE CARLO PANEL -->
   <div class="bp" id="bp-mc">
-    <div style="font-size:9px;color:var(--mut2);margin-bottom:7px">Poisson fan arrivals + Pareto per-client demand → P5/P50/P95 bands over N stochastic runs. Uses current 60-param config as baseline.</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;margin-bottom:7px">
+    <div style="font-size:9px;color:var(--mut2);margin-bottom:5px;line-height:1.55">
+  Stresses your config under realistic demand variance: Poisson fan arrivals × Pareto per-client traffic. Returns P5/P50/P75/P95 bands.
+  <span style="color:var(--yel)">Select a <b>Target Percentile</b> — this is what the Optimizer maximizes.</span>
+</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:5px;margin-bottom:7px">
       <div>
         <div style="font-size:8px;color:var(--mut);text-transform:uppercase;letter-spacing:.8px;margin-bottom:3px">Iterations</div>
         <select id="mc-iter" style="background:#111;border:1px solid var(--bd);color:var(--text);padding:3px 5px;border-radius:2px;font-size:9px;width:100%;font-family:inherit">
@@ -388,6 +405,14 @@ input:checked+.ts:before{transform:translateX(15px);background:#fff}
           <option value="1.5">1.5 (heavy)</option><option value="2.0" selected>2.0</option><option value="3.0">3.0 (light)</option>
         </select>
       </div>
+      <div>
+        <div style="font-size:8px;color:var(--mut);text-transform:uppercase;letter-spacing:.8px;margin-bottom:3px">Target %ile</div>
+        <select id="mc-pct" style="background:#111;border:1px solid var(--bd);color:var(--text);padding:3px 5px;border-radius:2px;font-size:9px;width:100%;font-family:inherit">
+          <option value="50">P50 — Median</option>
+          <option value="75">P75 — Conservative</option>
+          <option value="90">P90 — Robust</option>
+        </select>
+      </div>
     </div>
     <button id="mc-run-btn" onclick="runMC()" style="width:100%;background:#0a1a30;border:1px solid var(--cyan);color:var(--cyan);padding:5px;border-radius:2px;cursor:pointer;font-size:9px;font-family:inherit;margin-bottom:5px">▶ Run Monte Carlo</button>
     <div id="mc-results" style="display:none"></div>
@@ -395,7 +420,7 @@ input:checked+.ts:before{transform:translateX(15px);background:#fff}
 
   <!-- OPTIMIZER PANEL -->
   <div class="bp" id="bp-optz">
-    <div style="font-size:9px;color:var(--mut2);margin-bottom:7px">Coordinate ascent over 15 non-trivial knobs (threshold + interaction rows). Gate/monotone knobs locked to optimal. <span style="color:var(--yel)">Optimization against this model — not calibration to measurements.</span></div>
+    <div style="font-size:9px;color:var(--mut2);margin-bottom:7px">Coordinate ascent over 12 non-trivial knobs (threshold + interaction rows). All 48 gate/monotone/context-modulated knobs locked. MC runs inside each trial (100 draws). <span style="color:var(--yel)">Optimization against this model — not field measurements.</span></div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:7px">
       <div>
         <div style="font-size:8px;color:var(--mut);text-transform:uppercase;letter-spacing:.8px;margin-bottom:3px">Rounds</div>
@@ -403,14 +428,15 @@ input:checked+.ts:before{transform:translateX(15px);background:#fff}
           <option value="1">1 round</option><option value="2" selected>2 rounds</option><option value="3">3 rounds</option>
         </select>
       </div>
-      <div style="padding-top:16px;font-size:9px;color:var(--cyan)">15 knobs · 4–6 values each</div>
+      <div style="padding-top:16px;font-size:9px;color:var(--cyan)">12 knobs · 4–6 values each</div>
     </div>
     <button id="opt-run-btn" onclick="runOpt()" style="width:100%;background:#1a0a00;border:1px solid var(--org);color:var(--org);padding:5px;border-radius:2px;cursor:pointer;font-size:9px;font-family:inherit;margin-bottom:3px">★ Optimize Stadium Config</button>
     <div id="opt-log" class="opt-log"></div>
     <div id="opt-results" style="display:none"></div>
   </div>
 
-  <!-- Service class SLAs -->
+  <!-- Service class SLAs + Degradation pinned to bottom -->
+  <div style="margin-top:auto">
   <div style="margin-top:10px">
     <div style="font-size:9px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:1.2px;margin-bottom:4px">Service Class SLAs</div>
     <div class="sg">
@@ -425,6 +451,7 @@ input:checked+.ts:before{transform:translateX(15px);background:#fff}
     <div style="display:flex;justify-content:space-between;font-size:9px;color:var(--mut);margin-bottom:3px"><span>Degradation Level</span><span id="deg-inline" style="color:var(--green)">Level 0 — Nominal</span></div>
     <div class="dbar"><div class="ds" id="ds0"></div><div class="ds" id="ds1"></div><div class="ds" id="ds2"></div><div class="ds" id="ds3"></div><div class="ds" id="ds4"></div></div>
   </div>
+  </div><!-- /margin-top:auto -->
 </div>
 
 <!-- ══ RIGHT PANEL ══ -->
@@ -452,7 +479,7 @@ input:checked+.ts:before{transform:translateX(15px);background:#fff}
   </div>
   <!-- Config Export -->
   <div style="width:100%;margin-top:8px">
-    <button class="bpbtn" style="border-color:var(--gold);color:var(--gold)" onclick="showCfg()">📋 Config Export — All 60 Params</button>
+    <button class="bpbtn" style="border-color:var(--gold);color:var(--gold)" onclick="showCfg()">📋 Full Config — All 60 Params + Recommended</button>
   </div>
 </div>
 </div><!-- /layout -->
@@ -461,7 +488,7 @@ input:checked+.ts:before{transform:translateX(15px);background:#fff}
 <div id="cfg-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:1000;overflow-y:auto;padding:24px 12px">
   <div style="max-width:700px;margin:0 auto;background:#131618;border:1px solid var(--bd);border-radius:4px;padding:20px 24px">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
-      <div style="font-size:10px;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:1.2px">Full Config Output — Outputs · Search Knobs · Inputs · All 60 Params</div>
+      <div style="font-size:10px;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:1.2px">Full Config Output — Computed Outputs · 12 Optimal Knobs · Scenario Inputs · All 60 Params</div>
       <div style="display:flex;gap:6px">
         <button onclick="copyCfg()" style="background:#0d1928;border:1px solid var(--blue);color:var(--blue);padding:3px 10px;border-radius:2px;cursor:pointer;font-size:9px;font-family:inherit">Copy Text</button>
         <button onclick="closeCfg()" style="background:#1a0010;border:1px solid var(--red);color:var(--red);padding:3px 10px;border-radius:2px;cursor:pointer;font-size:9px;font-family:inherit">✕ Close</button>
@@ -477,7 +504,7 @@ input:checked+.ts:before{transform:translateX(15px);background:#fff}
 
 <div class="slabar" id="slabar"></div>
 <div class="logw" id="logw"></div>
-<div class="footer">© 2026 Khursheed Khan · Stadium WiFi Simulator v2 Phase 1 · FIFA WC 2026 Seattle · EP1 Security + AirDefense · <a href="stadium_simulator_v2_spec.html" style="color:var(--mut2)">I/O Spec ↗</a> · <a href="stadium_wifi_simulator.html" style="color:var(--mut2)">v1 ↗</a></div>
+<div class="footer">© 2026 Khursheed Khan · Outdoor Stadium WiFi Simulator v2 · AP5060 Broadcom WiFi 7 · FIFA WC 2026 Seattle · 60 params modelled · 12 searched · <a href="stadium_parameter_codex.html" style="color:var(--mut2)">Parameter Codex ↗</a> · <a href="archetype_matrix_v0.html" style="color:var(--mut2)">Archetype Matrix ↗</a> · <a href="journey_to_the_digital_twin.html" style="color:var(--mut2)">Strategy Doc ↗</a> · <a href="stadium_wifi_simulator.html" style="color:var(--mut2)">v1 ↗</a></div>
 
 <script>
 // ═══ CONSTANTS ═══
@@ -1080,7 +1107,7 @@ function applyOptimal(){
   g('client-ageout').value=5;g('frag-thr').value=2346;g('roam-cache-upd').value=60;g('roam-cache-age').value=60;
   g('mc2uc-thr').value=60;g('mc2uc-mbr').value=10;g('tog-mcast-drop').checked=false;g('tog-probe-ign').checked=true;
   g('tog-mac-dos').checked=true;g('tog-ip-dos').checked=true;
-  addLog('★ Stadium Optimal applied — all parameters at Lumen Field target','ok');
+  addLog('★ Stadium Optimal applied — all parameters at recommended target','ok');
   addLog('AP5060 Broadcom: 8-stream MU-MIMO · 4K-QAM · CWmin-BE=15 · RTS=1500 · TXOP-BE=3008µs','info');
   addLog('MBR 24M · RX-SOP −75 · Airtime Fairness Strict · Active Band Steering','info');
   addLog('BC Filter + MC→UC + Proxy ARP ON · rTWT ON · MLO STR · 802.11r ON','info');
@@ -1119,7 +1146,9 @@ function showCfg(){
   const p=s.p;
   const optPar=optResult?optResult.params:null;   // P50 optimal from optimizer run (if any)
   const mcR=optResult?optResult.mc:null;
-  let html='';
+  let html=`<div style="background:#001428;border:1px solid var(--cyan);border-radius:2px;padding:6px 10px;margin-bottom:10px;font-size:9px;color:var(--cyan)">
+  <strong>Tip:</strong> Scroll down to <strong>12 SEARCH KNOBS</strong> for the recommended optimal values · Run the <strong style="color:var(--org)">Optimizer tab</strong> first to populate P50-optimal column for your exact demand scenario
+</div>`;
   const textLines=['STADIUM WIFI SIMULATOR v2 — FULL CONFIG OUTPUT',new Date().toLocaleString(),''];
 
   // ── COMPUTED OUTPUTS ────────────────────────────────────────────────────────
@@ -1362,11 +1391,11 @@ function runMonteCarlo(baseOverride,nOverride){
     scores.push(r.score);airs.push(r.wAir);lats.push(r.wLat);posLats.push(r.posLat);tputs.push(r.bestTP);
   }
   return{
-    score:{p5:pct(scores,5),p50:pct(scores,50),p95:pct(scores,95)},
-    air:{p5:pct(airs,5),p50:pct(airs,50),p95:pct(airs,95)},
-    lat:{p5:pct(lats,5),p50:pct(lats,50),p95:pct(lats,95)},
-    posLat:{p5:pct(posLats,5),p50:pct(posLats,50),p95:pct(posLats,95)},
-    tput:{p5:pct(tputs,5),p50:pct(tputs,50),p95:pct(tputs,95)},
+    score:{p5:pct(scores,5),p50:pct(scores,50),p75:pct(scores,75),p95:pct(scores,95)},
+    air:{p5:pct(airs,5),p50:pct(airs,50),p75:pct(airs,75),p95:pct(airs,95)},
+    lat:{p5:pct(lats,5),p50:pct(lats,50),p75:pct(lats,75),p95:pct(lats,95)},
+    posLat:{p5:pct(posLats,5),p50:pct(posLats,50),p75:pct(posLats,75),p95:pct(posLats,95)},
+    tput:{p5:pct(tputs,5),p50:pct(tputs,50),p75:pct(tputs,75),p95:pct(tputs,95)},
     breachAir:+(airs.filter(a=>a>70).length/n*100).toFixed(1),
     breachPos:+(posLats.filter(l=>l>posThreshold).length/n*100).toFixed(1),
     posThreshold,spread:pct(scores,95)-pct(scores,5),n
@@ -1381,6 +1410,7 @@ function mcCol(metric,val){
   return CM.green;
 }
 function renderMCResults(r,label){
+  const selPct=+(g('mc-pct')||{value:50}).value;
   const panel=g('mc-results');if(!panel)return;
   const rows=[
     {name:'Score',key:'score',unit:'/100'},
@@ -1389,14 +1419,17 @@ function renderMCResults(r,label){
     {name:'POS Latency',key:'posLat',unit:'ms'},
     {name:'Tput/Client',key:'tput',unit:'M'},
   ];
-  let h=`<div style="font-size:8px;color:var(--mut);margin-bottom:4px;text-transform:uppercase;letter-spacing:.8px">${label||'Results'} — ${r.n} iterations</div>`;
-  h+=`<table class="mc-tbl"><thead><tr><th>Metric</th><th>P5</th><th style="color:var(--cyan)">P50</th><th>P95</th></tr></thead><tbody>`;
+  let h=`<div style="font-size:8px;color:var(--mut);margin-bottom:4px;text-transform:uppercase;letter-spacing:.8px">${label||'Results'} — ${r.n} iterations · optimizing for P${selPct}</div>`;
+  h+=`<table class="mc-tbl"><thead><tr><th>Metric</th><th>P5</th><th style="color:${selPct===50?'var(--cyan)':'var(--mut)'}">P50</th><th style="color:${selPct===75?'var(--cyan)':'var(--gold)'}">P75</th><th>P95</th></tr></thead><tbody>`;
   rows.forEach(row=>{
     const d=r[row.key];
+    const selKey=`p${selPct}`;
+    const p75val=d.p75!=null?d.p75:d.p50;
     h+=`<tr><td style="color:var(--mut2)">${row.name}</td>
-      <td style="color:${mcCol(row.key,d.p5)}">${typeof d.p5==='number'&&row.key==='tput'?d.p5.toFixed(1):d.p5}${row.unit}</td>
-      <td style="color:var(--cyan)">${typeof d.p50==='number'&&row.key==='tput'?d.p50.toFixed(1):d.p50}${row.unit}</td>
-      <td style="color:${mcCol(row.key,d.p95)}">${typeof d.p95==='number'&&row.key==='tput'?d.p95.toFixed(1):d.p95}${row.unit}</td></tr>`;
+      <td style="color:${mcCol(row.key,d.p5)}">${row.key==='tput'?d.p5.toFixed(1):d.p5}${row.unit}</td>
+      <td style="color:${selPct===50?'var(--cyan)':mcCol(row.key,d.p50)};font-weight:${selPct===50?700:400}">${row.key==='tput'?d.p50.toFixed(1):d.p50}${row.unit}</td>
+      <td style="color:${selPct===75?'var(--cyan)':mcCol(row.key,p75val)};font-weight:${selPct===75?700:400}">${row.key==='tput'?p75val.toFixed(1):p75val}${row.unit}</td>
+      <td style="color:${mcCol(row.key,d.p95)}">${row.key==='tput'?d.p95.toFixed(1):d.p95}${row.unit}</td></tr>`;
   });
   h+=`</tbody></table>`;
   h+=`<div class="mc-breach">
@@ -1470,7 +1503,9 @@ function runOpt(){
   // This is the §03 robust form: maximize P50[U(θ)] − k·(P95−P5) s.t. P(posLat>thr)≤1%
   function mcObj(params){
     const r=runMonteCarlo(params,100); // 100 draws per candidate — enough to rank; final check uses full UI count
-    const util=r.score.p50-0.5*(r.score.p95-r.score.p5);
+    const tgtPct=+(g('mc-pct')||{value:50}).value;
+    const tgtScore=r.score[`p${tgtPct}`]||r.score.p50;
+    const util=tgtScore-0.5*(r.score.p95-r.score.p5);
     const posPen=r.breachPos>1?50:0;  // hard: P(posLat > rTWT-aware threshold) ≤ 1%
     const pt=compute(params);
     const strandPen=pt.active>params.maxCli*280?Math.min(20,(pt.active-params.maxCli*280)/500):0; // admitted-count floor
@@ -1505,19 +1540,21 @@ const OPT_KNOB_LABELS={atFair:'Airtime Fairness',txPwr:'TX Power',minRSSI:'Min R
 // mcResult: the final full-MC pass run on the optimal params inside runOpt()
 function renderOptResults(best,params,mcResult){
   const panel=g('opt-results');if(!panel)return;
+  const selPct=+(g('mc-pct')||{value:50}).value;
   const cur=readInputs();
   const mc=mcResult||runMonteCarlo(params,200); // fallback if called without MC
   const delta=best.score-compute(cur).score;
+  const selScore=mc.score[`p${selPct}`]||mc.score.p50;
 
   // ── Header: P50/P95/P5 from MC on optimal params ──────────────────────
   let h=`<div style="padding:6px;background:#001428;border:1px solid var(--cyan);border-radius:2px;margin-bottom:6px">
     <div style="font-size:8px;color:var(--cyan);text-transform:uppercase;letter-spacing:.8px;margin-bottom:4px">
-      P50 Optimal · ${(+cur.fans||50000).toLocaleString()} fans · ${Math.round((+cur.concur||.6)*100)}% concur
+      P${selPct} Optimal · ${(+cur.fans||50000).toLocaleString()} fans · ${Math.round((+cur.concur||.6)*100)}% concur
     </div>
     <div style="display:flex;gap:10px;align-items:flex-end">
       <div>
-        <div style="font-size:9px;color:var(--mut);margin-bottom:1px">P50 score</div>
-        <div style="font-size:22px;font-weight:700;color:${mc.score.p50>=85?CM.green:mc.score.p50>=65?CM.yellow:CM.red}">${mc.score.p50}</div>
+        <div style="font-size:9px;color:var(--mut);margin-bottom:1px">P${selPct} score</div>
+        <div style="font-size:22px;font-weight:700;color:${selScore>=85?CM.green:selScore>=65?CM.yellow:CM.red}">${selScore}</div>
       </div>
       <div style="border-left:1px solid var(--border);padding-left:10px">
         <div style="font-size:8px;color:var(--mut)">P5</div><div style="font-size:13px;color:var(--mut2)">${mc.score.p5}</div>
@@ -1575,9 +1612,9 @@ function checkRobustness(){
 // ═══ WIRE EVENTS + INIT ═══
 document.querySelectorAll('input[type=range],select').forEach(el=>el.addEventListener('input',update));
 buildAPG();
-addLog('v2 Phase 1 loaded — 60 tunable parameters · AP5060 Broadcom + all SSID optional settings','ok');
-addLog('Click ★ Stadium Optimal to apply Lumen Field target config','info');
-addLog('Click ↺ Reset to see WORST CASE — then tune to see each parameter\'s impact','warn');
+addLog('Outdoor Stadium WiFi Simulator v2 — 60 params modelled · AP5060 Broadcom + all EP1 settings','ok');
+addLog('① Set demand scenario  ② Check Gap Analysis tab  ③ Run Monte Carlo  ④ Run Optimizer','info');
+addLog('★ Stadium Optimal = recommended config · ↺ Reset = worst case — compare the delta','warn');
 applyOptimal();
 </script>
 </body>
