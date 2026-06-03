@@ -226,13 +226,13 @@ input:checked+.ts:before{transform:translateX(15px);background:#fff}
   <hr class="sep">
   <div class="kg"><div class="kl" style="font-size:9px">MLO Mode <span id="lv-mlom" style="font-size:10px">STR</span></div><select id="mlo-mode" onchange="update()"><option value="STR" selected>STR — Simultaneous TX/RX (×1.90)</option><option value="Enhanced">Enhanced STR (×1.55)</option><option value="NSTR">NSTR — Time-division (×1.20)</option></select><div class="kd">STR requires 5+6GHz band separation · AP5060 only</div></div>
   <div class="kg"><div class="kl" style="font-size:9px">WMM TXOP AC_VO <span id="lv-txop" style="font-size:10px">1504 µs</span></div><select id="txop-vo" onchange="update()"><option value="0">0 µs (disabled)</option><option value="1504" selected>1504 µs (voice default)</option><option value="3008">3008 µs (high priority)</option></select><div class="kd">Voice/POS queue burst time → reduces latency jitter</div></div>
-  <div class="kg"><div class="kl" style="font-size:9px">WMM TXOP AC_BE <span id="lv-txop-be" style="font-size:10px">3008 µs</span></div><select id="txop-be" onchange="update()"><option value="0">0 µs (no burst)</option><option value="1504">1504 µs</option><option value="3008" selected>3008 µs (IPQ9574 stadium)</option></select><div class="kd">Best-effort queue burst. Higher = better bulk tput; brief POS risk when rTWT OFF.</div></div>
-  <div class="kg"><div class="kl" style="font-size:9px">EDCA CWmin AC_BE <span id="lv-cwbe" style="font-size:10px">15 slots</span></div><select id="cw-be" onchange="update()"><option value="7">7 slots (aggressive — collision storm >70%)</option><option value="15" selected>15 slots (IPQ9574 optimal)</option><option value="31">31 slots (conservative)</option><option value="63">63 slots (max backoff)</option></select><div class="kd">Min contention window for best-effort. CW=7 causes 3× more collisions at >70% airtime.</div></div>
-  <div class="kg"><div class="kl" style="font-size:9px">RTS/CTS Threshold <span id="lv-rts" style="font-size:10px">1500 B</span></div><select id="rts-thr" onchange="update()"><option value="65535">65535 B (disabled)</option><option value="2347">2347 B (802.11 default)</option><option value="1500" selected>1500 B (IPQ9574 stadium)</option></select><div class="kd">Frames above threshold use RTS/CTS → mitigates hidden terminal in dense stadium.</div></div>
-  <div class="kg"><div class="kl" style="font-size:9px">MU-MIMO DL Streams <span id="lv-mustm" style="font-size:10px">8 streams</span></div><select id="mu-streams" onchange="update()"><option value="1">1 stream (SISO)</option><option value="2">2 streams (2×2)</option><option value="4">4 streams (WiFi 6 / AP3000)</option><option value="8" selected>8 streams (IPQ9574 WiFi 7)</option></select><div class="kd">IPQ9574 supports 8-stream DL MU-MIMO. AP3000 hardware max = 2.</div></div>
+  <div class="kg"><div class="kl" style="font-size:9px">WMM TXOP AC_BE <span id="lv-txop-be" style="font-size:10px">3008 µs</span></div><select id="txop-be" onchange="update()"><option value="0">0 µs (no burst)</option><option value="1504">1504 µs</option><option value="3008" selected>3008 µs (AP5060 stadium)</option></select><div class="kd">Best-effort queue burst. Higher = better bulk tput; brief POS risk when rTWT OFF.</div></div>
+  <div class="kg"><div class="kl" style="font-size:9px">EDCA CWmin AC_BE <span id="lv-cwbe" style="font-size:10px">15 slots</span></div><select id="cw-be" onchange="update()"><option value="7">7 slots (aggressive — collision storm >70%)</option><option value="15" selected>15 slots (AP5060 optimal)</option><option value="31">31 slots (conservative)</option><option value="63">63 slots (max backoff)</option></select><div class="kd">Min contention window for best-effort. CW=7 causes 3× more collisions at >70% airtime.</div></div>
+  <div class="kg"><div class="kl" style="font-size:9px">RTS/CTS Threshold <span id="lv-rts" style="font-size:10px">1500 B</span></div><select id="rts-thr" onchange="update()"><option value="65535">65535 B (disabled)</option><option value="2347">2347 B (802.11 default)</option><option value="1500" selected>1500 B (AP5060 stadium)</option></select><div class="kd">Frames above threshold use RTS/CTS → mitigates hidden terminal in dense stadium.</div></div>
+  <div class="kg"><div class="kl" style="font-size:9px">MU-MIMO DL Streams <span id="lv-mustm" style="font-size:10px">8 streams</span></div><select id="mu-streams" onchange="update()"><option value="1">1 stream (SISO)</option><option value="2">2 streams (2×2)</option><option value="4">4 streams (WiFi 6 / AP3000)</option><option value="8" selected>8 streams (AP5060 WiFi 7)</option></select><div class="kd">AP5060 (Broadcom) supports 8-stream DL MU-MIMO. AP3000 hardware max = 2.</div></div>
   <div class="trow"><label class="tog"><input type="checkbox" id="tog-qam4k" checked onchange="update()"><span class="ts"></span></label><span class="tl">4K-QAM (MCS 12/13)</span><span class="tv">SNR≥42dB</span></div>
   <hr class="sep">
-  <div class="kg" style="margin-top:4px"><div class="kl" style="font-size:9px">MLO Active Links <span id="lv-mlolnk" style="font-size:10px">2 links</span></div><select id="mlo-links" onchange="update()"><option value="1">1 link (single-band, no MLO)</option><option value="2" selected>2 links — 5G + 6G (IPQ9574)</option><option value="3">3 links — 2.4 + 5 + 6G (tri-band)</option></select><div class="kd">IPQ9574: STR 2-link. 3-link tri-band MLO = future WiFi 7 extension.</div></div>
+  <div class="kg" style="margin-top:4px"><div class="kl" style="font-size:9px">MLO Active Links <span id="lv-mlolnk" style="font-size:10px">2 links</span></div><select id="mlo-links" onchange="update()"><option value="1">1 link (single-band, no MLO)</option><option value="2" selected>2 links — 5G + 6G (AP5060 STR)</option><option value="3">3 links — 2.4 + 5 + 6G (tri-band)</option></select><div class="kd">AP5060 (Broadcom): STR 2-link. 3-link tri-band MLO = future WiFi 7 extension.</div></div>
   <div class="kg"><div class="kl" style="font-size:9px">MLO Traffic Steering <span id="lv-mlosteer" style="font-size:10px">AI-driven</span></div><select id="mlo-steer" onchange="update()"><option value="wmm">WMM-QoS (standard priority)</option><option value="ai" selected>AI-driven (EP1 RRM continuous)</option></select><div class="kd">AI-driven = EP1 RRM re-balances per-link load continuously. +4% capacity vs WMM.</div></div>
 </div>
 </details>
@@ -379,7 +379,7 @@ input:checked+.ts:before{transform:translateX(15px);background:#fff}
   </div>
   <!-- Config Export -->
   <div style="width:100%;margin-top:8px">
-    <button class="bpbtn" style="border-color:var(--gold);color:var(--gold)" onclick="showCfg()">📋 Config Export — All 39 Params</button>
+    <button class="bpbtn" style="border-color:var(--gold);color:var(--gold)" onclick="showCfg()">📋 Config Export — All 47 Params</button>
   </div>
 </div>
 </div><!-- /layout -->
@@ -964,7 +964,7 @@ function applyOptimal(){
   g('mu-streams').value=8;g('tog-qam4k').checked=true;
   g('mlo-links').value=2;g('mlo-steer').value='ai';
   addLog('★ Stadium Optimal applied — all parameters at Lumen Field target','ok');
-  addLog('IPQ9574: 8-stream MU-MIMO · 4K-QAM · CWmin-BE=15 · RTS=1500 · TXOP-BE=3008µs','info');
+  addLog('AP5060 Broadcom: 8-stream MU-MIMO · 4K-QAM · CWmin-BE=15 · RTS=1500 · TXOP-BE=3008µs','info');
   addLog('MBR 24M · RX-SOP −75 · Airtime Fairness Strict · Active Band Steering','info');
   addLog('BC Filter + MC→UC + Proxy ARP ON · rTWT ON · MLO STR · 802.11r ON','info');
   update();
@@ -1109,7 +1109,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeCfg();});
 // ═══ WIRE EVENTS + INIT ═══
 document.querySelectorAll('input[type=range],select').forEach(el=>el.addEventListener('input',update));
 buildAPG();
-addLog('v2 Phase 1 loaded — 39 tunable parameters · IPQ9574 chip params added','ok');
+addLog('v2 Phase 1 loaded — 47 tunable parameters · AP5060 Broadcom chip params added','ok');
 addLog('Click ★ Stadium Optimal to apply Lumen Field target config','info');
 addLog('Click ↺ Reset to see WORST CASE — then tune to see each parameter\'s impact','warn');
 applyOptimal();
