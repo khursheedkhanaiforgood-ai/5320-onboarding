@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stadium Parameter Codex — v0 · Outdoor Bowl Archetype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..700&family=Newsreader:ital,opsz,wght@0,6..72,300..600;1,6..72,300..500&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0a0b0d;
+    --surface:#0f1115;
+    --border:#1e2128;
+    --mut:#5a6070;
+    --mut2:#8891a0;
+    --text:#d4d8df;
+    --head:#e8ecf0;
+    --cyan:#38bdf8;
+    --blue:#60a5fa;
+    --green:#4ade80;
+    --yel:#fbbf24;
+    --org:#fb923c;
+    --red:#f87171;
+    --pur:#a78bfa;
+    --mono:'IBM Plex Mono',ui-monospace,monospace;
+    --serif:'Newsreader',Georgia,serif;
+    --display:'Fraunces',Georgia,serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;background:var(--bg);color:var(--text);
+    font-family:var(--serif);font-size:17px;line-height:1.65;
+    font-optical-sizing:auto;
+    background-image:
+      radial-gradient(circle at 15% 10%, rgba(56,189,248,.04), transparent 38%),
+      radial-gradient(circle at 85% 90%, rgba(167,139,250,.04), transparent 40%);
+  }
+  .grain{position:fixed;inset:0;pointer-events:none;z-index:9999;opacity:.028;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");}
+  .wrap{max-width:1020px;margin:0 auto;padding:0 28px 120px}
+
+  /* ---- Masthead ---- */
+  .masthead{padding:64px 0 32px;border-bottom:1px solid var(--border);position:relative}
+  .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.34em;text-transform:uppercase;color:var(--cyan);margin-bottom:20px}
+  .masthead h1{
+    font-family:var(--display);font-weight:600;font-size:clamp(38px,7.5vw,82px);
+    line-height:.94;letter-spacing:-.02em;margin:0 0 14px;color:var(--head);
+    font-variation-settings:'opsz' 144;
+  }
+  .masthead h1 em{font-style:italic;color:var(--cyan);font-weight:500}
+  .dek{font-family:var(--serif);font-style:italic;font-size:clamp(16px,2.2vw,20px);color:var(--mut2);max-width:660px;line-height:1.45}
+  .meta-row{display:flex;flex-wrap:wrap;gap:8px 26px;margin-top:24px;font-family:var(--mono);font-size:11px;letter-spacing:.08em;color:var(--mut);text-transform:uppercase}
+  .meta-row b{color:var(--mut2);font-weight:600}
+  .badge{display:inline-block;font-family:var(--mono);font-size:9px;letter-spacing:.18em;text-transform:uppercase;background:var(--cyan);color:#0a0b0d;padding:3px 9px;border-radius:2px;margin-left:10px;vertical-align:middle;font-weight:700}
+
+  /* ---- Sticky TOC ---- */
+  nav.toc{
+    position:sticky;top:0;z-index:100;
+    background:rgba(10,11,13,.92);backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--border);
+    padding:12px 0;margin-bottom:0;
+  }
+  nav.toc .toc-inner{display:flex;flex-wrap:wrap;gap:4px 6px;align-items:center}
+  nav.toc .toc-label{font-family:var(--mono);font-size:10px;letter-spacing:.28em;text-transform:uppercase;color:var(--mut);margin-right:10px;white-space:nowrap}
+  nav.toc a{font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;color:var(--mut2);text-decoration:none;padding:4px 10px;border:1px solid var(--border);border-radius:3px;transition:.18s;white-space:nowrap}
+  nav.toc a:hover{color:var(--cyan);border-color:var(--cyan)}
+
+  /* ---- Sections ---- */
+  section{padding:56px 0 10px;border-top:1px solid var(--border);margin-top:28px}
+  section:first-of-type{border-top:none}
+  .sec-num{font-family:var(--mono);font-size:11.5px;letter-spacing:.22em;color:var(--cyan);text-transform:uppercase;margin-bottom:8px}
+  h2{font-family:var(--display);font-weight:560;font-size:clamp(26px,4vw,40px);line-height:1.04;letter-spacing:-.015em;margin:0 0 8px;color:var(--head);font-variation-settings:'opsz' 90}
+  h2 .sub{display:block;font-family:var(--serif);font-style:italic;font-weight:400;font-size:16px;color:var(--mut2);letter-spacing:0;margin-top:10px}
+  h3{font-family:var(--display);font-weight:600;font-size:21px;margin:36px 0 8px;letter-spacing:-.01em;color:var(--head)}
+  h4{font-family:var(--mono);font-size:11.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--yel);margin:28px 0 10px}
+  p{margin:0 0 16px}
+  strong{font-weight:600;color:var(--head)}
+  em{font-style:italic}
+
+  /* pull quote */
+  .pull{border-left:3px solid var(--cyan);padding:4px 0 4px 24px;margin:26px 0;font-family:var(--display);font-style:italic;font-weight:400;font-size:22px;line-height:1.35;color:var(--head)}
+
+  /* formal box */
+  .formal{border:1px solid var(--border);background:var(--surface);border-radius:6px;padding:26px 28px;margin:26px 0;border-left:3px solid var(--cyan)}
+  .formal .ttl{font-family:var(--mono);font-size:10.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--cyan);margin-bottom:16px}
+  .formula{font-family:var(--mono);font-size:14px;background:#080a0e;color:#c9d3de;padding:16px 20px;border-radius:4px;margin:14px 0;overflow-x:auto;line-height:1.8;border:1px solid var(--border)}
+  .formula .c{color:var(--cyan)}.formula .k{color:var(--pur)}.formula .v{color:var(--yel)}.formula .g{color:var(--green)}
+
+  /* note / callout */
+  .note{background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:16px 20px;margin:22px 0;font-size:15px}
+  .note .tag{font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--yel);display:block;margin-bottom:8px}
+  .note.cyan .tag{color:var(--cyan)}
+  .note.green .tag{color:var(--green)}
+  .note.warn{border-color:rgba(251,146,60,.3)}.note.warn .tag{color:var(--org)}
+
+  /* tier list */
+  .tier{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin:22px 0}
+  .tier-card{background:var(--surface);border:1px solid var(--border);border-radius:5px;padding:16px 18px}
+  .tier-card .tc-label{font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;margin-bottom:8px}
+  .tier-card.pos .tc-label{color:var(--red)}
+  .tier-card.vip .tc-label{color:var(--yel)}
+  .tier-card.teams .tc-label{color:var(--blue)}
+  .tier-card.bulk .tc-label{color:var(--green)}
+  .tier-card .tc-val{font-family:var(--mono);font-size:15px;color:var(--head);margin-bottom:4px}
+  .tier-card .tc-desc{font-size:13px;color:var(--mut2);line-height:1.45}
+
+  /* ---- Filter bar ---- */
+  .filter-bar{display:flex;flex-wrap:wrap;gap:8px;margin:24px 0 16px;align-items:center}
+  .filter-bar span{font-family:var(--mono);font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--mut);margin-right:4px}
+  .fbtn{font-family:var(--mono);font-size:11px;letter-spacing:.08em;padding:6px 14px;border-radius:3px;cursor:pointer;border:1px solid var(--border);background:var(--surface);color:var(--mut2);transition:.18s;text-transform:uppercase}
+  .fbtn:hover{color:var(--head);border-color:var(--mut2)}
+  .fbtn.active{color:#0a0b0d;font-weight:700}
+  .fbtn[data-f="ALL"].active{background:var(--mut2);border-color:var(--mut2)}
+  .fbtn[data-f="SEARCH"].active{background:var(--cyan);border-color:var(--cyan);color:#0a0b0d}
+  .fbtn[data-f="LOCKED"].active{background:var(--pur);border-color:var(--pur)}
+  .fbtn[data-f="GATE"].active{background:var(--green);border-color:var(--green)}
+  .fbtn[data-f="DEMAND"].active{background:var(--org);border-color:var(--org)}
+  .fbtn[data-f="SLA"].active{background:var(--blue);border-color:var(--blue)}
+
+  .search-row{margin-bottom:16px}
+  .search-row input{font-family:var(--mono);font-size:13px;width:100%;max-width:440px;padding:8px 14px;background:var(--surface);border:1px solid var(--border);border-radius:3px;color:var(--text);outline:none;transition:.18s}
+  .search-row input:focus{border-color:var(--cyan)}
+  .search-row input::placeholder{color:var(--mut)}
+
+  /* ---- Parameter Table ---- */
+  .tbl-scroll{overflow-x:auto;margin:0 -4px}
+  table.ptbl{width:100%;border-collapse:collapse;font-size:13.5px;font-family:var(--serif)}
+  table.ptbl th{font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;text-align:left;padding:10px 10px;border-bottom:1px solid var(--border);color:var(--mut);white-space:nowrap}
+  table.ptbl td{padding:10px 10px;border-bottom:1px solid var(--border);vertical-align:top;line-height:1.45}
+  table.ptbl tr.search-row-tr td{border-left:3px solid var(--cyan)}
+  table.ptbl tr.locked-row-tr td{border-left:3px solid var(--pur)}
+  table.ptbl tr.gate-row-tr td{border-left:3px solid var(--green)}
+  table.ptbl tr.demand-row-tr td{border-left:3px solid var(--org)}
+  table.ptbl tr.sla-row-tr td{border-left:3px solid var(--blue)}
+  table.ptbl tr:hover td{background:rgba(255,255,255,.02)}
+  table.ptbl .mono{font-family:var(--mono);font-size:12px}
+  table.ptbl .num{font-family:var(--mono);font-size:11px;color:var(--mut);text-align:right}
+  table.ptbl .grp{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--mut)}
+
+  /* status badges */
+  .badge-s{display:inline-block;font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;padding:2px 7px;border-radius:2px;font-weight:700;white-space:nowrap}
+  .bs-SEARCH{background:rgba(56,189,248,.18);color:var(--cyan);border:1px solid rgba(56,189,248,.35)}
+  .bs-LOCKED{background:rgba(167,139,250,.18);color:var(--pur);border:1px solid rgba(167,139,250,.35)}
+  .bs-GATE{background:rgba(74,222,128,.18);color:var(--green);border:1px solid rgba(74,222,128,.35)}
+  .bs-SLA{background:rgba(96,165,250,.18);color:var(--blue);border:1px solid rgba(96,165,250,.35)}
+  .bs-DEMAND{background:rgba(251,146,60,.18);color:var(--org);border:1px solid rgba(251,146,60,.35)}
+
+  /* impact chips */
+  .imp{display:inline-block;font-family:var(--mono);font-size:9.5px;padding:1px 6px;border-radius:2px;margin-top:4px;color:var(--yel);background:rgba(251,191,36,.1);border:1px solid rgba(251,191,36,.2)}
+
+  /* ---- Search set knob table ---- */
+  table.ktbl{width:100%;border-collapse:collapse;font-size:13.5px}
+  table.ktbl th{font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut);padding:10px 12px;border-bottom:1px solid var(--border);text-align:left}
+  table.ktbl td{padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:top;line-height:1.5}
+  table.ktbl .mono{font-family:var(--mono);font-size:12px}
+  table.ktbl .num{font-family:var(--mono);font-size:11px;color:var(--cyan);font-weight:700}
+  table.ktbl .prior{font-family:var(--mono);font-size:12px;color:var(--green)}
+  table.ktbl tr:hover td{background:rgba(56,189,248,.025)}
+
+  /* interaction pairs */
+  .ix-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin:24px 0}
+  @media(max-width:700px){.ix-grid{grid-template-columns:1fr}}
+  .ix-card{background:var(--surface);border:1px solid var(--border);border-radius:5px;padding:18px 20px}
+  .ix-card .ix-num{font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--cyan);margin-bottom:8px}
+  .ix-card h4{margin:0 0 8px;font-size:13px;letter-spacing:.04em;color:var(--head)}
+  .ix-card p{font-size:13.5px;margin:0;line-height:1.55}
+
+  /* copy JSON button */
+  .copy-btn{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;padding:8px 18px;background:rgba(56,189,248,.12);border:1px solid rgba(56,189,248,.4);border-radius:3px;color:var(--cyan);cursor:pointer;transition:.2s;margin:16px 0}
+  .copy-btn:hover{background:rgba(56,189,248,.22)}
+  .copy-btn.ok{background:rgba(74,222,128,.12);border-color:rgba(74,222,128,.4);color:var(--green)}
+
+  /* code block */
+  pre.code-block{background:#080a0e;color:#c9d3de;font-family:var(--mono);font-size:12.5px;line-height:1.65;padding:20px 22px;border-radius:5px;overflow-x:auto;margin:18px 0;border:1px solid var(--border)}
+  code{font-family:var(--mono);font-size:.85em;background:var(--surface);padding:1px 6px;border-radius:3px;color:var(--cyan)}
+
+  /* ul tight */
+  ul.tight{margin:8px 0 16px;padding-left:22px}
+  ul.tight li{margin-bottom:8px}
+
+  /* fade-in */
+  .fx{opacity:0;transform:translateY(14px);animation:rise .7s cubic-bezier(.2,.7,.2,1) forwards}
+  @keyframes rise{to{opacity:1;transform:none}}
+
+  /* footer */
+  footer{margin-top:60px;padding-top:20px;border-top:1px solid var(--border);font-family:var(--mono);font-size:11px;color:var(--mut);letter-spacing:.06em;display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px}
+
+  hr.soft{border:none;border-top:1px solid var(--border);margin:32px 0}
+
+  @media(max-width:640px){
+    nav.toc .toc-inner{gap:3px 4px}
+    .ix-grid{grid-template-columns:1fr}
+  }
+</style>
+</head>
+<body>
+<div class="grain"></div>
+<div class="wrap">
+
+<!-- ===== MASTHEAD ===== -->
+<header class="masthead fx">
+  <div class="eyebrow">Digital Twin · Extreme AP / EP1 · Stadium Outdoor</div>
+  <h1>Stadium Parameter<br><em>Codex</em></h1>
+  <p class="dek">Complete reference for all 60 simulator parameters — definitions, QoE impact, effect types, and the 12-knob optimizer search set for the outdoor bowl archetype.</p>
+  <div class="meta-row">
+    <span>Author · <b>Khursheed Khan</b></span>
+    <span>Date · <b>3 June 2026</b></span>
+    <span>Archetype · <b>Stadium Outdoor</b></span>
+    <span>Version · <b>v0</b><span class="badge">Draft</span></span>
+    <span>QoE · <b>Proportional Fairness</b></span>
+  </div>
+</header>
+
+<!-- ===== STICKY TOC ===== -->
+<nav class="toc fx" style="animation-delay:.08s">
+  <div class="toc-inner">
+    <span class="toc-label">Jump to</span>
+    <a href="#qoe">§00 QoE Definition</a>
+    <a href="#params">§01 All 60 Parameters</a>
+    <a href="#search">§02 12 Search Knobs</a>
+    <a href="#interactions">§03 Key Interactions</a>
+    <a href="#indoor">§04 Stadium Indoor</a>
+  </div>
+</nav>
+
+<!-- ===== §00 QoE DEFINITION ===== -->
+<section id="qoe">
+  <div class="sec-num">§ 00 — QoE Definition</div>
+  <h2>Stadium Outdoor QoE<span class="sub">Recommended definition — not yet locked by customer. We are assigning it.</span></h2>
+
+  <p class="lead" style="font-size:18px;line-height:1.6">At a 50,000-person outdoor venue, "the network is good" is not a sentence that can be finished with a single number. It needs a formal objective that respects the crowd, protects the payment rail, and doesn't reward one sector at the expense of another.</p>
+
+  <div class="formal">
+    <div class="ttl">Objective Function — Proportional Fairness Utility</div>
+    <div class="formula"><span class="c">U(θ)</span> = <span class="k">Σᵢ</span> <span class="v">log</span>(<span class="g">throughputᵢ</span>)   <span class="c">over all admitted bulk clients</span>
+
+<span class="c">Robust form:</span>
+  maximize  <span class="v">P50[U(θ)]</span> − <span class="k">0.5</span> · (<span class="v">P95[U]</span> − <span class="v">P5[U]</span>)
+  subject to  <span class="g">P(posLatency ≤ 10ms) ≥ 99%</span></div>
+    <p style="font-size:14px;color:var(--mut2);margin:8px 0 0">θ = parameter vector (the 12 search knobs). k = spread penalty weight (default 0.5). Customer-adjustable: k, POS threshold, VIP floor.</p>
+  </div>
+
+  <h3>Service Tiers — Hard Constraints</h3>
+  <div class="tier">
+    <div class="tier-card pos">
+      <div class="tc-label">POS Terminals · VLAN 50</div>
+      <div class="tc-val">Latency ≤ 10ms (P99) <span style="font-size:12px;opacity:.75">· ≤ 3ms where rTWT ON</span></div>
+      <div class="tc-desc">Loss ≤ 1%. Payment rail — breach = transaction failure. When rTWT is active, hardware-scheduled slots guarantee ≤ 3ms; the optimizer enforces this tighter bound.</div>
+    </div>
+    <div class="tier-card vip">
+      <div class="tc-label">VIP Suite Aggregate</div>
+      <div class="tc-val">≥ 25 Mbps</div>
+      <div class="tc-desc">Premium cluster — must sustain multi-screen video + conferencing throughout match.</div>
+    </div>
+    <div class="tier-card teams">
+      <div class="tc-label">Teams / Video Conferencing</div>
+      <div class="tc-val">≥ 5 Mbps per seat</div>
+      <div class="tc-desc">Corporate suites and press box; drives VIP SLA pressure with dedicated APs.</div>
+    </div>
+    <div class="tier-card bulk">
+      <div class="tc-label">Bulk Clients</div>
+      <div class="tc-val">Proportional Fairness</div>
+      <div class="tc-desc">log(throughput) utility over remaining capacity — no single sector starves another.</div>
+    </div>
+    <div class="tier-card" style="border-top:2px solid var(--org)">
+      <div class="tc-label" style="color:var(--org)">Admitted-Client Floor</div>
+      <div class="tc-val" style="font-size:14px">Count ≥ Deployment Target</div>
+      <div class="tc-desc">Cannot strand fans. Admitted sessions ≥ target_clients or penalty fires. Prevents the optimizer from "winning" score by kicking clients rather than improving the network.</div>
+    </div>
+  </div>
+
+  <div class="formal" style="margin-top:16px;border-color:var(--pur)">
+    <div class="ttl" style="color:var(--pur)">Priority Order on Conflict</div>
+    <div class="formula" style="font-size:13px;line-height:2">
+<span class="g">POS SLA</span>  &gt;  <span class="v">Fairness (log-utility)</span>  &gt;  <span class="c">Admitted count</span>  &gt;  <span class="k">Aggregate throughput</span>  &gt;  Per-client peak</div>
+    <p style="font-size:13px;color:var(--mut2);margin:8px 0 0;font-style:italic">Explicitly sacrificed: peak per-client throughput for strong clients. In a 72k bowl full of slow phones, fairness-or-collapse dominates raw speed.</p>
+  </div>
+
+  <h3>Why Proportional Fairness for Stadium</h3>
+  <p>At kickoff surge — 50,000 simultaneous sessions — PF prevents monopolization. No single AP sector can starve another sector's clients because the log utility penalizes starving the bottom decile far more than it rewards enriching the top. A linear sum (maximizing total throughput) would concentrate resources in the high-MCS front rows while the upper deck degrades. PF distributes gain across the log curve.</p>
+
+  <div class="note cyan">
+    <span class="tag">Customer-adjustable parameters</span>
+    <strong>k</strong> (spread penalty weight, default 0.5) — increase to penalize variance more aggressively at expense of mean utility. <strong>POS threshold</strong> (default 10ms P99) — tighten to 5ms for premium venues. <strong>VIP floor</strong> (default 25 Mbps) — scale with suite AV load.
+  </div>
+
+  <h3>Stadium Outdoor vs Indoor — Archetype Divergence</h3>
+  <p>The outdoor bowl has τ<sub>RMS</sub> ~200–400ns from stand reflections, higher angular spread, Rician K ~3–8, and larger cell radius. These force <strong>GI 1600ns</strong>, higher TX power, and wide channel widths. Indoor premium club (same venue, different archetype): τ<sub>RMS</sub> ~50–150ns, K ~10–20, smaller cells, GI 800ns, lower TX power (10–14 dBm). The QoE objective is identical; the locked parameter values differ. This codex applies specifically to the <strong>outdoor bowl archetype</strong>.</p>
+</section>
+
+<!-- ===== §01 ALL 60 PARAMETERS ===== -->
+<section id="params">
+  <div class="sec-num">§ 01 — The 60 Parameters</div>
+  <h2>Complete Parameter Reference<span class="sub">Every simulator knob — defined, classified, and mapped to QoE.</span></h2>
+
+  <div class="note">
+    <span class="tag">Status Key</span>
+    <span class="badge-s bs-SEARCH">SEARCH</span> optimizer search knob — interior tradeoff exists &nbsp;
+    <span class="badge-s bs-LOCKED">LOCKED</span> context-modulated — archetype sets the value &nbsp;
+    <span class="badge-s bs-GATE">GATE</span> binary monotone — always ON for stadium &nbsp;
+    <span class="badge-s bs-SLA">SLA</span> SLA/config constant — not searched &nbsp;
+    <span class="badge-s bs-DEMAND">DEMAND</span> scenario input — not a network parameter
+  </div>
+
+  <div class="filter-bar">
+    <span>Filter:</span>
+    <button class="fbtn active" data-f="ALL" onclick="filterTable('ALL')">All</button>
+    <button class="fbtn" data-f="SEARCH" onclick="filterTable('SEARCH')">Search</button>
+    <button class="fbtn" data-f="LOCKED" onclick="filterTable('LOCKED')">Locked</button>
+    <button class="fbtn" data-f="GATE" onclick="filterTable('GATE')">Gate</button>
+    <button class="fbtn" data-f="SLA" onclick="filterTable('SLA')">SLA</button>
+    <button class="fbtn" data-f="DEMAND" onclick="filterTable('DEMAND')">Demand</button>
+  </div>
+  <div class="search-row">
+    <input type="text" id="paramSearch" placeholder="Search name, key, or description…" oninput="liveSearch(this.value)">
+  </div>
+
+  <div class="tbl-scroll">
+  <table class="ptbl" id="paramTable">
+    <thead>
+      <tr>
+        <th style="width:36px">#</th>
+        <th style="width:120px">Name</th>
+        <th style="width:90px">Key</th>
+        <th style="width:80px">Section</th>
+        <th style="width:100px">Effect Type</th>
+        <th>Definition</th>
+        <th style="width:200px">QoE Impact</th>
+        <th style="width:80px">Status</th>
+      </tr>
+    </thead>
+    <tbody id="paramBody">
+    </tbody>
+  </table>
+  </div>
+  <p id="rowCount" style="font-family:var(--mono);font-size:11px;color:var(--mut);margin-top:8px"></p>
+</section>
+
+<!-- ===== §02 12 SEARCH KNOBS ===== -->
+<section id="search">
+  <div class="sec-num">§ 02 — The Optimizer Search Set</div>
+  <h2>12 Prime Inputs<span class="sub">The knobs the optimizer actually turns — and why.</span></h2>
+
+  <p>After classifying all 60 parameters by effect type and archetype context, the optimizer's true search space collapses to twelve knobs. The remaining 48 are either frozen by the outdoor-bowl regime (LOCKED), set once to "always on" (GATE), fixed by SLA contract (SLA), or scenario inputs controlled by the experiment (DEMAND). Only SEARCH parameters have an interior optimum — a value where the QoE derivative changes sign — and thus require Monte Carlo exploration rather than a point estimate.</p>
+
+  <div class="pull">A parameter earns SEARCH status when neither extreme of its range is correct — and the correct interior value depends on load, geometry, or another knob's state.</div>
+
+  <div class="tbl-scroll">
+  <table class="ktbl">
+    <thead>
+      <tr>
+        <th style="width:32px">#</th>
+        <th style="width:120px">Knob</th>
+        <th style="width:160px">Values Tested</th>
+        <th>Why Searched</th>
+        <th style="width:140px">Stadium Prior</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="num">1</td>
+        <td><strong>Airtime Fairness</strong><br><span class="mono" style="color:var(--mut2)">atFair</span></td>
+        <td class="mono">off / adaptive / strict</td>
+        <td>Context-dependent: strict helps fast clients, hurts slow edge-seat ones. Non-monotone with client MCS distribution. At stadium kickoff, mixed-MCS population makes adaptive or strict competitive — point estimate at mean load misses the tail.</td>
+        <td class="prior">strict</td>
+      </tr>
+      <tr>
+        <td class="num">2</td>
+        <td><strong>TX Power</strong><br><span class="mono" style="color:var(--mut2)">txPwr</span></td>
+        <td class="mono">7–23 dBm</td>
+        <td>Threshold effect: beyond ~20 dBm, inter-AP interference increases as distant APs hear each other's transmissions — raises CCA deferral and reduces spatial reuse. Below ~14 dBm, edge-seat clients drop an MCS tier. Ridge between 14–20 dBm by sector spacing.</td>
+        <td class="prior">17 dBm</td>
+      </tr>
+      <tr>
+        <td class="num">3</td>
+        <td><strong>Min RSSI</strong><br><span class="mono" style="color:var(--mut2)">minRSSI</span></td>
+        <td class="mono">−80 / −75 / −70 dBm</td>
+        <td>Admission threshold: too permissive admits weak clients using MCS 0–2 that consume 3–8× more airtime per byte; too strict excludes edge-seat fans and inflates complaint density. Interior optimum depends on path-loss distribution of seating bowl.</td>
+        <td class="prior">−70 dBm</td>
+      </tr>
+      <tr>
+        <td class="num">4</td>
+        <td><strong>RX-SOP</strong><br><span class="mono" style="color:var(--mut2)">rxSop</span></td>
+        <td class="mono">−85 / −75 / −65 dBm</td>
+        <td>Raises CCA floor so AP ignores weak out-of-BSS signals and reuses channel sooner. Too aggressive causes missed frames from distant legitimate seats — packet loss spike at bowl perimeter. Too conservative = excessive deferral to neighbor APs.</td>
+        <td class="prior">−75 dBm</td>
+      </tr>
+      <tr>
+        <td class="num">5</td>
+        <td><strong>CWmin BE</strong><br><span class="mono" style="color:var(--mut2)">cwBe</span></td>
+        <td class="mono">7 / 15 / 31 / 63</td>
+        <td>Non-monotone cliff: at utilization u &gt; 0.7, CWmin=7 causes exponential collision increase (+3ms latency spike). Stadium kickoff reaches u ≈ 0.75. Point estimate at P50 may show CWmin=7 safe; P95 shows POS SLA breach. Must explore stochastic regime crossing.</td>
+        <td class="prior">15</td>
+      </tr>
+      <tr>
+        <td class="num">6</td>
+        <td><strong>Max Clients</strong><br><span class="mono" style="color:var(--mut2)">maxCli</span></td>
+        <td class="mono">50 / 100 / 150 / 200</td>
+        <td>Admission vs congestion tradeoff: too low = fans denied association at gate; too high = overloaded MAC state table degrades all clients (association response latency rises, 802.11 mgmt frame overhead increases). Dense sector optimal trades off queue depth vs deny rate.</td>
+        <td class="prior">100–150</td>
+      </tr>
+      <tr>
+        <td class="num">7</td>
+        <td><strong>MCS Floor</strong><br><span class="mono" style="color:var(--mut2)">mcsFloor</span></td>
+        <td class="mono">0–8</td>
+        <td>Admission threshold: too low admits legacy slow clients (MCS 0 = 7.2 Mbps on 80MHz) that consume disproportionate airtime; too high excludes edge-seat fans. The excluded set's latency (walking to concessions, gate entry) is a key user-experience failure mode.</td>
+        <td class="prior">4–6</td>
+      </tr>
+      <tr>
+        <td class="num">8</td>
+        <td><strong>5G Channel Width</strong><br><span class="mono" style="color:var(--mut2)">bw5g</span></td>
+        <td class="mono">80 / 160 MHz</td>
+        <td>Interior tradeoff: 160 MHz doubles capacity per AP but halves non-overlapping channel count (1→2 in UNII-1/3), so adjacent sectors must co-channel and SINR per subcarrier drops. At stadium AP density, 80 MHz with spatial reuse may outperform 160 MHz. Depends on inter-AP spacing.</td>
+        <td class="prior">160 (test 80)</td>
+      </tr>
+      <tr>
+        <td class="num">9</td>
+        <td><strong>Frag Threshold</strong><br><span class="mono" style="color:var(--mut2)">fragThr</span></td>
+        <td class="mono">256 / 1500 / 2346</td>
+        <td>Only relevant when RF error rate is elevated. At clean outdoor RF, fragmentation adds overhead for no gain (2346 = off). During rain fade or interference event (deg &gt; 0), lower threshold reduces retransmission cost. Optimizer explores whether bowl geometry creates elevated error zones.</td>
+        <td class="prior">2346</td>
+      </tr>
+      <tr>
+        <td class="num">10</td>
+        <td><strong>DTIM Period</strong><br><span class="mono" style="color:var(--mut2)">dtim</span></td>
+        <td class="mono">1 / 2 / 4 / 10</td>
+        <td>Tradeoff between push-notification latency and battery life. At DTIM=10, buffered multicast delivery adds up to 900ms wake latency — fans in concourse miss social notifications. At DTIM=1, beacon overhead increases. Stadium fans expect instant mobile notifications during play.</td>
+        <td class="prior">1–2</td>
+      </tr>
+      <tr>
+        <td class="num">11</td>
+        <td><strong>RTS/CTS Threshold</strong><br><span class="mono" style="color:var(--mut2)">rtsThr</span></td>
+        <td class="mono">65535 / 2347 / 1500</td>
+        <td>Hidden-node protection vs overhead. In coordinated AP deployment with full bowl coverage, hidden nodes are rare (65535 = off is correct). In deep concourse or under-seat AP geometry, bowl curvature can create hidden-node zones — lower threshold prevents collision cascade but adds RTS/CTS overhead per frame.</td>
+        <td class="prior">65535</td>
+      </tr>
+      <tr>
+        <td class="num">12</td>
+        <td><strong>TXOP BE</strong><br><span class="mono" style="color:var(--mut2)">txopBe</span></td>
+        <td class="mono">0 / 1504 / 3008 μs</td>
+        <td>Interaction with rTWT: when rTWT assigns POS terminals scheduled delivery windows, long TXOP (3008 μs) bulk-data flows compete for those slots → POS latency rises. Short TXOP (0) hurts burst throughput for video. Interior optimum depends on POS terminal density and rTWT schedule granularity.</td>
+        <td class="prior">1504 μs</td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3>Why NOT in the Search Set</h3>
+  <div class="note">
+    <span class="tag">Locked at archetype value — not searched</span>
+    <ul class="tight" style="margin:6px 0 0;font-size:14px">
+      <li><strong>Guard Interval (1600ns)</strong> — τ<sub>RMS</sub> frozen by outdoor-bowl propagation assignment. Shorter GI would cause ISI from stand reflections. No search needed.</li>
+      <li><strong>MU-MIMO Streams (8)</strong> — monotone gain in outdoor bowl; angular spread frozen at archetype value. Maximum streams always wins. Lock to AP5060 max.</li>
+      <li><strong>Client Ageout (5 min)</strong> — long-dwell regime constant. Fans sit 90+ minutes. Ghost entries after halftime are the only concern; 5 min clears them without over-rotating the table.</li>
+      <li><strong>Roam Cache Age (60 min)</strong> — match-duration regime constant. Cache covers the first half; halftime triggers re-auth at most once per session.</li>
+      <li><strong>All binary GATEs</strong> — monotone ON; no interior tradeoff exists. OFDMA, MU-MIMO, BSS Color, rTWT, Proxy ARP, 802.11r/k/v, WMM, PMF, AirDefense: always ON for stadium outdoor.</li>
+    </ul>
+  </div>
+
+  <button class="copy-btn" id="copyBtn" onclick="copyJSON()">Copy Search Set as JSON</button>
+  <pre class="code-block" id="jsonPreview" style="display:none"></pre>
+</section>
+
+<!-- ===== §03 KEY INTERACTIONS ===== -->
+<section id="interactions">
+  <div class="sec-num">§ 03 — Key Interactions</div>
+  <h2>Four Governing Interactions<span class="sub">Why Monte Carlo is required — these are the shapes a point estimate cannot see.</span></h2>
+
+  <p>A simple grid-search at the mean scenario (P50 load, nominal RF) misses these four interaction structures. Each one creates a region of the parameter space where the outcome distribution has high variance — the optimizer must explore via Monte Carlo to estimate P5/P50/P95 utility and confirm the POS SLA constraint holds at the tail.</p>
+
+  <div class="ix-grid">
+    <div class="ix-card">
+      <div class="ix-num">Interaction 01</div>
+      <h4>CWmin BE × Utilization Load Cliff</h4>
+      <p>At u &gt; 0.7 (stadium kickoff), CWmin=7 causes exponential collision increase — measured as +3ms mean latency spike across BE queue. The cliff location is stochastic: Pareto demand means some MC draws cross u=0.7, others don't. A point estimate at P50 load may show CWmin=7 as safe; P95 load reveals POS SLA breach. The optimizer must jointly select CWmin and confirm P99 POS latency across the full load distribution, not just at mean occupancy.</p>
+    </div>
+    <div class="ix-card">
+      <div class="ix-num">Interaction 02</div>
+      <h4>TXOP BE × rTWT Scheduled Slots</h4>
+      <p>rTWT assigns POS and IoT terminals to known delivery windows on the channel schedule. When TXOP_BE is long (3008 μs), bulk data flows from fan devices compete for those scheduled windows — POS latency rises even though the POS devices themselves have priority. Interaction is only active when rTWT=ON (always ON for stadium). Optimizer must jointly resolve TXOP_BE and CWmin to protect the rTWT schedule while maintaining bulk throughput.</p>
+    </div>
+    <div class="ix-card">
+      <div class="ix-num">Interaction 03</div>
+      <h4>Channel Width × TX Power — The SINR Ridge</h4>
+      <p>160 MHz halves SINR per subcarrier vs 80 MHz at the same TX power — edge seats may drop one MCS tier. At higher TX power (20+ dBm), 160 MHz recovers and outperforms. The bw5g × txPwr interaction surface has a ridge: below a TX power threshold, 80 MHz wins; above it, 160 MHz wins. The ridge location depends on sector spacing (inter-AP distance), which varies by stadium tier. Cannot optimize channel width and TX power independently.</p>
+    </div>
+    <div class="ix-card">
+      <div class="ix-num">Interaction 04</div>
+      <h4>MCS Floor × Max Clients × Min RSSI — Admission Policy</h4>
+      <p>Three-way coupling in the admission decision. Tightening MCS Floor excludes slow clients but reduces the remaining population's airtime competition. Lowering Min RSSI admits edge-seat fans but increases the fraction at low MCS. Raising Max Clients admits more devices but increases association table pressure. Each knob independently changes which clients are admitted; the admitted set's throughput distribution shifts — and the log-utility objective is sensitive to the bottom decile of that distribution. Cannot optimize any one admission knob in isolation.</p>
+    </div>
+  </div>
+
+  <div class="note warn">
+    <span class="tag">Simulator limitation</span>
+    The current stadium_wifi_simulator_v2.html models these interactions as multiplicative scalar adjustments — it cannot derive the interior optima described above. It is a faithful teaching instrument but a pre-alpha tuning engine. These four interaction structures are the primary justification for the Monte Carlo + optimizer architecture described in <em>Journey to the Digital Twin</em>.
+  </div>
+</section>
+
+<!-- ===== §04 INDOOR ===== -->
+<section id="indoor">
+  <div class="sec-num">§ 04 — Future Archetype</div>
+  <h2>Stadium Indoor<span class="sub">How the codex changes for the premium club and concourse archetype.</span></h2>
+
+  <p>The indoor premium club at the same venue is a distinct archetype entry in the matrix — same 60-parameter framework, different locked values. The QoE objective function is unchanged; POS SLA tightens to ≤5ms in the premium club.</p>
+
+  <div class="tbl-scroll">
+  <table class="ktbl">
+    <thead>
+      <tr><th>Parameter</th><th>Outdoor Bowl (this codex)</th><th>Indoor Premium Club</th><th>Driver</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><strong>Guard Interval</strong></td><td class="mono">1600 ns</td><td class="mono">800 ns</td><td>τ<sub>RMS</sub> ~50–150ns (vs 200–400ns). Shorter GI = more data symbols per OFDM frame.</td></tr>
+      <tr><td><strong>Rician K-Factor</strong></td><td class="mono">K ~3–8</td><td class="mono">K ~10–20</td><td>LOS-dominant indoors → higher achievable MCS at shorter range.</td></tr>
+      <tr><td><strong>TX Power</strong></td><td class="mono">14–20 dBm</td><td class="mono">10–14 dBm</td><td>Smaller cells, wall attenuation — higher power causes co-channel flooding in enclosed space.</td></tr>
+      <tr><td><strong>Channel Width</strong></td><td class="mono">160 MHz (test 80)</td><td class="mono">80 MHz typical</td><td>Shorter range + higher AP density = co-channel reuse more valuable than per-AP bandwidth.</td></tr>
+      <tr><td><strong>MU-MIMO Streams</strong></td><td class="mono">8 (lock)</td><td class="mono">4 streams may saturate</td><td>Lower angular spread indoors — fewer spatially separable streams available.</td></tr>
+      <tr><td><strong>Client Ageout</strong></td><td class="mono">5 min</td><td class="mono">2 min</td><td>Short-dwell, high-mobility (concourse walking) → faster ageout prevents ghost entries.</td></tr>
+      <tr><td><strong>802.11r FT</strong></td><td class="mono">ON (GATE)</td><td class="mono">ON — more critical</td><td>Higher roaming frequency in enclosed walkways; handoff latency matters more.</td></tr>
+      <tr><td><strong>POS SLA</strong></td><td class="mono">≤ 10ms (P99)</td><td class="mono">≤ 5ms (P99)</td><td>Premium club = higher transaction density + executive expectation of instant payment.</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="note green">
+    <span class="tag">Codex applicability</span>
+    Every GATE parameter listed in §01 remains ON for the indoor archetype. The search set (§02) applies with recalibrated priors. The primary changes are: locked values for GI, TX power, channel width, and client ageout shift to shorter/lower values; the MU-MIMO stream lock drops from 8 to 4 subject to measured angular spread. The four interaction structures (§03) remain valid — their ridge locations shift with the propagation parameters.
+  </div>
+</section>
+
+</div><!-- /wrap -->
+
+<div class="wrap">
+<footer>
+  <span>Stadium Parameter Codex · v0 · 3 June 2026</span>
+  <span>Archetype: Stadium Outdoor · AP5060 / AP4000 / AP3000</span>
+  <span>Extreme AP / EP1 Digital Twin Project</span>
+</footer>
+</div>
+
+<script>
+// ===================== PARAMETER DATA =====================
+const PARAMS = [
+  // Section A — Demand & Scenario
+  {n:1, name:"Fans",key:"fans",section:"A — Demand",effect:"Scenario Input",def:"Total venue occupancy; drives total WiFi session count.",impact:"Scales aggregate demand proportionally; at 50K fans even 0.5% concurrency = 250 sessions/AP.",status:"DEMAND"},
+  {n:2, name:"Concurrency",key:"concur",section:"A — Demand",effect:"Scenario Input",def:"Fraction of fans actively using WiFi simultaneously.",impact:"Primary airtime driver; P50≈45%, kickoff surge reaches 65–70% in first 3 minutes.",status:"DEMAND"},
+  {n:3, name:"Device Multiplier",key:"devMult",section:"A — Demand",effect:"Scenario Input",def:"Average devices per fan (1.0–1.5).",impact:"Multiplies effective station count; 1.3× = 30% more association overhead.",status:"DEMAND"},
+  {n:4, name:"WiFi Attendance",key:"wifiAtt",section:"A — Demand",effect:"Scenario Input",def:"Fraction of fans with WiFi-capable devices.",impact:"Scales effective user base; ~95% for modern venues.",status:"DEMAND"},
+  {n:5, name:"Video Weight",key:"vidW",section:"A — Demand",effect:"Scenario Input",def:"Video stream demand weight in traffic mix.",impact:"High video → long-duration high-bitrate flows compete with POS for airtime.",status:"DEMAND"},
+  {n:6, name:"Teams Weight",key:"teaW",section:"A — Demand",effect:"Scenario Input",def:"Teams/conferencing demand weight in traffic mix.",impact:"High in corporate suites; drives VIP SLA pressure.",status:"DEMAND"},
+  {n:7, name:"Social Weight",key:"socW",section:"A — Demand",effect:"Scenario Input",def:"Social/upload demand weight in traffic mix.",impact:"Bursty asymmetric traffic; stress-tests UL OFDMA at kickoff.",status:"DEMAND"},
+  {n:8, name:"Browsing Weight",key:"broW",section:"A — Demand",effect:"Scenario Input",def:"Browsing/general demand weight in traffic mix.",impact:"Baseline; short flows, frequent re-association cycles.",status:"DEMAND"},
+  {n:9, name:"POS Weight",key:"posW",section:"A — Demand",effect:"Scenario Input",def:"POS terminal demand weight in traffic mix.",impact:"Always present; drives the hard latency constraint (≤10ms P99).",status:"DEMAND"},
+  {n:10, name:"Time Scrub",key:"t",section:"A — Demand",effect:"Scenario Input",def:"Simulation time scrub (0–90 min).",impact:"Represents match phase: warm-up → kickoff surge → halftime → final whistle.",status:"DEMAND"},
+  {n:11, name:"Noise Floor",key:"nf",section:"A — Demand",effect:"Scenario Input",def:"Noise floor adjustment (dB).",impact:"Models RF environment quality; outdoor bowl typically clean (nf=0).",status:"DEMAND"},
+  {n:12, name:"Degradation",key:"deg",section:"A — Demand",effect:"Scenario Input",def:"Degradation scenario level (0–3).",impact:"Injects simulated RF impairments for stress testing; not a network config knob.",status:"DEMAND"},
+  {n:13, name:"Cyber Scenario",key:"cyber",section:"A — Demand",effect:"Scenario Input",def:"Cyber threat scenario selector.",impact:"Injects simulated security events; scenario testing only, not a config knob.",status:"DEMAND"},
+  {n:14, name:"AP Type",key:"apType",section:"A — Demand",effect:"Scenario Input",def:"AP model selector (AP5060 / AP3000 / AP4000).",impact:"Determines hardware capabilities: spatial streams, bands, max client density, MLO support.",status:"DEMAND"},
+  // Section B — PHY
+  {n:15, name:"TX Power",key:"txPwr",section:"B — PHY",effect:"Threshold / Non-monotone",def:"Transmit power (dBm), range 7–23.",impact:"Higher improves RSSI/MCS up to inter-AP interference onset at ~20 dBm. Stadium outdoor optimal 14–20 dBm depending on sector spacing.",status:"SEARCH"},
+  {n:16, name:"5GHz BW",key:"bw5g",section:"B — PHY",effect:"Threshold / Non-monotone",def:"5GHz channel width (MHz): 80 or 160.",impact:"160 MHz doubles capacity but halves non-overlapping channel count; spatial reuse tradeoff in dense bowl makes 80 MHz competitive at high AP density.",status:"SEARCH"},
+  {n:17, name:"6GHz BW",key:"bw6g",section:"B — PHY",effect:"Gate / Enabler",def:"6GHz channel width (MHz): 160 or 320.",impact:"320 MHz locked for WiFi 7 6GHz band (AP5060 only). No tradeoff — maximum width always wins in uncongested 6GHz.",status:"SLA"},
+  {n:18, name:"Guard Interval",key:"gi",section:"B — PHY",effect:"Context-modulated",def:"Guard Interval (ns): 800 / 1600 / 3200.",impact:"Determined by τ_RMS (delay spread). Outdoor bowl τ_RMS ≈ 200–400ns → GI 1600ns mandatory. Shorter GI causes ISI from stand reflections.",status:"LOCKED"},
+  {n:19, name:"MCS Floor",key:"mcsFloor",section:"B — PHY",effect:"Threshold / Non-monotone",def:"Minimum MCS rate allowed (0–11).",impact:"Too low admits slow legacy clients consuming disproportionate airtime. Too high excludes edge-seat clients. Stadium optimal ~4–6 after admission modeling.",status:"SEARCH"},
+  {n:20, name:"4K-QAM",key:"qam4k",section:"B — PHY",effect:"Gate / Enabler",def:"4096-QAM encoding enable (WiFi 7 only).",impact:"+33% throughput vs 1024-QAM at RSSI > −65dBm. VIP rows consistently in range — no downside for stadium.",status:"GATE"},
+  {n:21, name:"Puncturing",key:"punct",section:"B — PHY",effect:"Gate / Enabler",def:"Preamble puncturing enable.",impact:"Allows 320MHz to skip busy 20MHz sub-channels; maintains full-width 6GHz operation during adjacent-AP interference. Always beneficial.",status:"GATE"},
+  // Section C — MAC/EDCA
+  {n:22, name:"CWmin BE",key:"cwBe",section:"C — MAC/EDCA",effect:"Threshold / Non-monotone",def:"Contention Window minimum for Best-Effort (AC_BE): 7, 15, 31, or 63.",impact:"Non-monotone cliff at u>0.7 — CWmin=7 causes +3ms latency spike at kickoff. Stadium kickoff u≈0.75 → CWmin=15 or 31 is safer.",status:"SEARCH"},
+  {n:23, name:"TXOP BE",key:"txopBe",section:"C — MAC/EDCA",effect:"Interaction-coupled",def:"TXOP duration AC_BE (μs): 0, 1504, or 3008.",impact:"Interaction: long TXOP boosts burst throughput but competes with rTWT POS slots. Must jointly optimize with CWmin.",status:"SEARCH"},
+  {n:24, name:"RTS Threshold",key:"rtsThr",section:"C — MAC/EDCA",effect:"Threshold / Non-monotone",def:"RTS/CTS threshold (bytes).",impact:"Hidden-node protection in bowl geometry. 65535 (off) correct for coordinated deployment; lower threshold adds overhead but prevents hidden-node collisions in concourse geometry.",status:"SEARCH"},
+  {n:25, name:"Frag Threshold",key:"fragThr",section:"C — MAC/EDCA",effect:"Threshold / Non-monotone",def:"Fragmentation threshold (bytes): 256–2346.",impact:"2346 (off) correct for clean outdoor RF. Lower threshold reduces retransmission cost only at error rate >5% — relevant in rain fade or interference event.",status:"SEARCH"},
+  {n:26, name:"DTIM Period",key:"dtim",section:"C — MAC/EDCA",effect:"Threshold / Non-monotone",def:"DTIM period: 1, 2, 4, or 10.",impact:"DTIM=1 minimizes push-notification latency. DTIM=10 adds up to 900ms wake latency — fans miss social notifications during play. Battery vs latency tradeoff.",status:"SEARCH"},
+  {n:27, name:"TXOP VO",key:"txopVO",section:"C — MAC/EDCA",effect:"SLA Constant",def:"TXOP duration AC_VO (μs).",impact:"Voice/Teams priority queue. Locked at 1504μs for Teams SLA. Changing this breaks VIP SLA guarantee.",status:"SLA"},
+  {n:28, name:"WMM AC_VO",key:"wmmAcVo",section:"C — MAC/EDCA",effect:"Gate / Enabler",def:"WMM AC_VO (voice) queue enable.",impact:"Required for Teams, VoIP, EDCA voice priority. Always ON — turning off violates Teams SLA immediately.",status:"GATE"},
+  {n:29, name:"WMM AC_VI",key:"wmmAcVi",section:"C — MAC/EDCA",effect:"Gate / Enabler",def:"WMM AC_VI (video) queue enable.",impact:"Video priority queue. Always ON for streaming content — venue video feed relies on AC_VI scheduling.",status:"GATE"},
+  {n:30, name:"U-APSD",key:"uapsd",section:"C — MAC/EDCA",effect:"Gate / Enabler",def:"Unscheduled APSD enable.",impact:"Improves VoIP/Teams latency for power-save capable clients. No downside — clients that don't support it simply ignore the feature.",status:"GATE"},
+  // Section D — Admission & Access Control
+  {n:31, name:"Max Clients",key:"maxCli",section:"D — Admission",effect:"Threshold / Non-monotone",def:"Max associated clients per AP: 50, 100, 150, or 200.",impact:"Too low = fans can't connect. Too high = overloaded association table degrades all clients. Dense sector optimal ≈ 100–150.",status:"SEARCH"},
+  {n:32, name:"Min RSSI",key:"minRSSI",section:"D — Admission",effect:"Threshold / Non-monotone",def:"Minimum RSSI for admission (dBm): −80 to −67.",impact:"Too permissive admits weak clients that use low MCS and consume airtime. Too strict blocks edge-seat fans. Interior optimum depends on seating bowl path-loss distribution.",status:"SEARCH"},
+  {n:33, name:"RX-SOP",key:"rxSop",section:"D — Admission",effect:"Threshold / Non-monotone",def:"RX-SOP threshold (dBm): −85 to −65.",impact:"Raises CCA sensitivity floor so AP ignores weak interferers and reuses channel sooner. Too aggressive = misses valid frames from distant seats.",status:"SEARCH"},
+  {n:34, name:"Airtime Fairness",key:"atFair",section:"D — Admission",effect:"Threshold / Non-monotone",def:"Airtime Fairness mode: off, adaptive, or strict.",impact:"Strict = equal airtime per client regardless of MCS (protects fast clients from slow ones). Adaptive = compromise. Non-monotone with mixed-MCS population distribution.",status:"SEARCH"},
+  {n:35, name:"Min Bit Rate",key:"mbr",section:"D — Admission",effect:"SLA Constant",def:"Minimum Bit Rate / rate-limiting (Mbps).",impact:"Clients unable to achieve MBR are kicked. 24 Mbps clears legacy 802.11a/g clients. Locked at SLA value.",status:"SLA"},
+  // Section E — SSID & Network
+  {n:36, name:"BSS Mode",key:"bsMode",section:"E — SSID/Net",effect:"Context-modulated",def:"BSS mode: active or passive beaconing.",impact:"Active required for outdoor bowl — clients cannot hear passive scan beacons from adjacent APs at 50K-seat scale.",status:"LOCKED"},
+  {n:37, name:"BSS Color Frame",key:"bcf",section:"E — SSID/Net",effect:"Gate / Enabler",def:"BSS Coloring Frame enable.",impact:"Extends BSS color signaling range; reduces false CCA deferrals between non-overlapping BSS. Always ON.",status:"GATE"},
+  {n:38, name:"MC-to-UC",key:"mc2uc",section:"E — SSID/Net",effect:"Gate / Enabler",def:"Multicast-to-unicast conversion.",impact:"Prevents multicast flood in 50K-client venue. Essential for venue video feed delivery — multicast at this scale saturates the channel.",status:"GATE"},
+  {n:39, name:"Proxy ARP",key:"proxyArp",section:"E — SSID/Net",effect:"Gate / Enabler",def:"Proxy ARP enable.",impact:"AP answers ARP requests on behalf of clients. Prevents ARP broadcast storm — at 50K clients, ARP floods can saturate the channel completely.",status:"GATE"},
+  {n:40, name:"Client Isolation",key:"clientIso",section:"E — SSID/Net",effect:"SLA Constant",def:"Client isolation enable.",impact:"Prevents peer-to-peer traffic between clients on same SSID. Required for guest/fan SSID, off for staff. SLA-locked per SSID policy.",status:"SLA"},
+  {n:41, name:"Enhanced RNR",key:"enhRNR",section:"E — SSID/Net",effect:"Gate / Enabler",def:"Enhanced Reduced Neighbor Report.",impact:"Helps 6GHz clients discover APs faster via 2.4/5GHz beacons. Reduces 6GHz discovery latency from >3s to <500ms.",status:"GATE"},
+  {n:42, name:"802.11r FT",key:"r80211",section:"E — SSID/Net",effect:"Gate / Enabler",def:"802.11r Fast BSS Transition.",impact:"Reduces roaming handoff from 300–800ms to <50ms. Critical for fans walking to concessions mid-game.",status:"GATE"},
+  {n:43, name:"802.11k/v",key:"kv",section:"E — SSID/Net",effect:"Gate / Enabler",def:"802.11k/v neighbor reports and BSS transition management.",impact:"Assists clients in discovering better APs proactively. Reduces sticky-client problem in bowl where clients hold weak associations.",status:"GATE"},
+  {n:44, name:"DCS Lock",key:"dcsLock",section:"E — SSID/Net",effect:"SLA Constant",def:"DCS channel lock.",impact:"Locks dynamic channel selection off during event. Pre-planned channels prevent mid-game reassignment that would disrupt all associated clients.",status:"SLA"},
+  {n:45, name:"Ignore Bcast Probe",key:"ignBcastProbe",section:"E — SSID/Net",effect:"Gate / Enabler",def:"Ignore broadcast probe requests.",impact:"Suppresses probe-request flood at venue entry. Prevents AP CPU saturation from ~50K simultaneous probes at gate opening.",status:"GATE"},
+  {n:46, name:"MLO Steering",key:"mloSteer",section:"E — SSID/Net",effect:"Context-modulated",def:"MLO steering mode: manual, QoS, or AI.",impact:"AI-driven for stadium archetype — predictable high-density pattern lets AI optimize band allocation in real time. Archetype-determined.",status:"LOCKED"},
+  // Section F — WiFi 7 / Advanced PHY
+  {n:47, name:"OFDMA DL",key:"ofdmaDL",section:"F — WiFi 7",effect:"Gate / Enabler",def:"OFDMA Downlink enable.",impact:"+15–30% capacity in dense venue via multi-user RU scheduling. Fundamental to 802.11ax/be performance at stadium density.",status:"GATE"},
+  {n:48, name:"OFDMA UL",key:"ofdmaUL",section:"F — WiFi 7",effect:"Gate / Enabler",def:"OFDMA Uplink enable.",impact:"Multi-user RU scheduling UL. Critical at kickoff when all fans upload simultaneously — prevents UL congestion collapse.",status:"GATE"},
+  {n:49, name:"MU-MIMO",key:"muMimo",section:"F — WiFi 7",effect:"Gate / Enabler",def:"MU-MIMO enable.",impact:"Simultaneous spatial streams to multiple clients. Core capacity multiplier in dense bowl. Always ON.",status:"GATE"},
+  {n:50, name:"BSS Coloring",key:"bssColor",section:"F — WiFi 7",effect:"Gate / Enabler",def:"BSS Coloring enable.",impact:"Spatial reuse via color-coded CCA. Reduces inter-BSS interference without coordination. Always ON.",status:"GATE"},
+  {n:51, name:"rTWT",key:"rtwt",section:"F — WiFi 7",effect:"Gate / Enabler",def:"Restricted Target Wake Time.",impact:"Schedules POS/IoT at known intervals — eliminates contention on payment flows. Interaction with TXOP BE (see §03).",status:"GATE"},
+  {n:52, name:"Multi-RU",key:"multiRU",section:"F — WiFi 7",effect:"Gate / Enabler",def:"Multi-Resource Unit allocation.",impact:"Allows small clients to use multiple RUs. Improves efficiency for POS/IoT terminals with small frames — no downside.",status:"GATE"},
+  {n:53, name:"MLO Enable",key:"mloOn",section:"F — WiFi 7",effect:"Gate / Enabler",def:"MLO (Multi-Link Operation) enable.",impact:"5G+6G band aggregation — doubles throughput and seamless failover for WiFi 7 clients. AP5060 only.",status:"GATE"},
+  {n:54, name:"MLO Mode",key:"mloMode",section:"F — WiFi 7",effect:"Context-modulated",def:"MLO mode: STR, NSTR, or EMLSR.",impact:"STR (simultaneous TX+RX on both links) requires client support. Correct for mixed WiFi 7/6E venue. Archetype-determined.",status:"LOCKED"},
+  {n:55, name:"MLO Links",key:"mloLinks",section:"F — WiFi 7",effect:"SLA Constant",def:"Number of active MLO links: 1 or 2.",impact:"2 links locked for stadium (5G+6G dual-band aggregate). Changing to 1 halves MLO capacity benefit.",status:"SLA"},
+  {n:56, name:"MU Streams",key:"muStreams",section:"F — WiFi 7",effect:"Context-modulated",def:"MU-MIMO DL streams: 1, 2, 4, or 8.",impact:"Monotone gain. Angular spread frozen by outdoor-bowl archetype — lock to 8 (AP5060 max). No search needed.",status:"LOCKED"},
+  // Section G — Security
+  {n:57, name:"PMF",key:"pmf",section:"G — Security",effect:"Gate / Enabler",def:"Protected Management Frames (802.11w).",impact:"Mandatory for 6GHz. Blocks deauth/disassoc attacks. Critical at large venues where deauth spray is a common attack vector.",status:"GATE"},
+  {n:58, name:"AirDefense",key:"airdef",section:"G — Security",effect:"Gate / Enabler",def:"AirDefense WIPS enable.",impact:"Detects/blocks rogue APs and evil-twin attacks. Stadium environments attract opportunistic attackers at scale.",status:"GATE"},
+  {n:59, name:"MAC DoS Prev",key:"macDosPrev",section:"G — Security",effect:"Gate / Enabler",def:"MAC DoS prevention.",impact:"Rate-limits MAC-level flood attacks. Prevents venue-wide deauth cascade from a single attacking device.",status:"GATE"},
+  {n:60, name:"IP DoS Prev",key:"ipDosPrev",section:"G — Security",effect:"Gate / Enabler",def:"IP DoS prevention.",impact:"Layer 3 flood protection. Protects POS payment infrastructure from IP-level flood that would breach latency SLA.",status:"GATE"},
+  // Section H — Roaming & Aging
+  {n:61, name:"Client Ageout",key:"clientAgeout",section:"H — Roaming",effect:"Context-modulated",def:"Inactive client ageout (minutes).",impact:"Long-dwell low-roam archetype — fans sit 90+ min. 5 min optimal: clears ghost entries after halftime without over-rotating association table.",status:"LOCKED"},
+  {n:62, name:"Roam Cache Age",key:"roamCacheAge",section:"H — Roaming",effect:"Context-modulated",def:"Roaming cache ageout (minutes).",impact:"Match game duration ~90 min. Cache age = 60 min ensures re-auth at halftime at most — one re-auth per session is acceptable.",status:"LOCKED"},
+  {n:63, name:"Roam Cache Upd",key:"roamCacheUpd",section:"H — Roaming",effect:"SLA Constant",def:"Roaming cache update interval.",impact:"Background sync rate. Informational — does not affect QoE directly.",status:"SLA"},
+  {n:64, name:"MC2UC Threshold",key:"mc2ucThr",section:"H — Roaming",effect:"SLA Constant",def:"MC2UC engagement threshold (client count).",impact:"Number of clients above which MC2UC activates. Locked at 60 — below this, native multicast is cheaper.",status:"SLA"},
+  {n:65, name:"MC2UC MBR",key:"mc2ucMbr",section:"H — Roaming",effect:"SLA Constant",def:"MC2UC guaranteed rate (Mbps).",impact:"Minimum rate for unicast-converted streams. Must match venue-feed bitrate. SLA-locked.",status:"SLA"},
+];
+
+// ===================== RENDER TABLE =====================
+function badge(s){return`<span class="badge-s bs-${s}">${s}</span>`}
+function rowClass(s){return`${s.toLowerCase()}-row-tr`}
+
+function renderTable(data){
+  const tbody=document.getElementById('paramBody');
+  tbody.innerHTML='';
+  data.forEach(p=>{
+    const tr=document.createElement('tr');
+    tr.className=rowClass(p.status);
+    tr.dataset.status=p.status;
+    tr.innerHTML=`
+      <td class="num" style="color:var(--mut)">${p.n}</td>
+      <td><strong style="color:var(--head)">${p.name}</strong></td>
+      <td class="mono" style="color:var(--cyan);font-size:12px">${p.key}</td>
+      <td class="grp">${p.section}</td>
+      <td style="font-size:12.5px;color:var(--mut2)">${p.effect}</td>
+      <td style="font-size:13px">${p.def}</td>
+      <td style="font-size:13px;color:var(--mut2)">${p.impact}</td>
+      <td>${badge(p.status)}</td>`;
+    tbody.appendChild(tr);
+  });
+  document.getElementById('rowCount').textContent=`Showing ${data.length} of ${PARAMS.length} parameters`;
+}
+renderTable(PARAMS);
+
+// ===================== FILTER =====================
+let activeFilter='ALL', searchVal='';
+function filterTable(f){
+  activeFilter=f;
+  document.querySelectorAll('.fbtn').forEach(b=>{
+    b.classList.toggle('active',b.dataset.f===f);
+  });
+  applyFilters();
+}
+function liveSearch(v){searchVal=v.toLowerCase();applyFilters();}
+function applyFilters(){
+  let data=PARAMS;
+  if(activeFilter!=='ALL') data=data.filter(p=>p.status===activeFilter);
+  if(searchVal) data=data.filter(p=>
+    p.name.toLowerCase().includes(searchVal)||
+    p.key.toLowerCase().includes(searchVal)||
+    p.def.toLowerCase().includes(searchVal)||
+    p.impact.toLowerCase().includes(searchVal)||
+    p.section.toLowerCase().includes(searchVal)
+  );
+  renderTable(data);
+}
+
+// ===================== COPY JSON =====================
+const SEARCH_SET=[
+  {knob:"Airtime Fairness",key:"atFair",values:["off","adaptive","strict"],prior:"strict",why:"Non-monotone with client MCS distribution; adaptive/strict competitive at mixed-MCS kickoff load"},
+  {knob:"TX Power",key:"txPwr",values_dBm:[7,10,13,14,15,16,17,18,19,20,21,23],prior_dBm:17,why:"Inter-AP interference onset ~20 dBm; edge-seat MCS drop below 14 dBm; ridge depends on sector spacing"},
+  {knob:"Min RSSI",key:"minRSSI",values_dBm:[-80,-75,-70],prior_dBm:-70,why:"Admission threshold; interior optimum between airtime efficiency and edge-seat coverage"},
+  {knob:"RX-SOP",key:"rxSop",values_dBm:[-85,-75,-65],prior_dBm:-75,why:"CCA floor tradeoff: channel reuse vs frame loss at bowl perimeter"},
+  {knob:"CWmin BE",key:"cwBe",values:[7,15,31,63],prior:15,why:"Non-monotone cliff at u>0.7 — kickoff surge crosses this stochastically; P95 load must be evaluated"},
+  {knob:"Max Clients",key:"maxCli",values:[50,100,150,200],prior:125,why:"Admission vs association table congestion; dense sector tradeoff"},
+  {knob:"MCS Floor",key:"mcsFloor",values:[0,2,4,6,8],prior:4,why:"Airtime efficiency vs edge-seat coverage admission threshold"},
+  {knob:"5G Channel Width",key:"bw5g",values_MHz:[80,160],prior_MHz:160,test_note:"80 MHz competitive at high AP density due to spatial reuse",why:"Interior tradeoff: 160 MHz capacity vs co-channel SINR at dense bowl AP spacing"},
+  {knob:"Frag Threshold",key:"fragThr",values_bytes:[256,1500,2346],prior_bytes:2346,why:"Retransmission overhead vs fragmentation benefit; relevant at error rate >5%"},
+  {knob:"DTIM Period",key:"dtim",values:[1,2,4,10],prior:1,why:"Push-notification latency vs battery life tradeoff for 90-min dwell session"},
+  {knob:"RTS/CTS Threshold",key:"rtsThr",values_bytes:[65535,2347,1500],prior_bytes:65535,why:"Hidden-node protection vs frame overhead; bowl geometry may create concourse dead-zones"},
+  {knob:"TXOP BE",key:"txopBe",values_us:[0,1504,3008],prior_us:1504,why:"Interaction with rTWT POS scheduled slots; long TXOP competes for payment windows"}
+];
+
+function copyJSON(){
+  const btn=document.getElementById('copyBtn');
+  const pre=document.getElementById('jsonPreview');
+  const j=JSON.stringify({
+    codex:"Stadium Parameter Codex v0",
+    archetype:"stadium_outdoor",
+    date:"2026-06-03",
+    qoe_objective:"maximize P50[U(θ)] − 0.5·(P95[U]−P5[U]) subject to P(posLatency≤10ms)≥99%",
+    search_set:SEARCH_SET
+  },null,2);
+  navigator.clipboard.writeText(j).then(()=>{
+    btn.textContent='Copied to clipboard';
+    btn.classList.add('ok');
+    setTimeout(()=>{btn.textContent='Copy Search Set as JSON';btn.classList.remove('ok');},2500);
+  }).catch(()=>{});
+  pre.textContent=j;
+  pre.style.display=pre.style.display==='none'?'block':'none';
+}
+
+// ===================== SCROLL FADE =====================
+const obs=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('fx-visible')});
+},{threshold:.08});
+document.querySelectorAll('section').forEach(s=>obs.observe(s));
+</script>
+</body>
+</html>
