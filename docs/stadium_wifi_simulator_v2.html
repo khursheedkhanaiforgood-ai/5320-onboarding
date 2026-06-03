@@ -107,9 +107,9 @@ input:checked+.ts:before{transform:translateX(15px);background:#fff}
 /* right panel */
 .bpfind{margin-top:10px;border:1px solid var(--bd);border-radius:2px;padding:8px;background:#0d0f12}
 .bpft{font-size:9px;color:var(--gold);text-transform:uppercase;letter-spacing:1px;margin-bottom:7px}
-.bpbtn{width:100%;margin-top:6px;background:#0d1928;border:1px solid var(--blue);color:var(--blue);padding:5px;border-radius:2px;cursor:pointer;font-size:9px;font-family:inherit;transition:.15s}
+.bpbtn{width:100%;margin-top:6px;background:#0d1928;border:1px solid var(--blue);color:var(--blue);padding:6px;border-radius:2px;cursor:pointer;font-size:11px;font-family:inherit;transition:.15s}
 .bpbtn:hover{background:#1a2840;color:#fff}
-.bpres{font-size:9px;margin-top:6px;padding:5px;border-radius:2px;line-height:1.5;min-height:24px}
+.bpres{font-size:11px;margin-top:6px;padding:5px;border-radius:2px;line-height:1.5;min-height:24px}
 .bpres.ok{background:#001a08;border:1px solid var(--green);color:#7cffaa}
 .bpres.warn{background:#1a1000;border:1px solid var(--yel);color:#ffe07a}
 .bpres.na{background:#0d0f12;border:1px solid var(--bd);color:var(--mut)}
@@ -481,6 +481,7 @@ input:checked+.ts:before{transform:translateX(15px);background:#fff}
   <!-- Config Export -->
   <div style="width:100%;margin-top:8px">
     <button class="bpbtn" style="border-color:var(--gold);color:var(--gold)" onclick="showCfg()">📋 Full Config — All 60 Params + Recommended</button>
+    <button class="bpbtn" style="border-color:var(--green);color:var(--green);background:#001a08;margin-top:5px;font-size:12px;font-weight:700;padding:8px" onclick="directDownload()">⬇ Download Config (.txt)</button>
   </div>
 </div>
 </div><!-- /layout -->
@@ -1363,15 +1364,25 @@ function copyCfg(){
   const t=g('cfg-overlay').dataset.text||'';
   navigator.clipboard.writeText(t).then(()=>addLog('Config copied to clipboard','ok')).catch(()=>addLog('Copy failed — use Ctrl+A in export panel','warn'));
 }
-function downloadCfg(){
-  const t=g('cfg-overlay').dataset.text||'';
+function _triggerDownload(t){
+  if(!t){addLog('Nothing to download — run optimizer first or open Full Config','warn');return;}
   const blob=new Blob([t],{type:'text/plain'});
   const a=document.createElement('a');
   a.href=URL.createObjectURL(blob);
   a.download='stadium-wifi-config.txt';
   document.body.appendChild(a);a.click();document.body.removeChild(a);
   URL.revokeObjectURL(a.href);
-  addLog('Config downloaded as stadium-wifi-config.txt','ok');
+  addLog('⬇ Downloaded stadium-wifi-config.txt','ok');
+}
+function downloadCfg(){
+  _triggerDownload(g('cfg-overlay').dataset.text||'');
+}
+function directDownload(){
+  // populate config text silently (without showing modal), then download
+  showCfg();
+  const t=g('cfg-overlay').dataset.text||'';
+  closeCfg();
+  _triggerDownload(t);
 }
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeCfg();});
 
