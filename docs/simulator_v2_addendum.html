@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulator v2 — Bug Report &amp; Sprint Tracker · June 3, 2026</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #0b0d0f;
+    color: #c9d1d9;
+    font-family: 'SF Mono', Consolas, 'Courier New', monospace;
+    font-size: 13px;
+    min-height: 100vh;
+  }
+
+  /* ── Header ── */
+  .page-header {
+    background: #131618;
+    border-bottom: 1px solid #232830;
+    padding: 18px 28px 14px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .page-header h1 {
+    font-size: 15px;
+    font-weight: 600;
+    color: #e6edf3;
+    letter-spacing: 0.3px;
+  }
+  .page-header .meta {
+    font-size: 11px;
+    color: #58636e;
+    margin-top: 3px;
+  }
+
+  /* ── Tab bar ── */
+  .tab-bar {
+    display: flex;
+    gap: 0;
+    background: #131618;
+    border-bottom: 1px solid #232830;
+    padding: 0 28px;
+    position: sticky;
+    top: 72px;
+    z-index: 99;
+  }
+  .tab-btn {
+    background: none;
+    border: none;
+    border-bottom: 3px solid transparent;
+    color: #58636e;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.4px;
+    padding: 10px 18px;
+    text-transform: uppercase;
+    transition: color 0.15s, border-color 0.15s;
+  }
+  .tab-btn:hover { color: #c9d1d9; }
+  .tab-btn.active-bugs    { color: #f4455a; border-bottom-color: #f4455a; }
+  .tab-btn.active-dialog  { color: #00c8d4; border-bottom-color: #00c8d4; }
+  .tab-btn.active-sprint  { color: #ff6d2d; border-bottom-color: #ff6d2d; }
+
+  /* ── Content panels ── */
+  .tab-panel { display: none; padding: 28px; }
+  .tab-panel.active { display: block; }
+
+  /* ── Panel section headers ── */
+  .panel-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #e6edf3;
+    margin-bottom: 18px;
+    letter-spacing: 0.2px;
+  }
+  .panel-title span { font-weight: 400; color: #58636e; }
+
+  /* ── Filter buttons ── */
+  .filter-bar {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+  }
+  .filter-btn {
+    background: #1c2128;
+    border: 1px solid #232830;
+    border-radius: 4px;
+    color: #8b949e;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    padding: 5px 12px;
+    text-transform: uppercase;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+  }
+  .filter-btn:hover { background: #232830; color: #c9d1d9; }
+  .filter-btn.active { background: #1a2236; border-color: #3d6cd6; color: #e6edf3; }
+  .filter-btn.critical.active { background: #2b1118; border-color: #f4455a; color: #f4455a; }
+  .filter-btn.high.active    { background: #2b1900; border-color: #ff6d2d; color: #ff6d2d; }
+  .filter-btn.medium.active  { background: #2b2200; border-color: #ffc107; color: #ffc107; }
+  .filter-btn.low.active     { background: #0d2b1c; border-color: #00d97e; color: #00d97e; }
+
+  /* ── Bug table ── */
+  .bug-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+  }
+  .bug-table th {
+    background: #131618;
+    border: 1px solid #232830;
+    color: #8b949e;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    padding: 8px 12px;
+    text-align: left;
+    text-transform: uppercase;
+  }
+  .bug-table td {
+    border: 1px solid #232830;
+    padding: 9px 12px;
+    vertical-align: top;
+    line-height: 1.5;
+  }
+  .bug-table tr { background: #131618; }
+  .bug-table tr:hover td { background: #161b22; }
+
+  .bug-table tr.sev-critical td:first-child { border-left: 3px solid #f4455a; }
+  .bug-table tr.sev-high     td:first-child { border-left: 3px solid #ff6d2d; }
+  .bug-table tr.sev-medium   td:first-child { border-left: 3px solid #ffc107; }
+  .bug-table tr.sev-low      td:first-child { border-left: 3px solid #00d97e; }
+
+  .badge {
+    border-radius: 3px;
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    padding: 2px 7px;
+    text-transform: uppercase;
+  }
+  .badge-critical { background: #2b1118; color: #f4455a; }
+  .badge-high     { background: #2b1900; color: #ff6d2d; }
+  .badge-medium   { background: #2b2200; color: #ffc107; }
+  .badge-low      { background: #0d2b1c; color: #00d97e; }
+  .badge-open     { background: #1c2128; color: #8b949e; }
+
+  .bug-id { color: #8b949e; font-weight: 700; white-space: nowrap; }
+  .bug-sprint { color: #58636e; white-space: nowrap; }
+  .bug-code { background: #0b0d0f; border-radius: 3px; color: #ff9580; display: block; font-size: 11px; margin-top: 4px; padding: 4px 8px; white-space: pre-wrap; word-break: break-all; }
+
+  /* ── Dialogue ── */
+  .dialogue-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    max-height: 74vh;
+    overflow-y: auto;
+    padding-right: 6px;
+  }
+  .dialogue-wrap::-webkit-scrollbar { width: 6px; }
+  .dialogue-wrap::-webkit-scrollbar-track { background: #0b0d0f; }
+  .dialogue-wrap::-webkit-scrollbar-thumb { background: #232830; border-radius: 3px; }
+
+  .msg-row { display: flex; }
+  .msg-row.user  { justify-content: flex-end; }
+  .msg-row.claude { justify-content: flex-start; }
+
+  .msg-user {
+    background: #2b2200;
+    border-radius: 16px 16px 4px 16px;
+    color: #ffc107;
+    font-size: 12px;
+    line-height: 1.6;
+    max-width: 70%;
+    padding: 10px 16px;
+    white-space: pre-wrap;
+  }
+  .msg-claude {
+    background: #131618;
+    border-left: 3px solid #00c8d4;
+    border-radius: 0 8px 8px 0;
+    color: #c9d1d9;
+    font-size: 12px;
+    line-height: 1.6;
+    max-width: 80%;
+    padding: 10px 16px;
+    white-space: pre-wrap;
+  }
+
+  .msg-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.6px;
+    margin-bottom: 4px;
+    text-transform: uppercase;
+  }
+  .msg-row.user  .msg-label { color: #ffc107; text-align: right; }
+  .msg-row.claude .msg-label { color: #00c8d4; }
+
+  /* ── Sprint cards ── */
+  .sprint-grid {
+    display: grid;
+    gap: 18px;
+    grid-template-columns: repeat(auto-fill, minmax(460px, 1fr));
+  }
+  .sprint-card {
+    background: #131618;
+    border: 1px solid #232830;
+    border-radius: 6px;
+    padding: 18px 20px;
+  }
+  .sprint-card.sp-critical { border-left: 4px solid #f4455a; }
+  .sprint-card.sp-high     { border-left: 4px solid #ff6d2d; }
+  .sprint-card.sp-medium   { border-left: 4px solid #ffc107; }
+  .sprint-card.sp-low      { border-left: 4px solid #00d97e; }
+
+  .sprint-card h3 {
+    color: #e6edf3;
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+  .sprint-goal {
+    color: #8b949e;
+    font-size: 12px;
+    line-height: 1.5;
+    margin-bottom: 10px;
+  }
+  .sprint-issues {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-bottom: 12px;
+  }
+  .issue-tag {
+    background: #1c2128;
+    border: 1px solid #232830;
+    border-radius: 3px;
+    color: #8b949e;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 7px;
+  }
+  .sprint-changes { list-style: none; padding: 0; }
+  .sprint-changes li {
+    border-top: 1px solid #1c2128;
+    color: #c9d1d9;
+    font-size: 12px;
+    line-height: 1.5;
+    padding: 6px 0;
+  }
+  .sprint-changes li::before {
+    color: #3d6cd6;
+    content: '→ ';
+    font-weight: 700;
+  }
+  .sprint-expected {
+    background: #0b0d0f;
+    border-radius: 4px;
+    color: #58a6ff;
+    font-size: 11px;
+    line-height: 1.5;
+    margin-top: 12px;
+    padding: 8px 12px;
+    white-space: pre-wrap;
+  }
+
+  /* ── Footer ── */
+  footer {
+    border-top: 1px solid #232830;
+    color: #58636e;
+    font-size: 11px;
+    margin-top: 40px;
+    padding: 16px 28px;
+    text-align: center;
+  }
+  footer a { color: #00c8d4; text-decoration: none; }
+  footer a:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>Simulator v2 — Bug Report &amp; Sprint Tracker &nbsp;·&nbsp; June 3, 2026</h1>
+  <div class="meta">Last updated: June 3, 2026 &nbsp;·&nbsp; Session: FIFA WC 2026 Seattle Digital Twin</div>
+</div>
+
+<div class="tab-bar">
+  <button class="tab-btn active-bugs"   onclick="switchTab('bugs',   this)" id="btn-bugs">&#x1F41E;&nbsp; Bug Tracker</button>
+  <button class="tab-btn"               onclick="switchTab('dialog', this)" id="btn-dialog">&#x1F4AC;&nbsp; Today's Dialogue</button>
+  <button class="tab-btn"               onclick="switchTab('sprint', this)" id="btn-sprint">&#x26A1;&nbsp; Sprint Plan</button>
+</div>
+
+<!-- ════════════════════════════════════════════════
+     TAB 1 — Bug Tracker
+════════════════════════════════════════════════ -->
+<div class="tab-panel active" id="tab-bugs">
+  <div class="panel-title">17 Open Issues &nbsp;<span>— 3 Critical &nbsp;·&nbsp; 7 High &nbsp;·&nbsp; 4 Medium &nbsp;·&nbsp; 3 Low</span></div>
+
+  <div class="filter-bar">
+    <button class="filter-btn active" id="f-all"      onclick="filterBugs('all',      this)">All (17)</button>
+    <button class="filter-btn critical" id="f-critical" onclick="filterBugs('critical', this)">Critical (3)</button>
+    <button class="filter-btn high"     id="f-high"     onclick="filterBugs('high',     this)">High (7)</button>
+    <button class="filter-btn medium"   id="f-medium"   onclick="filterBugs('medium',   this)">Medium (4)</button>
+    <button class="filter-btn low"      id="f-low"      onclick="filterBugs('low',      this)">Low (3)</button>
+  </div>
+
+  <table class="bug-table" id="bug-table">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Severity</th>
+        <th style="min-width:220px">Description</th>
+        <th style="min-width:260px">Root Cause</th>
+        <th>Sprint</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- CRITICAL -->
+      <tr class="sev-critical" data-sev="critical">
+        <td class="bug-id">C1</td>
+        <td><span class="badge badge-critical">Critical</span></td>
+        <td>MU-MIMO 2.8× gain multiplied on top of PHY rate that already includes 4 spatial streams</td>
+        <td><code class="bug-code">effPHY = phy * muF</code> where phy already = PHY1SS × ss × GI_EFF. Double-counts streams.</td>
+        <td class="bug-sprint">Sprint 1</td>
+        <td><span class="badge badge-open">Open</span></td>
+      </tr>
+      <tr class="sev-critical" data-sev="critical">
+        <td class="bug-id">C2</td>
+        <td><span class="badge badge-critical">Critical</span></td>
+        <td>capMult() stacks 14 multipliers to 4.62× with no physical ceiling</td>
+        <td><code class="bug-code">OFDMA×BSS×MBR×BCF×MC-UC×ProxyARP×ATF×MultiRU×RTS×TXOP×MLO×ProbeIgn×WMM×Frag = 4.62×</code>Combined with muF=2.8: total capacity inflation 12.9× over PHY.</td>
+        <td class="bug-sprint">Sprint 1</td>
+        <td><span class="badge badge-open">Open</span></td>
+      </tr>
+      <tr class="sev-critical" data-sev="critical">
+        <td class="bug-id">C3</td>
+        <td><span class="badge badge-critical">Critical</span></td>
+        <td>airtime `u` and goodput `gp` use different capacity bases — physically inconsistent</td>
+        <td><code class="bug-code">u = demand / (phy×muF×cm)
+gp = phy×0.65×(1-u)/clients</code>At u=1%, gp claims 33 Mbps/client while capacity would theoretically support 656 Mbps/client. Outputs contradict each other.</td>
+        <td class="bug-sprint">Sprint 1</td>
+        <td><span class="badge badge-open">Open</span></td>
+      </tr>
+      <!-- HIGH -->
+      <tr class="sev-high" data-sev="high">
+        <td class="bug-id">H1</td>
+        <td><span class="badge badge-high">High</span></td>
+        <td>8-stream MU-MIMO gain applied to 2.4 GHz band (AP5060 has only 2SS on 2.4G)</td>
+        <td><code class="bug-code">muF</code> computed once globally, applied to all 3 bands identically. AP5060 ss2g=2, not 8.</td>
+        <td class="bug-sprint">Sprint 1</td>
+        <td><span class="badge badge-open">Open</span></td>
+      </tr>
+      <tr class="sev-high" data-sev="high">
+        <td class="bug-id">H2</td>
+        <td><span class="badge badge-high">High</span></td>
+        <td>OFDMA UL toggle (labeled ×1.20) has zero effect on any computed value</td>
+        <td><code class="bug-code">tog-ofdma-ul</code> checkbox not referenced anywhere in capMult() or compute(). Dead UI control.</td>
+        <td class="bug-sprint">Sprint 2</td>
+        <td><span class="badge badge-open">Open</span></td>
+      </tr>
+      <tr class="sev-high" data-sev="high">
+        <td class="bug-id">H3</td>
+        <td><span class="badge badge-high">High</span></td>
+        <td>Enhanced RNR boosts 6 GHz split without re-normalizing — 1,960 phantom clients</td>
+        <td>split2g+split5g+split6g = 1.042 after boost. 7 clients double-counted per AP × 280 APs.</td>
+        <td class="bug-sprint">Sprint 2</td>
+        <td><span class="badge badge-open">Open</span></td>
+      </tr>
+      <tr class="sev-high" data-sev="high">
+        <td class="bug-id">H4</td>
+        <td><span class="badge badge-high">High</span></td>
+        <td>DL+UL demand summed against half-duplex channel — overstates demand 1.42×</td>
+        <td><code class="bug-code">demTot = demDL + demUL</code> used as single airtime load against one channel. WiFi is half-duplex.</td>
+        <td class="bug-sprint">Sprint 2</td>
+        <td><span class="badge badge-open">Open</span></td>
+      </tr>
+      <tr class="sev-high" data-sev="high">
+        <td class="bug-id">H5</td>
+        <td><span class="badge badge-high">High</span></td>
+        <td>6 GHz gets +4 dB SNR bonus vs 5 GHz — physically backwards for outdoor stadium</td>
+        <td><code class="bug-code">snrMod.g6 = +4</code>Outdoors, 6 GHz has ~10 dB MORE path loss than 5 GHz at same distance. Should be −6 dB.</td>
+        <td class="bug-sprint">Sprint 2</td>
+        <td><span class="badge badge-open">Open</span></td>
+      </tr>
+      <tr class="sev-high" data-sev="high">
+        <td class="bug-id">H6</td>
+        <td><span class="badge badge-high">High</span></td>
+        <td>MLO 1.90× gain applied to goodput values already distorted by C1/C2</td>
+        <td><code class="bug-code">tp = (b5.gp + b6.gp) × 1.90 × 0.85</code>Both gp values are from broken capacity chain.</td>
+        <td class="bug-sprint">Sprint 3</td>
+        <td><span class="badge badge-open">Open</span></td>
+      </tr>
+      <tr class="sev-high" data-sev="high">
+        <td class="bug-id">H7</td>
+        <td><span class="badge badge-high">High</span></td>
+        <td>Queueing delay coefficient 6 ms has no physical basis for WiFi 7 A-MPDU</td>
+        <td><code class="bug-code">qd = 6×u/(1-u)</code>WiFi 7 A-MPDU service time ~1.5 ms → coefficient should be ~1.5, not 6.</td>
+        <td class="bug-sprint">Sprint 3</td>
+        <td><span class="badge badge-open">Open</span></td>
+      </tr>
+      <!-- MEDIUM -->
+      <tr class="sev-medium" data-sev="medium">
+        <td class="bug-id">M1</td>
+        <td><span class="badge badge-medium">Medium</span></td>
+        <td>Monte Carlo UI says "Poisson fan arrivals" — code uses Uniform[0.85, 1.15]</td>
+        <td><code class="bug-code">fanF = 0.85 + Math.random()×0.30</code>Is Uniform. Neither Poisson nor described correctly.</td>
+        <td class="bug-sprint">Sprint 3</td>
+        <td><span class="badge badge-open">Open</span></td>
+      </tr>
+      <tr class="sev-medium" data-sev="medium">
+        <td class="bug-id">M2</td>
+        <td><span class="badge badge-medium">Medium</span></td>
+        <td>TX power slider uses 0.5× coefficient — compresses 16 dBm range to only 8 dB SNR</td>
+        <td><code class="bug-code">baseRSSI = -62 + (txPwr-17)×0.5</code>Physically: RSSI changes 1:1 with TX power at fixed distance.</td>
+        <td class="bug-sprint">Sprint 3</td>
+        <td><span class="badge badge-open">Open</span></td>
+      </tr>
+      <tr class="sev-medium" data-sev="medium">
+        <td class="bug-id">M3</td>
+        <td><span class="badge badge-medium">Medium</span></td>
+        <td>Degradation score penalty flat −12 pts/level, disconnected from RF physics</td>
+        <td><code class="bug-code">score -= p.deg × 12</code> regardless of whether airtime or latency actually changed.</td>
+        <td class="bug-sprint">Sprint 4</td>
+        <td><span class="badge badge-open">Open</span></td>
+      </tr>
+      <tr class="sev-medium" data-sev="medium">
+        <td class="bug-id">M4</td>
+        <td><span class="badge badge-medium">Medium</span></td>
+        <td>rTWT POS latency = lat×0.12 — wrong formula; rTWT uses scheduled SP intervals</td>
+        <td><code class="bug-code">posLatBase = lat×0.12</code>rTWT guarantees a fixed SP interval (e.g. 2 ms), not a fraction of queueing delay.</td>
+        <td class="bug-sprint">Sprint 3</td>
+        <td><span class="badge badge-open">Open</span></td>
+      </tr>
+      <!-- LOW -->
+      <tr class="sev-low" data-sev="low">
+        <td class="bug-id">L1</td>
+        <td><span class="badge badge-low">Low</span></td>
+        <td>280 APs hardcoded — user never sets it; no slider, no label, no derivation</td>
+        <td><code class="bug-code">perAP = Math.round(active/280)      // line 633
+capGbps = bands.reduce(...) * 280   // line 726</code>Hardcoded at two places.</td>
+        <td class="bug-sprint">Sprint 1</td>
+        <td><span class="badge badge-open">Open</span></td>
+      </tr>
+      <tr class="sev-low" data-sev="low">
+        <td class="bug-id">L2</td>
+        <td><span class="badge badge-low">Low</span></td>
+        <td>GI 800ns efficiency gain shown as 5% — 802.11be standard tables show ~11%</td>
+        <td><code class="bug-code">GI_EFF = {800: 1.05, ...}</code>Actual improvement: (4800/4000 - 1) ≈ 20% or ~11% per standard rate tables.</td>
+        <td class="bug-sprint">Sprint 4</td>
+        <td><span class="badge badge-open">Open</span></td>
+      </tr>
+      <tr class="sev-low" data-sev="low">
+        <td class="bug-id">L3</td>
+        <td><span class="badge badge-low">Low</span></td>
+        <td>"of N total" client count shows clients×2 (hardcoded /0.5) — always double the real number</td>
+        <td><code class="bug-code">sv('u-cli${key}', Math.round(b.clients/0.5))</code>Division by 0.5 has no documented meaning.</td>
+        <td class="bug-sprint">Sprint 2</td>
+        <td><span class="badge badge-open">Open</span></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ════════════════════════════════════════════════
+     TAB 2 — Today's Dialogue
+════════════════════════════════════════════════ -->
+<div class="tab-panel" id="tab-dialog">
+  <div class="panel-title">Today's Dialogue <span>— June 3, 2026 · Verbatim</span></div>
+
+  <div class="dialogue-wrap">
+
+    <!-- Exchange 1 -->
+    <div class="msg-row user">
+      <div>
+        <div class="msg-label">You</div>
+        <div class="msg-user">Where is the gap analyses button? the How to Use is too small a font, make use of the blank space in the middle? I cannot 'download the configured parameters' by clicking on the button? Also where is the choice to make P50 or P74 or any other Ps for MonteCarlo?</div>
+      </div>
+    </div>
+    <div class="msg-row claude">
+      <div>
+        <div class="msg-label">Claude</div>
+        <div class="msg-claude">Good — I can see all five issues clearly now. 1. Gap Analysis tab — it exists but 7 tabs at 9px are nearly invisible. 2. How to Use — 9px muted text, too small. 3. Center gap — margin-top:auto pushes SVC to bottom creating a ~450px void; fix with flex:1 on visible panel. 4. No download button — modal has only Copy Text, no file download. 5. P50/P75 selector — buried inside Monte Carlo tab; user never lands there.</div>
+      </div>
+    </div>
+
+    <!-- Exchange 2 -->
+    <div class="msg-row user">
+      <div>
+        <div class="msg-label">You</div>
+        <div class="msg-user">[Image of simulator showing big gap in center, unreadable SLA bar at bottom] On the bottom of the simulator I cannot read the SLA too small and the banners in bottom don't read well. There is a big gap in the middle.... can we make it nicer? Also, when I click the full output I am supposed to get the full dump of the parameters as recommended?</div>
+      </div>
+    </div>
+    <div class="msg-row claude">
+      <div>
+        <div class="msg-label">Claude</div>
+        <div class="msg-claude">Fixed 6 issues: center gap (flex:1 on .bp.vis), How to Use 9px→12px, log strip 60px→90px, P-target selector moved above tabs, Download .txt button added to modal, Gap Analysis tab got ⚡ icon.</div>
+      </div>
+    </div>
+
+    <!-- Exchange 3 -->
+    <div class="msg-row user">
+      <div>
+        <div class="msg-label">You</div>
+        <div class="msg-user">Where is the button to download the configured parameters? Also, for tomorrow, we need to work on the fonts...</div>
+      </div>
+    </div>
+    <div class="msg-row claude">
+      <div>
+        <div class="msg-label">Claude</div>
+        <div class="msg-claude">The download button is inside the Full Config modal (you have to open it first, then look for ⬇ Download .txt). That's the problem — it's buried. I'll add a direct download button to the right panel.</div>
+      </div>
+    </div>
+
+    <!-- Exchange 4 -->
+    <div class="msg-row user">
+      <div>
+        <div class="msg-label">You</div>
+        <div class="msg-user">I still don't see pls check?</div>
+      </div>
+    </div>
+    <div class="msg-row claude">
+      <div>
+        <div class="msg-label">Claude</div>
+        <div class="msg-claude">Found the bug — button is in HTML at line 484 but the right panel scrolls — hidden below the Breaking Point Finder. The right panel is 220px wide and overflows. Fix: moved download button to the header bar where it's always visible.</div>
+      </div>
+    </div>
+
+    <!-- Exchange 5 -->
+    <div class="msg-row user">
+      <div>
+        <div class="msg-label">You</div>
+        <div class="msg-user">But nothing downloads?</div>
+      </div>
+    </div>
+    <div class="msg-row claude">
+      <div>
+        <div class="msg-label">Claude</div>
+        <div class="msg-claude">Found the bug. _triggerDownload returns early if text is empty (falsy check), and showCfg() might throw silently before populating dataset.text. Rewrote directDownload() to be completely self-contained — generates text directly from compute() without modal, uses data: URI (no Blob, no popup blocker issues).</div>
+      </div>
+    </div>
+
+    <!-- Exchange 6 -->
+    <div class="msg-row user">
+      <div>
+        <div class="msg-label">You</div>
+        <div class="msg-user">Quick question, what the actual WiFi engine that is taking all these parameters and running them through what, we don't have ns3?</div>
+      </div>
+    </div>
+    <div class="msg-row claude">
+      <div>
+        <div class="msg-label">Claude</div>
+        <div class="msg-claude">Good question — and the honest answer is: there is no ns-3, no real RF simulation, and no actual packet engine. What you have is a calibrated multiplier chain — pure JavaScript math. PHY rate tables (real IEEE 802.11be numbers) → SNR→MCS lookup → multiply capacity by a chain of gain/penalty factors → divide by active clients → score.</div>
+      </div>
+    </div>
+
+    <!-- Exchange 7 -->
+    <div class="msg-row user">
+      <div>
+        <div class="msg-label">You</div>
+        <div class="msg-user">The outputs don't make sense... how can you calculate the airtime is only 2% and 287Gbps demand? How many APs did you take? I did not give any APs?</div>
+      </div>
+    </div>
+    <div class="msg-row claude">
+      <div>
+        <div class="msg-label">Claude</div>
+        <div class="msg-claude">Found the exact bug. capMult() with all features ON stacks to 4.62×. Per-AP 5G capacity = PHY(~4,300 Mbps) × 2.8 (MU-MIMO) × 4.62 = 55,700 Mbps = 55 Gbps. Then × 280 APs → ~46,000 Gbps total. Airtime = per-AP demand (148 clients × 6.9 Mbps = 1 Gbps) ÷ per-AP effCap (55 Gbps) = 1.8% → rounds to 2%. Completely nonsense.</div>
+      </div>
+    </div>
+
+    <!-- Exchange 8 -->
+    <div class="msg-row user">
+      <div>
+        <div class="msg-label">You</div>
+        <div class="msg-user">No, check everything....</div>
+      </div>
+    </div>
+    <div class="msg-row claude">
+      <div>
+        <div class="msg-label">Claude</div>
+        <div class="msg-claude">[Full audit: 3 Critical, 7 High, 4 Medium, 3 Low — see Bug Tracker tab]</div>
+      </div>
+    </div>
+
+    <!-- Exchange 9 -->
+    <div class="msg-row user">
+      <div>
+        <div class="msg-label">You</div>
+        <div class="msg-user">Where did you get 280 APs? I did not give you any?</div>
+      </div>
+    </div>
+    <div class="msg-row claude">
+      <div>
+        <div class="msg-label">Claude</div>
+        <div class="msg-claude">280 APs is hardcoded in the JavaScript. You never set it — it was baked in when the simulator was built.
+
+Line 633:  const perAP = Math.round(active / 280);
+Line 726:  const capGbps = bands.reduce(...) * 280;</div>
+      </div>
+    </div>
+
+  </div><!-- /dialogue-wrap -->
+</div>
+
+<!-- ════════════════════════════════════════════════
+     TAB 3 — Sprint Plan
+════════════════════════════════════════════════ -->
+<div class="tab-panel" id="tab-sprint">
+  <div class="panel-title">Tomorrow's Fix Plan <span>— June 4, 2026</span></div>
+
+  <div class="sprint-grid">
+
+    <!-- Sprint 1 -->
+    <div class="sprint-card sp-critical">
+      <h3>Sprint 1 — Morning (2–3h) — CRITICAL fixes</h3>
+      <div class="sprint-goal">Goal: Fix the physics so airtime, capacity, and goodput are all consistent and realistic.</div>
+      <div class="sprint-issues">
+        <span class="issue-tag">C1</span>
+        <span class="issue-tag">C2</span>
+        <span class="issue-tag">C3</span>
+        <span class="issue-tag">H1</span>
+        <span class="issue-tag">L1</span>
+      </div>
+      <ul class="sprint-changes">
+        <li>Add AP Count slider to left panel (default 280, range 50–500, label "APs Deployed")</li>
+        <li>Remove muF from effCap — MU-MIMO benefit is already in spatial streams</li>
+        <li>Cap capMult() at max 2.0× with saturation function</li>
+        <li>Make gp use same capacity denominator as u</li>
+        <li>Apply muF per-band based on actual AP antenna count (ss2g=2 for 2.4G, not 8)</li>
+      </ul>
+      <div class="sprint-expected">Expected result: airtime 20–60% at stadium load, capGbps ~1,400–3,500 Gbps, goodput/client consistent with airtime</div>
+    </div>
+
+    <!-- Sprint 2 -->
+    <div class="sprint-card sp-high">
+      <h3>Sprint 2 — Late Morning (1–2h) — HIGH fixes + font audit</h3>
+      <div class="sprint-goal">Goal: Fix physically backwards parameters and dead UI controls.</div>
+      <div class="sprint-issues">
+        <span class="issue-tag">H2</span>
+        <span class="issue-tag">H3</span>
+        <span class="issue-tag">H4</span>
+        <span class="issue-tag">H5</span>
+        <span class="issue-tag">L3</span>
+      </div>
+      <ul class="sprint-changes">
+        <li>Wire OFDMA UL to actual computation (or remove ×1.20 label)</li>
+        <li>Normalize band splits after enhRNR boost (divide by sum)</li>
+        <li>Separate DL and UL airtime loads (half-duplex model)</li>
+        <li>Flip snrMod.g6 from +4 to −6 (outdoor path loss)</li>
+        <li>Fix "of N total" clients display (remove /0.5)</li>
+        <li>Font audit: all 9px/8px inline overrides → 11–12px throughout</li>
+      </ul>
+    </div>
+
+    <!-- Sprint 3 -->
+    <div class="sprint-card" style="border-left: 4px solid #ffc107;">
+      <h3>Sprint 3 — Afternoon (2h) — HIGH/MEDIUM refinements</h3>
+      <div class="sprint-goal">Goal: Improve model accuracy and fix MC description.</div>
+      <div class="sprint-issues">
+        <span class="issue-tag">H6</span>
+        <span class="issue-tag">H7</span>
+        <span class="issue-tag">M1</span>
+        <span class="issue-tag">M2</span>
+        <span class="issue-tag">M4</span>
+      </div>
+      <ul class="sprint-changes">
+        <li>Fix MLO gain to apply to corrected gp values</li>
+        <li>Fix queueing delay coefficient: 6 ms → 1.5 ms</li>
+        <li>Fix MC description: Uniform[0.85, 1.15] not Poisson</li>
+        <li>Fix TX power coefficient: 0.5 → 1.0 (or document the assumed distance)</li>
+        <li>Fix rTWT POS formula: use fixed SP interval, not lat×0.12</li>
+      </ul>
+    </div>
+
+    <!-- Sprint 4 -->
+    <div class="sprint-card sp-low">
+      <h3>Sprint 4 — Future — LOW + model validation</h3>
+      <div class="sprint-goal">Goal: Model validation against real AP telemetry.</div>
+      <div class="sprint-issues">
+        <span class="issue-tag">H6 residual</span>
+        <span class="issue-tag">M3</span>
+        <span class="issue-tag">L2</span>
+        <span class="issue-tag">Track B</span>
+      </div>
+      <ul class="sprint-changes">
+        <li>Fix degradation score to interact with actual airtime/latency physics</li>
+        <li>Correct GI 800ns efficiency: 5% → 11%</li>
+        <li>Begin Track B: validate multiplier coefficients against AP5060 telemetry</li>
+        <li>Add "model confidence" disclaimer to all output cards</li>
+      </ul>
+    </div>
+
+  </div><!-- /sprint-grid -->
+</div>
+
+<footer>
+  &copy; 2026 Khursheed Khan &nbsp;·&nbsp;
+  <a href="stadium_wifi_simulator_v2.html">← Back to Simulator v2</a>
+</footer>
+
+<script>
+  /* ── Tab switching ── */
+  const panels = { bugs: 'tab-bugs', dialog: 'tab-dialog', sprint: 'tab-sprint' };
+  const btnIds  = { bugs: 'btn-bugs', dialog: 'btn-dialog', sprint: 'btn-sprint' };
+  const activeClass = { bugs: 'active-bugs', dialog: 'active-dialog', sprint: 'active-sprint' };
+
+  function switchTab(name, clickedBtn) {
+    Object.keys(panels).forEach(k => {
+      document.getElementById(panels[k]).classList.remove('active');
+      const b = document.getElementById(btnIds[k]);
+      b.classList.remove('active-bugs', 'active-dialog', 'active-sprint');
+    });
+    document.getElementById(panels[name]).classList.add('active');
+    clickedBtn.classList.add(activeClass[name]);
+  }
+
+  /* ── Bug filter ── */
+  let currentFilter = 'all';
+
+  function filterBugs(sev, btn) {
+    currentFilter = sev;
+    // update button styles
+    ['f-all','f-critical','f-high','f-medium','f-low'].forEach(id => {
+      const el = document.getElementById(id);
+      el.classList.remove('active');
+      // clear sev-specific active class too
+      el.classList.remove('critical','high','medium','low');
+    });
+    btn.classList.add('active');
+    if (sev !== 'all') btn.classList.add(sev);
+
+    // filter rows
+    const rows = document.querySelectorAll('#bug-table tbody tr');
+    rows.forEach(row => {
+      if (sev === 'all' || row.dataset.sev === sev) {
+        row.style.display = '';
+      } else {
+        row.style.display = 'none';
+      }
+    });
+  }
+
+  // Initialise filter button active state correctly on load
+  document.getElementById('f-all').classList.add('active');
+</script>
+</body>
+</html>
