@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Journey to the Digital Twin — Extreme AP / EP1 Parameter Twin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..700&family=Newsreader:ital,opsz,wght@0,6..72,300..600;1,6..72,300..500&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#f5efe2;
+    --paper-2:#efe7d6;
+    --ink:#1c1813;
+    --ink-soft:#463f34;
+    --rule:#cdbfa3;
+    --oxblood:#6e1f23;
+    --oxblood-bright:#9a2d2f;
+    --gold:#9c7a2e;
+    --teal:#1f4f4a;
+    --shadow:rgba(40,28,16,.16);
+    --mono:'IBM Plex Mono',ui-monospace,monospace;
+    --serif:'Newsreader',Georgia,serif;
+    --display:'Fraunces',Georgia,serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;background:var(--paper);color:var(--ink);
+    font-family:var(--serif);font-size:19px;line-height:1.62;
+    font-optical-sizing:auto;
+    background-image:
+      radial-gradient(circle at 12% 8%, rgba(110,31,35,.04), transparent 40%),
+      radial-gradient(circle at 88% 92%, rgba(31,79,74,.04), transparent 42%);
+  }
+  .grain{position:fixed;inset:0;pointer-events:none;z-index:9999;opacity:.035;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");}
+  .wrap{max-width:920px;margin:0 auto;padding:0 28px 120px}
+
+  /* ---- Masthead ---- */
+  .masthead{padding:64px 0 30px;border-bottom:3px double var(--ink);position:relative}
+  .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.34em;text-transform:uppercase;color:var(--oxblood);margin-bottom:22px}
+  .masthead h1{
+    font-family:var(--display);font-weight:600;font-size:clamp(42px,8vw,86px);
+    line-height:.95;letter-spacing:-.02em;margin:0 0 14px;
+    font-variation-settings:'opsz' 144;
+  }
+  .masthead h1 em{font-style:italic;color:var(--oxblood);font-weight:500}
+  .dek{font-family:var(--serif);font-style:italic;font-size:clamp(18px,2.5vw,23px);color:var(--ink-soft);max-width:640px;line-height:1.4}
+  .meta-row{display:flex;flex-wrap:wrap;gap:8px 26px;margin-top:26px;font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;color:var(--ink-soft);text-transform:uppercase}
+  .meta-row b{color:var(--ink);font-weight:600}
+
+  /* ---- TOC ---- */
+  nav.toc{margin:38px 0 10px;padding:22px 26px;background:linear-gradient(180deg,var(--paper-2),transparent);border-left:3px solid var(--oxblood)}
+  nav.toc h4{font-family:var(--mono);font-size:11px;letter-spacing:.3em;text-transform:uppercase;color:var(--oxblood);margin:0 0 14px}
+  nav.toc ol{margin:0;padding:0;list-style:none;columns:2;column-gap:40px}
+  nav.toc li{margin-bottom:9px;font-size:16px;break-inside:avoid}
+  nav.toc a{color:var(--ink);text-decoration:none;border-bottom:1px solid transparent;transition:.2s}
+  nav.toc a:hover{border-color:var(--oxblood);color:var(--oxblood)}
+  nav.toc .n{font-family:var(--mono);font-size:12px;color:var(--gold);margin-right:10px}
+
+  /* ---- Sections ---- */
+  section{padding:54px 0 8px;border-top:1px solid var(--rule);margin-top:30px}
+  section:first-of-type{border-top:none}
+  .sec-num{font-family:var(--mono);font-size:12px;letter-spacing:.2em;color:var(--oxblood);text-transform:uppercase;margin-bottom:8px}
+  h2{font-family:var(--display);font-weight:560;font-size:clamp(28px,4.4vw,42px);line-height:1.02;letter-spacing:-.015em;margin:0 0 8px;font-variation-settings:'opsz' 90}
+  h2 .sub{display:block;font-family:var(--serif);font-style:italic;font-weight:400;font-size:18px;color:var(--ink-soft);letter-spacing:0;margin-top:10px}
+  h3{font-family:var(--display);font-weight:600;font-size:23px;margin:34px 0 6px;letter-spacing:-.01em}
+  h4{font-family:var(--mono);font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--teal);margin:26px 0 8px}
+  p{margin:0 0 16px}
+  .lead{font-size:21px;line-height:1.55}
+  .lead::first-letter{font-family:var(--display);font-weight:600;font-size:3.6em;float:left;line-height:.74;padding:8px 12px 0 0;color:var(--oxblood)}
+  strong{font-weight:600}
+  em{font-style:italic}
+  a.ref{color:var(--oxblood);text-decoration:none;border-bottom:1px dotted var(--oxblood)}
+
+  /* callouts */
+  .pull{border-left:3px solid var(--oxblood);padding:4px 0 4px 24px;margin:26px 0;font-family:var(--display);font-style:italic;font-weight:400;font-size:24px;line-height:1.32;color:var(--ink)}
+  .note{background:var(--paper-2);border:1px solid var(--rule);border-radius:3px;padding:18px 22px;margin:24px 0;font-size:17px}
+  .note .tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--oxblood);display:block;margin-bottom:7px}
+  .warn{border-color:var(--oxblood-bright);background:#f3e3d8}
+  .warn .tag{color:var(--oxblood-bright)}
+
+  /* formal box (objective fn) */
+  .formal{border:1.5px solid var(--ink);background:#fbf7ee;border-radius:4px;padding:26px 28px;margin:26px 0;box-shadow:6px 6px 0 var(--shadow)}
+  .formal .ttl{font-family:var(--mono);font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--oxblood);margin-bottom:14px}
+  .formula{font-family:var(--mono);font-size:16px;background:#1c1813;color:#f5efe2;padding:16px 18px;border-radius:4px;margin:14px 0;overflow-x:auto;line-height:1.7}
+  .formula .c{color:#c9a14a}.formula .k{color:#7fb3ac}.formula .v{color:#e6967f}
+
+  /* tables */
+  .tbl{width:100%;border-collapse:collapse;margin:22px 0;font-size:14.5px;font-family:var(--serif)}
+  .tbl th{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;text-align:left;padding:10px 10px;border-bottom:2px solid var(--ink);color:var(--oxblood);vertical-align:bottom}
+  .tbl td{padding:10px 10px;border-bottom:1px solid var(--rule);vertical-align:top}
+  .tbl tr:hover td{background:rgba(110,31,35,.035)}
+  .tbl .mono{font-family:var(--mono);font-size:13px}
+  .tbl-scroll{overflow-x:auto;margin:22px -4px}
+
+  /* code */
+  pre{background:#1c1813;color:#e9e0cf;font-family:var(--mono);font-size:13px;line-height:1.62;padding:20px 22px;border-radius:5px;overflow-x:auto;margin:20px 0;border:1px solid #000}
+  pre .cm{color:#8a8270}.pre .kw{color:#c9a14a}
+  code{font-family:var(--mono);font-size:.86em;background:var(--paper-2);padding:1px 6px;border-radius:3px;color:var(--oxblood)}
+
+  /* ladder */
+  .ladder{margin:24px 0;counter-reset:rung}
+  .rung{display:flex;gap:18px;padding:14px 0;border-bottom:1px dashed var(--rule);align-items:baseline}
+  .rung .num{font-family:var(--display);font-weight:700;font-size:30px;color:var(--rule);min-width:46px;line-height:1}
+  .rung.here{background:linear-gradient(90deg,rgba(156,122,46,.14),transparent);margin:0 -14px;padding:14px}
+  .rung.here .num{color:var(--oxblood)}
+  .rung .body b{font-family:var(--display);font-size:18px;display:block;margin-bottom:2px}
+  .youhere{font-family:var(--mono);font-size:10px;letter-spacing:.2em;background:var(--oxblood);color:var(--paper);padding:3px 8px;border-radius:3px;margin-left:8px;vertical-align:middle}
+
+  /* agent graph */
+  .agents{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin:24px 0}
+  .agent{border:1px solid var(--rule);border-top:3px solid var(--teal);border-radius:4px;padding:14px 16px;background:#fbf7ee}
+  .agent.gov{border-top-color:var(--oxblood)}
+  .agent .an{font-family:var(--display);font-weight:600;font-size:17px;margin-bottom:4px}
+  .agent .ad{font-size:13.5px;color:var(--ink-soft);line-height:1.45}
+  .agent .tagx{font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--teal);margin-top:8px}
+  .agent.gov .tagx{color:var(--oxblood)}
+
+  /* governance toggle */
+  .gov-tabs{display:flex;gap:0;margin:24px 0 0;border-bottom:2px solid var(--ink)}
+  .gov-tab{font-family:var(--mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;padding:12px 22px;cursor:pointer;border:1px solid var(--rule);border-bottom:none;background:var(--paper-2);color:var(--ink-soft);margin-bottom:-2px}
+  .gov-tab.active{background:#1c1813;color:var(--paper);border-color:#1c1813}
+  .gov-panel{display:none;border:1px solid var(--rule);border-top:none;padding:26px;background:#fbf7ee}
+  .gov-panel.active{display:block}
+
+  /* journal log */
+  .log-entry{border-left:3px solid var(--gold);padding:6px 0 6px 26px;margin:34px 0}
+  .log-date{font-family:var(--mono);font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--oxblood);margin-bottom:6px}
+  .log-entry h3{margin-top:6px}
+  .append-marker{text-align:center;font-family:var(--mono);font-size:11px;letter-spacing:.2em;color:var(--rule);text-transform:uppercase;margin:40px 0;padding:14px;border:1px dashed var(--rule);border-radius:4px}
+
+  ul.tight{margin:8px 0 18px;padding-left:22px}
+  ul.tight li{margin-bottom:8px}
+  .kicker{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--gold)}
+  hr.soft{border:none;border-top:1px solid var(--rule);margin:34px 0}
+  footer{margin-top:60px;padding-top:24px;border-top:3px double var(--ink);font-family:var(--mono);font-size:11.5px;color:var(--ink-soft);letter-spacing:.06em;display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px}
+
+  /* fade-in */
+  .fx{opacity:0;transform:translateY(14px);animation:rise .8s cubic-bezier(.2,.7,.2,1) forwards}
+  @keyframes rise{to{opacity:1;transform:none}}
+  @media(max-width:640px){nav.toc ol{columns:1}.gov-tabs{flex-wrap:wrap}.lead::first-letter{font-size:3em}}
+</style>
+</head>
+<body>
+<div class="grain"></div>
+<div class="wrap">
+
+  <!-- ============ MASTHEAD ============ -->
+  <header class="masthead fx">
+    <div class="eyebrow">5320 Onboarding · A Living Strategy Record</div>
+    <h1>Journey to the<br><em>Digital Twin</em></h1>
+    <p class="dek">Building a calibrated, auditable parameter-tuning twin for Extreme access points — from EP1 knobs to per-archetype golden sets.</p>
+    <div class="meta-row">
+      <span>Author · <b>Khursheed Khan</b></span>
+      <span>Started · <b>3 June 2026</b></span>
+      <span>Status · <b>Active</b></span>
+      <span>Format · <b>Appendable</b></span>
+    </div>
+  </header>
+
+  <nav class="toc fx" style="animation-delay:.1s">
+    <h4>Contents of the Record</h4>
+    <ol>
+      <li><span class="n">00</span><a href="#premise">The Premise &amp; North Star</a></li>
+      <li><span class="n">01</span><a href="#reframe">From 60-D Nightmare to ~15</a></li>
+      <li><span class="n">02</span><a href="#seven">The Seven Regime Parameters</a></li>
+      <li><span class="n">03</span><a href="#objective">The Stadium QoE Objective</a></li>
+      <li><span class="n">04</span><a href="#optcal">Optimization vs Calibration</a></li>
+      <li><span class="n">05</span><a href="#discovery">Driver Discovery</a></li>
+      <li><span class="n">06</span><a href="#governance">Governance — Two Versions</a></li>
+      <li><span class="n">07</span><a href="#ladder">The ns-3 / Sionna Ladder</a></li>
+      <li><span class="n">08</span><a href="#agents">The Multi-Agent Framework</a></li>
+      <li><span class="n">09</span><a href="#fidelity">The Fidelity Ladder</a></li>
+      <li><span class="n">10</span><a href="#log">The Log</a></li>
+    </ol>
+  </nav>
+
+  <!-- ============ 00 PREMISE ============ -->
+  <section id="premise">
+    <div class="sec-num">§ 00 — North Star</div>
+    <h2>The Premise<span class="sub">What we are building, and — just as important — what we are <em>not</em>.</span></h2>
+    <p class="lead">We are not building a general-purpose "WiFi industry" digital twin. That object does not exist as a product, and chasing it is a research career, not an SA deliverable. We are building something narrower, more tractable, and more valuable: a <strong>parameter-tuning and calibration engine for Extreme AP deployments through Extreme Platform One</strong>, whose output is a library of <em>per-archetype golden parameter sets</em>.</p>
+    <p>The cellular instinct is the right one. In 5G you carry standardized parameter templates for macro, small-cell, dense-urban, indoor-DAS. WiFi has no equivalent — and that absence is not an oversight. Cellular earned its golden sets through enormous measurement campaigns against a <em>scheduled, licensed, deterministic</em> air interface where the operator owns every device. WiFi's medium is contention-based, unlicensed, and full of clients we do not own, so the same parameter that is optimal in one room is wrong two rooms over. No vendor ships golden sets because they cannot be shipped generically — which is exactly why building them, defensibly, is an edge rather than a download.</p>
+    <div class="pull">The unit of the golden-set library is the <em>archetype</em>, not the site. You will never have a set for "Lumen Field." You will have one for the class it belongs to — and Lumen is one instance.</div>
+    <p>Everything in this record serves that single goal: walk into a site, recognize its archetype, pull a candidate golden set, tune the last ten percent on the ground, and feed what you learned back into the model so the next site of that class starts smarter.</p>
+  </section>
+
+  <!-- ============ 01 REFRAME ============ -->
+  <section id="reframe">
+    <div class="sec-num">§ 01 — Dimensionality</div>
+    <h2>From a 60-D Nightmare to ~15<span class="sub">Why the search space is not 3⁶⁰, and never was.</span></h2>
+    <p>Sixty parameters with three settings each looks like 4×10²⁸ combinations. It is not, because three forces collapse the <em>effective</em> dimensionality to roughly twelve to eighteen per archetype:</p>
+    <ul class="tight">
+      <li><strong>Sparsity of effects.</strong> A handful of main effects plus a few interactions explain most output variance. The simulator already shows this — Airtime Fairness alone is ×1.38, MU-MIMO streams ×2.8, OFDMA ×1.35. A dozen knobs carry most of the QoE swing; the rest are second-decimal trim.</li>
+      <li><strong>Conditional gating.</strong> The 60 form a dependency graph, not a flat cube. <code>MLO Mode</code>, <code>MLO Links</code>, <code>MLO Steering</code> are dead dimensions unless MLO is on and both bands exist. <code>4K-QAM</code> does nothing unless <code>gen='be'</code> and SNR ≥ 42. Every gate that is off deletes its whole subtree.</li>
+      <li><strong>Monotone saturation.</strong> Many knobs are "more is better until it plateaus" — BSS Color, Proxy ARP, Broadcast Filter. Once the direction is known there is nothing to <em>search</em>; you set them on.</li>
+    </ul>
+    <p>But the panel grouping (PHY / MAC / SSID) is the wrong axis for the twin. Group instead by <strong>how each parameter acts on QoE</strong>, because that dictates how it must be modeled — and reveals that the entire difficulty lives in three of five categories.</p>
+    <div class="tbl-scroll">
+    <table class="tbl">
+      <thead><tr><th>Effect type</th><th>Behaviour</th><th>Representative parameters</th><th style="width:120px">Tunable alone?</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Multiplicative gain</strong></td><td>Scales capacity by a near-fixed factor; composes cleanly</td><td>OFDMA, BSS Color, Proxy ARP, BC Filter, MC→UC</td><td class="mono">Yes — the capMult chain</td></tr>
+        <tr><td><strong>Gate / enabler</strong></td><td>Step function; off = subtree dead, on = unlocks a regime</td><td>MLO links, 4K-QAM, rTWT, MU-MIMO on/off</td><td class="mono">Yes, but reshapes others</td></tr>
+        <tr><td><strong>Threshold / non-monotonic</strong></td><td>U-shaped — interior optimum, bad at both extremes</td><td>RX-SOP, Min RSSI, CWmin, TX Power, Max clients, DTIM</td><td class="mono" style="color:var(--oxblood)">No — the skill zone</td></tr>
+        <tr><td><strong>Interaction-coupled</strong></td><td>Effect depends on another parameter's state</td><td>TXOP-BE × rTWT, CWmin × load, MU-streams × angular spread</td><td class="mono" style="color:var(--oxblood)">No — co-tune</td></tr>
+        <tr><td><strong>Context-modulated</strong></td><td>Effect set entirely by the regime (the seven)</td><td>Guard Interval × delay spread, MCS Floor × path loss, RTS × density</td><td class="mono" style="color:var(--oxblood)">No — per archetype</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <div class="note"><span class="tag">The structural insight</span>The current simulator models <em>everything</em> as rows 1–2 (multipliers and switches). That is why it is an honest teaching tool but a pre-alpha tuning engine: the real golden-set decisions are all made in rows 3–5, which a chain of <code>m *= factor</code> cannot represent. A multiplier chain can never <em>derive</em> an interior optimum — someone hand-placed TX=17, GI=1600, MaxClients=100. The twin's job is to make those optima emerge.</div>
+  </section>
+
+  <!-- ============ 02 SEVEN ============ -->
+  <section id="seven">
+    <div class="sec-num">§ 02 — The Regime</div>
+    <h2>The Seven Regime Parameters<span class="sub">Not user inputs. A regime selector that changes what the 53 controls <em>do</em>.</span></h2>
+    <p>The seven are <strong>not numbers a user measures and types in</strong>. They are a regime selector — a dropdown where the user estimates "this is a warehouse" or "this is a stadium bowl." That estimate freezes a set of boundary conditions, and those boundary conditions change the QoE derivative of every one of the 53 controls. Guard Interval at 800 ns is correct in a clinic and wrong in a warehouse; the parameter did not change — the regime did.</p>
+    <p>What physically <em>defines</em> an archetype is its propagation signature, not its name. "Dense venue" versus "warehouse" is really "short delay spread, clustered clients, steep capacity wall" versus "long delay spread, dispersed clients, coverage wall." Eventually Sionna measures these from a survey; until then, the user estimates the bucket.</p>
+    <div class="tbl-scroll">
+    <table class="tbl">
+      <thead><tr><th style="width:150px">Regime parameter</th><th>What it governs</th><th>Drives which knobs</th></tr></thead>
+      <tbody>
+        <tr><td><strong>RMS Delay Spread (τ<sub>RMS</sub>)</strong><br><span class="mono">50–500 ns</span></td><td>Temporal multipath; whether GI suffices; frequency selectivity</td><td>Guard Interval, OFDMA RU sizing, pilot overhead</td></tr>
+        <tr><td><strong>Path-Loss Exponent (n)</strong><br><span class="mono">2.0–4.2</span></td><td>Signal fall-off with distance; capacity-bound vs coverage-bound</td><td>RSSI floor, admission, AF, spatial reuse</td></tr>
+        <tr><td><strong>Coherence Bandwidth (f<sub>c</sub>)</strong><br><span class="mono">≈ 1/(5·τ)</span></td><td>Subcarrier correlation; how aggressive MCS can be</td><td>MCS adaptation, RU granularity</td></tr>
+        <tr><td><strong>Rician K-Factor</strong><br><span class="mono">−5 to +20 dB</span></td><td>LoS vs scattering; whether beamforming/MIMO pays</td><td>MU-MIMO streams, beamforming, diversity</td></tr>
+        <tr><td><strong>Angular Spread</strong><br><span class="mono">5°–180°</span></td><td>Spatial separability; whether MU-MIMO can isolate clients</td><td>MU-MIMO, spatial reuse, OFDMA fallback</td></tr>
+        <tr><td><strong>Shadowing σ</strong><br><span class="mono">2–15 dB</span></td><td>Coverage variability; hot-spots and dead-zones</td><td>RSSI floor, roaming hysteresis, admission</td></tr>
+        <tr><td><strong>Band &amp; Channel Width</strong><br><span class="mono">2.4/5/6 GHz</span></td><td>Propagation scale and available spectrum</td><td>Channel width, MLO, spatial-reuse thresholds</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <h4>The archetype matrix (v0 — to be calibrated)</h4>
+    <div class="tbl-scroll">
+    <table class="tbl">
+      <thead><tr><th>Archetype</th><th>τ<sub>RMS</sub></th><th>n</th><th>K (dB)</th><th>Ang. spread</th><th>σ (dB)</th><th>Dominant concern</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Dense Public Venue</strong><br><span style="color:var(--ink-soft)">stadium · arena</span></td><td class="mono">50–120</td><td class="mono">3.5–4.2</td><td class="mono">−2 to +2</td><td class="mono">100–180°</td><td class="mono">6–12</td><td>Capacity + fairness</td></tr>
+        <tr><td><strong>High-Density Enclosed</strong><br><span style="color:var(--ink-soft)">lecture hall · office</span></td><td class="mono">80–150</td><td class="mono">2.8–3.5</td><td class="mono">+3 to +8</td><td class="mono">40–120°</td><td class="mono">4–8</td><td>Capacity + stability</td></tr>
+        <tr><td><strong>Sparse High-Throughput</strong><br><span style="color:var(--ink-soft)">warehouse · plant</span></td><td class="mono">150–300</td><td class="mono">2.5–3.2</td><td class="mono">+5 to +15</td><td class="mono">20–60°</td><td class="mono">2–6</td><td>Coverage + roaming</td></tr>
+        <tr><td><strong>Mixed Retail / Hospitality</strong><br><span style="color:var(--ink-soft)">store · hotel</span></td><td class="mono">100–200</td><td class="mono">3.0–3.8</td><td class="mono">+2 to +6</td><td class="mono">50–100°</td><td class="mono">5–10</td><td>POS SLA + guest seg.</td></tr>
+        <tr><td><strong>Latency-Critical Low-Density</strong><br><span style="color:var(--ink-soft)">medical · control</span></td><td class="mono">50–100</td><td class="mono">2.4–3.0</td><td class="mono">+8 to +15</td><td class="mono">10–40°</td><td class="mono">2–5</td><td>Jitter / latency</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p style="font-size:15px;color:var(--ink-soft)"><em>Note: convention center is provisionally a sub-class of Dense Public Venue with uplink-weighted demand and rapid spatial reconfiguration — "a mobile stadium." Whether it earns its own archetype is a question the driver-discovery procedure (§05) will answer empirically.</em></p>
+  </section>
+
+  <!-- ============ 03 OBJECTIVE ============ -->
+  <section id="objective">
+    <div class="sec-num">§ 03 — The Dependent Variable</div>
+    <h2>The Stadium QoE Objective<span class="sub">Before optimizing anything, write down what "good" means — explicitly, and defensibly.</span></h2>
+    <p>QoE is a <strong>vector</strong>, not a scalar, and parameters trade its components against one another. There is therefore no single optimum — there is a Pareto frontier, and the archetype's SLA priority order selects a point on it. Stadium, mall, and convention center share the same frontier but pick <em>different points</em>, because their objective functions have different shapes. This is the most fundamental dependent-variable choice in the whole project, and the first thing an auditor attacks: <em>"why are you maximizing that?"</em></p>
+    <div class="formal">
+      <div class="ttl">Objective — Dense Public Venue (Stadium)</div>
+      <p style="margin:0 0 6px"><strong>Maximize</strong> proportional-fairness utility over admitted clients:</p>
+      <div class="formula">U(θ) = <span class="c">Σ</span><sub>i∈admitted</sub> <span class="k">log</span>( throughput<sub>i</sub>(θ) )</div>
+      <p style="margin:14px 0 6px"><strong>Subject to hard constraints</strong> (satisfied, not maximized):</p>
+      <ul class="tight" style="margin-bottom:6px">
+        <li>POS / payment latency ≤ <strong>10 ms</strong> (≤ 3 ms where rTWT is on) — VLAN 50</li>
+        <li>Per-class throughput floors met: VIP ≥ 25 Mbps, Teams/Video ≥ 5 Mbps</li>
+        <li>Packet loss ≤ <strong>1%</strong> on latency-sensitive classes</li>
+        <li>Admitted-client count ≥ deployment target (cannot strand fans)</li>
+      </ul>
+      <p style="margin:12px 0 0"><strong>Priority order on conflict:</strong> &nbsp;<span class="mono" style="font-size:13px">POS SLA &gt; fairness &gt; admitted count &gt; aggregate throughput &gt; per-client peak</span></p>
+      <p style="margin:10px 0 0;font-size:15px;color:var(--ink-soft)"><em>Explicitly sacrificed: peak per-client throughput for strong clients. In a 72k bowl full of slow phones, fairness-or-collapse dominates raw speed.</em></p>
+    </div>
+    <div class="note"><span class="tag">Why proportional fairness</span>The <code>Σ log(throughput)</code> form is the standard, literature-grounded utility that automatically balances aggregate throughput against equity — maximizing it is mathematically equivalent to proportional fairness. It encodes the stadium's exact weighting without a hand-tuned fairness coefficient, which makes it far easier to defend than "we picked weights that looked right."</div>
+    <div class="formal" style="box-shadow:6px 6px 0 rgba(31,79,74,.18)">
+      <div class="ttl" style="color:var(--teal)">Robust form — evaluated under Monte Carlo (Track A optimizer)</div>
+      <p style="margin:0 0 6px">The point objective above is what the optimizer maximizes <em>deterministically</em>. Wrapped in Monte Carlo over demand, it becomes a <strong>chance-constrained robustness objective</strong>:</p>
+      <div class="formula"><span class="k">maximize</span>  P50[ U(θ) ] − k · ( P95[U] − P5[U] )
+<span class="k">subject to</span>  P( POS_latency ≤ 10ms )  ≥  <span class="c">99%</span></div>
+      <p style="margin:12px 0 0;font-size:15px;color:var(--ink-soft)"><em>Central tendency minus a spread penalty, with the POS SLA enforced as a chance constraint rather than a soft penalty. This is the objective that makes the optimizer prefer a config that <strong>holds up at P95 kickoff surge</strong> over one that wins at P50 but breaches under load — the extra thing Monte Carlo buys (§07, Track A).</em></p>
+    </div>
+    <h4>How mall and convention differ</h4>
+    <ul class="tight">
+      <li><strong>Mall</strong> — diffuse, roaming-heavy, long dwell. Objective weights <em>coverage continuity + roaming smoothness</em> and the POS SLA; raw capacity is secondary. The utility adds a roaming-disruption penalty and a coverage-hole term.</li>
+      <li><strong>Convention center</strong> — bursty, reconfigurable, uplink-heavy (everyone uploading). Objective weights <em>uplink capacity + rapid spatial load rebalancing</em>. Almost a mobile stadium.</li>
+    </ul>
+    <p>Same parameter space, same frontier — different chosen point. <strong>That weighting, not the parameter values, is what an archetype actually is.</strong></p>
+  </section>
+
+  <!-- ============ 04 OPT VS CAL ============ -->
+  <section id="optcal">
+    <div class="sec-num">§ 04 — Two Verbs</div>
+    <h2>Optimization vs Calibration<span class="sub">The distinction that makes or breaks the evidence trail.</span></h2>
+    <div class="tbl-scroll">
+    <table class="tbl">
+      <thead><tr><th style="width:140px"></th><th>Optimization</th><th>Calibration</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Held fixed</strong></td><td>The model</td><td>Reality (measurements)</td></tr>
+        <tr><td><strong>Adjusted</strong></td><td>The parameters</td><td>The model itself</td></tr>
+        <tr><td><strong>Question</strong></td><td>"Which settings maximize QoE in this model?"</td><td>"Why does the model's QoE differ from what AP2 measured?"</td></tr>
+        <tr><td><strong>Ground truth</strong></td><td>ns-3 / the surrogate</td><td>Lab / field telemetry</td></tr>
+        <tr><td><strong>Enters at</strong></td><td>Now (ladder steps 2–4)</td><td>Later (ladder step 7)</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <div class="note warn"><span class="tag">The trap to avoid</span>Tuning the 15 in ns-3 to push QoE up is <strong>optimization</strong> — ns-3 <em>is</em> the synthetic ground truth at that stage; there is nothing to calibrate against until real measurements arrive. Using "calibrate" for both confuses the operator, the agents' prompts, and — critically — the auditor, because the evidence for "we found good settings" is entirely different from the evidence for "our model matches reality." Two verbs, two boxes, two evidence trails, from day one.</div>
+  </section>
+
+  <!-- ============ 05 DISCOVERY ============ -->
+  <section id="discovery">
+    <div class="sec-num">§ 05 — Driver Discovery</div>
+    <h2>Finding the ~15<span class="sub">We do not pick the drivers. A ranking procedure picks them — and the procedure is the thing we defend.</span></h2>
+    <p>The discovery runs in three escalating tiers, cheapest first, and is run <strong>once per archetype</strong> with the seven regime parameters frozen at that archetype's ranges. The output is not "the 15 drivers" — it is five ranked lists, and <em>the differences between them are the scientific finding</em>.</p>
+
+    <h3>Tier 0 — Prior elicitation</h3>
+    <p>Before any compute: you (and ideally two other SAs) independently rank which knobs you <em>expect</em> to matter per archetype, each with a one-line physical rationale. This is not the answer — it is the <strong>prior</strong>, and it has two jobs: it is the hypothesis the data will confirm or embarrass, and it is the baseline an auditor compares the data-driven result against. Disagreement between prior and data is itself evidence.</p>
+
+    <h3>Tier 1 — Morris elementary effects</h3>
+    <p>A few hundred designed runs produce, per parameter, two numbers: <strong>μ*</strong> (mean absolute effect — how much it moves QoE) and <strong>σ</strong> (how much that effect varies with other parameters' settings). The μ*–σ scatter is the screening verdict:</p>
+    <div class="tbl-scroll">
+    <table class="tbl">
+      <thead><tr><th>μ*</th><th>σ</th><th>Verdict</th><th>Modeling consequence</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">low</td><td class="mono">low</td><td><strong>Negligible</strong></td><td>Drop it — set a sane default, stop tuning</td></tr>
+        <tr><td class="mono">high</td><td class="mono">low</td><td><strong>Clean main effect</strong></td><td>A multiplier — the capMult chain is correct for it</td></tr>
+        <tr><td class="mono">high</td><td class="mono">high</td><td><strong>Interaction / non-monotone</strong></td><td>A driver — must be co-tuned, never in isolation</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p>The ~15 drivers per archetype are everything that is <em>not</em> in the bottom-left corner.</p>
+
+    <h3>Tier 2 — Sobol total-order confirmation</h3>
+    <p>Run on the surrogate (§07–08), Sobol quantifies each parameter's <strong>first-order index</strong> (its solo contribution to QoE variance) and <strong>total-order index</strong> (including every interaction it participates in). <strong>The gap between total and first-order is a direct measurement of how interaction-coupled a parameter is</strong> — the rigorous, automated version of the hand-discovery of TXOP-BE × rTWT. Morris screens; Sobol is the audit-grade evidence.</p>
+    <div class="pull">If two archetypes produce nearly identical driver rankings, you have learned they should be merged. The screening procedure validates the taxonomy as a side effect.</div>
+  </section>
+
+  <!-- ============ 06 GOVERNANCE ============ -->
+  <section id="governance">
+    <div class="sec-num">§ 06 — Governance</div>
+    <h2>Governance, in Two Registers<span class="sub">The selection of driver variables is itself a decision — and decisions must be auditable and self-correcting.</span></h2>
+    <p>What we claim to an auditor is <em>not</em> that the fifteen are correct. It is that the <strong>process that selected them is sound, documented, and self-correcting</strong>. "We picked these because they seemed important" is not auditable. The two panels below are the same discipline at two levels of formality — pick the tab for the audience.</p>
+
+    <div class="gov-tabs">
+      <div class="gov-tab active" data-gov="internal">Internal — for the operator</div>
+      <div class="gov-tab" data-gov="external">External — for the auditor</div>
+    </div>
+
+    <div class="gov-panel active" id="gov-internal">
+      <h4>Purpose · speed and recalibration discipline</h4>
+      <p>A working ledger you update as the science moves. Optimized for fast iteration, not formal sign-off.</p>
+      <h3>Decision register (per archetype × parameter)</h3>
+      <div class="tbl-scroll">
+      <table class="tbl">
+        <thead><tr><th>Field</th><th>Captured</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">prior</td><td>Tier-0 rank + one-line physical rationale (who predicted it)</td></tr>
+          <tr><td class="mono">morris_mu / morris_sigma</td><td>Tier-1 result and verdict bucket</td></tr>
+          <tr><td class="mono">sobol_first / sobol_total</td><td>Tier-2 indices once the surrogate exists</td></tr>
+          <tr><td class="mono">decision</td><td>include / exclude — <em>with a recorded reason for exclusions too</em></td></tr>
+          <tr><td class="mono">version</td><td>archetype-def vsn · screening run ID · data-source hash · surrogate vsn</td></tr>
+          <tr><td class="mono">verb</td><td>optimization or calibration — the evidence trails never mix</td></tr>
+        </tbody>
+      </table>
+      </div>
+      <h4>Recalibration triggers</h4>
+      <ul class="tight">
+        <li>Field prediction error exceeds threshold on a deployed golden set → re-fit <em>values</em>.</li>
+        <li>Field data re-ranks a driver beyond a set tolerance → flag a <em>driver re-ranking</em> event (not a silent overwrite).</li>
+        <li>Two archetypes' rankings converge → propose a merge.</li>
+      </ul>
+      <p style="font-size:15px;color:var(--ink-soft)"><em>Lives alongside the git-committed EOD blueprints — same provenance discipline, applied to the variable-selection decision rather than the config.</em></p>
+    </div>
+
+    <div class="gov-panel" id="gov-external">
+      <h4>Purpose · defensibility to an independent reviewer</h4>
+      <p>For a customer, regulator, or Extreme internal review. Heavier on method statement, provenance, and falsification.</p>
+      <h3>1 · Methodology statement</h3>
+      <p>Driver variables are selected by a pre-registered three-tier procedure — prior elicitation, Morris screening, Sobol confirmation — run independently per environment archetype. No variable is included or excluded without recorded quantitative evidence. The procedure, not the selection, is the object of the claim.</p>
+      <h3>2 · Provenance &amp; versioning policy</h3>
+      <p>Every driver list is stamped with the archetype-definition version, screening run identifier, data-source hash (ns-3 configuration or telemetry window), and the surrogate version it derives from. Any change is a version increment, never an in-place edit, so any past claim is reproducible.</p>
+      <h3>3 · Challenge protocol (pre-registered falsification)</h3>
+      <p>For each archetype we record, in advance, the field observation that would <em>falsify</em> the current driver list — answering the auditor's first question, "what evidence would change your mind?", before it is asked.</p>
+      <div class="note"><span class="tag">Example — Warehouse</span>"If warehouse deployments show airtime fairness mattering more than coverage thresholds, the warehouse driver ranking is wrong and must be re-screened." A pre-registered falsifier per archetype.</div>
+      <h3>4 · Change control &amp; sign-off</h3>
+      <p>A driver re-ranking triggered by field data is a controlled event: it is logged, requires named sign-off, and carries the evidence that justified it. Value re-fits (optimization) and model re-fits (calibration) are recorded on separate trails and never conflated.</p>
+      <h3>5 · Separation of evidence</h3>
+      <p>Claims of the form "these settings perform well" (optimization) are supported by model/search evidence; claims of the form "the model reflects reality" (calibration) are supported by measurement evidence. The two are never used to support each other.</p>
+    </div>
+  </section>
+
+  <!-- ============ 07 LADDER ============ -->
+  <section id="ladder">
+    <div class="sec-num">§ 07 — Execution · Two Tracks</div>
+    <h2>What Ships Now, What Comes Later<span class="sub">Revised 3 June (PM): ns-3 is deferred. The near-term track optimizes the stadium against Monte Carlo on the existing model; ns-3 becomes the medium-term research track.</span></h2>
+
+    <div class="note"><span class="tag">Sequencing decision · 3 June PM</span><strong>Track A (now, no ns-3):</strong> archetype matrix → Monte Carlo tab → optimizer tab, optimizing the stadium golden set against a <em>chance-constrained robustness objective</em> on the current JS model. <strong>Track B (later):</strong> the ns-3 / Sionna ladder, for data-driven driver discovery and calibration. The Monte Carlo + optimizer scaffolding from Track A is <em>reused</em> by Track B — only the engine underneath changes (§09). The two tracks run in parallel; A does not block on B.</div>
+
+    <h3>Track A — near-term, on the existing model <span style="font-family:var(--mono);font-size:10px;letter-spacing:.16em;background:var(--teal);color:var(--paper);padding:3px 8px;border-radius:3px;vertical-align:middle">SHIPS NOW</span></h3>
+    <ol class="ladder">
+      <li class="rung here"><span class="num">A1</span><div class="body"><b>Archetype matrix HTML <span class="youhere">START HERE</span></b>Stadium-focused; the seven regime parameters and dominant levers per archetype. Standalone strategic artifact, no simulator dependency.</div></li>
+      <li class="rung"><span class="num">A2</span><div class="body"><b>Monte Carlo tab</b>Poisson client arrivals + Pareto per-client demand → P5/P50/P95 bands and breach probability. Robustness display + NOC forward estimates. <strong>Label the bands as model uncertainty, not measurement uncertainty</strong> — the coefficients are still unvalidated priors.</div></li>
+      <li class="rung"><span class="num">A3</span><div class="body"><b>Optimizer tab</b>Search the ~15 non-trivial knobs (lock the monotone/gate knobs to optimal per §01); maximize the chance-constrained stadium objective (§03). This is where Monte Carlo + optimizer combine — and where the result can differ from hand-coded "Apply Optimal," specifically around the threshold and interaction knobs.</div></li>
+    </ol>
+    <div class="note"><span class="tag">Why the optimizer needs Monte Carlo here — the sharpened point</span>On a <em>strictly</em> multiplicative, monotone model, Monte Carlo only adds bands; the optimum does not move. <strong>But the current model is not strictly monotone</strong> — it already contains a load-threshold (<code>cwBe=7 &amp; u&gt;0.7 → +3ms</code>), an interaction (<code>TXOP-BE × rTWT → POS latency</code>), and a hard SLA (POS ≤ 10 ms). Under stochastic demand, some draws cross the airtime cliff; a chance-constrained optimizer therefore prefers configs that keep <em>P(breach)</em> low — a different answer than the point optimizer, precisely at the rows-3–4 knobs that later become the driver-discovery targets. So "I want both" is not aesthetic; it is technically necessary the moment a threshold or constraint exists.</div>
+
+    <h3 style="margin-top:40px">Track B — medium-term · the ns-3 / Sionna ladder <span style="font-family:var(--mono);font-size:10px;letter-spacing:.16em;background:var(--ink-soft);color:var(--paper);padding:3px 8px;border-radius:3px;vertical-align:middle">DEFERRED</span></h3>
+    <p><strong>Sionna</strong> is the RF/physics engine: given a 3D room and antennas, it ray-traces propagation and outputs the channel — the SNR and multipath each client sees, and the very seven regime parameters. It answers <em>"what does the air look like here?"</em> <strong>ns-3</strong> is the protocol engine: given those channels plus the 60 knobs, it simulates the real 802.11 MAC — contention, OFDMA, retries, airtime, MLO — and emits the QoE vector. It answers <em>"given that air and these settings, what experience results?"</em> Sionna feeds ns-3. They are the high-fidelity ground truth the fast surrogate trains against; they are not run per-deployment. <em>Starter files (<code>stadium-wifi.cc</code>, <code>qoe_harness.py</code>) are written and parked for when Track B begins.</em></p>
+    <ol class="ladder">
+      <li class="rung"><span class="num">1</span><div class="body"><b>ns-3 alone, stock channel</b>1 AP, N STAs, 802.11ax, FlowMonitor. Reproduce one row of the simulator (e.g. AF on/off), confirm direction. Learn the WiFi module in isolation. <em>Begins when Track A's optimizer needs a higher-fidelity engine to optimize against.</em></div></li>
+      <li class="rung"><span class="num">2</span><div class="body"><b>ns-3 screening harness</b>Wrap ns-3 in Python; run a Morris design over ~15 candidate knobs for the stadium archetype. First data-driven driver ranking vs the Tier-0 prior.</div></li>
+      <li class="rung"><span class="num">3</span><div class="body"><b>Surrogate fit</b>Train a gradient-boosted-tree surrogate on the ns-3 runs. A fast twin for one archetype, plus feature importances to cross-check Morris.</div></li>
+      <li class="rung"><span class="num">4</span><div class="body"><b>Sobol on the surrogate</b>Quantify first-order vs total. Lock the audit-grade driver list for archetype #1.</div></li>
+      <li class="rung"><span class="num">5</span><div class="body"><b>Sionna, one room</b>Model a lab room, generate channels, confirm the seven come out in range. Where "user estimates the archetype" later becomes "Sionna measures it."</div></li>
+      <li class="rung"><span class="num">6</span><div class="body"><b>Couple them</b>Feed Sionna channels into ns-3 — full high-fidelity twin for one archetype. Repeat 2–6 per archetype.</div></li>
+      <li class="rung"><span class="num">7</span><div class="body"><b>Calibrate to the lab AP</b>Run a candidate golden set on AP2/SW2, measure via the EP1/XIQ API, compare to prediction, feed the error back. The loop closes — this is where it becomes a <em>twin</em>.</div></li>
+    </ol>
+    <div class="note warn"><span class="tag">Honest caveat</span>ns-3's EDCA/airtime model is standards-compliant 802.11 — it is <em>not</em> a literal model of Extreme's "Airtime Fairness: Strict," which is a vendor scheduler on top. Early ns-3 QoE tells you <em>directionally</em> whether a lever helps and how the physics responds; it is not yet a faithful twin of an Extreme AP. That faithfulness is exactly what step-7 calibration buys.</div>
+  </section>
+
+  <!-- ============ 08 AGENTS ============ -->
+  <section id="agents">
+    <div class="sec-num">§ 08 — Orchestration</div>
+    <h2>The Multi-Agent Framework<span class="sub">Agents map to disciplines, not steps — and arrive only when there is work for them.</span></h2>
+    <div class="agents">
+      <div class="agent"><div class="an">Orchestrator</div><div class="ad">Owns the phase graph and dependencies; decides what runs next; holds project state.</div><div class="tagx">conductor</div></div>
+      <div class="agent"><div class="an">Screening / DoE</div><div class="ad">Designs Morris &amp; Sobol experiments, sets run counts, interprets μ*/σ, proposes the shortlist.</div><div class="tagx">discovery</div></div>
+      <div class="agent"><div class="an">Simulation</div><div class="ad">Generates &amp; runs ns-3 (then Sionna) configs, manages compute, returns clean result tables.</div><div class="tagx">claude code</div></div>
+      <div class="agent"><div class="an">Surrogate</div><div class="ad">Fits &amp; validates models, reports accuracy, flags when a surrogate is too inaccurate to trust.</div><div class="tagx">modeling</div></div>
+      <div class="agent gov"><div class="an">Governance / Audit</div><div class="ad">Maintains the decision register, enforces versioning, runs the challenge protocol, flags re-ranking events. The auditor's interface.</div><div class="tagx">the one most omit</div></div>
+      <div class="agent gov"><div class="an">Calibration</div><div class="ad">Ingests telemetry, computes prediction error, decides re-fit values vs re-rank drivers, routes re-ranking to Governance.</div><div class="tagx">closes the loop</div></div>
+    </div>
+    <h4>Dependency graph = the workflow</h4>
+    <pre><span class="cm"># the orchestration spec, in one line</span>
+Orchestrator → Screening → Simulation → Surrogate → Sobol
+            → Governance (logs the decision) → Calibration (feeds next cycle)</pre>
+    <div class="note"><span class="tag">Incremental rollout</span>Six agents is the destination, not week one. If you spin up all six before a single ns-3 job runs, the orchestration becomes the project and the science stalls. Manual orchestration for rungs 1–2; add Screening + Simulation at 2–3; add Governance the moment there is a driver list worth auditing (rung 4); add Calibration at rung 7.</div>
+  </section>
+
+  <!-- ============ 09 FIDELITY ============ -->
+  <section id="fidelity">
+    <div class="sec-num">§ 09 — The Roadmap</div>
+    <h2>The Fidelity Ladder<span class="sub">Each rung adds one capability the rung below structurally cannot express.</span></h2>
+    <ol class="ladder">
+      <li class="rung here"><span class="num">1</span><div class="body"><b>Independent multiplicative model <span class="youhere">YOU ARE HERE</span></b>Each knob a fixed factor. Honest for effect-types 1–2. The current simulator.</div></li>
+      <li class="rung"><span class="num">2</span><div class="body"><b>+ Non-monotonic responses</b>Replace scalars with curves for threshold knobs (RX-SOP, CWmin, TX, Min-RSSI). Interior optima emerge instead of being hand-set.</div></li>
+      <li class="rung"><span class="num">3</span><div class="body"><b>+ Interaction terms</b>Add the two-way couplings Sobol surfaces. TXOP × rTWT is in the math, not a footnote.</div></li>
+      <li class="rung"><span class="num">4</span><div class="body"><b>+ Context modulation by the seven</b>The same surrogate, coefficients now functions of the regime. One model, five behaviours.</div></li>
+      <li class="rung"><span class="num">5</span><div class="body"><b>+ Multi-objective Pareto</b>Stop collapsing to one 0–100 score; expose the trade-off front; let SLA priority pick the point.</div></li>
+      <li class="rung"><span class="num">6</span><div class="body"><b>+ Calibration to ground truth</b>Coefficients fit to ns-3 / telemetry, with the feedback loop. This is what turns "simulator" into "twin."</div></li>
+    </ol>
+    <p>The jump from rung 1 to rung 6 is <strong>not a rewrite</strong>. The UI, Gap Analysis, Breaking-Point Finder, and Config Export all survive intact. What changes is the engine under <code>capMult</code>: scalars become calibrated functions, and a sensitivity stage tells you which scalars were lies.</p>
+    <div class="note"><span class="tag">Immediate target · Track A</span>The near-term work reaches up the ladder <em>without ns-3</em>: the Monte Carlo + optimizer tabs deliver a partial <strong>rung 5</strong> (multi-objective / robustness, via the chance-constrained objective) and motivate <strong>rung 2</strong> (the threshold knobs whose curves Monte Carlo proves matter). Rungs 3–4 and full calibration (rung 6) wait for Track B's ns-3 engine.</div>
+  </section>
+
+  <!-- ============ 10 LOG ============ -->
+  <section id="log">
+    <div class="sec-num">§ 10 — The Log</div>
+    <h2>The Log<span class="sub">A dated, appendable record of decisions, reasoning, and next actions. Newest entries go at the top.</span></h2>
+
+    <div class="append-marker">⌁ &nbsp; New entries appended below this line &nbsp; ⌁</div>
+
+    <div class="log-entry">
+      <div class="log-date">Entry 002 · 3 June 2026 (PM) · Sequencing revised</div>
+      <h3>ns-3 deferred — Monte Carlo + optimizer lead, stadium first</h3>
+      <p>After a Claude Code review of the AM strategy doc and the ns-3 starter files, the execution sequence was revised. ns-3 is a multi-week track and must not block near-term value, so it moves to <strong>Track B (deferred, parallel)</strong>. The near-term <strong>Track A</strong> optimizes the stadium golden set against Monte Carlo on the existing JS model.</p>
+      <h4>Decisions &amp; accepted refinements</h4>
+      <ul class="tight">
+        <li><strong>Track A now:</strong> archetype matrix HTML → Monte Carlo tab → optimizer tab. Track B (ns-3 ladder) deferred; its scaffolding is reused, not rebuilt.</li>
+        <li><strong>Monte Carlo is not cosmetic here.</strong> The model already has a load-cliff (<code>cwBe=7 &amp; u&gt;0.7</code>), a TXOP-BE × rTWT interaction, and the POS SLA — so it is a chance-constrained problem, and the robust optimizer <em>can move the optimum</em> at the threshold/interaction knobs. "Both" (MC + optimizer) is necessary, not optional. (§03 robust form, §07 Track A.)</li>
+        <li><strong>Optimizer scope:</strong> search only the ~15 non-trivial knobs; lock monotone/gate knobs to optimal per §01. Connects to driver discovery before ns-3 exists.</li>
+        <li><strong>Bands are model uncertainty,</strong> not measurement uncertainty — labelled as such until Track B calibration.</li>
+        <li><strong>Governance hardening (from Claude Code):</strong> archetype selection must be <em>locked before</em> any config recommendation is shown — folded into the external register challenge protocol. Convention-center hedge tightened to exhibit / breakout / plenary sub-modes pending §05.</li>
+        <li><strong>Carried to Track B:</strong> Morris cost is r×(k+1) — with k=60, r=10 ⇒ ~610 runs (~100+ compute-hours); set expectations and screen the shortlist, not all 60.</li>
+      </ul>
+      <h4>Next actions</h4>
+      <ul class="tight">
+        <li>Build archetype matrix HTML, stadium-focused — Track A1.</li>
+        <li>Add Monte Carlo tab (Poisson arrivals + Pareto demand → P5/P50/P95, breach probability) — A2.</li>
+        <li>Add optimizer tab maximizing the chance-constrained stadium objective (§03 robust form) over the ~15 non-trivial knobs — A3.</li>
+        <li>Tier-0 prior elicitation + Morris/Sobol deferred to Track B (need an ns-3 engine to screen against).</li>
+      </ul>
+    </div>
+
+    <div class="log-entry">
+      <div class="log-date">Entry 001 · 3 June 2026 · Strategy established</div>
+      <div class="note warn" style="margin:0 0 16px;padding:12px 18px"><span class="tag">Correction</span>The <em>Next actions</em> in this entry (ns-3 ladder as the immediate path) were <strong>superseded the same day by Entry 002</strong> after a Claude Code review. Kept unedited for provenance. ns-3 is now Track B (deferred).</div>
+      <h3>From simulator to twin — the architecture is set</h3>
+      <p>Starting point: <em>WiFi 7 Simulator v2</em> (60 parameters, AP5060 Broadcom, FIFA WC Lumen Field) — assessed as an A-grade teaching/sales instrument and a pre-alpha tuning engine. It models all 60 knobs as independent multipliers (capMult ≈ ×3.8 at Stadium Optimal), which is honest for effect-types 1–2 but cannot represent the non-monotonic, interaction-coupled, and context-modulated knobs where golden-set decisions actually live.</p>
+      <h4>Decisions made this session</h4>
+      <ul class="tight">
+        <li><strong>Scope locked:</strong> not a general WiFi-industry twin — an EP1 parameter-tuning + calibration engine producing per-archetype golden sets. The unit is the archetype, not the site.</li>
+        <li><strong>The seven regime parameters</strong> adopted as a regime selector (not measured user inputs): τ<sub>RMS</sub>, path-loss exponent, coherence bandwidth, K-factor, angular spread, shadowing σ, band/width.</li>
+        <li><strong>Five archetypes</strong> drafted (dense public venue · high-density enclosed · sparse high-throughput · mixed retail · latency-critical low-density); convention center provisionally a sub-class pending §05 evidence.</li>
+        <li><strong>Stadium QoE objective</strong> written explicitly as proportional-fairness utility under hard POS/SLA constraints, with a stated priority order and stated sacrifice (per-client peak).</li>
+        <li><strong>Optimization vs calibration</strong> separated into two verbs, two evidence trails — corrected an early conflation.</li>
+        <li><strong>Driver discovery</strong> defined as Tier 0 prior → Morris → Sobol, run per archetype; the differences between rankings <em>are</em> the finding.</li>
+        <li><strong>Governance</strong> specified in two registers (internal / external), treating variable selection as an auditable, self-correcting decision.</li>
+        <li><strong>Execution path</strong> set as the 7-rung ns-3/Sionna ladder, orchestrated by a 6-agent Claude framework rolled out incrementally.</li>
+      </ul>
+      <h4>Next actions</h4>
+      <ul class="tight">
+        <li>Stand up the minimal ns-3 sim (1 AP, N STAs, 11ax, FlowMonitor) — files delivered: <code>stadium-wifi.cc</code> + <code>qoe_harness.py</code>.</li>
+        <li>Hand the harness to Claude Code; run the optimization loop on 4–5 starter drivers against the stadium objective.</li>
+        <li>Tier-0 prior elicitation for the stadium archetype (whiteboard, before screening).</li>
+        <li>Then generalize the objective to mall / convention, and layer governance + EOD on a thing that runs.</li>
+      </ul>
+    </div>
+
+    <div class="append-marker">⌁ &nbsp; End of log — older entries above are immutable &nbsp; ⌁</div>
+  </section>
+
+  <footer>
+    <span>Journey to the Digital Twin · v1.1 · rev 3 June 2026 (PM)</span>
+    <span>5320 Onboarding · Extreme AP / EP1 Parameter Twin</span>
+    <span>Living document — Claude may review &amp; append</span>
+  </footer>
+
+</div>
+
+<script>
+  // governance tab toggle
+  document.querySelectorAll('.gov-tab').forEach(t=>{
+    t.addEventListener('click',()=>{
+      document.querySelectorAll('.gov-tab').forEach(x=>x.classList.remove('active'));
+      document.querySelectorAll('.gov-panel').forEach(x=>x.classList.remove('active'));
+      t.classList.add('active');
+      document.getElementById('gov-'+t.dataset.gov).classList.add('active');
+    });
+  });
+  // staggered reveal on scroll
+  const io=new IntersectionObserver((es)=>{es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('fx');io.unobserve(e.target);}})},{threshold:.08});
+  document.querySelectorAll('section').forEach(s=>io.observe(s));
+</script>
+</body>
+</html>

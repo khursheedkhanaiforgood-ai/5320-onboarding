@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Archetype × Dominant-Lever Matrix — v0 · Extreme AP / EP1</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..700&family=Newsreader:ital,opsz,wght@0,6..72,300..600;1,6..72,300..500&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#f5efe2;
+    --paper-2:#efe7d6;
+    --ink:#1c1813;
+    --ink-soft:#463f34;
+    --rule:#cdbfa3;
+    --oxblood:#6e1f23;
+    --oxblood-bright:#9a2d2f;
+    --gold:#9c7a2e;
+    --teal:#1f4f4a;
+    --shadow:rgba(40,28,16,.16);
+    --mono:'IBM Plex Mono',ui-monospace,monospace;
+    --serif:'Newsreader',Georgia,serif;
+    --display:'Fraunces',Georgia,serif;
+    --highlight-bg:rgba(156,122,46,.18);
+    --highlight-border:#9c7a2e;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;background:var(--paper);color:var(--ink);
+    font-family:var(--serif);font-size:19px;line-height:1.62;
+    font-optical-sizing:auto;
+    background-image:
+      radial-gradient(circle at 12% 8%, rgba(110,31,35,.04), transparent 40%),
+      radial-gradient(circle at 88% 92%, rgba(31,79,74,.04), transparent 42%);
+  }
+  .grain{position:fixed;inset:0;pointer-events:none;z-index:9999;opacity:.035;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");}
+  .wrap{max-width:960px;margin:0 auto;padding:0 28px 120px}
+
+  /* ---- Masthead ---- */
+  .masthead{padding:64px 0 30px;border-bottom:3px double var(--ink);position:relative}
+  .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.34em;text-transform:uppercase;color:var(--oxblood);margin-bottom:22px}
+  .masthead h1{
+    font-family:var(--display);font-weight:600;font-size:clamp(36px,7vw,78px);
+    line-height:.95;letter-spacing:-.02em;margin:0 0 14px;
+    font-variation-settings:'opsz' 144;
+  }
+  .masthead h1 em{font-style:italic;color:var(--oxblood);font-weight:500}
+  .dek{font-family:var(--serif);font-style:italic;font-size:clamp(17px,2.4vw,22px);color:var(--ink-soft);max-width:680px;line-height:1.4}
+  .meta-row{display:flex;flex-wrap:wrap;gap:8px 26px;margin-top:26px;font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;color:var(--ink-soft);text-transform:uppercase}
+  .meta-row b{color:var(--ink);font-weight:600}
+  .badge{display:inline-block;font-family:var(--mono);font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;background:var(--oxblood);color:var(--paper);padding:4px 10px;border-radius:3px;margin-left:10px;vertical-align:middle}
+
+  /* ---- TOC ---- */
+  nav.toc{margin:38px 0 10px;padding:22px 26px;background:linear-gradient(180deg,var(--paper-2),transparent);border-left:3px solid var(--oxblood)}
+  nav.toc h4{font-family:var(--mono);font-size:11px;letter-spacing:.3em;text-transform:uppercase;color:var(--oxblood);margin:0 0 14px}
+  nav.toc ol{margin:0;padding:0;list-style:none;columns:2;column-gap:40px}
+  nav.toc li{margin-bottom:9px;font-size:16px;break-inside:avoid}
+  nav.toc a{color:var(--ink);text-decoration:none;border-bottom:1px solid transparent;transition:.2s}
+  nav.toc a:hover{border-color:var(--oxblood);color:var(--oxblood)}
+  nav.toc .n{font-family:var(--mono);font-size:12px;color:var(--gold);margin-right:10px}
+
+  /* ---- Sections ---- */
+  section{padding:54px 0 8px;border-top:1px solid var(--rule);margin-top:30px}
+  section:first-of-type{border-top:none}
+  .sec-num{font-family:var(--mono);font-size:12px;letter-spacing:.2em;color:var(--oxblood);text-transform:uppercase;margin-bottom:8px}
+  h2{font-family:var(--display);font-weight:560;font-size:clamp(26px,4.2vw,40px);line-height:1.02;letter-spacing:-.015em;margin:0 0 8px;font-variation-settings:'opsz' 90}
+  h2 .sub{display:block;font-family:var(--serif);font-style:italic;font-weight:400;font-size:17px;color:var(--ink-soft);letter-spacing:0;margin-top:10px}
+  h3{font-family:var(--display);font-weight:600;font-size:22px;margin:34px 0 6px;letter-spacing:-.01em}
+  h4{font-family:var(--mono);font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--teal);margin:26px 0 8px}
+  p{margin:0 0 16px}
+  .lead{font-size:20px;line-height:1.55}
+  .lead::first-letter{font-family:var(--display);font-weight:600;font-size:3.4em;float:left;line-height:.74;padding:8px 12px 0 0;color:var(--oxblood)}
+  strong{font-weight:600}
+  em{font-style:italic}
+
+  /* callouts */
+  .pull{border-left:3px solid var(--oxblood);padding:4px 0 4px 24px;margin:26px 0;font-family:var(--display);font-style:italic;font-weight:400;font-size:23px;line-height:1.32;color:var(--ink)}
+  .note{background:var(--paper-2);border:1px solid var(--rule);border-radius:3px;padding:18px 22px;margin:24px 0;font-size:17px}
+  .note .tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--oxblood);display:block;margin-bottom:7px}
+  .warn{border-color:var(--oxblood-bright);background:#f3e3d8}
+  .warn .tag{color:var(--oxblood-bright)}
+
+  /* formal box */
+  .formal{border:1.5px solid var(--ink);background:#fbf7ee;border-radius:4px;padding:26px 28px;margin:26px 0;box-shadow:6px 6px 0 var(--shadow)}
+  .formal .ttl{font-family:var(--mono);font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--oxblood);margin-bottom:14px}
+
+  /* tables */
+  .tbl{width:100%;border-collapse:collapse;margin:22px 0;font-size:14px;font-family:var(--serif)}
+  .tbl th{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;text-align:left;padding:9px 9px;border-bottom:2px solid var(--ink);color:var(--oxblood);vertical-align:bottom}
+  .tbl td{padding:9px 9px;border-bottom:1px solid var(--rule);vertical-align:top}
+  .tbl tr:hover td{background:rgba(110,31,35,.03)}
+  .tbl .mono{font-family:var(--mono);font-size:12.5px}
+  .tbl-scroll{overflow-x:auto;margin:22px -4px}
+
+  /* archetype highlight — applied via JS */
+  .arch-row{cursor:pointer;transition:background .18s}
+  .arch-row.selected td{background:var(--highlight-bg)!important;border-color:var(--highlight-border)}
+  .lever-row{transition:background .18s, outline .18s}
+  .lever-row.highlighted td{background:var(--highlight-bg)!important;border-color:var(--highlight-border)}
+  .lever-row.highlighted td:first-child{border-left:3px solid var(--gold)}
+  .arch-hint{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin-bottom:6px;display:block}
+
+  /* effect type badges */
+  .et{display:inline-block;font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;padding:2px 7px;border-radius:2px;white-space:nowrap}
+  .et-mult{background:rgba(31,79,74,.12);color:var(--teal)}
+  .et-gate{background:rgba(110,31,35,.10);color:var(--oxblood)}
+  .et-thresh{background:rgba(156,122,46,.15);color:#7a5d1e}
+  .et-inter{background:rgba(28,24,19,.09);color:var(--ink-soft)}
+  .et-ctx{background:rgba(31,79,74,.18);color:var(--teal)}
+  .skill-zone{font-family:var(--mono);font-size:9px;letter-spacing:.14em;background:var(--oxblood);color:var(--paper);padding:1px 6px;border-radius:2px;margin-left:5px}
+
+  /* priority dot */
+  .pri{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px;vertical-align:middle}
+  .pri-1{background:var(--oxblood)}
+  .pri-2{background:var(--gold)}
+  .pri-3{background:var(--teal)}
+
+  code{font-family:var(--mono);font-size:.85em;background:var(--paper-2);padding:1px 6px;border-radius:3px;color:var(--oxblood)}
+  hr.soft{border:none;border-top:1px solid var(--rule);margin:34px 0}
+  ul.tight{margin:8px 0 18px;padding-left:22px}
+  ul.tight li{margin-bottom:8px}
+
+  footer{margin-top:60px;padding-top:24px;border-top:3px double var(--ink);font-family:var(--mono);font-size:11.5px;color:var(--ink-soft);letter-spacing:.06em;display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px}
+
+  /* fade-in */
+  .fx{opacity:0;transform:translateY(14px);animation:rise .8s cubic-bezier(.2,.7,.2,1) forwards}
+  @keyframes rise{to{opacity:1;transform:none}}
+  @media(max-width:640px){nav.toc ol{columns:1}.lead::first-letter{font-size:2.8em}}
+</style>
+</head>
+<body>
+<div class="grain"></div>
+<div class="wrap">
+
+  <!-- ============ MASTHEAD ============ -->
+  <header class="masthead fx">
+    <div class="eyebrow">5320 Onboarding · Digital Twin · Stadium First</div>
+    <h1>Archetype &times; <em>Dominant-Lever</em> Matrix</h1>
+    <p class="dek">Per-archetype regime parameters and the ~15 non-trivial knobs the optimizer must search — for Extreme AP deployments through Extreme Platform One.</p>
+    <div class="meta-row">
+      <span>Version · <b>v0 <span class="badge">Prior Elicitation</span></b></span>
+      <span>Author · <b>Khursheed Khan</b></span>
+      <span>Date · <b>3 June 2026</b></span>
+      <span>Status · <b>Pre-screening</b></span>
+    </div>
+  </header>
+
+  <nav class="toc fx" style="animation-delay:.1s">
+    <h4>Contents</h4>
+    <ol>
+      <li><span class="n">00</span><a href="#howto">How to Read This Document</a></li>
+      <li><span class="n">01</span><a href="#regime">Five Archetypes × Seven Regime Parameters</a></li>
+      <li><span class="n">02</span><a href="#effects">Effect-Type Classification of 60 Parameters</a></li>
+      <li><span class="n">03</span><a href="#stadium">Stadium: Dominant-Lever Deep Dive</a></li>
+      <li><span class="n">04</span><a href="#others">Other Four Archetypes — Summary</a></li>
+      <li><span class="n">05</span><a href="#conflicts">Spec Conflicts Pending Cleanup</a></li>
+      <li><span class="n">06</span><a href="#governance">Governance Note</a></li>
+    </ol>
+  </nav>
+
+  <!-- ============ §00 HOW TO READ ============ -->
+  <section id="howto">
+    <div class="sec-num">§ 00 — How to Read This Document</div>
+    <h2>What this artifact is — and what it is not<span class="sub">A regime selector, a parameter taxonomy, and a stadium deep dive. Not a golden set.</span></h2>
+    <p class="lead">The archetype is a <strong>regime selector</strong>, not a site label. "Dense Public Venue" does not mean "the Lumen Field deployment." It means: any deployment whose propagation signature lands in a specific region of the seven-dimensional regime space — short delay spread, steep path-loss, clustered clients, capacity wall dominant. Lumen is one instance of that class; so is Allegiant Stadium; so is any 72,000-seat bowl with 4 dBm Rician K-factor and 130° angular spread.</p>
+    <p>The matrix therefore shows <em>two things per archetype</em>: (1) the numeric ranges of the seven regime parameters that define the archetype, and (2) which ~15 of the 60 simulator knobs the optimizer must actually search for that regime — because those are the knobs whose QoE derivative is non-trivially shaped by the regime. Knobs outside the ~15 are either monotone (set them and forget them) or gated off (their subtree is dead for this regime).</p>
+    <div class="formal">
+      <div class="ttl">Column guide — §03 Stadium Deep-Dive table</div>
+      <ul class="tight" style="margin-bottom:0">
+        <li><strong>Effect type</strong> — one of the five categories from §02: Mult, Gate, Threshold, Interaction, Context.</li>
+        <li><strong>Current simulator value</strong> — what <code>applyOptimal()</code> sets today in the JS model.</li>
+        <li><strong>Why it dominates at stadium</strong> — the physical mechanism that promotes this knob to the shortlist for this archetype specifically.</li>
+        <li><strong>Interaction with</strong> — the other parameter(s) whose setting changes this knob's QoE derivative. Interaction-coupled knobs must be co-tuned.</li>
+        <li><strong>Optimizer priority</strong> — <span class="pri pri-1"></span>High (search first; biggest potential swing), <span class="pri pri-2"></span>Medium (refine after highs), <span class="pri pri-3"></span>Low (trim pass).</li>
+      </ul>
+    </div>
+    <div class="note"><span class="tag">Version 0 — Prior elicitation only</span>Every claim in this document is a <strong>human expert prior</strong> produced before any Morris or Sobol screening has run. The numbers come from the current simulator's embedded responses and from domain reasoning — not from designed experiments against ns-3 or measured field telemetry. This is Tier 0 of the three-tier driver-discovery procedure described in §05 of <em>journey_to_the_digital_twin.html</em>. Version 1 will supersede this document once Morris screening is complete.</div>
+  </section>
+
+  <!-- ============ §01 REGIME ============ -->
+  <section id="regime">
+    <div class="sec-num">§ 01 — Archetypes × Regime</div>
+    <h2>Five Archetypes and Their Seven Regime Parameters<span class="sub">Click a row to highlight the corresponding dominant levers in §03.</span></h2>
+    <p>The seven regime parameters are not user inputs to be typed in — they are a <strong>regime estimator</strong>. The user selects the archetype that best matches their site; that selection freezes a set of boundary conditions that change the QoE derivative of every one of the 53 active controls. Eventually Sionna measures these from a floor-plan survey; until then, the operator estimates the bucket from site description and domain experience.</p>
+    <span class="arch-hint">Click any archetype row — corresponding dominant levers in §03 will highlight</span>
+    <div class="tbl-scroll">
+    <table class="tbl" id="archetype-table">
+      <thead>
+        <tr>
+          <th style="width:180px">Archetype</th>
+          <th>τ<sub>RMS</sub> (ns)</th>
+          <th>Path-Loss n</th>
+          <th>Rician K (dB)</th>
+          <th>Angular Spread</th>
+          <th>Shadowing σ (dB)</th>
+          <th>Dominant Band</th>
+          <th>Dominant Concern</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="arch-row" data-arch="stadium">
+          <td><strong>Dense Public Venue</strong><br><span style="color:var(--ink-soft);font-size:13px">stadium · arena</span></td>
+          <td class="mono">50–120</td>
+          <td class="mono">3.5–4.2</td>
+          <td class="mono">−2 to +2</td>
+          <td class="mono">100–180°</td>
+          <td class="mono">6–12</td>
+          <td class="mono">5 GHz / 6 GHz</td>
+          <td>Capacity + fairness under extreme concurrency</td>
+        </tr>
+        <tr class="arch-row" data-arch="office">
+          <td><strong>High-Density Enclosed</strong><br><span style="color:var(--ink-soft);font-size:13px">lecture hall · office</span></td>
+          <td class="mono">80–150</td>
+          <td class="mono">2.8–3.5</td>
+          <td class="mono">+3 to +8</td>
+          <td class="mono">40–120°</td>
+          <td class="mono">4–8</td>
+          <td class="mono">5 GHz</td>
+          <td>Capacity + stability under sustained load</td>
+        </tr>
+        <tr class="arch-row" data-arch="warehouse">
+          <td><strong>Sparse High-Throughput</strong><br><span style="color:var(--ink-soft);font-size:13px">warehouse · plant</span></td>
+          <td class="mono">150–300</td>
+          <td class="mono">2.5–3.2</td>
+          <td class="mono">+5 to +15</td>
+          <td class="mono">20–60°</td>
+          <td class="mono">2–6</td>
+          <td class="mono">5 GHz</td>
+          <td>Coverage continuity + seamless roaming</td>
+        </tr>
+        <tr class="arch-row" data-arch="retail">
+          <td><strong>Mixed Retail / Hospitality</strong><br><span style="color:var(--ink-soft);font-size:13px">store · hotel</span></td>
+          <td class="mono">100–200</td>
+          <td class="mono">3.0–3.8</td>
+          <td class="mono">+2 to +6</td>
+          <td class="mono">50–100°</td>
+          <td class="mono">5–10</td>
+          <td class="mono">2.4 GHz / 5 GHz</td>
+          <td>POS SLA + guest segmentation</td>
+        </tr>
+        <tr class="arch-row" data-arch="medical">
+          <td><strong>Latency-Critical Low-Density</strong><br><span style="color:var(--ink-soft);font-size:13px">medical · control room</span></td>
+          <td class="mono">50–100</td>
+          <td class="mono">2.4–3.0</td>
+          <td class="mono">+8 to +15</td>
+          <td class="mono">10–40°</td>
+          <td class="mono">2–5</td>
+          <td class="mono">5 GHz</td>
+          <td>Deterministic jitter / latency floor</td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+    <p style="font-size:15px;color:var(--ink-soft)"><em>Convention center is provisionally a sub-class of Dense Public Venue with uplink-weighted demand and rapid spatial reconfiguration. Whether it earns its own archetype row is a question the Morris screening procedure will answer empirically — if its dominant-lever ranking diverges significantly, it splits; if it converges, it merges.</em></p>
+  </section>
+
+  <!-- ============ §02 EFFECTS ============ -->
+  <section id="effects">
+    <div class="sec-num">§ 02 — Effect-Type Taxonomy</div>
+    <h2>Effect-Type Classification of All 60 Parameters<span class="sub">Rows 3–5 are the skill zone — the only ones the optimizer must search.</span></h2>
+    <p>Group parameters by <strong>how they act on QoE</strong>, not by the UI panel they appear in. The panel grouping (PHY / MAC / SSID) is the right axis for configuration; the effect-type grouping is the right axis for the twin. The classification determines modeling strategy — and reveals that the entire difficulty, and all the golden-set decisions, live in the three bottom categories.</p>
+    <div class="tbl-scroll">
+    <table class="tbl">
+      <thead>
+        <tr>
+          <th style="width:40px">#</th>
+          <th style="width:160px">Effect type</th>
+          <th>Behaviour</th>
+          <th style="width:200px">Skill zone?</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="mono">1</td>
+          <td><span class="et et-mult">Multiplicative gain</span></td>
+          <td>Scales capacity or QoE by a near-fixed factor; composes cleanly across parameters. Direction is known — set and lock.</td>
+          <td>No — capMult chain is correct. Search direction only.</td>
+        </tr>
+        <tr>
+          <td class="mono">2</td>
+          <td><span class="et et-gate">Gate / enabler</span></td>
+          <td>Step function. Off = subtree dead (all child parameters are zero-effect); on = unlocks a regime and reshapes others downstream.</td>
+          <td>No — but turning a gate on changes which other knobs matter.</td>
+        </tr>
+        <tr>
+          <td class="mono">3</td>
+          <td><span class="et et-thresh">Threshold / non-monotonic</span> <span class="skill-zone">skill zone</span></td>
+          <td>U-shaped response — interior optimum that is bad at both extremes. The optimizer must find the trough. A multiplier chain cannot represent this.</td>
+          <td>Yes — must be searched per archetype. The current simulator hand-places these.</td>
+        </tr>
+        <tr>
+          <td class="mono">4</td>
+          <td><span class="et et-inter">Interaction-coupled</span> <span class="skill-zone">skill zone</span></td>
+          <td>Effect on QoE depends on another parameter's current state. Tuning in isolation gives the wrong answer — must be co-tuned with its coupling partner(s).</td>
+          <td>Yes — joint optimization required. Single-parameter sweeps are misleading.</td>
+        </tr>
+        <tr>
+          <td class="mono">5</td>
+          <td><span class="et et-ctx">Context-modulated</span> <span class="skill-zone">skill zone</span></td>
+          <td>Effect is set entirely by the regime (the seven parameters). The same knob value is correct in one archetype and wrong in another. Per-archetype tuning is mandatory.</td>
+          <td>Yes — must be re-tuned for each regime. Portable golden sets are meaningless for these.</td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+
+    <h4>All 60 parameters classified</h4>
+    <p style="font-size:15px;color:var(--ink-soft);margin-bottom:4px">★ = in the stadium ~15 dominant-lever shortlist (§03). Numbers in parentheses are current simulator capMult factors where applicable.</p>
+
+    <h3>Demand (5 parameters)</h3>
+    <div class="tbl-scroll">
+    <table class="tbl">
+      <thead><tr><th>Parameter</th><th>Section</th><th>Effect Type</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td>AP Type</td><td>Demand</td><td><span class="et et-gate">Gate</span></td><td>Sets generation (ax / be) — gates 4K-QAM, MLO, Preamble Puncturing subtrees</td></tr>
+        <tr><td>Fan Count</td><td>Demand</td><td><span class="et et-mult">Mult</span></td><td>Scales total admitted load; context for admission thresholds</td></tr>
+        <tr><td>Devices / Fan</td><td>Demand</td><td><span class="et et-mult">Mult</span></td><td>Multiplies client count; interacts with Max Clients admission cap</td></tr>
+        <tr><td>WiFi Attach %</td><td>Demand</td><td><span class="et et-mult">Mult</span></td><td>Scales active WiFi population</td></tr>
+        <tr><td>Concurrency %</td><td>Demand</td><td><span class="et et-thresh">Threshold</span></td><td>Drives utilization; above ~70% triggers CWmin load cliff</td></tr>
+      </tbody>
+    </table>
+    </div>
+
+    <h3>PHY (9 parameters)</h3>
+    <div class="tbl-scroll">
+    <table class="tbl">
+      <thead><tr><th>Parameter</th><th>Section</th><th>Effect Type</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td><strong>★ TX Power</strong></td><td>PHY</td><td><span class="et et-thresh">Threshold</span> <span class="skill-zone">skill zone</span></td><td>Interior optimum at 17 dBm; too high → co-channel interference; too low → RSSI floor breach. U-shaped at stadium density.</td></tr>
+        <tr><td>5G Channel BW</td><td>PHY</td><td><span class="et et-mult">Mult</span></td><td>80/160 MHz; clean capacity multiplier once channel is clear</td></tr>
+        <tr><td>6G Channel BW</td><td>PHY</td><td><span class="et et-mult">Mult</span></td><td>80/160/320 MHz; multiplicative; gates Preamble Puncturing</td></tr>
+        <tr><td><strong>★ Guard Interval</strong></td><td>PHY</td><td><span class="et et-ctx">Context</span> <span class="skill-zone">skill zone</span></td><td>Correct value is entirely regime-set: 800 ns in clinic (τ_RMS 50–100 ns, sparse), 1600 ns in stadium (τ_RMS 50–120 ns but extreme density + multipath from bowl geometry). Current simulator uses 1600 ns; spec targets 800 ns — see §05.</td></tr>
+        <tr><td>MBR (Min Bit Rate)</td><td>PHY</td><td><span class="et et-thresh">Threshold</span></td><td>Admission gate; too high strands legacy clients, too low allows drag-down</td></tr>
+        <tr><td><strong>★ RX-SOP</strong></td><td>PHY</td><td><span class="et et-thresh">Threshold</span> <span class="skill-zone">skill zone</span></td><td>Spatial-reuse threshold; interior optimum — too aggressive loses edge clients, too conservative inflates CCI. Regime-sensitive.</td></tr>
+        <tr><td><strong>★ MCS Floor</strong></td><td>PHY</td><td><span class="et et-ctx">Context</span> <span class="skill-zone">skill zone</span></td><td>Stadium K-factor −2 to +2 dB (scattered) + path-loss n=3.5–4.2 → MCS 5–7 spec target; simulator sets MCS 4 (conservative). Must be set per archetype — MCS 4 is correct in warehouse (sparse); over-conservative at stadium.</td></tr>
+        <tr><td>Noise Floor</td><td>PHY</td><td><span class="et et-mult">Mult</span></td><td>Affects sensitivity floor; treated as environmental, not a tuning lever</td></tr>
+        <tr><td>Preamble Puncturing</td><td>PHY</td><td><span class="et et-gate">Gate</span></td><td>6 GHz only (802.11be); gates partial channel usage in busy spectrum</td></tr>
+      </tbody>
+    </table>
+    </div>
+
+    <h3>MAC / EDCA (22 parameters)</h3>
+    <div class="tbl-scroll">
+    <table class="tbl">
+      <thead><tr><th>Parameter</th><th>Effect Type</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td>OFDMA DL</td><td><span class="et et-mult">Mult</span></td><td>×1.35 clean main effect; stadium benefits from dense UL/DL RU assignment</td></tr>
+        <tr><td>OFDMA UL</td><td><span class="et et-mult">Mult</span></td><td>×1.20 multiplicative; enables trigger-based UL scheduling</td></tr>
+        <tr><td>MU-MIMO on/off</td><td><span class="et et-gate">Gate</span></td><td>Unlocks spatial multiplexing; must be on to expose MU-MIMO Streams</td></tr>
+        <tr><td><strong>★ MU-MIMO Streams</strong></td><td><span class="et et-inter">Interaction</span> <span class="skill-zone">skill zone</span></td><td>Effect is tightly coupled to angular spread. Stadium: 100–180° → high spatial separability → streams help. Warehouse: 20–60° → streams hurt efficiency. Must co-tune with regime angular spread.</td></tr>
+        <tr><td>BSS Color</td><td><span class="et et-mult">Mult</span></td><td>×1.12 at dense venue; reduces OBSS overhead. Clean main effect — set on.</td></tr>
+        <tr><td>rTWT</td><td><span class="et et-gate">Gate</span></td><td>Gates scheduled wake time; enabling changes TXOP-BE interaction (see below)</td></tr>
+        <tr><td>Multi-RU</td><td><span class="et et-mult">Mult</span></td><td>802.11be only; multiplicative RU flexibility</td></tr>
+        <tr><td>MLO on/off</td><td><span class="et et-gate">Gate</span></td><td>Gates MLO Mode, MLO Links, MLO Steering subtree</td></tr>
+        <tr><td>MLO Mode</td><td><span class="et et-ctx">Context</span></td><td>STR vs NSTR vs eMLSR; regime-modulated; dead unless MLO gate is on</td></tr>
+        <tr><td>MLO Links</td><td><span class="et et-gate">Gate</span></td><td>2 vs 3 links; gates available band combinations; dead unless MLO on</td></tr>
+        <tr><td>MLO Steering</td><td><span class="et et-ctx">Context</span></td><td>QoS-based (spec) vs AI-driven (simulator); see §05 conflict</td></tr>
+        <tr><td>4K-QAM</td><td><span class="et et-gate">Gate</span></td><td>802.11be + SNR ≥ 42 dB required; dead subtree at stadium (SNR too variable)</td></tr>
+        <tr><td>802.11r (FT)</td><td><span class="et et-gate">Gate</span></td><td>Gates fast BSS transition; enabler for roaming cache effectiveness</td></tr>
+        <tr><td>802.11k/v</td><td><span class="et et-mult">Mult</span></td><td>Neighbor reports + BSS transition management; ×1.08 roaming assist</td></tr>
+        <tr><td>DCS Lock</td><td><span class="et et-gate">Gate</span></td><td>Prevents dynamic channel switches during event; set locked at stadium</td></tr>
+        <tr><td>TXOP VO</td><td><span class="et et-thresh">Threshold</span></td><td>Voice/video TXOP limit; latency-critical archetypes use shorter TXOP</td></tr>
+        <tr><td><strong>★ TXOP BE</strong></td><td><span class="et et-inter">Interaction</span> <span class="skill-zone">skill zone</span></td><td>Burst length for best-effort traffic. Coupled to rTWT: with rTWT off, longer TXOP helps throughput; with rTWT on, long TXOP creates POS latency spikes on VLAN 50. Must be co-tuned with rTWT state.</td></tr>
+        <tr><td><strong>★ CWmin BE</strong></td><td><span class="et et-thresh">Threshold</span> <span class="skill-zone">skill zone</span></td><td>Contention window minimum. Non-monotone: CWmin=3 at low load is fine; CWmin=7 at utilization &gt;70% → +3 ms POS latency cliff. Stadium concurrency drives frequent breach. Interior optimum is load-dependent.</td></tr>
+        <tr><td><strong>★ RTS/CTS</strong></td><td><span class="et et-thresh">Threshold</span> <span class="skill-zone">skill zone</span></td><td>Hidden-node mitigation threshold. At stadium density (100–180° angular spread, 60 clients/AP), collision domain is large; lower threshold reduces hidden-node collisions at the cost of RTS overhead. Interior optimum.</td></tr>
+        <tr><td>U-APSD</td><td><span class="et et-gate">Gate</span></td><td>Unscheduled APSD; power save. Enabler for latency-critical clients.</td></tr>
+        <tr><td>WMM AC VO</td><td><span class="et et-mult">Mult</span></td><td>VO queue priority multiplier; clean main effect once WMM is on</td></tr>
+        <tr><td>WMM AC VI</td><td><span class="et et-mult">Mult</span></td><td>VI queue priority multiplier; similar to VO</td></tr>
+      </tbody>
+    </table>
+    </div>
+
+    <h3>Admission Control (8 parameters)</h3>
+    <div class="tbl-scroll">
+    <table class="tbl">
+      <thead><tr><th>Parameter</th><th>Effect Type</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td><strong>★ Max Clients</strong></td><td><span class="et et-thresh">Threshold</span> <span class="skill-zone">skill zone</span></td><td>Admission cap. Too high → airtime collapse; too low → stranded fans (SLA breach on admitted-count constraint). Interior optimum tied to AP density and per-client demand distribution.</td></tr>
+        <tr><td><strong>★ Min RSSI</strong></td><td><span class="et et-thresh">Threshold</span> <span class="skill-zone">skill zone</span></td><td>Admission gate that also acts as an airtime-fairness lever. Spec: −67 dBm. Simulator: −70 dBm. Tighter threshold improves fairness but can strand edge clients. Stadium bowl geometry creates strong RSSI gradients.</td></tr>
+        <tr><td><strong>★ Airtime Fairness</strong></td><td><span class="et et-mult">Mult</span></td><td>×1.38 swing — <strong>single largest QoE delta in the simulator</strong>. Prevents slow-client drag-down in heterogeneous client mix. Technically a multiplicative gain, but the interaction with Min RSSI (which changes the admitted-client mix) makes it context-sensitive at the stadium.</td></tr>
+        <tr><td>Band Steering</td><td><span class="et et-mult">Mult</span></td><td>Pushes 5/6 GHz capable clients off 2.4 GHz; ×1.10 clean gain at dense venue</td></tr>
+        <tr><td><strong>★ Client Ageout</strong></td><td><span class="et et-thresh">Threshold</span> <span class="skill-zone">skill zone</span></td><td>Non-monotone: ageout at 1 min → premature disconnection (×0.97); 5 min → reference (×1.0); 10 min → stale clients (×0.95); 30 min → airtime stranding (×0.88). Optimum is archetype-specific.</td></tr>
+        <tr><td><strong>★ Fragment Threshold</strong></td><td><span class="et et-thresh">Threshold</span> <span class="skill-zone">skill zone</span></td><td>256 bytes → ×0.80 throughput penalty (excessive overhead); 2346 bytes → near-optimal (minimal fragmentation at stadium SNR). U-shaped with archetype-dependent optimal depending on interference level.</td></tr>
+        <tr><td><strong>★ Roaming Cache Update</strong></td><td><span class="et et-inter">Interaction</span> <span class="skill-zone">skill zone</span></td><td>Interaction-coupled with 802.11r and degradation level. Under load or attack, stale cache + active 802.11r → +5 ms latency on handoff. Must be co-tuned with 802.11r state.</td></tr>
+        <tr><td><strong>★ Roaming Cache Ageout</strong></td><td><span class="et et-inter">Interaction</span> <span class="skill-zone">skill zone</span></td><td>× 802.11r × degradation → +5 ms latency spike on BSS transition under stress. Stadium events produce bursty mobility (half-time) that stresses this triple interaction.</td></tr>
+      </tbody>
+    </table>
+    </div>
+
+    <h3>SSID / Network (12 parameters)</h3>
+    <div class="tbl-scroll">
+    <table class="tbl">
+      <thead><tr><th>Parameter</th><th>Effect Type</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td>BC Filter</td><td><span class="et et-mult">Mult</span></td><td>×1.08 clean gain; suppresses broadcast storm at dense venue. Set on.</td></tr>
+        <tr><td>MC→UC</td><td><span class="et et-mult">Mult</span></td><td>Multicast-to-unicast conversion; ×1.10 at stadium (dense multicast suppression)</td></tr>
+        <tr><td>Proxy ARP</td><td><span class="et et-mult">Mult</span></td><td>×1.06 gain; AP answers ARP on behalf of clients. Clean main effect.</td></tr>
+        <tr><td>Client Isolation</td><td><span class="et et-gate">Gate</span></td><td>On = blocks lateral client-client traffic. Security gate; no throughput swing when on for guest VLAN.</td></tr>
+        <tr><td>Enhanced RNR</td><td><span class="et et-mult">Mult</span></td><td>6 GHz discovery assist; multiplicative discovery speed-up</td></tr>
+        <tr><td>PMF (Protected Mgmt)</td><td><span class="et et-gate">Gate</span></td><td>Mandatory for WPA3; small overhead; security gate</td></tr>
+        <tr><td>AirDefense</td><td><span class="et et-gate">Gate</span></td><td>WIDS/WIPS scan mode; enables threat detection subtree; negligible throughput impact when scan-only</td></tr>
+        <tr><td><strong>★ DTIM</strong></td><td><span class="et et-thresh">Threshold</span> <span class="skill-zone">skill zone</span></td><td>Delivery Traffic Indication Map interval. Higher DTIM = better battery life (clients sleep longer) but worse multicast delivery latency. At stadium: fans asleep between plays → higher DTIM preferred; clinic: IoT devices need low DTIM. Classic archetype tradeoff.</td></tr>
+        <tr><td>MC→UC Util Threshold</td><td><span class="et et-thresh">Threshold</span></td><td>Threshold above which MC→UC conversion triggers; archetype-dependent activation point</td></tr>
+        <tr><td>MC→UC Membership</td><td><span class="et et-gate">Gate</span></td><td>IGMP snooping membership tracking; enabler for selective conversion</td></tr>
+        <tr><td>Multicast Drop</td><td><span class="et et-mult">Mult</span></td><td>Aggressive multicast suppression; ×1.04 at stadium; clean gain</td></tr>
+        <tr><td>Ignore BC Probe</td><td><span class="et et-mult">Mult</span></td><td>×1.08 clean main effect — suppresses broadcast probe responses. Row 1 behavior; already correctly modeled. Not in the ~15 because no optimization needed.</td></tr>
+      </tbody>
+    </table>
+    </div>
+
+    <h3>Degradation / Security (4 parameters)</h3>
+    <div class="tbl-scroll">
+    <table class="tbl">
+      <thead><tr><th>Parameter</th><th>Effect Type</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td>Degradation Level</td><td><span class="et et-thresh">Threshold</span></td><td>Environmental RF degradation step; context for roaming cache interaction</td></tr>
+        <tr><td>Cyber Attack</td><td><span class="et et-gate">Gate</span></td><td>Simulated attack on/off; gates MAC DoS / IP DoS response subtrees</td></tr>
+        <tr><td>MAC DoS Prevention</td><td><span class="et et-gate">Gate</span></td><td>Rate-limits MAC flood; enabler; no throughput cost when attack is off</td></tr>
+        <tr><td>IP DoS Prevention</td><td><span class="et et-gate">Gate</span></td><td>Rate-limits IP flood; same pattern as MAC DoS</td></tr>
+      </tbody>
+    </table>
+    </div>
+
+    <div class="note"><span class="tag">The structural insight</span>The optimizer searches only the ~15 non-trivial knobs — rows 3–5 of the effect-type taxonomy. Monotone/gate knobs (rows 1–2) are locked to their known-optimal state before the optimizer runs. This is what reduces the 60-D space to a tractable ~12–18-D per archetype — not by ignoring parameters, but by recognizing that most of them have <em>known directions</em> rather than <em>unknown optima</em>.</div>
+  </section>
+
+  <!-- ============ §03 STADIUM DEEP DIVE ============ -->
+  <section id="stadium">
+    <div class="sec-num">§ 03 — Stadium Deep Dive</div>
+    <h2>The Dense Public Venue: Dominant-Lever Deep Dive<span class="sub">The ~15 non-trivial knobs for the stadium archetype — the optimizer's search space.</span></h2>
+    <p class="lead">The stadium archetype is the first target because it produces the largest QoE swings, the hardest constraints (POS SLA ≤ 10 ms), and the most acute interactions — every lever that is interesting elsewhere is acute here. The <strong>72,000-seat bowl</strong> with 45,000 active WiFi devices at kickoff is the stress-test that exposes non-monotone behavior the flat capMult model cannot represent.</p>
+
+    <div class="note"><span class="tag">Ignore BC Probe note</span>Ignore BC Probe (×1.08) ranks first in clean multiplicative effect and is important — but it is <em>already correctly modeled</em> as a row-1 multiplier. The 15 below are the knobs the optimizer must <em>search</em>: the ones where the current simulator hand-placed an interior optimum that the twin must learn to derive.</div>
+
+    <span class="arch-hint">Rows highlighted in gold correspond to the Dense Public Venue selection in §01</span>
+    <div class="tbl-scroll">
+    <table class="tbl" id="lever-table">
+      <thead>
+        <tr>
+          <th style="width:160px">Parameter</th>
+          <th style="width:110px">Effect Type</th>
+          <th style="width:140px">Current Simulator Value</th>
+          <th>Why it dominates at stadium</th>
+          <th style="width:140px">Interaction with</th>
+          <th style="width:90px">Priority</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="lever-row" data-arch="stadium">
+          <td><strong>Airtime Fairness</strong></td>
+          <td><span class="et et-mult">Mult</span></td>
+          <td class="mono">ON (×1.38 swing)</td>
+          <td>Single largest QoE delta in the simulator. At 45k concurrent devices, even one slow legacy client consuming disproportionate airtime drags the proportional-fairness objective catastrophically. Without AF, MCS 0 clients consume 8× the airtime of MCS 7 clients — the 10 ms POS SLA is unachievable under those conditions.</td>
+          <td class="mono">Min RSSI<br>(changes admitted-client MCS mix)</td>
+          <td><span class="pri pri-1"></span>High</td>
+        </tr>
+        <tr class="lever-row" data-arch="stadium">
+          <td><strong>TX Power</strong></td>
+          <td><span class="et et-thresh">Threshold</span></td>
+          <td class="mono">17 dBm (hand-set)</td>
+          <td>U-shaped at stadium density. Too high → increased co-channel interference in the bowl (reflective concrete, adjacent APs within 10 m under seats); too low → RSSI floor breaches at stadium edges, violating Min RSSI admission. The optimal sits at 17 dBm for the standard bowl geometry — but varies with seat-bowl geometry and AP-mounting height.</td>
+          <td class="mono">Min RSSI<br>RX-SOP</td>
+          <td><span class="pri pri-1"></span>High</td>
+        </tr>
+        <tr class="lever-row" data-arch="stadium">
+          <td><strong>Min RSSI</strong></td>
+          <td><span class="et et-thresh">Threshold</span></td>
+          <td class="mono">−70 dBm (spec: −67 dBm)</td>
+          <td>Admission gate that doubles as an airness lever. Tighter threshold (−67) admits only strong-signal clients → higher average MCS → AF multiplier is larger. Looser threshold admits edge clients with MCS 0–2 → AF must work harder → POS SLA margin shrinks. Stadium bowl creates steep RSSI gradients per row — threshold placement determines which client rows are admitted.</td>
+          <td class="mono">Airtime Fairness<br>TX Power<br>Max Clients</td>
+          <td><span class="pri pri-1"></span>High</td>
+        </tr>
+        <tr class="lever-row" data-arch="stadium">
+          <td><strong>RX-SOP</strong></td>
+          <td><span class="et et-thresh">Threshold</span></td>
+          <td class="mono">−82 dBm (interior)</td>
+          <td>Spatial-reuse threshold: packets below this RSSI are discarded rather than deferred, treating distant APs as noise. At stadium, too aggressive (high threshold, e.g. −72 dBm) causes edge clients to be silently dropped; too conservative (−90 dBm) wastes medium time deferring to distant APs. Interior optimum is regime-sensitive — set by path-loss exponent n=3.5–4.2 and AP density.</td>
+          <td class="mono">TX Power<br>Min RSSI</td>
+          <td><span class="pri pri-1"></span>High</td>
+        </tr>
+        <tr class="lever-row" data-arch="stadium">
+          <td><strong>CWmin BE</strong></td>
+          <td><span class="et et-thresh">Threshold</span></td>
+          <td class="mono">CWmin = 4 (hand-set)</td>
+          <td>Contention window for best-effort traffic. Non-monotone with load: CWmin=3 reduces latency at low utilization; at utilization &gt;70% (stadium kickoff surge), CWmin=3 triggers rapid collision escalation → CWmin effectively becomes 7 → +3 ms POS latency cliff on VLAN 50. The simulator hand-codes this cliff as a conditional. The twin must discover it as an interior optimum from the data.</td>
+          <td class="mono">Concurrency %<br>TXOP BE<br>rTWT</td>
+          <td><span class="pri pri-1"></span>High</td>
+        </tr>
+        <tr class="lever-row" data-arch="stadium">
+          <td><strong>Max Clients</strong></td>
+          <td><span class="et et-thresh">Threshold</span></td>
+          <td class="mono">100 clients/AP</td>
+          <td>Admission cap sets the hard ceiling on per-AP load. Too high → airtime per client falls below throughput floor (QoE collapse, SLA breach on per-class floors); too low → admitted count drops below deployment target (SLA breach on coverage constraint). Optimal value moves with fan density and AP count — at stadium this is typically 80–120 clients/AP under-seat.</td>
+          <td class="mono">Min RSSI<br>Airtime Fairness<br>Devices/Fan</td>
+          <td><span class="pri pri-1"></span>High</td>
+        </tr>
+        <tr class="lever-row" data-arch="stadium">
+          <td><strong>MCS Floor</strong></td>
+          <td><span class="et et-ctx">Context</span></td>
+          <td class="mono">MCS 4 (simulator)<br>Spec: MCS 5–7</td>
+          <td>Stadium K-factor (−2 to +2 dB, near-Rayleigh fading) combined with path-loss n=3.5–4.2 means strong clients can sustain MCS 5–7 reliably. The current simulator sets MCS 4 conservatively. Setting MCS Floor too low wastes spectral efficiency; too high causes excessive retries for fringe clients. Must be calibrated against the admitted-client RSSI distribution, which is archetype-specific.</td>
+          <td class="mono">Min RSSI<br>Guard Interval<br>TX Power</td>
+          <td><span class="pri pri-2"></span>Medium</td>
+        </tr>
+        <tr class="lever-row" data-arch="stadium">
+          <td><strong>Guard Interval</strong></td>
+          <td><span class="et et-ctx">Context</span></td>
+          <td class="mono">1600 ns (simulator)<br>Spec: 800 ns</td>
+          <td>τ_RMS at stadium is 50–120 ns — shorter than a warehouse, suggesting 800 ns GI suffices. However, the concave bowl geometry creates focused reflections that increase effective delay spread beyond the free-space estimate; 1600 ns provides an additional 800 ns guard against late-arriving reflections. Whether 800 or 1600 ns is correct for a specific bowl is an empirical question — see §05 conflict and the ns-3 screening ladder.</td>
+          <td class="mono">MCS Floor<br>TX Power (via SNR)</td>
+          <td><span class="pri pri-2"></span>Medium</td>
+        </tr>
+        <tr class="lever-row" data-arch="stadium">
+          <td><strong>TXOP BE</strong></td>
+          <td><span class="et et-inter">Interaction</span></td>
+          <td class="mono">3008 μs</td>
+          <td>Best-effort burst length. Coupled to rTWT: with rTWT OFF, longer TXOP improves aggregate throughput (fewer SIFS gaps); with rTWT ON, long TXOP on BE traffic collides with scheduled POS windows on VLAN 50, causing +2–5 ms latency spikes. The optimizer must search this jointly with rTWT state — single-parameter sweep gives the wrong direction half the time.</td>
+          <td class="mono">rTWT (on/off)<br>CWmin BE<br>POS VLAN priority</td>
+          <td><span class="pri pri-2"></span>Medium</td>
+        </tr>
+        <tr class="lever-row" data-arch="stadium">
+          <td><strong>MU-MIMO Streams</strong></td>
+          <td><span class="et et-inter">Interaction</span></td>
+          <td class="mono">4 streams</td>
+          <td>Effect is coupled to angular spread. Stadium bowl: 100–180° spread → clients arrive from nearly every direction relative to under-seat APs → high spatial separability → 4–8 streams are achievable and highly beneficial (×2.8 in simulator). In contrast, warehouse with 20–60° spread → clients in LoS lines of sight → streams interfere → fewer streams are optimal. Angular spread is the coupling variable.</td>
+          <td class="mono">Angular spread (regime)<br>MU-MIMO on/off gate<br>OFDMA DL/UL</td>
+          <td><span class="pri pri-2"></span>Medium</td>
+        </tr>
+        <tr class="lever-row" data-arch="stadium">
+          <td><strong>Fragment Threshold</strong></td>
+          <td><span class="et et-thresh">Threshold</span></td>
+          <td class="mono">2346 bytes (near-optimal)</td>
+          <td>U-shaped: fragmenting at 256 bytes adds 4× the header overhead per MB of data → ×0.80 throughput penalty. No fragmentation (2346) is near-optimal at typical stadium SNR (−65 to −75 dBm admitted). However, under high interference / degradation scenarios where PER is elevated, smaller fragments reduce per-fragment loss and re-transmission cost. The breaking point between these regimes is interference-driven.</td>
+          <td class="mono">Degradation Level<br>TX Power (via CCI)</td>
+          <td><span class="pri pri-2"></span>Medium</td>
+        </tr>
+        <tr class="lever-row" data-arch="stadium">
+          <td><strong>Client Ageout</strong></td>
+          <td><span class="et et-thresh">Threshold</span></td>
+          <td class="mono">5 min (reference = ×1.0)</td>
+          <td>Non-monotone: {1 min → ×0.97 (premature disconnect), 5 min → ×1.0, 10 min → ×0.95 (stale client airtime), 30 min → ×0.88 (stranded airtime for clients who left their seat)}. Stadium events produce distinct mobility phases — 15 min of high mobility at gates/concourse, then 90 min of stable seated operation. The ageout optimum differs per phase; the optimizer sees the integrated effect.</td>
+          <td class="mono">Max Clients<br>Roaming Cache Ageout</td>
+          <td><span class="pri pri-3"></span>Low</td>
+        </tr>
+        <tr class="lever-row" data-arch="stadium">
+          <td><strong>Roaming Cache Ageout</strong></td>
+          <td><span class="et et-inter">Interaction</span></td>
+          <td class="mono">120 s</td>
+          <td>Three-way interaction: Roaming Cache Ageout × 802.11r (FT) × Degradation Level. When degradation is high (jamming or RF congestion) and 802.11r is on, stale cache entries cause re-association instead of fast transition → +5 ms added latency per handoff. At stadium half-time (bursty mobility spike), this triple interaction fires simultaneously for hundreds of clients. Must be co-tuned with both 802.11r state and expected degradation level.</td>
+          <td class="mono">802.11r (gate)<br>Degradation Level<br>Roaming Cache Update</td>
+          <td><span class="pri pri-3"></span>Low</td>
+        </tr>
+        <tr class="lever-row" data-arch="stadium">
+          <td><strong>DTIM</strong></td>
+          <td><span class="et et-thresh">Threshold</span></td>
+          <td class="mono">DTIM = 2</td>
+          <td>Higher DTIM → clients sleep longer between beacon check-ins → better battery life at the cost of multicast delivery latency. At stadium, most clients are passive consumers (video streaming), so DTIM=3–4 improves device battery without hurting the POS SLA (POS uses unicast). At medical/clinic, IoT alarms need DTIM=1 for deterministic latency. This is the purest archetype-selector parameter.</td>
+          <td class="mono">Multicast delivery latency<br>MC→UC conversion (if off)</td>
+          <td><span class="pri pri-3"></span>Low</td>
+        </tr>
+        <tr class="lever-row" data-arch="stadium">
+          <td><strong>RTS/CTS</strong></td>
+          <td><span class="et et-thresh">Threshold</span></td>
+          <td class="mono">2347 bytes (effectively off)</td>
+          <td>Hidden-node problem is severe when angular spread is 100–180° — clients behind the same AP cannot hear each other. At stadium density (60+ clients/AP, large collision domain), enabling RTS/CTS at 500–1000 bytes reduces hidden-node collisions at the cost of RTS overhead per frame. U-shaped: too low (always RTS) saturates the medium with control frames; too high (off) allows collision cascades. Interior optimum is density-driven.</td>
+          <td class="mono">Max Clients (density)<br>Angular spread (regime)</td>
+          <td><span class="pri pri-3"></span>Low</td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+  </section>
+
+  <!-- ============ §04 OTHERS ============ -->
+  <section id="others">
+    <div class="sec-num">§ 04 — Other Four Archetypes</div>
+    <h2>The Other Four Archetypes: Summary Dominant Levers<span class="sub">Top-5 knobs per archetype — for comparison and to validate archetype separation.</span></h2>
+    <p>These are Tier-0 priors, not screened rankings. Their primary purpose at this stage is not to produce golden sets — it is to verify that the five archetypes are meaningfully distinct. If two archetypes produce nearly identical top-5 rankings, they should be candidates for merger pending Morris confirmation.</p>
+
+    <div class="pull">If two archetypes produce nearly identical dominant-lever rankings, the screening procedure (Morris) will tell you they should be merged.</div>
+
+    <div class="tbl-scroll">
+    <table class="tbl">
+      <thead>
+        <tr>
+          <th style="width:190px">Archetype</th>
+          <th>Rank 1</th>
+          <th>Rank 2</th>
+          <th>Rank 3</th>
+          <th>Rank 4</th>
+          <th>Rank 5</th>
+          <th style="width:160px">Key difference from Stadium</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="arch-row" data-arch="warehouse" style="cursor:default">
+          <td><strong>Sparse High-Throughput</strong><br><span style="color:var(--ink-soft);font-size:13px">warehouse · plant</span></td>
+          <td>MCS Floor<br><span style="font-size:12px;color:var(--ink-soft)">High K, LoS → MCS 9–11 achievable</span></td>
+          <td>Guard Interval<br><span style="font-size:12px;color:var(--ink-soft)">τ_RMS 150–300 ns → 3200 ns GI needed</span></td>
+          <td>TX Power<br><span style="font-size:12px;color:var(--ink-soft)">Coverage-bound, not CCI-bound</span></td>
+          <td>RTS/CTS<br><span style="font-size:12px;color:var(--ink-soft)">Dispersed clients, low density → hidden node</span></td>
+          <td>Roaming Cache<br><span style="font-size:12px;color:var(--ink-soft)">Long aisles → frequent BSS transitions</span></td>
+          <td>Coverage wall dominates (not capacity wall). Airtime Fairness drops because client mix is uniform high-MCS. Guard Interval moves to top-2 due to long delay spread.</td>
+        </tr>
+        <tr class="arch-row" data-arch="office" style="cursor:default">
+          <td><strong>High-Density Enclosed</strong><br><span style="color:var(--ink-soft);font-size:13px">lecture hall · office</span></td>
+          <td>CWmin BE<br><span style="font-size:12px;color:var(--ink-soft)">Sustained high utilization → cliff risk</span></td>
+          <td>Max Clients<br><span style="font-size:12px;color:var(--ink-soft)">Dense but not extreme; cap is tight</span></td>
+          <td>Min RSSI<br><span style="font-size:12px;color:var(--ink-soft)">Wall attenuation creates sharp RSSI steps</span></td>
+          <td>MU-MIMO Streams<br><span style="font-size:12px;color:var(--ink-soft)">40–120° spread → moderate spatial sep.</span></td>
+          <td>Airtime Fairness<br><span style="font-size:12px;color:var(--ink-soft)">BYOD mix → legacy device drag-down</span></td>
+          <td>Similar to stadium but lower angular spread reduces MU-MIMO benefit. Stability over burst capacity is the SLA priority. No hard POS constraint.</td>
+        </tr>
+        <tr class="arch-row" data-arch="retail" style="cursor:default">
+          <td><strong>Mixed Retail / Hospitality</strong><br><span style="color:var(--ink-soft);font-size:13px">store · hotel</span></td>
+          <td>Min RSSI<br><span style="font-size:12px;color:var(--ink-soft)">Roaming clients + coverage variance</span></td>
+          <td>Airtime Fairness<br><span style="font-size:12px;color:var(--ink-soft)">Mixed guest / POS client speeds</span></td>
+          <td>DTIM<br><span style="font-size:12px;color:var(--ink-soft)">Guest battery life vs. POS latency tradeoff</span></td>
+          <td>Client Ageout<br><span style="font-size:12px;color:var(--ink-soft)">Dwell time variance: 5 min to 2 h</span></td>
+          <td>Fragment Threshold<br><span style="font-size:12px;color:var(--ink-soft)">Mixed RF quality across store zones</span></td>
+          <td>Roaming dominates over raw capacity. POS SLA is still critical (like stadium) but client density is lower. DTIM rises in importance due to battery-sensitive IoT + guest devices.</td>
+        </tr>
+        <tr class="arch-row" data-arch="medical" style="cursor:default">
+          <td><strong>Latency-Critical Low-Density</strong><br><span style="color:var(--ink-soft);font-size:13px">medical · control room</span></td>
+          <td>DTIM<br><span style="font-size:12px;color:var(--ink-soft)">IoT alarms need DTIM=1 determinism</span></td>
+          <td>RTS/CTS<br><span style="font-size:12px;color:var(--ink-soft)">Low density; low angular spread; collision avoidance</span></td>
+          <td>CWmin BE<br><span style="font-size:12px;color:var(--ink-soft)">Jitter control even at low utilization</span></td>
+          <td>TX Power<br><span style="font-size:12px;color:var(--ink-soft)">Controlled RSSI floor for determinism</span></td>
+          <td>Roaming Cache Ageout<br><span style="font-size:12px;color:var(--ink-soft)">Cart roaming + guaranteed fast handoff</span></td>
+          <td>Capacity wall is irrelevant (low density). Deterministic latency floor replaces POS SLA as the binding constraint. Airtime Fairness drops to unranked — all clients are mission-critical, not heterogeneous. Guard Interval is fixed at 800 ns (low τ_RMS).</td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+
+    <h4>Cross-archetype driver overlap analysis (Tier-0)</h4>
+    <div class="tbl-scroll">
+    <table class="tbl">
+      <thead><tr><th>Parameter</th><th>Stadium</th><th>Warehouse</th><th>Office</th><th>Retail</th><th>Medical</th><th>Separation verdict</th></tr></thead>
+      <tbody>
+        <tr><td>Airtime Fairness</td><td class="mono">1st</td><td><span style="color:var(--rule)">—</span></td><td class="mono">5th</td><td class="mono">2nd</td><td><span style="color:var(--rule)">—</span></td><td>Stadium/retail share; medical correctly excludes it</td></tr>
+        <tr><td>MCS Floor</td><td class="mono">7th</td><td class="mono">1st</td><td><span style="color:var(--rule)">—</span></td><td><span style="color:var(--rule)">—</span></td><td><span style="color:var(--rule)">—</span></td><td>Warehouse-only priority — good separation signal</td></tr>
+        <tr><td>Guard Interval</td><td class="mono">8th</td><td class="mono">2nd</td><td><span style="color:var(--rule)">—</span></td><td><span style="color:var(--rule)">—</span></td><td><span style="color:var(--rule)">—</span></td><td>Warehouse-dominant; τ_RMS regime separation working</td></tr>
+        <tr><td>DTIM</td><td class="mono">14th</td><td><span style="color:var(--rule)">—</span></td><td><span style="color:var(--rule)">—</span></td><td class="mono">3rd</td><td class="mono">1st</td><td>Medical/retail share; low in stadium — good separation</td></tr>
+        <tr><td>CWmin BE</td><td class="mono">5th</td><td><span style="color:var(--rule)">—</span></td><td class="mono">1st</td><td><span style="color:var(--rule)">—</span></td><td class="mono">3rd</td><td>Shared across load-sensitive archetypes — expected overlap</td></tr>
+        <tr><td>Min RSSI</td><td class="mono">3rd</td><td><span style="color:var(--rule)">—</span></td><td class="mono">3rd</td><td class="mono">1st</td><td><span style="color:var(--rule)">—</span></td><td>Admission sensitivity broadly shared — may need sub-archetypes</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <div class="note"><span class="tag">Morris will arbitrate</span>Where overlap is high (CWmin, Min RSSI), the Morris μ*/σ scatter will determine whether the <em>effect magnitude</em> differs between archetypes enough to justify separate tuning, or whether one setting covers both. Overlap in ranking does not mean the optimal values are the same.</div>
+  </section>
+
+  <!-- ============ §05 CONFLICTS ============ -->
+  <section id="conflicts">
+    <div class="sec-num">§ 05 — Spec Conflicts</div>
+    <h2>Spec Conflicts Pending Cleanup<span class="sub">Four known mismatches between the stadium spec target and the current simulator's <code>applyOptimal()</code>.</span></h2>
+    <p>These are not bugs in the simulator as a teaching tool — they are deliberate conservatisms or modeling simplifications. But they must be resolved before any optimizer result from the current model is claimed as a true stadium golden set. Each requires a specific code change or a design decision.</p>
+
+    <div class="tbl-scroll">
+    <table class="tbl">
+      <thead>
+        <tr>
+          <th style="width:150px">Parameter</th>
+          <th>Spec Target<br>(stadium archetype)</th>
+          <th>Current Simulator <code>applyOptimal()</code></th>
+          <th>Fix Needed</th>
+          <th style="width:130px">Who decides</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Guard Interval</strong></td>
+          <td class="mono">800 ns<br><span style="font-size:12px;color:var(--ink-soft)">τ_RMS 50–120 ns → standard GI-800 sufficient in open literature</span></td>
+          <td class="mono">1600 ns</td>
+          <td>Change <code>applyOptimal()</code> to 800 ns for stadium. Consider whether bowl-geometry reflections empirically require 1600 ns — document the rationale either way. This is the primary Guard Interval question ns-3 will answer in Track B.</td>
+          <td>Track B ns-3 screening (empirical); interim: set 800 ns with a warning flag</td>
+        </tr>
+        <tr>
+          <td><strong>Min RSSI</strong></td>
+          <td class="mono">−67 dBm<br><span style="font-size:12px;color:var(--ink-soft)">Stadium spec for under-seat AP admission</span></td>
+          <td class="mono">−70 dBm</td>
+          <td>Change <code>applyOptimal()</code> to −67 dBm. The 3 dBm gap may seem small but at stadium density it changes the admitted-client MCS mix by ~1 tier → affects Airtime Fairness multiplier and POS SLA margin.</td>
+          <td>Code change — no design debate needed</td>
+        </tr>
+        <tr>
+          <td><strong>MLO Steering</strong></td>
+          <td class="mono">QoS-based steering<br><span style="font-size:12px;color:var(--ink-soft)">802.11be spec: STA selects link by QoS class</span></td>
+          <td class="mono">AI-driven steering</td>
+          <td>Discuss whether EP1 RRM implements QoS-based (spec-compliant) or AI-assisted (vendor extension) steering. If EP1's AI steering is the actual product behavior, the simulator is correct and the "spec conflict" is a labeling issue — call it "AI-driven (EP1 RRM)" explicitly. If QoS-based is the deployed mode, change the simulator.</td>
+          <td>Design decision — requires EP1 RRM documentation check</td>
+        </tr>
+        <tr>
+          <td><strong>MCS Floor</strong></td>
+          <td class="mono">MCS 5–7<br><span style="font-size:12px;color:var(--ink-soft)">Stadium K-factor + admitted RSSI ≥ −67 dBm → MCS 5–7 achievable</span></td>
+          <td class="mono">MCS 4</td>
+          <td>Change <code>applyOptimal()</code> to MCS 6 as the stadium target. MCS 4 is the correct conservative default for mixed or unknown environments; MCS 6 is the defensible stadium-specific target given the admitted-client RSSI floor of −67 dBm and path-loss n=3.5–4.2.</td>
+          <td>Code change for stadium archetype; keep MCS 4 as non-stadium default</td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+
+    <h4>Three missing parameters not currently in the 60-parameter set</h4>
+    <div class="tbl-scroll">
+    <table class="tbl">
+      <thead><tr><th>Parameter</th><th>Correct Value (stadium)</th><th>Why it belongs in the model</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>CWmin AC_VO</strong></td>
+          <td class="mono">3 slots (EDCA default)</td>
+          <td>Voice/video contention window is separate from BE (CWmin AC_BE). At stadium, POS traffic uses VO queue. CWmin_VO and CWmin_BE are independent knobs — the simulator treats only BE, masking the POS-queue contention behavior.</td>
+        </tr>
+        <tr>
+          <td><strong>Beacon Interval</strong></td>
+          <td class="mono">100 TU (default)</td>
+          <td>At extreme density, shorter beacon intervals (50 TU) improve fast association at the cost of medium overhead. At 100 TU with 60 clients/AP, beacon collision probability is measurable. Not currently a tunable parameter in the model.</td>
+        </tr>
+        <tr>
+          <td><strong>SAE PWE Method</strong></td>
+          <td class="mono">H2E (Hash-to-Element)</td>
+          <td>WPA3-SAE timing-attack mitigation. H2E replaces Hunting-and-Pecking. At stadium scale (45k association events), H2E reduces association time by ~60 ms per client vs H&amp;P — measurable on total admission latency. Currently missing from security parameter set.</td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+  </section>
+
+  <!-- ============ §06 GOVERNANCE ============ -->
+  <section id="governance">
+    <div class="sec-num">§ 06 — Governance Note</div>
+    <h2>Version 0 — Prior Elicitation: Governance Statement<span class="sub">What this document is allowed to claim — and what it is not.</span></h2>
+    <p>This is a <strong>v0 prior</strong>: the product of human expert elicitation performed before any data-driven screening has been run. It is the Tier-0 step of the three-tier driver-discovery procedure described in §05 of <em>journey_to_the_digital_twin.html</em>. Every dominant-lever claim in this document carries the epistemological status of <em>hypothesis</em>, not finding.</p>
+    <div class="formal">
+      <div class="ttl">What v0 is licensed to claim</div>
+      <ul class="tight" style="margin-bottom:0">
+        <li><strong>Allowed:</strong> "Expert prior — these are the knobs we expect to dominate at stadium based on domain reasoning and simulator inspection."</li>
+        <li><strong>Allowed:</strong> "This is the hypothesis the screening procedure (Morris / Sobol) will confirm, modify, or embarrass."</li>
+        <li><strong>Not allowed:</strong> "These are the 15 drivers for the Dense Public Venue archetype." That claim requires Morris μ*/σ evidence.</li>
+        <li><strong>Not allowed:</strong> "The stadium golden set is [these values]." That claim requires both Morris screening and the optimizer running against the chance-constrained objective — Track A3 in the execution ladder.</li>
+      </ul>
+    </div>
+
+    <h4>Version increment policy</h4>
+    <ul class="tight">
+      <li><strong>v0 → v1:</strong> Superseded when Morris screening completes for the Dense Public Venue archetype and produces an evidence-ranked driver list. This document is then archived (not edited) and v1 is the operative reference.</li>
+      <li><strong>v1 → v2:</strong> Superseded when Sobol total-order confirmation produces audit-grade first-order and total-order indices. The gap between v1 and v2 ranks is itself a scientific finding.</li>
+      <li><strong>Any version:</strong> In-place edits are never made after a version is issued. Each revision is a new file. Past versions are immutable for provenance.</li>
+    </ul>
+
+    <h4>The three-tier procedure (reference)</h4>
+    <div class="tbl-scroll">
+    <table class="tbl">
+      <thead><tr><th>Tier</th><th>Method</th><th>Output</th><th>Evidence grade</th><th>Status (3 June 2026)</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>Tier 0</strong></td>
+          <td>Prior elicitation (this document)</td>
+          <td>Expert-ranked driver list per archetype, with physical rationale</td>
+          <td>Hypothesis — no data</td>
+          <td class="mono" style="color:var(--teal)">COMPLETE (v0)</td>
+        </tr>
+        <tr>
+          <td><strong>Tier 1</strong></td>
+          <td>Morris elementary effects screening</td>
+          <td>μ*/σ scatter per parameter; verdict (negligible / clean main / interaction)</td>
+          <td>Screening — r×(k+1) designed runs</td>
+          <td class="mono" style="color:var(--ink-soft)">NOT STARTED (Track B)</td>
+        </tr>
+        <tr>
+          <td><strong>Tier 2</strong></td>
+          <td>Sobol total-order confirmation</td>
+          <td>First-order and total-order sensitivity indices; interaction quantification</td>
+          <td>Audit grade — variance decomposition</td>
+          <td class="mono" style="color:var(--ink-soft)">NOT STARTED (Track B)</td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+    <div class="note warn"><span class="tag">Use this document correctly</span>v0 is the baseline an auditor will compare the data-driven result against. Disagreement between the prior (this document) and the Morris result is <em>evidence</em> — it means the physics is doing something the expert did not expect, and that is the most valuable finding the screening procedure can produce. Do not silently update this document when screening contradicts it — let it stand and document the discrepancy in v1.</div>
+
+    <p>Full governance architecture — internal decision register, external challenge protocol, recalibration triggers, and change control — is specified in §06 of <em>journey_to_the_digital_twin.html</em>.</p>
+  </section>
+
+  <footer>
+    <span>Archetype Matrix · v0 · Prior elicitation · 3 June 2026 — superseded by v1 when Morris screening completes</span>
+    <span>5320 Onboarding · Extreme AP / EP1 Parameter Twin</span>
+    <span>© 2026 Khursheed Khan</span>
+  </footer>
+
+</div>
+
+<script>
+  // ---- Archetype selector: clicking §01 row highlights §03 lever rows ----
+  const archRows = document.querySelectorAll('.arch-row[data-arch]');
+  const leverRows = document.querySelectorAll('.lever-row[data-arch]');
+  let activeArch = null;
+
+  archRows.forEach(row => {
+    // Only rows in §01 archetype table are interactive
+    if (row.closest('#archetype-table')) {
+      row.addEventListener('click', () => {
+        const arch = row.dataset.arch;
+
+        // Toggle off if same archetype clicked again
+        if (activeArch === arch) {
+          activeArch = null;
+          archRows.forEach(r => r.classList.remove('selected'));
+          leverRows.forEach(r => r.classList.remove('highlighted'));
+          return;
+        }
+
+        activeArch = arch;
+
+        // Update archetype row selections
+        archRows.forEach(r => {
+          if (r.closest('#archetype-table')) {
+            r.classList.toggle('selected', r.dataset.arch === arch);
+          }
+        });
+
+        // Highlight matching lever rows
+        leverRows.forEach(r => {
+          r.classList.toggle('highlighted', r.dataset.arch === arch);
+        });
+
+        // Smooth scroll to §03 if not visible
+        const leverSection = document.getElementById('stadium');
+        const rect = leverSection.getBoundingClientRect();
+        if (rect.top > window.innerHeight || rect.bottom < 0) {
+          leverSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      });
+    }
+  });
+
+  // ---- Staggered scroll reveal ----
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.style.opacity = '1';
+        e.target.style.transform = 'none';
+        io.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.06 });
+
+  document.querySelectorAll('section').forEach(s => {
+    s.style.opacity = '0';
+    s.style.transform = 'translateY(12px)';
+    s.style.transition = 'opacity .7s cubic-bezier(.2,.7,.2,1), transform .7s cubic-bezier(.2,.7,.2,1)';
+    io.observe(s);
+  });
+</script>
+</body>
+</html>

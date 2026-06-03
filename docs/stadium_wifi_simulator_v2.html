@@ -58,6 +58,17 @@ input:checked+.ts:before{transform:translateX(15px);background:#fff}
 .bt.act.g6{border-bottom:2px solid var(--pur)}
 .bt.act.agg{border-bottom:2px solid var(--green)}
 .bt.act.gap{border-bottom:2px solid var(--gold)}
+.bt.act.mc{border-bottom:2px solid var(--cyan)}
+.bt.act.optz{border-bottom:2px solid var(--org)}
+.mc-tbl{width:100%;border-collapse:collapse;font-size:9px;margin-top:5px}
+.mc-tbl th{font-size:8px;color:var(--mut);text-transform:uppercase;letter-spacing:.8px;padding:4px 6px;border-bottom:1px solid var(--bd);text-align:left}
+.mc-tbl td{padding:4px 6px;border-bottom:1px solid #0d0f12;font-weight:600}
+.mc-tbl tr:last-child td{border-bottom:none}
+.mc-breach{display:flex;gap:5px;margin-top:7px}
+.mc-bc{flex:1;background:#0d0f12;border:1px solid var(--bd);border-radius:2px;padding:5px;text-align:center}
+.mc-bn{font-size:8px;color:var(--mut);text-transform:uppercase;letter-spacing:.6px;margin-bottom:2px}
+.mc-bv{font-size:15px;font-weight:700}
+.opt-log{height:90px;background:#070809;border:1px solid var(--bd);overflow-y:auto;padding:4px 7px;font-size:8px;border-radius:2px;margin:5px 0;line-height:1.5;color:var(--mut2)}
 .bp{display:none}.bp.vis{display:block}
 .mg{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:8px}
 .mc{background:#0d0f12;border:1px solid var(--bd);border-radius:2px;padding:7px 9px}
@@ -297,6 +308,8 @@ input:checked+.ts:before{transform:translateX(15px);background:#fff}
     <div class="bt g6" id="tb-6g" onclick="showB('6g')">6 GHz</div>
     <div class="bt agg" id="tb-agg" onclick="showB('agg')">Aggregate</div>
     <div class="bt gap" id="tb-gap" onclick="showB('gap')">Gap Analysis</div>
+    <div class="bt mc" id="tb-mc" onclick="showB('mc')">Monte Carlo</div>
+    <div class="bt optz" id="tb-optz" onclick="showB('optz')">Optimizer</div>
   </div>
   <div class="mloc" id="mloc">
     <div class="mlot">⚡ MLO Active — 5GHz + 6GHz Bonded</div>
@@ -350,6 +363,50 @@ input:checked+.ts:before{transform:translateX(15px);background:#fff}
       <tbody id="gap-body"></tbody>
     </table>
     <div id="gap-none" style="display:none;font-size:9px;color:var(--green);padding:12px;text-align:center">✓ All parameters match Stadium Optimal — maximum QoE</div>
+  </div>
+
+  <!-- MONTE CARLO PANEL -->
+  <div class="bp" id="bp-mc">
+    <div style="font-size:9px;color:var(--mut2);margin-bottom:7px">Poisson fan arrivals + Pareto per-client demand → P5/P50/P95 bands over N stochastic runs. Uses current 60-param config as baseline.</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;margin-bottom:7px">
+      <div>
+        <div style="font-size:8px;color:var(--mut);text-transform:uppercase;letter-spacing:.8px;margin-bottom:3px">Iterations</div>
+        <select id="mc-iter" style="background:#111;border:1px solid var(--bd);color:var(--text);padding:3px 5px;border-radius:2px;font-size:9px;width:100%;font-family:inherit">
+          <option value="100">100 (fast)</option><option value="200" selected>200</option><option value="500">500</option><option value="1000">1000</option>
+        </select>
+      </div>
+      <div>
+        <div style="font-size:8px;color:var(--mut);text-transform:uppercase;letter-spacing:.8px;margin-bottom:3px">Demand CV</div>
+        <select id="mc-var" style="background:#111;border:1px solid var(--bd);color:var(--text);padding:3px 5px;border-radius:2px;font-size:9px;width:100%;font-family:inherit">
+          <option value="10">±10%</option><option value="20" selected>±20%</option><option value="30">±30%</option>
+        </select>
+      </div>
+      <div>
+        <div style="font-size:8px;color:var(--mut);text-transform:uppercase;letter-spacing:.8px;margin-bottom:3px">Pareto α</div>
+        <select id="mc-alpha" style="background:#111;border:1px solid var(--bd);color:var(--text);padding:3px 5px;border-radius:2px;font-size:9px;width:100%;font-family:inherit">
+          <option value="1.5">1.5 (heavy)</option><option value="2.0" selected>2.0</option><option value="3.0">3.0 (light)</option>
+        </select>
+      </div>
+    </div>
+    <button id="mc-run-btn" onclick="runMC()" style="width:100%;background:#0a1a30;border:1px solid var(--cyan);color:var(--cyan);padding:5px;border-radius:2px;cursor:pointer;font-size:9px;font-family:inherit;margin-bottom:5px">▶ Run Monte Carlo</button>
+    <div id="mc-results" style="display:none"></div>
+  </div>
+
+  <!-- OPTIMIZER PANEL -->
+  <div class="bp" id="bp-optz">
+    <div style="font-size:9px;color:var(--mut2);margin-bottom:7px">Coordinate ascent over 15 non-trivial knobs (threshold + interaction rows). Gate/monotone knobs locked to optimal. <span style="color:var(--yel)">Optimization against this model — not calibration to measurements.</span></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:7px">
+      <div>
+        <div style="font-size:8px;color:var(--mut);text-transform:uppercase;letter-spacing:.8px;margin-bottom:3px">Rounds</div>
+        <select id="opt-rounds" style="background:#111;border:1px solid var(--bd);color:var(--text);padding:3px 5px;border-radius:2px;font-size:9px;width:100%;font-family:inherit">
+          <option value="1">1 round</option><option value="2" selected>2 rounds</option><option value="3">3 rounds</option>
+        </select>
+      </div>
+      <div style="padding-top:16px;font-size:9px;color:var(--cyan)">15 knobs · 4–6 values each</div>
+    </div>
+    <button id="opt-run-btn" onclick="runOpt()" style="width:100%;background:#1a0a00;border:1px solid var(--org);color:var(--org);padding:5px;border-radius:2px;cursor:pointer;font-size:9px;font-family:inherit;margin-bottom:3px">★ Optimize Stadium Config</button>
+    <div id="opt-log" class="opt-log"></div>
+    <div id="opt-results" style="display:none"></div>
   </div>
 
   <!-- Service class SLAs -->
@@ -934,7 +991,7 @@ function update(){
 // ═══ BAND TAB ═══
 function showB(b){
   activeBand=b;
-  ['2g','5g','6g','agg','gap'].forEach(k=>{g(`tb-${k}`)?.classList.remove('act');g(`bp-${k}`)?.classList.remove('vis');});
+  ['2g','5g','6g','agg','gap','mc','optz'].forEach(k=>{g(`tb-${k}`)?.classList.remove('act');g(`bp-${k}`)?.classList.remove('vis');});
   g(`tb-${b}`)?.classList.add('act');g(`bp-${b}`)?.classList.add('vis');
 }
 
@@ -1187,6 +1244,195 @@ function copyCfg(){
   navigator.clipboard.writeText(t).then(()=>addLog('Config copied to clipboard','ok')).catch(()=>addLog('Copy failed — use Ctrl+A in export panel','warn'));
 }
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeCfg();});
+
+// ═══ MONTE CARLO ═══
+function paretoSample(alpha){
+  const a=Math.max(1.01,+alpha);
+  const xm=(a-1)/a;
+  return Math.min(3.5,xm*Math.pow(Math.random(),-1/a));
+}
+function pct(arr,p){
+  const s=[...arr].sort((a,b)=>a-b);
+  return s[Math.max(0,Math.floor(p/100*(s.length-1)))];
+}
+function runMonteCarlo(baseOverride){
+  const n=+(g('mc-iter')||{value:200}).value;
+  const dv=+(g('mc-var')||{value:20}).value/100;
+  const alpha=+(g('mc-alpha')||{value:2}).value;
+  const base=baseOverride||readInputs();
+  const scores=[],airs=[],lats=[],posLats=[],tputs=[];
+  for(let i=0;i<n;i++){
+    const fanF=0.85+Math.random()*0.30;
+    const demM=paretoSample(alpha);
+    const dvF=1+(Math.random()*2-1)*dv;
+    const ov={fans:Math.round(base.fans*fanF),concur:Math.min(0.98,Math.max(0.05,base.concur*demM*dvF))};
+    const r=compute(Object.assign({},base,ov));
+    scores.push(r.score);airs.push(r.wAir);lats.push(r.wLat);posLats.push(r.posLat);tputs.push(r.bestTP);
+  }
+  return{
+    score:{p5:pct(scores,5),p50:pct(scores,50),p95:pct(scores,95)},
+    air:{p5:pct(airs,5),p50:pct(airs,50),p95:pct(airs,95)},
+    lat:{p5:pct(lats,5),p50:pct(lats,50),p95:pct(lats,95)},
+    posLat:{p5:pct(posLats,5),p50:pct(posLats,50),p95:pct(posLats,95)},
+    tput:{p5:pct(tputs,5),p50:pct(tputs,50),p95:pct(tputs,95)},
+    breachAir:+(airs.filter(a=>a>70).length/n*100).toFixed(1),
+    breachPos:+(posLats.filter(l=>l>10).length/n*100).toFixed(1),
+    spread:pct(scores,95)-pct(scores,5),n
+  };
+}
+function mcCol(metric,val){
+  if(metric==='score')return val>=85?CM.green:val>=65?CM.yellow:val>=40?CM.orange:CM.red;
+  if(metric==='air')return val<=70?CM.green:val<=85?CM.yellow:CM.red;
+  if(metric==='lat')return val<=20?CM.green:val<=50?CM.yellow:CM.red;
+  if(metric==='posLat')return val<=10?CM.green:val<=15?CM.yellow:CM.red;
+  if(metric==='tput')return val>=10?CM.green:val>=5?CM.yellow:CM.red;
+  return CM.green;
+}
+function renderMCResults(r,label){
+  const panel=g('mc-results');if(!panel)return;
+  const rows=[
+    {name:'Score',key:'score',unit:'/100'},
+    {name:'Airtime',key:'air',unit:'%'},
+    {name:'Latency',key:'lat',unit:'ms'},
+    {name:'POS Latency',key:'posLat',unit:'ms'},
+    {name:'Tput/Client',key:'tput',unit:'M'},
+  ];
+  let h=`<div style="font-size:8px;color:var(--mut);margin-bottom:4px;text-transform:uppercase;letter-spacing:.8px">${label||'Results'} — ${r.n} iterations</div>`;
+  h+=`<table class="mc-tbl"><thead><tr><th>Metric</th><th>P5</th><th style="color:var(--cyan)">P50</th><th>P95</th></tr></thead><tbody>`;
+  rows.forEach(row=>{
+    const d=r[row.key];
+    h+=`<tr><td style="color:var(--mut2)">${row.name}</td>
+      <td style="color:${mcCol(row.key,d.p5)}">${typeof d.p5==='number'&&row.key==='tput'?d.p5.toFixed(1):d.p5}${row.unit}</td>
+      <td style="color:var(--cyan)">${typeof d.p50==='number'&&row.key==='tput'?d.p50.toFixed(1):d.p50}${row.unit}</td>
+      <td style="color:${mcCol(row.key,d.p95)}">${typeof d.p95==='number'&&row.key==='tput'?d.p95.toFixed(1):d.p95}${row.unit}</td></tr>`;
+  });
+  h+=`</tbody></table>`;
+  h+=`<div class="mc-breach">
+    <div class="mc-bc"><div class="mc-bn">Airtime Breach</div>
+      <div class="mc-bv" style="color:${r.breachAir>20?CM.red:r.breachAir>5?CM.yellow:CM.green}">${r.breachAir}%</div>
+      <div style="font-size:8px;color:var(--mut)">P(air>70%)</div></div>
+    <div class="mc-bc"><div class="mc-bn">POS SLA Breach</div>
+      <div class="mc-bv" style="color:${r.breachPos>1?CM.red:r.breachPos>0?CM.yellow:CM.green}">${r.breachPos}%</div>
+      <div style="font-size:8px;color:var(--mut)">P(pos>10ms)</div></div>
+    <div class="mc-bc"><div class="mc-bn">Score Spread</div>
+      <div class="mc-bv" style="color:${r.spread>30?CM.red:r.spread>15?CM.yellow:CM.green}">${r.spread}</div>
+      <div style="font-size:8px;color:var(--mut)">P95−P5 pts</div></div>
+  </div>
+  <div style="font-size:8px;color:var(--yel);margin-top:5px;padding:3px 6px;background:#1a1000;border-left:2px solid var(--yel)">
+    Model uncertainty bands — coefficients are unvalidated priors. Track B (ns-3 + AP telemetry) converts these to measurement uncertainty.
+  </div>`;
+  panel.innerHTML=h;panel.style.display='block';
+}
+function runMC(baseOverride){
+  const btn=g('mc-run-btn');
+  if(btn){btn.disabled=true;btn.textContent='Running…';}
+  setTimeout(()=>{
+    const r=runMonteCarlo(baseOverride);
+    renderMCResults(r,baseOverride?'Robustness check':'Current config');
+    if(btn){btn.disabled=false;btn.textContent='▶ Run Monte Carlo';}
+    addLog(`MC n=${r.n} P50score=${r.score.p50} breach:air=${r.breachAir}% pos=${r.breachPos}%`,'info');
+  },20);
+}
+
+// ═══ OPTIMIZER ═══
+const OPT_SEARCH={
+  atFair:['off','adaptive','strict'],
+  txPwr:[7,11,14,17,20,23],
+  minRSSI:[-80,-75,-70],
+  rxSop:[-85,-75,-65],
+  cwBe:[7,15,31,63],
+  maxCli:[50,100,150,200],
+  mcsFloor:[0,2,4,6,8],
+  gi:[800,1600,3200],
+  fragThr:[256,1500,2346],
+  clientAgeout:[1,5,10,30],
+  dtim:[1,2,4,10],
+  rtsThr:[65535,2347,1500],
+  txopBe:[0,1504,3008],
+  roamCacheAge:[10,60,300],
+  muStreams:[1,2,4,8],
+};
+const OPT_LOCK={
+  ofdmaDL:true,ofdmaUL:true,muMimo:true,bssColor:true,rtwt:true,multiRU:true,
+  mloOn:true,r80211:true,kv:true,bcf:true,mc2uc:true,proxyArp:true,
+  enhRNR:true,pmf:true,airdef:true,ignBcastProbe:true,wmmAcVo:true,
+  wmmAcVi:true,uapsd:true,bsMode:'active',mloMode:'STR',mloLinks:2,
+  mloSteer:'ai',qam4k:true,mbr:24,macDosPrev:true,ipDosPrev:true,
+  mcastDrop:true,mc2ucThr:60,mc2ucMbr:10,punct:true,
+};
+let optResult=null;
+function optObj(res){return res.posPass?res.score:res.score-35;}
+function runOpt(){
+  const btn=g('opt-run-btn');const log=g('opt-log');
+  const rounds=+(g('opt-rounds')||{value:2}).value;
+  if(btn){btn.disabled=true;btn.textContent='Optimizing…';}
+  if(log)log.innerHTML='';
+  function L(msg){if(log){log.innerHTML+=`<div>${msg}</div>`;log.scrollTop=log.scrollHeight;}}
+  setTimeout(()=>{
+    let cur=Object.assign({},readInputs(),OPT_LOCK);
+    let best=compute(cur);
+    L(`[init] score=${best.score} posPass=${best.posPass}`);
+    for(let r=0;r<rounds;r++){
+      for(const[knob,vals]of Object.entries(OPT_SEARCH)){
+        let bestV=cur[knob],bestO=optObj(compute(cur));
+        for(const v of vals){
+          const res=compute(Object.assign({},cur,{[knob]:v}));
+          const o=optObj(res);if(o>bestO){bestO=o;bestV=v;}
+        }
+        if(bestV!==cur[knob]){cur=Object.assign({},cur,{[knob]:bestV});L(`[r${r}] ${knob}=${bestV} → ${compute(cur).score}`);}
+      }
+      const res=compute(cur);if(res.score>best.score)best=res;
+    }
+    optResult=Object.assign({},best,{params:Object.assign({},cur)});
+    L(`[done] score=${best.score} posPass=${best.posPass}`);
+    renderOptResults(best,cur);
+    if(btn){btn.disabled=false;btn.textContent='★ Optimize Stadium Config';}
+    addLog(`Optimizer: ${best.score}/100 posPass=${best.posPass}`,'ok');
+  },20);
+}
+const OPT_KNOB_LABELS={atFair:'Airtime Fairness',txPwr:'TX Power',minRSSI:'Min RSSI',rxSop:'RX-SOP',cwBe:'CWmin BE',maxCli:'Max Clients',mcsFloor:'MCS Floor',gi:'Guard Interval',fragThr:'Frag Threshold',clientAgeout:'Client Ageout',dtim:'DTIM',rtsThr:'RTS/CTS',txopBe:'TXOP BE',roamCacheAge:'Roam Cache Age',muStreams:'MU-MIMO Streams'};
+function renderOptResults(best,params){
+  const panel=g('opt-results');if(!panel)return;
+  const cur=readInputs();const curScore=compute(cur).score;
+  const delta=best.score-curScore;
+  const changes=[];
+  for(const k of Object.keys(OPT_SEARCH)){if(params[k]!==cur[k])changes.push({k,from:cur[k],to:params[k]});}
+  let h=`<div style="padding:6px;background:#001428;border:1px solid var(--blue);border-radius:2px;margin-bottom:5px">
+    <div style="font-size:8px;color:var(--mut);text-transform:uppercase;letter-spacing:.8px;margin-bottom:4px">Result</div>
+    <div style="display:flex;gap:12px">
+      <div><div style="font-size:18px;font-weight:700;color:${best.score>=85?CM.green:CM.yellow}">${best.score}</div><div style="font-size:8px;color:var(--mut)">/100</div></div>
+      <div><div style="font-size:14px;font-weight:700;color:${delta>=0?CM.green:CM.red}">${delta>=0?'+':''}${delta}</div><div style="font-size:8px;color:var(--mut)">vs current</div></div>
+      <div><div style="font-size:12px;font-weight:700;color:${best.posPass?CM.green:CM.red}">${best.posPass?'POS ✓':'POS ✗'}</div><div style="font-size:8px;color:var(--mut)">SLA ≤10ms</div></div>
+    </div></div>`;
+  if(changes.length>0){
+    h+=`<div style="font-size:8px;color:var(--mut);text-transform:uppercase;letter-spacing:.8px;margin:5px 0 3px">${changes.length} knob(s) changed</div>`;
+    h+=`<table class="mc-tbl"><thead><tr><th>Knob</th><th>Current</th><th style="color:var(--cyan)">Optimal</th></tr></thead><tbody>`;
+    changes.forEach(c=>{h+=`<tr><td style="color:var(--mut2)">${OPT_KNOB_LABELS[c.k]||c.k}</td><td style="color:var(--yel)">${c.from}</td><td style="color:${CM.green}">${c.to}</td></tr>`;});
+    h+=`</tbody></table>`;
+  } else {
+    h+=`<div style="font-size:9px;color:${CM.green};padding:8px;text-align:center">✓ Current config already optimal for these 15 knobs</div>`;
+  }
+  h+=`<div style="display:flex;gap:5px;margin-top:7px">
+    <button onclick="applyOptResult()" style="flex:1;background:#001428;border:1px solid var(--blue);color:var(--blue);padding:5px;border-radius:2px;cursor:pointer;font-size:9px;font-family:inherit">Apply Config</button>
+    <button onclick="checkRobustness()" style="flex:1;background:#0a0820;border:1px solid var(--pur);color:var(--pur);padding:5px;border-radius:2px;cursor:pointer;font-size:9px;font-family:inherit">Check Robustness →</button>
+  </div>
+  <div style="font-size:8px;color:var(--mut);margin-top:3px;font-style:italic">Robustness: runs MC on optimal config → compare P95 breach vs current</div>`;
+  panel.innerHTML=h;panel.style.display='block';
+}
+function applyOptResult(){
+  if(!optResult)return;
+  const p=optResult.params;
+  applyOptimal();
+  const m={atFair:'at-fair',txPwr:'tx-pwr',minRSSI:'min-rssi',rxSop:'rx-sop',cwBe:'cw-be',maxCli:'max-cli',mcsFloor:'mcs-floor',gi:'guard-int',fragThr:'frag-thr',clientAgeout:'client-ageout',dtim:'dtim',rtsThr:'rts-thr',txopBe:'txop-be',roamCacheAge:'roam-cache-age',muStreams:'mu-streams'};
+  for(const[k,id]of Object.entries(m)){const el=g(id);if(el)el.value=p[k];}
+  addLog(`Optimizer config applied — ${optResult.score}/100`,'ok');
+  update();
+}
+function checkRobustness(){
+  if(!optResult)return;
+  showB('mc');
+  setTimeout(()=>runMC(optResult.params),60);
+}
 
 // ═══ WIRE EVENTS + INIT ═══
 document.querySelectorAll('input[type=range],select').forEach(el=>el.addEventListener('input',update));
