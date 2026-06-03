@@ -1255,11 +1255,14 @@ function pct(arr,p){
   const s=[...arr].sort((a,b)=>a-b);
   return s[Math.max(0,Math.floor(p/100*(s.length-1)))];
 }
-function runMonteCarlo(baseOverride){
-  const n=+(g('mc-iter')||{value:200}).value;
+// nOverride: skip UI element lookup (used by optimizer inner loop to cap at 100/trial)
+function runMonteCarlo(baseOverride,nOverride){
+  const n=nOverride||+(g('mc-iter')||{value:200}).value;
   const dv=+(g('mc-var')||{value:20}).value/100;
   const alpha=+(g('mc-alpha')||{value:2}).value;
   const base=baseOverride||readInputs();
+  // rTWT ON + MLO → hardware-scheduled POS slots guarantee ≤3ms; otherwise ≤10ms SLA
+  const posThreshold=base.rtwt!==false?3:10;
   const scores=[],airs=[],lats=[],posLats=[],tputs=[];
   for(let i=0;i<n;i++){
     const fanF=0.85+Math.random()*0.30;
@@ -1276,8 +1279,8 @@ function runMonteCarlo(baseOverride){
     posLat:{p5:pct(posLats,5),p50:pct(posLats,50),p95:pct(posLats,95)},
     tput:{p5:pct(tputs,5),p50:pct(tputs,50),p95:pct(tputs,95)},
     breachAir:+(airs.filter(a=>a>70).length/n*100).toFixed(1),
-    breachPos:+(posLats.filter(l=>l>10).length/n*100).toFixed(1),
-    spread:pct(scores,95)-pct(scores,5),n
+    breachPos:+(posLats.filter(l=>l>posThreshold).length/n*100).toFixed(1),
+    posThreshold,spread:pct(scores,95)-pct(scores,5),n
   };
 }
 function mcCol(metric,val){
@@ -1313,7 +1316,7 @@ function renderMCResults(r,label){
       <div style="font-size:8px;color:var(--mut)">P(air>70%)</div></div>
     <div class="mc-bc"><div class="mc-bn">POS SLA Breach</div>
       <div class="mc-bv" style="color:${r.breachPos>1?CM.red:r.breachPos>0?CM.yellow:CM.green}">${r.breachPos}%</div>
-      <div style="font-size:8px;color:var(--mut)">P(pos>10ms)</div></div>
+      <div style="font-size:8px;color:var(--mut)">P(pos>${r.posThreshold||10}ms) ${(r.posThreshold||10)===3?'· rTWT':''}</div></div>
     <div class="mc-bc"><div class="mc-bn">Score Spread</div>
       <div class="mc-bv" style="color:${r.spread>30?CM.red:r.spread>15?CM.yellow:CM.green}">${r.spread}</div>
       <div style="font-size:8px;color:var(--mut)">P95−P5 pts</div></div>
@@ -1335,6 +1338,14 @@ function runMC(baseOverride){
 }
 
 // ═══ OPTIMIZER ═══
+// Stadium-outdoor search set: 12 knobs with genuine interior tradeoffs.
+// Removed from search (context-modulated → locked at archetype value):
+//   gi=1600  — τ_RMS frozen by "outdoor-bowl" archetype; GI is determined, not free
+//   muStreams=8  — monotone gain; angular spread frozen by archetype → lock to max
+//   clientAgeout=5  — long-dwell/low-roam venue; ageout is a regime constant, not a tradeoff
+//   roamCacheAge=60  — match game duration; roaming rate too low to move the objective
+// Added to search:
+//   bw5g  — 80 vs 160 MHz: wider isn't monotone at stadium density (spatial reuse vs capacity)
 const OPT_SEARCH={
   atFair:['off','adaptive','strict'],
   txPwr:[7,11,14,17,20,23],
@@ -1343,14 +1354,11 @@ const OPT_SEARCH={
   cwBe:[7,15,31,63],
   maxCli:[50,100,150,200],
   mcsFloor:[0,2,4,6,8],
-  gi:[800,1600,3200],
+  bw5g:[80,160],
   fragThr:[256,1500,2346],
-  clientAgeout:[1,5,10,30],
   dtim:[1,2,4,10],
   rtsThr:[65535,2347,1500],
   txopBe:[0,1504,3008],
-  roamCacheAge:[10,60,300],
-  muStreams:[1,2,4,8],
 };
 const OPT_LOCK={
   ofdmaDL:true,ofdmaUL:true,muMimo:true,bssColor:true,rtwt:true,multiRU:true,
@@ -1359,27 +1367,39 @@ const OPT_LOCK={
   wmmAcVi:true,uapsd:true,bsMode:'active',mloMode:'STR',mloLinks:2,
   mloSteer:'ai',qam4k:true,mbr:24,macDosPrev:true,ipDosPrev:true,
   mcastDrop:true,mc2ucThr:60,mc2ucMbr:10,punct:true,
+  gi:1600,muStreams:8,clientAgeout:5,roamCacheAge:60,
 };
 let optResult=null;
-function optObj(res){return res.posPass?res.score:res.score-35;}
 function runOpt(){
   const btn=g('opt-run-btn');const log=g('opt-log');
   const rounds=+(g('opt-rounds')||{value:2}).value;
-  if(btn){btn.disabled=true;btn.textContent='Optimizing…';}
+  if(btn){btn.disabled=true;btn.textContent='Optimizing (MC)…';}
   if(log)log.innerHTML='';
   function L(msg){if(log){log.innerHTML+=`<div>${msg}</div>`;log.scrollTop=log.scrollHeight;}}
+  // Chance-constrained objective — evaluated via MC (100 draws/trial for speed).
+  // Priority order: POS SLA (−50) > admitted count (−20) > P50 utility − 0.5·spread
+  // This is the §03 robust form: maximize P50[U(θ)] − k·(P95−P5) s.t. P(posLat>thr)≤1%
+  function mcObj(params){
+    const r=runMonteCarlo(params,100); // 100 draws per candidate — enough to rank; final check uses full UI count
+    const util=r.score.p50-0.5*(r.score.p95-r.score.p5);
+    const posPen=r.breachPos>1?50:0;  // hard: P(posLat > rTWT-aware threshold) ≤ 1%
+    const pt=compute(params);
+    const strandPen=pt.active>params.maxCli*280?Math.min(20,(pt.active-params.maxCli*280)/500):0; // admitted-count floor
+    return util-posPen-strandPen;
+  }
   setTimeout(()=>{
     let cur=Object.assign({},readInputs(),OPT_LOCK);
     let best=compute(cur);
-    L(`[init] score=${best.score} posPass=${best.posPass}`);
+    const initR=runMonteCarlo(cur,100);
+    L(`[init] P50=${initR.score.p50} spread=${initR.spread} POS-breach=${initR.breachPos}% (thr=${initR.posThreshold}ms)`);
     for(let r=0;r<rounds;r++){
       for(const[knob,vals]of Object.entries(OPT_SEARCH)){
-        let bestV=cur[knob],bestO=optObj(compute(cur));
+        let bestV=cur[knob],bestO=mcObj(cur);
         for(const v of vals){
-          const res=compute(Object.assign({},cur,{[knob]:v}));
-          const o=optObj(res);if(o>bestO){bestO=o;bestV=v;}
+          const o=mcObj(Object.assign({},cur,{[knob]:v}));
+          if(o>bestO){bestO=o;bestV=v;}
         }
-        if(bestV!==cur[knob]){cur=Object.assign({},cur,{[knob]:bestV});L(`[r${r}] ${knob}=${bestV} → ${compute(cur).score}`);}
+        if(bestV!==cur[knob]){cur=Object.assign({},cur,{[knob]:bestV});L(`[r${r}] ${knob}=${bestV} → score=${compute(cur).score}`);}
       }
       const res=compute(cur);if(res.score>best.score)best=res;
     }
@@ -1387,10 +1407,10 @@ function runOpt(){
     L(`[done] score=${best.score} posPass=${best.posPass}`);
     renderOptResults(best,cur);
     if(btn){btn.disabled=false;btn.textContent='★ Optimize Stadium Config';}
-    addLog(`Optimizer: ${best.score}/100 posPass=${best.posPass}`,'ok');
+    addLog(`Optimizer (MC-inside n=100/trial): ${best.score}/100 posPass=${best.posPass}`,'ok');
   },20);
 }
-const OPT_KNOB_LABELS={atFair:'Airtime Fairness',txPwr:'TX Power',minRSSI:'Min RSSI',rxSop:'RX-SOP',cwBe:'CWmin BE',maxCli:'Max Clients',mcsFloor:'MCS Floor',gi:'Guard Interval',fragThr:'Frag Threshold',clientAgeout:'Client Ageout',dtim:'DTIM',rtsThr:'RTS/CTS',txopBe:'TXOP BE',roamCacheAge:'Roam Cache Age',muStreams:'MU-MIMO Streams'};
+const OPT_KNOB_LABELS={atFair:'Airtime Fairness',txPwr:'TX Power',minRSSI:'Min RSSI',rxSop:'RX-SOP',cwBe:'CWmin BE',maxCli:'Max Clients',mcsFloor:'MCS Floor',bw5g:'5G Channel Width',fragThr:'Frag Threshold',dtim:'DTIM',rtsThr:'RTS/CTS',txopBe:'TXOP BE'};
 function renderOptResults(best,params){
   const panel=g('opt-results');if(!panel)return;
   const cur=readInputs();const curScore=compute(cur).score;
@@ -1410,7 +1430,7 @@ function renderOptResults(best,params){
     changes.forEach(c=>{h+=`<tr><td style="color:var(--mut2)">${OPT_KNOB_LABELS[c.k]||c.k}</td><td style="color:var(--yel)">${c.from}</td><td style="color:${CM.green}">${c.to}</td></tr>`;});
     h+=`</tbody></table>`;
   } else {
-    h+=`<div style="font-size:9px;color:${CM.green};padding:8px;text-align:center">✓ Current config already optimal for these 15 knobs</div>`;
+    h+=`<div style="font-size:9px;color:${CM.green};padding:8px;text-align:center">✓ Current config already optimal for these 12 knobs</div>`;
   }
   h+=`<div style="display:flex;gap:5px;margin-top:7px">
     <button onclick="applyOptResult()" style="flex:1;background:#001428;border:1px solid var(--blue);color:var(--blue);padding:5px;border-radius:2px;cursor:pointer;font-size:9px;font-family:inherit">Apply Config</button>
@@ -1423,7 +1443,7 @@ function applyOptResult(){
   if(!optResult)return;
   const p=optResult.params;
   applyOptimal();
-  const m={atFair:'at-fair',txPwr:'tx-pwr',minRSSI:'min-rssi',rxSop:'rx-sop',cwBe:'cw-be',maxCli:'max-cli',mcsFloor:'mcs-floor',gi:'guard-int',fragThr:'frag-thr',clientAgeout:'client-ageout',dtim:'dtim',rtsThr:'rts-thr',txopBe:'txop-be',roamCacheAge:'roam-cache-age',muStreams:'mu-streams'};
+  const m={atFair:'at-fair',txPwr:'tx-pwr',minRSSI:'min-rssi',rxSop:'rx-sop',cwBe:'cw-be',maxCli:'max-cli',mcsFloor:'mcs-floor',bw5g:'bw5g',fragThr:'frag-thr',dtim:'dtim',rtsThr:'rts-thr',txopBe:'txop-be'};
   for(const[k,id]of Object.entries(m)){const el=g(id);if(el)el.value=p[k];}
   addLog(`Optimizer config applied — ${optResult.score}/100`,'ok');
   update();
