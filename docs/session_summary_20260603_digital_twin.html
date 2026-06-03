@@ -181,6 +181,7 @@
 </header>
 
 <nav id="toc">
+  <a href="#s-companion">Claude AI</a>
   <a href="#s00">§00 Overview</a>
   <a href="#s01">§01 Claude AI Artifacts</a>
   <a href="#s02">§02 Claude Code Artifacts</a>
@@ -188,6 +189,160 @@
   <a href="#s04">§04 Open Items</a>
   <a href="#s05">§05 Artifacts Index</a>
 </nav>
+
+<!-- ══ CLAUDE AI COMPANION NARRATIVES ══ -->
+<section id="s-companion">
+  <h2>Claude AI Companion Narratives</h2>
+
+  <p>This morning Claude AI (claude.ai) built three standalone reference documents that frame the day's work. The narrative explanations below are drawn directly from those documents. Read these before the session notes — they explain <em>why</em> the artifacts exist and how to think about them.</p>
+
+  <div class="artifact-banner">
+    <div class="ab-label">Standalone Documents — open any in a new tab</div>
+    <div class="ab-title">Three companion artifacts from Claude AI</div>
+    <div class="ab-meta">
+      <a href="journey_to_the_digital_twin.html" target="_blank">→ Journey to the Digital Twin (strategy record, v1.1)</a><br>
+      <a href="stadium_parameter_codex.html" target="_blank">→ The Stadium Codex — Sixty Parameters, Twelve That Matter</a><br>
+      <a href="archetype_matrix_v0.html" target="_blank">→ The Archetype Matrix — Prime Levers Across Five Classes</a>
+    </div>
+  </div>
+
+  <!-- ── PART 1: The Premise ── -->
+  <h3>I. The Premise — What We Are Building (and What We Are Not)</h3>
+
+  <p>We are not building a general-purpose "WiFi industry" digital twin. That object does not exist as a product, and chasing it is a research career, not an SA deliverable. We are building something narrower, more tractable, and more valuable: a <strong>parameter-tuning and calibration engine for Extreme AP deployments through Extreme Platform One</strong>, whose output is a library of <em>per-archetype golden parameter sets</em>.</p>
+
+  <p>The cellular instinct is the right one. In 5G you carry standardized parameter templates for macro, small-cell, dense-urban, indoor-DAS. WiFi has no equivalent — and that absence is not an oversight. Cellular earned its golden sets through enormous measurement campaigns against a <em>scheduled, licensed, deterministic</em> air interface where the operator owns every device. WiFi's medium is contention-based, unlicensed, and full of clients we do not own, so the same parameter that is optimal in one room is wrong two rooms over. No vendor ships golden sets because they cannot be shipped generically — which is exactly why building them, defensibly, is an edge rather than a download.</p>
+
+  <div class="callout">
+    <p style="margin:0;font-style:italic;font-size:1.05rem">"The unit of the golden-set library is the <strong>archetype</strong>, not the site. You will never have a set for 'Lumen Field.' You will have one for the class it belongs to — and Lumen is one instance."</p>
+  </div>
+
+  <!-- ── PART 2: Dimensionality Collapse ── -->
+  <h3>II. From a 60-Dimensional Nightmare to ~15</h3>
+
+  <p>Sixty parameters with three settings each looks like 4×10²⁸ combinations. It is not, because three forces collapse the effective dimensionality to roughly twelve to eighteen per archetype: <strong>sparsity of effects</strong> (a handful of main effects explain most variance), <strong>conditional gating</strong> (MLO Mode and its subtree are dead dimensions unless MLO is on), and <strong>monotone saturation</strong> (BSS Color, Proxy ARP — direction known, nothing to search).</p>
+
+  <p>But the panel grouping (PHY / MAC / SSID) is the wrong axis for the twin. Group instead by <strong>how each parameter acts on QoE</strong>, because that dictates how it must be modeled:</p>
+
+  <table>
+    <thead>
+      <tr><th>Effect type</th><th>Behaviour</th><th>Representative parameters</th><th>Tunable alone?</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><strong>Multiplicative gain</strong></td><td>Scales capacity by a near-fixed factor; composes cleanly</td><td>OFDMA, BSS Color, Proxy ARP, BC Filter, MC→UC</td><td>Yes — the capMult chain</td></tr>
+      <tr><td><strong>Gate / enabler</strong></td><td>Step function; off = subtree dead, on = unlocks a regime</td><td>MLO links, 4K-QAM, rTWT, MU-MIMO on/off</td><td>Yes, but reshapes others</td></tr>
+      <tr><td><strong>Threshold / non-monotonic</strong></td><td>U-shaped — interior optimum, bad at both extremes</td><td>RX-SOP, Min RSSI, CWmin, TX Power, Max clients, DTIM</td><td class="red">No — the skill zone</td></tr>
+      <tr><td><strong>Interaction-coupled</strong></td><td>Effect depends on another parameter's state</td><td>TXOP-BE × rTWT, CWmin × load, MU-streams × angular spread</td><td class="red">No — co-tune</td></tr>
+      <tr><td><strong>Context-modulated</strong></td><td>Effect set entirely by the propagation regime</td><td>Guard Interval × delay spread, MCS Floor × path loss, RTS × density</td><td class="red">No — per archetype</td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout-blue">
+    <p style="margin:0"><strong>The structural insight:</strong> The current simulator models everything as rows 1–2 (multipliers and switches). That is why it is an honest teaching tool but a pre-alpha tuning engine: the real golden-set decisions are all made in rows 3–5, which a chain of <code>m *= factor</code> cannot represent. A multiplier chain can never <em>derive</em> an interior optimum — someone hand-placed TX=17, GI=1600, MaxClients=100. The twin's job is to make those optima emerge.</p>
+  </div>
+
+  <!-- ── PART 3: QoE Objective ── -->
+  <h3>III. The Stadium QoE Objective — What "Good" Means, Defensibly</h3>
+
+  <p>QoE is a <strong>vector</strong>, not a scalar, and parameters trade its components against one another. There is no single optimum — there is a Pareto frontier, and the archetype's SLA priority order selects a point on it. Stadium, mall, and convention center share the same frontier but pick <em>different points</em>, because their objective functions have different shapes.</p>
+
+  <div class="callout-green">
+    <h4 style="margin-top:0">Objective — Dense Public Venue (Stadium · Outdoor)</h4>
+    <p><strong>Maximize</strong> proportional-fairness utility over admitted clients:</p>
+    <pre class="blue" style="margin:6px 0 12px">U(θ) = Σᵢ∈admitted  log( throughputᵢ(θ) )</pre>
+    <p><strong>Subject to hard constraints:</strong></p>
+    <ul>
+      <li>POS / payment latency ≤ <strong>10 ms</strong> (≤ 3 ms where rTWT is on) — VLAN 50</li>
+      <li>Per-class throughput floors: VIP ≥ 25 Mbps, Teams/Video ≥ 5 Mbps</li>
+      <li>Packet loss ≤ <strong>1%</strong> on latency-sensitive classes</li>
+      <li>Admitted-client count ≥ deployment target (cannot strand fans)</li>
+    </ul>
+    <p style="margin-bottom:0"><strong>Priority order on conflict:</strong> <code>POS SLA &gt; fairness &gt; admitted count &gt; aggregate throughput &gt; per-client peak</code></p>
+  </div>
+
+  <div class="callout-blue">
+    <h4 style="margin-top:0">Robust Form — Evaluated Under Monte Carlo (Track A Optimizer)</h4>
+    <p>The point objective above is what the optimizer maximizes deterministically. Wrapped in Monte Carlo over demand, it becomes a <strong>chance-constrained robustness objective</strong>:</p>
+    <pre class="blue" style="margin:6px 0 12px">maximize  P50[ U(θ) ] − k · ( P95[U] − P5[U] )
+subject to  P( POS_latency ≤ 10 ms )  ≥  99%</pre>
+    <p style="margin-bottom:0">Central tendency minus a spread penalty, with the POS SLA enforced as a chance constraint. This makes the optimizer prefer a config that <strong>holds up at P95 kickoff surge</strong> over one that wins at P50 but breaches under load — the extra thing Monte Carlo buys.</p>
+  </div>
+
+  <!-- ── PART 4: The Twelve That Matter ── -->
+  <h3>IV. Sixty Parameters, Twelve That Matter</h3>
+
+  <p>The optimizer does not turn sixty dials. It searches only the handful with an interior optimum or a load-dependent threshold, locks the rest to their archetype-correct values, and treats demand and threats as the scenario it must survive. The classification — not the count — is the whole point.</p>
+
+  <p><strong>Three classes:</strong> <strong>SEARCH</strong> — interior optimum / threshold; the optimizer tunes it &nbsp;·&nbsp; <strong>LOCK</strong> — monotone gain, gate, or fixed by the archetype &nbsp;·&nbsp; <strong>SCENARIO</strong> — demand or threat input; not a knob</p>
+
+  <table>
+    <thead>
+      <tr><th>#</th><th>Prime Input</th><th>Why it has an interior optimum</th><th>QoE tension</th><th>Start</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>6</td><td><strong>TX Power</strong></td><td>Too high floods the bowl with co-channel interference; too low leaves dead seats.</td><td>COV↑ / CCI↑ FAIR↓</td><td>17 dBm</td></tr>
+      <tr><td>7</td><td><strong>5 GHz Channel Width</strong></td><td>Wider gives capacity but fewer non-overlapping channels — worse reuse in a dense bowl.</td><td>THR↑ / reuse↓</td><td>80 v 160</td></tr>
+      <tr><td>11</td><td><strong>RX-SOP Threshold</strong></td><td>Low defers to everything; high ignores real signal and invites hidden-node loss.</td><td>THR↑ LOSS↓</td><td>−75 dBm</td></tr>
+      <tr><td>12</td><td><strong>MCS Floor</strong></td><td>Low admits slow edge clients that hog airtime; high strands fans at the back.</td><td>FAIR↑ / CAP↓ COV↓</td><td>MCS 4–6</td></tr>
+      <tr><td>31</td><td><strong>TXOP AC_BE</strong></td><td>Bigger bulk bursts raise throughput, but with rTWT on they steal scheduled voice slots.</td><td>THR↑ / LAT↑ POS</td><td>3008 µs</td></tr>
+      <tr><td>32</td><td><strong>CWmin AC_BE</strong></td><td>A small window is fast at low load but storms into collisions above 70% airtime.</td><td>THR↑ / LAT↑@load</td><td>15 slots</td></tr>
+      <tr><td>33</td><td><strong>RTS/CTS Threshold</strong></td><td>Tames hidden terminals in a crowd but adds handshake overhead. Density-dependent.</td><td>LOSS↓ / overhead↑</td><td>1500 B</td></tr>
+      <tr><td>37</td><td><strong>Max Clients / Radio</strong></td><td>Too low rejects fans; too high oversubscribes the radio and degrades everyone.</td><td>CAP↑ / PCT↓ LAT↑</td><td>100</td></tr>
+      <tr><td>38</td><td><strong>Min RSSI Admission</strong></td><td>Strict sheds weak clients and protects airtime; lenient improves reach.</td><td>FAIR↑ / COV↓</td><td>−70 dBm</td></tr>
+      <tr><td>42</td><td><strong>Fragment Threshold</strong></td><td>Smaller fragments survive interference but add overhead. A mild interior optimum.</td><td>LOSS↓ / overhead↑</td><td>2346 B</td></tr>
+      <tr><td>52</td><td><strong>DTIM Period</strong></td><td>Longer saves battery but delays buffered downlink — a latency/power trade.</td><td>LAT↓ / power↑</td><td>2</td></tr>
+      <tr><td>30</td><td><strong>TXOP AC_VO</strong></td><td>Longer voice bursts help VoIP but can starve other access categories.</td><td>LAT↓ / FAIR↓</td><td>1504 µs</td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout">
+    <p style="margin:0"><strong>The tally:</strong> <strong>SEARCH ≈ 12</strong> (8 strong, 4 mild) &nbsp;·&nbsp; <strong>LOCK ≈ 41</strong> (monotone gains, gates, context-fixed, security) &nbsp;·&nbsp; <strong>SCENARIO ≈ 7</strong> (5 demand, 2 threat). Locked from the earlier list of 15: Guard Interval (set by delay spread), MU-MIMO Streams (gain saturates at 8 given angular spread), Client Ageout and Roaming Cache Age (low-impact in a long-dwell stadium). Added to search: 5 GHz Channel Width — the reuse-versus-capacity trade is real in a dense bowl.</p>
+  </div>
+
+  <!-- ── PART 5: Archetype Matrix ── -->
+  <h3>V. The Archetype Matrix — One Parameter Space, Five Orderings</h3>
+
+  <p>The Stadium Codex showed how 60 parameters distil to ~12 prime inputs for one archetype. The matrix shows the next layer: those prime levers <em>reorder</em> across classes. A dial that is the single biggest lever in a stadium can be a liability in a warehouse. The reordering — which knobs dominate where — is precisely what defines an archetype.</p>
+
+  <div class="callout">
+    <p style="margin:0;font-style:italic;font-size:1.05rem">"Airtime Fairness is the stadium's biggest lever and the warehouse's biggest mistake. Same dial, opposite verdict — that gap is the whole reason archetypes exist."</p>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Prime lever</th>
+        <th>Stadium<br><small style="font-weight:400;text-transform:none;letter-spacing:0">capacity + fairness</small></th>
+        <th>Enclosed<br><small style="font-weight:400;text-transform:none;letter-spacing:0">capacity + stability</small></th>
+        <th>Warehouse<br><small style="font-weight:400;text-transform:none;letter-spacing:0">coverage + roaming</small></th>
+        <th>Retail<br><small style="font-weight:400;text-transform:none;letter-spacing:0">POS + guest</small></th>
+        <th>Medical<br><small style="font-weight:400;text-transform:none;letter-spacing:0">latency + jitter</small></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>Airtime Fairness</td><td class="green"><strong>Strict ★</strong></td><td>Adaptive</td><td class="green"><strong>Off → Adaptive ★</strong></td><td>Adaptive</td><td>Adaptive</td></tr>
+      <tr><td>TX Power</td><td>17 dBm</td><td>14–17</td><td class="green"><strong>20–23 ★</strong></td><td>14–17</td><td class="green"><strong>11–14 ★</strong></td></tr>
+      <tr><td>Min RSSI Admission</td><td class="green"><strong>−70 dBm ★</strong></td><td>−72</td><td>−80</td><td>−72</td><td class="green"><strong>−67 ★</strong></td></tr>
+      <tr><td>MCS Floor</td><td>MCS 4–6</td><td>MCS 4</td><td class="green"><strong>MCS 0–2 ★</strong></td><td>MCS 2–4</td><td>MCS 6</td></tr>
+      <tr><td>RX-SOP Threshold</td><td class="green"><strong>−75 dBm ★</strong></td><td>−78</td><td>−82</td><td>−78</td><td>−72</td></tr>
+      <tr><td>Max Clients / Radio</td><td class="green"><strong>100 ★</strong></td><td class="green"><strong>80 ★</strong></td><td>50</td><td>60</td><td class="green"><strong>30 ★</strong></td></tr>
+      <tr><td>Guard Interval</td><td>1600 ns</td><td>800–1600</td><td class="green"><strong>3200 ★</strong></td><td>1600</td><td class="green"><strong>800 ★</strong></td></tr>
+      <tr><td>MU-MIMO Streams</td><td>8</td><td class="green"><strong>8 ★</strong></td><td>2–4</td><td>4</td><td>4</td></tr>
+      <tr><td>rTWT (sched. latency)</td><td>On · POS</td><td>On</td><td>Optional</td><td class="green"><strong>On · POS ★</strong></td><td class="green"><strong>On · critical ★</strong></td></tr>
+      <tr><td>CWmin AC_BE</td><td>15</td><td>15</td><td>31</td><td>15</td><td class="green"><strong>31 ★</strong></td></tr>
+      <tr><td>DTIM Period</td><td>2</td><td>2</td><td>3</td><td>2</td><td class="green"><strong>1 ★</strong></td></tr>
+      <tr><td>Band Steering</td><td>Active → 6 GHz</td><td>Active</td><td class="green"><strong>Passive · keep 2.4 ★</strong></td><td>Active</td><td>Active</td></tr>
+      <tr><td>2.4 GHz Radio</td><td>Limited</td><td>Off / Ltd</td><td class="green"><strong>ON · scanners ★</strong></td><td>Limited</td><td>Off</td></tr>
+      <tr><td>Client Isolation</td><td>Policy</td><td>Off</td><td>Off</td><td class="green"><strong>On · POS/guest ★</strong></td><td class="green"><strong>On ★</strong></td></tr>
+      <tr><td>802.11r/k/v Roaming</td><td>On</td><td>On</td><td class="green"><strong>On · critical ★</strong></td><td class="green"><strong>On · critical ★</strong></td><td>On</td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout-blue">
+    <p style="margin:0"><strong>How to read the reordering:</strong> Scan across any row to see one dial's verdict change by class — <em>Airtime Fairness</em> goes Strict→Off, <em>2.4 GHz</em> goes Limited→ON, <em>Guard Interval</em> goes 1600→3200→800. Scan down any column to see that class's strategy — the ★ cells. Stadium fights over fairness and admission; warehouse over range, 2.4 GHz, and roaming; medical over latency determinism (CWmin, DTIM, rTWT). That divergence is the justification for separate archetypes. These are v0 priors — the Tier-0 estimate that driver screening (Morris → Sobol) will confirm or revise.</p>
+  </div>
+
+</section>
 
 <!-- ══ §00 — SESSION OVERVIEW ══ -->
 <section id="s00">
