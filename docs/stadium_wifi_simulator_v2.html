@@ -222,6 +222,9 @@ input:checked+.ts:before{transform:translateX(15px);background:#fff}
     <div class="trow"><label class="tog"><input type="checkbox" id="tog-r80211" checked onchange="update()"><span class="ts"></span></label><span class="tl">802.11r FT</span><span class="tv">Fast roam</span></div>
     <div class="trow"><label class="tog"><input type="checkbox" id="tog-kv" checked onchange="update()"><span class="ts"></span></label><span class="tl">802.11k/v</span><span class="tv">Steer</span></div>
     <div class="trow"><label class="tog"><input type="checkbox" id="tog-dcslock" onchange="update()"><span class="ts"></span></label><span class="tl">DCS Lock</span><span class="tv">Match</span></div>
+    <div class="trow"><label class="tog"><input type="checkbox" id="tog-uapsd" checked onchange="update()"><span class="ts"></span></label><span class="tl">U-APSD</span><span class="tv">−2ms jitter</span></div>
+    <div class="trow"><label class="tog"><input type="checkbox" id="tog-wmm-ac-vo" checked onchange="update()"><span class="ts"></span></label><span class="tl">WMM AC VO</span><span class="tv">VO gate</span></div>
+    <div class="trow"><label class="tog"><input type="checkbox" id="tog-wmm-ac-vi" checked onchange="update()"><span class="ts"></span></label><span class="tl">WMM AC VI</span><span class="tv">VI gate</span></div>
   </div>
   <hr class="sep">
   <div class="kg"><div class="kl" style="font-size:9px">MLO Mode <span id="lv-mlom" style="font-size:10px">STR</span></div><select id="mlo-mode" onchange="update()"><option value="STR" selected>STR — Simultaneous TX/RX (×1.90)</option><option value="Enhanced">Enhanced STR (×1.55)</option><option value="NSTR">NSTR — Time-division (×1.20)</option></select><div class="kd">STR requires 5+6GHz band separation · AP5060 only</div></div>
@@ -244,6 +247,10 @@ input:checked+.ts:before{transform:translateX(15px);background:#fff}
   <div class="kg"><div class="kl">Min RSSI Admission <span id="lv-rssi">−70 dBm</span></div><select id="min-rssi" onchange="update()"><option value="-80">−80 dBm (permissive)</option><option value="-75">−75 dBm</option><option value="-70" selected>−70 dBm (stadium optimal)</option></select><div class="kd">Rejects clients below threshold at association → raises avg MCS</div></div>
   <div class="kg"><div class="kl">Airtime Fairness <span id="lv-af" style="color:var(--green)">Strict</span></div><select id="at-fair" onchange="update()"><option value="off">OFF — No fairness (old phones steal)</option><option value="adaptive">Adaptive — Balanced</option><option value="strict" selected>Strict — Equalise all clients</option></select><div class="kd">Critical in stadium: 1 MCS0 phone consumes 32× airtime of MCS11. Strict AF = +38% aggregate tput.</div></div>
   <div class="kg"><div class="kl">Band Steering <span id="lv-bs">Active</span></div><select id="bs-mode" onchange="update()"><option value="none">None — Client chooses</option><option value="passive">Passive — Suggest only</option><option value="active" selected>Active — Push to 5/6GHz</option></select><div class="kd">Active = 42% on 6GHz (AP5060). None = only 20%.</div></div>
+  <div class="kg"><div class="kl">Inactive Client Ageout <span id="lv-cliage">5 min</span></div><select id="client-ageout" onchange="update()"><option value="1">1 min (aggressive — re-auth storm risk)</option><option value="5" selected>5 min (stadium optimal)</option><option value="10">10 min</option><option value="30">30 min (EP1 default)</option></select><div class="kd">At 30 min, 12% of association table slots are ghost entries — arriving fans fail to join.</div></div>
+  <div class="kg"><div class="kl" style="font-size:9px">Fragment Threshold <span id="lv-frag">2346 B</span></div><select id="frag-thr" onchange="update()"><option value="256">256 B (max fragmentation — severe overhead)</option><option value="1500">1500 B (interference-adaptive)</option><option value="2346" selected>2346 B (disabled — WiFi 7 default)</option></select><div class="kd">WiFi 7 uses HARQ for error recovery. Fragmentation at 256B costs 20% throughput in clean RF.</div></div>
+  <div class="kg"><div class="kl" style="font-size:9px">Roaming Cache Update <span id="lv-rcupd">60 s</span></div><select id="roam-cache-upd" onchange="update()"><option value="30">30 s (frequent)</option><option value="60" selected>60 s (EP1 default)</option><option value="300">300 s (stale)</option></select><div class="kd">PMK cache refresh for 802.11r. At 300s, cache is stale by half-time → fast BSS failures.</div></div>
+  <div class="kg"><div class="kl" style="font-size:9px">Roaming Cache Ageout <span id="lv-rcage">60 min</span></div><select id="roam-cache-age" onchange="update()"><option value="10">10 min (short — frequent re-auth)</option><option value="60" selected>60 min (match game duration)</option><option value="300">300 min (long)</option></select><div class="kd">10 min ageout → 2× re-auth per 90-min half → latency spikes at re-association peaks.</div></div>
 </div>
 </details>
 
@@ -258,15 +265,23 @@ input:checked+.ts:before{transform:translateX(15px);background:#fff}
     <div class="trow"><label class="tog"><input type="checkbox" id="tog-enhrnr" checked onchange="update()"><span class="ts"></span></label><span class="tl">Enh RNR</span><span class="tv">6GHz disc</span></div>
     <div class="trow"><label class="tog"><input type="checkbox" id="tog-pmf" checked onchange="update()"><span class="ts"></span></label><span class="tl">PMF Req</span><span class="tv">WPA3</span></div>
     <div class="trow"><label class="tog"><input type="checkbox" id="tog-airdef" checked onchange="update()"><span class="ts"></span></label><span class="tl">AirDefense</span><span class="tv">WIPS</span></div>
+    <div class="trow"><label class="tog"><input type="checkbox" id="tog-mcast-drop" onchange="update()"><span class="ts"></span></label><span class="tl">Multicast Drop</span><span class="tv">+6%</span></div>
+    <div class="trow"><label class="tog"><input type="checkbox" id="tog-probe-ign" checked onchange="update()"><span class="ts"></span></label><span class="tl">Ignore BC Probe</span><span class="tv">−8% overhead</span></div>
   </div>
   <hr class="sep">
   <div class="kg"><div class="kl">DTIM Period <span id="lv-dtim">2</span></div><select id="dtim" onchange="update()"><option value="1">1 — Frequent (100ms, low latency)</option><option value="2" selected>2 — Default WiFi 7 (200ms)</option><option value="4">4 — Power save (400ms)</option><option value="10">10 — IoT (1000ms)</option></select><div class="kd">Power-save delivery interval. DTIM=2 adds ~8ms latency for buffered frames vs DTIM=1.</div></div>
+  <div class="kg"><div class="kl" style="font-size:9px">MC→UC Util Threshold <span id="lv-mc2ucthr">60%</span></div><select id="mc2uc-thr" onchange="update()"><option value="40">40% — Aggressive (converts earlier)</option><option value="60" selected>60% — EP1 default</option><option value="80">80% — Delayed (conversion lags load)</option></select><div class="kd">MC→UC only activates above this airtime threshold. At 80%, conversion delays until load is already critical.</div></div>
+  <div class="kg"><div class="kl" style="font-size:9px">MC→UC Membership <span id="lv-mc2ucmbr">10</span></div><select id="mc2uc-mbr" onchange="update()"><option value="5">5 members (more groups converted)</option><option value="10" selected>10 members (EP1 default)</option><option value="20">20 members (only large groups)</option></select><div class="kd">Groups below this threshold are unicast-converted. Lower value = more multicast groups converted = less overhead.</div></div>
 </div>
 </details>
 
 <details>
 <summary>Degradation &amp; Threats</summary>
 <div class="sbody">
+  <div class="tog-grid" style="margin-bottom:8px">
+    <div class="trow"><label class="tog"><input type="checkbox" id="tog-mac-dos" checked onchange="update()"><span class="ts"></span></label><span class="tl">MAC DoS Prev</span><span class="tv">L2 shield</span></div>
+    <div class="trow"><label class="tog"><input type="checkbox" id="tog-ip-dos" checked onchange="update()"><span class="ts"></span></label><span class="tl">IP DoS Prev</span><span class="tv">L3 shield</span></div>
+  </div>
   <div class="kg"><div class="kl" style="margin-bottom:5px">Level <span id="lv-deg" style="color:var(--green)">0 — Nominal</span></div><select id="deg-lvl" onchange="update()"><option value="0">Level 0 — All nominal</option><option value="1">Level 1 — 5GHz CCI congestion</option><option value="2">Level 2 — Two bands degraded</option><option value="3">Level 3 — Jammer + auth storm</option><option value="4">Level 4 — Critical failure</option></select></div>
   <div class="kg"><div class="kl" style="margin-bottom:5px">Cyber Attack</div><select id="cyber" onchange="update()"><option value="none">None</option><option value="deauth">Deauth Flood (L2)</option><option value="evil_twin">Evil Twin / Rogue AP</option><option value="cred_storm">Credential Storm (RADIUS)</option><option value="arp">ARP Poisoning</option></select></div>
 </div>
@@ -379,7 +394,7 @@ input:checked+.ts:before{transform:translateX(15px);background:#fff}
   </div>
   <!-- Config Export -->
   <div style="width:100%;margin-top:8px">
-    <button class="bpbtn" style="border-color:var(--gold);color:var(--gold)" onclick="showCfg()">📋 Config Export — All 47 Params</button>
+    <button class="bpbtn" style="border-color:var(--gold);color:var(--gold)" onclick="showCfg()">📋 Config Export — All 60 Params</button>
   </div>
 </div>
 </div><!-- /layout -->
@@ -431,7 +446,8 @@ function capMult(p){
   m*=p.bssColor?1.15:1;
   m*=({6:1,12:1.10,24:1.18}[p.mbr]||1);
   m*=p.bcf?1.15:1;
-  m*=p.mc2uc?1.10:1;
+  if(p.mc2uc){let mcg=p.mc2ucThr===40?1.12:p.mc2ucThr===80?1.07:1.10;if(p.mc2ucMbr===5)mcg+=0.02;else if(p.mc2ucMbr===20)mcg-=0.02;m*=mcg;}
+  m*=p.mcastDrop?1.06:1;
   m*=p.proxyArp?1.07:1;
   m*=p.clientIso?1.02:1;
   m*=({off:1,adaptive:1.22,strict:1.38}[p.atFair]||1);
@@ -439,6 +455,9 @@ function capMult(p){
   m*=({65535:1.0,2347:1.02,1500:1.04}[p.rtsThr]||1.0);
   m*=p.txopBe>=3008?1.05:p.txopBe>=1504?1.03:1.0;
   m*=p.mloSteer==='ai'?1.04:1.0;
+  m*=p.ignBcastProbe?1.08:1.0;
+  m*=p.wmmAcVo?1.02:1.0;
+  m*=({256:0.80,1500:0.97,2346:1.0}[p.fragThr]||1.0);
   return m;
 }
 
@@ -496,6 +515,19 @@ function readInputs(){
     qam4k:g('tog-qam4k').checked,
     mloLinks:+g('mlo-links').value,
     mloSteer:g('mlo-steer').value,
+    uapsd:g('tog-uapsd').checked,
+    wmmAcVo:g('tog-wmm-ac-vo').checked,
+    wmmAcVi:g('tog-wmm-ac-vi').checked,
+    clientAgeout:+g('client-ageout').value,
+    fragThr:+g('frag-thr').value,
+    roamCacheUpd:+g('roam-cache-upd').value,
+    roamCacheAge:+g('roam-cache-age').value,
+    mc2ucThr:+g('mc2uc-thr').value,
+    mc2ucMbr:+g('mc2uc-mbr').value,
+    mcastDrop:g('tog-mcast-drop').checked,
+    ignBcastProbe:g('tog-probe-ign').checked,
+    macDosPrev:g('tog-mac-dos').checked,
+    ipDosPrev:g('tog-ip-dos').checked,
   };
 }
 
@@ -514,9 +546,11 @@ function compute(ov){
   // enhance RNR boosts 6GHz attach by 10% when active
   const g6boost=p.enhRNR&&ap.has6g?1.10:1;
   const split2g=bssplit.g2,split5g=bssplit.g5,split6g=bssplit.g6*g6boost;
-  const cli2g=Math.min(Math.round(perAP*split2g),p.maxCli);
-  const cli5g=Math.min(Math.round(perAP*split5g),p.maxCli);
-  const cli6g=ap.has6g?Math.min(Math.round(perAP*split6g),p.maxCli):0;
+  const ageoutF={1:0.97,5:1.0,10:0.95,30:0.88}[p.clientAgeout]||1.0;
+  const effMaxCli=Math.floor(p.maxCli*ageoutF);
+  const cli2g=Math.min(Math.round(perAP*split2g),effMaxCli);
+  const cli5g=Math.min(Math.round(perAP*split5g),effMaxCli);
+  const cli6g=ap.has6g?Math.min(Math.round(perAP*split6g),effMaxCli):0;
   const rxSopBoost={'-85':0,'-75':3,'-65':6}[p.rxSop]||0;
   const rssiMCSBoost={'-80':0,'-75':1,'-70':2}[p.minRSSI]||0;
   const effMCSFloor=Math.max(0,p.mcsFloor+rssiMCSBoost);
@@ -549,6 +583,14 @@ function compute(ov){
     lat+=(p.dtim-1)*8;
     if(p.cwBe===7&&u>0.7)lat+=3;   // aggressive CWmin → collision burst at >70% airtime
     if((p.cwBe||15)>=31)lat-=1;    // conservative CWmin marginal benefit
+    if(!p.uapsd)lat+=2;             // buffered wake-up frames add jitter without U-APSD
+    if(!p.wmmAcVo)lat+=2;           // unprotected VO queue — video clients starve POS/Teams
+    if(!p.wmmAcVi)lat+=1;           // unprotected VI queue
+    if(p.clientAgeout>=30)lat+=3;else if(p.clientAgeout>=10)lat+=1; // stale table → re-assoc storm
+    if(p.r80211&&p.roamCacheAge<60&&p.deg>=1)lat+=5; // short PMK ageout → fast BSS miss at peak
+    if(p.r80211&&p.roamCacheUpd>=300&&p.deg>=1)lat+=3; // stale PMK cache → FT failure
+    if(!p.macDosPrev&&p.cyber==='cred_storm')lat+=3; // unprotected RADIUS flood
+    if(!p.ipDosPrev&&p.cyber==='arp')lat+=3;          // ARP flooding unmitigated
     lat=Math.max(2,Math.round(lat));
     const airLoss=Math.max(0,(Math.min(150,Math.round(u*100))-85)*.5);
     const snrLoss=mcs<0?50:mcs<2?3:0;
@@ -670,6 +712,13 @@ function renderGapTable(s){
   if(p.rtsThr>1500) rows.push({n:'RTS/CTS Threshold',cur:p.rtsThr+'B',opt:'1500B',cost:'Hidden terminal collisions unmitigated',cls:'gwarn'});
   if(!p.muMimo||p.muStreams<8){const sg={1:0,2:30,4:100,8:180};const cur=p.muMimo?(sg[p.muStreams]||100):0;rows.push({n:'MU-MIMO DL Streams',cur:p.muMimo?p.muStreams+' streams':'OFF',opt:'8 streams',cost:`−${180-cur}% DL-MU capacity`,cls:cur<100?'gbad':'gwarn'});}
   if(p.txopBe<3008) rows.push({n:'TXOP AC_BE',cur:p.txopBe+'µs',opt:'3008µs',cost:'Lower bulk throughput for video/social',cls:'gwarn'});
+  if(!p.uapsd) rows.push({n:'U-APSD',cur:'OFF',opt:'ON',cost:'+2ms jitter Teams/VoIP',cls:'gwarn'});
+  if(!p.wmmAcVo) rows.push({n:'WMM AC VO',cur:'OFF',opt:'ON',cost:'+2ms POS/Teams latency — voice queue unprotected',cls:'gbad'});
+  if(!p.ignBcastProbe) rows.push({n:'Ignore BC Probe',cur:'OFF',opt:'ON',cost:'−8% capacity at kickoff probe storm',cls:'gwarn'});
+  if(p.clientAgeout>=30) rows.push({n:'Client Ageout',cur:p.clientAgeout+' min',opt:'5 min',cost:'Ghost entries block 12% of assoc slots',cls:'gbad'});
+  else if(p.clientAgeout>=10) rows.push({n:'Client Ageout',cur:p.clientAgeout+' min',opt:'5 min',cost:'Mild stale entry overhead at peak',cls:'gwarn'});
+  if(p.fragThr===256) rows.push({n:'Fragment Threshold',cur:'256B',opt:'2346B',cost:'−20% throughput from fragmentation overhead',cls:'gbad'});
+  if(p.mc2ucThr>60&&p.mc2uc) rows.push({n:'MC→UC Threshold',cur:p.mc2ucThr+'%',opt:'60%',cost:'Multicast overhead persists until airtime critical',cls:'gwarn'});
 
   const tb=g('gap-body');const gn=g('gap-none');
   if(rows.length===0){if(tb)tb.innerHTML='';if(gn)gn.style.display='block';}
@@ -859,6 +908,12 @@ function update(){
   sv('lv-mustm',g('mu-streams').value+' streams');
   sv('lv-mlolnk',g('mlo-links').value+' links');
   sv('lv-mlosteer',g('mlo-steer').value==='ai'?'AI-driven':'WMM-QoS');
+  sv('lv-cliage',g('client-ageout').value+' min');
+  sv('lv-frag',g('frag-thr').value+' B');
+  sv('lv-rcupd',g('roam-cache-upd').value+' s');
+  sv('lv-rcage',g('roam-cache-age').value+' min');
+  sv('lv-mc2ucthr',g('mc2uc-thr').value+'%');
+  sv('lv-mc2ucmbr',g('mc2uc-mbr').value);
 
   // Highlight active preset
   const tv2=+g('t-scrub').value;
@@ -963,6 +1018,10 @@ function applyOptimal(){
   g('txop-be').value=3008;g('cw-be').value=15;g('rts-thr').value=1500;
   g('mu-streams').value=8;g('tog-qam4k').checked=true;
   g('mlo-links').value=2;g('mlo-steer').value='ai';
+  g('tog-uapsd').checked=true;g('tog-wmm-ac-vo').checked=true;g('tog-wmm-ac-vi').checked=true;
+  g('client-ageout').value=5;g('frag-thr').value=2346;g('roam-cache-upd').value=60;g('roam-cache-age').value=60;
+  g('mc2uc-thr').value=60;g('mc2uc-mbr').value=10;g('tog-mcast-drop').checked=false;g('tog-probe-ign').checked=true;
+  g('tog-mac-dos').checked=true;g('tog-ip-dos').checked=true;
   addLog('★ Stadium Optimal applied — all parameters at Lumen Field target','ok');
   addLog('AP5060 Broadcom: 8-stream MU-MIMO · 4K-QAM · CWmin-BE=15 · RTS=1500 · TXOP-BE=3008µs','info');
   addLog('MBR 24M · RX-SOP −75 · Airtime Fairness Strict · Active Band Steering','info');
@@ -988,6 +1047,10 @@ function resetAll(){
   g('txop-be').value=0;g('cw-be').value=63;g('rts-thr').value=65535;
   g('mu-streams').value=1;g('tog-qam4k').checked=false;
   g('mlo-links').value=1;g('mlo-steer').value='wmm';
+  g('tog-uapsd').checked=false;g('tog-wmm-ac-vo').checked=false;g('tog-wmm-ac-vi').checked=false;
+  g('client-ageout').value=30;g('frag-thr').value=256;g('roam-cache-upd').value=300;g('roam-cache-age').value=10;
+  g('mc2uc-thr').value=80;g('mc2uc-mbr').value=20;g('tog-mcast-drop').checked=false;g('tog-probe-ign').checked=false;
+  g('tog-mac-dos').checked=false;g('tog-ip-dos').checked=false;
   addLog('Reset to WORST CASE — all features OFF · compare with ★ Optimal','warn');
   update();
 }
@@ -1005,7 +1068,11 @@ function showCfg(){
     qam4k:true,mloLinks:2,mloSteer:'ai',
     maxCli:100,minRSSI:-70,atFair:'strict',bsMode:'active',
     bcf:true,mc2uc:true,proxyArp:true,clientIso:false,enhRNR:true,
-    pmf:true,airdef:true,dtim:2,deg:0,cyber:'none'
+    pmf:true,airdef:true,dtim:2,deg:0,cyber:'none',
+    uapsd:true,wmmAcVo:true,wmmAcVi:true,
+    clientAgeout:5,fragThr:2346,roamCacheUpd:60,roamCacheAge:60,
+    mc2ucThr:60,mc2ucMbr:10,mcastDrop:false,ignBcastProbe:true,
+    macDosPrev:true,ipDosPrev:true
   };
   const SECTIONS=[
     {title:'DEMAND MODEL',params:[
@@ -1046,12 +1113,19 @@ function showCfg(){
       {k:'txopBe',l:'TXOP AC_BE',fmt:v=>v+' µs'},
       {k:'cwBe',l:'CWmin AC_BE',fmt:v=>v+' slots'},
       {k:'rtsThr',l:'RTS/CTS Threshold',fmt:v=>v+' B'},
+      {k:'uapsd',l:'U-APSD',fmt:v=>v?'ON':'OFF'},
+      {k:'wmmAcVo',l:'WMM Admission Ctrl VO',fmt:v=>v?'ON':'OFF'},
+      {k:'wmmAcVi',l:'WMM Admission Ctrl VI',fmt:v=>v?'ON':'OFF'},
     ]},
     {title:'ADMISSION & STEERING',params:[
       {k:'maxCli',l:'Max Clients / Radio',fmt:v=>v},
       {k:'minRSSI',l:'Min RSSI Admission',fmt:v=>v+' dBm'},
       {k:'atFair',l:'Airtime Fairness',fmt:v=>v},
       {k:'bsMode',l:'Band Steering',fmt:v=>v},
+      {k:'clientAgeout',l:'Client Ageout',fmt:v=>v+' min'},
+      {k:'fragThr',l:'Fragment Threshold',fmt:v=>v+' B'},
+      {k:'roamCacheUpd',l:'Roaming Cache Update',fmt:v=>v+' s'},
+      {k:'roamCacheAge',l:'Roaming Cache Ageout',fmt:v=>v+' min'},
     ]},
     {title:'SSID & NETWORK',params:[
       {k:'bcf',l:'Broadcast Filter',fmt:v=>v?'ON':'OFF'},
@@ -1062,10 +1136,18 @@ function showCfg(){
       {k:'pmf',l:'PMF (802.11w)',fmt:v=>v?'ON':'OFF'},
       {k:'airdef',l:'AirDefense WIPS',fmt:v=>v?'ON':'OFF'},
       {k:'dtim',l:'DTIM Period',fmt:v=>v},
+      {k:'mc2ucThr',l:'MC→UC Util Threshold',fmt:v=>v+'%'},
+      {k:'mc2ucMbr',l:'MC→UC Membership',fmt:v=>v+' members'},
+      {k:'mcastDrop',l:'Multicast Drop',fmt:v=>v?'ON':'OFF'},
+      {k:'ignBcastProbe',l:'Ignore BC Probe',fmt:v=>v?'ON':'OFF'},
     ]},
     {title:'DEGRADATION & THREATS',params:[
       {k:'deg',l:'Degradation Level',fmt:v=>['0 — Nominal','1 — 5G CCI','2 — Dual Degrade','3 — Jammer+Auth','4 — Critical'][v]||v},
       {k:'cyber',l:'Cyber Attack',fmt:v=>v},
+    ]},
+    {title:'SECURITY & DoS',params:[
+      {k:'macDosPrev',l:'MAC-Based DoS Prev',fmt:v=>v?'ON':'OFF'},
+      {k:'ipDosPrev',l:'IP-Based DoS Prev',fmt:v=>v?'ON':'OFF'},
     ]},
   ];
 
@@ -1109,7 +1191,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeCfg();});
 // ═══ WIRE EVENTS + INIT ═══
 document.querySelectorAll('input[type=range],select').forEach(el=>el.addEventListener('input',update));
 buildAPG();
-addLog('v2 Phase 1 loaded — 47 tunable parameters · AP5060 Broadcom chip params added','ok');
+addLog('v2 Phase 1 loaded — 60 tunable parameters · AP5060 Broadcom + all SSID optional settings','ok');
 addLog('Click ★ Stadium Optimal to apply Lumen Field target config','info');
 addLog('Click ↺ Reset to see WORST CASE — then tune to see each parameter\'s impact','warn');
 applyOptimal();
