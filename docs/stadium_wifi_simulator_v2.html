@@ -1403,40 +1403,69 @@ function runOpt(){
       }
       const res=compute(cur);if(res.score>best.score)best=res;
     }
-    optResult=Object.assign({},best,{params:Object.assign({},cur)});
-    L(`[done] score=${best.score} posPass=${best.posPass}`);
-    renderOptResults(best,cur);
+    // Final full-MC pass on the optimal params — this is what drives the P50/P95 display
+    const finalMC=runMonteCarlo(cur,+(g('mc-iter')||{value:200}).value);
+    optResult=Object.assign({},best,{params:Object.assign({},cur),mc:finalMC});
+    L(`[done] score=${best.score} P50=${finalMC.score.p50} P95=${finalMC.score.p95} POS-breach=${finalMC.breachPos}% (thr=${finalMC.posThreshold}ms)`);
+    renderOptResults(best,cur,finalMC);
     if(btn){btn.disabled=false;btn.textContent='★ Optimize Stadium Config';}
     addLog(`Optimizer (MC-inside n=100/trial): ${best.score}/100 posPass=${best.posPass}`,'ok');
   },20);
 }
 const OPT_KNOB_LABELS={atFair:'Airtime Fairness',txPwr:'TX Power',minRSSI:'Min RSSI',rxSop:'RX-SOP',cwBe:'CWmin BE',maxCli:'Max Clients',mcsFloor:'MCS Floor',bw5g:'5G Channel Width',fragThr:'Frag Threshold',dtim:'DTIM',rtsThr:'RTS/CTS',txopBe:'TXOP BE'};
-function renderOptResults(best,params){
+// mcResult: the final full-MC pass run on the optimal params inside runOpt()
+function renderOptResults(best,params,mcResult){
   const panel=g('opt-results');if(!panel)return;
-  const cur=readInputs();const curScore=compute(cur).score;
-  const delta=best.score-curScore;
-  const changes=[];
-  for(const k of Object.keys(OPT_SEARCH)){if(params[k]!==cur[k])changes.push({k,from:cur[k],to:params[k]});}
-  let h=`<div style="padding:6px;background:#001428;border:1px solid var(--blue);border-radius:2px;margin-bottom:5px">
-    <div style="font-size:8px;color:var(--mut);text-transform:uppercase;letter-spacing:.8px;margin-bottom:4px">Result</div>
-    <div style="display:flex;gap:12px">
-      <div><div style="font-size:18px;font-weight:700;color:${best.score>=85?CM.green:CM.yellow}">${best.score}</div><div style="font-size:8px;color:var(--mut)">/100</div></div>
-      <div><div style="font-size:14px;font-weight:700;color:${delta>=0?CM.green:CM.red}">${delta>=0?'+':''}${delta}</div><div style="font-size:8px;color:var(--mut)">vs current</div></div>
-      <div><div style="font-size:12px;font-weight:700;color:${best.posPass?CM.green:CM.red}">${best.posPass?'POS ✓':'POS ✗'}</div><div style="font-size:8px;color:var(--mut)">SLA ≤10ms</div></div>
-    </div></div>`;
-  if(changes.length>0){
-    h+=`<div style="font-size:8px;color:var(--mut);text-transform:uppercase;letter-spacing:.8px;margin:5px 0 3px">${changes.length} knob(s) changed</div>`;
-    h+=`<table class="mc-tbl"><thead><tr><th>Knob</th><th>Current</th><th style="color:var(--cyan)">Optimal</th></tr></thead><tbody>`;
-    changes.forEach(c=>{h+=`<tr><td style="color:var(--mut2)">${OPT_KNOB_LABELS[c.k]||c.k}</td><td style="color:var(--yel)">${c.from}</td><td style="color:${CM.green}">${c.to}</td></tr>`;});
-    h+=`</tbody></table>`;
-  } else {
-    h+=`<div style="font-size:9px;color:${CM.green};padding:8px;text-align:center">✓ Current config already optimal for these 12 knobs</div>`;
-  }
-  h+=`<div style="display:flex;gap:5px;margin-top:7px">
-    <button onclick="applyOptResult()" style="flex:1;background:#001428;border:1px solid var(--blue);color:var(--blue);padding:5px;border-radius:2px;cursor:pointer;font-size:9px;font-family:inherit">Apply Config</button>
+  const cur=readInputs();
+  const mc=mcResult||runMonteCarlo(params,200); // fallback if called without MC
+  const delta=best.score-compute(cur).score;
+
+  // ── Header: P50/P95/P5 from MC on optimal params ──────────────────────
+  let h=`<div style="padding:6px;background:#001428;border:1px solid var(--cyan);border-radius:2px;margin-bottom:6px">
+    <div style="font-size:8px;color:var(--cyan);text-transform:uppercase;letter-spacing:.8px;margin-bottom:4px">
+      P50 Optimal · ${(+cur.fans||50000).toLocaleString()} fans · ${Math.round((+cur.concur||.6)*100)}% concur
+    </div>
+    <div style="display:flex;gap:10px;align-items:flex-end">
+      <div>
+        <div style="font-size:9px;color:var(--mut);margin-bottom:1px">P50 score</div>
+        <div style="font-size:22px;font-weight:700;color:${mc.score.p50>=85?CM.green:mc.score.p50>=65?CM.yellow:CM.red}">${mc.score.p50}</div>
+      </div>
+      <div style="border-left:1px solid var(--border);padding-left:10px">
+        <div style="font-size:8px;color:var(--mut)">P5</div><div style="font-size:13px;color:var(--mut2)">${mc.score.p5}</div>
+      </div>
+      <div><div style="font-size:8px;color:var(--mut)">P95</div><div style="font-size:13px;color:var(--mut2)">${mc.score.p95}</div></div>
+      <div style="border-left:1px solid var(--border);padding-left:10px">
+        <div style="font-size:8px;color:var(--mut)">Spread</div><div style="font-size:12px;color:${mc.spread>30?CM.red:mc.spread>15?CM.yel:CM.green}">${mc.spread} pts</div>
+      </div>
+      <div style="border-left:1px solid var(--border);padding-left:10px">
+        <div style="font-size:8px;color:var(--mut)">POS breach</div>
+        <div style="font-size:12px;font-weight:700;color:${mc.breachPos>1?CM.red:mc.breachPos>0?CM.yel:CM.green}">${mc.breachPos}%</div>
+        <div style="font-size:7px;color:var(--mut)">&gt;${mc.posThreshold}ms</div>
+      </div>
+    </div>
+    <div style="font-size:8px;color:var(--mut);margin-top:4px">${delta>=0?'↑':''}<span style="color:${delta>=0?CM.green:CM.red}">${delta>=0?'+':''}${delta} pts</span> vs current config · n=${mc.n} MC draws</div>
+  </div>`;
+
+  // ── All 12 search knob values at P50 optimal ──────────────────────────
+  h+=`<div style="font-size:8px;color:var(--mut);text-transform:uppercase;letter-spacing:.8px;margin-bottom:3px">All 12 Knobs — P50 Optimal for These Inputs</div>`;
+  h+=`<table class="mc-tbl"><thead><tr><th>Parameter</th><th style="color:var(--cyan)">P50 Optimal</th><th style="color:var(--mut)">Current</th></tr></thead><tbody>`;
+  Object.entries(OPT_SEARCH).forEach(([k])=>{
+    const opt=params[k];const curr=cur[k];const changed=String(opt)!==String(curr);
+    h+=`<tr style="${changed?'background:#001a00':''}">
+      <td style="color:var(--mut2)">${OPT_KNOB_LABELS[k]||k}</td>
+      <td style="color:${changed?CM.green:'var(--text)'};font-weight:${changed?'700':'400'}">${opt}${changed?' ✓':''}</td>
+      <td style="color:${changed?CM.yel:'var(--mut)'}">${curr}</td></tr>`;
+  });
+  h+=`</tbody></table>`;
+
+  // ── Action buttons ────────────────────────────────────────────────────
+  h+=`<div style="display:flex;gap:5px;margin-top:8px">
+    <button onclick="applyOptResult()" style="flex:1;background:#001428;border:1px solid var(--blue);color:var(--blue);padding:5px;border-radius:2px;cursor:pointer;font-size:9px;font-family:inherit">↳ Apply to Simulator</button>
     <button onclick="checkRobustness()" style="flex:1;background:#0a0820;border:1px solid var(--pur);color:var(--pur);padding:5px;border-radius:2px;cursor:pointer;font-size:9px;font-family:inherit">Check Robustness →</button>
   </div>
-  <div style="font-size:8px;color:var(--mut);margin-top:3px;font-style:italic">Robustness: runs MC on optimal config → compare P95 breach vs current</div>`;
+  <div style="font-size:8px;color:var(--mut);margin-top:4px;padding:3px 6px;background:#0a000a;border-left:2px solid var(--pur);line-height:1.5">
+    Move sliders → re-run optimizer → table updates for new demand. P50 = median outcome; P95 = kickoff surge.
+  </div>`;
   panel.innerHTML=h;panel.style.display='block';
 }
 function applyOptResult(){
