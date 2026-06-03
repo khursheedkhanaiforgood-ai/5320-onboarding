@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FIFA WC 2026 Seattle — Simulator v2 Phase 1 + IPQ9574 · June 2 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Source+Code+Pro:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Libre Baskerville', Georgia, serif;
+    background: #fff;
+    color: #1a1a1a;
+    font-size: 17px;
+    line-height: 1.75;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 48px 32px 120px;
+  }
+  header { border-bottom: 3px solid #1a1a1a; padding-bottom: 20px; margin-bottom: 12px; }
+  .dateline { font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: #666; margin-bottom: 8px; }
+  h1 { font-size: 2.4rem; font-weight: 700; line-height: 1.15; margin-bottom: 10px; }
+  .deck { font-size: 1.1rem; font-style: italic; color: #444; border-left: 3px solid #1a1a1a; padding-left: 16px; margin-top: 10px; }
+  nav#toc {
+    position: sticky; top: 0; background: #fff; border-bottom: 1px solid #ddd;
+    padding: 10px 0; margin: 20px 0 40px; z-index: 100;
+    font-size: 12px; letter-spacing: 0.05em; display: flex; flex-wrap: wrap; gap: 4px 0;
+  }
+  nav#toc a { color: #1a1a1a; text-decoration: none; margin-right: 16px; text-transform: uppercase; font-weight: 700; border-bottom: 2px solid transparent; padding-bottom: 2px; transition: border-color 0.15s; }
+  nav#toc a:hover { border-color: #1a1a1a; }
+  section { margin-bottom: 56px; }
+  h2 { font-size: 1.05rem; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 700; border-top: 2px solid #1a1a1a; padding-top: 14px; margin-bottom: 20px; color: #1a1a1a; }
+  h3 { font-size: 1rem; font-weight: 700; margin: 28px 0 8px; }
+  h4 { font-size: 0.95rem; font-weight: 700; font-style: italic; margin: 18px 0 6px; color: #333; }
+  p { margin-bottom: 14px; }
+  ul, ol { margin: 10px 0 16px 24px; }
+  li { margin-bottom: 6px; }
+
+  /* ── VICTORY BANNER ── */
+  .victory-banner {
+    background: #0a3d0a; color: #fff; text-align: center;
+    padding: 40px 32px; margin: 32px 0; border-radius: 4px; border: 3px solid #1a7a1a;
+  }
+  .victory-banner .vb-label {
+    font-family: 'Source Code Pro', monospace; font-size: 11px;
+    letter-spacing: 0.2em; text-transform: uppercase; color: #7dff7d; margin-bottom: 12px;
+  }
+  .victory-banner h2 {
+    font-size: 2rem; color: #fff; border: none; padding: 0; margin: 0 0 10px;
+    text-transform: none; letter-spacing: 0;
+  }
+  .victory-banner .vb-sub { font-size: 1rem; font-style: italic; color: #a8f0a8; margin-top: 8px; }
+  .victory-banner .vb-fdb {
+    font-family: 'Source Code Pro', monospace; font-size: 13px;
+    background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.2);
+    padding: 14px 20px; margin: 20px auto 0; max-width: 680px;
+    text-align: left; border-radius: 3px; color: #7dff7d; line-height: 1.7;
+  }
+
+  /* ── MILESTONE BANNERS ── */
+  .milestone { border: 2px solid #1a1a1a; padding: 20px 24px; margin: 24px 0; position: relative; }
+  .milestone-label {
+    position: absolute; top: -11px; left: 16px; background: #fff;
+    padding: 0 8px; font-family: 'Source Code Pro', monospace; font-size: 11px;
+    font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: #1a1a1a;
+  }
+  .milestone-green  { border-color: #1a7a3a; }
+  .milestone-green .milestone-label { color: #1a7a3a; }
+  .milestone-red    { border-color: #c0392b; }
+  .milestone-red .milestone-label { color: #c0392b; }
+  .milestone-blue   { border-color: #1a6fba; }
+  .milestone-blue .milestone-label { color: #1a6fba; }
+  .milestone-gold   { border-color: #b8860b; }
+  .milestone-gold .milestone-label { color: #b8860b; }
+  .milestone-purple { border-color: #6a0dad; }
+  .milestone-purple .milestone-label { color: #6a0dad; }
+
+  /* ── LEARNING CARD ── */
+  .learning-card {
+    background: #fffbf0; border: 1px solid #e8d5a3; border-left: 5px solid #c9973a;
+    padding: 16px 20px; margin: 16px 0; border-radius: 2px;
+  }
+  .learning-card .lc-number {
+    font-family: 'Source Code Pro', monospace; font-size: 11px; font-weight: 700;
+    letter-spacing: 0.1em; text-transform: uppercase; color: #c9973a; margin-bottom: 6px;
+  }
+  .learning-card h4 { margin: 0 0 8px; font-style: normal; color: #1a1a1a; }
+  .learning-card p:last-child { margin-bottom: 0; }
+
+  .badge { display: inline-block; font-family: 'Source Code Pro', monospace; font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; padding: 2px 8px; border-radius: 3px; margin-right: 6px; vertical-align: middle; }
+  .badge-done   { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+  .badge-block  { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+  .badge-wip    { background: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
+  .badge-next   { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+  .badge-ref    { background: #e2e3e5; color: #383d41; border: 1px solid #d6d8db; }
+  .badge-win    { background: #0a3d0a; color: #7dff7d; border: 1px solid #1a7a1a; }
+
+  code { font-family: 'Source Code Pro', monospace; font-size: 14px; background: #f5f5f5; padding: 1px 5px; border-radius: 3px; color: #c7254e; }
+  pre { font-family: 'Source Code Pro', monospace; font-size: 13px; background: #f8f8f8; border: 1px solid #e0e0e0; border-left: 4px solid #1a1a1a; padding: 16px 18px; overflow-x: auto; margin: 14px 0 20px; line-height: 1.55; }
+  pre.win { border-left-color: #1a7a3a; background: #f0fff4; }
+  pre.purple { border-left-color: #6a0dad; background: #f8f0ff; }
+
+  .callout { background: #fffbf0; border: 1px solid #e8d5a3; border-left: 5px solid #c9973a; padding: 16px 20px; margin: 18px 0; border-radius: 2px; }
+  .callout-red { background: #fff5f5; border: 1px solid #f5c6cb; border-left: 5px solid #c0392b; padding: 16px 20px; margin: 18px 0; border-radius: 2px; }
+  .callout-blue { background: #f0f7ff; border: 1px solid #b8d4f0; border-left: 5px solid #1a6fba; padding: 16px 20px; margin: 18px 0; border-radius: 2px; }
+  .callout-green { background: #f0fff4; border: 1px solid #a8dfb8; border-left: 5px solid #1a7a3a; padding: 16px 20px; margin: 18px 0; border-radius: 2px; }
+  .callout-purple { background: #f8f0ff; border: 1px solid #d4b0f0; border-left: 5px solid #6a0dad; padding: 16px 20px; margin: 18px 0; border-radius: 2px; }
+  .callout p:last-child, .callout-red p:last-child, .callout-blue p:last-child, .callout-green p:last-child, .callout-purple p:last-child { margin-bottom: 0; }
+
+  table { width: 100%; border-collapse: collapse; margin: 16px 0 24px; font-size: 14.5px; }
+  th { background: #1a1a1a; color: #fff; text-align: left; padding: 9px 12px; font-size: 12px; letter-spacing: 0.07em; text-transform: uppercase; }
+  td { padding: 9px 12px; border-bottom: 1px solid #e8e8e8; vertical-align: top; }
+  tr:nth-child(even) td { background: #fafafa; }
+  td.green { color: #155724; font-weight: 700; }
+  td.red { color: #721c24; font-weight: 700; }
+  td.blue { color: #1a6fba; font-weight: 700; }
+  td.gold { color: #b8860b; font-weight: 700; }
+
+  .timeline { margin: 20px 0; border-left: 3px solid #1a1a1a; padding-left: 24px; }
+  .timeline-event { margin-bottom: 24px; position: relative; }
+  .timeline-event::before { content: ''; position: absolute; left: -31px; top: 7px; width: 12px; height: 12px; border-radius: 50%; background: #1a1a1a; border: 2px solid #fff; outline: 2px solid #1a1a1a; }
+  .timeline-event.green::before { background: #1a7a3a; outline-color: #1a7a3a; }
+  .timeline-event.blue::before { background: #1a6fba; outline-color: #1a6fba; }
+  .timeline-event.gold::before { background: #b8860b; outline-color: #b8860b; }
+  .timeline-event.purple::before { background: #6a0dad; outline-color: #6a0dad; }
+  .timeline-time { font-family: 'Source Code Pro', monospace; font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #888; margin-bottom: 4px; }
+  .timeline-title { font-weight: 700; margin-bottom: 4px; }
+  .timeline-detail { font-size: 15px; color: #444; }
+
+  .param-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 16px 0 24px; }
+  .param-card {
+    border: 1px solid #e0e0e0; border-left: 4px solid #1a6fba;
+    padding: 12px 14px; border-radius: 2px; font-size: 14px;
+  }
+  .param-card.green-accent { border-left-color: #1a7a3a; }
+  .param-card.gold-accent { border-left-color: #b8860b; }
+  .param-card.purple-accent { border-left-color: #6a0dad; }
+  .param-card .param-name { font-family: 'Source Code Pro', monospace; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #555; margin-bottom: 4px; }
+  .param-card .param-val { font-weight: 700; font-size: 15px; margin-bottom: 2px; }
+  .param-card .param-why { font-size: 13px; color: #555; font-style: italic; }
+
+  footer { border-top: 1px solid #ccc; padding-top: 20px; font-size: 13px; color: #888; font-style: italic; margin-top: 60px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="dateline">Tuesday, 2 June 2026 &nbsp;·&nbsp; FIFA World Cup 2026 Seattle &nbsp;·&nbsp; Simulator v2 Phase 1 · IPQ9574 · Guest CWP · PPSK Flow</div>
+  <h1>39 Knobs, One Breaking Point</h1>
+  <p class="deck">Simulator v2 Phase 1 ships with every tunable parameter that affects QoE at Lumen Field — from EDCA contention windows to rTWT service periods to MLO link counts. The Qualcomm IPQ9574 chip's full 27-parameter export is modelled. The gap between worst case and Stadium Optimal is now visible in one screen. Meanwhile the Guest CWP self-registration push completes and the PPSK self-reg flow is designed end-to-end.</p>
+</header>
+
+<nav id="toc">
+  <a href="#shipped">Shipped</a>
+  <a href="#sim-v2">Simulator v2</a>
+  <a href="#ipq9574">IPQ9574 Params</a>
+  <a href="#ppsk-flow">PPSK Self-Reg</a>
+  <a href="#guest-cwp">Guest CWP</a>
+  <a href="#model">Compute Model</a>
+  <a href="#learnings">Learnings</a>
+  <a href="#commits">Commits</a>
+  <a href="#pending">Pending</a>
+</nav>
+
+<!-- ══ 1. SHIPPED ══ -->
+<section id="shipped">
+  <h2>§1 — What Shipped Today</h2>
+
+  <div class="victory-banner">
+    <div class="vb-label">Simulator v2 Phase 1 · Live on GitHub Pages</div>
+    <h2>39 Tunable Parameters · Gap Analysis · Breaking Point Finder</h2>
+    <div class="vb-sub">Multi-band WiFi 7 · OFDMA · MU-MIMO · BSS Color · MLO · rTWT · IPQ9574</div>
+    <div class="vb-fdb">
+      Simulator v2:  https://khursheedkhanaiforgood-ai.github.io/5320-onboarding/docs/stadium_wifi_simulator_v2.html<br>
+      Commit (Phase 1 initial):   e0702c4  Build Stadium WiFi Simulator v2<br>
+      Commit (landing page card): 334081a  Add v2 card to landing pages<br>
+      Commit (IPQ9574 params):    360d43e  Add IPQ9574 chip params — 39 tunable params total
+    </div>
+  </div>
+
+  <div class="timeline">
+    <div class="timeline-event green">
+      <div class="timeline-time">Carried over from June 1</div>
+      <div class="timeline-title">Sprint 3 PPSK Dynamic VLAN — COMPLETE</div>
+      <div class="timeline-detail">iPhone → <code>WC_Seattle-PPSK</code> → TeamUSA passphrase → VLAN 10 (10.10.0.101) ✓<br>iPhone → <code>WC_Seattle-PPSK</code> → TeamAUS passphrase → VLAN 20 ✓<br>FDB: <code>b6:1c:de:e9:1e:92 TeamUSA(0010) + TeamAUS(0020) port 3</code></div>
+    </div>
+    <div class="timeline-event blue">
+      <div class="timeline-time">June 2 — Morning</div>
+      <div class="timeline-title">Guest CWP Self-Registration Push — In Progress</div>
+      <div class="timeline-detail">OWE SSID <code>WC_Guest_CWP</code> + CWP profile <code>CWP_WC_Seattle_Guest</code> configured in EP1. Key resolution: CWP profile type must match SSID auth type — Enhanced Open SSID requires Enhanced Open CWP.</div>
+    </div>
+    <div class="timeline-event gold">
+      <div class="timeline-time">June 2 — Afternoon</div>
+      <div class="timeline-title">PPSK Self-Registration Flow — Designed</div>
+      <div class="timeline-detail">Two-SSID architecture: Open SSID (landing) → CWP self-reg form → EP1 generates PPSK → emails passphrase + QR code → user connects to <code>WC_Seattle-PPSK</code>. EP1 cloud-hosted: no customer SMTP needed.</div>
+    </div>
+    <div class="timeline-event purple">
+      <div class="timeline-time">June 2 — Evening</div>
+      <div class="timeline-title">Simulator v2 Phase 1 — Built and Shipped</div>
+      <div class="timeline-detail">Initial build: 32 parameters. IPQ9574 chip export integrated: 39 parameters. Gap Analysis, Breaking Point Finder, Stadium Optimal preset, Worst Case reset. Live on GitHub Pages commit 360d43e.</div>
+    </div>
+  </div>
+
+  <h3>Sprint Status Board</h3>
+  <table>
+    <tr><th>Sprint</th><th>Focus</th><th>Status</th><th>Evidence</th></tr>
+    <tr><td>Sprint 1</td><td>802.1X WPA3-Enterprise + EP1 RADIUS dynamic VLAN</td><td class="green">COMPLETE ✓</td><td>FDB 74:a6:cd:8b:19:60 VLAN 10+40</td></tr>
+    <tr><td>Sprint 3</td><td>PPSK per-user passphrase → dynamic VLAN</td><td class="green">COMPLETE ✓</td><td>FDB b6:1c:de:e9:1e:92 VLAN 10+20</td></tr>
+    <tr><td>Sim v2</td><td>Multi-band WiFi 7 capacity simulator Phase 1</td><td class="green">COMPLETE ✓</td><td>39 params, commit 360d43e, live on Pages</td></tr>
+    <tr><td>Guest CWP</td><td>Enhanced Open OWE + self-registration portal</td><td class="gold">In Progress</td><td>Push in flight — EP1 config done</td></tr>
+    <tr><td>PPSK Self-Reg</td><td>Email + QR code passphrase delivery</td><td class="gold">Designed</td><td>Architecture defined, CWP config next</td></tr>
+    <tr><td>Sprint 2</td><td>AD Integration — PEAP-MSCHAPv2</td><td class="red">BLOCKED</td><td>Waiting for boss AD access</td></tr>
+    <tr><td>PCI-DSS</td><td>VLAN 50 ACL lockdown, inter-VLAN isolation</td><td class="blue">Queued</td><td>—</td></tr>
+  </table>
+</section>
+
+<!-- ══ 2. SIMULATOR V2 ══ -->
+<section id="sim-v2">
+  <h2>§2 — Simulator v2 Phase 1 Architecture</h2>
+
+  <p>The v1 simulator was a single-band, fixed-demand model with one airtime pool. Phase 1 of v2 rebuilds it from scratch as a full multi-band WiFi 7 simulator. Every parameter that the Extreme EP1 radio profile and SSID optional settings expose is now tunable in one panel.</p>
+
+  <div class="milestone milestone-purple">
+    <div class="milestone-label">Design Principle — Phase 1</div>
+    <p style="margin:0"><strong>Phase 1 is deterministic.</strong> All clients have fixed per-app demand rates. The simulator asks: given these exact settings, what is the QoE? Phase 2 (not yet built) will introduce stochastic arrivals — Poisson client sessions, Pareto-distributed per-client demand, and burstiness variance. Phase 1 is the foundation.</p>
+  </div>
+
+  <h3>Panel Architecture — 7 Collapsible Sections</h3>
+  <table>
+    <tr><th>Section</th><th>Parameters (count)</th><th>Key Controls</th></tr>
+    <tr><td>Demand Model</td><td>7</td><td>AP type, match timeline, fan count, devices/fan, WiFi attach, concurrency, app mix</td></tr>
+    <tr><td>PHY Layer</td><td>9</td><td>TX power, 5G/6G BW, guard interval, MBR, RX-SOP, MCS floor, noise floor, preamble puncturing</td></tr>
+    <tr><td>MAC / EDCA / Features</td><td>15</td><td>OFDMA DL/UL, MU-MIMO, BSS Color, rTWT, Multi-RU, MLO, 802.11r/k/v, DCS Lock, MLO mode, TXOP VO/BE, CWmin BE, RTS/CTS, MU streams, 4K-QAM, MLO links, MLO steering</td></tr>
+    <tr><td>Admission &amp; Steering</td><td>4</td><td>Max clients/radio, Min RSSI, Airtime Fairness, Band Steering mode</td></tr>
+    <tr><td>SSID &amp; Network</td><td>8</td><td>BC Filter, MC→UC, Proxy ARP, Client Isolation, Enhanced RNR, PMF, AirDefense, DTIM</td></tr>
+    <tr><td>Degradation &amp; Threats</td><td>2</td><td>Degradation Level (0–4), Cyber Attack (deauth/evil twin/cred storm/ARP)</td></tr>
+  </table>
+
+  <h3>Center Panel — 5 Tabs</h3>
+  <ul>
+    <li><strong>2.4 GHz / 5 GHz / 6 GHz tabs</strong> — Per-band: SNR, MCS, airtime, clients/AP, tput/client</li>
+    <li><strong>Aggregate tab</strong> — Total sessions, active transfers, demand vs capacity (Gbps), E2E latency, packet loss, DL/UL per client</li>
+    <li><strong>Gap Analysis tab</strong> — Compares current settings vs Stadium Optimal; shows every parameter that costs QoE with the exact penalty in plain English</li>
+  </ul>
+
+  <h3>Right Panel — Stability + Breaking Point Finder</h3>
+  <ul>
+    <li><strong>Gauge</strong> — 0–100 score, canvas arc, needle pointer. STABLE ≥85, DEGRADED ≥70, WARNING ≥50, CRITICAL below</li>
+    <li><strong>AP Array</strong> — 280 dots colour-coded by score (green/yellow/red)</li>
+    <li><strong>Active Automations</strong> — Contextual EP1 responses: TPC boost, admission MCS raise, PMF absorbed deauth, AirDefense rogue containment</li>
+    <li><strong>Breaking Point Finder</strong> — Sweeps a selected parameter through its full range, finds the value where a chosen SLA first breaks, restores the original value</li>
+  </ul>
+
+  <h3>Two Key Presets</h3>
+  <div class="param-grid">
+    <div class="param-card green-accent">
+      <div class="param-name">★ Stadium Optimal</div>
+      <div class="param-val">All 39 parameters at Lumen Field target</div>
+      <div class="param-why">AP5060, MBR 24M, RX-SOP −75, Strict AF, Active band steering, BC Filter + MC→UC + Proxy ARP, rTWT, MLO STR, 802.11r, 8-stream MU-MIMO, 4K-QAM, CWmin-BE=15, RTS=1500, TXOP-BE=3008µs, AI MLO steering</div>
+    </div>
+    <div class="param-card">
+      <div class="param-name">↺ Reset — Worst Case</div>
+      <div class="param-val">All features OFF — maximum degradation</div>
+      <div class="param-why">MBR=12, RX-SOP=−85, AF=off, MaxCli=512, MinRSSI=−80, all toggles OFF, NSTR MLO, 1 stream SISO, 4K-QAM OFF, CW=63, RTS disabled, TXOP-BE=0</div>
+    </div>
+  </div>
+
+  <p>The pedagogical intent: click Reset to see the worst case score. Then click each parameter in the Gap Analysis and watch the score climb. Every parameter has a visible cost, making the benefit of each EP1 feature concrete.</p>
+
+  <div class="callout-blue">
+    <p><strong>v1 is frozen forever.</strong> File: <code>docs/stadium_wifi_simulator.html</code> on <code>main</code>. URL: <code>…/docs/stadium_wifi_simulator.html</code>. Do not modify under any circumstances. v2 is the active file.</p>
+  </div>
+</section>
+
+<!-- ══ 3. IPQ9574 ══ -->
+<section id="ipq9574">
+  <h2>§3 — Qualcomm IPQ9574 Chip Parameters</h2>
+
+  <p>The user provided the full CLI export from the WiFi 7 AP Design Tool for the Qualcomm IPQ9574 chipset (AP5010). This is the silicon inside the AP5060. The export contained 27 parameters. Seven were not yet in the Phase 1 simulator and were integrated in commit <code>360d43e</code>.</p>
+
+  <h3>The Seven New Parameters — Model and Effect</h3>
+
+  <div class="param-grid">
+    <div class="param-card blue">
+      <div class="param-name">EDCA CWmin AC_BE</div>
+      <div class="param-val">15 slots (IPQ9574)</div>
+      <div class="param-why">Min contention window for best-effort. CW=7 → 3× more collisions when airtime &gt;70%. Modelled: +3ms latency penalty at CW=7 &amp; u&gt;0.7.</div>
+    </div>
+    <div class="param-card blue">
+      <div class="param-name">WMM TXOP AC_BE</div>
+      <div class="param-val">3008 µs (IPQ9574)</div>
+      <div class="param-why">Best-effort burst duration. Higher = better bulk tput. Risk: when rTWT OFF, a 3008µs BE burst can briefly starve AC_VO. Modelled: ×1.05 capacity + +1ms POS latency when rTWT=OFF.</div>
+    </div>
+    <div class="param-card green-accent">
+      <div class="param-name">RTS/CTS Threshold</div>
+      <div class="param-val">1500 B (IPQ9574)</div>
+      <div class="param-why">Frames above threshold trigger RTS/CTS handshake → mitigates hidden terminal collisions in dense 280-AP stadium. Modelled: ×1.04 capacity multiplier.</div>
+    </div>
+    <div class="param-card green-accent">
+      <div class="param-name">MU-MIMO DL Streams</div>
+      <div class="param-val">8 streams (IPQ9574)</div>
+      <div class="param-why">IPQ9574 supports 8-stream DL MU-MIMO (serves 8 clients simultaneously). Sublinear gain model: {1:×1.0, 2:×1.3, 4:×2.0, 8:×2.8}. AP3000 capped at ×1.6 (2SS hardware).</div>
+    </div>
+    <div class="param-card gold-accent">
+      <div class="param-name">4K-QAM (MCS 12/13)</div>
+      <div class="param-val">Enabled at SNR≥42dB</div>
+      <div class="param-why">When OFF: MCS capped at 11 (WiFi 6 ceiling). When ON: MCS12 at SNR≥42dB, MCS13 at SNR≥46dB. Only for WiFi 7 EHT (AP5060, gen=ʻbeʼ). PHY rate jumps: MCS11→MCS13 is +25% at 320MHz 4SS.</div>
+    </div>
+    <div class="param-card gold-accent">
+      <div class="param-name">MLO Active Links</div>
+      <div class="param-val">2 links — 5G + 6G</div>
+      <div class="param-why">1 link = MLO disabled entirely. 2 links = current STR 5G+6G bonding. 3 links = tri-band 2.4+5+6G (+12% gain from 2.4G channel addition). IPQ9574 ships as 2-link STR.</div>
+    </div>
+    <div class="param-card purple-accent">
+      <div class="param-name">MLO Traffic Steering</div>
+      <div class="param-val">AI-driven (EP1 RRM)</div>
+      <div class="param-why">WMM-QoS = standard per-AC priority steering. AI-driven = EP1 RRM continuously re-balances per-link load in real time. Modelled: ×1.04 capacity multiplier vs WMM-only.</div>
+    </div>
+  </div>
+
+  <h3>How They Wire Into the Compute Engine</h3>
+
+  <pre>
+// capMult() — overhead-reduction chain (full)
+m *= ofdmaDL  ? 1.35 : 1;     // OFDMA DL
+m *= bssColor ? 1.15 : 1;     // BSS Coloring
+m *= {6:1, 12:1.10, 24:1.18}[mbr] || 1;   // Min Basic Rate
+m *= bcf      ? 1.15 : 1;     // Broadcast Filter
+m *= mc2uc    ? 1.10 : 1;     // MC→UC
+m *= proxyArp ? 1.07 : 1;     // Proxy ARP
+m *= clientIso? 1.02 : 1;     // Client Isolation
+m *= {off:1, adaptive:1.22, strict:1.38}[atFair];  // Airtime Fairness ← biggest lever
+m *= multiRU  ? 1.08 : 1;     // Multi-RU
+m *= {65535:1.0, 2347:1.02, 1500:1.04}[rtsThr];    // RTS/CTS  ← IPQ9574
+m *= txopBe >= 3008 ? 1.05 : txopBe >= 1504 ? 1.03 : 1.0;  // TXOP BE ← IPQ9574
+m *= mloSteer === 'ai' ? 1.04 : 1.0;                // MLO steer ← IPQ9574
+
+// MU-MIMO stream scaling ← IPQ9574
+const muStreamGain = {1:1.0, 2:1.3, 4:2.0, 8:2.8};
+const muF = muMimo ? (ss5g >= 4 ? muStreamGain[muStreams] : 1.6) : 1.0;
+
+// 4K-QAM gate ← IPQ9574
+let mcs = snrToMcs(snr, gen, effMCSFloor);
+if (!qam4k &amp;&amp; gen === 'be') mcs = Math.min(mcs, 11);
+
+// CWmin collision penalty at high airtime ← IPQ9574
+if (cwBe === 7 &amp;&amp; u > 0.7) lat += 3;
+if (cwBe >= 31) lat -= 1;
+
+// MLO Active Links — gates MLO entirely ← IPQ9574
+const mloActive = mloOn &amp;&amp; ap.mlo &amp;&amp; b5 &amp;&amp; b6 &amp;&amp; mloLinks > 1;
+
+// TXOP BE risk on POS when rTWT OFF ← IPQ9574
+const posLat = (!rtwt &amp;&amp; txopBe === 3008) ? posLatBase + 1 : posLatBase;</pre>
+
+  <div class="callout-green">
+    <p><strong>Combined multiplier at Stadium Optimal with all IPQ9574 params ON:</strong> The capMult chain reaches approximately ×3.8 over baseline (all OFF). Airtime Fairness Strict alone is ×1.38. The RTS/CTS + TXOP BE + AI MLO Steering add ×1.04 × 1.05 × 1.04 = ×1.14 on top of everything else. Together with 8-stream MU-MIMO (×2.8) these are the difference between a functional stadium WiFi and one that collapses at kickoff.</p>
+  </div>
+
+  <h3>Gap Analysis — What the Simulator Tells You</h3>
+  <p>When any parameter is off-optimal, the Gap Analysis tab shows it with the exact QoE cost in plain English. Examples:</p>
+  <table>
+    <tr><th>Parameter</th><th>Current</th><th>Optimal</th><th>QoE Cost Shown</th></tr>
+    <tr><td>Airtime Fairness</td><td>OFF</td><td>Strict</td><td>−38% fair throughput</td></tr>
+    <tr><td>MU-MIMO Streams</td><td>1 stream</td><td>8 streams</td><td>−180% DL-MU capacity</td></tr>
+    <tr><td>4K-QAM</td><td>OFF</td><td>ON</td><td>Peak MCS capped at 11 (−25% peak PHY)</td></tr>
+    <tr><td>MLO Active Links</td><td>1 link</td><td>2 links</td><td>No 5G+6G bonding — MLO disabled</td></tr>
+    <tr><td>RTS/CTS</td><td>65535B (off)</td><td>1500B</td><td>Hidden terminal collisions unmitigated</td></tr>
+    <tr><td>CWmin AC_BE</td><td>7 slots</td><td>15</td><td>+3ms collision burst at &gt;70% load</td></tr>
+    <tr><td>TXOP AC_BE</td><td>0µs</td><td>3008µs</td><td>Lower bulk tput for video/social</td></tr>
+  </table>
+</section>
+
+<!-- ══ 4. PPSK SELF-REG ══ -->
+<section id="ppsk-flow">
+  <h2>§4 — PPSK Self-Registration Flow</h2>
+
+  <p>The goal: a fan arrives at Lumen Field, has no passphrase, and wants to get onto <code>WC_Seattle-PPSK</code> (the per-user passphrase SSID that puts them on their assigned VLAN). This requires a self-service registration pathway that EP1 can handle entirely without a help desk.</p>
+
+  <h3>Two-SSID Architecture</h3>
+
+  <div class="milestone milestone-gold">
+    <div class="milestone-label">Architecture Decision</div>
+    <p style="margin:0">A single SSID cannot serve as both the landing zone (no password needed) and the target SSID (PPSK-protected). Two SSIDs are required: one Open for the CWP landing, one PPSK for the final connection. EP1 CWP bridges them.</p>
+  </div>
+
+  <ol>
+    <li>Fan's device connects to <code>WC_Guest_CWP</code> — Enhanced Open (OWE), no password required</li>
+    <li>EP1 CWP intercepts the HTTP request and serves the self-registration form (name + email)</li>
+    <li>EP1 generates a unique PPSK passphrase and assigns it to the submitted email as a new user</li>
+    <li>EP1 emails the passphrase + QR code to the fan's email address — no customer SMTP needed (EP1 cloud infrastructure handles delivery)</li>
+    <li>Fan opens email, scans QR code → device auto-connects to <code>WC_Seattle-PPSK</code> with the passphrase</li>
+    <li>PPSK auth → EP1 Core evaluates user group → assigns VLAN 30 (Guest) via dynamic VLAN profile</li>
+  </ol>
+
+  <h3>QR Code Format</h3>
+  <pre>WIFI:T:WPA;S:WC_Seattle-PPSK;P:&lt;generated_passphrase&gt;;;</pre>
+  <p>Standard Wi-Fi QR code format — compatible with iOS Camera app and Android native scanner. No app install required. Fan scans, device joins automatically.</p>
+
+  <h3>EP1 Config Location</h3>
+  <p>The PPSK generation, email delivery, and QR code settings all live inside the CWP profile → email/notification tab. No separate email server or webhook is needed. EP1's cloud infrastructure handles the outbound email on behalf of the customer.</p>
+
+  <div class="callout-blue">
+    <p><strong>Security note:</strong> The landing SSID <code>WC_Guest_CWP</code> is Enhanced Open (OWE) — traffic is encrypted in transit even without a password. The PPSK SSID <code>WC_Seattle-PPSK</code> uses WPA2-PSK with per-user passphrases. Once a fan has their passphrase they always connect to the PPSK SSID, never returning to the CWP landing SSID.</p>
+  </div>
+</section>
+
+<!-- ══ 5. GUEST CWP ══ -->
+<section id="guest-cwp">
+  <h2>§5 — Guest CWP Self-Registration (Enhanced Open)</h2>
+
+  <p>The <code>WC_Guest_CWP</code> SSID provides zero-friction stadium guest access. No password, no app. Fans connect and are redirected to a branded self-registration portal.</p>
+
+  <h3>Configuration</h3>
+  <table>
+    <tr><th>Item</th><th>Setting</th></tr>
+    <tr><td>SSID</td><td><code>WC_Guest_CWP</code></td></tr>
+    <tr><td>Auth Type</td><td>Enhanced Open (OWE — Opportunistic Wireless Encryption)</td></tr>
+    <tr><td>VLAN</td><td>30 (Guest — 10.30.0.0/16)</td></tr>
+    <tr><td>CWP Profile</td><td><code>CWP_WC_Seattle_Guest</code></td></tr>
+    <tr><td>CWP Type</td><td>Enhanced Open (must match SSID auth type)</td></tr>
+    <tr><td>CWP Mode</td><td>Self-Registration</td></tr>
+  </table>
+
+  <div class="learning-card">
+    <div class="lc-number">Critical Lesson — CWP Profile Type</div>
+    <h4>CWP profile type must match SSID auth type exactly</h4>
+    <p>Attempting to attach a standard Open CWP profile to an Enhanced Open SSID causes a save error in EP1. You must create a new CWP profile with type set to Enhanced Open. The error is cryptic — "profile type mismatch" — but the fix is straightforward: create a dedicated CWP profile for the OWE SSID.</p>
+  </div>
+
+  <h3>EP1 Cloud Email — No SMTP Required</h3>
+  <p>EP1 is a cloud-hosted platform. The CWP self-registration email (welcome email, passphrase delivery, QR code) is sent by EP1's cloud infrastructure directly. The customer does not need to configure an SMTP relay, an email server, or any outbound mail credentials. This is a significant operational simplification for a temporary event like a FIFA World Cup venue.</p>
+</section>
+
+<!-- ══ 6. COMPUTE MODEL ══ -->
+<section id="model">
+  <h2>§6 — Compute Model Reference</h2>
+
+  <h3>Band Split by AP Type and Steering Mode</h3>
+  <table>
+    <tr><th>AP</th><th>Steering</th><th>2.4G</th><th>5G</th><th>6G</th></tr>
+    <tr><td>AP5060</td><td>None</td><td>22%</td><td>55%</td><td>23%</td></tr>
+    <tr><td>AP5060</td><td>Passive</td><td>14%</td><td>52%</td><td>34%</td></tr>
+    <tr><td>AP5060</td><td>Active (optimal)</td><td>8%</td><td>50%</td><td>42%</td></tr>
+    <tr><td>AP3000</td><td>None</td><td>30%</td><td>70%</td><td>—</td></tr>
+    <tr><td>AP3000</td><td>Active (optimal)</td><td>12%</td><td>88%</td><td>—</td></tr>
+  </table>
+
+  <h3>SNR → MCS Thresholds</h3>
+  <table>
+    <tr><th>MCS</th><th>WiFi 7 EHT (be) SNR</th><th>WiFi 6 HE (ax) SNR</th><th>Modulation</th></tr>
+    <tr><td>13</td><td>≥50 dB</td><td>N/A</td><td>4096-QAM 5/6 (4K-QAM)</td></tr>
+    <tr><td>12</td><td>≥46 dB</td><td>N/A</td><td>4096-QAM 3/4 (4K-QAM)</td></tr>
+    <tr><td>11</td><td>≥42 dB</td><td>≥44 dB</td><td>1024-QAM 5/6</td></tr>
+    <tr><td>9</td><td>≥34 dB</td><td>≥32 dB</td><td>256-QAM 5/6</td></tr>
+    <tr><td>7</td><td>≥26 dB</td><td>≥24 dB</td><td>64-QAM 5/6</td></tr>
+    <tr><td>4</td><td>≥18 dB</td><td>≥17 dB</td><td>16-QAM 3/4</td></tr>
+    <tr><td>0</td><td>≥3 dB</td><td>≥6 dB</td><td>BPSK 1/2</td></tr>
+  </table>
+
+  <h3>PHY 1SS Peak Rates (Mbps)</h3>
+  <table>
+    <tr><th>BW</th><th>MCS 9</th><th>MCS 11</th><th>MCS 12</th><th>MCS 13</th></tr>
+    <tr><td>80 MHz</td><td>480</td><td>600</td><td>675</td><td>750</td></tr>
+    <tr><td>160 MHz</td><td>961</td><td>1201</td><td>1350</td><td>1500</td></tr>
+    <tr><td>320 MHz (WiFi 7)</td><td>1922</td><td>2402</td><td>2700</td><td>3000</td></tr>
+  </table>
+  <p style="font-size:14px;color:#555;font-style:italic">Rates at GI=1600ns. Multiply by SS count and GI efficiency {800ns:×1.05, 1600ns:×1.0, 3200ns:×0.93}. 4SS AP5060 at 320MHz MCS13 1600ns GI = 4 × 3000 × 1.0 = 12,000 Mbps peak PHY.</p>
+
+  <h3>MLO Gain Factors</h3>
+  <table>
+    <tr><th>Mode</th><th>Description</th><th>Gain Factor</th></tr>
+    <tr><td>STR</td><td>Simultaneous Transmit/Receive — full duplex 5G+6G</td><td class="green">×1.90</td></tr>
+    <tr><td>Enhanced</td><td>Enhanced STR — improved scheduling</td><td class="gold">×1.55</td></tr>
+    <tr><td>NSTR</td><td>Non-STR — time-division, no simultaneous TX/RX</td><td>×1.20</td></tr>
+  </table>
+
+  <h3>Service Class SLA Targets</h3>
+  <table>
+    <tr><th>Service</th><th>VLAN</th><th>Latency</th><th>Throughput</th><th>Mechanism</th></tr>
+    <tr><td>POS / Payment</td><td>50</td><td>≤10ms (≤3ms with rTWT)</td><td>—</td><td>rTWT hardware-enforced TDMA service period</td></tr>
+    <tr><td>VIP</td><td>40</td><td>—</td><td>≥25 Mbps/client</td><td>MLO + 6GHz priority</td></tr>
+    <tr><td>Teams / Video</td><td>10</td><td>—</td><td>≥5 Mbps/client</td><td>WMM AC_VI + OFDMA</td></tr>
+    <tr><td>Guest</td><td>30</td><td>—</td><td>Best effort</td><td>Standard AC_BE</td></tr>
+  </table>
+</section>
+
+<!-- ══ 7. LEARNINGS ══ -->
+<section id="learnings">
+  <h2>§7 — Key Learnings</h2>
+
+  <div class="learning-card">
+    <div class="lc-number">Lesson 1 — Simulator Design</div>
+    <h4>Reset to Worst Case, not Baseline</h4>
+    <p>The ↺ Reset button sets every parameter to its worst possible value (all features OFF, MBR=12, CW=63, etc.), not a "reasonable baseline." This is pedagogically superior: the full delta from worst to optimal is visible in one click. Each gap row in the Gap Analysis tab directly links to a specific parameter the user can then fix. The score typically goes from ~12/100 (worst case) to ~96/100 (Stadium Optimal).</p>
+  </div>
+
+  <div class="learning-card">
+    <div class="lc-number">Lesson 2 — Airtime Fairness Is the Biggest Lever</div>
+    <h4>1 MCS0 device consumes 32× the airtime of an MCS11 device</h4>
+    <p>In a 72,000-fan stadium with thousands of older phones, Airtime Fairness is not optional. Without it (AF=OFF), a handful of devices with bad RF can steal the entire airtime budget. With Strict AF the aggregate throughput improves by ×1.38. No other single parameter has this magnitude of effect in a dense public venue.</p>
+  </div>
+
+  <div class="learning-card">
+    <div class="lc-number">Lesson 3 — IPQ9574 CWmin Models at High Load</div>
+    <h4>CWmin AC_BE = 7 causes collision storms above 70% airtime</h4>
+    <p>The contention window minimum sets how quickly a device retries after a collision. At low load, CW=7 is fine — retries happen fast and succeed. At high load (airtime &gt;70%), many devices are retrying simultaneously. CW=7 means they all retry almost simultaneously → exponential collision cascade. IPQ9574 uses CW=15 as the sweet spot: fast enough for throughput, large enough to spread retries.</p>
+  </div>
+
+  <div class="learning-card">
+    <div class="lc-number">Lesson 4 — CWP Profile Type Must Match SSID Auth</div>
+    <h4>Enhanced Open SSID requires Enhanced Open CWP — not standard Open</h4>
+    <p>EP1 enforces a strict type match between the SSID authentication type and the CWP profile type attached to it. An OWE (Enhanced Open) SSID will reject a standard Open CWP profile at save time. The error message in EP1 says "profile type mismatch." Fix: create a new CWP profile with auth type explicitly set to Enhanced Open.</p>
+  </div>
+
+  <div class="learning-card">
+    <div class="lc-number">Lesson 5 — EP1 Email Delivery Needs No SMTP</div>
+    <h4>CWP self-registration email is sent by EP1's cloud infrastructure</h4>
+    <p>Customers deploying EP1 CWP with email delivery (welcome email, passphrase QR code) do not need to configure outbound mail. EP1 handles SMTP through its own cloud infrastructure. This is a significant operational simplification: no email server provisioning, no SPF/DKIM records, no SMTP relay firewall rules needed at the venue.</p>
+  </div>
+
+  <div class="learning-card">
+    <div class="lc-number">Lesson 6 — Phase 1 vs Phase 2 Simulator</div>
+    <h4>Deterministic now, stochastic later</h4>
+    <p>Phase 1 assumes all clients have identical per-app demand at all times — it is a steady-state capacity model. Phase 2 will introduce Poisson arrival rates for client sessions, Pareto-distributed per-client demand (heavy tail — a small fraction of clients consume most bandwidth), and burstiness variance. Phase 1 is sufficient for parameter tuning and breaking-point discovery. Phase 2 is needed for realistic traffic simulation.</p>
+  </div>
+</section>
+
+<!-- ══ 8. COMMITS ══ -->
+<section id="commits">
+  <h2>§8 — Commits, URLs, Files</h2>
+
+  <h3>Commits — June 2</h3>
+  <table>
+    <tr><th>Hash</th><th>Message</th></tr>
+    <tr><td><code>e0702c4</code></td><td>Build Stadium WiFi Simulator v2 — multi-band, WiFi 7, MLO, demand model (32 params)</td></tr>
+    <tr><td><code>334081a</code></td><td>Add Stadium WiFi Simulator v2 card to landing pages (dark purple Sim 6 card)</td></tr>
+    <tr><td><code>360d43e</code></td><td>Add IPQ9574 chip parameters to v2 simulator — 39 tunable params total</td></tr>
+  </table>
+
+  <h3>Live URLs</h3>
+  <table>
+    <tr><th>Resource</th><th>URL</th></tr>
+    <tr><td>Simulator v2 (Phase 1)</td><td><code>https://khursheedkhanaiforgood-ai.github.io/5320-onboarding/docs/stadium_wifi_simulator_v2.html</code></td></tr>
+    <tr><td>Simulator v1 (frozen)</td><td><code>https://khursheedkhanaiforgood-ai.github.io/5320-onboarding/docs/stadium_wifi_simulator.html</code></td></tr>
+    <tr><td>June 1 EOD</td><td><code>https://khursheedkhanaiforgood-ai.github.io/5320-onboarding/docs/session_summary_20260601_fifa_wc.html</code></td></tr>
+    <tr><td>June 2 EOD (this file)</td><td><code>https://khursheedkhanaiforgood-ai.github.io/5320-onboarding/docs/session_summary_20260602_fifa_wc.html</code></td></tr>
+    <tr><td>EOD Landing Page</td><td><code>https://khursheedkhanaiforgood-ai.github.io/5320-onboarding/</code></td></tr>
+  </table>
+
+  <h3>Key Files</h3>
+  <table>
+    <tr><th>File</th><th>Notes</th></tr>
+    <tr><td><code>docs/stadium_wifi_simulator_v2.html</code></td><td>v2 Phase 1 — active development file, 39 params</td></tr>
+    <tr><td><code>docs/stadium_wifi_simulator.html</code></td><td>v1 — FROZEN, do not modify</td></tr>
+    <tr><td><code>docs/session_summary_20260602_fifa_wc.html</code></td><td>This EOD file</td></tr>
+    <tr><td><code>docs/WC_Secure_TeamUSA_20260601_1315.mobileconfig</code></td><td>Apple config profile — EAP-TTLS/PAP for WC_Secure SSID</td></tr>
+  </table>
+
+  <h3>Credentials (Non-Production Lab Only)</h3>
+  <table>
+    <tr><th>User</th><th>Credential</th><th>Group</th><th>VLAN</th></tr>
+    <tr><td>khursheedkhan@gmail.com</td><td>WCSeattle2026!!</td><td>Group_TeamUSA</td><td>10</td></tr>
+    <tr><td>iPhone MAC</td><td>b6:1c:de:e9:1e:92</td><td>PPSK TeamUSA + TeamAUS tested</td><td>10 / 20</td></tr>
+    <tr><td>MacBook MAC</td><td>74:a6:cd:8b:19:60</td><td>802.1X TeamUSA + VIP tested</td><td>10 / 40</td></tr>
+  </table>
+
+  <h3>RadSec Endpoint</h3>
+  <pre>Host:   radius.oh-uz.extremecloudiq.com
+IP:     3.15.90.11
+Port:   2083
+Secret: radsec</pre>
+</section>
+
+<!-- ══ 9. PENDING ══ -->
+<section id="pending">
+  <h2>§9 — Sprint Queue — Pending</h2>
+
+  <table>
+    <tr><th>Item</th><th>Status</th><th>Next Action</th></tr>
+    <tr>
+      <td>Guest CWP push verification</td>
+      <td><span class="badge badge-wip">In Progress</span></td>
+      <td>Confirm EP1 push completes; test OWE association + CWP redirect on phone</td>
+    </tr>
+    <tr>
+      <td>PPSK self-registration + email + QR</td>
+      <td><span class="badge badge-wip">Designed</span></td>
+      <td>Configure CWP email/notification tab in EP1 for <code>WC_Guest_CWP</code>; test passphrase email delivery</td>
+    </tr>
+    <tr>
+      <td>PCI-DSS — VLAN 50 ACL lockdown</td>
+      <td><span class="badge badge-next">Queued</span></td>
+      <td>ACL: permit POS→gateway only, deny inter-VLAN; prove with ping isolation test</td>
+    </tr>
+    <tr>
+      <td>Guest VLAN /24 → /16 on SW1</td>
+      <td><span class="badge badge-next">Queued</span></td>
+      <td>VLAN 30 DHCP pool needs /16 for 72K fan density; currently /24 (200 addresses)</td>
+    </tr>
+    <tr>
+      <td>Sprint 2 — AD Integration</td>
+      <td><span class="badge badge-block">Blocked</span></td>
+      <td>Waiting for boss to provide AD domain, LDAP IP, service account, Base DN, AD group names. Changes: PEAP-MSCHAPv2 replaces EAP-TTLS; 5 network policies + Filter-Id unchanged.</td>
+    </tr>
+    <tr>
+      <td>Sprint 5 — OpenAI 401 fix + RAG ingest</td>
+      <td><span class="badge badge-next">Queued</span></td>
+      <td>Fix OpenAI API key 401 error; then ingest PPSK guide + FIFA docs into RAG knowledge base</td>
+    </tr>
+    <tr>
+      <td>Simulator v2 Phase 2 — Stochastic traffic</td>
+      <td><span class="badge badge-next">Future</span></td>
+      <td>Poisson arrivals, Pareto per-client demand, burstiness variance, confidence intervals. Phase 1 must be validated first.</td>
+    </tr>
+    <tr>
+      <td>Index parity — June 2 EOD card</td>
+      <td><span class="badge badge-next">Queued</span></td>
+      <td>Add June 2 EOD card to index.html, index-nyt.html, index-harpers.html</td>
+    </tr>
+  </table>
+
+  <div class="callout-green">
+    <p><strong>Next session start:</strong> Verify Guest CWP push completed (check EP1 policy status). If complete: test OWE association on iPhone → confirm CWP redirect → submit self-reg form → confirm passphrase email arrives → scan QR → confirm <code>WC_Seattle-PPSK</code> join + VLAN 30 assignment in FDB.</p>
+  </div>
+</section>
+
+<footer>
+  <p>© 2026 Khursheed Khan &nbsp;·&nbsp; FIFA WC 2026 Seattle Lab &nbsp;·&nbsp; Session Summary June 2 2026</p>
+  <p style="margin-top:6px">Sprint 1 ✓ · Sprint 3 ✓ · Simulator v2 Phase 1 ✓ · <a href="session_summary_20260601_fifa_wc.html" style="color:#888">June 1 EOD ↗</a> · <a href="stadium_wifi_simulator_v2.html" style="color:#888">Simulator v2 ↗</a></p>
+</footer>
+
+<script>
+  // Build sticky TOC from <a> tags already in nav
+  // (TOC links are hand-authored above — no JS generation needed)
+</script>
+</body>
+</html>
