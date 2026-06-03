@@ -156,6 +156,7 @@ input:checked+.ts:before{transform:translateX(15px);background:#fff}
     <div class="b v2">v2 Phase 1</div>
     <div class="b clk" onclick="toggleAP()" title="Click to switch">AP5060 ⇄ AP3000</div>
     <button class="b opt" onclick="applyOptimal()">★ Stadium Optimal</button>
+    <button onclick="showCfg()" style="background:#0a1a00;border:1px solid var(--gold);color:var(--gold);padding:3px 9px;border-radius:2px;cursor:pointer;font-size:9px;font-family:inherit">📋 Full Output</button>
     <div class="b" style="color:#5aff9a;border-color:#00501a;background:#001a08" id="stbadge">● STABLE</div>
     <button onclick="resetAll()" style="background:#0d1020;border:1px solid var(--bd);color:var(--mut2);padding:3px 9px;border-radius:2px;cursor:pointer;font-size:9px;font-family:inherit">↺ Reset</button>
   </div>
@@ -460,7 +461,7 @@ input:checked+.ts:before{transform:translateX(15px);background:#fff}
 <div id="cfg-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:1000;overflow-y:auto;padding:24px 12px">
   <div style="max-width:700px;margin:0 auto;background:#131618;border:1px solid var(--bd);border-radius:4px;padding:20px 24px">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
-      <div style="font-size:10px;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:1.2px">Config Export — Current vs Stadium Optimal</div>
+      <div style="font-size:10px;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:1.2px">Full Config Output — Outputs · Search Knobs · Inputs · All 60 Params</div>
       <div style="display:flex;gap:6px">
         <button onclick="copyCfg()" style="background:#0d1928;border:1px solid var(--blue);color:var(--blue);padding:3px 10px;border-radius:2px;cursor:pointer;font-size:9px;font-family:inherit">Copy Text</button>
         <button onclick="closeCfg()" style="background:#1a0010;border:1px solid var(--red);color:var(--red);padding:3px 10px;border-radius:2px;cursor:pointer;font-size:9px;font-family:inherit">✕ Close</button>
@@ -1116,6 +1117,95 @@ function resetAll(){
 function showCfg(){
   const s=compute();
   const p=s.p;
+  const optPar=optResult?optResult.params:null;   // P50 optimal from optimizer run (if any)
+  const mcR=optResult?optResult.mc:null;
+  let html='';
+  const textLines=['STADIUM WIFI SIMULATOR v2 — FULL CONFIG OUTPUT',new Date().toLocaleString(),''];
+
+  // ── COMPUTED OUTPUTS ────────────────────────────────────────────────────────
+  html+=`<div style="margin-bottom:14px">
+  <div style="font-size:9px;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:1.2px;border-bottom:1px solid var(--bd);padding-bottom:3px;margin-bottom:8px">COMPUTED OUTPUTS — Simulator results right now</div>
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-bottom:8px">
+    ${[['SCORE',`${s.score}/100`,s.score>=85?CM.green:s.score>=65?CM.yel:CM.red],
+       ['POS LATENCY',`${s.posLat.toFixed(1)}ms ${s.posPass?'✓':'✗'}`,s.posPass?CM.green:CM.red],
+       ['AIRTIME',`${s.wAir}%`,s.wAir<=70?CM.green:s.wAir<=85?CM.yel:CM.red],
+       ['TPUT/CLIENT',`${s.bestTP.toFixed(1)}M`,s.bestTP>=10?CM.green:s.bestTP>=5?CM.yel:CM.red]
+      ].map(([lbl,val,col])=>`<div style="background:#0d0f12;border:1px solid var(--bd);border-radius:2px;padding:5px;text-align:center">
+      <div style="font-size:16px;font-weight:700;color:${col}">${val}</div>
+      <div style="font-size:7px;color:var(--mut);text-transform:uppercase;margin-top:2px">${lbl}</div></div>`).join('')}
+  </div>
+  <table style="width:100%;border-collapse:collapse;font-size:10px;margin-bottom:6px">
+    <thead><tr style="border-bottom:1px solid var(--bd)">
+      ${['Band','SNR','MCS','PHY Rate','Airtime','Latency','Loss/Client'].map(h=>`<th style="text-align:left;color:var(--mut);font-weight:400;padding:2px 6px 3px 0;font-size:8px">${h}</th>`).join('')}
+    </tr></thead><tbody>`;
+  [{lbl:'2.4G',b:s.b2},{lbl:'5G',b:s.b5},{lbl:'6G',b:s.b6}].forEach(({lbl,b})=>{
+    if(!b){html+=`<tr><td style="color:var(--mut2);padding:2px 6px 2px 0">${lbl}</td><td colspan="6" style="color:var(--mut);font-size:9px">— not active</td></tr>`;return;}
+    html+=`<tr>
+      <td style="padding:2px 6px 2px 0;font-weight:700;color:var(--mut2)">${lbl}</td>
+      <td style="padding:2px 6px 2px 0;color:${b.snr>=25?CM.green:b.snr>=18?CM.yel:CM.red}">${b.snr} dB</td>
+      <td style="padding:2px 6px 2px 0">${b.mcs>=0?'MCS '+b.mcs:'Auto'}</td>
+      <td style="padding:2px 6px 2px 0;color:var(--cyan)">${b.phy} Mbps</td>
+      <td style="padding:2px 6px 2px 0;color:${b.air<=70?CM.green:b.air<=85?CM.yel:CM.red}">${b.air}%</td>
+      <td style="padding:2px 6px 2px 0;color:${b.lat<=20?CM.green:b.lat<=50?CM.yel:CM.red}">${b.lat} ms</td>
+      <td style="padding:2px 0;color:${b.ploss<=0.1?CM.green:b.ploss<=1?CM.yel:CM.red}">${b.ploss}%</td></tr>`;
+  });
+  if(s.mloActive&&s.mlo)html+=`<tr style="background:#001020;border-top:1px solid var(--bd)">
+    <td style="padding:2px 6px 2px 0;color:var(--cyan);font-weight:700">MLO</td>
+    <td colspan="2" style="padding:2px 6px 2px 0;color:var(--cyan)">5G+6G · ${s.mlo.gain}× gain</td>
+    <td style="padding:2px 6px 2px 0;color:var(--cyan)">${s.mlo.tput} Mbps</td>
+    <td colspan="2" style="padding:2px 6px 2px 0;color:var(--cyan)">${s.mlo.lat} ms</td><td></td></tr>`;
+  html+=`</tbody></table>
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;font-size:9px">
+    <div style="padding:3px 6px;background:#0a0a0a;border:1px solid var(--bd);border-radius:2px"><span style="color:var(--mut)">Sessions: </span><span>${s.active.toLocaleString()} active / ${s.totalSess.toLocaleString()} total</span></div>
+    <div style="padding:3px 6px;background:#0a0a0a;border:1px solid var(--bd);border-radius:2px"><span style="color:var(--mut)">Demand: </span><span>${s.demGbps}G / ${s.capGbps}G capacity</span></div>
+    <div style="padding:3px 6px;background:#0a0a0a;border:1px solid var(--bd);border-radius:2px">
+      <span style="color:${s.posPass?CM.green:CM.red}">POS ${s.posPass?'✓':'✗'}</span>
+      <span style="color:${s.vipPass?CM.green:CM.red}"> VIP ${s.vipPass?'✓':'✗'}</span>
+      <span style="color:${s.teaPass?CM.green:CM.red}"> Teams ${s.teaPass?'✓':'✗'}</span>
+    </div>
+  </div></div>`;
+  textLines.push('── OUTPUTS ──',`Score:${s.score} POS:${s.posLat.toFixed(1)}ms Airtime:${s.wAir}% Tput:${s.bestTP.toFixed(1)}M`,`Sessions:${s.active} Demand:${s.demGbps}G/Cap:${s.capGbps}G`,'');
+
+  // ── 12 SEARCH KNOBS ─────────────────────────────────────────────────────────
+  html+=`<div style="margin-bottom:14px">
+  <div style="font-size:9px;font-weight:700;color:var(--cyan);text-transform:uppercase;letter-spacing:1.2px;border-bottom:1px solid var(--bd);padding-bottom:3px;margin-bottom:6px">
+    12 SEARCH KNOBS — ${optPar?'P50 OPTIMAL for your current demand inputs':'Stadium prior · run Optimizer for your exact scenario'}
+  </div>`;
+  if(mcR)html+=`<div style="font-size:9px;color:var(--mut2);margin-bottom:6px;padding:3px 6px;background:#001020;border-left:2px solid var(--cyan)">MC result on optimal config: P50=${mcR.score.p50} · P5=${mcR.score.p5} · P95=${mcR.score.p95} · spread=${mcR.spread} · POS breach=${mcR.breachPos}% (&gt;${mcR.posThreshold}ms)</div>`;
+  const kFmt={atFair:v=>v,txPwr:v=>v+' dBm',minRSSI:v=>v+' dBm',rxSop:v=>v+' dBm',cwBe:v=>String(v),maxCli:v=>String(v),mcsFloor:v=>'MCS '+v,bw5g:v=>v+' MHz',fragThr:v=>v+' B',dtim:v=>String(v),rtsThr:v=>v+' B',txopBe:v=>v+' µs'};
+  html+=`<table style="width:100%;border-collapse:collapse"><thead><tr>
+    <th style="text-align:left;color:var(--mut);font-weight:400;font-size:8px;padding:2px 8px 3px 0">Parameter</th>
+    <th style="color:var(--mut);font-weight:400;font-size:8px;padding:2px 6px">Current</th>
+    <th style="color:${optPar?CM.cyan:'var(--mut)'};font-weight:${optPar?700:400};font-size:8px;padding:2px 0">${optPar?'P50 Optimal ↓':'Stadium Prior'}</th>
+  </tr></thead><tbody>`;
+  Object.entries(OPT_SEARCH).forEach(([k])=>{
+    const cv=p[k];const ov=optPar?optPar[k]:(typeof OPT[k]!=='undefined'?OPT[k]:null);
+    const fmt=kFmt[k]||(v=>String(v));
+    const diff=ov!==null&&String(cv)!==String(ov);
+    html+=`<tr style="${diff?'background:#001a00':''}">
+      <td style="padding:2px 8px 2px 0;color:var(--mut2);font-size:10px">${OPT_KNOB_LABELS[k]||k}</td>
+      <td style="padding:2px 6px;font-weight:700;color:${diff?CM.yel:'var(--text)'};font-size:10px">${fmt(cv)}</td>
+      <td style="padding:2px 0;font-weight:${diff?700:400};color:${diff?CM.green:ov!==null?'var(--mut2)':'var(--mut)'};font-size:10px">${ov!==null?fmt(ov):'—'}${diff&&optPar?' ←':''}</td></tr>`;
+    textLines.push(`  ${(OPT_KNOB_LABELS[k]||k).padEnd(26)} ${fmt(cv).padEnd(16)} ${ov!==null&&diff?(optPar?'→ P50: ':'→ prior: ')+fmt(ov):''}`);
+  });
+  if(!optPar)html+=`<tr><td colspan="3" style="padding:6px 0;font-size:8px;color:var(--mut);font-style:italic">↑ Showing static priors. Click the <strong style="color:var(--org)">Optimizer tab</strong> above and hit <strong style="color:var(--org)">★ Optimize Stadium Config</strong> — the column above will update with MC-driven values for exactly ${(+p.fans||0).toLocaleString()} fans / ${Math.round((+p.concur||0)*100)}% concur.</td></tr>`;
+  html+=`</tbody></table></div>`;
+  textLines.push('');
+
+  // ── SCENARIO INPUTS ─────────────────────────────────────────────────────────
+  html+=`<div style="margin-bottom:14px">
+  <div style="font-size:9px;font-weight:700;color:var(--org);text-transform:uppercase;letter-spacing:1.2px;border-bottom:1px solid var(--bd);padding-bottom:3px;margin-bottom:6px">SCENARIO INPUTS — Your slider settings</div>
+  <table style="width:100%;border-collapse:collapse">`;
+  [{l:'AP Type',v:p.apType},{l:'Fan Count',v:(+p.fans||0).toLocaleString()},{l:'Devices / Fan',v:p.devMult+'×'},{l:'WiFi Attach',v:Math.round(p.wifiAtt*100)+'%'},{l:'Concurrency',v:Math.round(p.concur*100)+'%'},{l:'Demand Mix',v:`Video ${Math.round(p.vidW)}% · Teams ${Math.round(p.teaW)}% · Social ${Math.round(p.socW)}% · Browse ${Math.round(p.broW)}% · POS ${Math.round(p.posW)}%`},{l:'Degradation',v:['0 — Nominal','1 — 5G CCI','2 — Dual Degrade','3 — Jammer+Auth'][p.deg]||p.deg},{l:'Cyber Threat',v:p.cyber==='none'?'None':p.cyber}].forEach(r=>{
+    html+=`<tr><td style="padding:2px 8px 2px 0;color:var(--mut2);width:36%;font-size:10px">${r.l}</td><td style="padding:2px 0;font-size:10px;color:var(--text)">${r.v}</td></tr>`;
+    textLines.push(`  ${r.l.padEnd(22)} ${r.v}`);
+  });
+  html+=`</table></div>`;
+  textLines.push('');
+
+  // ── ALL 60 PARAMS (collapsible) ──────────────────────────────────────────────
+  html+=`<details><summary style="font-size:9px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:1.2px;cursor:pointer;padding:4px 0;border-top:1px solid var(--bd)">▶ All 60 Parameters — Full Detail (expand)</summary><div style="margin-top:8px">`;
+
   const OPT={
     apType:'AP5060',fans:72000,devMult:1.4,wifiAtt:.75,concur:.55,
     txPwr:17,bw5g:160,bw6g:320,gi:1600,mbr:24,rxSop:-75,mcsFloor:4,nf:0,
@@ -1214,10 +1304,8 @@ function showCfg(){
     return String(cur)===String(opt);
   }
 
-  let html='';
-  let textLines=['STADIUM WIFI SIMULATOR v2 — CONFIG EXPORT','Score: '+s.score+'/100  |  '+new Date().toLocaleTimeString(),''];
   SECTIONS.forEach(sec=>{
-    html+=`<div style="margin-bottom:12px"><div style="font-size:8px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:1.2px;border-bottom:1px solid var(--bd);padding-bottom:3px;margin-bottom:5px">${sec.title}</div>`;
+    html+=`<div style="margin-bottom:10px"><div style="font-size:8px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:1.2px;border-bottom:1px solid var(--bd);padding-bottom:2px;margin-bottom:4px">${sec.title}</div>`;
     textLines.push('── '+sec.title+' ──');
     html+='<table style="width:100%;border-collapse:collapse">';
     sec.params.forEach(pr=>{
@@ -1226,14 +1314,15 @@ function showCfg(){
       const curFmt=pr.fmt(cur);const optFmt=pr.fmt(opt);
       const col=match?'var(--green)':typeof opt==='boolean'||typeof opt==='string'?'var(--red)':'var(--yel)';
       const icon=match?'✓':'⚠';
-      html+=`<tr><td style="padding:2px 6px 2px 0;color:var(--mut2);width:42%">${pr.l}</td><td style="padding:2px 6px 2px 0;font-weight:700;color:${col};width:28%">${icon} ${curFmt}</td><td style="padding:2px 0;color:var(--mut);font-size:10px;width:30%">${match?'':('opt: '+optFmt)}</td></tr>`;
+      html+=`<tr><td style="padding:2px 6px 2px 0;color:var(--mut2);width:42%;font-size:10px">${pr.l}</td><td style="padding:2px 6px 2px 0;font-weight:700;color:${col};width:28%;font-size:10px">${icon} ${curFmt}</td><td style="padding:2px 0;color:var(--mut);font-size:9px;width:30%">${match?'':('opt: '+optFmt)}</td></tr>`;
       textLines.push(`  ${pr.l.padEnd(26)} ${curFmt.padEnd(18)} ${match?'✓':('→ opt: '+optFmt)}`);
     });
     html+='</table></div>';
     textLines.push('');
   });
+  html+=`</div></details>`; // close collapsible details section
 
-  g('cfg-score-line').textContent=`Score ${s.score}/100  ·  ${s.totalSess.toLocaleString()} sessions  ·  ${s.active.toLocaleString()} active  ·  ${s.demGbps}G demand / ${s.capGbps}G capacity  ·  Gaps: ${countGaps(s)}`;
+  g('cfg-score-line').textContent=`Score ${s.score}/100 · ${(+p.fans||0).toLocaleString()} fans · ${Math.round((+p.concur||0)*100)}% concur · ${s.active.toLocaleString()} active · ${s.demGbps}G demand / ${s.capGbps}G capacity · POS ${s.posPass?'PASS':'FAIL'} ${s.posLat.toFixed(1)}ms`;
   g('cfg-body').innerHTML=html;
   g('cfg-overlay').dataset.text=textLines.join('\n');
   g('cfg-overlay').style.display='block';
