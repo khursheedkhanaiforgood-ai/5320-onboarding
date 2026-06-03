@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Journey to the Digital Twin · June 3, 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Source+Code+Pro:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Libre Baskerville', Georgia, serif;
+    background: #fff;
+    color: #1a1a1a;
+    font-size: 17px;
+    line-height: 1.75;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 48px 32px 120px;
+  }
+  header { border-bottom: 3px solid #1a1a1a; padding-bottom: 20px; margin-bottom: 12px; }
+  .dateline { font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: #666; margin-bottom: 8px; }
+  h1 { font-size: 2.4rem; font-weight: 700; line-height: 1.15; margin-bottom: 10px; }
+  .deck { font-size: 1.1rem; font-style: italic; color: #444; border-left: 3px solid #1a1a1a; padding-left: 16px; margin-top: 10px; }
+  nav#toc {
+    position: sticky; top: 0; background: #fff; border-bottom: 1px solid #ddd;
+    padding: 10px 0; margin: 20px 0 40px; z-index: 100;
+    font-size: 12px; letter-spacing: 0.05em; display: flex; flex-wrap: wrap; gap: 4px 0;
+  }
+  nav#toc a { color: #1a1a1a; text-decoration: none; margin-right: 16px; text-transform: uppercase; font-weight: 700; border-bottom: 2px solid transparent; padding-bottom: 2px; transition: border-color 0.15s; }
+  nav#toc a:hover { border-color: #1a1a1a; }
+  section { margin-bottom: 56px; }
+  h2 { font-size: 1.05rem; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 700; border-top: 2px solid #1a1a1a; padding-top: 14px; margin-bottom: 20px; color: #1a1a1a; }
+  h3 { font-size: 1rem; font-weight: 700; margin: 28px 0 8px; }
+  h4 { font-size: 0.95rem; font-weight: 700; font-style: italic; margin: 18px 0 6px; color: #333; }
+  p { margin-bottom: 14px; }
+  ul, ol { margin: 10px 0 16px 24px; }
+  li { margin-bottom: 6px; }
+
+  /* ── VICTORY BANNER ── */
+  .victory-banner {
+    background: #0a2a4a; color: #fff; text-align: center;
+    padding: 40px 32px; margin: 32px 0; border-radius: 4px; border: 3px solid #1a6fba;
+  }
+  .victory-banner .vb-label {
+    font-family: 'Source Code Pro', monospace; font-size: 11px;
+    letter-spacing: 0.2em; text-transform: uppercase; color: #7dc8ff; margin-bottom: 12px;
+  }
+  .victory-banner h2 {
+    font-size: 2rem; color: #fff; border: none; padding: 0; margin: 0 0 10px;
+    text-transform: none; letter-spacing: 0;
+  }
+  .victory-banner .vb-sub { font-size: 1rem; font-style: italic; color: #a8d8f0; margin-top: 8px; }
+  .victory-banner .vb-fdb {
+    font-family: 'Source Code Pro', monospace; font-size: 13px;
+    background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.2);
+    padding: 14px 20px; margin: 20px auto 0; max-width: 680px;
+    text-align: left; border-radius: 3px; color: #7dc8ff; line-height: 1.7;
+  }
+
+  /* ── MILESTONE BANNERS ── */
+  .milestone { border: 2px solid #1a1a1a; padding: 20px 24px; margin: 24px 0; position: relative; }
+  .milestone-label {
+    position: absolute; top: -11px; left: 16px; background: #fff;
+    padding: 0 8px; font-family: 'Source Code Pro', monospace; font-size: 11px;
+    font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: #1a1a1a;
+  }
+  .milestone-green  { border-color: #1a7a3a; }
+  .milestone-green .milestone-label { color: #1a7a3a; }
+  .milestone-red    { border-color: #c0392b; }
+  .milestone-red .milestone-label { color: #c0392b; }
+  .milestone-blue   { border-color: #1a6fba; }
+  .milestone-blue .milestone-label { color: #1a6fba; }
+  .milestone-gold   { border-color: #b8860b; }
+  .milestone-gold .milestone-label { color: #b8860b; }
+  .milestone-purple { border-color: #6a0dad; }
+  .milestone-purple .milestone-label { color: #6a0dad; }
+
+  /* ── LEARNING CARD ── */
+  .learning-card {
+    background: #fffbf0; border: 1px solid #e8d5a3; border-left: 5px solid #c9973a;
+    padding: 16px 20px; margin: 16px 0; border-radius: 2px;
+  }
+  .learning-card .lc-number {
+    font-family: 'Source Code Pro', monospace; font-size: 11px; font-weight: 700;
+    letter-spacing: 0.1em; text-transform: uppercase; color: #c9973a; margin-bottom: 6px;
+  }
+  .learning-card h4 { margin: 0 0 8px; font-style: normal; color: #1a1a1a; }
+  .learning-card p:last-child { margin-bottom: 0; }
+
+  /* ── DECISION LOG ── */
+  .decision-log {
+    background: #f8f0ff; border: 1px solid #d4b0f0; border-left: 5px solid #6a0dad;
+    padding: 16px 20px; margin: 16px 0; border-radius: 2px;
+  }
+  .decision-log .dl-number {
+    font-family: 'Source Code Pro', monospace; font-size: 11px; font-weight: 700;
+    letter-spacing: 0.1em; text-transform: uppercase; color: #6a0dad; margin-bottom: 6px;
+  }
+  .decision-log h4 { margin: 0 0 8px; font-style: normal; color: #1a1a1a; }
+  .decision-log p:last-child { margin-bottom: 0; }
+
+  .badge { display: inline-block; font-family: 'Source Code Pro', monospace; font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; padding: 2px 8px; border-radius: 3px; margin-right: 6px; vertical-align: middle; }
+  .badge-done   { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+  .badge-block  { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+  .badge-wip    { background: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
+  .badge-next   { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+  .badge-ref    { background: #e2e3e5; color: #383d41; border: 1px solid #d6d8db; }
+  .badge-win    { background: #0a2a4a; color: #7dc8ff; border: 1px solid #1a6fba; }
+  .badge-defer  { background: #ede0f8; color: #4a0a8a; border: 1px solid #c4a0e0; }
+
+  code { font-family: 'Source Code Pro', monospace; font-size: 14px; background: #f5f5f5; padding: 1px 5px; border-radius: 3px; color: #c7254e; }
+  pre { font-family: 'Source Code Pro', monospace; font-size: 13px; background: #f8f8f8; border: 1px solid #e0e0e0; border-left: 4px solid #1a1a1a; padding: 16px 18px; overflow-x: auto; margin: 14px 0 20px; line-height: 1.55; }
+  pre.blue { border-left-color: #1a6fba; background: #f0f7ff; }
+  pre.purple { border-left-color: #6a0dad; background: #f8f0ff; }
+  pre.gold { border-left-color: #b8860b; background: #fffbf0; }
+
+  .callout { background: #fffbf0; border: 1px solid #e8d5a3; border-left: 5px solid #c9973a; padding: 16px 20px; margin: 18px 0; border-radius: 2px; }
+  .callout-red { background: #fff5f5; border: 1px solid #f5c6cb; border-left: 5px solid #c0392b; padding: 16px 20px; margin: 18px 0; border-radius: 2px; }
+  .callout-blue { background: #f0f7ff; border: 1px solid #b8d4f0; border-left: 5px solid #1a6fba; padding: 16px 20px; margin: 18px 0; border-radius: 2px; }
+  .callout-green { background: #f0fff4; border: 1px solid #a8dfb8; border-left: 5px solid #1a7a3a; padding: 16px 20px; margin: 18px 0; border-radius: 2px; }
+  .callout-purple { background: #f8f0ff; border: 1px solid #d4b0f0; border-left: 5px solid #6a0dad; padding: 16px 20px; margin: 18px 0; border-radius: 2px; }
+  .callout p:last-child, .callout-red p:last-child, .callout-blue p:last-child, .callout-green p:last-child, .callout-purple p:last-child { margin-bottom: 0; }
+
+  table { width: 100%; border-collapse: collapse; margin: 16px 0 24px; font-size: 14.5px; }
+  th { background: #1a1a1a; color: #fff; text-align: left; padding: 9px 12px; font-size: 12px; letter-spacing: 0.07em; text-transform: uppercase; }
+  td { padding: 9px 12px; border-bottom: 1px solid #e8e8e8; vertical-align: top; }
+  tr:nth-child(even) td { background: #fafafa; }
+  td.green { color: #155724; font-weight: 700; }
+  td.red { color: #721c24; font-weight: 700; }
+  td.blue { color: #1a6fba; font-weight: 700; }
+  td.gold { color: #b8860b; font-weight: 700; }
+  td.purple { color: #6a0dad; font-weight: 700; }
+
+  .timeline { margin: 20px 0; border-left: 3px solid #1a1a1a; padding-left: 24px; }
+  .timeline-event { margin-bottom: 24px; position: relative; }
+  .timeline-event::before { content: ''; position: absolute; left: -31px; top: 7px; width: 12px; height: 12px; border-radius: 50%; background: #1a1a1a; border: 2px solid #fff; outline: 2px solid #1a1a1a; }
+  .timeline-event.green::before { background: #1a7a3a; outline-color: #1a7a3a; }
+  .timeline-event.blue::before { background: #1a6fba; outline-color: #1a6fba; }
+  .timeline-event.gold::before { background: #b8860b; outline-color: #b8860b; }
+  .timeline-event.purple::before { background: #6a0dad; outline-color: #6a0dad; }
+  .timeline-time { font-family: 'Source Code Pro', monospace; font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #888; margin-bottom: 4px; }
+  .timeline-title { font-weight: 700; margin-bottom: 4px; }
+  .timeline-detail { font-size: 15px; color: #444; }
+
+  .param-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 16px 0 24px; }
+  .param-card {
+    border: 1px solid #e0e0e0; border-left: 4px solid #1a6fba;
+    padding: 12px 14px; border-radius: 2px; font-size: 14px;
+  }
+  .param-card.green-accent { border-left-color: #1a7a3a; }
+  .param-card.gold-accent { border-left-color: #b8860b; }
+  .param-card.purple-accent { border-left-color: #6a0dad; }
+  .param-card.red-accent { border-left-color: #c0392b; }
+  .param-card .param-name { font-family: 'Source Code Pro', monospace; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #555; margin-bottom: 4px; }
+  .param-card .param-val { font-weight: 700; font-size: 15px; margin-bottom: 2px; }
+  .param-card .param-why { font-size: 13px; color: #555; font-style: italic; }
+
+  .artifact-banner {
+    border: 2px solid #1a6fba; padding: 16px 20px; margin: 20px 0; border-radius: 3px;
+    background: #f0f7ff;
+  }
+  .artifact-banner .ab-label {
+    font-family: 'Source Code Pro', monospace; font-size: 11px; font-weight: 700;
+    letter-spacing: 0.15em; text-transform: uppercase; color: #1a6fba; margin-bottom: 8px;
+  }
+  .artifact-banner .ab-title { font-weight: 700; font-size: 1rem; margin-bottom: 6px; }
+  .artifact-banner .ab-meta { font-family: 'Source Code Pro', monospace; font-size: 12px; color: #555; }
+
+  footer { border-top: 1px solid #ccc; padding-top: 20px; font-size: 13px; color: #888; font-style: italic; margin-top: 60px; }
+  a { color: #1a6fba; }
+  a:hover { color: #0a4f9a; }
+  td a { font-family: 'Source Code Pro', monospace; font-size: 13px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="dateline">Wednesday, 3 June 2026 &nbsp;·&nbsp; FIFA World Cup 2026 Seattle &nbsp;·&nbsp; Stadium WiFi Optimization &nbsp;·&nbsp; Extreme AP5060 &nbsp;·&nbsp; Track A Complete</div>
+  <h1>Journey to the Digital Twin · June 3, 2026</h1>
+  <p class="deck">FIFA WC 2026 Seattle &nbsp;·&nbsp; Stadium WiFi Optimization &nbsp;·&nbsp; Extreme AP5060 &nbsp;·&nbsp; Track A Complete. Two-agent day: Claude AI built the strategy and ns-3 starter kit in the morning; Claude Code shipped three Track A artifacts on the existing JS simulator — all without requiring ns-3. Track A ships now on the multiplier-chain model; Track B (ns-3 / Sionna 7-rung ladder) is deferred.</p>
+</header>
+
+<nav id="toc">
+  <a href="#s00">§00 Overview</a>
+  <a href="#s01">§01 Claude AI Artifacts</a>
+  <a href="#s02">§02 Claude Code Artifacts</a>
+  <a href="#s03">§03 Key Decisions</a>
+  <a href="#s04">§04 Open Items</a>
+  <a href="#s05">§05 Artifacts Index</a>
+</nav>
+
+<!-- ══ §00 — SESSION OVERVIEW ══ -->
+<section id="s00">
+  <h2>§00 — Session Overview</h2>
+
+  <div class="victory-banner">
+    <div class="vb-label">Track A · Complete · Three Artifacts Shipped · June 3 2026</div>
+    <h2>Archetype Matrix · Monte Carlo · Optimizer · Parameter Codex</h2>
+    <div class="vb-sub">Chance-constrained optimizer · MC-inside · 12 search knobs · rTWT-aware POS SLA · AP5060 Broadcom</div>
+    <div class="vb-fdb">
+      Commit 59cf038 &nbsp;·&nbsp; Commit f6456e7 &nbsp;·&nbsp; Commit 3a0bf09<br><br>
+      <a href="https://khursheedkhanaiforgood-ai.github.io/5320-onboarding/docs/stadium_wifi_simulator_v2.html" target="_blank" style="color:#7dc8ff">→ Simulator v2 (Monte Carlo + Optimizer tabs) ↗</a><br>
+      <a href="https://khursheedkhanaiforgood-ai.github.io/5320-onboarding/docs/archetype_matrix_v0.html" target="_blank" style="color:#7dc8ff">→ Archetype × Dominant-Lever Matrix ↗</a><br>
+      <a href="https://khursheedkhanaiforgood-ai.github.io/5320-onboarding/docs/stadium_parameter_codex.html" target="_blank" style="color:#7dc8ff">→ Stadium Parameter Codex ↗</a><br>
+      <a href="https://khursheedkhanaiforgood-ai.github.io/5320-onboarding/docs/journey_to_the_digital_twin.html" target="_blank" style="color:#a8d8f0">→ Journey to the Digital Twin (strategy record) ↗</a>
+    </div>
+  </div>
+
+  <h3>Day Shape — Two-Agent Execution</h3>
+
+  <div class="timeline">
+    <div class="timeline-event blue">
+      <div class="timeline-time">Morning — Claude AI (claude.ai)</div>
+      <div class="timeline-title">Track B ns-3 Starter Kit + Strategy Update</div>
+      <div class="timeline-detail">Four artifacts delivered: <code>CHANGELOG.md</code> (append-only governance log), <code>journey_to_the_digital_twin-2.html</code> (v1.1 strategy record with governance correction banner on Entry 001), <code>stadium-wifi.cc</code> (ns-3 802.11ax C++ sim), <code>qoe_harness.py</code> (Python optimizer). All parked — Track B awaits ns-3 install.</div>
+    </div>
+    <div class="timeline-event gold">
+      <div class="timeline-time">Afternoon — Claude Code (this session)</div>
+      <div class="timeline-title">Track A: Three Artifacts on Existing JS Simulator</div>
+      <div class="timeline-detail">Archetype × Dominant-Lever Matrix (commit 59cf038), Monte Carlo tab added to simulator (commit 59cf038), Optimizer tab with MC-inside (commits 59cf038 + f6456e7), Stadium Parameter Codex (commit 3a0bf09). All live on GitHub Pages.</div>
+    </div>
+    <div class="timeline-event green">
+      <div class="timeline-time">Strategy Decision</div>
+      <div class="timeline-title">Track A Ships Now — Track B Deferred</div>
+      <div class="timeline-detail">No ns-3 install on this machine. The existing multiplier-chain JS model already captures threshold and interaction effects (CWmin cliff, TXOP × rTWT, admission constraint). Track A delivers a fully functional chance-constrained optimizer without ns-3. Track B resumes when ns-3 is ready.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ §01 — CLAUDE AI ARTIFACTS ══ -->
+<section id="s01">
+  <h2>§01 — Claude AI Artifacts (Morning Session, Track B Parked)</h2>
+
+  <p>Four artifacts delivered by the user's Claude AI chat session. These constitute the ns-3 starter kit — parked for Track B but staged and ready when ns-3 install is complete.</p>
+
+  <div class="callout-blue">
+    <p><strong>Governance note from v1.1:</strong> Entry 001 of <code>CHANGELOG.md</code> stated "files delivered" as a completed fact before the files existed — a governance violation. Entry 002 corrected this via a correction banner appended to Entry 001 (append-only, body intact, no silent rewrite). This is the governance discipline pattern the project follows going forward.</p>
+  </div>
+
+  <table>
+    <tr><th>File</th><th>Location</th><th>Description</th></tr>
+    <tr>
+      <td><code>CHANGELOG.md</code></td>
+      <td><code>Downloads/</code> → repo root</td>
+      <td>Append-only strategy log. [1.0] AM session and [1.1] PM session entries. Integrity verified: 91/91 divs accounted for.</td>
+    </tr>
+    <tr>
+      <td><code>journey_to_the_digital_twin-2.html</code></td>
+      <td><code>Downloads/</code> → <code>docs/journey_to_the_digital_twin.html</code></td>
+      <td>v1.1 living strategy record: two-track execution model, §03 robust chance-constrained objective, Entry 002 sequencing revision, Entry 001 governance correction banner (append-only, body left intact).</td>
+    </tr>
+    <tr>
+      <td><code>stadium-wifi.cc</code></td>
+      <td><code>/Users/khukhan/Downloads/</code></td>
+      <td>ns-3 802.11ax C++ scratch sim: 1 AP, N STAs, BULK + POS traffic classes, FlowMonitor → CSV output. 5 starter CLI drivers. <span class="badge badge-defer">Track B — Parked</span></td>
+    </tr>
+    <tr>
+      <td><code>qoe_harness.py</code></td>
+      <td><code>/Users/khukhan/Downloads/</code></td>
+      <td>Python <code>score(SimParams)</code> function: runs ns-3 → parses FlowMonitor → returns exact Σlog(throughput) objective. <code>coordinate_ascent()</code> optimizer with governance logging. <span class="badge badge-defer">Track B — Parked</span></td>
+    </tr>
+    <tr>
+      <td><code>README_ns3_starter.md</code></td>
+      <td><code>/Users/khukhan/Downloads/</code></td>
+      <td>Setup guide + honest caveats: ns-3 EDCA ≠ Extreme Airtime Fairness, 802.11ax not 802.11be, no per-service-class floors yet.</td>
+    </tr>
+  </table>
+
+  <h3>ns-3 Starter Kit — Honest Caveats</h3>
+
+  <div class="learning-card">
+    <div class="lc-number">Track B Readiness</div>
+    <h4>What the ns-3 kit does and does not model</h4>
+    <p><strong>Does model:</strong> 802.11ax EDCA contention windows, QoS traffic classes (BULK vs POS), per-client throughput via FlowMonitor, basic admission via max STA count.</p>
+    <p><strong>Does not model:</strong> Extreme Airtime Fairness (vendor-proprietary scheduler), 802.11be (WiFi 7 EHT), per-service-class latency floors, rTWT hardware scheduling, MLO link bonding. These gaps are documented in <code>README_ns3_starter.md</code> and tracked as Track B extension work.</p>
+  </div>
+</section>
+
+<!-- ══ §02 — CLAUDE CODE ARTIFACTS ══ -->
+<section id="s02">
+  <h2>§02 — Claude Code Artifacts (This Session, Track A)</h2>
+
+  <!-- A1 -->
+  <div class="artifact-banner">
+    <div class="ab-label">A1 — Archetype × Dominant-Lever Matrix</div>
+    <div class="ab-title">docs/archetype_matrix_v0.html</div>
+    <div class="ab-meta">858 lines &nbsp;·&nbsp; 67 KB &nbsp;·&nbsp; commit 59cf038</div>
+  </div>
+
+  <p>Five deployment archetypes (Stadium Outdoor, Arena Indoor, Convention Center, Office Campus, Outdoor Festival) mapped against seven regime parameters: τ_RMS delay spread, path-loss exponent n, coherence bandwidth, Rician K-factor, angular spread, shadowing σ, and dominant band.</p>
+
+  <p><strong>Interactivity:</strong> Clicking a row in the §01 archetype table highlights the corresponding 15 dominant levers in §03 with a gold scroll animation, making the stadium-specific lever set immediately visible without leaving the page.</p>
+
+  <h3>All 60 Parameters Classified</h3>
+  <p>The matrix includes six sub-tables classifying all 60 simulator parameters by effect-type badge and skill-zone indicator:</p>
+
+  <div class="param-grid">
+    <div class="param-card">
+      <div class="param-name">Demand Model</div>
+      <div class="param-val">Fan count, devices/fan, app mix, concurrency, timeline scrubber</div>
+      <div class="param-why">Sets the load envelope — all other sections respond to this</div>
+    </div>
+    <div class="param-card green-accent">
+      <div class="param-name">PHY Layer</div>
+      <div class="param-val">TX power, BW, GI, MBR, RX-SOP, MCS floor</div>
+      <div class="param-why">RF admission and spectral efficiency knobs</div>
+    </div>
+    <div class="param-card blue">
+      <div class="param-name">MAC / EDCA</div>
+      <div class="param-val">OFDMA, MU-MIMO, BSS Color, rTWT, CWmin, TXOP, RTS/CTS</div>
+      <div class="param-why">Airtime contention and sharing — largest interaction surface</div>
+    </div>
+    <div class="param-card gold-accent">
+      <div class="param-name">Admission &amp; Steering</div>
+      <div class="param-val">Max clients, Min RSSI, Airtime Fairness, Band Steering</div>
+      <div class="param-why">Who gets on the network and on which band</div>
+    </div>
+    <div class="param-card purple-accent">
+      <div class="param-name">SSID &amp; Network</div>
+      <div class="param-val">BC Filter, MC→UC, Proxy ARP, PMF, AirDefense, DTIM</div>
+      <div class="param-why">Control-plane overhead reduction and security</div>
+    </div>
+    <div class="param-card red-accent">
+      <div class="param-name">Degradation &amp; Threats</div>
+      <div class="param-val">Degradation level 0–4, Cyber attacks</div>
+      <div class="param-why">Failure mode simulation — EP1 countermeasure validation</div>
+    </div>
+  </div>
+
+  <h3>Stadium 15-Lever Deep Dive</h3>
+  <p>The archetype matrix includes a full physical rationale for why each of the 15 dominant levers is critical in the outdoor bowl context: high τ_RMS (→ GI 1600ns mandate), low K-factor (→ no LoS assumption, RX-SOP conservative), wide angular spread (→ MU-MIMO 8 streams), high shadowing σ (→ MBR 24M, not 6M), dense deployment (→ BSS Color, RTS/CTS, Airtime Fairness).</p>
+
+  <h3>Spec Conflicts Surfaced</h3>
+  <table>
+    <tr><th>Parameter</th><th>Simulator Optimal</th><th>Spec Value</th><th>Conflict Type</th></tr>
+    <tr><td>Guard Interval</td><td>800 ns</td><td>1600 ns</td><td class="red">Disagreement — τ_RMS mandates 1600</td></tr>
+    <tr><td>Min RSSI Admission</td><td>−67 dBm</td><td>−70 dBm</td><td class="gold">Conservative vs aggressive admission</td></tr>
+    <tr><td>MLO Traffic Steering</td><td>AI-driven (EP1 RRM)</td><td>QoS-based</td><td class="gold">Feature availability assumption</td></tr>
+    <tr><td>MCS Floor</td><td>5–7 range</td><td>4</td><td class="gold">Stricter admission in spec</td></tr>
+  </table>
+  <p>Three missing parameters also surfaced: CWmin AC_VO (not yet modelled), Beacon Interval 100 TU (fixed), SAE PWE Method H2E (not yet in simulator).</p>
+
+  <!-- A2 -->
+  <div class="artifact-banner" style="margin-top:36px">
+    <div class="ab-label">A2 — Monte Carlo Tab</div>
+    <div class="ab-title">docs/stadium_wifi_simulator_v2.html — Monte Carlo tab added</div>
+    <div class="ab-meta">Added to existing simulator &nbsp;·&nbsp; commit 59cf038</div>
+  </div>
+
+  <h3>Controls</h3>
+  <ul>
+    <li><strong>Iterations:</strong> 100 / 200 / 500 / 1000</li>
+    <li><strong>Demand CV:</strong> ±10% / ±20% / ±30% (coefficient of variation on per-client demand)</li>
+    <li><strong>Pareto α:</strong> 1.5 / 2.0 / 3.0 (tail heaviness of demand distribution)</li>
+  </ul>
+
+  <h3>Pareto Demand Sampling</h3>
+  <pre class="blue">// Heavy-tail demand sampling
+xm = (α − 1) / α                     // scale parameter
+sample = xm × U^(−1/α)               // inverse-CDF method
+sample = Math.min(sample, 3.5 × xm)  // cap at 3.5× to prevent runaway outliers
+
+// Fan-count variation
+fanCount = baseCount × (1 + (Math.random() − 0.5) × 0.30)  // ±15%</pre>
+
+  <h3>Output Metrics</h3>
+  <p>P5 / P50 / P95 on: QoE score, airtime utilisation, E2E latency, POS latency, throughput/client. Three breach metrics:</p>
+  <ul>
+    <li><code>P(airtime &gt; 70%)</code> — collapse probability</li>
+    <li><code>P(posLatency &gt; threshold)</code> — POS SLA breach rate</li>
+    <li>Score spread: <code>P95 − P5</code> — robustness indicator</li>
+  </ul>
+
+  <div class="callout-green">
+    <p><strong>rTWT-aware POS threshold (added same day):</strong> When rTWT is ON, the POS breach threshold tightens from 10ms to 3ms. The model already computes <code>posLat ≤ 3ms</code> via rTWT hardware scheduling — the MC now enforces the correct SLA for each rTWT state independently. This prevents rTWT from appearing to "help" when the threshold is wrongly fixed at 10ms.</p>
+  </div>
+
+  <!-- A3 -->
+  <div class="artifact-banner" style="margin-top:36px">
+    <div class="ab-label">A3 — Optimizer Tab with MC-Inside</div>
+    <div class="ab-title">docs/stadium_wifi_simulator_v2.html — Optimizer tab</div>
+    <div class="ab-meta">commits 59cf038 + f6456e7</div>
+  </div>
+
+  <h3>Track A → Track B Conceptual Bridge</h3>
+  <p>The optimizer directly implements the §03 robust objective without ns-3. It finds parameters that hold up at P95 demand — not just the median — making it the correct architecture for chance-constrained search regardless of whether ns-3 is eventually used.</p>
+
+  <h3>Objective Function (Chance-Constrained)</h3>
+  <pre class="purple">maximize   P50[U(θ)] − 0.5 · (P95[U] − P5[U])
+
+subject to P(posLatency ≤ threshold) ≥ 99%
+           P(active_clients ≤ maxClients × 280 APs) ≥ 95%
+
+where U(θ) = Σᵢ log(throughputᵢ)   over all admitted bulk clients</pre>
+
+  <h3>12 Search Knobs (Stadium Outdoor Archetype)</h3>
+  <table>
+    <tr><th>Knob</th><th>Range</th><th>Why Searched</th></tr>
+    <tr><td>Airtime Fairness</td><td>OFF / Adaptive / Strict</td><td>Biggest single lever — ×1.38 at Strict</td></tr>
+    <tr><td>TX Power</td><td>7–23 dBm</td><td>Coverage vs interference tradeoff in dense bowl</td></tr>
+    <tr><td>Min RSSI Admission</td><td>−80 / −75 / −70 / −67 dBm</td><td>Admission aggressiveness — impacts stranded fan count</td></tr>
+    <tr><td>RX-SOP Threshold</td><td>−85 / −75 / −65 dBm</td><td>CCI sensitivity — outdoor bowl is interference-limited</td></tr>
+    <tr><td>CWmin AC_BE</td><td>7 / 15 / 31 / 63</td><td>Collision cascade threshold at high airtime</td></tr>
+    <tr><td>Max Clients / Radio</td><td>50–200</td><td>Admitted count vs SLA tradeoff</td></tr>
+    <tr><td>MCS Floor</td><td>MCS 0–7</td><td>Minimum modulation — bars slow devices from consuming airtime</td></tr>
+    <tr><td>5G Channel Width</td><td>80 / 160 MHz</td><td>Spatial reuse vs throughput tradeoff — not monotone in dense bowl</td></tr>
+    <tr><td>Frag Threshold</td><td>256 / 1500 / 2346 B</td><td>Fragmentation reduces per-frame collision duration</td></tr>
+    <tr><td>DTIM Period</td><td>1 / 2 / 4 / 10</td><td>Power-save interval affects latency and beacon overhead</td></tr>
+    <tr><td>RTS/CTS Threshold</td><td>65535 / 2347 / 1500 B</td><td>Hidden terminal mitigation — critical in dense outdoor</td></tr>
+    <tr><td>TXOP AC_BE</td><td>0 / 1504 / 3008 µs</td><td>Bulk throughput vs POS starvation risk when rTWT OFF</td></tr>
+  </table>
+
+  <h3>Locked-Out Parameters (Context-Modulated by Archetype)</h3>
+  <div class="callout-purple">
+    <p><strong>GI = 1600 ns</strong> — τ_RMS in stadium outdoor mandates this. Adding GI to the search would be a category error: once you commit to the "stadium outdoor" archetype, τ_RMS is a regime constant, not a free variable.</p>
+    <p><strong>MU-MIMO Streams = 8</strong> — Angular spread is high in the bowl. 8-stream MU-MIMO is optimal by archetype. This is locked, not searched.</p>
+    <p><strong>Client Ageout = 5 min</strong> — Stadium dwell time is long (3–4 hours). Aggressive ageout would strand fans with intermittent connectivity. Locked at 5 min.</p>
+    <p><strong>Roam Cache Age = 60 min</strong> — Game duration. Locked to match event timeline.</p>
+  </div>
+
+  <h3>Why MC-Inside Matters: The CWmin Example</h3>
+
+  <div class="learning-card">
+    <div class="lc-number">Key Insight — Point-Estimate vs MC-Inside Optimizer</div>
+    <h4>At CWmin=7, the point-estimate optimizer gets the wrong answer</h4>
+    <p>At P50 demand (moderate load), CWmin=7 produces u≈0.62 — below the collision cliff. The point-estimate optimizer sees a fine score and picks CWmin=7.</p>
+    <p>At P95 kickoff surge, the same CWmin=7 produces u≈0.81 → exponential collision burst → POS SLA breach at a rate that violates the 99% constraint. The MC-inside optimizer correctly observes this breach probability and penalizes CWmin=7, converging to CWmin=15 or 31.</p>
+    <p>The same logic governs TXOP-BE × rTWT interaction: the point-estimate model misses the starvation risk that only manifests at P95 demand with rTWT OFF.</p>
+  </div>
+
+  <h3>Admitted-Count Constraint</h3>
+  <pre class="gold">// Priority order in objective
+strandPenalty  = P(active > maxCli × 280 APs) × 20   // cannot strand fans
+posPenalty     = P(posLat > threshold) × 50           // POS SLA is first-class
+spreadPenalty  = 0.5 × (P95[U] − P5[U])              // robustness term
+
+score = P50[U] − strandPenalty − posPenalty − spreadPenalty</pre>
+
+  <h3>Dialogue Review — Claude AI Feedback on Optimizer</h3>
+  <p>After the optimizer was built, the user ran the design by Claude AI for review. Key exchanges:</p>
+  <ul>
+    <li><strong>Claude AI flagged DTIM as a duplicate</strong> — this was wrong (only one DTIM instance in OPT_SEARCH). Not incorporated.</li>
+    <li><strong>Claude AI correctly flagged GI/muStreams/clientAgeout/roamCacheAge as context-modulated</strong> — should be locked out of the search set, not optimized. Incorporated: all four removed from search knobs.</li>
+    <li><strong>Claude AI correctly recommended adding 5G channel width</strong> — 160 vs 80 MHz is a genuine spatial-reuse tradeoff in dense outdoor. Not monotone. Incorporated: channel width added as knob #8.</li>
+  </ul>
+
+  <!-- Parameter Codex -->
+  <div class="artifact-banner" style="margin-top:36px">
+    <div class="ab-label">A4 — Stadium Parameter Codex</div>
+    <div class="ab-title">docs/stadium_parameter_codex.html</div>
+    <div class="ab-meta">712 lines &nbsp;·&nbsp; 58 KB &nbsp;·&nbsp; commit 3a0bf09</div>
+  </div>
+
+  <h3>§00 QoE Definition (Our Recommendation)</h3>
+  <div class="milestone milestone-blue">
+    <div class="milestone-label">QoE Definition — Customer Has Not Locked This Yet</div>
+    <p style="margin:0 0 10px"><strong>Base:</strong> U(θ) = Σᵢ log(throughputᵢ) over all admitted bulk clients<br>
+    <strong>Robust form:</strong> maximize P50[U] − 0.5·(P95−P5) subject to P(posLat ≤ threshold) ≥ 99%<br>
+    <strong>POS SLA:</strong> ≤10ms (P99) &nbsp;·&nbsp; ≤3ms where rTWT ON &nbsp;·&nbsp; VLAN 50<br>
+    <strong>VIP:</strong> ≥25 Mbps &nbsp;·&nbsp; Teams: ≥5 Mbps/seat &nbsp;·&nbsp; Admitted count ≥ deployment target</p>
+    <p style="margin:0;font-style:italic;color:#333">"Explicitly sacrificed: peak per-client throughput for strong clients. In a 72K bowl full of slow phones, fairness-or-collapse dominates raw speed."</p>
+  </div>
+
+  <p><strong>Priority order (codex §00):</strong> POS SLA &gt; fairness &gt; admitted count &gt; aggregate throughput &gt; per-client peak</p>
+
+  <h3>Codex Sections</h3>
+  <table>
+    <tr><th>Section</th><th>Content</th></tr>
+    <tr><td>§00 QoE Definition</td><td>Formal objective, SLA targets, priority order, rationale for proportional fairness</td></tr>
+    <tr><td>§01 Parameter Table</td><td>All 60 parameters — interactive filter + live search, effect-type badges, archetype indicators</td></tr>
+    <tr><td>§02 Search Knobs</td><td>12 optimizer knobs with values / rationale / priors + locked-out explanation with archetype reasoning</td></tr>
+    <tr><td>§03 Interaction Diagrams</td><td>4 diagrams: CWmin×load cliff, TXOP×rTWT starvation risk, BW×TXPower spatial reuse, 3-way admission (RSSI × MCSfloor × maxCli)</td></tr>
+    <tr><td>§04 Stadium Indoor</td><td>Future archetype divergence: where indoor differs from outdoor bowl (τ_RMS lower, K-factor higher, angular spread narrower)</td></tr>
+  </table>
+</section>
+
+<!-- ══ §03 — KEY DECISIONS ══ -->
+<section id="s03">
+  <h2>§03 — Key Decisions Made Today</h2>
+
+  <div class="decision-log">
+    <div class="dl-number">Decision 1 — Track Split</div>
+    <h4>ns-3 deferred (Track B) — existing JS model ships immediately (Track A)</h4>
+    <p><strong>Rationale:</strong> No ns-3 install on this machine. The existing JS multiplier-chain model already captures threshold and interaction effects: CWmin cliff at u&gt;0.7, TXOP×rTWT starvation risk, admission constraint. These are the mechanisms that matter for the optimizer.</p>
+    <p><strong>Implication:</strong> Track A ships three usable artifacts today. Track B resumes when ns-3 is ready — the starter kit (<code>stadium-wifi.cc</code> + <code>qoe_harness.py</code>) is staged and waiting.</p>
+  </div>
+
+  <div class="decision-log">
+    <div class="dl-number">Decision 2 — Architecture: Both MC and Optimizer</div>
+    <h4>Monte Carlo + Optimizer are complementary — not either/or</h4>
+    <p><strong>Rationale:</strong> MC finds the P95 exposure of any given parameter set θ. The optimizer finds the θ that minimizes that exposure while maximizing P50 utility. They compose: optimizer calls MC internally (MC-inside architecture). Running them separately would miss the robust objective.</p>
+    <p><strong>Implication:</strong> The optimizer is not a search over point-estimates. It is a search over the distribution of outcomes under uncertain demand. This is the correct architecture for a stadium where kickoff surge can be 2× the P50 load.</p>
+  </div>
+
+  <div class="decision-log">
+    <div class="dl-number">Decision 3 — 12 Knobs Not 15</div>
+    <h4>GI, MU-MIMO streams, client ageout, roam cache are context-modulated — locked by archetype</h4>
+    <p><strong>Rationale:</strong> These four parameters are determined by the deployment context (stadium outdoor), not by optimization. GI is mandated by τ_RMS. MU-MIMO streams are mandated by angular spread. Client ageout and roam cache are mandated by event duration. Including them in the search set would allow the optimizer to "discover" suboptimal archetypes.</p>
+    <p><strong>Implication:</strong> Once you assign an archetype, regime constants are frozen. The optimizer searches within the archetype, not across archetypes.</p>
+  </div>
+
+  <div class="decision-log">
+    <div class="dl-number">Decision 4 — 5G Channel Width Added to Search Set</div>
+    <h4>160 MHz vs 80 MHz is a genuine tradeoff in dense bowl — not monotone</h4>
+    <p><strong>Rationale:</strong> Wider channel → higher peak PHY rate per client. But in a dense 280-AP deployment, 160 MHz halves the number of non-overlapping channels, increasing inter-AP interference. The tradeoff is non-monotone: 80 MHz + more spatial reuse may outperform 160 MHz + fewer reuse opportunities at high density. Let the optimizer test both.</p>
+    <p><strong>Implication:</strong> The optimizer now searches 80 vs 160 MHz on 5G. The result will be archetype-specific — a different result than for a sparse outdoor deployment.</p>
+  </div>
+
+  <div class="decision-log">
+    <div class="dl-number">Decision 5 — QoE = Proportional Fairness Under SLAs</div>
+    <h4>U(θ) = Σ log(throughput) with hard POS/VIP/Teams constraints</h4>
+    <p><strong>Rationale:</strong> Proportional fairness (log-sum) prevents throughput monopolization at kickoff surge without requiring explicit per-client rate caps. The log utility function naturally allocates airtime fairly: doubling one client's rate while halving another's leaves the objective unchanged. Hard SLA constraints protect POS, VIP, and Teams service classes from fairness-driven preemption.</p>
+    <p><strong>Implication:</strong> All future optimization targets this definition. Changes to the objective are governance events requiring a new CHANGELOG entry and a correction banner on the previous entry.</p>
+  </div>
+
+  <div class="decision-log">
+    <div class="dl-number">Decision 6 — rTWT Tightens POS Threshold to 3ms</div>
+    <h4>When rTWT ON, POS SLA is 3ms — not 10ms</h4>
+    <p><strong>Rationale:</strong> rTWT (Restricted Target Wake Time for WiFi 7) allows the AP to schedule POS terminals in dedicated time slots with TDMA-like guarantees. The hardware can deliver ≤3ms latency when rTWT is active. Using the 10ms threshold with rTWT ON would make rTWT appear to have no effect on the POS breach rate — a false result.</p>
+    <p><strong>Implication:</strong> The MC breach threshold switches dynamically: <code>threshold = rTWT ? 3 : 10</code> ms. Both the Monte Carlo tab and the optimizer enforce this correctly.</p>
+  </div>
+
+  <div class="decision-log">
+    <div class="dl-number">Decision 7 — Admitted-Count Constraint Added</div>
+    <h4>"Cannot strand fans" is a first-class constraint in the objective</h4>
+    <p><strong>Rationale:</strong> An optimizer without an admitted-count constraint can "win" by tightening Min RSSI so aggressively that thousands of fans are denied service. The score looks great but the deployment fails its primary mission.</p>
+    <p><strong>Implication:</strong> strandPenalty = P(active > maxCli × 280 APs) × 20 is always present. Priority order: POS SLA (×50) &gt; admitted count (×20) &gt; utility spread (×0.5). The optimizer cannot trade access for SLA compliance.</p>
+  </div>
+
+  <h3>Summary Table</h3>
+  <table>
+    <tr><th>Decision</th><th>Rationale (short)</th><th>Implication</th></tr>
+    <tr><td>ns-3 deferred (Track B)</td><td>No ns-3 install; JS model captures key effects</td><td>Track A ships now; Track B resumes when ns-3 ready</td></tr>
+    <tr><td>MC + Optimizer (not either/or)</td><td>Complementary: optimizer finds θ; MC validates P95</td><td>MC-inside optimizer is the correct architecture</td></tr>
+    <tr><td>12 knobs not 15</td><td>GI/muStreams/ageout/roamCache are context-modulated</td><td>Regime constants frozen by archetype; optimizer searches within</td></tr>
+    <tr><td>5G channel width added</td><td>160 vs 80 MHz is non-monotone in dense bowl</td><td>Optimizer tests both; result is archetype-specific</td></tr>
+    <tr><td>QoE = proportional fairness under SLAs</td><td>PF prevents monopolization; hard constraints protect service classes</td><td>All future optimization targets this definition</td></tr>
+    <tr><td>rTWT tightens POS to 3ms</td><td>Hardware scheduling gives stronger guarantee</td><td>MC threshold switches dynamically with rTWT state</td></tr>
+    <tr><td>Admitted-count constraint added</td><td>Cannot strand fans — first-class constraint</td><td>Optimizer cannot win by excluding clients</td></tr>
+  </table>
+</section>
+
+<!-- ══ §04 — OPEN ITEMS ══ -->
+<section id="s04">
+  <h2>§04 — Open Items</h2>
+
+  <table>
+    <tr><th>Item</th><th>Priority</th><th>Notes</th></tr>
+    <tr>
+      <td>Simulator bottom layout readability</td>
+      <td><span class="badge badge-wip">High</span></td>
+      <td>User flagged hard to read at bottom of simulator panel. Screenshot not yet received — fix pending visual inspection.</td>
+    </tr>
+    <tr>
+      <td>Live optimal-knobs panel</td>
+      <td><span class="badge badge-wip">High</span></td>
+      <td>As sliders change, show recommended 12-knob values live alongside current settings. Removes the need to run the optimizer to know the target.</td>
+    </tr>
+    <tr>
+      <td>Optimizer result: show all 12 knobs at P50</td>
+      <td><span class="badge badge-wip">High</span></td>
+      <td>Currently shows only knobs that changed from defaults — confusing when most knobs are already optimal. Should display full 12-knob table with current vs recommended.</td>
+    </tr>
+    <tr>
+      <td>Codex: switch to NYT theme</td>
+      <td><span class="badge badge-next">Medium</span></td>
+      <td><code>stadium_parameter_codex.html</code> currently uses dark theme. User expected NYT journal style (white, Libre Baskerville, dark ink) to match EODs.</td>
+    </tr>
+    <tr>
+      <td>Spec cleanup: 4 applyOptimal() conflicts</td>
+      <td><span class="badge badge-next">Medium</span></td>
+      <td>GI 800→1600 ns, Min RSSI −67→−70 dBm, MCS Floor 4→6, MLO Steering QoS vs AI. Resolve and update <code>applyOptimal()</code> in simulator + archetype matrix.</td>
+    </tr>
+    <tr>
+      <td>Morris sensitivity screening (Track A extension)</td>
+      <td><span class="badge badge-next">Medium</span></td>
+      <td>610 runs (r=10, k=60 parameters). SALib Morris method. Stadium outdoor archetype first. Ranks all 60 parameters by influence on QoE score — prioritizes which knobs matter most.</td>
+    </tr>
+    <tr>
+      <td>ns-3 Track B</td>
+      <td><span class="badge badge-defer">Deferred</span></td>
+      <td><code>stadium-wifi.cc</code> + <code>qoe_harness.py</code> ready in Downloads. Resumes when ns-3 is installed. Caveats in <code>README_ns3_starter.md</code>.</td>
+    </tr>
+    <tr>
+      <td>Index parity — June 3 EOD card</td>
+      <td><span class="badge badge-next">Queued</span></td>
+      <td>Add June 3 EOD card to <code>index.html</code>, <code>index-nyt.html</code>, <code>index-harpers.html</code></td>
+    </tr>
+  </table>
+
+  <div class="callout-blue">
+    <p><strong>Next session start:</strong> Open <code>stadium_wifi_simulator_v2.html</code> and screenshot the bottom panel layout. Fix readability issue. Then: add live optimal-knobs panel. Then: resolve the 4 <code>applyOptimal()</code> spec conflicts using the archetype matrix as source-of-truth.</p>
+  </div>
+</section>
+
+<!-- ══ §05 — ARTIFACTS INDEX ══ -->
+<section id="s05">
+  <h2>§05 — Artifacts Index</h2>
+
+  <table>
+    <tr><th>File</th><th>Type</th><th>Status</th><th>Link</th></tr>
+    <tr>
+      <td><code>docs/journey_to_the_digital_twin.html</code></td>
+      <td>Strategy record</td>
+      <td><span class="badge badge-done">Live</span></td>
+      <td><a href="https://khursheedkhanaiforgood-ai.github.io/5320-onboarding/docs/journey_to_the_digital_twin.html" target="_blank">journey_to_the_digital_twin.html ↗</a></td>
+    </tr>
+    <tr>
+      <td><code>CHANGELOG.md</code></td>
+      <td>Governance log</td>
+      <td><span class="badge badge-done">In repo</span></td>
+      <td>Append-only. [1.0] AM + [1.1] PM entries. 91/91 divs verified.</td>
+    </tr>
+    <tr>
+      <td><code>docs/archetype_matrix_v0.html</code></td>
+      <td>Reference</td>
+      <td><span class="badge badge-done">Live</span></td>
+      <td><a href="https://khursheedkhanaiforgood-ai.github.io/5320-onboarding/docs/archetype_matrix_v0.html" target="_blank">archetype_matrix_v0.html ↗</a></td>
+    </tr>
+    <tr>
+      <td><code>docs/stadium_wifi_simulator_v2.html</code></td>
+      <td>Interactive simulator</td>
+      <td><span class="badge badge-done">Live (Phase 1 + MC + Optimizer)</span></td>
+      <td><a href="https://khursheedkhanaiforgood-ai.github.io/5320-onboarding/docs/stadium_wifi_simulator_v2.html" target="_blank">stadium_wifi_simulator_v2.html ↗</a></td>
+    </tr>
+    <tr>
+      <td><code>docs/stadium_parameter_codex.html</code></td>
+      <td>Reference codex</td>
+      <td><span class="badge badge-done">Live</span></td>
+      <td><a href="https://khursheedkhanaiforgood-ai.github.io/5320-onboarding/docs/stadium_parameter_codex.html" target="_blank">stadium_parameter_codex.html ↗</a></td>
+    </tr>
+    <tr>
+      <td><code>Downloads/stadium-wifi.cc</code></td>
+      <td>ns-3 C++ sim</td>
+      <td><span class="badge badge-defer">Parked / Track B</span></td>
+      <td>Local only — <code>/Users/khukhan/Downloads/stadium-wifi.cc</code></td>
+    </tr>
+    <tr>
+      <td><code>Downloads/qoe_harness.py</code></td>
+      <td>Python harness</td>
+      <td><span class="badge badge-defer">Parked / Track B</span></td>
+      <td>Local only — <code>/Users/khukhan/Downloads/qoe_harness.py</code></td>
+    </tr>
+    <tr>
+      <td><code>Downloads/README_ns3_starter.md</code></td>
+      <td>Track B setup guide</td>
+      <td><span class="badge badge-defer">Parked / Track B</span></td>
+      <td>Local only — <code>/Users/khukhan/Downloads/README_ns3_starter.md</code></td>
+    </tr>
+  </table>
+
+  <h3>Commits — June 3</h3>
+  <table>
+    <tr><th>Hash</th><th>Message</th></tr>
+    <tr><td><code>59cf038</code></td><td>Add Archetype Matrix v0, Monte Carlo tab, Optimizer tab with MC-inside to simulator v2</td></tr>
+    <tr><td><code>f6456e7</code></td><td>Optimizer refinements: 5G channel width added, GI/muStreams/ageout locked out, admitted-count constraint</td></tr>
+    <tr><td><code>3a0bf09</code></td><td>Add Stadium Parameter Codex — QoE definition, 60 params, 12 knobs, 4 interaction diagrams</td></tr>
+  </table>
+
+  <h3>GitHub Pages Base</h3>
+  <p>All live artifacts: <a href="https://khursheedkhanaiforgood-ai.github.io/5320-onboarding/" target="_blank">https://khursheedkhanaiforgood-ai.github.io/5320-onboarding/ ↗</a></p>
+
+  <div class="callout-green">
+    <p><strong>Track A complete.</strong> Three artifacts (Archetype Matrix, Monte Carlo tab, Optimizer with MC-inside) and the Parameter Codex are live on GitHub Pages. The chance-constrained optimizer enforces POS SLA, admitted-count, and robustness across demand uncertainty without requiring ns-3. Track B (ns-3 / Sionna) is staged and waiting for the install.</p>
+  </div>
+</section>
+
+<footer>
+  <p>© 2026 Khursheed Khan &nbsp;·&nbsp; Journey to the Digital Twin &nbsp;·&nbsp; June 3, 2026 &nbsp;·&nbsp; Extreme Networks AP5060 &nbsp;·&nbsp; FIFA WC Seattle</p>
+  <p style="margin-top:6px">Track A ✓ &nbsp;·&nbsp; <a href="session_summary_20260602_fifa_wc.html" style="color:#888">June 2 EOD ↗</a> &nbsp;·&nbsp; <a href="stadium_wifi_simulator_v2.html" style="color:#888">Simulator v2 ↗</a> &nbsp;·&nbsp; <a href="archetype_matrix_v0.html" style="color:#888">Archetype Matrix ↗</a> &nbsp;·&nbsp; <a href="stadium_parameter_codex.html" style="color:#888">Parameter Codex ↗</a></p>
+</footer>
+
+</body>
+</html>
