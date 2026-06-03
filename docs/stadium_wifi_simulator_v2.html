@@ -377,8 +377,30 @@ input:checked+.ts:before{transform:translateX(15px);background:#fff}
     <button class="bpbtn" onclick="findBreak()">Find Threshold →</button>
     <div class="bpres na" id="bpres">Select parameter + SLA target above</div>
   </div>
+  <!-- Config Export -->
+  <div style="width:100%;margin-top:8px">
+    <button class="bpbtn" style="border-color:var(--gold);color:var(--gold)" onclick="showCfg()">📋 Config Export — All 39 Params</button>
+  </div>
 </div>
 </div><!-- /layout -->
+
+<!-- ══ CONFIG EXPORT MODAL ══ -->
+<div id="cfg-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:1000;overflow-y:auto;padding:24px 12px">
+  <div style="max-width:700px;margin:0 auto;background:#131618;border:1px solid var(--bd);border-radius:4px;padding:20px 24px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+      <div style="font-size:10px;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:1.2px">Config Export — Current vs Stadium Optimal</div>
+      <div style="display:flex;gap:6px">
+        <button onclick="copyCfg()" style="background:#0d1928;border:1px solid var(--blue);color:var(--blue);padding:3px 10px;border-radius:2px;cursor:pointer;font-size:9px;font-family:inherit">Copy Text</button>
+        <button onclick="closeCfg()" style="background:#1a0010;border:1px solid var(--red);color:var(--red);padding:3px 10px;border-radius:2px;cursor:pointer;font-size:9px;font-family:inherit">✕ Close</button>
+      </div>
+    </div>
+    <div style="font-size:8px;color:var(--mut);margin-bottom:12px" id="cfg-score-line">—</div>
+    <div id="cfg-body" style="font-size:11px;line-height:1.6"></div>
+    <div style="margin-top:14px;font-size:8px;color:var(--mut);border-top:1px solid var(--bd);padding-top:8px">
+      ● Current &nbsp;|&nbsp; <span style="color:var(--green)">✓ Matches optimal</span> &nbsp;|&nbsp; <span style="color:var(--yel)">⚠ Sub-optimal</span> &nbsp;|&nbsp; <span style="color:var(--red)">✗ Below optimal</span>
+    </div>
+  </div>
+</div>
 
 <div class="slabar" id="slabar"></div>
 <div class="logw" id="logw"></div>
@@ -969,6 +991,120 @@ function resetAll(){
   addLog('Reset to WORST CASE — all features OFF · compare with ★ Optimal','warn');
   update();
 }
+
+// ═══ CONFIG EXPORT ═══
+function showCfg(){
+  const s=compute();
+  const p=s.p;
+  const OPT={
+    apType:'AP5060',fans:72000,devMult:1.4,wifiAtt:.75,concur:.55,
+    txPwr:17,bw5g:160,bw6g:320,gi:1600,mbr:24,rxSop:-75,mcsFloor:4,nf:0,
+    punct:true,ofdmaDL:true,ofdmaUL:true,muMimo:true,bssColor:true,rtwt:true,
+    multiRU:true,mloOn:true,r80211:true,kv:true,dcsLock:false,
+    mloMode:'STR',txopVO:1504,txopBe:3008,cwBe:15,rtsThr:1500,muStreams:8,
+    qam4k:true,mloLinks:2,mloSteer:'ai',
+    maxCli:100,minRSSI:-70,atFair:'strict',bsMode:'active',
+    bcf:true,mc2uc:true,proxyArp:true,clientIso:false,enhRNR:true,
+    pmf:true,airdef:true,dtim:2,deg:0,cyber:'none'
+  };
+  const SECTIONS=[
+    {title:'DEMAND MODEL',params:[
+      {k:'apType',l:'AP Type',fmt:v=>v},
+      {k:'fans',l:'Fan Count',fmt:v=>v.toLocaleString()},
+      {k:'devMult',l:'Devices / Fan',fmt:v=>v+'×'},
+      {k:'wifiAtt',l:'WiFi Attach',fmt:v=>Math.round(v*100)+'%'},
+      {k:'concur',l:'Concurrency',fmt:v=>Math.round(v*100)+'%'},
+    ]},
+    {title:'PHY LAYER',params:[
+      {k:'txPwr',l:'TX Power',fmt:v=>v+' dBm'},
+      {k:'bw5g',l:'5G Channel BW',fmt:v=>v+' MHz'},
+      {k:'bw6g',l:'6G Channel BW',fmt:v=>v+' MHz'},
+      {k:'gi',l:'Guard Interval',fmt:v=>v+' ns'},
+      {k:'mbr',l:'Min Basic Rate',fmt:v=>v+' Mbps'},
+      {k:'rxSop',l:'RX-SOP Threshold',fmt:v=>v+' dBm'},
+      {k:'mcsFloor',l:'MCS Floor',fmt:v=>'MCS '+v},
+      {k:'nf',l:'Noise Floor Offset',fmt:v=>v+' dB'},
+      {k:'punct',l:'Preamble Puncturing',fmt:v=>v?'ON':'OFF'},
+    ]},
+    {title:'MAC / EDCA / FEATURES',params:[
+      {k:'ofdmaDL',l:'OFDMA DL',fmt:v=>v?'ON':'OFF'},
+      {k:'ofdmaUL',l:'OFDMA UL',fmt:v=>v?'ON':'OFF'},
+      {k:'muMimo',l:'MU-MIMO',fmt:v=>v?'ON':'OFF'},
+      {k:'muStreams',l:'MU-MIMO DL Streams',fmt:v=>v+' streams'},
+      {k:'bssColor',l:'BSS Coloring',fmt:v=>v?'ON':'OFF'},
+      {k:'rtwt',l:'rTWT',fmt:v=>v?'ON':'OFF'},
+      {k:'multiRU',l:'Multi-RU',fmt:v=>v?'ON':'OFF'},
+      {k:'mloOn',l:'MLO',fmt:v=>v?'ON':'OFF'},
+      {k:'mloMode',l:'MLO Mode',fmt:v=>v},
+      {k:'mloLinks',l:'MLO Active Links',fmt:v=>v+' links'},
+      {k:'mloSteer',l:'MLO Traffic Steering',fmt:v=>v==='ai'?'AI-driven':'WMM-QoS'},
+      {k:'qam4k',l:'4K-QAM (MCS 12/13)',fmt:v=>v?'ON':'OFF'},
+      {k:'r80211',l:'802.11r FT',fmt:v=>v?'ON':'OFF'},
+      {k:'kv',l:'802.11k/v',fmt:v=>v?'ON':'OFF'},
+      {k:'dcsLock',l:'DCS Lock',fmt:v=>v?'ON':'OFF'},
+      {k:'txopVO',l:'TXOP AC_VO',fmt:v=>v+' µs'},
+      {k:'txopBe',l:'TXOP AC_BE',fmt:v=>v+' µs'},
+      {k:'cwBe',l:'CWmin AC_BE',fmt:v=>v+' slots'},
+      {k:'rtsThr',l:'RTS/CTS Threshold',fmt:v=>v+' B'},
+    ]},
+    {title:'ADMISSION & STEERING',params:[
+      {k:'maxCli',l:'Max Clients / Radio',fmt:v=>v},
+      {k:'minRSSI',l:'Min RSSI Admission',fmt:v=>v+' dBm'},
+      {k:'atFair',l:'Airtime Fairness',fmt:v=>v},
+      {k:'bsMode',l:'Band Steering',fmt:v=>v},
+    ]},
+    {title:'SSID & NETWORK',params:[
+      {k:'bcf',l:'Broadcast Filter',fmt:v=>v?'ON':'OFF'},
+      {k:'mc2uc',l:'MC→UC',fmt:v=>v?'ON':'OFF'},
+      {k:'proxyArp',l:'Proxy ARP',fmt:v=>v?'ON':'OFF'},
+      {k:'clientIso',l:'Client Isolation',fmt:v=>v?'ON':'OFF'},
+      {k:'enhRNR',l:'Enhanced RNR',fmt:v=>v?'ON':'OFF'},
+      {k:'pmf',l:'PMF (802.11w)',fmt:v=>v?'ON':'OFF'},
+      {k:'airdef',l:'AirDefense WIPS',fmt:v=>v?'ON':'OFF'},
+      {k:'dtim',l:'DTIM Period',fmt:v=>v},
+    ]},
+    {title:'DEGRADATION & THREATS',params:[
+      {k:'deg',l:'Degradation Level',fmt:v=>['0 — Nominal','1 — 5G CCI','2 — Dual Degrade','3 — Jammer+Auth','4 — Critical'][v]||v},
+      {k:'cyber',l:'Cyber Attack',fmt:v=>v},
+    ]},
+  ];
+
+  function cmp(k,cur,opt){
+    if(typeof opt==='boolean') return cur===opt;
+    if(typeof opt==='number') return cur===opt;
+    return String(cur)===String(opt);
+  }
+
+  let html='';
+  let textLines=['STADIUM WIFI SIMULATOR v2 — CONFIG EXPORT','Score: '+s.score+'/100  |  '+new Date().toLocaleTimeString(),''];
+  SECTIONS.forEach(sec=>{
+    html+=`<div style="margin-bottom:12px"><div style="font-size:8px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:1.2px;border-bottom:1px solid var(--bd);padding-bottom:3px;margin-bottom:5px">${sec.title}</div>`;
+    textLines.push('── '+sec.title+' ──');
+    html+='<table style="width:100%;border-collapse:collapse">';
+    sec.params.forEach(pr=>{
+      const cur=p[pr.k];const opt=OPT[pr.k];
+      const match=cmp(pr.k,cur,opt);
+      const curFmt=pr.fmt(cur);const optFmt=pr.fmt(opt);
+      const col=match?'var(--green)':typeof opt==='boolean'||typeof opt==='string'?'var(--red)':'var(--yel)';
+      const icon=match?'✓':'⚠';
+      html+=`<tr><td style="padding:2px 6px 2px 0;color:var(--mut2);width:42%">${pr.l}</td><td style="padding:2px 6px 2px 0;font-weight:700;color:${col};width:28%">${icon} ${curFmt}</td><td style="padding:2px 0;color:var(--mut);font-size:10px;width:30%">${match?'':('opt: '+optFmt)}</td></tr>`;
+      textLines.push(`  ${pr.l.padEnd(26)} ${curFmt.padEnd(18)} ${match?'✓':('→ opt: '+optFmt)}`);
+    });
+    html+='</table></div>';
+    textLines.push('');
+  });
+
+  g('cfg-score-line').textContent=`Score ${s.score}/100  ·  ${s.totalSess.toLocaleString()} sessions  ·  ${s.active.toLocaleString()} active  ·  ${s.demGbps}G demand / ${s.capGbps}G capacity  ·  Gaps: ${countGaps(s)}`;
+  g('cfg-body').innerHTML=html;
+  g('cfg-overlay').dataset.text=textLines.join('\n');
+  g('cfg-overlay').style.display='block';
+}
+function closeCfg(){g('cfg-overlay').style.display='none';}
+function copyCfg(){
+  const t=g('cfg-overlay').dataset.text||'';
+  navigator.clipboard.writeText(t).then(()=>addLog('Config copied to clipboard','ok')).catch(()=>addLog('Copy failed — use Ctrl+A in export panel','warn'));
+}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeCfg();});
 
 // ═══ WIRE EVENTS + INIT ═══
 document.querySelectorAll('input[type=range],select').forEach(el=>el.addEventListener('input',update));
