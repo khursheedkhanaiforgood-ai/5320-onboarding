@@ -446,7 +446,7 @@ input:checked+.ts:before{transform:translateX(15px);background:#fff}
   </div>
 
   <!-- Service class SLAs + Degradation -->
-  <div style="max-height:160px;overflow-y:auto;padding-bottom:4px;border:1px solid var(--bd);border-radius:2px;padding:6px 8px">
+  <div style="height:90px;overflow-y:auto;border:1px solid var(--bd);border-radius:2px;padding:4px 8px">
   <div style="margin-top:10px">
     <div style="font-size:9px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:1.2px;margin-bottom:4px">Service Class SLAs</div>
     <div class="sg">
@@ -1166,6 +1166,7 @@ function resetAll(){
 
 // ═══ CONFIG EXPORT ═══
 function showCfg(){
+  try{
   const s=compute();
   const p=s.p;
   const optPar=optResult?optResult.params:null;   // P50 optimal from optimizer run (if any)
@@ -1380,6 +1381,7 @@ function showCfg(){
   g('cfg-body').innerHTML=html;
   g('cfg-overlay').dataset.text=textLines.join('\n');
   g('cfg-overlay').style.display='block';
+  }catch(e){addLog('Full Config error: '+e.message,'alert');console.error(e);}
 }
 function closeCfg(){g('cfg-overlay').style.display='none';}
 function copyCfg(){
