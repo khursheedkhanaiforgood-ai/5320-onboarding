@@ -91,9 +91,9 @@ input:checked+.ts:before{transform:translateX(15px);background:#fff}
 /* svc */
 .sg{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin-top:7px}
 .sc{background:#0d0f12;border:1px solid var(--bd);border-radius:2px;padding:6px 7px;text-align:center}
-.sn{font-size:8px;color:var(--mut);text-transform:uppercase;letter-spacing:.8px;margin-bottom:3px}
-.ss2{font-size:10px;font-weight:700}
-.sd{font-size:8px;color:var(--mut2);margin-top:2px;line-height:1.3}
+.sn{font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:.8px;margin-bottom:3px}
+.ss2{font-size:12px;font-weight:700}
+.sd{font-size:11px;color:var(--mut2);margin-top:2px;line-height:1.3}
 /* gap table */
 .gtable{width:100%;border-collapse:collapse;font-size:9px;margin-top:6px}
 .gtable th{font-size:8px;color:var(--mut);text-transform:uppercase;letter-spacing:.8px;padding:4px 6px;border-bottom:1px solid var(--bd);text-align:left}
@@ -155,11 +155,11 @@ input:checked+.ts:before{transform:translateX(15px);background:#fff}
   <div class="brow">
     <div class="b v2" style="color:var(--cyan);border-color:var(--cyan)">v3 Sprint 1</div>
     <div class="b clk" onclick="toggleAP()" title="Click to switch">AP5060 ⇄ AP3000</div>
-    <button class="b opt" onclick="applyOptimal()">★ Stadium Optimal</button>
+    <button class="b opt" onclick="applyOptimal()">★ Apply Golden Set</button>
     <button onclick="showCfg()" style="background:#0a1a00;border:1px solid var(--gold);color:var(--gold);padding:3px 9px;border-radius:2px;cursor:pointer;font-size:9px;font-family:inherit" title="📋 Full Config — Outputs · 12 Knobs · All 60 Params">📋 Full Config</button>
     <button onclick="directDownload()" style="background:#001a08;border:1px solid var(--green);color:var(--green);padding:3px 9px;border-radius:2px;cursor:pointer;font-size:9px;font-family:inherit;font-weight:700" title="Download full config as .txt file">⬇ Download</button>
     <div class="b" style="color:#5aff9a;border-color:#00501a;background:#001a08" id="stbadge">● STABLE</div>
-    <button onclick="resetAll()" style="background:#0d1020;border:1px solid var(--bd);color:var(--mut2);padding:3px 9px;border-radius:2px;cursor:pointer;font-size:9px;font-family:inherit">↺ Reset</button>
+    <button onclick="resetAll()" style="background:#1a0a0a;border:1px solid var(--red);color:#ff6060;padding:3px 9px;border-radius:2px;cursor:pointer;font-size:9px;font-family:inherit" title="Sets all parameters to worst-case values — use to demonstrate Gap Analysis baseline">▼ Load Worst Case</button>
     <a href="simulator_v2_addendum.html" style="background:#0a1a00;border:1px solid var(--green);color:var(--green);padding:3px 9px;border-radius:2px;font-size:9px;font-family:inherit;text-decoration:none" title="Sprint 1 complete: C1/C2/C3/L1 fixed. Sprint 2+ in addendum.">✓ Sprint 1</a>
   </div>
 </header>
@@ -395,8 +395,9 @@ input:checked+.ts:before{transform:translateX(15px);background:#fff}
   <!-- MONTE CARLO PANEL -->
   <div class="bp" id="bp-mc">
     <div style="font-size:9px;color:var(--mut2);margin-bottom:5px;line-height:1.55">
-  Stresses your config under realistic demand variance: Poisson fan arrivals × Pareto per-client traffic. Returns P5/P50/P75/P95 bands.
-  <span style="color:var(--yel)">Select a <b>Target Percentile</b> — this is what the Optimizer maximizes.</span>
+  Stresses your config under realistic demand variance: <b>Poisson fan arrivals × Pareto per-client traffic</b>. Returns P5/P50/P75/P95 bands.
+  <span style="color:var(--yel)">Bands represent <b>model uncertainty</b>, not field measurements — coefficients are unvalidated priors until Track B calibration.</span>
+  <span style="color:var(--mut)">Select a <b>Target Percentile</b> below — this is what the Optimizer maximizes.</span>
 </div>
     <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;margin-bottom:7px">
       <div>
@@ -410,12 +411,14 @@ input:checked+.ts:before{transform:translateX(15px);background:#fff}
         <select id="mc-var" style="background:#111;border:1px solid var(--bd);color:var(--text);padding:3px 5px;border-radius:2px;font-size:9px;width:100%;font-family:inherit">
           <option value="10">±10%</option><option value="20" selected>±20%</option><option value="30">±30%</option>
         </select>
+        <div class="kd">Coefficient of variation — ±% spread in per-fan demand each draw. Higher = more random demand surges.</div>
       </div>
       <div>
         <div style="font-size:8px;color:var(--mut);text-transform:uppercase;letter-spacing:.8px;margin-bottom:3px">Pareto α</div>
         <select id="mc-alpha" style="background:#111;border:1px solid var(--bd);color:var(--text);padding:3px 5px;border-radius:2px;font-size:9px;width:100%;font-family:inherit">
           <option value="1.5">1.5 (heavy)</option><option value="2.0" selected>2.0</option><option value="3.0">3.0 (light)</option>
         </select>
+        <div class="kd">Tail heaviness of per-fan traffic. α=1.5: a few fans saturate the AP. α=3.0: uniform crowd. Stadium prior: α=2.0.</div>
       </div>
     </div>
     <button id="mc-run-btn" onclick="runMC()" style="width:100%;background:#0a1a30;border:1px solid var(--cyan);color:var(--cyan);padding:5px;border-radius:2px;cursor:pointer;font-size:9px;font-family:inherit;margin-bottom:5px">▶ Run Monte Carlo</button>
@@ -440,7 +443,7 @@ input:checked+.ts:before{transform:translateX(15px);background:#fff}
   </div>
 
   <!-- Service class SLAs + Degradation -->
-  <div>
+  <div style="resize:vertical;overflow:auto;min-height:80px;padding-bottom:4px">
   <div style="margin-top:10px">
     <div style="font-size:9px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:1.2px;margin-bottom:4px">Service Class SLAs</div>
     <div class="sg">
@@ -490,7 +493,7 @@ input:checked+.ts:before{transform:translateX(15px);background:#fff}
 </div><!-- /layout -->
 
 <!-- ══ CONFIG EXPORT MODAL ══ -->
-<div id="cfg-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:1000;overflow-y:auto;padding:24px 12px">
+<div id="cfg-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:5000;overflow-y:auto;padding:24px 12px">
   <div style="max-width:700px;margin:0 auto;background:#131618;border:1px solid var(--bd);border-radius:4px;padding:20px 24px">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
       <div style="font-size:10px;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:1.2px">Full Config Output — Computed Outputs · 12 Optimal Knobs · Scenario Inputs · All 60 Params</div>
@@ -864,11 +867,11 @@ function render(s){
 
   // Stability
   drawGauge(s.score);
-  const sl=s.score>=85?'STABLE':s.score>=70?'DEGRADED':s.score>=50?'WARNING':'CRITICAL';
-  const sc3=s.score>=85?CM.green:s.score>=70?CM.yellow:s.score>=50?CM.orange:CM.red;
+  const sl=s.score>=80?'STABLE':s.score>=60?'WARNING':'CRITICAL';
+  const sc3=s.score>=80?CM.green:s.score>=60?CM.yellow:CM.red;
   sv('stlbl',sl);const stl=g('stlbl');if(stl)stl.style.color=sc3;
   sv('stscore',`${s.score} / 100`);
-  const sf=g('stfill');if(sf){sf.style.width=s.score+'%';sf.className=`stfill bg-${s.score>=85?'green':s.score>=65?'yellow':s.score>=40?'orange':'red'}`;}
+  const sf=g('stfill');if(sf){sf.style.width=s.score+'%';sf.className=`stfill bg-${s.score>=80?'green':s.score>=60?'yellow':'red'}`;}
 
   // Status badge
   const sb=g('stbadge');if(sb){sb.textContent=`● ${sl}`;sb.style.color=sc3;sb.style.borderColor=sc3+'44';sb.style.background=sc3+'11';}
@@ -1653,12 +1656,16 @@ function renderOptResults(best,params,mcResult){
   h+=`</tbody></table>`;
 
   // ── Action buttons ────────────────────────────────────────────────────
+  const iters=g('mc-iter')?.value||'200';
   h+=`<div style="display:flex;gap:5px;margin-top:8px">
-    <button onclick="applyOptResult()" style="flex:1;background:#001428;border:1px solid var(--blue);color:var(--blue);padding:5px;border-radius:2px;cursor:pointer;font-size:9px;font-family:inherit">↳ Apply to Simulator</button>
-    <button onclick="checkRobustness()" style="flex:1;background:#0a0820;border:1px solid var(--pur);color:var(--pur);padding:5px;border-radius:2px;cursor:pointer;font-size:9px;font-family:inherit">Check Robustness →</button>
+    <button onclick="applyOptResult()" style="flex:1;background:#001428;border:1px solid var(--blue);color:var(--blue);padding:5px;border-radius:2px;cursor:pointer;font-size:9px;font-family:inherit">↳ Apply Optimized Knobs</button>
+    <button onclick="checkRobustness()" style="flex:1;background:#0a0820;border:1px solid var(--pur);color:var(--pur);padding:5px;border-radius:2px;cursor:pointer;font-size:9px;font-family:inherit">Check Robustness (${iters}-draw) →</button>
   </div>
-  <div style="font-size:8px;color:var(--mut);margin-top:4px;padding:3px 6px;background:#0a000a;border-left:2px solid var(--pur);line-height:1.5">
-    Move sliders → re-run optimizer → table updates for new demand. P50 = median outcome; P95 = kickoff surge.
+  <div style="font-size:8px;color:var(--mut);margin-top:4px;padding:3px 6px;background:#001428;border-left:2px solid var(--blue);line-height:1.5;margin-bottom:3px">
+    <b style="color:var(--blue)">↳ Apply Optimized Knobs</b> — sets all 12 search knobs to optimizer best values and recomputes all outputs.
+  </div>
+  <div style="font-size:8px;color:var(--mut);margin-top:2px;padding:3px 6px;background:#0a000a;border-left:2px solid var(--pur);line-height:1.5">
+    <b style="color:var(--pur)">Check Robustness</b> — runs ${iters}-draw Monte Carlo on the optimizer's recommended settings. Reports whether P95 holds against SLA thresholds.
   </div>`;
   panel.innerHTML=h;panel.style.display='block';
 }
@@ -1682,7 +1689,7 @@ document.querySelectorAll('input[type=range],select').forEach(el=>el.addEventLis
 buildAPG();
 addLog('Outdoor Stadium WiFi Simulator v3 — Sprint 1 physics fixed · C1/C2/C3/L1 · AP5060 Broadcom + all EP1 settings','ok');
 addLog('① Set demand scenario  ② Check Gap Analysis tab  ③ Run Monte Carlo  ④ Run Optimizer','info');
-addLog('★ Stadium Optimal = recommended config · ↺ Reset = worst case — compare the delta','warn');
+addLog('★ Apply Golden Set = best-known stadium config · ▼ Load Worst Case = baseline for Gap Analysis — compare the delta','warn');
 applyOptimal();
 </script>
 </body>
