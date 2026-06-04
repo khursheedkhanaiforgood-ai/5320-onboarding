@@ -479,6 +479,8 @@ input:checked+.ts:before{transform:translateX(15px);background:#fff}
     <div class="ralt">Active Automations</div>
     <div id="reclist"></div>
   </div>
+  <!-- Threat Response Panel -->
+  <div id="threat-panel" style="display:none;width:100%;margin-top:6px"></div>
   <!-- Breaking Point Finder -->
   <div class="bpfind" style="width:100%">
     <div class="bpft">⚡ Breaking Point Finder</div>
@@ -896,6 +898,8 @@ function render(s){
   const recs=buildRecs(s);
   sv('reclist','');const rl=g('reclist');
   if(rl)rl.innerHTML=recs.map(r=>`<div class="ra ra-${r.t}">${r.m}</div>`).join('');
+  // Threat response panel
+  renderThreatPanel(s);
 
   // SLA bar
   const slaData=[
@@ -945,6 +949,181 @@ function buildRecs(s){
   if(p.dcsLock)recs.push({t:'info',m:'🔒 DCS Lock: Channel plan frozen for match'});
   if(recs.length===0)recs.push({t:'ok',m:'✓ All systems nominal'});
   return recs.slice(0,7);
+}
+
+// ── THREAT RESPONSE ENGINE ────────────────────────────────────────────────────
+// Maps each threat/degradation to the exact parameters that must be set,
+// where they live in the UI, expected improvement, and a one-click fix.
+const THREAT_RESP={
+  deauth:{name:'Deauth Flood (L2)',sev:'HIGH',col:'#ff6060',
+    actions:[
+      {id:'tog-pmf',type:'toggle',val:true,label:'PMF (802.11w)',
+       section:'Security & DoS — toggle row',
+       impact:'−15% airtime · −8ms latency · flood absorbed completely',
+       why:'802.11w encrypts management frames — forged deauths become cryptographically invalid'},
+      {id:'tog-airdef',type:'toggle',val:true,label:'AirDefense WIPS',
+       section:'Security & DoS — toggle row',
+       impact:'Flood source identified · ops alerted in <30 s',
+       why:'WIPS fingerprints the attacking MAC and triggers over-the-air containment'}
+    ]},
+  evil_twin:{name:'Evil Twin / Rogue AP',sev:'HIGH',col:'#ff6060',
+    actions:[
+      {id:'tog-airdef',type:'toggle',val:true,label:'AirDefense WIPS',
+       section:'Security & DoS — toggle row',
+       impact:'−5% airtime · −3ms latency · rogue contained',
+       why:'Over-the-air deauth of clients that associated to rogue AP'},
+      {id:'tog-pmf',type:'toggle',val:true,label:'PMF (802.11w)',
+       section:'Security & DoS — toggle row',
+       impact:'Clients cannot be lured off by rogue deauths',
+       why:'Encrypted mgmt frames cannot be forged or replayed by evil twin'}
+    ]},
+  cred_storm:{name:'Credential Storm (RADIUS)',sev:'MEDIUM',col:'#ffb347',
+    actions:[
+      {id:'tog-mac-dos',type:'toggle',val:true,label:'MAC-Based DoS Prevention',
+       section:'Security & DoS — toggle row',
+       impact:'Auth attempts rate-limited · −3ms latency · RADIUS protected',
+       why:'Per-MAC rate limiting stops storm before it reaches authentication server'},
+      {id:'tog-ip-dos',type:'toggle',val:true,label:'IP-Based DoS Prevention',
+       section:'Security & DoS — toggle row',
+       impact:'IP-layer amplification blocked at AP',
+       why:'Drops crafted auth packets at L3 before RADIUS processes them'}
+    ]},
+  arp:{name:'ARP Poisoning',sev:'MEDIUM',col:'#ffb347',
+    actions:[
+      {id:'tog-proxyarp',type:'toggle',val:true,label:'Proxy ARP',
+       section:'Network Features — toggle row',
+       impact:'−6% airtime · −4ms latency · forged ARP never reaches clients',
+       why:'AP intercepts ARP and responds on behalf of clients — poisoned reply is dropped'},
+      {id:'tog-ip-dos',type:'toggle',val:true,label:'IP-Based DoS Prevention',
+       section:'Security & DoS — toggle row',
+       impact:'Gratuitous ARP broadcasts suppressed',
+       why:'Filters malformed ARP used for L3 amplification before it propagates'}
+    ]}
+};
+const DEG_RESP={
+  1:{name:'5GHz CCI Congestion',sev:'MEDIUM',col:'#ffb347',
+    actions:[
+      {id:'tog-bsscolor',type:'toggle',val:true,label:'BSS Coloring',
+       section:'WiFi 7 feature toggles',
+       impact:'~−8% airtime penalty from CCI eliminated via spatial reuse',
+       why:'Color bits let APs ignore transmissions from overlapping BSS'},
+      {id:'rx-sop',type:'select',val:'-75',label:'RX-SOP → −75 dBm',
+       section:'PHY Layer — RX-SOP slider',
+       impact:'AP ignores CCI below −75 dBm · ~+15% effective capacity',
+       why:'Raises the threshold above which the AP considers the channel busy'},
+      {id:'tog-dcslock',type:'toggle',val:true,label:'DCS Lock',
+       section:'PHY Layer toggles',
+       impact:'Channel plan frozen · CCI-triggered rescans suppressed',
+       why:'Prevents DCS from reassigning channels and creating new CCI during match'}
+    ]},
+  2:{name:'Dual-Band Degradation',sev:'HIGH',col:'#ff6060',
+    actions:[
+      {id:'tog-bsscolor',type:'toggle',val:true,label:'BSS Coloring',
+       section:'WiFi 7 feature toggles',
+       impact:'Maximum spatial reuse on surviving bands',
+       why:'Allows APs to transmit despite overlap from degraded bands'},
+      {id:'bw5g',type:'select',val:'80',label:'5G Channel BW → 80 MHz',
+       section:'PHY Layer — 5G BW slider',
+       impact:'Narrower BW = stronger link budget per sub-carrier under degradation',
+       why:'160 MHz doubles noise floor — 80 MHz improves SNR margin by ~3 dB'},
+      {id:'tog-rtwt',type:'toggle',val:true,label:'rTWT',
+       section:'WiFi 7 feature toggles',
+       impact:'POS service period fires on schedule despite band degradation',
+       why:'Scheduled wake time is independent of channel conditions'}
+    ]},
+  3:{name:'Jammer + Auth Storm',sev:'CRITICAL',col:'#ff3030',
+    actions:[
+      {id:'tog-airdef',type:'toggle',val:true,label:'AirDefense WIPS',
+       section:'Security & DoS — toggle row',
+       impact:'Jammer located · ops dispatched · containment started',
+       why:'WIPS triangulates jammer position for physical removal'},
+      {id:'tog-mac-dos',type:'toggle',val:true,label:'MAC-Based DoS Prevention',
+       section:'Security & DoS — toggle row',
+       impact:'Auth storm rate-limited · RADIUS load capped',
+       why:'Per-MAC limits prevent storm from flooding authentication pipeline'},
+      {id:'tog-rtwt',type:'toggle',val:true,label:'rTWT',
+       section:'WiFi 7 feature toggles',
+       impact:'POS SPs guaranteed even through auth noise',
+       why:'rTWT service periods are pre-scheduled and immune to association storms'},
+      {id:'mcs-floor',type:'select',val:'6',label:'MCS Floor → MCS 6',
+       section:'PHY Layer — MCS Floor slider',
+       impact:'Fewer low-rate retries during jammer bursts · −10% overhead',
+       why:'Higher floor rejects clients that would retransmit at 1–5 Mbps repeatedly'}
+    ]},
+  4:{name:'Critical Failure — Full Degradation',sev:'CRITICAL',col:'#ff3030',
+    actions:[
+      {id:'tog-airdef',type:'toggle',val:true,label:'AirDefense WIPS',
+       section:'Security & DoS — toggle row',
+       impact:'MANDATORY — locate and isolate failure source immediately',
+       why:'Cannot recover without identifying root cause — WIPS is the sensor'},
+      {id:'tog-dcslock',type:'toggle',val:true,label:'DCS Lock',
+       section:'PHY Layer toggles',
+       impact:'Channel plan frozen during incident · prevents AP pile-up',
+       why:'DCS channel reassignment during failure cascades interference'},
+      {id:'max-cli',type:'select',val:'50',label:'Max Clients/Radio → 50',
+       section:'Admission — Max Clients slider',
+       impact:'Load shedding · admitted clients keep their SLAs',
+       why:'Controlled admission beats random congestion collapse'}
+    ]}
+};
+
+function fixParam(id,type,val){
+  const el=g(id);if(!el)return;
+  if(type==='toggle')el.checked=(val===true||val==='true');
+  else el.value=val;
+  el.scrollIntoView({behavior:'smooth',block:'center'});
+  el.style.outline='2px solid #7ee787';el.style.outlineOffset='3px';
+  setTimeout(()=>{if(el)el.style.outline='';},2500);
+  addLog('Fix applied: '+el.labels?.[0]?.textContent?.trim()||id,'ok');
+  update();
+}
+
+function renderThreatPanel(s){
+  const tp=g('threat-panel');if(!tp)return;
+  const p=s.p;
+  const cyberResp=THREAT_RESP[p.cyber];
+  const degResp=p.deg>0?DEG_RESP[p.deg]:null;
+  if(!cyberResp&&!degResp){tp.style.display='none';return;}
+  tp.style.display='block';
+  let h='';
+  const renderBlock=(resp)=>{
+    const sevCol=resp.col;
+    const allOk=resp.actions.every(a=>{
+      const el=g(a.id);if(!el)return false;
+      return a.type==='toggle'?el.checked===(a.val===true):String(el.value)===String(a.val);
+    });
+    h+=`<div style="background:#0d0f12;border:1px solid ${sevCol};border-radius:3px;padding:8px 10px;margin-bottom:6px">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:7px">
+  <div style="font-size:10px;font-weight:700;color:${sevCol};letter-spacing:.5px">🛡 THREAT RESPONSE — ${resp.name}</div>
+  <div style="font-size:8px;font-weight:700;padding:2px 6px;background:${sevCol}22;border:1px solid ${sevCol};border-radius:2px;color:${sevCol}">${resp.sev}</div>
+</div>
+<div style="font-size:8px;color:#8892a4;margin-bottom:6px;font-style:italic">These parameters are <b style="color:#c9d1d9">outside the 12 optimizer knobs</b> — they require manual action. Click <b style="color:#7ee787">Apply Fix</b> to enable instantly.</div>`;
+    resp.actions.forEach(a=>{
+      const el=g(a.id);
+      const isOk=el?(a.type==='toggle'?el.checked===(a.val===true):String(el.value)===String(a.val)):false;
+      const stCol=isOk?'#7ee787':'#ff6060';
+      const stLbl=isOk?'✓ ACTIVE':'✗ REQUIRED';
+      h+=`<div style="background:#080a0d;border:1px solid #1e2530;border-radius:2px;padding:6px 8px;margin-bottom:4px">
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
+    <div style="flex:1">
+      <div style="font-size:10px;font-weight:700;color:#e6edf3;margin-bottom:2px">${a.label}</div>
+      <div style="font-size:8px;color:#8892a4;margin-bottom:2px">📍 Where: <span style="color:#c0a8ff">${a.section}</span></div>
+      <div style="font-size:8px;color:#7abfff;margin-bottom:2px">→ ${a.impact}</div>
+      <div style="font-size:8px;color:#58636e;font-style:italic">${a.why}</div>
+    </div>
+    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0">
+      <div style="font-size:8px;font-weight:700;color:${stCol}">${stLbl}</div>
+      ${!isOk?`<button onclick="fixParam('${a.id}','${a.type}',${a.type==='toggle'?a.val:("'"+a.val+"'")})" style="background:#001a00;border:1px solid #7ee787;color:#7ee787;padding:3px 8px;border-radius:2px;cursor:pointer;font-size:8px;font-family:inherit;font-weight:700;white-space:nowrap">Apply Fix ↗</button>`:'<div style="font-size:8px;color:#7ee787">✓ Done</div>'}
+    </div>
+  </div>
+</div>`;
+    });
+    if(allOk)h+=`<div style="font-size:9px;color:#7ee787;padding:4px 6px;background:#001a0a;border-radius:2px;text-align:center">✓ All ${resp.name} mitigations active — threat contained</div>`;
+    h+='</div>';
+  };
+  if(cyberResp)renderBlock(cyberResp);
+  if(degResp)renderBlock(degResp);
+  tp.innerHTML=h;
 }
 
 // ═══ GAUGE ═══
