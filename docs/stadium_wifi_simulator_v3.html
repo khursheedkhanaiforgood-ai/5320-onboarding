@@ -1673,10 +1673,11 @@ function renderOptResults(best,params,mcResult){
 function applyOptResult(){
   if(!optResult)return;
   const p=optResult.params;
-  applyOptimal();
+  // Apply only the 12 search knobs — demand scenario, degradation, cyber attack,
+  // and all frozen params remain exactly as the user set them.
   const m={atFair:'at-fair',txPwr:'tx-pwr',minRSSI:'min-rssi',rxSop:'rx-sop',cwBe:'cw-be',maxCli:'max-cli',mcsFloor:'mcs-floor',bw5g:'bw5g',fragThr:'frag-thr',dtim:'dtim',rtsThr:'rts-thr',txopBe:'txop-be'};
   for(const[k,id]of Object.entries(m)){const el=g(id);if(el)el.value=p[k];}
-  addLog(`Optimizer config applied — ${optResult.score}/100`,'ok');
+  addLog(`Optimizer knobs applied — ${optResult.score}/100 (scenario preserved: ${g('cyber').value!=='none'?'cyber active · ':''}deg level ${g('deg-lvl').value})`,'ok');
   update();
 }
 function checkRobustness(){
