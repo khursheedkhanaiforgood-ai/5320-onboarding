@@ -337,6 +337,8 @@ input:checked+.ts:before{transform:translateX(15px);background:#fff}
       <option value="75">P75 — Conservative</option>
       <option value="90">P90 — Robust</option>
     </select>
+    <span style="color:var(--mut);font-size:9px">or custom:</span>
+    <input type="number" id="mc-pct-custom" min="1" max="99" placeholder="e.g. 95" oninput="update()" style="width:62px;background:#111;border:1px solid var(--cyan);color:var(--cyan);padding:3px 6px;border-radius:2px;font-size:11px;font-weight:700;font-family:inherit" title="Type any percentile 1–99 to override the preset above">
     <span style="color:var(--mut2);font-size:9px">← optimizer maximizes this percentile</span>
   </div>
   <div class="mloc" id="mloc">
@@ -444,7 +446,7 @@ input:checked+.ts:before{transform:translateX(15px);background:#fff}
   </div>
 
   <!-- Service class SLAs + Degradation -->
-  <div style="resize:vertical;overflow:auto;min-height:80px;padding-bottom:4px">
+  <div style="max-height:160px;overflow-y:auto;padding-bottom:4px;border:1px solid var(--bd);border-radius:2px;padding:6px 8px">
   <div style="margin-top:10px">
     <div style="font-size:9px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:1.2px;margin-bottom:4px">Service Class SLAs</div>
     <div class="sg">
@@ -1172,6 +1174,22 @@ function showCfg(){
   <strong>Tip:</strong> Scroll down to <strong>12 SEARCH KNOBS</strong> for the recommended optimal values · Run the <strong style="color:var(--org)">Optimizer tab</strong> first to populate P50-optimal column for your exact demand scenario
 </div>`;
   const textLines=['STADIUM WIFI SIMULATOR v3 — FULL CONFIG OUTPUT',new Date().toLocaleString(),''];
+  // Reference optimal values — must be declared before any OPT[k] reference below
+  const OPT={
+    apType:'AP5060',fans:72000,devMult:1.4,wifiAtt:.75,concur:.55,
+    txPwr:17,bw5g:160,bw6g:320,gi:1600,mbr:24,rxSop:-75,mcsFloor:4,nf:0,
+    punct:true,ofdmaDL:true,ofdmaUL:true,muMimo:true,bssColor:true,rtwt:true,
+    multiRU:true,mloOn:true,r80211:true,kv:true,dcsLock:false,
+    mloMode:'STR',txopVO:1504,txopBe:3008,cwBe:15,rtsThr:1500,muStreams:8,
+    qam4k:true,mloLinks:2,mloSteer:'ai',
+    maxCli:100,minRSSI:-70,atFair:'strict',bsMode:'active',
+    bcf:true,mc2uc:true,proxyArp:true,clientIso:false,enhRNR:true,
+    pmf:true,airdef:true,dtim:2,deg:0,cyber:'none',
+    uapsd:true,wmmAcVo:true,wmmAcVi:true,
+    clientAgeout:5,fragThr:2346,roamCacheUpd:60,roamCacheAge:60,
+    mc2ucThr:60,mc2ucMbr:10,mcastDrop:false,ignBcastProbe:true,
+    macDosPrev:true,ipDosPrev:true
+  };
 
   // ── COMPUTED OUTPUTS ────────────────────────────────────────────────────────
   html+=`<div style="margin-bottom:14px">
@@ -1257,21 +1275,6 @@ function showCfg(){
   // ── ALL 60 PARAMS (collapsible) ──────────────────────────────────────────────
   html+=`<details><summary style="font-size:9px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:1.2px;cursor:pointer;padding:4px 0;border-top:1px solid var(--bd)">▶ All 60 Parameters — Full Detail (expand)</summary><div style="margin-top:8px">`;
 
-  const OPT={
-    apType:'AP5060',fans:72000,devMult:1.4,wifiAtt:.75,concur:.55,
-    txPwr:17,bw5g:160,bw6g:320,gi:1600,mbr:24,rxSop:-75,mcsFloor:4,nf:0,
-    punct:true,ofdmaDL:true,ofdmaUL:true,muMimo:true,bssColor:true,rtwt:true,
-    multiRU:true,mloOn:true,r80211:true,kv:true,dcsLock:false,
-    mloMode:'STR',txopVO:1504,txopBe:3008,cwBe:15,rtsThr:1500,muStreams:8,
-    qam4k:true,mloLinks:2,mloSteer:'ai',
-    maxCli:100,minRSSI:-70,atFair:'strict',bsMode:'active',
-    bcf:true,mc2uc:true,proxyArp:true,clientIso:false,enhRNR:true,
-    pmf:true,airdef:true,dtim:2,deg:0,cyber:'none',
-    uapsd:true,wmmAcVo:true,wmmAcVi:true,
-    clientAgeout:5,fragThr:2346,roamCacheUpd:60,roamCacheAge:60,
-    mc2ucThr:60,mc2ucMbr:10,mcastDrop:false,ignBcastProbe:true,
-    macDosPrev:true,ipDosPrev:true
-  };
   const SECTIONS=[
     {title:'DEMAND MODEL',params:[
       {k:'apType',l:'AP Type',fmt:v=>v},
@@ -1397,7 +1400,7 @@ function directDownload(){
     const s=compute();const p=readInputs();
     const kFmt={atFair:v=>v,txPwr:v=>v+' dBm',minRSSI:v=>v+' dBm',rxSop:v=>v+' dBm',cwBe:v=>String(v),maxCli:v=>String(v),mcsFloor:v=>'MCS '+v,bw5g:v=>v+' MHz',fragThr:v=>v+' B',dtim:v=>String(v),rtsThr:v=>v+' B',txopBe:v=>v+' µs'};
     const optPar=optResult?optResult.params:null;
-    const selPct=(+(g('mc-pct')||{value:50}).value)||50;
+    const selPct=getMCPct();
     const lines=[
       'OUTDOOR STADIUM WIFI SIMULATOR v3 — CONFIG EXPORT',
       new Date().toLocaleString(),'='.repeat(54),'',
@@ -1441,6 +1444,7 @@ function paretoSample(alpha){
   const xm=(a-1)/a;
   return Math.min(3.5,xm*Math.pow(Math.random(),-1/a));
 }
+function getMCPct(){const c=+(g('mc-pct-custom')||{value:''}).value;if(c>=1&&c<=99)return Math.round(c);return+(g('mc-pct')||{value:50}).value;}
 function pct(arr,p){
   const s=[...arr].sort((a,b)=>a-b);
   return s[Math.max(0,Math.floor(p/100*(s.length-1)))];
@@ -1482,7 +1486,7 @@ function mcCol(metric,val){
   return CM.green;
 }
 function renderMCResults(r,label){
-  const selPct=+(g('mc-pct')||{value:50}).value;
+  const selPct=getMCPct();
   const panel=g('mc-results');if(!panel)return;
   const rows=[
     {name:'Score',key:'score',unit:'/100'},
@@ -1575,7 +1579,7 @@ function runOpt(){
   // This is the §03 robust form: maximize P50[U(θ)] − k·(P95−P5) s.t. P(posLat>thr)≤1%
   function mcObj(params){
     const r=runMonteCarlo(params,100); // 100 draws per candidate — enough to rank; final check uses full UI count
-    const tgtPct=+(g('mc-pct')||{value:50}).value;
+    const tgtPct=getMCPct();
     const tgtScore=r.score[`p${tgtPct}`]||r.score.p50;
     const util=tgtScore-0.5*(r.score.p95-r.score.p5);
     const posPen=r.breachPos>1?50:0;  // hard: P(posLat > rTWT-aware threshold) ≤ 1%
@@ -1612,7 +1616,7 @@ const OPT_KNOB_LABELS={atFair:'Airtime Fairness',txPwr:'TX Power',minRSSI:'Min R
 // mcResult: the final full-MC pass run on the optimal params inside runOpt()
 function renderOptResults(best,params,mcResult){
   const panel=g('opt-results');if(!panel)return;
-  const selPct=+(g('mc-pct')||{value:50}).value;
+  const selPct=getMCPct();
   const cur=readInputs();
   const mc=mcResult||runMonteCarlo(params,200); // fallback if called without MC
   const delta=best.score-compute(cur).score;
