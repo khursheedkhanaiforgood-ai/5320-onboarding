@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulator v3 — Sprint 2 Debug &amp; Equations · June 4–5, 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Source+Code+Pro:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Libre Baskerville', Georgia, serif;
+    background: #fff;
+    color: #1a1a1a;
+    font-size: 17px;
+    line-height: 1.75;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 48px 32px 120px;
+  }
+  header { border-bottom: 3px solid #1a1a1a; padding-bottom: 20px; margin-bottom: 12px; }
+  .dateline { font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: #666; margin-bottom: 8px; }
+  h1 { font-size: 2.4rem; font-weight: 700; line-height: 1.15; margin-bottom: 10px; }
+  .deck { font-size: 1.1rem; font-style: italic; color: #444; border-left: 3px solid #1a1a1a; padding-left: 16px; margin-top: 10px; }
+  nav#toc {
+    position: sticky; top: 0; background: #fff; border-bottom: 1px solid #ddd;
+    padding: 10px 0; margin: 20px 0 40px; z-index: 100;
+    font-size: 12px; letter-spacing: 0.05em; display: flex; flex-wrap: wrap; gap: 4px 0;
+  }
+  nav#toc a { color: #1a1a1a; text-decoration: none; margin-right: 16px; text-transform: uppercase; font-weight: 700; border-bottom: 2px solid transparent; padding-bottom: 2px; transition: border-color 0.15s; }
+  nav#toc a:hover { border-color: #1a1a1a; }
+  section { margin-bottom: 56px; }
+  h2 { font-size: 1.05rem; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 700; border-top: 2px solid #1a1a1a; padding-top: 14px; margin-bottom: 20px; color: #1a1a1a; }
+  h3 { font-size: 1rem; font-weight: 700; margin: 28px 0 8px; }
+  h4 { font-size: 0.95rem; font-weight: 700; font-style: italic; margin: 18px 0 6px; color: #333; }
+  p { margin-bottom: 14px; }
+  ul, ol { margin: 10px 0 16px 24px; }
+  li { margin-bottom: 6px; }
+
+  .milestone { border: 2px solid #1a1a1a; padding: 20px 24px; margin: 24px 0; position: relative; }
+  .milestone-label {
+    position: absolute; top: -11px; left: 16px; background: #fff;
+    padding: 0 8px; font-family: 'Source Code Pro', monospace; font-size: 11px;
+    font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: #1a1a1a;
+  }
+  .milestone-green  { border-color: #1a7a3a; }
+  .milestone-green .milestone-label { color: #1a7a3a; }
+  .milestone-red    { border-color: #c0392b; }
+  .milestone-red .milestone-label { color: #c0392b; }
+  .milestone-blue   { border-color: #1a6fba; }
+  .milestone-blue .milestone-label { color: #1a6fba; }
+  .milestone-gold   { border-color: #b8860b; }
+  .milestone-gold .milestone-label { color: #b8860b; }
+  .milestone-purple { border-color: #6a0dad; }
+  .milestone-purple .milestone-label { color: #6a0dad; }
+
+  .learning-card {
+    background: #fffbf0; border: 1px solid #e8d5a3; border-left: 5px solid #c9973a;
+    padding: 16px 20px; margin: 16px 0; border-radius: 2px;
+  }
+  .learning-card .lc-number {
+    font-family: 'Source Code Pro', monospace; font-size: 11px; font-weight: 700;
+    letter-spacing: 0.1em; text-transform: uppercase; color: #c9973a; margin-bottom: 6px;
+  }
+  .learning-card h4 { margin: 0 0 8px; font-style: normal; color: #1a1a1a; }
+  .learning-card p:last-child { margin-bottom: 0; }
+
+  .decision-log {
+    background: #f8f0ff; border: 1px solid #d4b0f0; border-left: 5px solid #6a0dad;
+    padding: 16px 20px; margin: 16px 0; border-radius: 2px;
+  }
+  .decision-log .dl-number {
+    font-family: 'Source Code Pro', monospace; font-size: 11px; font-weight: 700;
+    letter-spacing: 0.1em; text-transform: uppercase; color: #6a0dad; margin-bottom: 6px;
+  }
+  .decision-log h4 { margin: 0 0 8px; font-style: normal; color: #1a1a1a; }
+  .decision-log p:last-child { margin-bottom: 0; }
+
+  .badge { display: inline-block; font-family: 'Source Code Pro', monospace; font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; padding: 2px 8px; border-radius: 3px; margin-right: 6px; vertical-align: middle; }
+  .badge-done   { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+  .badge-block  { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+  .badge-wip    { background: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
+  .badge-next   { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+  .badge-ref    { background: #e2e3e5; color: #383d41; border: 1px solid #d6d8db; }
+
+  code { font-family: 'Source Code Pro', monospace; font-size: 14px; background: #f5f5f5; padding: 1px 5px; border-radius: 3px; color: #c7254e; }
+  pre { font-family: 'Source Code Pro', monospace; font-size: 13px; background: #f8f8f8; border: 1px solid #e0e0e0; border-left: 4px solid #1a1a1a; padding: 16px 18px; overflow-x: auto; margin: 14px 0 20px; line-height: 1.55; }
+  pre.blue   { border-left-color: #1a6fba; background: #f0f7ff; }
+  pre.purple { border-left-color: #6a0dad; background: #f8f0ff; }
+  pre.gold   { border-left-color: #b8860b; background: #fffbf0; }
+  pre.green  { border-left-color: #1a7a3a; background: #f0fff4; }
+  pre.red    { border-left-color: #c0392b; background: #fff5f5; }
+
+  .callout       { background: #fffbf0; border: 1px solid #e8d5a3; border-left: 5px solid #c9973a; padding: 16px 20px; margin: 18px 0; border-radius: 2px; }
+  .callout-red   { background: #fff5f5; border: 1px solid #f5c6cb; border-left: 5px solid #c0392b; padding: 16px 20px; margin: 18px 0; border-radius: 2px; }
+  .callout-blue  { background: #f0f7ff; border: 1px solid #b8d4f0; border-left: 5px solid #1a6fba; padding: 16px 20px; margin: 18px 0; border-radius: 2px; }
+  .callout-green { background: #f0fff4; border: 1px solid #a8dfb8; border-left: 5px solid #1a7a3a; padding: 16px 20px; margin: 18px 0; border-radius: 2px; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 14px; margin: 16px 0 24px; }
+  th { background: #1a1a1a; color: #fff; padding: 10px 12px; text-align: left; font-family: 'Source Code Pro', monospace; font-size: 12px; letter-spacing: 0.05em; }
+  td { padding: 9px 12px; border-bottom: 1px solid #e0e0e0; }
+  tr:nth-child(even) td { background: #fafafa; }
+  .td-done  { color: #155724; font-weight: 700; }
+  .td-next  { color: #0c5460; }
+  .td-block { color: #721c24; }
+
+  .eq-block {
+    background: #f8f8f8; border: 1px solid #e0e0e0; border-left: 4px solid #1a6fba;
+    padding: 14px 18px; margin: 12px 0 20px; border-radius: 2px;
+    font-family: 'Source Code Pro', monospace; font-size: 13px; line-height: 1.7;
+  }
+  .eq-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: #666; margin-bottom: 6px; font-family: 'Source Code Pro', monospace; }
+  .eq-var   { color: #c7254e; }
+  .eq-const { color: #1a6fba; }
+  .eq-note  { font-size: 12px; color: #666; margin-top: 6px; font-style: italic; font-family: 'Libre Baskerville', Georgia, serif; }
+
+  .dialogue-block {
+    background: #f0f7ff; border: 1px solid #b8d4f0; border-left: 5px solid #1a6fba;
+    padding: 18px 22px; margin: 16px 0; border-radius: 2px;
+    font-size: 15px; font-style: italic; color: #1a3a5c;
+  }
+  .dialogue-block .speaker { font-style: normal; font-family: 'Source Code Pro', monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: #1a6fba; margin-bottom: 8px; }
+
+  .commit-row { font-family: 'Source Code Pro', monospace; font-size: 12px; background: #f0fff4; border: 1px solid #a8dfb8; border-radius: 3px; padding: 3px 8px; margin: 4px 0; display: inline-block; }
+  .commit-hash { color: #1a7a3a; font-weight: 600; }
+  .commit-msg  { color: #1a1a1a; }
+
+  footer { border-top: 2px solid #1a1a1a; margin-top: 80px; padding-top: 20px; font-size: 13px; color: #666; }
+  .footer-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 32px; }
+  .footer-grid a { color: #1a6fba; text-decoration: none; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="dateline">FIFA WC 2026 Stadium WiFi Simulator · Sprint 2 · June 4–5, 2026</div>
+  <h1>Six Bugs Fixed, One Threat Engine Built, Every Equation Documented</h1>
+  <div class="deck">A complete reference for how the v3 simulator calculates demand, PHY rate, airtime, latency, packet loss, score, and SLA — plus the full Sprint 2 debug log that got us here.</div>
+</header>
+
+<nav id="toc">
+  <a href="#accomplished">Accomplished</a>
+  <a href="#equations">Equations</a>
+  <a href="#bugs">Bug Fixes</a>
+  <a href="#threat">Threat Engine</a>
+  <a href="#sprint2">Sprint 2 Tracker</a>
+  <a href="#dialogue">Dialogue Log</a>
+  <a href="#next">Next Steps</a>
+</nav>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<section id="accomplished">
+<h2>What We Accomplished</h2>
+
+<div class="milestone milestone-green">
+  <div class="milestone-label">Session Win</div>
+  <p><strong>Six Sprint 2 bugs closed in one session.</strong> The optimizer no longer resets cyber and degradation scenarios. Full Config modal is now crash-proof. The MC percentile is user-tunable. The SLA panel scrolls. And a new Threat Response Panel maps each active threat directly to the parameters that mitigate it — with one-click Apply Fix buttons.</p>
+</div>
+
+<table>
+  <tr><th>Item</th><th>Commit</th><th>Status</th></tr>
+  <tr><td>applyOptResult() — optimizer preserves cyber + deg scenario</td><td><span class="commit-row"><span class="commit-hash">906c0d5</span></span></td><td class="td-done">✓ Done</td></tr>
+  <tr><td>Full Config TDZ crash (const OPT accessed before declaration)</td><td><span class="commit-row"><span class="commit-hash">9159032</span></span></td><td class="td-done">✓ Done</td></tr>
+  <tr><td>MC custom percentile input — getMCPct() helper</td><td><span class="commit-row"><span class="commit-hash">9159032</span></span></td><td class="td-done">✓ Done</td></tr>
+  <tr><td>Full Config padEnd crash — String() wrap on numeric fmt values</td><td><span class="commit-row"><span class="commit-hash">9f935ff</span></span></td><td class="td-done">✓ Done</td></tr>
+  <tr><td>SLA panel scroll — fixed height 80px forces overflow</td><td><span class="commit-row"><span class="commit-hash">4070855</span></span></td><td class="td-done">✓ Done</td></tr>
+  <tr><td>Threat Response Panel — THREAT_RESP + DEG_RESP engine</td><td><span class="commit-row"><span class="commit-hash">f88bd6b</span></span></td><td class="td-done">✓ Done</td></tr>
+</table>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<section id="equations">
+<h2>Simulator Equations — Complete Reference</h2>
+
+<p>Everything the simulator displays traces back to one call chain: <code>compute()</code> → <code>band()</code> → <code>phyR()</code>. Below is the full derivation from user inputs to output numbers.</p>
+
+<!-- ─── 1. DEMAND MODEL ─── -->
+<h3>1 · Demand Mix Model</h3>
+<p>Five app types contribute demand per active session. The mix weights (Video / Teams / Social / Browse / POS) are set by the user's sliders and normalized to 1.</p>
+
+<div class="eq-block">
+  <div class="eq-label">Per-session demand rates (Mbps)</div>
+  Video DL = 15.0   Video UL = 0.5<br>
+  Teams DL =  3.0   Teams UL = 3.0<br>
+  Social DL =  1.0   Social UL = 4.0<br>
+  Browse DL =  2.0   Browse UL = 0.1<br>
+  POS    DL =  0.1   POS    UL = 0.1
+</div>
+
+<div class="eq-block">
+  <div class="eq-label">Mix-weighted demand per session (Mbps)</div>
+  tw  = vidW + teaW + socW + broW + posW<br>
+  mix.vid = vidW / tw  <span style="color:#666">/* fraction of demand from video */</span><br><br>
+  <span class="eq-var">demDL</span> = mix.vid×15 + mix.tea×3 + mix.soc×1 + mix.bro×2 + mix.pos×0.1<br>
+  <span class="eq-var">demUL</span> = mix.vid×0.5 + mix.tea×3 + mix.soc×4 + mix.bro×0.1 + mix.pos×0.1<br>
+  <span class="eq-var">demTot</span> = demDL + demUL<br>
+  <div class="eq-note">demTot is the per-active-session aggregate demand used in every band's capacity equation.</div>
+</div>
+
+<!-- ─── 2. SESSION COUNTS ─── -->
+<h3>2 · Session and Client Counts</h3>
+
+<div class="eq-block">
+  <div class="eq-label">Stadium population → active clients per AP</div>
+  totalSess  = round( fans × devMult × wifiAtt )<br>
+  active     = round( totalSess × concur )<br>
+  perAP      = round( active / apCount )<br><br>
+  bsSplit    = BS_SPLITS[apType][bsMode]  <span style="color:#666">/* {g2, g5, g6} fractions */</span><br>
+  cli2g      = min( round(perAP × split2g), effMaxCli )<br>
+  cli5g      = min( round(perAP × split5g), effMaxCli )<br>
+  cli6g      = min( round(perAP × split6g × g6boost), effMaxCli )
+  <div class="eq-note">effMaxCli = floor(maxCli × ageoutF) where ageoutF accounts for stale client table entries. g6boost = 1.10 when Enhanced RNR is ON.</div>
+</div>
+
+<div class="callout-blue">
+  <strong>Example — 100/100 screenshot:</strong> 72,000 fans × 1.4 devices × 0.75 WiFi attach × 0.55 concurrency ÷ 280 APs = ~166 clients/AP on 5G. Stadium total demand = 55,440 active × ~5.2 Mbps/session = 287.1 Gbps.
+</div>
+
+<!-- ─── 3. SNR CHAIN ─── -->
+<h3>3 · RF Link — RSSI, Noise, SNR</h3>
+
+<div class="eq-block">
+  <div class="eq-label">Signal and noise floor</div>
+  baseRSSI  = −62 + (txPwr − 17) × 0.5   <span style="color:#666">/* dBm; nominal at txPwr=17 dBm */</span><br>
+  degNoise  = [0, 5, 10, 20, 35][degLevel] <span style="color:#666">/* dB added by degradation scenario */</span><br>
+  noiseDBm  = −95 + noiseFl + degNoise<br>
+  rxSopBoost = {−85:0, −75:+3, −65:+6}[rxSop]<br><br>
+  <span class="eq-var">baseSNR</span> = baseRSSI − noiseDBm + rxSopBoost<br><br>
+  Per-band SNR modifier:<br>
+  snrMod  = { 2.4GHz: −3,  5GHz: 0,  6GHz: +4 }<br>
+  DCS Lock bonus: +2 dB when dcsLock = ON<br>
+  Degradation SNR penalty (5GHz): [0, 0, −5, −12, −20][degLevel]
+</div>
+
+<!-- ─── 4. PHY RATE ─── -->
+<h3>4 · PHY Rate — phyR()</h3>
+
+<div class="eq-block">
+  <div class="eq-label">MCS lookup → PHY rate</div>
+  SNR thresholds (WiFi 7 BE / WiFi 6 HE) per MCS:<br>
+  BE: MCS13=3, 12=6, 11=9, 10=12, 9=15, 8=18, 7=22, 6=26, 5=30, 4=34, 3=38, 2=42, 1=46, 0=50 dB<br>
+  HE: MCS11=9, 10=11, 9=14, 8=17, 7=20, 6=24, 5=28, 4=32, 3=36, 2=40, 1=44, 0=44 dB<br><br>
+  mcs = highest MCS where SNR ≥ threshold, subject to mcsFloor<br>
+  MCS12/13 also gated by qam4k toggle (4K-QAM must be ON)<br><br>
+  PHY1SS[bw][mcs] — 1-spatial-stream rate table (Mbps) for bw ∈ {20,40,80,160,320} MHz<br>
+  GI_EFF = { 800ns: ×1.05, 1600ns: ×1.00, 3200ns: ×0.93 }<br><br>
+  <span class="eq-var">phyR</span> = PHY1SS[bw][mcs] × ss × GI_EFF[gi]
+  <div class="eq-note">For AP5060 (4SS), 160MHz, MCS11, GI 1600ns: PHY1SS[160][11] = 1201 Mbps × 4SS × 1.0 = 4804 Mbps raw PHY rate.</div>
+</div>
+
+<!-- ─── 5. CAPACITY MULTIPLIER ─── -->
+<h3>5 · Capacity Multiplier — capMult()</h3>
+<p>capMult() aggregates the efficiency gains from every overhead-reduction feature. It applies to <em>channel utilization</em>, not PHY rate — the gain is in reducing wasted airtime (collision overhead, retransmissions, management frames, multicast floods).</p>
+
+<div class="eq-block">
+  <div class="eq-label">Multiplicative gain from feature set (capped at 2.0×)</div>
+  OFDMA DL:        ON → ×1.35<br>
+  BSS Coloring:    ON → ×1.15<br>
+  Min Basic Rate:  6M → ×1.00 | 12M → ×1.10 | 24M → ×1.18<br>
+  Broadcast Filter:ON → ×1.15<br>
+  MC→UC:           ON → ×1.10 (±0.02 for threshold/MBR tuning)<br>
+  Proxy ARP:       ON → ×1.07<br>
+  Client Isolation:ON → ×1.02<br>
+  Airtime Fairness:OFF→ ×1.00 | Adaptive → ×1.22 | Strict → ×1.38<br>
+  Multi-RU:        ON → ×1.08<br>
+  MU-MIMO streams: 1SS→×1.00 | 2SS→×1.10 | 4SS→×1.15 | 8SS→×1.20<br>
+  TXOP AC_BE:      ≥3008µs→×1.05 | ≥1504µs→×1.03<br>
+  MLO Steering:    AI → ×1.04<br>
+  Ignore BC Probe: ON → ×1.08<br>
+  WMM AC VO:       ON → ×1.02<br>
+  Fragment Threshold: 256B→×0.80 | 1500B→×0.97 | 2346B→×1.00<br>
+  RTS/CTS:         1500B→×1.04 | 2347B→×1.02 | OFF→×1.00<br><br>
+  <span class="eq-var">capMult</span> = min( product of all above, 2.0 )
+  <div class="eq-note">The 2.0× ceiling is a physical constraint: MAC optimizations cannot more than double efficiency at the same PHY rate. At golden-set settings, capMult ≈ 1.88 (just below ceiling).</div>
+</div>
+
+<!-- ─── 6. EFFECTIVE CAPACITY ─── -->
+<h3>6 · Effective Capacity</h3>
+
+<div class="eq-block">
+  <div class="eq-label">Channel capacity after MAC overhead</div>
+  MAC_EFF = 0.45  <span style="color:#666">/* 55% of channel time lost to DIFS+SIFS+ACK+preamble+backoff */</span><br><br>
+  <span class="eq-var">effCap</span> = phyR(ss, bw, mcs, gi) × 0.45 × capMult
+  <div class="eq-note">MAC_EFF = 0.45 is a conservative baseline for dense 802.11ax/be at typical frame sizes (1500B PDUs). capMult then recovers a portion of that overhead through OFDMA, BSS Coloring, airtime fairness, etc.</div>
+</div>
+
+<!-- ─── 7. AIRTIME UTILIZATION ─── -->
+<h3>7 · Airtime Utilization</h3>
+
+<div class="eq-block">
+  <div class="eq-label">Normalized channel load</div>
+  demand = clients × demTot   <span style="color:#666">/* total Mbps demanded from this band */</span><br>
+  <span class="eq-var">u</span>  = min(0.98, demand / effCap)   <span style="color:#666">/* utilization 0..0.98 */</span><br>
+  <span class="eq-var">air</span> = min(150, round(u × 100))    <span style="color:#666">/* displayed as % */</span>
+  <div class="eq-note">u is capped at 0.98 (never reaches 1.0 — the M/D/1 queueing model diverges at u=1). air can exceed 100% as a warning indicator at overload.</div>
+</div>
+
+<!-- ─── 8. LATENCY ─── -->
+<h3>8 · Latency — M/D/1 Queueing Approximation</h3>
+
+<div class="eq-block">
+  <div class="eq-label">Aggregate 802.11 latency (ms)</div>
+  qd  = u &lt; 0.05  ?  0.5  :  6u / (1−u)  <span style="color:#666">/* M/D/1 queue delay */</span><br>
+  lat = 8 + qd                             <span style="color:#666">/* 8ms = fixed MAC + PHY overhead */</span><br><br>
+  Adjustments (additive, ms):<br>
+  + k/v OFF:             +10 ms<br>
+  + 802.11r OFF + deg≥1: +8 ms<br>
+  + TXOP VO active:      −4 ms<br>
+  + DTIM interval:       +(dtim − 1) × 8 ms<br>
+  + CWmin=7 + u>0.7:     +3 ms<br>
+  + U-APSD OFF:          +2 ms<br>
+  + WMM AC VO OFF:       +2 ms<br>
+  + WMM AC VI OFF:       +1 ms<br>
+  + clientAgeout ≥30min: +3 ms  | ≥10min: +1 ms<br>
+  + Short PMK ageout + deg≥1: +5 ms<br>
+  + Stale PMK cache + deg≥1:  +3 ms<br>
+  + MAC-DoS OFF + cred storm: +3 ms<br>
+  + IP-DoS OFF + ARP attack:  +3 ms<br><br>
+  lat = max(2, round(lat))
+  <div class="eq-note">At u=0.36 (golden-set 100/100 state): qd = 6×0.36/(1−0.36) = 3.4ms, lat = 8+3.4 = 11ms before subtracting TXOP VO = 4ms → ~7ms aggregate. POS sees 0.12× of this via rTWT.</div>
+</div>
+
+<!-- ─── 9. POS LATENCY ─── -->
+<h3>9 · POS Latency — rTWT Hardware Scheduling</h3>
+
+<div class="eq-block">
+  <div class="eq-label">Restricted Target Wake Time latency guarantee</div>
+  <span style="color:#888">/* rTWT ON + AP has MLO (AP5060) */</span><br>
+  posLat = max(1,  min( b5.lat × 0.12,  3 ))  <span style="color:#666">/* 8× reduction, capped at 3ms */</span><br><br>
+  <span style="color:#888">/* rTWT OFF */</span><br>
+  posLat = b5.lat   <span style="color:#666">/* POS shares same queue as all traffic */</span><br><br>
+  <span style="color:#888">/* rTWT OFF + TXOP_BE = 3008µs */</span><br>
+  posLat += 1  <span style="color:#666">/* AC_BE TXOP can briefly block AC_VO */</span>
+  <div class="eq-note">The 0.12× factor models the rTWT service period: POS terminals are pre-scheduled into a dedicated 1.2% of airtime window. At b5.lat=12ms → posLat = max(1, min(1.44, 3)) = 1.4ms. At golden set: posLat ≈ 1.6ms.</div>
+</div>
+
+<!-- ─── 10. PACKET LOSS ─── -->
+<h3>10 · Packet Loss Model</h3>
+
+<div class="eq-block">
+  <div class="eq-label">Combined airtime saturation + SNR loss</div>
+  airLoss = max(0,  (min(150, round(u×100)) − 85) × 0.5 )<br>
+  snrLoss = mcs &lt; 0 ? 50 : mcs &lt; 2 ? 3 : 0<br><br>
+  <span class="eq-var">ploss</span> = airLoss + snrLoss   <span style="color:#666">/* displayed as % */</span>
+  <div class="eq-note">airLoss only activates above 85% airtime. At 36% airtime: airLoss = 0. At 90% airtime: airLoss = (90−85)×0.5 = 2.5%. snrLoss fires when MCS drops below 2 (link budget failure).</div>
+</div>
+
+<!-- ─── 11. GOODPUT PER CLIENT ─── -->
+<h3>11 · Goodput per Client</h3>
+
+<div class="eq-block">
+  <div class="eq-label">Available throughput per associated client (Mbps)</div>
+  <span class="eq-var">gp</span> = max(0,  effCap × (1−u) / clients )
+  <div class="eq-note">This is the C3 fix from Sprint 1: gp now uses effCap in both numerator and denominator (consistent with u = demand/effCap). Using raw phyR in the numerator would over-estimate available throughput by 2× at golden-set settings.</div>
+</div>
+
+<!-- ─── 12. MLO ─── -->
+<h3>12 · MLO Combined Throughput (AP5060 only)</h3>
+
+<div class="eq-block">
+  <div class="eq-label">Multi-Link Operation — simultaneous 5GHz + 6GHz</div>
+  MLO_GAIN = { STR: 1.90,  Enhanced: 1.55,  NSTR: 1.20 }<br>
+  triLink  = (mloLinks===3 &amp;&amp; b2 active) ? 1.12 : 1.0  <span style="color:#666">/* 3rd link +12% */</span><br><br>
+  <span class="eq-var">mlo.tput</span> = round( (b5.gp + b6.gp) × MLO_GAIN[mode] × 0.85 × triLink )<br>
+  mlo.lat  = min(b5.lat, b6.lat)<br>
+  mlo.gain = mlo.tput / max(b5.gp, b6.gp)
+  <div class="eq-note">The 0.85 factor is an overhead reservation: STR requires coordination frames between links, consuming ~15% of combined capacity. At golden set (STR, 2-link): mlo.tput ≈ 234 Mbps displayed in the MLO card.</div>
+</div>
+
+<!-- ─── 13. STADIUM TOTALS ─── -->
+<h3>13 · Stadium-Wide Capacity and Demand</h3>
+
+<div class="eq-block">
+  <div class="eq-label">Aggregate across all APs</div>
+  capGbps = ( sum of band.effCap for each active band ) / 1000 × apCount<br>
+  demGbps = active × demTot / 1000
+</div>
+
+<!-- ─── 14. SCORE ─── -->
+<h3>14 · QoE Score (0–100)</h3>
+
+<div class="eq-block">
+  <div class="eq-label">Composite quality score with deduction rules</div>
+  score = 100<br><br>
+  SNR deduction:    SNR &lt; 25 dB  → −min(20, (25−SNR) × 1.2)<br>
+  Airtime deduction: air &gt; 70%   → −min(25, (air−70) × 1.0)<br>
+  Latency deduction: lat &gt; 20ms  → −min(20, (lat−20) × 0.4)<br>
+  Loss deduction:   ploss &gt; 0.1% → −min(20, ploss × 10)<br>
+  Degradation:      deg &gt; 0      → −deg × 12<br>
+  Cyber active:                   → −8<br>
+  PMF OFF + deauth:               → −10 (additive on top of −8)<br><br>
+  <span class="eq-var">score</span> = max(0, round(score))<br><br>
+  STABLE badge:<br>
+  score ≥ 80 → STABLE (green)<br>
+  score ≥ 60 → WARNING (yellow)<br>
+  score &lt; 60 → CRITICAL (red)
+  <div class="eq-note">At golden-set, 100/100 screenshot: SNR ~38 dB (no deduction), air = 36% (no deduction), lat = 7ms (no deduction), ploss = 0% (no deduction), deg = 0, cyber = none → score = 100.</div>
+</div>
+
+<!-- ─── 15. SLA PASS/FAIL ─── -->
+<h3>15 · SLA Pass / Fail Criteria</h3>
+
+<div class="eq-block">
+  <div class="eq-label">Service class thresholds</div>
+  POS   PASS : posLat ≤ 10ms  AND  ploss &lt; 0.3%<br>
+  VIP   PASS : bestTP ≥ 25 Mbps<br>
+  Teams PASS : bestTP ≥ 5 Mbps<br>
+  Guest PASS : score ≥ 50
+  <div class="eq-note">bestTP = mlo.tput when MLO is active; otherwise gp of the best available band (6G > 5G > 2.4G).</div>
+</div>
+
+<!-- ─── 16. CYBER EFFECTS ─── -->
+<h3>16 · Cyber Attack Effects on 5GHz Band</h3>
+
+<div class="eq-block">
+  <div class="eq-label">Airtime and latency penalties by threat type</div>
+  deauth:     air += PMF ON ? 1 : 15   |  lat += PMF ON ? 0 : 8<br>
+  evil_twin:  air += AirDef ON ? 0 : 5  |  lat += AirDef ON ? 0 : 3<br>
+  cred_storm: air += 0                  |  lat += 6<br>
+  ARP poison: air += ProxyARP ON ? 0 : 6 | lat += ProxyARP ON ? 0 : 4
+</div>
+
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<section id="bugs">
+<h2>Bug Fix Log — Sprint 2 Debug Trail</h2>
+
+<div class="learning-card">
+  <div class="lc-number">Bug Fix 1 · Commit 906c0d5</div>
+  <h4>Optimizer was resetting cyber / degradation to zero</h4>
+  <p><strong>Symptom:</strong> "When I apply the optimized knobs why does my cyber attack and other degradations go down to zero?"</p>
+  <p><strong>Root cause:</strong> <code>applyOptResult()</code> called <code>applyOptimal()</code> which hard-sets <code>deg-lvl = 0</code> and <code>cyber = none</code>. The optimizer was supposed to only touch the 12 search-space knobs.</p>
+  <p><strong>Fix:</strong> Removed the <code>applyOptimal()</code> call from <code>applyOptResult()</code>. The function now only iterates over the 12 knob→elementId mapping and calls <code>update()</code>. Cyber and degradation are preserved.</p>
+  <p><strong>Why it matters:</strong> The whole point of "Apply Optimized Knobs" is to tune the radio parameters <em>within</em> a degraded or threatened scenario, not to pretend the scenario doesn't exist.</p>
+</div>
+
+<div class="learning-card">
+  <div class="lc-number">Bug Fix 2 · Commit 9159032</div>
+  <h4>Full Config modal silently did nothing — TDZ crash</h4>
+  <p><strong>Symptom:</strong> Clicking Full Config button produced no visible modal. No error in UI.</p>
+  <p><strong>Root cause:</strong> JavaScript Temporal Dead Zone (TDZ). <code>const OPT = {...}</code> was declared at line 1260 inside <code>showCfg()</code> but referenced at line 1233 inside an <code>Object.entries(OPT_SEARCH).forEach()</code> loop. In JavaScript, <code>const</code> is hoisted but not initialized — accessing it before its declaration line throws <code>ReferenceError: Cannot access 'OPT' before initialization</code>, even inside a <code>typeof</code> check. Because there was no try/catch, the modal never rendered.</p>
+  <p><strong>Fix:</strong> Moved <code>const OPT</code> to the top of <code>showCfg()</code>, before all references. Added a try/catch wrapper around the entire function body so future errors surface in the log bar instead of failing silently.</p>
+</div>
+
+<div class="learning-card">
+  <div class="lc-number">Bug Fix 3 · Commit 9159032</div>
+  <h4>MC percentile hardcoded — user wanted free input</h4>
+  <p><strong>Symptom:</strong> "In MonteCarlo, why is it hard coded to P50/P75 or P99, can you not take the user-input here?"</p>
+  <p><strong>Fix:</strong> Added a number input <code>id="mc-pct-custom"</code> alongside the dropdown. The <code>getMCPct()</code> helper reads the custom field first; if it holds a valid integer 1–99, it overrides the dropdown. If empty or out of range, the dropdown value is used.</p>
+  <p><strong>Self-referential bug during fix:</strong> A <code>replace_all</code> on the pattern <code>+(g('mc-pct')||{value:50}).value</code> accidentally replaced the pattern inside the helper's own body, creating infinite recursion. Resolved by rewriting the function without the problematic pattern.</p>
+</div>
+
+<div class="learning-card">
+  <div class="lc-number">Bug Fix 4 · Commit 9f935ff</div>
+  <h4>Full Config crash — curFmt.padEnd is not a function</h4>
+  <p><strong>Symptom:</strong> Log bar showed: <em>Full Config error: curFmt.padEnd is not a function. (In 'curFmt.padEnd(18)', 'curFmt.padEnd' is undefined)</em></p>
+  <p><strong>Root cause:</strong> In the SECTIONS forEach loop, some parameters use <code>fmt: v =&gt; v</code> (identity function). When <code>v</code> is a number (e.g., <code>dtim = 2</code>), the returned <code>curFmt</code> is a JavaScript number — and numbers have no <code>.padEnd()</code> method.</p>
+  <p><strong>Fix:</strong> Wrapped with <code>String(curFmt).padEnd(18)</code> and <code>String(optFmt)</code> throughout the comparison row builder. Numbers are now coerced to strings before any string method call.</p>
+</div>
+
+<div class="learning-card">
+  <div class="lc-number">Bug Fix 5 · Commit 4070855</div>
+  <h4>SLA panel would not scroll — 4 failed attempts</h4>
+  <p><strong>Symptom:</strong> The panel below the SLA inputs was not scrollable. Four prior fixes failed.</p>
+  <p><strong>Root cause (discovered on 5th attempt):</strong> <code>resize: vertical</code> requires a <em>fixed</em> <code>height</code> to work. All prior attempts used <code>min-height</code>, <code>max-height</code>, or <code>height</code> values that happened to be large enough to contain the ~125px content. The key insight: content must actually overflow the container for a scroll handle to appear. The container's parent <code>.panel</code> is a <strong>block</strong> container (not flex), so <code>resize: vertical</code> is respected — previous failures were purely a height arithmetic issue.</p>
+  <p><strong>Fix:</strong> <code>height: 80px; overflow-y: scroll; resize: vertical; min-height: 60px; box-sizing: border-box</code>. At 80px, the ~125px content overflows by 45px. <code>overflow-y: scroll</code> (not <code>auto</code>) always shows the scrollbar handle. The browser drag handle is on the bottom-right corner.</p>
+</div>
+
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<section id="threat">
+<h2>Threat Response Panel — New Feature</h2>
+
+<div class="milestone milestone-blue">
+  <div class="milestone-label">New Feature · Commit f88bd6b</div>
+  <p><strong>User question that created this:</strong> "What will the system recommend for configuration due to a cyber degradation? I need the user to know what needs to be done, if not in the knobs then where?"</p>
+  <p>The panel appears in the right column when any cyber attack or degradation level is active. It maps the threat directly to the exact parameters that mitigate it — with section location, expected impact, physical rationale, and a one-click Apply Fix button that sets the parameter, scrolls it into view, and highlights it in green.</p>
+</div>
+
+<h3>Threat → Response Mapping</h3>
+
+<table>
+  <tr><th>Threat / Degradation</th><th>Severity</th><th>Required Parameter</th><th>Expected Impact</th></tr>
+  <tr><td>Deauth Flood (L2)</td><td>HIGH</td><td>PMF (802.11w) → ON</td><td>−15% airtime · −8ms latency · flood absorbed</td></tr>
+  <tr><td>Deauth Flood (L2)</td><td>HIGH</td><td>AirDefense WIPS → ON</td><td>Flood source identified · ops alerted &lt;30s</td></tr>
+  <tr><td>Evil Twin / Rogue AP</td><td>HIGH</td><td>AirDefense WIPS → ON</td><td>−5% airtime · −3ms latency · rogue contained</td></tr>
+  <tr><td>Evil Twin / Rogue AP</td><td>HIGH</td><td>PMF (802.11w) → ON</td><td>Clients cannot be lured off by rogue deauths</td></tr>
+  <tr><td>Credential Storm (RADIUS)</td><td>MEDIUM</td><td>MAC-Based DoS Prevention → ON</td><td>Auth attempts rate-limited · RADIUS protected</td></tr>
+  <tr><td>Credential Storm (RADIUS)</td><td>MEDIUM</td><td>IP-Based DoS Prevention → ON</td><td>IP-layer amplification blocked at AP</td></tr>
+  <tr><td>ARP Poisoning</td><td>MEDIUM</td><td>Proxy ARP → ON</td><td>−6% airtime · −4ms latency · poisoned ARP dropped</td></tr>
+  <tr><td>Level 1 — 5G CCI</td><td>MEDIUM</td><td>BSS Coloring → ON</td><td>~−8% airtime from CCI eliminated via spatial reuse</td></tr>
+  <tr><td>Level 1 — 5G CCI</td><td>MEDIUM</td><td>RX-SOP → −75 dBm</td><td>AP ignores CCI below −75 dBm · +15% effective cap</td></tr>
+  <tr><td>Level 2 — Dual Degrade</td><td>HIGH</td><td>5G BW → 80 MHz</td><td>160MHz doubles noise floor — 80MHz adds ~3dB SNR margin</td></tr>
+  <tr><td>Level 2 — Dual Degrade</td><td>HIGH</td><td>rTWT → ON</td><td>POS service period fires on schedule despite degradation</td></tr>
+  <tr><td>Level 3 — Jammer + Auth</td><td>CRITICAL</td><td>AirDefense + MAC-DoS + rTWT + MCS Floor 6</td><td>Jammer located · storm limited · POS protected</td></tr>
+  <tr><td>Level 4 — Critical Failure</td><td>CRITICAL</td><td>AirDefense + DCS Lock + Max Clients → 50</td><td>Identify root cause · freeze channel plan · load shed</td></tr>
+</table>
+
+<div class="decision-log">
+  <div class="dl-number">Design Decision</div>
+  <h4>Why rule-based, not optimizer-driven</h4>
+  <p>Cyber threats and physical jammers require <em>deterministic</em> countermeasures, not a gradient search. PMF must be ON to stop deauths — there is no "maybe PMF" tradeoff to optimize. The rule engine makes the causal chain explicit: parameter → mechanism → effect. This also teaches the user the WiFi security reasoning, not just the correct knob value.</p>
+  <p>Future Sprint 3+: integrate threat context as a constraint into the optimizer so that the 12-knob search space adapts to the active threat archetype.</p>
+</div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<section id="sprint2">
+<h2>Sprint 2 Tracker — 9 of 18 Complete</h2>
+
+<table>
+  <tr><th>Pass</th><th>#</th><th>Item</th><th>Status</th></tr>
+  <tr><td>P1</td><td>1</td><td>Full Config z-index 1000 → 5000</td><td class="td-done">✓ Done</td></tr>
+  <tr><td>P1</td><td>2</td><td>SLA fonts .sn/.ss2/.sd → 11px</td><td class="td-done">✓ Done</td></tr>
+  <tr><td>P1</td><td>3</td><td>Below-SLA panel scrollable</td><td class="td-done">✓ Done</td></tr>
+  <tr><td>P1</td><td>4</td><td>MC description text (model uncertainty)</td><td class="td-done">✓ Done</td></tr>
+  <tr><td>P1</td><td>5</td><td>Pareto α + σ% knob descriptions</td><td class="td-done">✓ Done</td></tr>
+  <tr><td>P1</td><td>6</td><td>"Apply Optimized Knobs" relabel + subtitle</td><td class="td-done">✓ Done</td></tr>
+  <tr><td>P1</td><td>7</td><td>"Check Robustness (P95 vs SLA)" relabel</td><td class="td-done">✓ Done</td></tr>
+  <tr><td>P1</td><td>8</td><td>★ Apply Golden Set + ▼ Load Worst Case relabels</td><td class="td-done">✓ Done</td></tr>
+  <tr><td>P1</td><td>9</td><td>STABLE badge 3-tier ≥80 / 60 / &lt;60</td><td class="td-done">✓ Done</td></tr>
+  <tr><td>P2</td><td>10</td><td>SLA_THRESHOLDS central object (6 call sites)</td><td class="td-next">Next</td></tr>
+  <tr><td>P2</td><td>11</td><td>MC custom percentile (store raw arrays)</td><td class="td-done">✓ Done (this session)</td></tr>
+  <tr><td>P2</td><td>12</td><td>Optimizer Target %ile separate input</td><td class="td-next">Next</td></tr>
+  <tr><td>P2</td><td>13</td><td>DL/UL airtime display (shared channel, display split)</td><td class="td-next">Next</td></tr>
+  <tr><td>P3</td><td>14</td><td>ARCHETYPES JS constant (5 physics-grounded)</td><td class="td-next">Next</td></tr>
+  <tr><td>P3</td><td>15</td><td>Archetype selector UI (5 buttons + dominant concern tag)</td><td class="td-next">Next</td></tr>
+  <tr><td>P3</td><td>16</td><td>Regime Confirmation Panel modal (7 params, Confirm btn)</td><td class="td-next">Next</td></tr>
+  <tr><td>P3</td><td>17</td><td>Optimizer reconciliation with archetype frozenParams</td><td class="td-next">Next</td></tr>
+  <tr><td>P4</td><td>18</td><td>SLA card drill-down (contribution heatmap + Apply fix btns)</td><td class="td-next">Next</td></tr>
+</table>
+
+<p>Plus 12 gap items (G1–G12) from the 4-PDF review documented in the Sprint 2 tab of <code>simulator_v2_addendum.html</code>, not yet coded.</p>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<section id="dialogue">
+<h2>Verbatim Dialogue Log</h2>
+<p style="font-size:14px;color:#666;font-style:italic">Preserved per CLAUDE.md EOD convention. These are the exact user messages that drove this session's decisions.</p>
+
+<div class="dialogue-block">
+  <div class="speaker">User — on optimizer behavior</div>
+  "When I apply the optimized knobs why does my cyber attack and other degradations go down to zero? The system cannot thwart those degradations and should not assume they are 'fixed' with selecting the 'apply optimized knobs'"
+</div>
+
+<div class="dialogue-block">
+  <div class="speaker">User — on Full Config and SLA</div>
+  "Nothing happens when I press full-config. The bottom screen below SLA does not move up/down... Tell me what's in the 1-9 bug fixes? What's going on?"
+</div>
+
+<div class="dialogue-block">
+  <div class="speaker">User — on Monte Carlo</div>
+  "For MonteCarlo, where is the user-selectable option?"
+</div>
+
+<div class="dialogue-block">
+  <div class="speaker">User — on Full Config error (screenshot provided)</div>
+  "Full Config error: curFmt.padEnd is not a function. (In 'curFmt.padEnd(18)', 'curFmt.padEnd' is undefined)"
+</div>
+
+<div class="dialogue-block">
+  <div class="speaker">User — on threat response</div>
+  "Question, what will the system recommend for configuration due to a cyber degradation? Yes let's do that for next phase. I need the user to know what needs to be done, if not in the knobs then where?"
+</div>
+
+<div class="dialogue-block">
+  <div class="speaker">User — on score and equations (100/100 screenshot provided)</div>
+  "How did we calculate the score, POS latency, airtime and Tput? Plus the demand on this... ALSO... STILL THE SLA PANEL IS NOT RESIZABLE?"
+</div>
+
+<div class="dialogue-block">
+  <div class="speaker">User — current request</div>
+  "I am back. I need you to document all the equations behind the outputs. Can you update today's EOD HTML."
+</div>
+
+<div class="dialogue-block">
+  <div class="speaker">User — earlier sprint 2 planning (from memory, June 4)</div>
+  "We need to evaluate the 'naming of the archetypes from the Claude deliberations yesterday. Pls review. We need to give the option to set the SLA parameters for each archetype to the user in a bounded range or give them a 'standard option to begin with'. We need to also give the user the option to select number of APs. The question I have now is, how do we 'simulate the concurrency of the number of AP's on the downlink? Or uplink? After this iteration, pls work with me to fix the issues we identified above. HOLD ALL THIS DIALOGUE IN MEMORY verbatim so we can link-list at EOD for the way we debugged and upgraded. My question is, bigger... on the ns3 integration, how can we 'run this simulation against time' and 'see the performance of the system' as a function of it, where the 'user can define the load changes a priori' or as we progress..."
+</div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<section id="next">
+<h2>Next Steps</h2>
+
+<h3>Sprint 2 Pass 2 — next session</h3>
+<ul>
+  <li><strong>Item 10 — SLA_THRESHOLDS central object:</strong> refactor all 6 call sites (<code>compute()</code>, <code>slaC()</code>, <code>runMC()</code>, <code>findBreak()</code>, <code>renderGap()</code>, SLA bar render) to use a single <code>SLA_THRESHOLDS</code> object. This is the foundation for archetype-specific SLA targets.</li>
+  <li><strong>Item 12 — Optimizer Target %ile:</strong> add a separate input alongside the optimizer rounds so the user can set which percentile the optimizer targets (currently shares the MC dropdown).</li>
+  <li><strong>Item 13 — DL/UL split display:</strong> <code>airDL = air × dlFraction</code>, <code>airUL = air × (1−dlFraction)</code>. Display separately in the aggregate panel. Single <code>u</code> still drives latency (shared channel, no double-counting).</li>
+</ul>
+
+<h3>Sprint 2 Pass 3 — ARCHETYPES and Regime Panel</h3>
+<ul>
+  <li><strong>Items 14–16:</strong> Define the 5 physics-grounded archetypes (Dense Public Venue, High-Density Enclosed, Sparse High-Throughput, Mixed Retail/Hospitality, Latency-Critical Low-Density) as a JS constant with frozenParams, searchParams, SLA targets, and regime parameter ranges.</li>
+  <li>Regime Confirmation Panel modal: user sets τRMS, N, K-factor, angular spread, σ within archetype bounds, then clicks "Confirm — Apply to Physics Model." This is PDF §02 "user estimates the bucket."</li>
+</ul>
+
+<h3>Sprint 2 Pass 4 — SLA Drill-Down</h3>
+<ul>
+  <li><strong>Item 18:</strong> Clicking a POS/VIP/Teams/Guest service card opens a modal showing which parameters are contributing to the failure, ranked by impact, with Apply Fix buttons. This is the in-simulator version of the Gap Analysis drill-down.</li>
+</ul>
+
+<h3>Phase 3 — Time-Series (Track B)</h3>
+<p>User's longer arc: "how can we run this simulation against time — see the performance of the system as a function of it, where the user can define the load changes a priori." Approach: define a load profile (time → concurrency %), feed each tick into <code>compute()</code>, collect time-series of score / airtime / latency / SLA, render as a chart. ns-3 integration for multi-AP spatial concurrency is a further step requiring <code>Simulator::Schedule()</code> and <code>FlowMonitor</code>.</p>
+
+<div class="callout-blue">
+  <strong>Say "start Sprint 2 Pass 2"</strong> to begin Items 10, 12, 13 in the next session. The ARCHETYPES schema is already designed and saved to memory (<code>project_simulator_sprint2_plan.md</code>) — ready to code.
+</div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<footer>
+  <div class="footer-grid">
+    <div>
+      <strong>Simulator v3 (live)</strong><br>
+      <a href="stadium_wifi_simulator_v3.html">stadium_wifi_simulator_v3.html</a>
+    </div>
+    <div>
+      <strong>Sprint 2 Tracker</strong><br>
+      <a href="simulator_v2_addendum.html">simulator_v2_addendum.html → Sprint 2 tab</a>
+    </div>
+    <div>
+      <strong>Strategy Paper</strong><br>
+      Journey to the Digital Twin — EP1 Parameter Twin (PDF, June 4 2026)
+    </div>
+    <div>
+      <strong>Branch</strong><br>
+      feature/simulator-v3 · also on main (GitHub Pages)
+    </div>
+    <div>
+      <strong>Commits this session</strong><br>
+      906c0d5 → f88bd6b → 9159032 → 9f935ff → 258d470 → 4070855
+    </div>
+    <div>
+      <strong>EOD index</strong><br>
+      <a href="https://khursheedkhanaiforgood-ai.github.io/5320-onboarding/">5320-onboarding landing ↗</a>
+    </div>
+  </div>
+  <p style="margin-top:24px;font-size:13px;color:#999">© 2026 Khursheed Khan · Stadium WiFi Simulator v3 · FIFA WC 2026 Seattle · Sprint 2 Debug &amp; Equations Reference</p>
+</footer>
+
+</body>
+</html>
