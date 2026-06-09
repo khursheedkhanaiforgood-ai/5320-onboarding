@@ -315,9 +315,19 @@ def main():
     threading.Thread(
         target=run_dashboard, args=(data_store, port), daemon=True, name='dash').start()
 
-    # Collector in background
-    threading.Thread(
-        target=_collector_loop, args=(data_store,), daemon=True, name='collector').start()
+    # Collector in non-daemon thread so finally block runs on any exit
+    collector_thread = threading.Thread(
+        target=_collector_loop, args=(data_store,), daemon=False, name='collector')
+    collector_thread.start()
+
+    # Ctrl-C: set flag and wait for collector to finish cleanly
+    def _sigint(sig, frame):
+        global _widget_running
+        _widget_running = False
+        collector_thread.join(timeout=15)
+        raise SystemExit(0)
+    signal.signal(signal.SIGINT,  _sigint)
+    signal.signal(signal.SIGTERM, _sigint)
 
     # Open browser after server has a moment to bind
     def _open():
@@ -327,6 +337,10 @@ def main():
 
     # rumps must run in the main thread
     DTEWidget(data_store, port=port).run()
+
+    # After rumps exits (Quit from menu), wait for collector to finish
+    _widget_running = False
+    collector_thread.join(timeout=15)
 
 
 if __name__ == '__main__':
