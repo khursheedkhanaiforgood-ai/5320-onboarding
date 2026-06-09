@@ -83,6 +83,7 @@
   <a href="#pending">Pending</a>
   <a href="#session4">Session 4 (Jun 9)</a>
   <a href="#session5">Session 5 (Architecture)</a>
+  <a href="#session5b">Session 5 (Schema+ICDs)</a>
   <a href="#param-ref">Param Reference</a>
 </nav>
 
@@ -724,6 +725,142 @@ Step 7: Print iteration summary: i, δ_progress, δ_calibration, alarm status</p
 }</pre>
 </section>
 
+<section id="session5b">
+  <h2>Session 5 Continued — Schema, Planes, ICDs, Management (June 9)</h2>
+
+  <h3>Verbatim Dialogue Log</h3>
+
+  <ul>
+    <li>
+      <strong>User:</strong> "First, I want to confirm that I want to go this route beginning with 2a [revised sprint map confirmed]. Then, R1: single, R2: not sure what it means, clarify, R3: yes defer, R4: clarify. Also, outline the entire architecture of the program with the interactions highlighted between the agents, so an agentic_architecture and the actual software_design one?"
+      <br>
+      <strong>Claude:</strong> R2 clarified = which 31 of ~100 RadioMetrics fields go into the SQL table (vs CSV-only archive). R4 clarified = one main.py run = one session, SSH reconnects stay inside it. Delivered: full agentic architecture diagram (APCollectorAgent → FederatedTwinAgent → Sim/Calib/Optimizer loop), software design tree (all files, classes, functions, data contracts), three-plane breakdown (data/control/management), ICD table with gaps identified.
+    </li>
+    <li>
+      <strong>User:</strong> "Add all stars [⭐ fields]. I want all ICDs in one of the later sprints. /health for management, accept your recommendation, put in a sprint later when needed. Update the details we have to execute now with the new info. I do want the management plane of course. Keep ALL this dialog in a linked-list for EOD HTML in memory."
+      <br>
+      <strong>Claude:</strong> Added all 33 ⭐ fields → 64-field radio_polls schema. ICD sprint inserted between Sprint 3 and Sprint 4. /health added to Sprint 2a (3 lines). Management plane sprint added before Railway. Sprint map updated to: 2a → 2b → 2c → 3 → ICD → 4 → Mgmt → 5. All decisions saved to memory and EOD HTML.
+    </li>
+    <li>
+      <strong>User:</strong> "I also need the API ICD you mention... I think?"
+      <br>
+      <strong>Claude:</strong> Yes — ICD-06 is the Federated JSON API spec (/health, /api/twin-state, /api/bridge, /api/simulator, /api/qoe-history). It is included in the ICD sprint and its spec is already locked (below). It gates Sprint 4 coding — the Prius FederatedDashboard calls all 5 of these endpoints.
+    </li>
+  </ul>
+
+  <h3>Final R Decisions — All Resolved</h3>
+  <table>
+    <tr><th>Decision</th><th>Answer</th><th>Impact</th></tr>
+    <tr><td>R1 — DB file</td><td class="td-done">Single <code>digital_twin.db</code></td><td>Cross-session calibration history; Sprint 2c federated_debug.py can query past sessions</td></tr>
+    <tr><td>R2 — radio_polls fields</td><td class="td-done">All ⭐ added — 64 fields</td><td>31 original + 33 recommended = 69 total columns (+ id/session_id/ts/radio/band)</td></tr>
+    <tr><td>R3 — knob_change_events</td><td class="td-done">Table empty in Sprint 2a; producer in Sprint 2b</td><td>Schema versioned from day one; no migration needed when Sprint 2b adds writer</td></tr>
+    <tr><td>R4 — Session boundary</td><td class="td-done">One <code>main.py</code> run = one session</td><td>SSH reconnects transparent; single HTML report per run; gap visible in timestamps</td></tr>
+  </table>
+
+  <h3>radio_polls — Final 64-Field Schema (additions beyond original 31)</h3>
+  <table>
+    <tr><th>Group</th><th>Fields added (⭐)</th><th>Reason</th></tr>
+    <tr><td>Running averages</td><td><code>avg_tx_cu_pct</code>, <code>avg_rx_cu_pct</code>, <code>avg_interference_cu_pct</code>, <code>avg_noise_dbm</code></td><td>30s AP rolling avg — smoother than snapshot for calibration</td></tr>
+    <tr><td>Hardware/config</td><td><code>beacon_interval_ms</code></td><td>DTIM proxy — partial optimizer knob</td></tr>
+    <tr><td>WiFi 6 flags</td><td><code>ofdma_dl</code>, <code>ofdma_ul</code>, <code>mu_mimo</code>, <code>bss_color</code>, <code>twt</code>, <code>beamforming</code>, <code>dynamic_chan_width</code>, <code>acsp_state</code></td><td>All OFF on this AP — GS_1 will recommend enabling; track over iterations</td></tr>
+    <tr><td>EDCA</td><td><code>wmm_cw_max_be</code></td><td>CWmax ceiling for contention window range</td></tr>
+    <tr><td>ACSP thresholds</td><td><code>interference_switch_pct</code>, <code>crc_switch_pct</code>, <code>power_floor_dbm</code>, <code>lb_airtime_limit_pct</code>, <code>dcw_trigger_threshold</code></td><td>All calibration knob sources — must track to understand optimizer decisions</td></tr>
+    <tr><td>Mode flags</td><td><code>high_density</code>, <code>band_steering_enabled</code>, <code>load_balance_enabled</code>, <code>safety_net_enabled</code></td><td>Mode flags change EDCA profile entirely — must know if active during tuning</td></tr>
+    <tr><td>BGSCAN</td><td><code>bgscan_count</code>, <code>bgscan_missed</code>, <code>radar_count</code></td><td>Background scans interrupt service; radar forces DFS channel change</td></tr>
+    <tr><td>Airtime %</td><td><code>rx_airtime_pct</code>, <code>tx_airtime_pct</code></td><td>Percent form immediately useful for QoE; cumulative sec stays CSV-only</td></tr>
+    <tr><td>Short-term 10s</td><td><code>st_tx_cu_pct</code>, <code>st_rx_cu_pct</code>, <code>st_int_cu_pct</code>, <code>st_noise_dbm</code></td><td>10s rolling window — tighter than 30s avg, better for latency proxy</td></tr>
+    <tr><td>Retries</td><td><code>tx_retry_pct</code></td><td>One of 4 link_score buckets — must store to track score components</td></tr>
+  </table>
+
+  <div class="callout">
+    <p><strong>CSV-only (NOT in SQL):</strong> Raw cumulative counters: rx/tx_packets_total, rx/tx_pkt_errors, rx/tx_pkt_dropped, rx/tx/crc_airtime_sec, tx/rx_bytes_total, tx_retry_count, tx_failed_count, tx_failed_pct (always None on AP3000), snap_*_cu_pct (noisier than st_), spectral_scan (debug only), radio_mac (constant — one-time in sessions). CSV is the lossless archive; SQL is the queryable analysis layer.</p>
+  </div>
+
+  <h3>Three Planes — Confirmed</h3>
+  <table>
+    <tr><th>Plane</th><th>Purpose</th><th>Current state</th><th>Sprint</th></tr>
+    <tr><td><strong>Data</strong></td><td>What is flowing right now</td><td>AP→SSH→Collector→DataStore+CSV+SQLite→Dash</td><td class="td-done">Sprint 1 ✅ + 2a</td></tr>
+    <tr><td><strong>Control</strong></td><td>What should change and when</td><td>FederatedTwinAgent FSM, HITL gate, CONVERGENCE_CONFIG</td><td class="td-next">Sprint 3</td></tr>
+    <tr><td><strong>Management</strong></td><td>Is the system healthy; who configures it</td><td>/health in Sprint 2a (3 lines); full Mgmt sprint before Railway</td><td class="td-next">Sprint 2a (partial) + Mgmt sprint</td></tr>
+  </table>
+
+  <h3>Interface Control Documents (ICDs) — All 8</h3>
+  <table>
+    <tr><th>ICD</th><th>Between</th><th>Protocol</th><th>Status</th><th>Gates</th></tr>
+    <tr><td>ICD-01</td><td>AP ↔ Collector</td><td>SSH/HiveOS CLI</td><td class="td-done">EXISTS — dt_parameter_reference.html §10</td><td>Sprint 1 (done)</td></tr>
+    <tr><td>ICD-02</td><td>Collector ↔ DataStore</td><td>Python dataclass, in-process</td><td class="td-done">Docstring sufficient</td><td>Sprint 1 (done)</td></tr>
+    <tr><td>ICD-03</td><td>Collector ↔ SQLiteStore</td><td>Python API (write)</td><td class="td-next">Docstring in storage.py</td><td>Sprint 2a</td></tr>
+    <tr><td>ICD-04</td><td>SQLiteStore ↔ report.py</td><td>Python API (read)</td><td class="td-next">Docstring in report.py</td><td>Sprint 2a</td></tr>
+    <tr><td>ICD-05</td><td>Backend ↔ Browser</td><td>Dash HTTP + WebSocket</td><td class="td-done">Dash framework — N/A</td><td>—</td></tr>
+    <tr><td><strong>ICD-06</strong></td><td>FederatedTwinAgent ↔ Browser</td><td>REST JSON (GET /api/*)</td><td class="td-next">Spec LOCKED (below) — formal HTML in ICD sprint</td><td><strong>Sprint 4</strong></td></tr>
+    <tr><td>ICD-07</td><td>Collector ↔ Railway PG</td><td>TCP/libpq</td><td>Pending</td><td>Sprint 5</td></tr>
+    <tr><td>ICD-08</td><td>SimulatorAgent ↔ CalibrationAgent</td><td>Python dataclass (SensitivityMatrix)</td><td>Pending</td><td>Sprint 3</td></tr>
+  </table>
+
+  <h4>ICD-06 — Federated JSON API Spec (locked June 9)</h4>
+  <pre class="blue">GET /health
+→ { "status": "ok"|"degraded"|"down",
+    "last_poll_ts": "2026-06-09T15:05:32Z",
+    "session_id": 7,
+    "collector_uptime_s": 3612 }
+
+GET /api/twin-state
+→ { "state": "OPTIMIZING",
+    "iteration": 2,
+    "session_id": 7,
+    "last_poll_ts": "2026-06-09T15:05:32Z" }
+
+GET /api/bridge
+→ { "params": [
+      { "name": "tx_power_dbm",  "t1": 18.0, "t2": 20.0, "delta": +2.0, "tier": "EXACT" },
+      { "name": "total_cu_pct",  "t1": 12.1, "t2": 28.4, "delta": +16.3, "tier": "AP_DIRECT" },
+      ...  // 15 entries total
+    ] }
+
+GET /api/simulator
+→ { "physics_params":  { "path_loss_exp": 2.8, "shadowing_std_db": 4.0, ... },
+    "knob_states":     { "txPwr": 18.0, "bw5g": 80, "maxCli": 100, ... },  // 12 knobs
+    "mc_log":          [ "iter 1: txPwr sensitivity=0.84, proposed +2dBm", ... ] }
+
+GET /api/qoe-history
+→ { "iterations": [
+      { "i": 1,
+        "qoe_actual":    {"throughput":22.1,"reliability":0.997,"latency":0.082,"conn":0.91,"headroom":0.44},
+        "qoe_predicted": {"throughput":24.5,"reliability":0.998,"latency":0.071,"conn":0.92,"headroom":0.42},
+        "delta_progress":    0.089,
+        "delta_calibration": 0.031 },
+      ...
+    ] }</pre>
+
+  <h3>Management Plane — Plan</h3>
+  <table>
+    <tr><th>Phase</th><th>Sprint</th><th>Deliverable</th></tr>
+    <tr><td>Phase 1 — Health</td><td class="td-next">Sprint 2a</td><td><code>/health</code> endpoint: 3 lines in main.py Flask, returns status/uptime/session_id</td></tr>
+    <tr><td>Phase 2 — Auth</td><td>Sprint Mgmt</td><td>Bearer token check on all <code>/api/*</code> routes. Token set via env var. No login UI needed for lab.</td></tr>
+    <tr><td>Phase 2 — Config</td><td>Sprint Mgmt</td><td><code>GET /config</code> returns current poll_interval, thresholds. <code>POST /config</code> updates in-memory config (no restart needed).</td></tr>
+    <tr><td>Phase 2 — Multi-AP</td><td>Sprint Mgmt</td><td><code>sessions</code> table already has <code>ap_mac</code>. Add AP inventory table + collector loop supports >1 AP target.</td></tr>
+    <tr><td>Phase 2 — Watchdog</td><td>Sprint Mgmt</td><td>macOS launchd plist for auto-restart on crash. Not a code change — OS-level.</td></tr>
+    <tr><td>Phase 2 — Alerts</td><td>Sprint Mgmt</td><td>Webhook POST on collector crash, calibration alarm, convergence. Configurable URL via env var.</td></tr>
+  </table>
+
+  <h3>Final Sprint Map — APPROVED (June 9, 2026)</h3>
+  <table>
+    <tr><th>Sprint</th><th>Deliverable</th><th>Gate to next</th></tr>
+    <tr><td class="td-next"><strong>2a</strong></td><td><code>storage.py</code> (64-field SQLiteStore) + <code>report.py</code> (session HTML) + <code>/health</code> endpoint</td><td>DB has ≥1 complete session; HTML renders on Ctrl-C</td></tr>
+    <tr><td class="td-next"><strong>2b</strong></td><td><code>knob_panel.py</code> + dash-daq 4×3 gauge grid + <code>knob_change_events</code> producer</td><td>All 12 knobs render with AP live values</td></tr>
+    <tr><td class="td-next"><strong>2c</strong></td><td><code>federated_debug.py</code> + synthetic injection (<code>--inject scenario.json</code>)</td><td>Full loop prints bridge → QoE_t1 → sensitivity → GS_1</td></tr>
+    <tr><td><strong>3</strong></td><td>SimulatorAgent + CalibrationAgent + OptimizerAgent + FederatedTwinAgent</td><td>≥1 full HITL loop drives to convergence</td></tr>
+    <tr><td><strong>ICD</strong></td><td><code>docs/icd_reference.html</code> — all 8 ICDs, ICD-06 JSON API fully specced</td><td>ICD-06 approved → gates Sprint 4 coding</td></tr>
+    <tr><td><strong>4</strong></td><td>Prius FederatedDashboard + all 5 <code>/api/*</code> endpoints</td><td>All 4 click-throughs work; QoE convergence history renders</td></tr>
+    <tr><td><strong>Mgmt</strong></td><td>Bearer token auth + <code>/config</code> API + multi-AP inventory + watchdog + alerts</td><td>Colleague can access with token; collector self-heals</td></tr>
+    <tr><td><strong>5</strong></td><td>Railway deploy — PG-backed DataStore, remote read-only dashboard</td><td>Dashboard visible from at least one remote machine without AP access</td></tr>
+  </table>
+
+  <div class="callout">
+    <p><strong>Schema version guard added to Sprint 2a:</strong> <code>schema_version</code> table (version INTEGER) inserted at DB creation. Future column additions run ALTER TABLE migrations keyed on this version. Prevents silent schema mismatch on DB upgrade.</p>
+  </div>
+</section>
+
 <section id="param-ref">
   <h2>Parameter Reference Document — Built June 9</h2>
 
@@ -757,7 +894,7 @@ Step 7: Print iteration summary: i, δ_progress, δ_calibration, alarm status</p
 </section>
 
 <footer>
-  <p>© 2026 Khursheed Khan · DigitalTwinEngine EOD · June 5 (Sprint 1–3) + June 9 (Console + Param Ref + Architecture + Prius Display) · AP3000 AH-556680</p>
+  <p>© 2026 Khursheed Khan · DigitalTwinEngine EOD · June 5 (Sprint 1–3) + June 9 (Console + Param Ref + Architecture + ICDs + Schema + Sprint Map) · AP3000 AH-556680</p>
 </footer>
 
 </body>
