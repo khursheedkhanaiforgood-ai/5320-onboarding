@@ -27,6 +27,7 @@ sys.path.insert(0, os.path.dirname(__file__))
 
 import rumps
 import config
+import storage as _st
 from agents.collector import CollectorAgent, PollResult
 from dashboard import DataStore, run_dashboard, find_free_port
 
@@ -240,7 +241,6 @@ _widget_running = True
 
 def _collector_loop(data_store: DataStore):
     session_ts = datetime.now(timezone.utc).isoformat()
-    slug       = session_ts.replace(':', '').replace('.', '').replace('+', '')[:15]
 
     radio_fh, client_fh, radio_wr, client_wr = _open_csv_writers(
         config.LOG_DIR, session_ts)
@@ -250,11 +250,20 @@ def _collector_loop(data_store: DataStore):
         Path(config.LOG_DIR).mkdir(parents=True, exist_ok=True)
         debug_path = os.path.join(config.LOG_DIR, 'debug_cli.log')
 
+    # Sprint 2a SQLite store
+    db_path    = os.path.join(config.LOG_DIR, 'digital_twin.db')
+    store      = _st.SQLiteStore(db_path)
+    session_id = store.open_session(ap_ip=config.AP_IP)
+    _st.init_health_clock()
+    _st.update_health('starting', session_id=session_id)
+
     agent = CollectorAgent(config.AP_IP, config.AP_USER, config.AP_PASS,
                            debug_log=debug_path)
     try:
         agent.connect()
         agent.onboard()
+        store.update_session_header(session_id, agent.ap_name, agent.ap_model)
+        _st.update_health('ok', session_id=session_id)
 
         while _widget_running:
             try:
@@ -264,14 +273,28 @@ def _collector_loop(data_store: DataStore):
                 _write_csv(result, radio_wr, client_wr)
                 radio_fh.flush()
                 client_fh.flush()
+                store.write_poll(session_id, result.radios, result.clients)
+                for tag, text, radio in result.raw_snapshots:
+                    store.write_raw_snapshot(session_id, tag, text, radio=radio,
+                                             ts=result.ts)
+                _st.update_health('ok', last_poll_ts=result.ts, session_id=session_id)
                 data_store.push(result)
             except Exception:
                 pass
             time.sleep(config.POLL_INTERVAL)
     finally:
+        _st.update_health('down')
         agent.disconnect()
         radio_fh.close()
         client_fh.close()
+        try:
+            store.close_session(session_id)
+            from report import generate_session_html
+            generate_session_html(session_id, db_path, config.LOG_DIR)
+        except Exception:
+            pass
+        finally:
+            store.close()
 
 
 # ── Entry point ───────────────────────────────────────────────────────────────

@@ -19,7 +19,7 @@ from pathlib import Path
 
 sys.path.insert(0, os.path.dirname(__file__))
 
-from rich.console import Console
+from rich.console import Console, Group
 from rich.table import Table
 from rich.live import Live
 from rich.panel import Panel
@@ -142,70 +142,93 @@ def _fmt_crc(v: float | None) -> str:
 
 
 def _radio_table(rm: RadioMetrics) -> Table:
+    """Compact 5-row table — fits two radios side-by-side in an 80-col terminal."""
     t = Table(
         title=(f'[bold]{rm.radio}[/bold]  [{rm.band}]  '
                f'Ch {rm.channel or "?"}  {rm.channel_width_mhz or "?"}MHz'),
-        box=box.ROUNDED, show_header=True, header_style='bold cyan', min_width=44,
+        box=box.ROUNDED, show_header=False, min_width=48,
     )
-    t.add_column('Metric', style='dim', width=26)
-    t.add_column('Value',  width=16)
+    t.add_column('', style='dim', width=9, no_wrap=True)
+    t.add_column('', width=37, no_wrap=True)
 
-    t.add_row('Summary state',      _fmt_state(rm.summary_state))
-    t.add_row('Noise floor',        f'{rm.noise_floor_dbm:.0f} dBm' if rm.noise_floor_dbm else '?')
-    t.add_row('TX power (chain)',   f'{rm.tx_power_dbm:.0f} dBm'    if rm.tx_power_dbm    else '?')
-    t.add_row('Spatial streams',    str(rm.spatial_streams)          if rm.spatial_streams  else '?')
-    t.add_section()
-    t.add_row('CRC error rate',     _fmt_crc(rm.crc_error_pct))
-    t.add_row('CRC airtime %',      _fmt_crc(rm.crc_airtime_pct))
-    t.add_section()
-    t.add_row('Tx CU %',            f'{rm.tx_cu_pct:.0f}%'           if rm.tx_cu_pct is not None else '?')
-    t.add_row('Rx CU %',            f'{rm.rx_cu_pct:.0f}%'           if rm.rx_cu_pct is not None else '?')
-    t.add_row('Interference CU %',  f'{rm.interference_cu_pct:.0f}%' if rm.interference_cu_pct is not None else '?')
-    t.add_row('Total CU %',         f'{rm.total_cu_pct:.0f}%'        if rm.total_cu_pct is not None else '?')
-    t.add_section()
-    t.add_row('Stations',           str(rm.station_count or 0))
-    t.add_row('ACSP channel',       f'Ch {rm.acsp_channel}  (cost {rm.acsp_channel_cost})' if rm.acsp_channel else '?')
-    t.add_row('ACSP neighbors',     str(rm.acsp_neighbor_count or 0))
-    t.add_section()
-    t.add_row('Dynamic chan width',  _fmt_bool(rm.dynamic_chan_width))
-    t.add_row('OFDMA DL',           _fmt_bool(rm.ofdma_dl))
-    t.add_row('OFDMA UL',           _fmt_bool(rm.ofdma_ul))
-    t.add_row('MU-MIMO',            _fmt_bool(rm.mu_mimo))
-    t.add_row('BSS Color',          f'{rm.bss_color}' if rm.bss_color is not None else '?')
-    t.add_row('TWT',                _fmt_bool(rm.twt))
-    t.add_row('Short GI (400ns)',   _fmt_bool(rm.short_gi))
-    t.add_row('BGSCAN count',       str(rm.bgscan_count) if rm.bgscan_count is not None else '?')
+    # Row 1: RF state + noise + power
+    nf  = f'NF:{rm.noise_floor_dbm:.0f}' if rm.noise_floor_dbm else 'NF:?'
+    txp = f'Pwr:{rm.tx_power_dbm:.0f}dBm' if rm.tx_power_dbm else 'Pwr:?'
+    ss  = f'{rm.spatial_streams}ss' if rm.spatial_streams else ''
+    t.add_row('RF', f'{_fmt_state(rm.summary_state)}  {nf}  {txp}  {ss}')
+
+    # Row 2: CRC + link score
+    score_s = f'{rm.link_score:.0f}/100' if rm.link_score is not None else '?'
+    score_c = 'green' if (rm.link_score or 0) >= 75 else ('yellow' if (rm.link_score or 0) >= 40 else 'red')
+    crc_air = f'  air:{rm.crc_airtime_pct:.1f}%' if rm.crc_airtime_pct is not None else ''
+    t.add_row('CRC',
+              f'{_fmt_crc(rm.crc_error_pct)}{crc_air}  Score:[{score_c}]{score_s}[/{score_c}]')
+
+    # Row 3: Channel utilization all four values
+    def _pct(v): return f'{v:.0f}%' if v is not None else '?'
+    t.add_row('CU',
+              f'Tx:{_pct(rm.tx_cu_pct)}  Rx:{_pct(rm.rx_cu_pct)}'
+              f'  Int:{_pct(rm.interference_cu_pct)}  Tot:{_pct(rm.total_cu_pct)}')
+
+    # Row 4: Stations + ACSP
+    sta  = str(rm.station_count or 0)
+    acsp = (f'Ch{rm.acsp_channel}(c{rm.acsp_channel_cost})'
+            if rm.acsp_channel else '?')
+    nbrs = f'{rm.acsp_neighbor_count or 0}nb'
+    t.add_row('RRM', f'{sta} sta  {acsp}  {nbrs}  BG:{rm.bgscan_count or 0}')
+
+    # Row 5: WiFi6 flags inline
+    def _f(label, val):
+        if val is True:  return f'[green]{label}[/green]'
+        if val is False: return f'[dim]{label}[/dim]'
+        return f'[dim]{label}?[/dim]'
+    flags = '  '.join([
+        _f('DL',  rm.ofdma_dl),
+        _f('UL',  rm.ofdma_ul),
+        _f('MU',  rm.mu_mimo),
+        _f('TWT', rm.twt),
+        _f('GI',  getattr(rm, 'short_gi', None)),
+        _f('DCW', rm.dynamic_chan_width),
+    ])
+    bss = rm.bss_color if rm.bss_color is not None else '?'
+    t.add_row('WiFi6', f'{flags}  BSS:{bss}')
+
     return t
 
 
-def _client_table(clients: list) -> Table:
-    t = Table(
-        title=f'[bold]Clients[/bold]  ({len(clients)} connected)',
-        box=box.ROUNDED, show_header=True, header_style='bold cyan',
-    )
+def _client_table(clients: list, max_rows: int = 8) -> Table:
+    shown = clients[:max_rows]
+    overflow = len(clients) - len(shown)
+    title = f'[bold]Clients[/bold]  ({len(clients)} connected)'
+    if overflow:
+        title += f'  [dim]+{overflow} more[/dim]'
+
+    t = Table(title=title, box=box.ROUNDED, show_header=True,
+              header_style='bold cyan')
     t.add_column('Radio',   width=6)
     t.add_column('MAC',     width=18)
-    t.add_column('IP',      width=16)
+    t.add_column('IP',      width=15)
     t.add_column('VLAN',    width=5)
     t.add_column('SNR',     width=7)
-    t.add_column('Tx Mbps', width=9)
-    t.add_column('Rx Mbps', width=9)
-    t.add_column('Phymode', width=7)
-    t.add_column('State',   width=6)
+    t.add_column('Tx',      width=7)
+    t.add_column('Rx',      width=7)
+    t.add_column('Mode',    width=6)
+    t.add_column('Auth',    width=10)
 
-    for c in clients:
+    for c in shown:
         sc = 'green' if (c.snr_db or 0) > 25 else ('yellow' if (c.snr_db or 0) > 15 else 'red')
         t.add_row(
             c.radio, c.mac, c.ip_addr or '—', str(c.vlan_id or ''),
-            f'[{sc}]{c.snr_db:.0f} dB[/{sc}]' if c.snr_db else '?',
+            f'[{sc}]{c.snr_db:.0f}dB[/{sc}]' if c.snr_db else '?',
             f'{c.tx_rate_mbps:.0f}' if c.tx_rate_mbps else '?',
             f'{c.rx_rate_mbps:.0f}' if c.rx_rate_mbps else '?',
-            c.phymode or '—', c.station_state or '—',
+            c.phymode or '—',
+            c.a_mode or '—',
         )
     return t
 
 
-def _build_display(result: PollResult, poll_num: int) -> Panel:
+def _build_display(result: PollResult, poll_num: int, port: int = 8050) -> Panel:
     radio_tables = [_radio_table(rm) for rm in result.radios]
     client_tbl   = _client_table(result.clients)
     ts_local     = datetime.now().strftime('%H:%M:%S')
@@ -213,12 +236,14 @@ def _build_display(result: PollResult, poll_num: int) -> Panel:
         f'[bold yellow]DigitalTwinEngine[/bold yellow] · '
         f'[bold]{result.ap_name}[/bold] ({result.ap_model}) · '
         f'Poll #{poll_num} · {ts_local} · '
-        f'[dim]Browser → http://localhost:8050[/dim]'
+        f'[dim]http://localhost:{port}[/dim]'
     )
-    return Panel(
-        Columns(radio_tables + [client_tbl], equal=False, expand=False),
-        title=title, border_style='bright_blue',
+    # Radios side-by-side on top row, client table below — avoids chopping
+    body = Group(
+        Columns(radio_tables, equal=False, expand=False),
+        client_tbl,
     )
+    return Panel(body, title=title, border_style='bright_blue')
 
 
 # ── Main ──────────────────────────────────────────────────────────────────────
@@ -307,7 +332,7 @@ def main():
                     _st.update_health('ok', last_poll_ts=result.ts, session_id=session_id)
 
                     data_store.push(result)
-                    live.update(_build_display(result, poll_num))
+                    live.update(_build_display(result, poll_num, port=port))
 
                 except Exception as e:
                     console.print(f'[red]Poll error: {e}[/red]')
