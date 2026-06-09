@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DigitalTwinEngine — Parameter Reference · AP3000 · 802.11ax</title>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Source+Code+Pro:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Libre Baskerville', Georgia, serif; background: #fff; color: #1a1a1a; font-size: 16px; line-height: 1.75; max-width: 980px; margin: 0 auto; padding: 48px 32px 120px; }
+  header { border-bottom: 3px solid #1a1a1a; padding-bottom: 20px; margin-bottom: 12px; }
+  .dateline { font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: #666; margin-bottom: 8px; font-family: 'Libre Baskerville', serif; }
+  h1 { font-size: 2.1rem; font-weight: 700; line-height: 1.15; margin-bottom: 10px; }
+  .deck { font-size: 1rem; font-style: italic; color: #444; border-left: 3px solid #1a1a1a; padding-left: 16px; margin-top: 10px; }
+  nav#toc { position: sticky; top: 0; background: #fff; border-bottom: 1px solid #ddd; padding: 10px 0; margin: 20px 0 40px; z-index: 100; font-size: 11px; letter-spacing: 0.05em; display: flex; flex-wrap: wrap; gap: 4px 0; }
+  nav#toc a { color: #1a1a1a; text-decoration: none; margin-right: 14px; text-transform: uppercase; font-weight: 700; border-bottom: 2px solid transparent; padding-bottom: 2px; transition: border-color 0.15s; white-space: nowrap; }
+  nav#toc a:hover { border-color: #1a1a1a; }
+  section { margin-bottom: 56px; }
+  h2 { font-size: 1rem; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 700; border-top: 2px solid #1a1a1a; padding-top: 14px; margin-bottom: 20px; }
+  h3 { font-size: 1rem; font-weight: 700; margin: 28px 0 8px; }
+  h4 { font-size: 0.9rem; font-weight: 700; font-style: italic; margin: 18px 0 6px; color: #333; }
+  p { margin-bottom: 14px; }
+  ul, ol { margin: 10px 0 16px 24px; }
+  li { margin-bottom: 6px; }
+  a { color: #1a1a1a; }
+  a:hover { color: #555; }
+  code { font-family: 'Source Code Pro', monospace; background: #f4f4f4; padding: 2px 6px; border-radius: 3px; font-size: 0.85em; }
+  pre { font-family: 'Source Code Pro', monospace; background: #f4f4f4; border-left: 3px solid #1a1a1a; padding: 16px; margin: 16px 0; overflow-x: auto; font-size: 0.82em; line-height: 1.6; }
+
+  /* Tables */
+  .tbl-wrap { overflow-x: auto; margin: 16px 0 32px; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.88em; }
+  th { background: #1a1a1a; color: #fff; padding: 8px 11px; text-align: left; font-size: 0.78em; letter-spacing: 0.06em; text-transform: uppercase; font-family: 'Source Code Pro', monospace; white-space: nowrap; }
+  td { border-bottom: 1px solid #e0e0e0; padding: 8px 11px; vertical-align: top; line-height: 1.55; }
+  tr:nth-child(even) td { background: #fafafa; }
+  tr:hover td { background: #f5f5f5; }
+  .param-name { font-family: 'Source Code Pro', monospace; font-weight: 600; font-size: 0.88em; white-space: nowrap; }
+  .std-ref { font-family: 'Source Code Pro', monospace; font-size: 0.78em; color: #444; }
+  .formula-cell { font-family: 'Source Code Pro', monospace; font-size: 0.78em; color: #1a1a1a; }
+  .cli-field { font-family: 'Source Code Pro', monospace; font-size: 0.78em; color: #333; }
+
+  /* Tier badges */
+  .tier { display: inline-block; font-family: 'Source Code Pro', monospace; font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; padding: 2px 7px; border-radius: 2px; font-weight: 600; vertical-align: middle; white-space: nowrap; }
+  .tier-d { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+  .tier-c { background: #fef9c3; color: #854d0e; border: 1px solid #fde68a; }
+  .tier-u { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+  .tier-s { background: #ede9fe; color: #4c1d95; border: 1px solid #ddd6fe; }
+
+  /* Tier legend */
+  .legend { display: flex; flex-wrap: wrap; gap: 10px 28px; margin: 16px 0 28px; padding: 14px 18px; background: #f9f9f9; border: 1px solid #e0e0e0; border-left: 3px solid #1a1a1a; }
+  .legend-item { display: flex; align-items: center; gap: 10px; font-size: 0.88em; color: #333; }
+
+  /* Range cells */
+  .range-good { color: #166534; font-family: 'Source Code Pro', monospace; font-size: 0.82em; display: block; }
+  .range-warn { color: #92400e; font-family: 'Source Code Pro', monospace; font-size: 0.82em; display: block; }
+  .range-crit { color: #991b1b; font-family: 'Source Code Pro', monospace; font-size: 0.82em; display: block; }
+  .range-note { color: #666; font-family: 'Source Code Pro', monospace; font-size: 0.78em; display: block; }
+
+  /* Callout boxes */
+  .callout { background: #f9f9f9; border-left: 3px solid #1a1a1a; padding: 14px 18px; margin: 18px 0 24px; font-size: 0.92em; }
+  .callout-warn { border-left-color: #92400e; background: #fffbeb; }
+  .milestone { border: 2px solid #1a1a1a; padding: 18px 22px; margin: 20px 0; }
+  .milestone-label { font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; font-weight: 700; color: #666; margin-bottom: 6px; }
+  .milestone h3 { margin-top: 0; }
+
+  /* QoE cards */
+  .qoe-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin: 18px 0 32px; }
+  .qoe-card { border: 1px solid #e0e0e0; padding: 14px 16px; }
+  .qoe-card .qoe-num { font-family: 'Source Code Pro', monospace; font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: #888; margin-bottom: 4px; }
+  .qoe-card .qoe-name { font-size: 1.05rem; font-weight: 700; margin-bottom: 4px; }
+  .qoe-card .qoe-proxy { font-family: 'Source Code Pro', monospace; font-size: 0.78em; color: #444; margin-bottom: 6px; }
+  .qoe-card .qoe-desc { font-size: 0.85em; color: #555; line-height: 1.5; }
+
+  /* Status tags */
+  .status-done { color: #166534; font-weight: 700; }
+  .status-off { color: #991b1b; font-weight: 700; }
+  .status-on { color: #166534; font-weight: 700; }
+
+  footer { border-top: 1px solid #ddd; padding-top: 20px; margin-top: 60px; font-size: 12px; color: #999; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="dateline">June 9, 2026 · DigitalTwinEngine · AP3000-WW (AH-556680) · IEEE 802.11ax / HiveOS</div>
+  <h1>Parameter Reference</h1>
+  <p class="deck">Formal definitions, 802.11 standard clauses, formulas, and operational ranges for every metric collected from the AP, displayed on the dashboard, and fed into the Digital Twin calibration loop. The authoritative mapping between the 60 simulator inputs and what live AP SSH data can provide.</p>
+</header>
+
+<nav id="toc">
+  <a href="#overview">Overview</a>
+  <a href="#throughput">Throughput</a>
+  <a href="#reliability">Link Reliability</a>
+  <a href="#rfhealth">RF Health</a>
+  <a href="#airtime">Airtime</a>
+  <a href="#cu">Channel Util</a>
+  <a href="#txpower">TX Power</a>
+  <a href="#capacity">Capacity &amp; RRM</a>
+  <a href="#flags80211">802.11 Flags</a>
+  <a href="#flagsprop">HiveOS Flags</a>
+  <a href="#bridge">15-Param Bridge</a>
+  <a href="#static45">45 Static</a>
+  <a href="#qoe">QoE Vector</a>
+</nav>
+
+<!-- ══════════════════════════════════════ OVERVIEW -->
+<section id="overview">
+  <h2>Overview — Source Tiers and the 60/15 Split</h2>
+
+  <p>Every parameter in this reference belongs to one of four <strong>source tiers</strong>. The tier determines whether the AP reports it directly, whether it must be computed, or whether it can only come from the Design Parameter Manifest (DPM).</p>
+
+  <div class="legend">
+    <div class="legend-item"><span class="tier tier-d">AP Direct</span> Read verbatim from AP SSH poll — 5 commands, 5-second cycle</div>
+    <div class="legend-item"><span class="tier tier-c">Computed</span> Derived from one or more AP Direct fields in the collector or dashboard</div>
+    <div class="legend-item"><span class="tier tier-u">Unavailable</span> Not present in any AP3000 HiveOS show command</div>
+    <div class="legend-item"><span class="tier tier-s">Static / DPM</span> Site, client, or app context — not measurable from any single AP</div>
+  </div>
+
+  <div class="callout">
+    <strong>The 60/15 split:</strong> The v3 simulator takes ~60 input parameters. Of those, <strong>15 can be populated dynamically from live AP SSH data</strong> — the "15-Parameter Bridge" (§10). The remaining 45 are static site and client context from the DPM. See §10 and §11 for the full mapping.
+  </div>
+
+  <h3>AP Poll Commands (5 per radio per 5-second cycle)</h3>
+  <pre>show interface wifi0
+show interface wifi1
+show radio profile radio_ng_11ax-2g
+show radio profile radio_ng_11ax-5g
+show station
+show acsp channel-info</pre>
+</section>
+
+<!-- ══════════════════════════════════════ THROUGHPUT -->
+<section id="throughput">
+  <h2>§1 — Throughput</h2>
+  <p>User-plane data rate from the AP radio perspective. These are Layer 2 (802.11 MSDU payload) rates — not PHY rate, not IP throughput.</p>
+
+  <div class="tbl-wrap">
+  <table>
+    <thead><tr>
+      <th>Parameter</th><th>Definition</th><th>Standard</th>
+      <th>Formula</th><th>Units</th><th>Thresholds</th>
+      <th>AP3000 CLI Field</th><th>Tier</th>
+    </tr></thead>
+    <tbody>
+    <tr>
+      <td class="param-name">Tx Throughput</td>
+      <td>Bytes per second transmitted by AP to all associated clients. Averaged over the polling interval.</td>
+      <td class="std-ref">802.11-2020 §9.3.2 (MSDU delivery)</td>
+      <td class="formula-cell">Δtx_bytes / Δt × 8 / 1e6</td>
+      <td>Mbps</td>
+      <td>
+        <span class="range-good">Good: &gt;10 Mbps/client</span>
+        <span class="range-warn">Warn: 1–10 Mbps</span>
+        <span class="range-crit">Crit: &lt;1 Mbps with clients present</span>
+        <span class="range-note">AP3000 5 GHz ceiling: 573 Mbps (MCS 11, 80 MHz, 2×2)</span>
+      </td>
+      <td class="cli-field">tx_bytes counter (polled, differenced)</td>
+      <td><span class="tier tier-c">Computed</span></td>
+    </tr>
+    <tr>
+      <td class="param-name">Rx Throughput</td>
+      <td>Bytes per second received from all associated clients. Low Rx with high Tx = download-heavy load (video streaming, file delivery).</td>
+      <td class="std-ref">802.11-2020 §9.3.2</td>
+      <td class="formula-cell">Δrx_bytes / Δt × 8 / 1e6</td>
+      <td>Mbps</td>
+      <td>
+        <span class="range-good">Good: &gt;5 Mbps with active UL</span>
+        <span class="range-warn">Warn: &lt;1 Mbps with active uploads</span>
+        <span class="range-note">Short GI (400 ns, enabled on AP3000): +11% over standard 800 ns GI</span>
+      </td>
+      <td class="cli-field">rx_bytes counter (polled, differenced)</td>
+      <td><span class="tier tier-c">Computed</span></td>
+    </tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════ LINK RELIABILITY -->
+<section id="reliability">
+  <h2>§2 — Link Reliability</h2>
+  <p>MAC-layer error rates and the HiveOS composite health score. These are the primary indicators of RF quality and collision pressure.</p>
+
+  <div class="tbl-wrap">
+  <table>
+    <thead><tr>
+      <th>Parameter</th><th>Definition</th><th>Standard</th>
+      <th>Formula</th><th>Units</th><th>Thresholds</th>
+      <th>AP3000 CLI Field</th><th>Tier</th>
+    </tr></thead>
+    <tbody>
+    <tr>
+      <td class="param-name">Link Score</td>
+      <td>HiveOS composite link health. Four 25-point buckets summed: (1) CRC Error %, (2) Tx Retry %, (3) Frame Fail %, (4) Channel Utilization. Unknown field = 12.5 pts neutral. Higher = healthier.</td>
+      <td class="std-ref">HiveOS proprietary — no IEEE clause</td>
+      <td class="formula-cell">sum(bucket_i) · each bucket 0–25 based on threshold bands</td>
+      <td>0–100</td>
+      <td>
+        <span class="range-good">Good: 75–100</span>
+        <span class="range-warn">Warn: 50–74</span>
+        <span class="range-crit">Crit: &lt;50</span>
+      </td>
+      <td class="cli-field">Reported in show interface as link_score</td>
+      <td><span class="tier tier-d">AP Direct</span></td>
+    </tr>
+    <tr>
+      <td class="param-name">CRC Error %</td>
+      <td>Fraction of received frames failing the 802.11 Frame Check Sequence (FCS, CRC-32-MPEG2). Each CRC failure = one frame discarded. Primary indicator of RF noise, co-channel interference, or low SNR. AP3000 ACSP trigger threshold: 35%.</td>
+      <td class="std-ref">802.11-2020 §9.2.4.8 (FCS field: 4 octets, CRC-32)</td>
+      <td class="formula-cell">rx_crc_errors / rx_total_frames × 100</td>
+      <td>%</td>
+      <td>
+        <span class="range-good">Good: &lt;2%</span>
+        <span class="range-warn">Warn: 2–10%</span>
+        <span class="range-crit">Crit: &gt;10%</span>
+        <span class="range-note">ACSP trigger: 35%</span>
+      </td>
+      <td class="cli-field">CRC error airtime percent=</td>
+      <td><span class="tier tier-d">AP Direct</span></td>
+    </tr>
+    <tr>
+      <td class="param-name">Frame Failure %</td>
+      <td>Fraction of transmitted frames that ultimately failed — all retransmission attempts exhausted (Short/Long Retry Limit reached), frame dropped at MAC. Distinct from CRC (receive-side) and Retry (attempts before failure). High Frame Fail = persistent RF obstruction or hidden node.</td>
+      <td class="std-ref">802.11-2020 §9.3.2.10 (Short/Long Retry Limit; MSDU lifetime expiry)</td>
+      <td class="formula-cell">tx_pkt_errors / tx_packets_total × 100</td>
+      <td>%</td>
+      <td>
+        <span class="range-good">Good: &lt;1%</span>
+        <span class="range-warn">Warn: 1–5%</span>
+        <span class="range-crit">Crit: &gt;5%</span>
+      </td>
+      <td class="cli-field">tx_pkt_errors / tx_packets (computed from counters). Note: tx_failed_pct is always None on AP3000 — use tx_error_pct.</td>
+      <td><span class="tier tier-c">Computed</span></td>
+    </tr>
+    <tr>
+      <td class="param-name">Tx Retry %</td>
+      <td>Fraction of transmitted frames requiring at least one retransmission (Retry bit set in 802.11 Frame Control header, bit 11). A frame that retries and succeeds appears here but NOT in Frame Fail. High retry = degraded SNR or collision pressure that resolves before retry limit.</td>
+      <td class="std-ref">802.11-2020 §9.2.4.1.3 (Frame Control: Retry subfield, bit 11)</td>
+      <td class="formula-cell">tx_retry_count / tx_packets_total × 100</td>
+      <td>%</td>
+      <td>
+        <span class="range-good">Good: &lt;10%</span>
+        <span class="range-warn">Warn: 10–20%</span>
+        <span class="range-crit">Crit: &gt;20%</span>
+      </td>
+      <td class="cli-field">Tx retry rate= (in show interface)</td>
+      <td><span class="tier tier-d">AP Direct</span></td>
+    </tr>
+    <tr>
+      <td class="param-name">CRC Airtime %</td>
+      <td>Fraction of channel airtime consumed by frames that had CRC errors. Even corrupted frames consume spectrum during transmission. This metric captures the spectrum efficiency cost of bad frames — wasted airtime that could have carried good data.</td>
+      <td class="std-ref">802.11-2020 §11.11.9 (BSS channel utilization; CRC airtime contribution)</td>
+      <td class="formula-cell">airtime_of_crc_frames / total_channel_airtime × 100</td>
+      <td>%</td>
+      <td>
+        <span class="range-good">Good: &lt;5%</span>
+        <span class="range-warn">Warn: 5–15%</span>
+        <span class="range-crit">Crit: &gt;15%</span>
+      </td>
+      <td class="cli-field">CRC error airtime percent= (direct CRC airtime metric, also used for CRC Error %)</td>
+      <td><span class="tier tier-d">AP Direct</span></td>
+    </tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════ RF HEALTH -->
+<section id="rfhealth">
+  <h2>§3 — RF Health</h2>
+  <p>Physical layer ambient noise measurement — the baseline from which all SNR calculations are derived.</p>
+
+  <div class="tbl-wrap">
+  <table>
+    <thead><tr>
+      <th>Parameter</th><th>Definition</th><th>Standard</th>
+      <th>Measurement</th><th>Units</th><th>Thresholds</th>
+      <th>AP3000 CLI Field</th><th>Tier</th>
+    </tr></thead>
+    <tbody>
+    <tr>
+      <td class="param-name">Noise Floor</td>
+      <td>Ambient electromagnetic noise power measured by the radio during clear-channel periods (no active Tx or Rx). Combines thermal noise and in-band interference from non-802.11 sources (microwave ovens, Bluetooth, DECT phones, radar). SNR = Client RSSI − Noise Floor.</td>
+      <td class="std-ref">802.11-2020 §17.3.10.7 (OFDM RX sensitivity: −82 dBm min for 54 Mbps at 20 MHz)<br>802.11ax §27.3.12 (HE PHY sensitivity floors)<br>Thermal floor: N₀ = kTB = −174 dBm/Hz + 10·log(BW)</td>
+      <td>Hardware ADC measurement reported by radio firmware during idle periods. Not computed.</td>
+      <td>dBm</td>
+      <td>
+        <span class="range-good">Good: ≤ −90 dBm</span>
+        <span class="range-warn">Warn: −90 to −75 dBm</span>
+        <span class="range-crit">Crit: &gt; −75 dBm (severe interference)</span>
+        <span class="range-note">AP3000 lab typical: −89 to −93 dBm (5 GHz)</span>
+      </td>
+      <td class="cli-field">Noise floor=−89dBm</td>
+      <td><span class="tier tier-d">AP Direct</span></td>
+    </tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="callout">
+    <strong>SNR and MCS floor:</strong> SNR = client RSSI − Noise Floor. 802.11ax MCS 11 (1201 Mbps, 80 MHz, 2×2) requires SNR ≥ 30 dB. MCS 0 requires SNR ≥ 5 dB. The AP3000 radio profile sets <code>Weak SNR threshold=15 dB</code> — clients below this are capped at lower MCS tiers, directly reducing their throughput.
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════ AIRTIME DETAIL -->
+<section id="airtime">
+  <h2>§4 — Airtime Detail</h2>
+  <p>Fine-grained channel occupancy. 802.11 is half-duplex — while the radio transmits, it cannot receive. Tx + Rx airtime can sum to at most 100%. The AP3000 reports both cumulative (running average) and instantaneous (snapshot) variants.</p>
+
+  <div class="tbl-wrap">
+  <table>
+    <thead><tr>
+      <th>Parameter</th><th>Definition</th><th>Standard</th>
+      <th>Units</th><th>Notes</th><th>AP3000 CLI</th><th>Tier</th>
+    </tr></thead>
+    <tbody>
+    <tr>
+      <td class="param-name">Rx Airtime %</td>
+      <td>Fraction of time the radio detected valid 802.11 frames being received (from any source: BSS + OBSS). Includes management, control, and data frames. High Rx with low throughput = many overhead frames or corrupted frames being counted.</td>
+      <td class="std-ref">802.11-2020 §11.11.9</td>
+      <td>%</td>
+      <td>Typically 10–40% on a busy AP. Saturated: 80–100%.</td>
+      <td class="cli-field">Rx utilization= (cumulative)</td>
+      <td><span class="tier tier-d">AP Direct</span></td>
+    </tr>
+    <tr>
+      <td class="param-name">Tx Airtime %</td>
+      <td>Fraction of time the radio was actively transmitting 802.11 frames (data, ACK, beacons, management). Beacons alone consume ~1–2% even on an idle AP.</td>
+      <td class="std-ref">802.11-2020 §11.11.9</td>
+      <td>%</td>
+      <td>Heavy DL: 40–70%. Purely idle with beacons: ~2%.</td>
+      <td class="cli-field">Tx utilization= (cumulative)</td>
+      <td><span class="tier tier-d">AP Direct</span></td>
+    </tr>
+    <tr>
+      <td class="param-name">ST Tx CU %</td>
+      <td>Station transmit CU — subset of Tx Airtime attributable to uplink frames from associated clients. Difference from Tx Airtime = AP beacon and management overhead.</td>
+      <td class="std-ref">802.11-2020 §11.11.9 (per-STA contribution)</td>
+      <td>%</td>
+      <td>Always ≤ Tx Airtime %.</td>
+      <td class="cli-field">ST Tx CU%=</td>
+      <td><span class="tier tier-d">AP Direct</span></td>
+    </tr>
+    <tr>
+      <td class="param-name">ST Rx CU %</td>
+      <td>Station receive CU — airtime consumed delivering downlink data frames from AP to associated clients. Excludes broadcast/multicast and frames to disassociated clients.</td>
+      <td class="std-ref">802.11-2020 §11.11.9</td>
+      <td>%</td>
+      <td>High = heavy video streaming or file delivery to clients.</td>
+      <td class="cli-field">ST Rx CU%=</td>
+      <td><span class="tier tier-d">AP Direct</span></td>
+    </tr>
+    <tr>
+      <td class="param-name">Snap Tx CU %</td>
+      <td>Instantaneous Tx CU at the moment of the last poll — not a rolling average. Reveals transient bursts that running averages smooth. Critical for detecting hidden-node collisions and short interference events.</td>
+      <td class="std-ref">802.11-2020 §11.11.9 (instantaneous vs RCPI average)</td>
+      <td>%</td>
+      <td>Can briefly hit 100% during burst transfers. Compare to Tx Airtime % to detect burstiness.</td>
+      <td class="cli-field">Snap Tx CU%=</td>
+      <td><span class="tier tier-d">AP Direct</span></td>
+    </tr>
+    <tr>
+      <td class="param-name">Snap Rx CU %</td>
+      <td>Instantaneous Rx CU at last poll. Large delta between Snap Rx and Rx Airtime = bursty interference (interference comes and goes between polls).</td>
+      <td class="std-ref">802.11-2020 §11.11.9</td>
+      <td>%</td>
+      <td>Compare with Rx Airtime % to detect interference burst events.</td>
+      <td class="cli-field">Snap Rx CU%=</td>
+      <td><span class="tier tier-d">AP Direct</span></td>
+    </tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════ CHANNEL UTILIZATION -->
+<section id="cu">
+  <h2>§5 — Channel Utilization</h2>
+  <p>The formal 802.11k/RRM channel load measurements. The AP3000 uses these directly for Automatic Channel and Power Selection (ACSP). Configured trigger threshold for all three components: <code>35%</code>.</p>
+
+  <div class="tbl-wrap">
+  <table>
+    <thead><tr>
+      <th>Parameter</th><th>Definition</th><th>Standard</th>
+      <th>Formula</th><th>Units</th><th>Thresholds</th>
+      <th>AP3000 CLI Field</th><th>Tier</th>
+    </tr></thead>
+    <tbody>
+    <tr>
+      <td class="param-name">Tx CU %</td>
+      <td>Fraction of channel time AP was transmitting (all 802.11 frame types: data, management, control). Measured over hardware sampling window by radio CCA counter.</td>
+      <td class="std-ref">802.11k-2008 / 802.11-2020 §11.11.9 (Channel Load Report: BSS Load IE)</td>
+      <td class="formula-cell">tx_busy_time / total_time × 100</td>
+      <td>%</td>
+      <td>
+        <span class="range-good">Good: &lt;30%</span>
+        <span class="range-warn">Warn: 30–50%</span>
+        <span class="range-crit">Crit: &gt;50%</span>
+      </td>
+      <td class="cli-field">Tx utilization=0%</td>
+      <td><span class="tier tier-d">AP Direct</span></td>
+    </tr>
+    <tr>
+      <td class="param-name">Rx CU %</td>
+      <td>Fraction of channel time AP detected valid 802.11 preamble+PLCP that was successfully decoded (BSS + OBSS frames). This is the "useful signal" occupancy — compare with Int CU to understand signal-vs-noise balance.</td>
+      <td class="std-ref">802.11-2020 §11.11.9 (receive component — decoded frames)</td>
+      <td class="formula-cell">rx_busy_decoded / total_time × 100</td>
+      <td>%</td>
+      <td>
+        <span class="range-good">Good: &lt;40%</span>
+        <span class="range-warn">Warn: 40–60%</span>
+        <span class="range-crit">Crit: &gt;60%</span>
+      </td>
+      <td class="cli-field">Rx utilization=3%</td>
+      <td><span class="tier tier-d">AP Direct</span></td>
+    </tr>
+    <tr>
+      <td class="param-name">Interference CU %</td>
+      <td>Fraction of channel time the radio detected RF energy above the CCA threshold (−62 dBm default for 20 MHz OFDM) but could NOT decode it as valid 802.11. Sources: non-802.11 devices (DECT, microwave, Bluetooth), adjacent-channel leakage, hidden-node collisions, non-decodable OBSS frames.</td>
+      <td class="std-ref">802.11-2020 §17.3.10.6 (CCA Energy Detection: ED threshold ≥ −62 dBm for OFDM at 20 MHz)<br>802.11-2020 §11.11.9 (non-802.11 channel load)</td>
+      <td class="formula-cell">cca_busy_non_dot11 / total_time × 100</td>
+      <td>%</td>
+      <td>
+        <span class="range-good">Good: &lt;10%</span>
+        <span class="range-warn">Warn: 10–20%</span>
+        <span class="range-crit">Crit: &gt;20%</span>
+        <span class="range-note">ACSP trigger: 35%</span>
+      </td>
+      <td class="cli-field">Interference utilization=7%</td>
+      <td><span class="tier tier-d">AP Direct</span></td>
+    </tr>
+    <tr>
+      <td class="param-name">Total CU %</td>
+      <td>Sum of all channel occupancy: Tx + Rx + Interference. The single headline "how busy is this channel" metric. The AP3000 reports all four components independently — Total CU is their arithmetic sum.</td>
+      <td class="std-ref">802.11-2020 §11.11.9 (total channel occupancy)</td>
+      <td class="formula-cell">Tx CU + Rx CU + Int CU</td>
+      <td>%</td>
+      <td>
+        <span class="range-good">Good: &lt;50%</span>
+        <span class="range-warn">Warn: 50–70%</span>
+        <span class="range-crit">Crit: &gt;70%</span>
+        <span class="range-note">Saturated stadium: 85–95% typical</span>
+      </td>
+      <td class="cli-field">Total utilization=10%</td>
+      <td><span class="tier tier-d">AP Direct</span></td>
+    </tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════ TX POWER -->
+<section id="txpower">
+  <h2>§6 — TX Power</h2>
+
+  <div class="tbl-wrap">
+  <table>
+    <thead><tr>
+      <th>Parameter</th><th>Definition</th><th>Standard / Regulation</th>
+      <th>Formula</th><th>Units</th><th>AP3000 Range</th>
+      <th>AP3000 CLI Field</th><th>Tier</th>
+    </tr></thead>
+    <tbody>
+    <tr>
+      <td class="param-name">Tx Power</td>
+      <td>Conducted transmit power — power delivered to the antenna port by the radio PA, before antenna gain. The configurable knob. Lower Tx power = smaller cell, fewer co-channel collisions in dense deployments.</td>
+      <td class="std-ref">802.11-2020 §19.3.18 (HT power reporting)<br>802.11ax §27.3.14 (HE power reporting)<br>ETSI EN 301 893 / FCC Part 15.247</td>
+      <td class="formula-cell">Reported directly by AP firmware</td>
+      <td>dBm</td>
+      <td>
+        <span class="range-good">Min: 5 dBm · Max: 18 dBm (one chain)</span>
+        <span class="range-note">ACSP auto-range: Power floor=5 dBm, Max ACSP tx power=20 dBm</span>
+      </td>
+      <td class="cli-field">One Chain EIRP power=22.00dBm(18dBm + 4.00dBi) → Tx Power = 18 dBm (middle value)</td>
+      <td><span class="tier tier-d">AP Direct</span></td>
+    </tr>
+    <tr>
+      <td class="param-name">EIRP</td>
+      <td>Effective Isotropic Radiated Power — total radiated power including antenna gain. The regulatory limit metric. FCC and ETSI specify EIRP limits, not conducted power.</td>
+      <td class="std-ref">FCC Part 15.247: max 36 dBm EIRP (5 GHz P2P)<br>ETSI EN 301 893: 23 dBm EIRP typical (5 GHz indoor)<br>FCC Part 15.407: U-NII-3 limit 30 dBm EIRP (1W)</td>
+      <td class="formula-cell">EIRP (dBm) = Tx Power (dBm) + Antenna Gain (dBi)</td>
+      <td>dBm</td>
+      <td>
+        <span class="range-good">AP3000: 22 dBm EIRP (18 dBm + 4 dBi internal)</span>
+        <span class="range-note">Country-dependent ceiling</span>
+      </td>
+      <td class="cli-field">One Chain EIRP power=22.00dBm(18dBm + 4.00dBi) → EIRP = 22 dBm (first value)</td>
+      <td><span class="tier tier-d">AP Direct</span></td>
+    </tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════ CAPACITY & RRM -->
+<section id="capacity">
+  <h2>§7 — Capacity &amp; RRM</h2>
+
+  <div class="tbl-wrap">
+  <table>
+    <thead><tr>
+      <th>Parameter</th><th>Definition</th><th>Standard</th>
+      <th>Units</th><th>AP3000 Range / Notes</th>
+      <th>AP3000 CLI Field</th><th>Tier</th>
+    </tr></thead>
+    <tbody>
+    <tr>
+      <td class="param-name">Station Count</td>
+      <td>Clients currently associated to this radio. An associated client has completed 802.11 authentication + 4-way handshake and holds a valid AID (Association Identifier). Does not count probe-only or authenticated-not-associated devices.</td>
+      <td class="std-ref">802.11-2020 §9.4.1.5 (AID, 1–2007)<br>802.11-2020 §9.3.3.6 (Association Response)</td>
+      <td>count</td>
+      <td>0–100 per radio (max_clients_number=100 in radio profile). Dense venue target: &lt;50/radio for reliable QoE.</td>
+      <td class="cli-field">show station (row count)</td>
+      <td><span class="tier tier-d">AP Direct</span></td>
+    </tr>
+    <tr>
+      <td class="param-name">Chan Width</td>
+      <td>Current operating channel bandwidth. Wider channel = higher PHY rate but more likely to overlap neighboring channels. AP3000 dynamic channel width adapts under interference pressure.</td>
+      <td class="std-ref">802.11n-2020 §19.3.11.1 (HT: 20/40 MHz)<br>802.11-2020 §21.3.7 (VHT: 80/160 MHz)<br>802.11ax §27.3.9 (HE: 20/40/80/160 MHz)</td>
+      <td>MHz</td>
+      <td>wifi0: 20 or 40 MHz max. wifi1: 20/40/80 MHz max. 160 MHz NOT supported on AP3000. Dynamic channel width=enabled (adapts under interference).</td>
+      <td class="cli-field">Channel width=80Mhz</td>
+      <td><span class="tier tier-d">AP Direct</span></td>
+    </tr>
+    <tr>
+      <td class="param-name">ACSP Cost</td>
+      <td>HiveOS Automatic Channel Selection Protocol cost metric — proprietary composite combining CRC %, interference CU %, neighbor RSSI, and channel plan efficiency. Lower = better. Monitor trend, not absolute value.</td>
+      <td class="std-ref">HiveOS proprietary — inspired by 802.11k §11.11 (RRM channel load reports) and 802.11-2020 Annex E (channel plan)</td>
+      <td>score (lower = better)</td>
+      <td>Relative value matters. Rising cost = worsening RF environment. ACSP uses this to rank candidate channels before a hop.</td>
+      <td class="cli-field">show acsp channel-info → cost per channel</td>
+      <td><span class="tier tier-d">AP Direct</span></td>
+    </tr>
+    <tr>
+      <td class="param-name">ACSP Neighbors</td>
+      <td>Count of co-channel or adjacent-channel APs detected in the ACSP neighbor scan (by beacon RSSI). Neighbors with RSSI ≥ −70 dBm are weighted as "near" and contribute more to ACSP cost. Lab: 1 neighbor (QFiberKK, RSSI −7 dBm).</td>
+      <td class="std-ref">802.11-2020 §11.11.1 (Neighbor Report)<br>802.11k §11.11.9 (Channel Load from neighbors)</td>
+      <td>count</td>
+      <td>0 = isolated. &gt;3 strong neighbors = dense deployment. Current lab: 1 neighbor (very strong signal = significant co-channel interference).</td>
+      <td class="cli-field">show acsp channel-info → neighbor list count</td>
+      <td><span class="tier tier-d">AP Direct</span></td>
+    </tr>
+    <tr>
+      <td class="param-name">BSS Color</td>
+      <td>802.11ax spatial reuse mechanism. 6-bit value (0–63) embedded in every HE PPDU's PHY header (HE-SIG-A). APs with different colors can raise their CCA threshold for differently-colored frames, enabling concurrent transmissions. 0 = disabled.</td>
+      <td class="std-ref">802.11ax-2021 §26.17 (BSS Color subfield in HE-SIG-A)<br>802.11-2020 §26.17.3 (Spatial Reuse operation)</td>
+      <td>0–63</td>
+      <td>AP3000: supported but BSS Color=0 (disabled). Enabling requires careful color assignment — same color on neighboring APs negates the benefit entirely.</td>
+      <td class="cli-field">BSS Color=0</td>
+      <td><span class="tier tier-d">AP Direct</span></td>
+    </tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════ 802.11 FEATURE FLAGS -->
+<section id="flags80211">
+  <h2>§8 — Feature Flags: IEEE 802.11 Standard</h2>
+  <p>Protocol capabilities defined in the 802.11 standard. Standardized and interoperable across vendors.</p>
+
+  <div class="tbl-wrap">
+  <table>
+    <thead><tr>
+      <th>Flag</th><th>Full Name</th><th>802.11 Clause</th>
+      <th>What It Enables</th><th>AP3000 State</th><th>CLI Field</th>
+    </tr></thead>
+    <tbody>
+    <tr>
+      <td class="param-name">OFDMA DL</td>
+      <td>Downlink OFDMA</td>
+      <td class="std-ref">802.11ax-2021 §27.3.12 (Resource Unit allocation, DL MU PPDU)</td>
+      <td>AP subdivides channel into Resource Units (RUs) and simultaneously serves multiple clients in one PPDU. Each client receives its own RU sub-carrier set. Eliminates per-client TXOP contention for downlink. Max: 8 simultaneous DL clients (20 MHz, 26-tone RUs).</td>
+      <td><span class="status-off">OFF</span> — disabled in lab</td>
+      <td class="cli-field">HE OFDMA downlink=disabled</td>
+    </tr>
+    <tr>
+      <td class="param-name">OFDMA UL</td>
+      <td>Uplink OFDMA</td>
+      <td class="std-ref">802.11ax-2021 §27.3.13 (Trigger Frame, UL MU PPDU)</td>
+      <td>AP sends a Trigger Frame scheduling multiple clients to transmit simultaneously on different RUs. Dramatically reduces uplink collision probability under high client density. Requires HE-capable clients.</td>
+      <td><span class="status-off">OFF</span> — disabled in lab</td>
+      <td class="cli-field">HE OFDMA uplink=disabled</td>
+    </tr>
+    <tr>
+      <td class="param-name">MU-MIMO</td>
+      <td>Multi-User MIMO</td>
+      <td class="std-ref">802.11ac §22.3.11.10 (VHT DL only)<br>802.11ax §27.3.10 (HE DL+UL)</td>
+      <td>AP uses spatial steering (beamforming + nulling) to transmit separate data streams to multiple clients simultaneously on the same channel. AP3000 max: 2×2 DL MU-MIMO. Requires explicit channel sounding per client (NDP frame exchange).</td>
+      <td><span class="status-off">OFF</span> — 2×2 supports DL MU-MIMO but disabled</td>
+      <td class="cli-field">MU-MIMO=disabled</td>
+    </tr>
+    <tr>
+      <td class="param-name">TWT</td>
+      <td>Target Wake Time</td>
+      <td class="std-ref">802.11ax-2021 §26.8 (TWT Agreement, TWT SP)<br>802.11-2020 §9.4.2.200 (TWT element)</td>
+      <td>AP and client negotiate scheduled wake windows (TWT Service Periods). Client sleeps between SPs — reduces power 90%+ for IoT. Reduces uplink contention: multiple clients have non-overlapping SPs. Individual TWT (iTWT) for IoT; Broadcast TWT (bTWT) for coordinated wakeup groups.</td>
+      <td><span class="status-off">OFF</span> — TWT=disabled</td>
+      <td class="cli-field">TWT=disabled (in show interface, regex: ^\s*TWT\s*=\s*)</td>
+    </tr>
+    <tr>
+      <td class="param-name">Short GI</td>
+      <td>Short Guard Interval (400 ns)</td>
+      <td class="std-ref">802.11n-2009 §20.4.7.10 (400 ns vs 800 ns GI)<br>802.11-2020 §19.3.11.10.2</td>
+      <td>Reduces cyclic prefix between OFDM symbols from 800 ns to 400 ns. Throughput gain: ~11%. Only beneficial when multipath delay spread &lt;400 ns (close clients, few reflections). Standard 800 ns GI is safer in echoing environments (stadiums, warehouses).</td>
+      <td><span class="status-on">ON</span> — both radios</td>
+      <td class="cli-field">Short guard interval=enabled</td>
+    </tr>
+    <tr>
+      <td class="param-name">Beamform</td>
+      <td>Explicit Transmit Beamforming</td>
+      <td class="std-ref">802.11ac §22.3.11.8 (Explicit Compressed Beamforming)<br>802.11ax §27.3.11 (HE Beamforming Feedback)</td>
+      <td>AP sounds the channel (NDP frame) to measure per-subcarrier response per client, then applies steering matrices to focus RF energy toward each client. Gain: 3–6 dB SNR per client. Requires beamformee-capable client. Overhead: sounding exchange every few seconds per client.</td>
+      <td><span class="status-off">OFF</span> — Tx beamforming=disabled</td>
+      <td class="cli-field">Tx beamforming=disabled</td>
+    </tr>
+    <tr>
+      <td class="param-name">A-MPDU</td>
+      <td>Aggregate MPDU</td>
+      <td class="std-ref">802.11n-2009 §9.7.2 (A-MPDU aggregation)<br>802.11-2020 §9.7.2</td>
+      <td>Concatenates multiple MPDUs into a single PPDU. Each sub-MPDU individually ACK'd via Block ACK. Dramatically reduces per-frame PHY preamble overhead. Max: 64 subframes (802.11n), 1024 (802.11ax), 4 MB max size. The primary aggregation mechanism in modern 802.11 — essential for high throughput.</td>
+      <td><span class="status-on">ON</span> — A-MPDU=enabled</td>
+      <td class="cli-field">A-MPDU=enabled</td>
+    </tr>
+    <tr>
+      <td class="param-name">DFS</td>
+      <td>Dynamic Frequency Selection</td>
+      <td class="std-ref">802.11h-2003 §11.8 / 802.11-2020 §11.8<br>FCC KDB 905462 (60 s quiet period)<br>ETSI EN 301 893 §4.7</td>
+      <td>Mandatory for U-NII-2 (52–64) and U-NII-2e (100–144) 5 GHz channels. AP must vacate channel within 10 s of radar detection and stay off 30 min (Non-Occupancy Period). AP3000 is on Ch 149 (U-NII-3) — DFS-exempt. Enable only if moving to DFS channels.</td>
+      <td><span class="status-off">OFF</span> — Ch 149 = U-NII-3, DFS-exempt</td>
+      <td class="cli-field">DFS=disabled</td>
+    </tr>
+    <tr>
+      <td class="param-name">A-MSDU</td>
+      <td>Aggregate MSDU</td>
+      <td class="std-ref">802.11n-2009 §9.7.1 (A-MSDU aggregation)<br>802.11-2020 §9.7.1</td>
+      <td>Groups multiple MSDUs (Layer 3 packets) into a single MSDU container before MPDU wrapping. Lower overhead per MSDU than A-MPDU but all-or-nothing ARQ — if the A-MSDU fails, all contained MSDUs retransmit. Typically combined with A-MPDU (two-level aggregation).</td>
+      <td><span class="status-on">ON</span> — A-MSDU=enabled</td>
+      <td class="cli-field">A-MSDU=enabled</td>
+    </tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════ HIVEOS PROPRIETARY FLAGS -->
+<section id="flagsprop">
+  <h2>§9 — Feature Flags: HiveOS Proprietary</h2>
+  <p>Extreme/Aerohive vendor extensions. No IEEE 802.11 standard clause. Behavior may differ from other vendor implementations.</p>
+
+  <div class="tbl-wrap">
+  <table>
+    <thead><tr>
+      <th>Flag</th><th>What It Does</th><th>AP3000 State</th><th>CLI Field</th>
+    </tr></thead>
+    <tbody>
+    <tr>
+      <td class="param-name">Dyn CW</td>
+      <td><strong>Dynamic Contention Window.</strong> HiveOS extension of 802.11e EDCA. Normally CWmin/CWmax are static per AC (AC_BE: CWmin=4, CWmax=6 on AP3000). Dyn CW adjusts these dynamically based on real-time collision pressure. Under high load: larger CW = fewer collisions. Under low load: smaller CW = lower latency.</td>
+      <td><span class="status-off">OFF</span></td>
+      <td class="cli-field">Dynamic CW=disabled</td>
+    </tr>
+    <tr>
+      <td class="param-name">Hi-Dens</td>
+      <td><strong>High Density Mode.</strong> Coordinated set of optimizations for dense environments: raises minimum RSSI threshold (blocking distant clients), tightens airtime fairness limits, adjusts EDCA params for lower per-client CWmax, enables rate steering. Reduces range; increases per-client throughput when many clients are present.</td>
+      <td><span class="status-off">OFF</span> — High density=disabled</td>
+      <td class="cli-field">High density=disabled</td>
+    </tr>
+    <tr>
+      <td class="param-name">BandSteer</td>
+      <td><strong>Band Steering.</strong> During probe/association, if a dual-band client appears on 2.4 GHz while 5 GHz is available, HiveOS delays or rejects the 2.4 GHz response to nudge the client to 5 GHz. 5 GHz = more non-overlapping channels, higher PHY rates, typically lower interference indoors.</td>
+      <td><span class="status-off">OFF</span> — Band steering=disabled</td>
+      <td class="cli-field">Band steering=disabled</td>
+    </tr>
+    <tr>
+      <td class="param-name">LoadBal</td>
+      <td><strong>Load Balancing.</strong> In multi-AP deployments, distributes new associations across APs based on airtime utilization. If this AP's airtime exceeds a threshold, new associations are steered to a less-loaded neighbor. Requires HiveOS controller coordination (XIQ/CAPWAP).</td>
+      <td><span class="status-off">OFF</span> — Load balance=disabled</td>
+      <td class="cli-field">Load balance=disabled</td>
+    </tr>
+    <tr>
+      <td class="param-name">SafetyNet</td>
+      <td><strong>Safety Net.</strong> If AP loses controller contact (XIQ/HiveManager) for an extended period, Safety Net allows existing sessions to continue using a locally-cached policy snapshot. Prevents mass client disconnection during controller outages. AP operates in degraded-but-functional standalone mode.</td>
+      <td><span class="status-on">ON</span> — both radios</td>
+      <td class="cli-field">Safety net=enabled</td>
+    </tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════ 15-PARAM BRIDGE -->
+<section id="bridge">
+  <h2>§10 — The 15-Parameter AP → Simulator Bridge</h2>
+  <p>Of the ~60 simulator inputs, exactly <strong>15 can be populated dynamically from live AP SSH data</strong>. These are the parameters the FederatedTwinAgent uses to calibrate the Digital Twin against observed AP behavior every 5 seconds.</p>
+
+  <div class="callout">
+    <strong>Calibration loop:</strong> FederatedTwinAgent reads these 15 values every 5 s → feeds into SimulatorAgent → computes predicted QoE → compares against observed AP QoE → δ_calibration drives parameter adjustment via Monte Carlo sensitivity oracle (∂QoE/∂param_i).
+  </div>
+
+  <div class="tbl-wrap">
+  <table>
+    <thead><tr>
+      <th>#</th><th>DPM Section</th><th>Simulator Parameter</th>
+      <th>Real AP Measurement</th><th>AP3000 CLI Source</th><th>Tier</th><th>Notes</th>
+    </tr></thead>
+    <tbody>
+    <tr><td>1</td><td>B — Clients</td><td><code>n_clients</code></td><td>Station count per radio</td><td class="cli-field">show station (count)</td><td><span class="tier tier-d">AP Direct</span></td><td>Separate for wifi0 and wifi1</td></tr>
+    <tr><td>2</td><td>D — Network</td><td><code>chan_width_mhz</code></td><td>Channel width (wifi1)</td><td class="cli-field">Channel width=80Mhz</td><td><span class="tier tier-d">AP Direct</span></td><td>wifi0: 20/40; wifi1: 80 MHz</td></tr>
+    <tr><td>3</td><td>A — RF</td><td><code>collision_rate</code></td><td>CRC Error %</td><td class="cli-field">CRC error airtime percent=</td><td><span class="tier tier-d">AP Direct</span></td><td>Primary RF quality proxy</td></tr>
+    <tr><td>4</td><td>A — RF</td><td><code>noise_floor_dbm</code></td><td>Noise floor (dBm)</td><td class="cli-field">Noise floor=−89dBm</td><td><span class="tier tier-d">AP Direct</span></td><td>Direct link budget input</td></tr>
+    <tr><td>5</td><td>B — Clients</td><td><code>snr_mean_db</code></td><td>Avg SNR per client</td><td class="cli-field">show station → SNR column, averaged</td><td><span class="tier tier-c">Computed</span></td><td>Mean SNR across all associated clients</td></tr>
+    <tr><td>6</td><td>G — RRM</td><td><code>tx_utilization</code></td><td>Tx Airtime CU %</td><td class="cli-field">Tx utilization=</td><td><span class="tier tier-d">AP Direct</span></td><td>Simulator DL throughput model</td></tr>
+    <tr><td>7</td><td>G — RRM</td><td><code>rx_utilization</code></td><td>Rx Airtime CU %</td><td class="cli-field">Rx utilization=</td><td><span class="tier tier-d">AP Direct</span></td><td>Simulator UL throughput model</td></tr>
+    <tr><td>8</td><td>G — RRM</td><td><code>interference_cu</code></td><td>Interference CU %</td><td class="cli-field">Interference utilization=</td><td><span class="tier tier-d">AP Direct</span></td><td>Non-802.11 contention load</td></tr>
+    <tr><td>9</td><td>B — Clients</td><td><code>mcs_tier</code></td><td>Avg Tx rate (MCS proxy)</td><td class="cli-field">show station → Tx rate column, averaged</td><td><span class="tier tier-c">Computed</span></td><td>Maps Mbps → MCS index via AP3000 rate table</td></tr>
+    <tr><td>10</td><td>B — Clients</td><td><code>actual_chan_width_client</code></td><td>Negotiated chan-width per client</td><td class="cli-field">show station → Chan Width column</td><td><span class="tier tier-d">AP Direct</span></td><td>Legacy clients may negotiate 20 MHz on 80 MHz AP</td></tr>
+    <tr><td>11</td><td>G — RRM</td><td><code>co_channel_neighbors</code></td><td>ACSP neighbor count</td><td class="cli-field">show acsp channel-info → neighbor count</td><td><span class="tier tier-d">AP Direct</span></td><td>Direct CCI load input</td></tr>
+    <tr><td>12</td><td>G — RRM</td><td><code>external_interference_rssi</code></td><td>Strongest neighbor RSSI</td><td class="cli-field">show acsp channel-info → max neighbor RSSI</td><td><span class="tier tier-d">AP Direct</span></td><td>Lab: QFiberKK at −7 dBm (very strong)</td></tr>
+    <tr><td>13</td><td>G — RRM</td><td><code>collision_state</code></td><td>Summary state</td><td class="cli-field">Derived from CRC% + retry% + CU% thresholds</td><td><span class="tier tier-c">Computed</span></td><td>3-state: good / fair / collision</td></tr>
+    <tr><td>14</td><td>A — RF</td><td><code>peak_throughput_measured</code></td><td>Peak Tx Mbps (rolling max)</td><td class="cli-field">Computed from tx_bytes diff, max over session</td><td><span class="tier tier-c">Computed</span></td><td>Calibration upper bound for throughput model</td></tr>
+    <tr><td>15</td><td>C — Apps</td><td><code>traffic_mix</code></td><td>Station VLAN distribution</td><td class="cli-field">show station → VLAN column, grouped</td><td><span class="tier tier-c">Computed</span></td><td>VLAN → app profile proxy (Staff/Guest)</td></tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════ 45 STATIC PARAMS -->
+<section id="static45">
+  <h2>§11 — 45 Static DPM Parameters</h2>
+  <p>Simulator inputs with no AP CLI equivalent. Set once in the Design Parameter Manifest and held constant during GS calibration cycles. No AP can measure these — they define the physical and operational context of the deployment.</p>
+
+  <h3>Section A — Site &amp; RF Environment (10 params)</h3>
+  <div class="tbl-wrap">
+  <table>
+    <thead><tr><th>DPM Ref</th><th>Parameter</th><th>Units</th><th>AP Visibility</th></tr></thead>
+    <tbody>
+    <tr><td>A1</td><td>Site type (indoor arena / outdoor bowl / convention / hotel)</td><td>enum</td><td><em>None</em></td></tr>
+    <tr><td>A2</td><td>Venue area (m²)</td><td>m²</td><td><em>None</em></td></tr>
+    <tr><td>A3</td><td>Number of floors / tiers</td><td>count</td><td><em>None</em></td></tr>
+    <tr><td>A4</td><td>Ceiling height (m)</td><td>m</td><td><em>None</em></td></tr>
+    <tr><td>A5</td><td>Wall / structure material (concrete / glass / wood / open)</td><td>enum</td><td><em>None</em></td></tr>
+    <tr><td>A6</td><td>Regulatory domain (FCC / ETSI / MIC)</td><td>enum</td><td><em>Fixed at provisioning — not in show interface</em></td></tr>
+    <tr><td>A7</td><td>Path loss exponent (n) for link budget model</td><td>dimensionless</td><td><em>None</em></td></tr>
+    <tr><td>A8</td><td>AP placement height (m)</td><td>m</td><td><em>None</em></td></tr>
+    <tr><td>A9</td><td>AP-to-client distance distribution (near/mid/far ratio)</td><td>%</td><td><em>RSSI per client available, not distance</em></td></tr>
+    <tr><td>A10</td><td>Multipath delay spread (τ_rms, ns)</td><td>ns</td><td><em>Implicit in CRC% — not measured directly</em></td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3>Section B — Client Devices (8 params not in bridge)</h3>
+  <div class="tbl-wrap">
+  <table>
+    <thead><tr><th>DPM Ref</th><th>Parameter</th><th>AP Visibility</th></tr></thead>
+    <tbody>
+    <tr><td>B1</td><td>Peak device quantity (total venue capacity)</td><td><em>AP sees only currently associated — not total venue capacity</em></td></tr>
+    <tr><td>B2</td><td>Concurrent association % of capacity</td><td><em>None — requires DPM context (associated ÷ total)</em></td></tr>
+    <tr><td>B3</td><td>Concurrent active % of associated</td><td><em>Partial — show station gives Tx/Rx rates but not activity ratio</em></td></tr>
+    <tr><td>B4</td><td>Device type distribution (iPhone / Android / laptop / IoT)</td><td><em>None — 802.11 has no device type field</em></td></tr>
+    <tr><td>B5</td><td>Client antenna chains distribution (1×1 / 2×2)</td><td><em>None — HT/VHT caps infer max chains but not actual config</em></td></tr>
+    <tr><td>B6</td><td>Client 802.11 protocol mix (11n / 11ac / 11ax)</td><td><em>Partial — PHY mode per client in show station, no aggregate distribution</em></td></tr>
+    <tr><td>B7</td><td>Client max antenna gain (dBi)</td><td><em>None</em></td></tr>
+    <tr><td>B8</td><td>Client Tx power capability (dBm)</td><td><em>None — clients do not advertise Tx power in association</em></td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3>Section C — Applications (6 params)</h3>
+  <div class="tbl-wrap">
+  <table>
+    <thead><tr><th>DPM Ref</th><th>Parameter</th><th>AP Visibility</th></tr></thead>
+    <tbody>
+    <tr><td>C1</td><td>Application type distribution (video / web / VoIP / POS / IoT)</td><td><em>None — AP sees Ethernet frames, not application payload</em></td></tr>
+    <tr><td>C2</td><td>SLA per app type (latency / throughput targets)</td><td><em>None — DPM input only</em></td></tr>
+    <tr><td>C3</td><td>Transport protocol distribution (TCP / UDP / QUIC)</td><td><em>None — not visible at 802.11 MAC layer</em></td></tr>
+    <tr><td>C4</td><td>Latency sensitivity (real-time / interactive / background)</td><td><em>None</em></td></tr>
+    <tr><td>C5</td><td>Frame size distribution (small / large / mixed)</td><td><em>Partial — A-MPDU counters infer average; no distribution</em></td></tr>
+    <tr><td>C6</td><td>Background traffic % (email / sync / IoT heartbeat)</td><td><em>None</em></td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3>Sections D–F — Network, Channel, Security (21 params)</h3>
+  <div class="tbl-wrap">
+  <table>
+    <thead><tr><th>Section</th><th>DPM Ref</th><th>Parameter</th><th>AP Visibility</th></tr></thead>
+    <tbody>
+    <tr><td>D — Network</td><td>D1</td><td>AP density (APs per 1000 m²)</td><td><em>None — single AP cannot see deployment density</em></td></tr>
+    <tr><td>D — Network</td><td>D4</td><td>Coverage tier (excellent / nominal / edge)</td><td><em>Partial — RSSI distribution implies quality but not design tier</em></td></tr>
+    <tr><td>D — Network</td><td>D5</td><td>SSID count and overhead</td><td><em>Partial — show ssid gives SSID count; SSID overhead calculable</em></td></tr>
+    <tr><td>D — Network</td><td>D6</td><td>Expected client growth rate %</td><td><em>None — requires historic session database</em></td></tr>
+    <tr><td>D — Network</td><td>D7</td><td>2.4 GHz client ceiling</td><td><em>AP reports current count but not the design ceiling</em></td></tr>
+    <tr><td>D — Network</td><td>D11</td><td>UL/DL traffic asymmetry ratio</td><td><em>Partial — Tx/Rx bytes give ratio; need time context for model</em></td></tr>
+    <tr><td>E — Channel</td><td>E1</td><td>Designed channel plan (non-overlapping set)</td><td><em>None — AP knows its own channel, not the plan</em></td></tr>
+    <tr><td>E — Channel</td><td>E2</td><td>Co-channel AP density per cell</td><td><em>Partial — ACSP neighbor count is a proxy but not exact density</em></td></tr>
+    <tr><td>E — Channel</td><td>E3</td><td>Adjacent-channel interference threshold (dBm)</td><td><em>None — design parameter only</em></td></tr>
+    <tr><td>E — Channel</td><td>E4</td><td>CCI threshold for ACSP trigger (%)</td><td><em>In show radio profile, not show interface</em></td></tr>
+    <tr><td>E — Channel</td><td>E5</td><td>Planned frequency reuse factor (K)</td><td><em>None — network design input</em></td></tr>
+    <tr><td>F — Security</td><td>F1</td><td>Security protocol per SSID (WPA3 / WPA2 / OWE)</td><td><em>Partial — show ssid reveals security type</em></td></tr>
+    <tr><td>F — Security</td><td>F2</td><td>MFP (Management Frame Protection) requirement</td><td><em>Partial — show ssid may expose MFP flag</em></td></tr>
+    <tr><td>F — Security</td><td>F3</td><td>VLAN assignment per SSID</td><td><em>Partial — show ssid gives VLAN ID; design intent not captured</em></td></tr>
+    <tr><td>F — Security</td><td>F4</td><td>802.11r/k/v fast BSS transition flags</td><td><em>Partial — show radio profile exposes these; not in show interface</em></td></tr>
+    <tr><td>F — Security</td><td>F5</td><td>Client isolation policy (intra-BSS blocking)</td><td><em>Partial — show ssid client-isolation flag</em></td></tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════ QoE VECTOR -->
+<section id="qoe">
+  <h2>§12 — QoE Proxy Vector</h2>
+  <p>QoE is not a single number. The FederatedTwinAgent computes a <strong>5-dimensional vector</strong> from live AP data. The simulator produces a matching 5-vector. The delta is δ_calibration. When a user sets a target, δ_progress tracks movement toward that goal.</p>
+
+  <div class="qoe-grid">
+    <div class="qoe-card">
+      <div class="qoe-num">QoE-1</div>
+      <div class="qoe-name">Throughput</div>
+      <div class="qoe-proxy">avg Tx Mbps / station</div>
+      <div class="qoe-desc">Mean downlink throughput per associated client. Computed as total Tx Mbps ÷ station count. Ceiling = PHY rate × airtime efficiency.</div>
+    </div>
+    <div class="qoe-card">
+      <div class="qoe-num">QoE-2</div>
+      <div class="qoe-name">Reliability</div>
+      <div class="qoe-proxy">1 − CRC Error %</div>
+      <div class="qoe-desc">Fraction of frames delivered without PHY errors. Directly maps to user-perceived packet loss before TCP layer. 1.0 = perfect, 0.0 = total RF collapse.</div>
+    </div>
+    <div class="qoe-card">
+      <div class="qoe-num">QoE-3</div>
+      <div class="qoe-name">Latency (proxy)</div>
+      <div class="qoe-proxy">M/D/1: qd = 6u / (1 − u)</div>
+      <div class="qoe-desc">Queuing delay estimate via M/D/1 model where u = Total CU %. Not directly measurable from AP — model-derived approximation. True latency requires active probing.</div>
+    </div>
+    <div class="qoe-card">
+      <div class="qoe-num">QoE-4</div>
+      <div class="qoe-name">Conn Quality</div>
+      <div class="qoe-proxy">avg SNR → MCS tier</div>
+      <div class="qoe-desc">Mean SNR across clients maps to MCS index via AP3000 rate table. MCS 0–3 = poor, 4–7 = fair, 8–11 = good. Directly caps per-client throughput ceiling.</div>
+    </div>
+    <div class="qoe-card">
+      <div class="qoe-num">QoE-5</div>
+      <div class="qoe-name">Capacity Headroom</div>
+      <div class="qoe-proxy">1 − (Tx CU + Rx CU) / 100</div>
+      <div class="qoe-desc">Fraction of channel capacity not yet consumed. 1.0 = idle, 0.0 = saturated. Determines how many additional clients the AP can absorb before QoE degrades.</div>
+    </div>
+  </div>
+
+  <h3>Convergence Stopping Conditions (CONVERGENCE_CONFIG)</h3>
+  <div class="tbl-wrap">
+  <table>
+    <thead><tr><th>Parameter</th><th>Default</th><th>Meaning</th></tr></thead>
+    <tbody>
+    <tr><td><code>max_iterations</code></td><td>5</td><td>Hard cap — never more than N GS cycles regardless of delta</td></tr>
+    <tr><td><code>progress_threshold</code></td><td>10%</td><td>Stop when δ_progress &lt;10% of target — close enough</td></tr>
+    <tr><td><code>min_improvement</code></td><td>5%</td><td>Stop when GS_n → GS_n+1 gains &lt;5% — diminishing returns</td></tr>
+    <tr><td><code>calibration_alarm</code></td><td>20%</td><td>PAUSE if δ_calibration &gt;20% — model unreliable, do not iterate</td></tr>
+    <tr><td><code>mode</code></td><td>HITL</td><td>Human approves every AP config push. <code>auto</code> = Sprint 5 only</td></tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<footer>
+  <p>© 2026 Khursheed Khan · DigitalTwinEngine Parameter Reference · AP3000-WW (AH-556680) · HiveOS · 802.11ax · June 9, 2026</p>
+</footer>
+
+</body>
+</html>

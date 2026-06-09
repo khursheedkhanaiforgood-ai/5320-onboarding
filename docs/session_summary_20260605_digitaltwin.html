@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DigitalTwinEngine — Sprint 1 Complete · Sprint 2 Plan · June 5, 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Source+Code+Pro:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Libre Baskerville', Georgia, serif; background: #fff; color: #1a1a1a; font-size: 17px; line-height: 1.75; max-width: 920px; margin: 0 auto; padding: 48px 32px 120px; }
+  header { border-bottom: 3px solid #1a1a1a; padding-bottom: 20px; margin-bottom: 12px; }
+  .dateline { font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: #666; margin-bottom: 8px; }
+  h1 { font-size: 2.2rem; font-weight: 700; line-height: 1.15; margin-bottom: 10px; }
+  .deck { font-size: 1.05rem; font-style: italic; color: #444; border-left: 3px solid #1a1a1a; padding-left: 16px; margin-top: 10px; }
+  nav#toc { position: sticky; top: 0; background: #fff; border-bottom: 1px solid #ddd; padding: 10px 0; margin: 20px 0 40px; z-index: 100; font-size: 12px; letter-spacing: 0.05em; display: flex; flex-wrap: wrap; gap: 4px 0; }
+  nav#toc a { color: #1a1a1a; text-decoration: none; margin-right: 16px; text-transform: uppercase; font-weight: 700; border-bottom: 2px solid transparent; padding-bottom: 2px; transition: border-color 0.15s; }
+  nav#toc a:hover { border-color: #1a1a1a; }
+  section { margin-bottom: 56px; }
+  h2 { font-size: 1.05rem; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 700; border-top: 2px solid #1a1a1a; padding-top: 14px; margin-bottom: 20px; }
+  h3 { font-size: 1rem; font-weight: 700; margin: 28px 0 8px; }
+  h4 { font-size: 0.95rem; font-weight: 700; font-style: italic; margin: 18px 0 6px; color: #333; }
+  p { margin-bottom: 14px; }
+  ul, ol { margin: 10px 0 16px 24px; }
+  li { margin-bottom: 6px; }
+  code { font-family: 'Source Code Pro', monospace; background: #f4f4f4; padding: 2px 6px; border-radius: 3px; font-size: 0.88em; }
+  pre { font-family: 'Source Code Pro', monospace; background: #f4f4f4; border-left: 3px solid #1a1a1a; padding: 16px; margin: 16px 0; overflow-x: auto; font-size: 0.85em; line-height: 1.6; }
+  table { width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 0.9em; }
+  th { background: #1a1a1a; color: #fff; padding: 8px 12px; text-align: left; font-size: 0.8em; letter-spacing: 0.06em; text-transform: uppercase; }
+  td { border-bottom: 1px solid #e0e0e0; padding: 8px 12px; vertical-align: top; }
+  tr:nth-child(even) td { background: #fafafa; }
+  .status-done { color: #166534; font-weight: 700; }
+  .status-proxy { color: #92400e; font-weight: 700; }
+  .status-partial { color: #1e40af; font-weight: 700; }
+  .status-blocked { color: #991b1b; font-weight: 700; }
+  .milestone { border: 2px solid #1a1a1a; padding: 20px 24px; margin: 24px 0; }
+  .milestone-label { font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; font-weight: 700; color: #666; margin-bottom: 6px; }
+  .milestone h3 { margin-top: 0; }
+  .phase-box { border: 1px solid #ccc; padding: 16px 20px; margin: 16px 0; border-radius: 4px; }
+  .phase-box h4 { margin-top: 0; color: #1a1a1a; }
+  footer { border-top: 1px solid #ddd; padding-top: 20px; margin-top: 60px; font-size: 12px; color: #999; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="dateline">Thursday, June 5, 2026 · DigitalTwinEngine · AP3000 / AH-556680</div>
+  <h1>Sprint 1 Complete — Sprint 2 Architecture Locked</h1>
+  <div class="deck">Full AP telemetry pipeline running. 100 fields per poll. 12 optimizer knobs mapped. Sprint 2 plan approved: SQLite storage, visual knob panel, Digital Twin bridge.</div>
+</header>
+
+<nav id="toc">
+  <a href="#accomplished">Accomplished</a>
+  <a href="#knobs">12 Knobs</a>
+  <a href="#radio-profile">Radio Profile</a>
+  <a href="#sprint2-plan">Sprint 2 Plan</a>
+  <a href="#digital-twin">Digital Twin Logic</a>
+  <a href="#commands">Commands</a>
+  <a href="#files">Files</a>
+  <a href="#session2">Session 2</a>
+  <a href="#session3">Session 3</a>
+  <a href="#launch">Launch Ref</a>
+  <a href="#sprints">Sprint Map</a>
+  <a href="#pending">Pending</a>
+  <a href="#session4">Session 4 (Jun 9)</a>
+  <a href="#param-ref">Param Reference</a>
+</nav>
+
+<section id="accomplished">
+  <h2>Accomplished Today</h2>
+
+  <div class="milestone">
+    <div class="milestone-label">Sprint 1 Complete</div>
+    <h3>Full AP Telemetry Pipeline — Running</h3>
+    <p>The DigitalTwinEngine Sprint 1 collector is complete and operational against AH-556680 (AP3000 WiFi 6, 192.168.0.12). Two entry points:</p>
+    <ul>
+      <li><strong>Developer mode:</strong> <code>live_monitor/main.py</code> — rich terminal table + Plotly Dash browser dashboard + CSV logs</li>
+      <li><strong>End-user mode:</strong> <code>live_monitor/widget.py</code> — macOS menu bar icon (rumps), no terminal, auto-opens browser</li>
+    </ul>
+    <p>The dashboard runs at <code>http://localhost:8050</code> (auto-selects next free port if occupied). 10 metric groups in the sidebar. Time-series subplots per radio. Boolean badge row. Per-client DataTable.</p>
+  </div>
+
+  <h3>What We Poll Each Cycle (5 commands, ~100 fields)</h3>
+  <table>
+    <tr><th>Command</th><th>Fields captured</th></tr>
+    <tr><td><code>show interface wifi0/wifi1</code></td><td>Channel, width, TX power, EIRP, noise floor, CRC%, airtime CU (3 windows), OFDMA/MU-MIMO/TWT flags, EDCA CWmin, byte counters → throughput delta, packet counters → error%, BGSCAN counts, radar count, ACSP state, all WiFi 6 feature flags</td></tr>
+    <tr><td><code>show radio profile radio_ng_11ax-*</code></td><td>Full EDCA table (CWmin/max/AIFS/TXOP per AC), Weak SNR threshold, ACSP switch thresholds, TX power floor/max, load balance params, mode flags (high-density/band-steering/safety-net)</td></tr>
+    <tr><td><code>show station</code></td><td>Per-client: MAC, IP, channel, SNR, Tx/Rx rate, VLAN, auth mode, cipher, phymode, LDPC, association time, station state</td></tr>
+    <tr><td><code>show acsp channel-info</code></td><td>ACSP best channel, channel cost, neighbor count per radio</td></tr>
+  </table>
+
+  <h3>AP3000 Confirmed State (AH-556680)</h3>
+  <ul>
+    <li>wifi0: 2.4 GHz, Ch 6, 20 MHz | wifi1: 5 GHz, Ch 149, 80 MHz</li>
+    <li>TX power: 18 dBm per chain, EIRP 22 dBm</li>
+    <li>Spatial streams: 2×2 both radios</li>
+    <li>ALL WiFi 6 features disabled: MU-MIMO=off, OFDMA=off, TWT=off, BSS Color=0, Beamforming=off</li>
+    <li>Dynamic channel width: enabled (Trigger threshold=medium)</li>
+    <li>Weak SNR threshold=15 dB · Safety net=enabled · Max clients=100 per radio</li>
+    <li>ACSP cost on Ch 149 = 0 (no co-channel neighbors)</li>
+  </ul>
+
+  <h3>Bugs Fixed This Session</h3>
+  <ul>
+    <li><strong>Port 8050 conflict:</strong> Added <code>find_free_port()</code> — auto-increments to 8051, 8052, etc.</li>
+    <li><strong>Dash IndexError on callback:</strong> New metric groups <code>EDCA Params</code> / <code>Policy Thresholds</code> used em-dash <code>—</code> in names → malformed HTML component IDs. Fixed with <code>_group_id()</code> using <code>re.sub(r'[^a-z0-9]+', '-', name.lower())</code>.</li>
+    <li><strong>Parser patterns:</strong> MAC addr, BGSCAN count, packet counter format all corrected against actual AP output.</li>
+  </ul>
+</section>
+
+<section id="knobs">
+  <h2>12 Optimizer Knobs — Coverage Status</h2>
+  <p>The simulator's <code>OPT_SEARCH</code> defines 12 non-trivial knobs for coordinate-ascent optimization. Here is the full AP3000 mapping after today's <code>show radio profile</code> parser:</p>
+
+  <table>
+    <tr><th>#</th><th>Sim Knob</th><th>Description</th><th>AP3000 Field</th><th>Current Value</th><th>Status</th></tr>
+    <tr><td>1</td><td><code>txPwr</code></td><td>TX Power (dBm)</td><td><code>tx_power_dbm</code></td><td>18 dBm</td><td class="status-done">✅ EXACT</td></tr>
+    <tr><td>2</td><td><code>bw5g</code></td><td>Channel width 5 GHz</td><td><code>channel_width_mhz</code></td><td>80 MHz</td><td class="status-done">✅ EXACT</td></tr>
+    <tr><td>3</td><td><code>maxCli</code></td><td>Max clients/radio</td><td><code>max_clients</code></td><td>100</td><td class="status-done">✅ EXACT</td></tr>
+    <tr><td>4</td><td><code>cwBe</code></td><td>CWmin Best Effort</td><td><code>cw_min_be</code> + <code>wmm_cw_min_be</code></td><td>7 / 4 (exp)</td><td class="status-done">✅ EXACT</td></tr>
+    <tr><td>5</td><td><code>txopBe</code></td><td>TXOP limit BE (µs)</td><td><code>wmm_txop_be</code></td><td>0 µs</td><td class="status-done">✅ NEW from radio profile</td></tr>
+    <tr><td>6</td><td><code>atFair</code></td><td>Airtime fairness mode</td><td><code>lb_airtime_limit_pct</code></td><td>4%</td><td class="status-done">✅ NEW proxy</td></tr>
+    <tr><td>7</td><td><code>mcsFloor</code></td><td>MCS admission floor</td><td><code>weak_snr_threshold_db</code></td><td>15 dB</td><td class="status-proxy">⚠️ PROXY (no MCS floor field in AP3000)</td></tr>
+    <tr><td>8</td><td><code>minRSSI</code></td><td>Min RSSI for assoc.</td><td><code>weak_snr_threshold_db</code></td><td>15 dB</td><td class="status-proxy">⚠️ PROXY (same field as mcsFloor)</td></tr>
+    <tr><td>9</td><td><code>dtim</code></td><td>DTIM interval</td><td><code>beacon_period_ms</code></td><td>100 ms</td><td class="status-partial">⚠️ PARTIAL (beacon ≠ DTIM; DTIM not in CLI)</td></tr>
+    <tr><td>10</td><td><code>rxSop</code></td><td>Rx SOP threshold</td><td>—</td><td>—</td><td class="status-blocked">❌ Not in AP3000 CLI</td></tr>
+    <tr><td>11</td><td><code>fragThr</code></td><td>Fragmentation threshold</td><td>—</td><td>—</td><td class="status-blocked">❌ Not in AP3000 CLI</td></tr>
+    <tr><td>12</td><td><code>rtsThr</code></td><td>RTS threshold</td><td>—</td><td>—</td><td class="status-blocked">❌ Not in AP3000 CLI</td></tr>
+  </table>
+
+  <p><strong>Score: 6 exact + 2 proxy + 1 partial = 9 of 12 covered. 3 are hardware-register values not exposed by HiveOS CLI on AP3000.</strong></p>
+</section>
+
+<section id="radio-profile">
+  <h2>show radio profile — Actual AP Output</h2>
+  <p>First time parsing <code>show radio profile radio_ng_11ax-5g</code> against live AP output. Key confirmed values:</p>
+
+  <pre>AC=be; WMM min CW=4; max CW=6; AIFS=3; txoplimit=0;
+AC=vi; WMM min CW=3; max CW=4; AIFS=1; txoplimit=3008;
+AC=vo; WMM min CW=2; max CW=3; AIFS=1; txoplimit=1504;
+Weak SNR threshold=15 dB;
+Safety net=enabled; Band steering=disabled; Load balance=disabled;
+High density=disabled;
+LB station airtime limit=4%;
+Max ACSP tx power=20dBm; Power floor=5dBm;
+Interference threshold=35%; CRC error threshold=35%; Channel utilization threshold=35%;
+Dynamic channel width=enabled; Trigger threshold=medium;
+MU-MIMO=disabled; OFDMA downlink=disabled; OFDMA uplink=disabled; TWT=disabled; BSS Color=0;</pre>
+
+  <p>All 20 new RadioMetrics fields parse cleanly. The parser is in <code>CollectorAgent._parse_radio_profile()</code>. Each radio gets its own profile command: <code>show radio profile radio_ng_11ax-2g</code> (wifi0) and <code>show radio profile radio_ng_11ax-5g</code> (wifi1).</p>
+
+  <h3>Observation: WiFi 6 Feature Flags MATCH show interface</h3>
+  <p>The radio profile and <code>show interface</code> output both confirm: MU-MIMO=disabled, OFDMA=disabled, TWT=disabled, BSS Color=0. This is the AP as configured in XIQ/EP1 — none of the WiFi 6 efficiency features have been turned on. The FederatedTwinAgent's first recommended GS_1 will likely be: enable OFDMA DL + UL (highest leverage per simulator MC sensitivity).</p>
+</section>
+
+<section id="sprint2-plan">
+  <h2>Sprint 2 Plan — Approved Architecture</h2>
+
+  <div class="phase-box">
+    <h4>Phase 1 — Structured Storage (SQLite + HTML report)</h4>
+    <p><strong>New file:</strong> <code>live_monitor/storage.py</code> — <code>SQLiteStore</code> with 4 tables: <code>sessions</code>, <code>radio_polls</code>, <code>client_polls</code>, <code>knob_change_events</code>. Stdlib only, no new deps. Stores ~30 most-queried fields (not all 100 — CSV remains lossless archive).</p>
+    <p><strong>New file:</strong> <code>live_monitor/report.py</code> — <code>generate_session_html(session_id)</code>. Runs at session end (Ctrl-C), produces <code>data/session_YYYYMMDD.html</code> with embedded Plotly charts. Open in browser, email, share — no tooling needed.</p>
+    <p><strong>Edit:</strong> <code>main.py</code> — 3 lines: open_session, write_poll per cycle, close_session + generate HTML in finally block.</p>
+  </div>
+
+  <div class="phase-box">
+    <h4>Phase 2 — 12 Knob Panel (dash-daq gauges)</h4>
+    <p><strong>New file:</strong> <code>live_monitor/knob_panel.py</code> — <code>KNOB_SPEC</code> dict + <code>build_knob_panel()</code>. Each of the 12 knobs shows: AP current value (needle), simulator target (mark), Δ caption, OPT_SEARCH range as arc. 3 unavailable knobs render greyed-out with lock icon.</p>
+    <p><strong>Edit:</strong> <code>dashboard.py</code> — add <code>daq.Gauge</code> 4×3 grid between status-row and feature-flags. New dep: <code>dash-daq>=0.5.0</code>.</p>
+  </div>
+
+  <div class="phase-box">
+    <h4>Phase 3 — Digital Twin Bridge</h4>
+    <p><strong>New file:</strong> <code>live_monitor/twin_bridge.py</code> — <code>write_twin_state()</code>, <code>ChangeDetector</code> (12-poll stabilization window), <code>BaselineManager</code>. Flask routes <code>/simulator</code> + <code>/twin-state.json</code> added to existing Dash server.</p>
+    <p><strong>New file:</strong> <code>live_monitor/assets/stadium_wifi_simulator_v3.html</code> — copy of simulator with live AP sidebar patch: <code>fetch('/twin-state.json')</code> every 5s, shows AP knob values alongside simulator sliders.</p>
+    <p>Original <code>docs/stadium_wifi_simulator_v3.html</code> stays untouched for standalone use.</p>
+  </div>
+
+  <h3>Architecture Decisions</h3>
+  <table>
+    <tr><th>Decision</th><th>Choice</th><th>Why</th></tr>
+    <tr><td>Storage format</td><td>SQLite + end-of-session HTML</td><td>SQLite = queryable history; HTML = shareable artifact. No new deps.</td></tr>
+    <tr><td>Knob visualization</td><td>dash-daq Gauge</td><td>User said "knobs" — Plotly's own instrument library, native Dash integration</td></tr>
+    <tr><td>Bridge architecture</td><td>File-polling via Flask route</td><td>Simulator is static HTML — can't reach localhost API from file://. Serve through Dash same-origin.</td></tr>
+    <tr><td>QoE comparison axis</td><td>Relative delta only</td><td>Lab AP (2 clients) vs stadium model (72K fans) — absolute scores incomparable. Compare Δ only.</td></tr>
+    <tr><td>Stabilization window</td><td>12 polls = 60 seconds</td><td>AP3000 running averages refresh ~30s. 12 polls = one fresh cycle + confirmation sample.</td></tr>
+  </table>
+</section>
+
+<section id="digital-twin">
+  <h2>Digital Twin Loop — Logic + Holes</h2>
+
+  <h3>The Vision</h3>
+  <pre>1. User moves knob in simulator (txPwr: 17 → 20 dBm)
+2. Simulator shows predicted QoE change immediately
+3. User manually SSHs into AP, applies the change
+4. Collector detects new AP value on next poll (ChangeDetector)
+5. Dashboard shows: AP actual ΔQoE vs Simulator predicted ΔQoE
+6. Delta = model accuracy for this parameter</pre>
+
+  <h3>Six Holes — All Diagnosed</h3>
+  <table>
+    <tr><th>#</th><th>Hole</th><th>Classification</th><th>Resolution</th></tr>
+    <tr><td>1</td><td>QoE definition mismatch (AP link_score vs sim composite)</td><td>Design decision</td><td>Two separate y-axes, never unified. Compare relative Δ only.</td></tr>
+    <tr><td>2</td><td>Attribution — live RF isn't controlled</td><td>Known limitation</td><td>Always show noise_floor_dbm + acsp_neighbor_count Δ alongside comparison. Panel header warns: "Live RF — not a controlled experiment."</td></tr>
+    <tr><td>3</td><td>No before/after snapshot</td><td>Solved by Phase 3</td><td>ChangeDetector: pre-change 12-poll window + post-change 12-poll window stored in knob_change_events table.</td></tr>
+    <tr><td>4</td><td>Baseline drift (lab 2 clients vs stadium 72K)</td><td>Design decision</td><td>Relative-delta-only. "Sim Scenario" dropdown: Lab / Arena / Stadium.</td></tr>
+    <tr><td>5</td><td>Where comparison panel lives</td><td>Design decision</td><td>Both: Dash dashboard card + live AP sidebar in served simulator copy.</td></tr>
+    <tr><td>6</td><td>3 unavailable knobs (rxSop/fragThr/rtsThr)</td><td>Known limitation</td><td>Greyed-out gauge with "AP3000 CLI does not expose" tooltip. Excluded from ChangeDetector.</td></tr>
+  </table>
+
+  <h3>GS Convergence Loop (Sprint 4)</h3>
+  <pre>GS_0: Baseline snapshot of all 12 knob values
+      → Simulator_GS_0 → QoE_Sim_0
+      → Real AP → QoE_AP_0
+      → δ_calibration_0 = |QoE_Sim_0 − QoE_AP_0|  (model accuracy)
+
+User sets QoE_target
+FederatedTwinAgent proposes GS_1 (highest-leverage param from MC sensitivity)
+      → Simulator_GS_1 → QoE_Sim_1 (predicted improvement)
+      [HUMAN GATE: approve push to AP?]
+      → Apply GS_1 to AP → wait 60s
+      → QoE_AP_1 (measured improvement)
+      → δ_progress_1 = |QoE_target − QoE_AP_1|
+
+Continue until: goal reached OR max iterations OR diminishing returns OR model drift alarm</pre>
+
+  <p>Two deltas, never conflate: <strong>δ_calibration</strong> = "is the simulator accurate?" · <strong>δ_progress</strong> = "are we reaching the goal?"</p>
+</section>
+
+<section id="commands">
+  <h2>Commands</h2>
+  <pre># Kill any lingering Dash server
+lsof -ti:8050 | xargs kill -9 2>/dev/null; true
+
+# Developer terminal mode (rich table + browser dashboard + CSV logs)
+cd /Users/khukhan/5320-onboarding-agent
+.venv/bin/python live_monitor/main.py
+
+# End-user menu bar widget (no terminal, macOS menu bar icon)
+cd /Users/khukhan/5320-onboarding-agent
+.venv/bin/python live_monitor/widget.py
+
+# Debug raw AP SSH output (tail while collector runs)
+tail -f /Users/khukhan/5320-onboarding-agent/live_monitor/data/debug_cli.log
+
+# Read radio profile manually (to verify parser against live AP)
+ssh admin@192.168.0.12
+show radio profile radio_ng_11ax-5g
+show radio profile radio_ng_11ax-2g</pre>
+</section>
+
+<section id="files">
+  <h2>Files Changed Today</h2>
+  <table>
+    <tr><th>File</th><th>Change</th></tr>
+    <tr><td><code>live_monitor/agents/collector.py</code></td><td>Added 22 new RadioMetrics fields (radio profile group). Added <code>_parse_radio_profile()</code> method. Updated <code>poll()</code> to call <code>show radio profile</code> per radio.</td></tr>
+    <tr><td><code>live_monitor/dashboard.py</code></td><td>Added EDCA Params + Policy Thresholds to _GROUPS (10 groups total). Added 4 new _BOOL_FLAGS (Hi-Dens, BandSteer, LoadBal, SafetyNet). Added <code>import re</code> + <code>_group_id()</code> helper. Fixed all component IDs to use sanitized ASCII. Added <code>all_chk_ids = [_group_id(g) for g in _GROUPS]</code>.</td></tr>
+    <tr><td><code>live_monitor/main.py</code></td><td>CSV radio_fields expanded with 20 new radio profile fields.</td></tr>
+    <tr><td><code>live_monitor/widget.py</code></td><td>CSV radio_fields expanded (same as main.py).</td></tr>
+  </table>
+
+  <h3>Key Code — _group_id() fix</h3>
+  <pre>def _group_id(name: str) -> str:
+    """ASCII-safe Dash component ID from a group name."""
+    return 'chk-' + re.sub(r'[^a-z0-9]+', '-', name.lower()).strip('-')</pre>
+  <p>Root cause: em-dash <code>—</code> in group names created IDs like <code>chk-radio-profile-—-edca</code>. Dash's internal routing couldn't match them, causing <code>IndexError: list index out of range</code> in <code>flat_data[ind]</code>.</p>
+</section>
+
+<section id="session2">
+  <h2>Session 2 — Definitions, Bug Fixes, IndexError Root-Cause (June 5 Evening)</h2>
+
+  <div class="milestone">
+    <div class="milestone-label">Dashboard hardened · Definitions added · Bugs resolved</div>
+    <h3>Three Bugs Closed</h3>
+    <table>
+      <tr><th>Bug</th><th>Root cause</th><th>Fix</th></tr>
+      <tr>
+        <td><strong>IndexError: list index out of range</strong> in Dash chart callback</td>
+        <td><code>_update_chart</code> registered N=10 checklist IDs as direct inputs. Any layout change (add/remove group) makes the browser's cached checklist count differ from the server's registration, causing <code>flat_data[ind]</code> to go out of bounds.</td>
+        <td>Introduced <code>dcc.Store(id='selected-metrics')</code>. A new <code>_update_store</code> callback aggregates all 10 checklists → store. The chart callback now has only 2 inputs (store + interval). Adding or removing checklist groups can never cause an IndexError again.</td>
+      </tr>
+      <tr>
+        <td><strong>Frame Fail always shows <code>?</code></strong> in status badge row</td>
+        <td><code>fail_s</code> checked <code>rm.tx_failed_pct is not None</code>, but <code>tx_failed_pct</code> is always <code>None</code> on AP3000 (not in HiveOS CLI). The correct field is <code>tx_error_pct</code>, which IS computed from packet counters.</td>
+        <td>Changed check to <code>rm.tx_error_pct is not None</code>. Frame Fail will now show the computed value.</td>
+      </tr>
+      <tr>
+        <td><strong>TWT shows <code>?</code> on wifi0</strong></td>
+        <td>Regex <code>r'(?m)^TWT=(enabled|disabled)'</code> requires TWT at the absolute start of a line. wifi0's <code>show interface</code> output has leading whitespace before <code>TWT=</code>.</td>
+        <td>Changed to <code>r'(?m)^\s*TWT\s*=\s*(enabled|disabled)'</code> in <code>_parse_interface()</code>.</td>
+      </tr>
+    </table>
+  </div>
+
+  <h3>Definitions + Hover Tooltips — Added Everywhere</h3>
+  <p>Every metric now carries a full definition, formula (if derived), and AP CLI source command. Users see them by hovering.</p>
+  <table>
+    <tr><th>Location</th><th>How to access</th><th>What you see</th></tr>
+    <tr><td>Sidebar metric labels</td><td>Hover the <code>ⓘ</code> after each label</td><td>Description + formula + AP CLI source (e.g. "CRC error rate — % received frames with CRC errors. Source: AP "CRC error rate=". Good &lt;5%…")</td></tr>
+    <tr><td>Status badges (Link Score, CRC, Frame Fail…)</td><td>Hover any badge</td><td>Full definition of that metric, thresholds explained</td></tr>
+    <tr><td>Feature flag badges (OFDMA, TWT, MU-MIMO…)</td><td>Hover any flag badge</td><td>802.11 explanation of what the feature does</td></tr>
+    <tr><td>Client table column headers</td><td>Hover any column header</td><td>Column definition (e.g. "SNR (dB): Signal-to-Noise ratio. Good >25 dB…")</td></tr>
+    <tr><td>Legend row (top of feature flags)</td><td>Always visible</td><td><strong>? = not reported by AP</strong> · <strong>OFF = explicitly disabled</strong> · <strong>ON = enabled</strong></td></tr>
+  </table>
+
+  <h3>Architecture: Store Pattern (permanent fix)</h3>
+  <pre>BEFORE (fragile):
+_update_chart ← [Input(chk-throughput), Input(chk-link-reliability), … ×10]
+→ flat_data[ind] crashes if browser count ≠ server count
+
+AFTER (robust):
+_update_store ← [Input(chk-throughput), … ×10]  →  Output('selected-metrics', 'data')
+_update_chart ← [Input('interval'), Input('selected-metrics')]
+→ chart callback always has exactly 2 inputs — count can never mismatch</pre>
+
+  <h3>Files Changed in Session 2</h3>
+  <table>
+    <tr><th>File</th><th>Change</th></tr>
+    <tr><td><code>live_monitor/dashboard.py</code></td><td>Full rewrite: <code>_DEFINITIONS</code> dict (40 entries), <code>_FLAG_DEFINITIONS</code> (14 entries), <code>_CLIENT_COL_DEFS</code> (14 entries), <code>_metric_label()</code> with ⓘ tooltip, <code>_badge(tooltip=)</code> param, <code>_legend_row()</code>, <code>dcc.Store</code> + <code>_update_store</code> callback, <code>tooltip_header</code> on DataTable. Fixed Frame Fail field check.</td></tr>
+    <tr><td><code>live_monitor/agents/collector.py</code></td><td>TWT regex: <code>r'(?m)^\s*TWT\s*=\s*(enabled|disabled)'</code> (was <code>^TWT=</code>, missed leading whitespace).</td></tr>
+  </table>
+</section>
+
+<section id="session3">
+  <h2>Session 3 — Tooltip Fix, Double Tooltip Bug, Sprint Planning (June 5 Night)</h2>
+
+  <h3>Verbatim Dialogue</h3>
+
+  <ul>
+    <li>
+      <strong>User:</strong> "The hover function does not work?"
+      <br>
+      <strong>Claude:</strong> Diagnosed two root causes: (1) <code>title=</code> on HTML elements produces native OS tooltips — invisible on macOS Safari, ~1s delay elsewhere, not styled. (2) Attempted <code>dcc.Tooltip</code> from Dash 4.x — discovered that <code>target=</code> and <code>placement=</code> kwargs were removed in Dash 4.2.0; allowed args are now: <em>background_color, bbox, border_color, children, className, direction, id, loading_text, show, style, targetable, zindex.</em>
+      <br><br>
+      Fix: created <code>live_monitor/assets/dt_tips.js</code> — a pure-JavaScript floating tooltip div using <code>position:fixed</code> relative to the viewport. Any element with a <code>data-tip="…"</code> attribute triggers it on hover. <code>position:fixed</code> is relative to the browser viewport, not to any scroll container, so it escapes <em>all</em> <code>overflow:auto</code> or <code>overflow:hidden</code> clipping in parent elements including the sidebar.
+    </li>
+    <li>
+      <strong>User:</strong> "The middle portion hovers give me two instances of explanations? The left column is good."
+      <br>
+      <strong>Claude:</strong> Found root cause: <code>_badge()</code> was setting <em>both</em> <code>className='dt-tip'</code> (CSS <code>::after</code> pseudo-element tooltip) <em>and</em> <code>data-tip=…</code> (JS floating tooltip) simultaneously. The sidebar ⓘ icons only had <code>data-tip</code> so they were fine. Fix: removed <code>'className': 'dt-tip'</code> from the <code>extra</code> dict in <code>_badge()</code>. Single tooltip source everywhere. Also simplified <code>dt_tips.css</code> to only style the <code>#dt-floating-tip</code> div — no <code>::after</code> rules remaining.
+    </li>
+    <li>
+      <strong>User:</strong> "After this please update EOD HTML with verbatim dialogue as linked list and close the day. I want to tie [the sprints] to the v3 simulator and publish on Railway for colleagues to test drive. But then the harder part for the tuning comes into play — the knobs we move. How do we test degraded RF conditions or inject errors into the link to simulate whatever we want to figure out how the 12 knobs should be changed? That is for tomorrow — keep in memory."
+      <br>
+      <strong>Claude:</strong> Saved degraded RF injection research question to memory with 5 candidate approaches ranked by implementation cost. Updated EOD HTML and sprint map. See Sprint Map section below.
+    </li>
+  </ul>
+
+  <h3>Files Changed in Session 3</h3>
+  <table>
+    <tr><th>File</th><th>Change</th></tr>
+    <tr><td><code>live_monitor/assets/dt_tips.js</code></td><td>NEW — floating JS tooltip. position:fixed, data-tip attribute trigger, viewport-aware positioning, MutationObserver for Dash re-renders.</td></tr>
+    <tr><td><code>live_monitor/assets/dt_tips.css</code></td><td>NEW (then simplified) — only styles #dt-floating-tip div. Removed all ::after CSS rules (were causing double tooltips).</td></tr>
+    <tr><td><code>live_monitor/dashboard.py</code></td><td>Sidebar: html.Span('ⓘ', **{'data-tip': defn}) in Checklist labels. _badge(): removed className='dt-tip', kept only data-tip. DataTable tooltip_header: simplified to plain string format for Dash 4.x.</td></tr>
+  </table>
+</section>
+
+<section id="sprints">
+  <h2>Sprint Map — Tomorrow and Beyond</h2>
+
+  <div class="phase-box">
+    <h4>Sprint 2 Phase 1 — Structured Storage (START HERE)</h4>
+    <p>New file: <code>live_monitor/storage.py</code> — <code>SQLiteStore</code> with 4 tables: <code>sessions</code>, <code>radio_polls</code>, <code>client_polls</code>, <code>knob_change_events</code>. Stdlib only. Wire into <code>main.py</code> in 3 lines. On Ctrl-C: <code>generate_session_html()</code> auto-produces <code>data/session_YYYYMMDD.html</code> with embedded Plotly charts — open, email, share, no tooling needed.</p>
+  </div>
+
+  <div class="phase-box">
+    <h4>Sprint 2 Phase 2 — 12 Knob Panel</h4>
+    <p>New file: <code>live_monitor/knob_panel.py</code> — <code>KNOB_SPEC</code> + <code>build_knob_panel()</code>. Add <code>dash-daq</code> gauges to dashboard: current AP value (needle), simulator target (mark), Δ caption, OPT_SEARCH range as arc. 3 unavailable knobs (rxSop/fragThr/rtsThr) rendered greyed-out with lock icon.</p>
+  </div>
+
+  <div class="phase-box">
+    <h4>Sprint 2 Phase 3 — Digital Twin Bridge + v3 Simulator Tie-in</h4>
+    <p>New file: <code>live_monitor/twin_bridge.py</code> — writes <code>/twin-state.json</code> with live AP knob values every poll. New Flask route <code>/simulator</code> serves a copy of <code>stadium_wifi_simulator_v3.html</code> from <code>assets/</code>. The simulator copy fetches <code>/twin-state.json</code> every 5s and displays AP actual values alongside each simulator slider. This is the first visible Digital Twin comparison: <em>"simulator says txPwr=17, AP says 18"</em>.</p>
+  </div>
+
+  <div class="phase-box">
+    <h4>Railway Deploy — Architecture Decision Required</h4>
+    <p><strong>Constraint:</strong> Railway cloud cannot SSH to your local AP. Collector must run locally. Two options:</p>
+    <ul>
+      <li><strong>Option A (recommended):</strong> Local collector → writes to Railway PostgreSQL → Railway serves Dash dashboard reading from DB. Colleagues get a live-updating browser dashboard. Collector stays on your Mac.</li>
+      <li><strong>Option B:</strong> Run everything locally + expose via ngrok. Simpler but requires ngrok running.</li>
+    </ul>
+    <p>Option A requires: replacing in-memory <code>DataStore</code> with a PostgreSQL-backed version for the Railway deployment. Local run keeps the in-memory <code>DataStore</code> + writes to PG simultaneously.</p>
+  </div>
+
+  <div class="phase-box">
+    <h4>Degraded RF Injection — How to Stress-Test the 12 Knobs</h4>
+    <p><strong>The problem:</strong> Lab AP (2 clients, clean RF) will always look "healthy." The optimizer will always recommend the same thing: enable WiFi 6 features. To test the knobs meaningfully, we need degraded RF conditions — high CRC, high CU, low SNR, interference — without going to a real stadium.</p>
+
+    <p><strong>Five approaches (ranked by cost):</strong></p>
+    <table>
+      <tr><th>#</th><th>Method</th><th>What it stresses</th><th>Cost</th></tr>
+      <tr><td>1</td><td><code>iperf3 -c &lt;client&gt; -t 300 -P 8</code></td><td>Tx/Rx CU, throughput saturation</td><td>Zero — use now</td></tr>
+      <tr><td>2</td><td>Second AP on Ch 149 or Ch 11 nearby</td><td>interference_cu_pct, ACSP neighbor cost</td><td>Zero — already have it</td></tr>
+      <tr><td>3</td><td>Wrap client in foil / move to range edge</td><td>SNR drop, weak_snr_threshold kicks in</td><td>Zero</td></tr>
+      <tr><td>4</td><td>Synthetic DataStore injection (<code>--inject scenario.json</code>)</td><td>Any field, fully controlled, repeatable</td><td>1 day code</td></tr>
+      <tr><td>5</td><td>HiveOS <code>kdebug</code> commands</td><td>Potentially CRC injection at kernel level</td><td>Research needed</td></tr>
+    </table>
+
+    <p><strong>Recommended path:</strong> Implement synthetic injection (#4) first — define a set of "degraded scenario" JSON files (high-CU stadium, high-CRC interference, low-SNR edge) and replay them into <code>DataStore</code>. This lets us test the optimizer in software before touching real RF. Then layer in iperf3 (#1) for live RF stress tests and co-channel AP (#2) for interference testing. The synthetic mode also enables <em>unit testing</em> of the FederatedTwinAgent — you can assert "given this degraded input, the agent should recommend X knob change."</p>
+  </div>
+
+  <div class="phase-box">
+    <h4>Sprint 3 — FederatedTwinAgent + SimulatorAgent</h4>
+    <p>Python port of v3 simulator equations into <code>live_monitor/agents/simulator.py</code>. FederatedTwinAgent: reads AP live metrics → maps to 15 simulator params → computes δ_calibration → uses MC sensitivity oracle to rank which knob to change. Outputs GS_1 recommendation.</p>
+  </div>
+
+  <div class="phase-box">
+    <h4>Sprint 4 — GS Convergence Loop (HITL)</h4>
+    <p>Full Golden-Set iteration: GS_0 baseline → FederatedTwinAgent proposes GS_1 → human approves AP push → wait 60s (12 polls) → measure QoE_AP_1 → compare δ_progress. GS History Panel in dashboard. Convergence config UI (max iterations, improvement threshold, calibration alarm). AP is production — human gate on every push, never auto-deploy.</p>
+  </div>
+</section>
+
+<section id="launch">
+  <h2>Launch Reference — All Commands in Sequence</h2>
+
+  <h3>Option A — Developer Mode (terminal table + browser dashboard)</h3>
+  <pre># Terminal 1: start the collector + Rich table + Dash
+cd /Users/khukhan/5320-onboarding-agent
+.venv/bin/python live_monitor/main.py
+# → Rich table renders in THIS terminal, updates every 5 s
+# → Browser opens automatically at http://localhost:8050
+# → If browser didn't open: paste http://localhost:8050 manually
+# → Ctrl-C to stop. CSV logs auto-saved to live_monitor/data/</pre>
+
+  <h3>Option B — End-User Widget Mode (menu bar, no terminal clutter)</h3>
+  <pre># macOS menu bar icon only — no Rich table
+cd /Users/khukhan/5320-onboarding-agent
+.venv/bin/python live_monitor/widget.py
+# → 📡 icon appears in menu bar
+# → Click icon → Open Dashboard → http://localhost:8050
+# → Quit via menu bar → Quit</pre>
+
+  <h3>Option C — Debug Mode (see every raw SSH command and AP response)</h3>
+  <pre># Step 1: enable debug logging in .env
+echo "DEBUG_CLI=true" >> live_monitor/.env
+
+# Step 2: start collector normally (either main.py or widget.py)
+.venv/bin/python live_monitor/main.py
+
+# Step 3: in a SECOND terminal, tail the raw log
+tail -f /Users/khukhan/5320-onboarding-agent/live_monitor/data/debug_cli.log
+# → Every SSH command + full AP response printed in real time
+# → Ctrl-C to stop tail (collector keeps running)
+
+# To turn debug off again:
+sed -i '' 's/DEBUG_CLI=true/DEBUG_CLI=false/' live_monitor/.env</pre>
+
+  <h3>Port Conflict / Force Kill</h3>
+  <pre># Kill anything holding port 8050 (if Dash startup fails)
+lsof -ti:8050 | xargs kill -9 2>/dev/null; true</pre>
+
+  <h3>Manual AP SSH (verify parser against live output)</h3>
+  <pre>ssh admin@192.168.0.12
+show interface wifi0
+show interface wifi1
+show radio profile radio_ng_11ax-5g
+show radio profile radio_ng_11ax-2g
+show station
+show acsp channel-info
+exit</pre>
+</section>
+
+<section id="pending">
+  <h2>Pending — Next Session</h2>
+
+  <h3>Sprint 2 Phase 1 (start here)</h3>
+  <ol>
+    <li>Create <code>live_monitor/storage.py</code> — <code>SQLiteStore</code> with 4-table schema</li>
+    <li>Wire into <code>main.py</code> — 3 lines (open_session, write_poll, close_session + HTML)</li>
+    <li>Verify: 2-min run → <code>digital_twin.db</code> populates, <code>session_YYYYMMDD.html</code> auto-opens</li>
+  </ol>
+
+  <h3>Sprint 2 Phase 2</h3>
+  <ol>
+    <li>Create <code>live_monitor/knob_panel.py</code> with <code>KNOB_SPEC</code> for all 12 knobs</li>
+    <li>Install <code>dash-daq>=0.5.0</code></li>
+    <li>Add 4×3 gauge grid to dashboard between status-row and feature-flags</li>
+  </ol>
+
+  <h3>Questions to Think Through</h3>
+  <ul>
+    <li><strong>Storage sorting:</strong> SQLite enables querying by time, by radio, by session. The HTML report will show metrics grouped by category (RF health, EDCA, thresholds) not by CSV column order. Is that the "useful" view you had in mind?</li>
+    <li><strong>Knob values on AP vs simulator:</strong> All WiFi 6 features are OFF on this AP (MU-MIMO, OFDMA, TWT). The simulator has them all ON (locked=true in OPT_LOCK). This means GS_1 recommendation from FederatedTwinAgent will almost certainly be: "enable OFDMA DL" (×1.35 capacity multiplier in simulator). Do you want to test this manually as a first calibration experiment?</li>
+    <li><strong>AP extraction completeness:</strong> The 3 unavailable knobs (rxSop, fragThr, rtsThr) are truly not in HiveOS CLI for AP3000. MBR (Minimum Basic Rate) also not found in radio profile output — the field exists in the simulator (<code>mbr:24</code> in OPT_LOCK) but AP3000 doesn't expose it. We have everything the AP can give us.</li>
+  </ul>
+</section>
+
+<section id="session4">
+  <h2>Session 4 — June 9, 2026</h2>
+
+  <h3>Console Cable — What It Does and Doesn't Add</h3>
+  <p>Connected AP1 console cable (USB-to-serial: <code>/dev/tty.usbserial-BG01WC92</code>). Correct baud rate confirmed: <strong>115200</strong> (not 9600). Connect via <code>screen /dev/tty.usbserial-BG01WC92 115200</code>.</p>
+
+  <h4>Console vs SSH for automated data collection</h4>
+  <table>
+    <tr><th>Dimension</th><th>Console (serial)</th><th>SSH (Paramiko)</th></tr>
+    <tr><td>Baud rate</td><td>115200 = ~14 KB/s</td><td>~1 MB/s (LAN)</td></tr>
+    <tr><td>5-command poll feasibility</td><td>~2 s per command = 10+ s total → exceeds 5 s poll interval</td><td>Full cycle in &lt;1 s</td></tr>
+    <tr><td>Concurrent sessions</td><td>1 (one serial cable)</td><td>Multiple</td></tr>
+    <tr><td>Blocks SSH?</td><td><strong>No</strong> — console and SSH are fully independent</td><td>N/A</td></tr>
+    <tr><td>Same CLI commands?</td><td>Yes — identical show commands</td><td>Yes</td></tr>
+  </table>
+
+  <p><strong>Conclusion:</strong> Console adds no value to automated data collection. SSH remains the sole collector transport. Console is valuable as a physical safety net for: boot-time kernel output, kernel panics, password recovery, management IP loss, firmware upgrade verification, and kdebug streams.</p>
+
+  <h4>Console screen commands</h4>
+  <pre># Find adapter
+ls /dev/tty.*
+# → /dev/tty.usbserial-BG01WC92
+
+# Connect
+screen /dev/tty.usbserial-BG01WC92 115200
+
+# List sessions
+screen -ls
+
+# Kill a detached session
+screen -X -S &lt;id&gt; quit
+
+# Exit screen
+Ctrl+A then K then y</pre>
+
+  <h3>Verbatim Dialogue — Console Cable Clarification</h3>
+  <ul>
+    <li><strong>User:</strong> "I have a console cable to connect directly to AP1. I want to see if that will help with the data collection from the APs, in addition to the SSH or not?"
+      <br><em>Answer: Console adds no value to automated collection (baud rate, exclusive port). Keep SSH. Console = recovery tool only.</em></li>
+    <li><strong>User:</strong> "Are you sure it is 9600 baud? Screen's still blank."
+      <br><em>Answer: Corrected to 115200. AP3000 console = 115200 baud, 8N1.</em></li>
+    <li><strong>User:</strong> "Got it. Now, are you saying if I have a session on the console then ALL other SSHs are disabled?"
+      <br><em>Answer: No — clarification issued. Console port is exclusive (one cable at a time) but console session does NOT block SSH. They are completely independent management paths.</em></li>
+    <li><strong>User:</strong> "I am in the console."
+      <br><em>Console confirmed working. SSH continues in parallel.</em></li>
+    <li><strong>User:</strong> "Now, what can I do here that I cannot on SSH?"
+      <br><em>Answer: Boot-time kernel output, U-Boot/bootloader access, kernel panic capture, password recovery, firmware upgrade monitoring, recovery when management IP unreachable. On a running healthy AP: CLI is identical.</em></li>
+  </ul>
+</section>
+
+<section id="param-ref">
+  <h2>Parameter Reference Document — Built June 9</h2>
+
+  <p>A comprehensive 802.11 parameter reference document was built today covering every metric collected from the AP, displayed on the dashboard, and fed into the Digital Twin calibration loop.</p>
+
+  <div class="milestone">
+    <div class="milestone-label">New Deliverable</div>
+    <h3>DigitalTwinEngine Parameter Reference</h3>
+    <p><code>docs/dt_parameter_reference.html</code> — open locally: <a href="dt_parameter_reference.html">dt_parameter_reference.html</a></p>
+  </div>
+
+  <h4>Sections in the reference document</h4>
+  <ol>
+    <li><strong>§0 Overview</strong> — Source tier legend (AP Direct / Computed / Unavailable / Static DPM), the 60/15 split explained</li>
+    <li><strong>§1 Throughput</strong> — Tx/Rx Mbps: formula (Δbytes/Δt × 8/1e6), AP3000 ceiling (573 Mbps PHY, 5 GHz 80 MHz MCS 11)</li>
+    <li><strong>§2 Link Reliability</strong> — Link Score (HiveOS composite, 4 × 25-pt buckets), CRC Error % (802.11-2020 §9.2.4.8, CRC-32-MPEG2), Frame Failure %, Tx Retry % (802.11 Retry bit §9.2.4.1.3), CRC Airtime %</li>
+    <li><strong>§3 RF Health</strong> — Noise Floor: thermal N₀ = kT × BW = −174 dBm/Hz + NF; 802.11-2020 §17.3.10.7; SNR = Signal − Noise Floor; Weak SNR threshold on AP3000 = 15 dB</li>
+    <li><strong>§4 Airtime Detail</strong> — Rx/Tx Airtime, ST Tx/Rx CU, Snap Tx/Rx CU: all 802.11-2020 §11.11.9</li>
+    <li><strong>§5 Channel Utilization</strong> — Tx/Rx/Interference/Total CU % with ACSP trigger thresholds (35%); 802.11k / 802.11-2020 §11.11.9; CCA threshold = −62 dBm</li>
+    <li><strong>§6 TX Power</strong> — Conducted power vs EIRP; FCC Part 15.247 / ETSI EN 301 893; AP3000: 18 dBm conducted + 4 dBi = 22 dBm EIRP</li>
+    <li><strong>§7 Capacity &amp; RRM</strong> — Station Count (802.11 AID, §9.4.1.5), Chan Width (802.11ax §27.3.9), ACSP Cost, ACSP Neighbors, BSS Color (802.11ax §26.17)</li>
+    <li><strong>§8 IEEE 802.11 Feature Flags</strong> — OFDMA DL/UL (§27.3.12/13), MU-MIMO (§22.3.11.10 + §27.3.10), TWT (§26.8), Short GI (§20.4.7.10), Beamforming (§22.3.11.8), A-MPDU (§9.7.2), DFS (§11.8), A-MSDU (§9.7.1)</li>
+    <li><strong>§9 HiveOS Proprietary Flags</strong> — Dyn CW, Hi-Dens, BandSteer, LoadBal, SafetyNet: all vendor-specific, no 802.11 clause</li>
+    <li><strong>§10 15-Parameter AP → Simulator Bridge</strong> — The complete calibration bridge table with DPM section, simulator param name, AP CLI source, tier for all 15 dynamic inputs</li>
+    <li><strong>§11 45 Static DPM Parameters</strong> — All sections A–F showing which params have no AP CLI equivalent (site geometry, client device types, applications, security config intent)</li>
+    <li><strong>§12 QoE Proxy Vector</strong> — 5 dimensions (Throughput, Reliability, Latency proxy via M/D/1, Connection Quality via SNR→MCS, Capacity Headroom); convergence stopping conditions table</li>
+  </ol>
+
+  <h4>Motivation for this document</h4>
+  <p>The dashboard displays 35+ metrics. The simulator takes 60 parameters. To close the Digital Twin calibration loop, every input must be formally defined — its 802.11 clause, formula, valid range, and whether the AP can provide it or not. Without this reference, the FederatedTwinAgent has no authoritative source for what each field means or which 45 parameters must come from the DPM.</p>
+</section>
+
+<footer>
+  <p>© 2026 Khursheed Khan · DigitalTwinEngine EOD · June 5 (Sprint 1–3) + June 9 (Console + Parameter Reference) · AP3000 AH-556680</p>
+</footer>
+
+</body>
+</html>
