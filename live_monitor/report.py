@@ -563,7 +563,8 @@ function resetDefault() {{
 document.querySelectorAll('#metric-panel .mx-cb').forEach(cb =>
   cb.addEventListener('change', buildExplorer));
 
-buildExplorer();  // initial render
+// defer so flex layout is painted before Plotly measures container width
+requestAnimationFrame(() => requestAnimationFrame(buildExplorer));
 
 /* ── Native tables (no CDN — works on file://) ───────────────────────────── */
 function filterTable(inputId, tbodyId) {{
@@ -601,6 +602,10 @@ function switchTab(name, btn) {{
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   document.getElementById('tab-' + name).classList.add('active');
   btn.classList.add('active');
+  // resize explorer chart in case it was rendered while hidden
+  if (document.getElementById('explorer-chart')?.data) {{
+    Plotly.Plots.resize('explorer-chart');
+  }}
 }}
 
 /* wire column-header sort on both tables */
