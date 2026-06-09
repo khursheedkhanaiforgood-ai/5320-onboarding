@@ -211,6 +211,22 @@ class SQLiteStore:
 
         CREATE INDEX IF NOT EXISTS ix_kce_session_ts ON knob_change_events(session_id, ts);
 
+        -- Raw CLI snapshots — verbatim SSH output for regression / replay testing.
+        -- Each poll stores every CLI command's raw text keyed by command_tag.
+        -- Replay: read rows for a session, pipe raw_text back through the parser,
+        -- compare against stored radio_polls to verify parser parity.
+        CREATE TABLE IF NOT EXISTS raw_cli_snapshots (
+            id          INTEGER PRIMARY KEY AUTOINCREMENT,
+            session_id  INTEGER NOT NULL REFERENCES sessions(id),
+            ts          TEXT    NOT NULL,
+            command_tag TEXT    NOT NULL,
+            radio       TEXT,
+            raw_text    TEXT    NOT NULL
+        );
+
+        CREATE INDEX IF NOT EXISTS ix_rcs_session_ts  ON raw_cli_snapshots(session_id, ts);
+        CREATE INDEX IF NOT EXISTS ix_rcs_cmd         ON raw_cli_snapshots(session_id, command_tag);
+
         COMMIT;
         """)
 
@@ -315,6 +331,24 @@ class SQLiteStore:
         except Exception:
             _log.error("write_knob_event failed", exc_info=True)
 
+    def write_raw_snapshot(self, session_id: int, command_tag: str,
+                           raw_text: str, radio: str = None,
+                           ts: str = None) -> None:
+        """Store verbatim CLI output for regression / replay testing.
+
+        command_tag identifies which SSH command produced the text
+        (e.g. 'show_interface_wifi0', 'show_station', 'show_acsp').
+        Never raises — a storage failure must not stop the polling loop.
+        """
+        try:
+            self._conn.execute(
+                "INSERT INTO raw_cli_snapshots"
+                "(session_id,ts,command_tag,radio,raw_text) VALUES (?,?,?,?,?)",
+                (session_id, ts or _now_iso(), command_tag, radio, raw_text),
+            )
+        except Exception:
+            _log.error("write_raw_snapshot failed", exc_info=True)
+
     # ── Read (for report.py) ───────────────────────────────────────────────────
 
     def iter_radio_polls(self, session_id: int) -> list[dict]:
@@ -327,6 +361,24 @@ class SQLiteStore:
         rows = self._conn.execute(
             "SELECT * FROM client_polls WHERE session_id=? ORDER BY ts",
             (session_id,)).fetchall()
+        return [dict(r) for r in rows]
+
+    def iter_raw_snapshots(self, session_id: int,
+                           command_tag: str = None) -> list[dict]:
+        """Return raw CLI snapshots for a session, optionally filtered by tag.
+
+        Use for regression testing: read raw_text rows, re-parse, compare
+        against stored radio_polls to verify parser correctness after changes.
+        """
+        if command_tag:
+            rows = self._conn.execute(
+                "SELECT * FROM raw_cli_snapshots "
+                "WHERE session_id=? AND command_tag=? ORDER BY ts",
+                (session_id, command_tag)).fetchall()
+        else:
+            rows = self._conn.execute(
+                "SELECT * FROM raw_cli_snapshots WHERE session_id=? ORDER BY ts",
+                (session_id,)).fetchall()
         return [dict(r) for r in rows]
 
     def avg_snr_by_ts_radio(self, session_id: int) -> list[dict]:
@@ -410,6 +462,14 @@ if __name__ == '__main__':
     print(f'  radio_polls → {len(polls)} row(s), {len(polls[0])} columns')
     print(f'  client_polls → {len(clients)} row(s)')
     print(f'  channel={polls[0]["channel"]}, link_score={polls[0]["link_score"]}')
+
+    # Raw CLI snapshot
+    fake_cli = "show interface wifi1\nNoise floor=-95dBm\nTotal utilization=12\n"
+    s.write_raw_snapshot(sid, 'show_interface_wifi1', fake_cli, radio='wifi1')
+    snaps = s.iter_raw_snapshots(sid)
+    print(f'  raw_cli_snapshots → {len(snaps)} row(s)')
+    print(f'  command_tag={snaps[0]["command_tag"]}, radio={snaps[0]["radio"]}')
+    assert 'Noise floor' in snaps[0]['raw_text'], "raw_text not stored"
 
     s.close_session(sid)
     sess = s.get_session(sid)
