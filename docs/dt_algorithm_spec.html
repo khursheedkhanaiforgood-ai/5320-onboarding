@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DigitalTwinEngine — Algorithm Specification v1.0</title>
+<title>DigitalTwinEngine — Algorithm Specification v1.2</title>
 <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box}
@@ -89,24 +89,33 @@ footer{margin-top:72px;border-top:1px solid #ddd;padding-top:16px;
   <a href="session_summary_20260603_digital_twin.html">Sprint EOD</a>
   <a href="dt_parameter_reference.html">Parameter Ref</a>
   <a href="#a1">Algo 1: GS Loop</a>
-  <a href="#a2">Algo 2: MC Oracle</a>
-  <a href="#a3">Algo 3: Optimizer</a>
+  <a href="#a2">Algo 2: Hessian Oracle</a>
+  <a href="#a3">Algo 3: Newton Optimizer</a>
   <a href="#a4">Algo 4: QoE Vector</a>
-  <a href="#bridge">Bridge Table</a>
-  <a href="#knobs">12 Knobs</a>
-  <a href="#config">Config</a>
-  <a href="#audit">Audit Trail</a>
-  <a href="#trace">Traceability</a>
+  <a href="#a5">Algo 5: BO Pre-Search</a>
+  <a href="#interactions">§7 Interactions</a>
+  <a href="#optprog">§8 Opt Progression</a>
+  <a href="#bridge">§9 Bridge Table</a>
+  <a href="#knobs">§10 12 Knobs</a>
+  <a href="#config">§11 Config</a>
+  <a href="#audit">§12 Audit Trail</a>
+  <a href="#trace">§13 Traceability</a>
 </nav>
 
 <h1>DigitalTwinEngine — Algorithm Specification</h1>
 <div class="meta">
-  <span class="version-badge">v1.0</span>
+  <span class="version-badge">v1.2</span>
   <span class="status-badge">APPROVED</span>
   &nbsp;&nbsp;
-  Authored: 2026-06-09 &nbsp;·&nbsp; AP Platform: AP3000 HiveOS (WiFi 6) &nbsp;·&nbsp;
-  Scope: Sprint 2b–Sprint 4 &nbsp;·&nbsp;
+  Authored: 2026-06-09 &nbsp;·&nbsp; Revised: 2026-06-09 &nbsp;·&nbsp;
+  AP Platform: AP3000 HiveOS (WiFi 6) &nbsp;·&nbsp;
+  Scope: Sprint 2b–Sprint 5 &nbsp;·&nbsp;
   Audit reference: <code>docs/dt_algorithm_spec.html</code>
+  <br><span style="font-size:11px;margin-top:4px;display:inline-block">
+    v1.1: Added windowed QoE_actual, gs_label in radio_polls, continuous polling invariant &nbsp;·&nbsp;
+    v1.2: Replaced coordinate ascent with Newton+Hessian; added MINLP Branch&amp;Bound,
+    Bayesian Optimization (GP), MDP/RL progression; added interaction dependency graph
+  </span>
 </div>
 
 <div class="callout info">
@@ -167,6 +176,60 @@ footer{margin-top:72px;border-top:1px solid #ddd;padding-top:16px;
   because they are RF outcomes, not configuration choices.
 </div>
 
+<h3>Two Clocks — Invariant</h3>
+<p>
+  <strong>The AP polling loop never stops.</strong> It runs on CLOCK 1 continuously at
+  POLL_INTERVAL. The GS convergence loop runs on CLOCK 2 as discrete triggered events
+  overlaid on top. This invariant must hold in all sprint implementations.
+</p>
+<table>
+  <thead><tr><th>Clock</th><th>Frequency</th><th>What it does</th><th>Stops when</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><strong>CLOCK 1</strong> — Data plane</td>
+      <td>Every POLL_INTERVAL (15 s)</td>
+      <td>SSH poll → <code>radio_polls</code> row. Continuous RF ground truth.</td>
+      <td>Only on clean session exit or AP disconnect.</td>
+    </tr>
+    <tr>
+      <td><strong>CLOCK 2</strong> — Control plane</td>
+      <td>User-triggered; one GS iteration at a time</td>
+      <td>MC oracle → optimizer → HITL gate → AP push → stabilization → QoE sample.</td>
+      <td>On any convergence verdict.</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>QoE_actual_n is a Windowed Average</h3>
+<p>
+  A single poll is noisy. QoE_actual_n is the mean over the last
+  <code>window_polls</code> (default 5) radio_polls rows collected while GS_n was active,
+  after the stabilization window has elapsed.
+</p>
+<div class="eq">
+  QoE_actual_n = mean{ compute_qoe(row) : row ∈ radio_polls<br>
+  &nbsp;&nbsp;WHERE session_id = S<br>
+  &nbsp;&nbsp;AND ts &gt; (gs_push_ts_n + stabilization_polls × POLL_INTERVAL)<br>
+  &nbsp;&nbsp;AND ts &lt; gs_push_ts_{n+1}<br>
+  &nbsp;&nbsp;ORDER BY ts DESC LIMIT window_polls }
+</div>
+<p>
+  Each <code>radio_polls</code> row carries a <code>gs_label</code> column
+  (NULL before first GS push; 'GS_0', 'GS_1', … thereafter), populated by
+  <code>FederatedTwinAgent</code> from the <code>knob_change_events</code> timestamp.
+  This enables direct SQL queries such as:
+</p>
+<div class="algo" style="border-left-color:#0e7490"><span class="cmt">-- Before/after comparison, no joins needed</span>
+SELECT gs_label,
+       AVG(crc_error_pct)   AS avg_crc,
+       AVG(total_cu_pct)    AS avg_cu,
+       AVG(link_score)      AS avg_score,
+       COUNT(*)             AS polls
+FROM   radio_polls
+WHERE  session_id = ?
+GROUP  BY gs_label
+ORDER  BY gs_label;</div>
+
 
 <!-- ══════════════════════════════════════════════════════════════════════ -->
 <h2 id="a1">§2 — Algorithm 1: GS Convergence Loop</h2>
@@ -178,7 +241,7 @@ footer{margin-top:72px;border-top:1px solid #ddd;padding-top:16px;
     <tr><td><code>AP_IP</code></td><td>string</td><td>SSH target</td></tr>
     <tr><td><code>DPM_static</code></td><td>dict[45]</td><td>Static site/client/app params from user DPM</td></tr>
     <tr><td><code>QoE_target</code></td><td>float[N_dim]</td><td>User-supplied target per active QoE dimension</td></tr>
-    <tr><td><code>CONVERGENCE_CONFIG</code></td><td>dict</td><td>See §6</td></tr>
+    <tr><td><code>CONVERGENCE_CONFIG</code></td><td>dict</td><td>See §11</td></tr>
     <tr><td>→ <code>GS_history</code></td><td>list[GS_record]</td><td>All GS iterations written to DB</td></tr>
     <tr><td>→ <code>convergence_verdict</code></td><td>enum</td><td>CONVERGED | PLATEAU | DIVERGED | MAX_ITER | USER_HALT</td></tr>
   </tbody>
@@ -261,140 +324,199 @@ footer{margin-top:72px;border-top:1px solid #ddd;padding-top:16px;
 
 
 <!-- ══════════════════════════════════════════════════════════════════════ -->
-<h2 id="a2">§3 — Algorithm 2: Monte Carlo Sensitivity Oracle</h2>
+<h2 id="a2">§3 — Algorithm 2: Hessian Oracle (Gradient + Full Interaction Matrix)</h2>
 
 <p>
-  The MC oracle computes the local gradient of QoE with respect to each of the
-  12 optimizer knobs at the current operating point GS_n. It uses central-difference
-  finite differences — not random sampling. The word "Monte Carlo" refers to the
-  repeated simulation runs (one per knob × 2 directions = 24 total per iteration),
-  not to random exploration of parameter space.
+  The oracle computes both the <strong>gradient</strong> (first-order: how QoE changes per knob)
+  and the <strong>Hessian</strong> (second-order: how knobs interact with each other).
+  The Hessian off-diagonal entry H[i,j] ≠ 0 means knobs i and j are coupled —
+  changing both together produces a different result than the sum of changing each alone.
+  This is the mathematical capture of all pairwise dependencies.
+</p>
+<p>
+  All calls use central-difference finite differences — not random sampling. Total cost:
+  24 runs for the gradient + 264 runs for the off-diagonal Hessian = <strong>288 simulator
+  calls per iteration</strong>. At ~1 ms per call: ~0.3 seconds. Acceptable.
 </p>
 
 <div class="callout info">
-  <strong>Why central difference, not forward difference?</strong> Central difference
-  (<code>(f(x+h) − f(x−h)) / 2h</code>) achieves second-order accuracy with the same
-  number of function evaluations as forward difference. The simulator is cheap
-  (milliseconds), so 24 runs per iteration is acceptable.
+  <strong>Why compute the full Hessian instead of just the gradient?</strong>
+  Coordinate ascent (gradient only) changes one knob at a time and zigzags toward the
+  optimum when knobs interact. Newton's method (gradient + Hessian) takes a joint step
+  across all 12 knobs simultaneously, in the direction that accounts for all interactions.
+  The Hessian IS the interaction matrix — its off-diagonal entries are the coupling strengths
+  between knob pairs, and it is also what auditors and regulators can inspect to understand
+  why a particular set of changes was recommended.
 </div>
 
-<div class="algo"><span class="kw">ALGORITHM</span> <span class="fn">MC_Sensitivity_Oracle</span>(GS_n, DPM_static):
+<div class="algo"><span class="kw">ALGORITHM</span> <span class="fn">Hessian_Oracle</span>(GS_n, DPM_static):
 
-  <span class="cmt">── Constants ─────────────────────────────────────────────────────────────</span>
-  h ← <span class="num">0.05</span>   <span class="cmt">// perturbation factor = ±5% of current value</span>
-  K ← <span class="num">12</span>    <span class="cmt">// number of search knobs</span>
+  h ← <span class="num">0.05</span>    <span class="cmt">// perturbation factor ±5%</span>
+  K ← <span class="num">12</span>     <span class="cmt">// knobs</span>
   D ← len(active_QoE_dimensions)
 
-  sensitivity ← zeros(K × D)   <span class="cmt">// output matrix: ∂QoE_d / ∂θ_i</span>
+  gradient  ← zeros(K × D)     <span class="cmt">// ∂QoE_d / ∂θ_i  (first order)</span>
+  hessian   ← zeros(K × K × D) <span class="cmt">// ∂²QoE_d / ∂θ_i∂θ_j  (second order)</span>
 
+  <span class="cmt">── Part 1: Gradient — 24 simulator calls ────────────────────────────────</span>
   <span class="kw">FOR</span> i <span class="kw">IN</span> range(K):
-    knob_i    ← GS_n.knobs[i]
-    θ_current ← knob_i.value
-
-    <span class="kw">IF</span> knob_i.type == <span class="num">"continuous"</span>:
-      θ_plus  ← <span class="fn">clip</span>(θ_current × (<span class="num">1</span> + h), knob_i.min, knob_i.max)
-      θ_minus ← <span class="fn">clip</span>(θ_current × (<span class="num">1</span> - h), knob_i.min, knob_i.max)
-      dθ      ← θ_plus − θ_minus                         <span class="cmt">// actual denominator</span>
-
-    <span class="kw">ELIF</span> knob_i.type == <span class="num">"boolean"</span>:
-      θ_plus  ← <span class="num">1</span>     <span class="cmt">// feature ON</span>
-      θ_minus ← <span class="num">0</span>     <span class="cmt">// feature OFF</span>
-      dθ      ← <span class="num">1</span>
-
-    <span class="kw">ELIF</span> knob_i.type == <span class="num">"integer"</span>:
-      θ_plus  ← <span class="fn">clip</span>(<span class="fn">round</span>(θ_current × (<span class="num">1</span> + h)), knob_i.min, knob_i.max)
-      θ_minus ← <span class="fn">clip</span>(<span class="fn">round</span>(θ_current × (<span class="num">1</span> - h)), knob_i.min, knob_i.max)
-      dθ      ← <span class="fn">max</span>(<span class="num">1</span>, θ_plus − θ_minus)              <span class="cmt">// guard against 0 denominator</span>
-
-    GS_plus  ← <span class="fn">copy</span>(GS_n) with knobs[i].value = θ_plus
-    GS_minus ← <span class="fn">copy</span>(GS_n) with knobs[i].value = θ_minus
-
-    QoE_plus  ← <span class="fn">SimulatorAgent.run</span>(GS_plus,  DPM_static)
-    QoE_minus ← <span class="fn">SimulatorAgent.run</span>(GS_minus, DPM_static)
-
+    θ_plus_i, θ_minus_i, dθ_i ← <span class="fn">perturb</span>(GS_n.knobs[i], h)
+    QoE_plus_i  ← <span class="fn">Simulator.run</span>(<span class="fn">copy</span>(GS_n, knob_i=θ_plus_i),  DPM_static)
+    QoE_minus_i ← <span class="fn">Simulator.run</span>(<span class="fn">copy</span>(GS_n, knob_i=θ_minus_i), DPM_static)
     <span class="kw">FOR</span> d <span class="kw">IN</span> range(D):
-      sensitivity[i][d] ← (QoE_plus[d] − QoE_minus[d]) / dθ
-      <span class="cmt">// Units: ΔQoE_d per unit Δθ_i</span>
+      gradient[i][d] ← (QoE_plus_i[d] − QoE_minus_i[d]) / dθ_i
 
-  <span class="kw">RETURN</span> sensitivity   <span class="cmt">// shape: [12 × D]; written to gs_history.sensitivity_json</span>
+  <span class="cmt">── Part 2: Off-diagonal Hessian — 66 pairs × 4 calls = 264 simulator calls</span>
+  <span class="kw">FOR</span> i <span class="kw">IN</span> range(K):
+    <span class="kw">FOR</span> j <span class="kw">IN</span> range(i+<span class="num">1</span>, K):   <span class="cmt">// upper triangle only; H is symmetric</span>
+      θ_pi, θ_mi, dθ_i ← <span class="fn">perturb</span>(GS_n.knobs[i], h)
+      θ_pj, θ_mj, dθ_j ← <span class="fn">perturb</span>(GS_n.knobs[j], h)
+
+      <span class="cmt">// 4-point cross-difference: ∂²f/∂θᵢ∂θⱼ</span>
+      Q_pp ← <span class="fn">Simulator.run</span>(<span class="fn">copy</span>(GS_n, knob_i=θ_pi, knob_j=θ_pj), DPM_static)
+      Q_pm ← <span class="fn">Simulator.run</span>(<span class="fn">copy</span>(GS_n, knob_i=θ_pi, knob_j=θ_mj), DPM_static)
+      Q_mp ← <span class="fn">Simulator.run</span>(<span class="fn">copy</span>(GS_n, knob_i=θ_mi, knob_j=θ_pj), DPM_static)
+      Q_mm ← <span class="fn">Simulator.run</span>(<span class="fn">copy</span>(GS_n, knob_i=θ_mi, knob_j=θ_mj), DPM_static)
+
+      <span class="kw">FOR</span> d <span class="kw">IN</span> range(D):
+        cross ← (Q_pp[d] − Q_pm[d] − Q_mp[d] + Q_mm[d]) / (dθ_i × dθ_j)
+        hessian[i][j][d] ← cross
+        hessian[j][i][d] ← cross   <span class="cmt">// symmetric</span>
+
+  <span class="cmt">── Diagonal Hessian terms (from gradient calls, no extra cost) ───────────</span>
+  <span class="kw">FOR</span> i <span class="kw">IN</span> range(K):
+    QoE_0 ← <span class="fn">Simulator.run</span>(GS_n, DPM_static)   <span class="cmt">// cache — only once</span>
+    <span class="kw">FOR</span> d <span class="kw">IN</span> range(D):
+      hessian[i][i][d] ← (QoE_plus_i[d] − <span class="num">2</span>×QoE_0[d] + QoE_minus_i[d]) / (dθ_i²)
+
+  <span class="kw">RETURN</span> gradient, hessian
+  <span class="cmt">// Both written to gs_history: gradient_json, hessian_json (auditable)</span>
+</div>
+
+<h4>perturb() helper — handles all knob types</h4>
+<div class="algo"><span class="kw">FUNCTION</span> <span class="fn">perturb</span>(knob, h):
+  <span class="kw">IF</span> knob.type == <span class="num">"continuous"</span>:
+    θ+ ← <span class="fn">clip</span>(knob.value × (<span class="num">1</span>+h), knob.min, knob.max)
+    θ− ← <span class="fn">clip</span>(knob.value × (<span class="num">1</span>-h), knob.min, knob.max)
+    dθ ← θ+ − θ−
+
+  <span class="kw">ELIF</span> knob.type == <span class="num">"boolean"</span>:
+    θ+ ← <span class="num">1</span>;  θ− ← <span class="num">0</span>;  dθ ← <span class="num">1</span>
+
+  <span class="kw">ELIF</span> knob.type == <span class="num">"integer"</span>:
+    θ+ ← <span class="fn">clip</span>(<span class="fn">round</span>(knob.value × (<span class="num">1</span>+h)), knob.min, knob.max)
+    θ− ← <span class="fn">clip</span>(<span class="fn">round</span>(knob.value × (<span class="num">1</span>-h)), knob.min, knob.max)
+    dθ ← <span class="fn">max</span>(<span class="num">1</span>, θ+ − θ−)   <span class="cmt">// guard: never divide by zero</span>
+
+  <span class="kw">RETURN</span> θ+, θ−, dθ
 </div>
 
 <div class="callout warn">
-  <strong>Hardware ceiling enforcement.</strong> The <code>clip()</code> calls above enforce
-  AP3000 hardware limits defined in <code>AP3000_HARDWARE_LIMITS</code>
-  (e.g. max chan_width=80 MHz on wifi1, max_clients=100, MCS tier 0–11).
-  Perturbing beyond hardware limits produces meaningless sensitivity values.
-  Clip before every simulator call.
+  <strong>Hardware ceiling enforcement.</strong> All <code>clip()</code> calls enforce
+  <code>AP3000_HARDWARE_LIMITS</code>: chan_width ≤ 80 MHz (wifi1),
+  max_clients ≤ 100, MCS ≤ 11, no 6 GHz / wifi2 params.
+  Perturbing beyond hardware limits produces physically meaningless Hessian entries.
 </div>
 
 
 <!-- ══════════════════════════════════════════════════════════════════════ -->
-<h2 id="a3">§4 — Algorithm 3: Coordinate Ascent Optimizer</h2>
+<h2 id="a3">§4 — Algorithm 3: Newton Optimizer with MINLP Structure</h2>
 
 <p>
-  The optimizer takes the sensitivity matrix from Algorithm 2 and proposes GS_n+1:
-  the next set of knob values that should move QoE closer to the user's target.
-  It uses coordinate ascent — adjusting one knob at a time, prioritised by leverage —
-  rather than simultaneous gradient descent on all 12 dimensions. This makes each
-  proposed change auditable: one knob → one reason.
+  The optimizer uses the full Hessian from Algorithm 2 to take a <strong>joint Newton step</strong>
+  across all 12 knobs simultaneously. This replaces coordinate ascent (which changes one knob at
+  a time and fails when knobs interact). The Hessian inverse H⁻¹ rotates the gradient into the
+  natural coordinate system of the QoE surface — the step automatically compensates for
+  inter-knob coupling.
+</p>
+<p>
+  Because 5 of the 12 knobs are boolean, the problem is formally
+  <strong>MINLP (Mixed Integer Nonlinear Programming)</strong>.
+  We exploit the small boolean count (2⁵ = 32 combinations) to handle the integer subspace
+  exactly via enumeration, while applying Newton's method to the 7 continuous/integer knobs
+  within each boolean configuration.
 </p>
 
-<div class="algo"><span class="kw">ALGORITHM</span> <span class="fn">Coordinate_Ascent_Optimizer</span>(GS_n, sensitivity, QoE_target, QoE_actual_n, CONFIG):
+<div class="callout info">
+  <strong>Sprint 3 vs Sprint 4 scope.</strong>
+  Sprint 3 implements Stage A only (Newton on full 12D with projection for booleans) —
+  sufficient for a lab AP with few clients. Sprint 4 adds Stage B (Branch &amp; Bound over
+  all 32 boolean configurations + Bayesian Optimization for the continuous sub-problem).
+</div>
 
-  <span class="cmt">── Constants ─────────────────────────────────────────────────────────────</span>
-  α       ← <span class="num">0.10</span>   <span class="cmt">// step size (learning rate) — 10% of gap per iteration</span>
-  K_top   ← <span class="num">3</span>     <span class="cmt">// max knobs changed per iteration (keep changes auditable)</span>
-  ε_bool  ← <span class="num">0.05</span>  <span class="cmt">// threshold: flip boolean knob only if |sensitivity| > this</span>
+<div class="algo"><span class="kw">ALGORITHM</span> <span class="fn">Newton_MINLP_Optimizer</span>(GS_n, gradient, hessian, QoE_target, QoE_actual_n, CONFIG):
 
-  <span class="cmt">── Step 1: Compute per-dimension progress gap ────────────────────────────</span>
-  gap[d] ← QoE_target[d] − QoE_actual_n[d]   <span class="cmt">// signed: positive = below target</span>
-  gap_norm ← <span class="fn">norm</span>(gap)                       <span class="cmt">// for weight normalization</span>
-  <span class="kw">IF</span> gap_norm == <span class="num">0</span>: <span class="kw">RETURN</span> GS_n            <span class="cmt">// already at target</span>
+  <span class="cmt">── Inputs (from Algorithm 2) ─────────────────────────────────────────────</span>
+  <span class="cmt">// gradient[K][D], hessian[K][K][D]</span>
+  <span class="cmt">// (K=12 knobs, D=active QoE dimensions)</span>
 
-  <span class="cmt">── Step 2: Compute per-knob aggregate leverage score ─────────────────────</span>
-  <span class="kw">FOR</span> i <span class="kw">IN</span> range(K):
-    <span class="cmt">// Weight each dimension by how far we are from its target</span>
-    w[d] ← |gap[d]| / gap_norm               <span class="cmt">// larger gap → higher weight</span>
+  <span class="cmt">── Step 1: Weighted objective gradient (collapse D dimensions → 1 vector) ─</span>
+  gap[d]   ← QoE_target[d] − QoE_actual_n[d]    <span class="cmt">// signed gap per dimension</span>
+  w[d]     ← |gap[d]| / <span class="fn">norm</span>(gap)              <span class="cmt">// dimension weights: bigger gap → more weight</span>
+  g[i]     ← Σ_d ( gradient[i][d] × w[d] × <span class="fn">sign</span>(gap[d]) )  <span class="cmt">// weighted gradient, shape [K]</span>
+  H[i][j]  ← Σ_d ( hessian[i][j][d] × w[d] )                <span class="cmt">// weighted Hessian, shape [K×K]</span>
 
-    <span class="cmt">// Sign: does this knob move us TOWARD target on each dimension?</span>
-    aligned[i][d] ← <span class="fn">sign</span>(sensitivity[i][d]) == <span class="fn">sign</span>(gap[d])
+  <span class="cmt">── Stage A (Sprint 3): Joint Newton step over all 12 knobs ───────────────</span>
+  <span class="cmt">// Newton direction: Δθ = α × H⁻¹ × g</span>
+  <span class="cmt">// Use damped Newton (add λI to H for numerical stability if H is near-singular)</span>
+  λ ← <span class="num">1e-4</span>
+  H_reg ← H + λ × I                              <span class="cmt">// regularised Hessian</span>
+  Δθ    ← CONFIG.step_size_alpha × <span class="fn">solve</span>(H_reg, g)  <span class="cmt">// linear solve, not matrix inverse</span>
 
-    score[i] ← Σ_d ( |sensitivity[i][d]| × w[d] × aligned[i][d] )
-    <span class="cmt">// Knobs that are both high-sensitivity AND moving toward all targets score highest</span>
-
-  <span class="cmt">── Step 3: Rank knobs; take top K_top ───────────────────────────────────</span>
-  priority ← <span class="fn">argsort</span>(score, descending=True)[:K_top]
   GS_n1   ← <span class="fn">deepcopy</span>(GS_n)
   changes ← []
 
-  <span class="cmt">── Step 4: Compute proposed change per selected knob ─────────────────────</span>
-  <span class="kw">FOR</span> i <span class="kw">IN</span> priority:
+  <span class="kw">FOR</span> i <span class="kw">IN</span> range(K):
     knob ← GS_n.knobs[i]
 
-    <span class="kw">IF</span> knob.type == <span class="num">"continuous"</span> <span class="kw">OR</span> knob.type == <span class="num">"integer"</span>:
-      <span class="cmt">// Gradient step: move each knob proportional to α × gap / sensitivity</span>
-      <span class="cmt">// Weighted average across dimensions</span>
-      Δθ ← Σ_d( w[d] × α × gap[d] / sensitivity[i][d] )  where sensitivity[i][d] ≠ 0
+    <span class="kw">IF</span> knob.type == <span class="num">"continuous"</span>:
+      new_val ← <span class="fn">clip</span>(knob.value + Δθ[i], knob.min, knob.max)
 
-      new_val ← <span class="fn">clip</span>(knob.value + Δθ, knob.min, knob.max)
-      <span class="kw">IF</span> knob.type == <span class="num">"integer"</span>: new_val ← <span class="fn">round</span>(new_val)
+    <span class="kw">ELIF</span> knob.type == <span class="num">"integer"</span>:
+      new_val ← <span class="fn">clip</span>(<span class="fn">round</span>(knob.value + Δθ[i]), knob.min, knob.max)
 
     <span class="kw">ELIF</span> knob.type == <span class="num">"boolean"</span>:
-      <span class="cmt">// Flip only if aggregate sensitivity exceeds threshold</span>
-      net_sensitivity ← Σ_d( w[d] × sensitivity[i][d] × <span class="fn">sign</span>(gap[d]) )
-      <span class="kw">IF</span> |net_sensitivity| > ε_bool:
-        new_val ← <span class="num">1</span> <span class="kw">IF</span> net_sensitivity > <span class="num">0</span> <span class="kw">ELSE</span> <span class="num">0</span>
-      <span class="kw">ELSE</span>:
-        new_val ← knob.value   <span class="cmt">// no change — sensitivity too small to justify a flip</span>
+      <span class="cmt">// Project: if Newton step pushes past 0.5 threshold, flip</span>
+      projected ← knob.value + Δθ[i]
+      <span class="kw">IF</span>   projected > <span class="num">0.5</span> <span class="kw">AND</span> knob.value == <span class="num">0</span>: new_val ← <span class="num">1</span>  <span class="cmt">// flip ON</span>
+      <span class="kw">ELIF</span> projected < <span class="num">0.5</span> <span class="kw">AND</span> knob.value == <span class="num">1</span>: new_val ← <span class="num">0</span>  <span class="cmt">// flip OFF</span>
+      <span class="kw">ELSE</span>: new_val ← knob.value                             <span class="cmt">// no flip</span>
 
+    <span class="kw">IF</span> new_val != knob.value:
+      <span class="cmt">// Record reason: which QoE dimension drove this change, and Hessian coupling strength</span>
+      top_dim     ← argmax_d(|gradient[i][d]| × w[d])
+      couplings   ← {j: H[i][j] for j ≠ i if |H[i][j]| > <span class="num">0.01</span>}  <span class="cmt">// significant cross-terms</span>
+      changes.append({knob: knob.name, from: knob.value, to: new_val,
+                      newton_step: Δθ[i], primary_dim: top_dim,
+                      coupled_knobs: couplings})                 <span class="cmt">// AUDIT RECORD</span>
     GS_n1.knobs[i].value ← new_val
-    changes.append({knob: knob.name, from: knob.value, to: new_val,
-                    score: score[i], reason: <span class="fn">top_dimension</span>(sensitivity[i], w)})
 
-  GS_n1.changes   ← changes     <span class="cmt">// written to gs_history.changes_json for audit</span>
+  GS_n1.changes   ← changes
   GS_n1.iteration ← n + <span class="num">1</span>
-
   <span class="kw">RETURN</span> GS_n1
+
+
+  <span class="cmt">── Stage B (Sprint 4): MINLP Branch &amp; Bound over boolean subspace ─────────</span>
+  <span class="cmt">// 2^5 = 32 boolean configurations; optimize continuous knobs within each</span>
+
+  best_QoE ← −∞;  best_GS ← None
+
+  <span class="kw">FOR</span> b <span class="kw">IN</span> all_32_boolean_configs:
+    <span class="kw">IF</span> <span class="fn">INTERACTION_GRAPH.prune</span>(b, QoE_actual_n):
+      <span class="kw">CONTINUE</span>   <span class="cmt">// prune: e.g. skip OFDMA=ON if chan_width=20MHz</span>
+      <span class="cmt">            // skip MU-MIMO=ON if station_count < 2</span>
+      <span class="cmt">            // skip BSS-Color=ON if neighbor_count == 0</span>
+
+    GS_b       ← <span class="fn">copy</span>(GS_n) with boolean knobs set to b
+    GS_b_opt   ← <span class="fn">Newton_continuous_subproblem</span>(GS_b, DPM_static, CONFIG)
+    QoE_b      ← <span class="fn">Simulator.run</span>(GS_b_opt, DPM_static)
+    QoE_scalar ← Σ_d( QoE_b[d] × w[d] )
+
+    <span class="kw">IF</span> QoE_scalar > best_QoE:
+      best_QoE ← QoE_scalar
+      best_GS  ← GS_b_opt
+
+  <span class="kw">RETURN</span> best_GS   <span class="cmt">// global optimum over boolean subspace + local optimum in continuous</span>
 </div>
 
 
@@ -506,7 +628,225 @@ footer{margin-top:72px;border-top:1px solid #ddd;padding-top:16px;
 
 
 <!-- ══════════════════════════════════════════════════════════════════════ -->
-<h2 id="bridge">§6 — The 15-Parameter Bridge (AP → Simulator)</h2>
+<h2 id="a5">§6 — Algorithm 5: Bayesian Optimization Pre-Search on Simulator (Sprint 4)</h2>
+
+<p>
+  Before the first real AP push, run Bayesian Optimization on the simulator to find GS*
+  — the globally optimal configuration in simulation space. This replaces the first
+  gradient step with a properly explored starting recommendation.
+  A Gaussian Process builds a probability distribution over the QoE surface;
+  the acquisition function decides where to sample next.
+</p>
+
+<div class="algo"><span class="kw">ALGORITHM</span> <span class="fn">BO_Simulator_PreSearch</span>(GS_0, DPM_static, QoE_target, CONFIG):
+
+  <span class="cmt">// GP surrogate with mixed kernel:</span>
+  <span class="cmt">//   Continuous/integer knobs → Matérn-5/2 kernel</span>
+  <span class="cmt">//   Boolean knobs           → Hamming distance kernel</span>
+  <span class="cmt">//   Combined via product kernel</span>
+
+  GP     ← <span class="fn">GaussianProcess</span>(kernel=<span class="fn">MixedKernel</span>(KNOB_SPEC))
+  X_obs  ← [GS_0]
+  Y_obs  ← [<span class="fn">scalar_QoE</span>(<span class="fn">Simulator.run</span>(GS_0, DPM_static), QoE_target)]
+
+  <span class="kw">FOR</span> iteration <span class="kw">IN</span> range(CONFIG.bo_budget):   <span class="cmt">// default bo_budget = 200 simulator calls</span>
+
+    GP.<span class="fn">fit</span>(X_obs, Y_obs)                       <span class="cmt">// update surrogate with all observations</span>
+
+    <span class="cmt">// Expected Improvement acquisition: E[max(QoE(θ) − QoE_best, 0)]</span>
+    θ_next ← argmax_θ <span class="fn">EI</span>(θ, GP, QoE_best=<span class="fn">max</span>(Y_obs))
+    <span class="cmt">// θ_next is constrained to AP3000 hardware limits</span>
+    <span class="cmt">// Boolean dims use integer relaxation then round</span>
+
+    Y_next ← <span class="fn">scalar_QoE</span>(<span class="fn">Simulator.run</span>(θ_next, DPM_static), QoE_target)
+    X_obs.<span class="fn">append</span>(θ_next);  Y_obs.<span class="fn">append</span>(Y_next)
+
+  GS_star ← X_obs[<span class="fn">argmax</span>(Y_obs)]
+
+  <span class="cmt">// GP posterior at GS_star gives confidence interval:</span>
+  μ, σ ← GP.<span class="fn">predict</span>(GS_star)
+  CI_95 ← (μ − <span class="num">1.96</span>×σ, μ + <span class="num">1.96</span>×σ)   <span class="cmt">// presented to user at HITL gate</span>
+
+  <span class="kw">RETURN</span> GS_star, CI_95
+  <span class="cmt">// User sees: "Pushing these 12 knobs has 95% CI of improving QoE by [X, Y]"</span>
+</div>
+
+<div class="callout ok">
+  <strong>What BO adds beyond Newton.</strong>
+  Newton's method finds the nearest local optimum. BO explores the full simulator space
+  and finds the global optimum (within the bo_budget). With 200 simulator calls
+  (~0.2 seconds), BO can evaluate all 32 boolean combinations plus explore the
+  continuous space thoroughly. The GP covariance matrix explicitly encodes which knob
+  combinations are correlated — and the 95% confidence interval at HITL gives the user
+  a statistically grounded reason to approve or reject the push.
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════════ -->
+<h2 id="interactions">§7 — Knob Interaction Dependency Graph</h2>
+
+<p>
+  Known pairwise dependencies from 802.11 physics. These are hard-coded into the
+  <code>INTERACTION_GRAPH.prune()</code> function (Stage B, Algorithm 3) and displayed
+  in the FederatedDashboard knob panel. When the Hessian confirms a coupling, it is
+  annotated as physics-confirmed; when the Hessian H[i,j] is near-zero for a
+  theoretically coupled pair, it is flagged as "inactive in current conditions."
+</p>
+
+<table>
+  <thead>
+    <tr><th>Knob A</th><th>Knob B</th><th>Interaction type</th><th>Condition</th><th>Physics basis</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>K07 OFDMA-DL</td><td>K04 Chan Width</td>
+      <td><strong>Synergistic</strong></td>
+      <td>Always coupled</td>
+      <td>OFDMA subdivides the channel into Resource Units (RUs). 80 MHz → 37 RUs; 20 MHz → 9 RUs. Enabling OFDMA on 20 MHz gives near-zero multi-user gain. These knobs must move together.</td>
+    </tr>
+    <tr>
+      <td>K08 OFDMA-UL</td><td>K04 Chan Width</td>
+      <td><strong>Synergistic</strong></td>
+      <td>Always coupled</td>
+      <td>Same as OFDMA-DL — uplink trigger-frame scheduling requires sub-channel space.</td>
+    </tr>
+    <tr>
+      <td>K07 OFDMA-DL</td><td>K08 OFDMA-UL</td>
+      <td><strong>Subadditive</strong></td>
+      <td>When both enabled</td>
+      <td>Combined gain &lt; sum of individual gains. Airtime shared between DL+UL scheduling. Enabling both provides diminishing marginal return on the second feature.</td>
+    </tr>
+    <tr>
+      <td>K09 MU-MIMO</td><td>B14 Station Count</td>
+      <td><strong>Conditional</strong></td>
+      <td>station_count &lt; 2 → disable K09 from search</td>
+      <td>MU-MIMO serves multiple spatial streams to different clients simultaneously. With &lt;2 clients, there is no second client to serve — the feature has zero value. Prune from Branch &amp; Bound.</td>
+    </tr>
+    <tr>
+      <td>K09 MU-MIMO</td><td>K07 OFDMA-DL</td>
+      <td><strong>Subadditive</strong></td>
+      <td>When both enabled</td>
+      <td>Both are 802.11ax multi-user features competing for the same scheduler. Combined gain is typically 10–15% less than predicted by treating them as independent.</td>
+    </tr>
+    <tr>
+      <td>K10 BSS Color</td><td>B15 ACSP Neighbor Count</td>
+      <td><strong>Conditional</strong></td>
+      <td>neighbor_count == 0 → disable K10 from search</td>
+      <td>BSS Coloring differentiates overlapping BSSs by a 6-bit color field. If there are no neighboring APs, all frames are already unambiguously from this BSS — BSS Color adds zero value. Prune.</td>
+    </tr>
+    <tr>
+      <td>K01 Tx Power</td><td>K12 Weak SNR Threshold</td>
+      <td><strong>Tradeoff</strong></td>
+      <td>Always coupled</td>
+      <td>Higher Tx power improves received SNR at all clients. But a higher Weak SNR threshold aggressively steers weak clients to 5 GHz — partially counteracting the power increase. Net effect depends on client distribution.</td>
+    </tr>
+    <tr>
+      <td>K05 CW-min BE</td><td>B14 Station Count</td>
+      <td><strong>Load-dependent</strong></td>
+      <td>station_count &lt; 4 → K05 sensitivity ≈ 0</td>
+      <td>EDCA contention window governs back-off in collision-prone environments. With few stations, collisions are rare — CW-min has negligible effect. At high density (&gt;10 clients), K05 is high-leverage.</td>
+    </tr>
+    <tr>
+      <td>K11 LB Airtime</td><td>B14 Station Count</td>
+      <td><strong>Conditional</strong></td>
+      <td>station_count &lt; 2 → disable K11 from search</td>
+      <td>Airtime fairness limiting only activates when multiple clients compete. Single client gets all airtime regardless of K11 setting.</td>
+    </tr>
+    <tr>
+      <td>K01 Tx Power</td><td>K04 Chan Width</td>
+      <td><strong>Regulatory tradeoff</strong></td>
+      <td>Regulatory EIRP ceiling active</td>
+      <td>In some regulatory domains, EIRP = Tx power + antenna gain is capped. Wider channels may require lower per-subcarrier power to stay within EIRP limits. AP3000 enforces this automatically, but the optimizer must respect it.</td>
+    </tr>
+    <tr>
+      <td>K02 Dynamic CW</td><td>K04 Chan Width</td>
+      <td><strong>Synergistic</strong></td>
+      <td>Always coupled</td>
+      <td>Dynamic channel width narrows the channel when interference is detected. If static channel width is already 20 MHz, DCW has no room to narrow further — the feature is inert. Meaningful only when K04 ≥ 40 MHz.</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="callout warn">
+  <strong>Hessian confirmation.</strong> Each pair above should produce a non-trivial
+  off-diagonal Hessian entry in typical lab conditions. If the Hessian oracle returns
+  H[K07][K04] ≈ 0 while OFDMA is enabled, it indicates the current operating point is
+  already at the interaction boundary — not that the interaction is absent.
+  Log both the theoretically expected coupling and the empirically measured H[i,j]
+  in <code>gs_history.hessian_json</code> for audit.
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════════ -->
+<h2 id="optprog">§8 — Optimization Method Progression</h2>
+
+<p>
+  The system upgrades its optimizer as more data accumulates. Each sprint adds a
+  mathematically more powerful method while keeping the prior method available as
+  a fallback.
+</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Sprint</th><th>Method</th><th>Captures interactions</th>
+      <th>AP pushes/session</th><th>Simulator calls/iter</th><th>Statistical guarantee</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>3</strong></td>
+      <td>Newton + full Hessian<br><em>(joint 12D step)</em></td>
+      <td>✅ All pairwise via H⁻¹</td>
+      <td>≤ 5</td>
+      <td>288</td>
+      <td>Locally optimal (second-order convergence near optimum)</td>
+    </tr>
+    <tr>
+      <td><strong>4</strong></td>
+      <td>MINLP Branch &amp; Bound<br>+ Bayesian Optimization (GP)<br><em>(global over booleans)</em></td>
+      <td>✅ Global over integer subspace; GP covariance captures continuous coupling</td>
+      <td>≤ 5</td>
+      <td>~1,600 (B&amp;B) + 200 (BO)</td>
+      <td>Global optimum over boolean subspace; 95% CI on QoE prediction</td>
+    </tr>
+    <tr>
+      <td><strong>5+</strong></td>
+      <td>Markov Decision Process<br>/ Q-learning<br><em>(cross-session policy)</em></td>
+      <td>✅ Learns cross-session, cross-venue dependencies from replay buffer</td>
+      <td>Improves per session</td>
+      <td>Policy inference only</td>
+      <td>Policy converges to optimal with sufficient sessions (PAC-MDP bounds)</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>MDP / Reinforcement Learning — Long-Term Architecture</h3>
+<p>
+  Every GS iteration is a <strong>(state, action, reward)</strong> tuple:
+</p>
+<div class="eq">
+  state   = QoE_actual_n  (5D vector at time n)<br>
+  action  = Δknobs = GS_n+1 − GS_n  (the proposed change)<br>
+  reward  = −δ_progress_n+1  (negative gap = higher reward when gap shrinks)
+</div>
+<p>
+  The <code>gs_history</code> table IS the RL replay buffer. After ~50 sessions across
+  different conditions (low density, high density, interference present, interference absent),
+  a Deep Q-Network trained on this buffer learns the optimal knob policy for this AP
+  in its specific environment — capturing all interactions, including three-way and
+  higher-order effects that the pairwise Hessian misses.
+</p>
+<div class="callout info">
+  <strong>MCMC for uncertainty quantification (available alongside any optimizer).</strong>
+  Markov Chain Monte Carlo sampling from the GP posterior gives calibrated confidence
+  intervals on every recommendation — not just a point estimate but a full probability
+  distribution over expected QoE. The HITL gate can display:
+  <em>"95% probability that enabling OFDMA-DL will improve throughput by [4.2, 18.7] Mbps
+  given current station count and channel conditions."</em>
+  This is the statistical foundation for a defensible audit trail.
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════════ -->
+<h2 id="bridge">§9 — The 15-Parameter Bridge (AP → Simulator)</h2>
 
 <p>
   These 15 fields are read from the AP at every poll and passed to the SimulatorAgent
@@ -538,7 +878,7 @@ footer{margin-top:72px;border-top:1px solid #ddd;padding-top:16px;
 
 
 <!-- ══════════════════════════════════════════════════════════════════════ -->
-<h2 id="knobs">§7 — The 12 Optimizer Knobs</h2>
+<h2 id="knobs">§10 — The 12 Optimizer Knobs</h2>
 
 <table>
   <thead>
@@ -568,7 +908,7 @@ footer{margin-top:72px;border-top:1px solid #ddd;padding-top:16px;
 
 
 <!-- ══════════════════════════════════════════════════════════════════════ -->
-<h2 id="config">§8 — Convergence Configuration (CONVERGENCE_CONFIG)</h2>
+<h2 id="config">§11 — Convergence Configuration (CONVERGENCE_CONFIG)</h2>
 
 <table>
   <thead><tr><th>Parameter</th><th>Default</th><th>Meaning</th><th>Regression test value</th></tr></thead>
@@ -587,7 +927,7 @@ footer{margin-top:72px;border-top:1px solid #ddd;padding-top:16px;
 
 
 <!-- ══════════════════════════════════════════════════════════════════════ -->
-<h2 id="audit">§9 — Audit Trail (What Gets Written to DB)</h2>
+<h2 id="audit">§12 — Audit Trail (What Gets Written to DB)</h2>
 
 <p>
   Every GS iteration produces a complete audit record. The schema below is the
@@ -645,7 +985,7 @@ footer{margin-top:72px;border-top:1px solid #ddd;padding-top:16px;
 
 
 <!-- ══════════════════════════════════════════════════════════════════════ -->
-<h2 id="trace">§10 — Traceability Matrix</h2>
+<h2 id="trace">§13 — Traceability Matrix</h2>
 
 <table>
   <thead>
