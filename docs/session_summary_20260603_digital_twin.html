@@ -188,6 +188,8 @@
   <a href="#s03">§03 Key Decisions</a>
   <a href="#s04">§04 Open Items</a>
   <a href="#s05">§05 Artifacts Index</a>
+  <a href="#s06">§06 Live Sessions</a>
+  <a href="#s07">§07 Cheat Sheet</a>
 </nav>
 
 <!-- ══ CLAUDE AI COMPANION NARRATIVES ══ -->
@@ -818,6 +820,331 @@ score = P50[U] − strandPenalty − posPenalty − spreadPenalty</pre>
   <div class="callout-green">
     <p><strong>Track A complete.</strong> Three artifacts (Archetype Matrix, Monte Carlo tab, Optimizer with MC-inside) and the Parameter Codex are live on GitHub Pages. The chance-constrained optimizer enforces POS SLA, admitted-count, and robustness across demand uncertainty without requiring ns-3. Track B (ns-3 / Sionna) is staged and waiting for the install.</p>
   </div>
+</section>
+
+<section id="s06">
+  <h2>§06 — Sprint 2a Live Session Reports (June 9 2026)</h2>
+  <p style="font-size:13px;color:#555;margin-bottom:20px">
+    Self-contained HTML reports generated from <code>digital_twin.db</code> at session end.
+    Each file embeds Plotly time-series charts <em>and</em> a full raw DataTable
+    (all 65 radio_polls fields + client_polls) — sortable, searchable, CSV-exportable.
+    No server needed — open directly in a browser.
+  </p>
+
+  <table style="width:100%;border-collapse:collapse;font-size:13px;font-family:'Inter',sans-serif">
+    <thead>
+      <tr style="background:#f5f5f5;border-bottom:2px solid #ccc">
+        <th style="padding:8px 12px;text-align:left">Session</th>
+        <th style="padding:8px 12px;text-align:left">AP</th>
+        <th style="padding:8px 12px;text-align:left">Start (UTC)</th>
+        <th style="padding:8px 12px;text-align:left">Duration</th>
+        <th style="padding:8px 12px;text-align:left">Polls</th>
+        <th style="padding:8px 12px;text-align:left">DB Rows</th>
+        <th style="padding:8px 12px;text-align:left">Raw Snapshots</th>
+        <th style="padding:8px 12px;text-align:left">Report</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr style="border-bottom:1px solid #eee">
+        <td style="padding:7px 12px">Session 1 (root/data)</td>
+        <td style="padding:7px 12px">AH-556680 (AP3000-WW)</td>
+        <td style="padding:7px 12px">2026-06-09 17:24</td>
+        <td style="padding:7px 12px">~37 min</td>
+        <td style="padding:7px 12px">390</td>
+        <td style="padding:7px 12px">780 radio rows</td>
+        <td style="padding:7px 12px">0 (pre-Sprint 2a+)</td>
+        <td style="padding:7px 12px">
+          <a href="../data/session_20260609_1724.html" target="_blank" style="color:#1a1a1a;font-weight:700">
+            session_20260609_1724.html ↗
+          </a>
+        </td>
+      </tr>
+      <tr style="border-bottom:1px solid #eee;background:#fafff8">
+        <td style="padding:7px 12px">Session 2 (live_monitor/data) ★</td>
+        <td style="padding:7px 12px">AH-556680 (AP3000-WW)</td>
+        <td style="padding:7px 12px">2026-06-09 17:44</td>
+        <td style="padding:7px 12px">~16 min</td>
+        <td style="padding:7px 12px">199</td>
+        <td style="padding:7px 12px">398 radio rows</td>
+        <td style="padding:7px 12px">1,281 raw CLI rows</td>
+        <td style="padding:7px 12px">
+          <a href="../live_monitor/data/session_20260609_1744.html" target="_blank" style="color:#1a1a1a;font-weight:700">
+            session_20260609_1744.html ↗
+          </a>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p style="font-size:11px;color:#888;margin-top:12px;font-family:'Inter',sans-serif">
+    ★ Session 2 includes raw CLI snapshots (Sprint 2a+): 1,281 verbatim SSH outputs stored
+    for regression testing — replay any session's raw text through the parser without a live AP.
+    Field coverage: 63/65 (97%) — only <code>tx_error_pct</code> and <code>tx_retry_pct</code>
+    are NULL (AP3000 does not expose retry counters via <code>show interface</code>).
+  </p>
+
+  <div style="margin-top:20px;padding:14px 16px;background:#f9f9f9;border-left:3px solid #1a1a1a;font-size:12px;font-family:'Inter',sans-serif">
+    <strong>To view a session database directly (replace slug with your session):</strong><br>
+    <code style="font-size:11px">
+      sqlite3 live_monitor/data/session_20260609_1744.db<br>
+      &nbsp;&nbsp;.mode column<br>
+      &nbsp;&nbsp;.headers on<br>
+      &nbsp;&nbsp;SELECT ts, radio, noise_floor_dbm, crc_error_pct, link_score FROM radio_polls LIMIT 10;
+    </code>
+    <br><br>
+    <strong>To regenerate a session HTML from its DB:</strong><br>
+    <code style="font-size:11px">
+      cd live_monitor &amp;&amp; python3 -c "from report import generate_session_html; print(generate_session_html(1, 'data/session_20260609_1744.db', 'data'))"
+    </code>
+    <br><br>
+    <span style="color:#888">Note: session HTML is also generated <em>automatically</em> at clean exit — see §07 Cheat Sheet.</span>
+  </div>
+</section>
+
+<section id="s07">
+  <h2>§07 — DigitalTwinEngine Quick-Start Cheat Sheet</h2>
+  <p style="font-size:13px;color:#555;margin-bottom:24px">
+    Everything you need to run a live collection session, read results in the terminal,
+    and open the data report. Print this or keep this tab open during test drives.
+  </p>
+
+  <div style="font-family:'Inter',sans-serif;font-size:13px">
+
+    <!-- ── ONE-TIME SETUP ── -->
+    <h3 style="font-size:0.95rem;font-weight:700;margin:0 0 10px;border-left:4px solid #1a1a1a;padding-left:10px">
+      One-Time Setup
+    </h3>
+    <table style="width:100%;border-collapse:collapse;margin-bottom:28px">
+      <thead>
+        <tr style="background:#f5f5f5;border-bottom:2px solid #ccc">
+          <th style="padding:7px 12px;text-align:left;width:28%">Step</th>
+          <th style="padding:7px 12px;text-align:left">Command / Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr style="border-bottom:1px solid #eee">
+          <td style="padding:7px 12px;color:#555">Install deps</td>
+          <td style="padding:7px 12px">
+            <code>pip3 install paramiko rich dash plotly python-dotenv pandas rumps</code>
+          </td>
+        </tr>
+        <tr style="border-bottom:1px solid #eee;background:#fafafa">
+          <td style="padding:7px 12px;color:#555">Set AP credentials</td>
+          <td style="padding:7px 12px">
+            Edit <code>live_monitor/.env</code> — set <code>AP_IP</code>, <code>AP_USER</code>, <code>AP_PASS</code>
+          </td>
+        </tr>
+        <tr style="border-bottom:1px solid #eee">
+          <td style="padding:7px 12px;color:#555">Verify config</td>
+          <td style="padding:7px 12px">
+            <code>cd live_monitor &amp;&amp; python3 -c "import config; print(config.AP_IP)"</code>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- ── MODE A: TERMINAL ── -->
+    <h3 style="font-size:0.95rem;font-weight:700;margin:0 0 10px;border-left:4px solid #2563eb;padding-left:10px">
+      Mode A — Terminal Live Monitor <code style="font-weight:400;font-size:11px">(main.py)</code>
+    </h3>
+    <p style="font-size:12px;color:#555;margin:0 0 10px">
+      Compact 5-row radio tables side-by-side + client table in terminal.
+      Plotly Dash dashboard auto-opens in browser. Best for SSH sessions and headless servers.
+    </p>
+    <table style="width:100%;border-collapse:collapse;margin-bottom:28px">
+      <thead>
+        <tr style="background:#eff6ff;border-bottom:2px solid #93c5fd">
+          <th style="padding:7px 12px;text-align:left;width:28%">Action</th>
+          <th style="padding:7px 12px;text-align:left">Command</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr style="border-bottom:1px solid #eee">
+          <td style="padding:7px 12px;color:#555">Start</td>
+          <td style="padding:7px 12px">
+            <code>cd /Users/khukhan/5320-onboarding-agent/live_monitor &amp;&amp; python3 main.py</code>
+          </td>
+        </tr>
+        <tr style="border-bottom:1px solid #eee;background:#fafafa">
+          <td style="padding:7px 12px;color:#555">Watch terminal</td>
+          <td style="padding:7px 12px">
+            Poll table refreshes every <code>POLL_INTERVAL</code> seconds (default 15 s).
+            Port printed at startup — note it (e.g. <code>8050</code> or <code>8052</code> if busy).
+          </td>
+        </tr>
+        <tr style="border-bottom:1px solid #eee">
+          <td style="padding:7px 12px;color:#555">Open live dashboard</td>
+          <td style="padding:7px 12px">
+            <code>http://localhost:8050</code> — auto-opens; if not, check port in terminal output
+          </td>
+        </tr>
+        <tr style="border-bottom:1px solid #eee;background:#fafafa">
+          <td style="padding:7px 12px;color:#555">Health check</td>
+          <td style="padding:7px 12px">
+            <code>curl -s localhost:8050/health</code> — returns
+            <code>{"status":"ok","poll_count":N,...}</code>
+          </td>
+        </tr>
+        <tr style="border-bottom:1px solid #eee">
+          <td style="padding:7px 12px;color:#555">Stop + generate report</td>
+          <td style="padding:7px 12px">
+            <strong>Ctrl-C</strong> — session closes cleanly; HTML report auto-generated and path printed
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- ── MODE B: WIDGET ── -->
+    <h3 style="font-size:0.95rem;font-weight:700;margin:0 0 10px;border-left:4px solid #16a34a;padding-left:10px">
+      Mode B — macOS Menu Bar Widget <code style="font-weight:400;font-size:11px">(widget.py)</code>
+    </h3>
+    <p style="font-size:12px;color:#555;margin:0 0 10px">
+      No terminal needed after launch. Live AP health score in menu bar icon (🟢/🟡/🔴).
+      Click icon to see per-radio CRC, CU, Link Score, client IPs. Dashboard auto-opens in browser.
+    </p>
+    <table style="width:100%;border-collapse:collapse;margin-bottom:28px">
+      <thead>
+        <tr style="background:#f0fdf4;border-bottom:2px solid #86efac">
+          <th style="padding:7px 12px;text-align:left;width:28%">Action</th>
+          <th style="padding:7px 12px;text-align:left">Command / Step</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr style="border-bottom:1px solid #eee">
+          <td style="padding:7px 12px;color:#555">Start</td>
+          <td style="padding:7px 12px">
+            <code>cd /Users/khukhan/5320-onboarding-agent/live_monitor &amp;&amp; python3 widget.py</code>
+          </td>
+        </tr>
+        <tr style="border-bottom:1px solid #eee;background:#fafafa">
+          <td style="padding:7px 12px;color:#555">Menu bar</td>
+          <td style="padding:7px 12px">
+            📡 icon appears top-right of macOS menu bar → click to see AP name, poll count, per-radio stats, client list
+          </td>
+        </tr>
+        <tr style="border-bottom:1px solid #eee">
+          <td style="padding:7px 12px;color:#555">Open live dashboard</td>
+          <td style="padding:7px 12px">
+            Click <strong>Open Dashboard →</strong> in menu, or <code>http://localhost:8050</code>
+          </td>
+        </tr>
+        <tr style="border-bottom:1px solid #eee;background:#fafafa">
+          <td style="padding:7px 12px;color:#555">Stop + generate report</td>
+          <td style="padding:7px 12px">
+            Click <strong>Quit</strong> in menu bar dropdown — session closes cleanly; HTML report auto-generated
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- ── SESSION REPORT ── -->
+    <h3 style="font-size:0.95rem;font-weight:700;margin:0 0 10px;border-left:4px solid #7c3aed;padding-left:10px">
+      Session Report — Auto-Generated at Clean Exit
+    </h3>
+    <p style="font-size:12px;color:#555;margin:0 0 10px">
+      Both modes write <code>session_YYYYMMDD_HHMM.db</code> and generate <code>session_YYYYMMDD_HHMM.html</code>
+      in <code>live_monitor/data/</code> when the app exits. The HTML is fully self-contained — no server needed.
+    </p>
+    <table style="width:100%;border-collapse:collapse;margin-bottom:28px">
+      <thead>
+        <tr style="background:#faf5ff;border-bottom:2px solid #c4b5fd">
+          <th style="padding:7px 12px;text-align:left;width:28%">Action</th>
+          <th style="padding:7px 12px;text-align:left">Command / Note</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr style="border-bottom:1px solid #eee">
+          <td style="padding:7px 12px;color:#555">Find latest report</td>
+          <td style="padding:7px 12px">
+            <code>ls -lht live_monitor/data/session_*.html | head -5</code>
+          </td>
+        </tr>
+        <tr style="border-bottom:1px solid #eee;background:#fafafa">
+          <td style="padding:7px 12px;color:#555">Open report</td>
+          <td style="padding:7px 12px">
+            <code>open live_monitor/data/session_YYYYMMDD_HHMM.html</code>
+            &nbsp;— or drag to browser
+          </td>
+        </tr>
+        <tr style="border-bottom:1px solid #eee">
+          <td style="padding:7px 12px;color:#555">What's in the report</td>
+          <td style="padding:7px 12px">
+            <strong>§1</strong> Main chart (Throughput / CU+CRC+Link / Stations+SNR) &nbsp;·&nbsp;
+            <strong>§2</strong> Metric Explorer — 46 fields, checkboxes, dual Y-axis &nbsp;·&nbsp;
+            <strong>§3</strong> Raw DataTables (radio_polls + client_polls, CSV export)
+          </td>
+        </tr>
+        <tr style="border-bottom:1px solid #eee;background:#fafafa">
+          <td style="padding:7px 12px;color:#555">Regenerate manually</td>
+          <td style="padding:7px 12px">
+            <code>cd live_monitor &amp;&amp; python3 -c "from report import generate_session_html; print(generate_session_html(1, 'data/session_YYYYMMDD_HHMM.db', 'data'))"</code>
+          </td>
+        </tr>
+        <tr style="border-bottom:1px solid #eee">
+          <td style="padding:7px 12px;color:#555">If app killed (no clean exit)</td>
+          <td style="padding:7px 12px">
+            Session HTML won't auto-generate — use the regenerate command above.
+            <code>end_ts</code> will be NULL in the DB; fix:
+            <code>UPDATE sessions SET end_ts=datetime('now') WHERE id=1;</code>
+          </td>
+        </tr>
+        <tr style="border-bottom:1px solid #eee;background:#fafafa">
+          <td style="padding:7px 12px;color:#555">Raw DB query</td>
+          <td style="padding:7px 12px">
+            <code>sqlite3 live_monitor/data/session_SLUG.db ".mode column" ".headers on" "SELECT ts,radio,noise_floor_dbm,crc_error_pct,link_score FROM radio_polls LIMIT 10;"</code>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- ── QUICK REFERENCE ── -->
+    <h3 style="font-size:0.95rem;font-weight:700;margin:0 0 10px;border-left:4px solid #dc2626;padding-left:10px">
+      Quick Reference — Key Files &amp; Paths
+    </h3>
+    <table style="width:100%;border-collapse:collapse;margin-bottom:12px">
+      <thead>
+        <tr style="background:#fef2f2;border-bottom:2px solid #fca5a5">
+          <th style="padding:7px 12px;text-align:left;width:28%">File</th>
+          <th style="padding:7px 12px;text-align:left">Purpose</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr style="border-bottom:1px solid #eee">
+          <td style="padding:7px 12px"><code>live_monitor/main.py</code></td>
+          <td style="padding:7px 12px">Terminal mode — Rich live display + Dash dashboard + collector loop</td>
+        </tr>
+        <tr style="border-bottom:1px solid #eee;background:#fafafa">
+          <td style="padding:7px 12px"><code>live_monitor/widget.py</code></td>
+          <td style="padding:7px 12px">macOS menu bar mode — same collector + Dash, no terminal needed</td>
+        </tr>
+        <tr style="border-bottom:1px solid #eee">
+          <td style="padding:7px 12px"><code>live_monitor/.env</code></td>
+          <td style="padding:7px 12px">AP credentials: <code>AP_IP</code>, <code>AP_USER</code>, <code>AP_PASS</code>, <code>POLL_INTERVAL</code></td>
+        </tr>
+        <tr style="border-bottom:1px solid #eee;background:#fafafa">
+          <td style="padding:7px 12px"><code>live_monitor/config.py</code></td>
+          <td style="padding:7px 12px">Loads .env; <code>LOG_DIR</code> defaults to <code>live_monitor/data/</code></td>
+        </tr>
+        <tr style="border-bottom:1px solid #eee">
+          <td style="padding:7px 12px"><code>live_monitor/data/session_*.db</code></td>
+          <td style="padding:7px 12px">One SQLite DB per session — radio_polls (65 fields), client_polls, raw_cli_snapshots</td>
+        </tr>
+        <tr style="border-bottom:1px solid #eee;background:#fafafa">
+          <td style="padding:7px 12px"><code>live_monitor/data/session_*.html</code></td>
+          <td style="padding:7px 12px">Self-contained session report — open directly in browser, no server</td>
+        </tr>
+        <tr style="border-bottom:1px solid #eee">
+          <td style="padding:7px 12px"><code>live_monitor/report.py</code></td>
+          <td style="padding:7px 12px">Report generator — call <code>generate_session_html(1, db_path, out_dir)</code></td>
+        </tr>
+        <tr style="border-bottom:1px solid #eee;background:#fafafa">
+          <td style="padding:7px 12px"><code>live_monitor/storage.py</code></td>
+          <td style="padding:7px 12px">SQLiteStore — WAL mode, 65-field schema, raw_cli_snapshots, /health</td>
+        </tr>
+      </tbody>
+    </table>
+
+  </div><!-- /font-family wrapper -->
 </section>
 
 <footer>
