@@ -341,21 +341,30 @@ def main():
                 time.sleep(config.POLL_INTERVAL)
 
     finally:
-        _st.update_health('down')
-        agent.disconnect()
-        radio_fh.close()
-        client_fh.close()
+        try: _st.update_health('down')
+        except Exception: pass
+        try: agent.disconnect()
+        except Exception: pass
+        try: radio_fh.close()
+        except Exception: pass
+        try: client_fh.close()
+        except Exception: pass
         console.print('\n[bold]Session ended. CSV logs saved.[/bold]')
 
         # ── SQLite close + session HTML report ────────────────────────────────
         try:
             store.close_session(session_id)
+        except Exception: pass
+        try:
             html_path = generate_session_html(session_id, db_path, config.LOG_DIR)
-            console.print(f'[bold green]Session report → {html_path}[/bold green]')
+            console.print(f'\n[bold green]═══════════════════════════════════[/bold green]')
+            console.print(f'[bold green]  Session report → {html_path}[/bold green]')
+            console.print(f'[bold green]═══════════════════════════════════[/bold green]\n')
         except Exception as exc:
             console.print(f'[yellow]Report generation failed: {exc}[/yellow]')
         finally:
-            store.close()
+            try: store.close()
+            except Exception: pass
 
         if debug_log_path:
             console.print(
