@@ -106,6 +106,7 @@
   <a href="#flags80211">802.11 Flags</a>
   <a href="#flagsprop">HiveOS Flags</a>
   <a href="#bridge">15-Param Bridge</a>
+  <a href="#knobs">12 Knobs</a>
   <a href="#static45">45 Static</a>
   <a href="#qoe">QoE Vector</a>
 </nav>
@@ -729,6 +730,155 @@ show acsp channel-info</pre>
     <tr><td>15</td><td>C — Apps</td><td><code>traffic_mix</code></td><td>Station VLAN distribution</td><td class="cli-field">show station → VLAN column, grouped</td><td><span class="tier tier-c">Computed</span></td><td>VLAN → app profile proxy (Staff/Guest)</td></tr>
     </tbody>
   </table>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════ 12 OPTIMIZER KNOBS -->
+<section id="knobs">
+  <h2>§10a — The 12 Optimizer Knobs</h2>
+  <p>These are the parameters the simulator's Monte Carlo optimizer searches over (the <code>OPT_SEARCH</code> set in v3 simulator JS). They are the levers the FederatedTwinAgent proposes changing to improve QoE. Coverage against the AP3000 CLI falls into four categories.</p>
+
+  <div class="legend">
+    <div class="legend-item"><span class="tier tier-d">EXACT</span> AP CLI exposes this field directly — value reads verbatim</div>
+    <div class="legend-item"><span class="tier tier-c">PROXY</span> No exact field — a related metric is used as a substitute</div>
+    <div class="legend-item"><span class="tier tier-s">PARTIAL</span> Field exists but is not the same parameter (e.g. beacon ≠ DTIM)</div>
+    <div class="legend-item"><span class="tier tier-u">NOT EXPOSED</span> Not in any AP3000 HiveOS show command</div>
+  </div>
+
+  <div class="tbl-wrap">
+  <table>
+    <thead><tr>
+      <th>#</th><th>Knob</th><th>Full Name</th><th>Standard / Reference</th>
+      <th>Range / Units</th><th>AP3000 CLI Field</th>
+      <th>Current AH-556680</th><th>Coverage</th>
+    </tr></thead>
+    <tbody>
+    <tr>
+      <td>1</td>
+      <td class="param-name">txPwr</td>
+      <td>Transmit power</td>
+      <td class="std-ref">802.11-2020 §19.3.18 / FCC Part 15.247</td>
+      <td>5–20 dBm (AP3000 max 18 dBm conducted)</td>
+      <td class="cli-field">One Chain EIRP power=22.00dBm(<strong>18dBm</strong> + 4.00dBi)</td>
+      <td>18 dBm</td>
+      <td><span class="tier tier-d">EXACT</span></td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td class="param-name">bw5g</td>
+      <td>5 GHz channel width</td>
+      <td class="std-ref">802.11ax §27.3.9 (HE: 20/40/80 MHz)</td>
+      <td>20 / 40 / 80 MHz (160 MHz not supported on AP3000)</td>
+      <td class="cli-field">Channel width=80Mhz (wifi1)</td>
+      <td>80 MHz</td>
+      <td><span class="tier tier-d">EXACT</span></td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td class="param-name">maxCli</td>
+      <td>Max clients per radio</td>
+      <td class="std-ref">802.11-2020 §9.4.1.5 (AID limit: 1–2007; HiveOS enforces lower cap)</td>
+      <td>1–100 (AP3000 hard max = 100 per radio)</td>
+      <td class="cli-field">Max clients number=100 (in show radio profile)</td>
+      <td>100</td>
+      <td><span class="tier tier-d">EXACT</span></td>
+    </tr>
+    <tr>
+      <td>4</td>
+      <td class="param-name">cwBe</td>
+      <td>Contention Window min — Best Effort (AC_BE)</td>
+      <td class="std-ref">802.11e-2005 §9.19.2.2 (EDCA: CWmin per AC)<br>Now: 802.11-2020 §9.3.3.2 (EDCA parameter set)</td>
+      <td>CWmin: 0–10 (exponent, actual CW = 2^n − 1). AP3000 default: 4 (CW = 15 slots)</td>
+      <td class="cli-field">AC=be; WMM min CW=<strong>4</strong>; max CW=6; AIFS=3; txoplimit=0;</td>
+      <td>CWmin=4</td>
+      <td><span class="tier tier-d">EXACT</span></td>
+    </tr>
+    <tr>
+      <td>5</td>
+      <td class="param-name">txopBe</td>
+      <td>TXOP limit — Best Effort (AC_BE)</td>
+      <td class="std-ref">802.11e-2005 §9.19.2.2 (TXOP limit field, units: 32 µs)<br>Now: 802.11-2020 §9.3.3.2</td>
+      <td>0 = unlimited TXOP (one frame per TXOP). Units: 32 µs increments. AC_BE default = 0.</td>
+      <td class="cli-field">AC=be; WMM min CW=4; max CW=6; AIFS=3; txoplimit=<strong>0</strong>;</td>
+      <td>0 (unlimited)</td>
+      <td><span class="tier tier-d">EXACT</span></td>
+    </tr>
+    <tr>
+      <td>6</td>
+      <td class="param-name">atFair</td>
+      <td>Airtime fairness limit per station</td>
+      <td class="std-ref">HiveOS proprietary. Related: 802.11ax §26.3.3 (TXOP-based fairness)</td>
+      <td>% of total airtime per station. AP3000: 0–100%, default 4%</td>
+      <td class="cli-field">LB station airtime limit=<strong>4%</strong>; (in show radio profile)</td>
+      <td>4%</td>
+      <td><span class="tier tier-d">EXACT</span></td>
+    </tr>
+    <tr>
+      <td>7</td>
+      <td class="param-name">mcsFloor</td>
+      <td>Minimum MCS index (rate floor)</td>
+      <td class="std-ref">802.11ax §27.5 (HE MCS and NSS: MCS 0–11 for 2×2)<br>HiveOS: enforced via minimum basic rate or weak SNR threshold</td>
+      <td>MCS 0–11 (AP3000 max MCS 11). Sets minimum PHY rate admitted for data frames.</td>
+      <td class="cli-field">Weak SNR threshold=<strong>15 dB</strong>; (proxy — SNR→MCS mapping, not direct MCS index)</td>
+      <td>15 dB SNR proxy</td>
+      <td><span class="tier tier-c">PROXY</span></td>
+    </tr>
+    <tr>
+      <td>8</td>
+      <td class="param-name">minRSSI</td>
+      <td>Minimum client RSSI admission threshold</td>
+      <td class="std-ref">HiveOS proprietary. Related: 802.11k §11.11 (RCPI threshold for admission)</td>
+      <td>−95 to −50 dBm. Clients below threshold blocked from associating (cell sizing).</td>
+      <td class="cli-field">Weak SNR threshold=<strong>15 dB</strong>; (same proxy as mcsFloor — SNR not RSSI)</td>
+      <td>15 dB SNR proxy</td>
+      <td><span class="tier tier-c">PROXY</span></td>
+    </tr>
+    <tr>
+      <td>9</td>
+      <td class="param-name">dtim</td>
+      <td>DTIM interval (Delivery Traffic Indication Message)</td>
+      <td class="std-ref">802.11-2020 §9.4.2.5 (TIM element: DTIM Count, DTIM Period)<br>DTIM Period = how many beacon intervals between multicast delivery windows</td>
+      <td>1–255 beacon intervals. AP3000 beacon interval = 100 ms. DTIM=1 → multicast every beacon. DTIM=3 → every 300 ms.</td>
+      <td class="cli-field">Beacon period=100ms reported but DTIM Period not separately exposed in AP3000 show commands</td>
+      <td>Unknown (beacon=100ms only)</td>
+      <td><span class="tier tier-s">PARTIAL</span></td>
+    </tr>
+    <tr>
+      <td>10</td>
+      <td class="param-name">rxSop</td>
+      <td>Rx Start of Packet (energy detection threshold)</td>
+      <td class="std-ref">802.11ax §26.10.3 (Spatial Reuse: Rx SOP threshold for OBSS PD)<br>Also: 802.11-2020 §17.3.10.6 (CCA energy detect threshold adjustment)</td>
+      <td>−82 to −62 dBm. Higher rxSop = ignore weaker OBSS frames = more aggressive spatial reuse. Risk: hidden node.</td>
+      <td class="cli-field" style="color:#991b1b">❌ Not in AP3000 CLI — no show command exposes this parameter</td>
+      <td>—</td>
+      <td><span class="tier tier-u">NOT EXPOSED</span></td>
+    </tr>
+    <tr>
+      <td>11</td>
+      <td class="param-name">fragThr</td>
+      <td>Fragmentation threshold</td>
+      <td class="std-ref">802.11-2020 §9.7.2.2 (MSDU fragmentation: FragmentationThreshold attribute)<br>Frames larger than threshold are fragmented into multiple MPDUs before transmission</td>
+      <td>256–2346 bytes. Default: 2346 (fragmentation disabled). Lowering helps in high-interference environments by reducing per-fragment exposure time.</td>
+      <td class="cli-field" style="color:#991b1b">❌ Not in AP3000 CLI — not supported or not exposed in HiveOS show commands</td>
+      <td>—</td>
+      <td><span class="tier tier-u">NOT EXPOSED</span></td>
+    </tr>
+    <tr>
+      <td>12</td>
+      <td class="param-name">rtsThr</td>
+      <td>RTS/CTS threshold</td>
+      <td class="std-ref">802.11-2020 §9.3.2.4 (RTS/CTS exchange: dot11RTSThreshold MIB attribute)<br>Frames above threshold trigger RTS/CTS handshake before data transmission</td>
+      <td>0–2347 bytes. 0 = always use RTS/CTS. 2347 = never (disabled). Lowering helps with hidden-node collisions at cost of overhead.</td>
+      <td class="cli-field" style="color:#991b1b">❌ Not in AP3000 CLI — HiveOS does not expose this MIB attribute in any show command</td>
+      <td>—</td>
+      <td><span class="tier tier-u">NOT EXPOSED</span></td>
+    </tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="callout callout-warn">
+    <strong>Implication for the optimizer:</strong> rxSop, fragThr, and rtsThr cannot be verified or confirmed from the AP after a change. The FederatedTwinAgent must treat them as write-only knobs — it can propose a value for GS_n+1 but cannot close the calibration loop on them without a separate validation mechanism (e.g. kdebug frame capture or client-side packet capture to observe hidden-node behaviour).
   </div>
 </section>
 
