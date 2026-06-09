@@ -302,10 +302,6 @@ def generate_session_html(session_id: int, db_path: str, out_dir: str,
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>DT Session — {ap_name} · {slug}</title>
 <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&display=swap" rel="stylesheet">
-<link  rel="stylesheet" href="https://cdn.datatables.net/v/dt/jq-3.7.0-dt-2.0.8-b-3.0.2/datatables.min.css">
-<script src="https://cdn.datatables.net/v/dt/jq-3.7.0-dt-2.0.8-b-3.0.2/datatables.min.js"></script>
-<script src="https://cdn.datatables.net/buttons/3.0.2/js/buttons.html5.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <style>
 body{{font-family:'Libre Baskerville',Georgia,serif;background:#fff;color:#1a1a1a;
      max-width:1400px;margin:0 auto;padding:36px 28px 80px}}
@@ -332,27 +328,29 @@ h2{{font-size:1.05rem;font-weight:700;margin:44px 0 12px;
 .ex-hint{{font-size:11px;color:#888;margin-bottom:10px;
           font-family:'Inter','Helvetica Neue',Arial,sans-serif}}
 
-/* DataTables */
+/* Raw data tables */
 .tab-bar{{display:flex;border-bottom:2px solid #1a1a1a;margin-bottom:16px}}
 .tab-btn{{padding:8px 20px;font-family:inherit;font-size:13px;font-weight:700;
           cursor:pointer;border:none;background:transparent;color:#666;
           border-bottom:3px solid transparent;margin-bottom:-2px}}
 .tab-btn.active{{color:#1a1a1a;border-bottom-color:#1a1a1a}}
 .tab-pane{{display:none}}.tab-pane.active{{display:block}}
-table.dataTable{{font-family:'Inter','Helvetica Neue',Arial,sans-serif;
-                font-size:11px;border-collapse:collapse;width:100%!important}}
-table.dataTable thead th{{background:#f5f5f5;color:#333;font-weight:700;
-  font-size:10px;text-transform:uppercase;letter-spacing:.04em;
-  border-bottom:2px solid #ccc;white-space:nowrap;padding:6px 10px}}
-table.dataTable tbody td{{padding:4px 10px;border-bottom:1px solid #eee;
+.raw-search{{padding:5px 10px;border:1px solid #ccc;border-radius:3px;
+             font-size:12px;width:240px;font-family:inherit}}
+.raw-tbl{{border-collapse:collapse;font-family:'Inter','Helvetica Neue',Arial,sans-serif;
+          font-size:11px;width:100%}}
+.raw-tbl thead th{{background:#f5f5f5;color:#333;font-weight:700;font-size:10px;
+  text-transform:uppercase;letter-spacing:.04em;border-bottom:2px solid #ccc;
+  white-space:nowrap;padding:6px 10px;cursor:pointer;user-select:none}}
+.raw-tbl thead th:hover{{background:#ebebeb}}
+.raw-tbl thead th.sort-asc::after{{content:' ▲';font-size:8px;color:#999}}
+.raw-tbl thead th.sort-desc::after{{content:' ▼';font-size:8px;color:#999}}
+.raw-tbl tbody td{{padding:4px 10px;border-bottom:1px solid #eee;
   white-space:nowrap;font-variant-numeric:tabular-nums}}
-table.dataTable tbody tr:hover{{background:#fffbe6}}
-.dt-buttons{{margin-bottom:8px}}
-.dt-button{{font-family:inherit!important;font-size:11px!important;
-  background:#1a1a1a!important;color:#fff!important;border-radius:3px!important;
-  padding:5px 12px!important;border:none!important;cursor:pointer!important;margin-right:4px}}
-.dt-button:hover{{background:#444!important}}
+.raw-tbl tbody tr:hover{{background:#fffbe6}}
+.raw-tbl tbody tr.hidden{{display:none}}
 .null-val{{color:#bbb;font-style:italic}}
+.pg-info{{font-size:11px;color:#888;font-family:'Inter',sans-serif}}
 footer{{margin-top:60px;border-top:1px solid #ddd;padding-top:16px;font-size:12px;color:#999}}
 </style>
 </head>
@@ -405,7 +403,7 @@ footer{{margin-top:60px;border-top:1px solid #ddd;padding-top:16px;font-size:12p
 <h2>Raw Database &mdash; radio_polls &amp; client_polls</h2>
 <p style="font-size:13px;color:#555;margin-bottom:16px;
    font-family:'Inter',sans-serif">
-  All rows from <code>digital_twin.db</code> for this session.
+  All rows from <code>session_{slug}.db</code> for this session.
   Sortable · Searchable · CSV export. Null = <span class="null-val">—</span>.
 </p>
 
@@ -417,8 +415,38 @@ footer{{margin-top:60px;border-top:1px solid #ddd;padding-top:16px;font-size:12p
     Client Polls ({n_client_rows} rows · {len(client_cols)} cols)
   </button>
 </div>
-<div id="tab-radio"  class="tab-pane active"><table id="tbl-radio"  class="display" style="width:100%"></table></div>
-<div id="tab-client" class="tab-pane">        <table id="tbl-client" class="display" style="width:100%"></table></div>
+<div id="tab-radio" class="tab-pane active">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap">
+    <input id="search-radio" class="raw-search" placeholder="Search radio data…"
+           oninput="filterTable('search-radio','tbody-radio')">
+    <button class="ex-btn" onclick="exportCSV('tbody-radio','thead-radio','radio_polls_{slug}')">⬇ CSV</button>
+    <span class="pg-info" id="pg-tbody-radio"></span>
+  </div>
+  <div style="overflow-x:auto">
+    <table class="raw-tbl">
+      <thead id="thead-radio"><tr>
+        {''.join(f'<th>{c["title"]}</th>' for c in json.loads(radio_dt_cols))}
+      </tr></thead>
+      <tbody id="tbody-radio"></tbody>
+    </table>
+  </div>
+</div>
+<div id="tab-client" class="tab-pane">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap">
+    <input id="search-client" class="raw-search" placeholder="Search client data…"
+           oninput="filterTable('search-client','tbody-client')">
+    <button class="ex-btn" onclick="exportCSV('tbody-client','thead-client','client_polls_{slug}')">⬇ CSV</button>
+    <span class="pg-info" id="pg-tbody-client"></span>
+  </div>
+  <div style="overflow-x:auto">
+    <table class="raw-tbl">
+      <thead id="thead-client"><tr>
+        {''.join(f'<th>{c["title"]}</th>' for c in json.loads(client_dt_cols))}
+      </tr></thead>
+      <tbody id="tbody-client"></tbody>
+    </table>
+  </div>
+</div>
 
 <footer>
   © 2026 Khursheed Khan · DigitalTwinEngine · {ap_name} · {ap_model}{eod_foot}
@@ -524,43 +552,92 @@ document.querySelectorAll('#metric-panel .mx-cb').forEach(cb =>
 
 buildExplorer();  // initial render
 
-/* ── DataTables ──────────────────────────────────────────────────────────── */
-function renderNull(data) {{
-  return (data === null || data === undefined || data === '')
-         ? '<span class="null-val">—</span>' : data;
-}}
-function addRender(cols) {{
-  return cols.map(c => Object.assign({{}}, c, {{render: renderNull}}));
+/* ── Native tables (no CDN — works on file://) ───────────────────────────── */
+function fmtVal(v) {{
+  return (v === null || v === undefined || v === '')
+    ? '<span class="null-val">—</span>' : v;
 }}
 
-$(function() {{
-  $('#tbl-radio').DataTable({{
-    data: RADIO_DATA, columns: addRender(RADIO_COLS),
-    pageLength: 25, scrollX: true, dom: 'Bfrtip',
-    buttons: [
-      {{extend:'csvHtml5', text:'⬇ Radio CSV',  filename:'radio_polls_{slug}', exportOptions:{{columns:':visible'}}}},
-      {{extend:'colvis',   text:'Columns ▾'}},
-    ],
-    order: [[0,'asc']], language: {{search: 'Filter:'}},
+function buildTable(tbodyId, data, cols) {{
+  const tbody = document.getElementById(tbodyId);
+  if (!tbody) return;
+  tbody.innerHTML = data.map(row =>
+    '<tr>' + cols.map(c => `<td>${{fmtVal(row[c.data])}}</td>`).join('') + '</tr>'
+  ).join('');
+}}
+
+function filterTable(inputId, tbodyId) {{
+  const q = document.getElementById(inputId).value.toLowerCase();
+  document.querySelectorAll('#' + tbodyId + ' tr').forEach(tr => {{
+    tr.classList.toggle('hidden', q !== '' && !tr.textContent.toLowerCase().includes(q));
   }});
-  $('#tbl-client').DataTable({{
-    data: CLIENT_DATA, columns: addRender(CLIENT_COLS),
-    pageLength: 25, scrollX: true, dom: 'Bfrtip',
-    buttons: [
-      {{extend:'csvHtml5', text:'⬇ Client CSV', filename:'client_polls_{slug}', exportOptions:{{columns:':visible'}}}},
-      {{extend:'colvis',   text:'Columns ▾'}},
-    ],
-    order: [[0,'asc']], language: {{search: 'Filter:'}},
+  updatePageInfo(tbodyId);
+}}
+
+function exportCSV(tbodyId, theadId, filename) {{
+  const ths = [...document.querySelectorAll('#' + theadId + ' th')]
+               .map(th => '"' + th.textContent.trim().replace(/[▲▼]/g,'').trim() + '"');
+  const rows = [...document.querySelectorAll('#' + tbodyId + ' tr:not(.hidden)')]
+    .map(tr => [...tr.querySelectorAll('td')].map(td => {{
+      const v = td.textContent.trim();
+      return v === '—' ? '' : '"' + v.replace(/"/g,'""') + '"';
+    }}).join(','));
+  const csv = [ths.join(','), ...rows].join('\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv], {{type:'text/csv'}}));
+  a.download = filename + '.csv';
+  a.click();
+}}
+
+function sortTable(tbodyId, data, cols, colIdx, asc) {{
+  const col = cols[colIdx].data;
+  const sorted = [...data].sort((a,b) => {{
+    const va = a[col], vb = b[col];
+    if (va == null) return 1; if (vb == null) return -1;
+    const cmp = typeof va === 'number' ? va - vb : String(va).localeCompare(String(vb));
+    return asc ? cmp : -cmp;
   }});
-}});
+  buildTable(tbodyId, sorted, cols);
+  return sorted;
+}}
+
+function updatePageInfo(tbodyId) {{
+  const visible = document.querySelectorAll('#' + tbodyId + ' tr:not(.hidden)').length;
+  const el = document.getElementById('pg-' + tbodyId);
+  if (el) el.textContent = visible + ' rows shown';
+}}
 
 function switchTab(name, btn) {{
   document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   document.getElementById('tab-' + name).classList.add('active');
   btn.classList.add('active');
-  $.fn.dataTable.tables({{visible:true, api:true}}).columns.adjust();
 }}
+
+/* init both tables */
+(function() {{
+  const radioState = {{ data: RADIO_DATA,  cols: RADIO_COLS,  asc: true, sortCol: 0 }};
+  const clientState= {{ data: CLIENT_DATA, cols: CLIENT_COLS, asc: true, sortCol: 0 }};
+
+  function initTable(state, tbodyId, theadId) {{
+    buildTable(tbodyId, state.data, state.cols);
+    updatePageInfo(tbodyId);
+    document.querySelectorAll('#' + theadId + ' th').forEach((th, i) => {{
+      th.addEventListener('click', () => {{
+        if (state.sortCol === i) state.asc = !state.asc;
+        else {{ state.sortCol = i; state.asc = true; }}
+        document.querySelectorAll('#' + theadId + ' th').forEach(t =>
+          t.classList.remove('sort-asc','sort-desc'));
+        th.classList.add(state.asc ? 'sort-asc' : 'sort-desc');
+        state.data = sortTable(tbodyId, state.data, state.cols, i, state.asc);
+        updatePageInfo(tbodyId);
+      }});
+    }});
+  }}
+
+  initTable(radioState,  'tbody-radio',  'thead-radio');
+  initTable(clientState, 'tbody-client', 'thead-client');
+}})();
 </script>
 </body>
 </html>"""
