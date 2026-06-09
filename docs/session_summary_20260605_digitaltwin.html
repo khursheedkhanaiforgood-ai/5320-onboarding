@@ -37,6 +37,19 @@
   .milestone h3 { margin-top: 0; }
   .phase-box { border: 1px solid #ccc; padding: 16px 20px; margin: 16px 0; border-radius: 4px; }
   .phase-box h4 { margin-top: 0; color: #1a1a1a; }
+  .milestone-blue { border-color: #1a6fba; }
+  .milestone-blue .milestone-label { color: #1a6fba; }
+  .callout { background: #fffbf0; border: 1px solid #e8d5a3; border-left: 5px solid #c9973a; padding: 14px 18px; margin: 16px 0; }
+  .callout-blue { background: #f0f7ff; border: 1px solid #b8d4f0; border-left: 5px solid #1a6fba; padding: 14px 18px; margin: 16px 0; }
+  .callout-green { background: #f0fff4; border: 1px solid #a8dfb8; border-left: 5px solid #1a7a3a; padding: 14px 18px; margin: 16px 0; }
+  pre.blue   { border-left-color: #1a6fba; background: #f0f7ff; }
+  pre.green  { border-left-color: #1a7a3a; background: #f0fff4; }
+  .eq-block { background: #f8f8f8; border: 1px solid #e0e0e0; border-left: 4px solid #1a6fba; padding: 12px 16px; margin: 10px 0 16px; font-family: 'Source Code Pro', monospace; font-size: 0.85em; }
+  .eq-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: #666; margin-bottom: 4px; }
+  .eq-var   { color: #c7254e; }
+  .eq-note  { font-size: 0.85em; color: #666; margin-top: 6px; font-family: 'Libre Baskerville', Georgia, serif; font-style: italic; }
+  .td-done  { color: #166534; font-weight: 700; }
+  .td-next  { color: #0c5460; }
   footer { border-top: 1px solid #ddd; padding-top: 20px; margin-top: 60px; font-size: 12px; color: #999; }
 </style>
 </head>
@@ -69,6 +82,7 @@
   <a href="#sprints">Sprint Map</a>
   <a href="#pending">Pending</a>
   <a href="#session4">Session 4 (Jun 9)</a>
+  <a href="#session5">Session 5 (Architecture)</a>
   <a href="#param-ref">Param Reference</a>
 </nav>
 
@@ -543,6 +557,173 @@ Ctrl+A then K then y</pre>
   </ul>
 </section>
 
+<section id="session5">
+  <h2>Session 5 — June 9, 2026 (Architecture Deep-Dive + Prius Display)</h2>
+
+  <div class="milestone milestone-blue">
+    <div class="milestone-label">Architecture Locked</div>
+    <p><strong>Digital Twin loop fully validated.</strong> 60/15/12 split confirmed. 5D QoE vector defined. Two-delta design locked (δ_progress ≠ δ_calibration). Calibration math formalised. Prius FederatedDashboard designed. Revised sprint map approved. E2E debug path (no Railway needed) defined.</p>
+  </div>
+
+  <h3>Loop Logic — Confirmed in Dialogue</h3>
+
+  <div class="callout-blue">
+    <p><strong>The 60/15/12 split:</strong> 60 simulator params total. 15 populated dynamically from AP SSH (the "bridge"). 12 are optimizer knobs. 45 are static DPM inputs. 15 and 12 overlap but are distinct sets.</p>
+  </div>
+
+  <pre class="blue">Iteration i at time t1:
+  AP reports 15 measurements
+  → SimulatorAgent(15 dynamic + 45 static) → QoE_t1  (5D predicted)
+
+OptimizerAgent proposes Δ12_knobs:
+  → SimulatorAgent(adjusted knobs) → QoE_predicted_t2
+
+[HUMAN GATE — HITL: approve push to AP?]
+  → Apply knobs to AP → wait 60 s (12 polls)
+  → AP reports 15 measurements at time t2
+  → QoE_actual_t2
+
+δ_progress    = QoE_actual_t2 − QoE_actual_t1       ← are we reaching the goal?
+δ_calibration = QoE_predicted_t2 − QoE_actual_t2    ← is the simulator accurate?
+
+Iterate until |δ_progress| &lt; epsilon  OR  max_iterations</pre>
+
+  <h3>5D QoE Vector (user-set epsilon per dimension)</h3>
+  <table>
+    <tr><th>#</th><th>Dimension</th><th>Formula</th><th>Good target</th></tr>
+    <tr><td>1</td><td>Throughput</td><td>avg Tx Mbps / client</td><td>&gt; 20 Mbps/client</td></tr>
+    <tr><td>2</td><td>Reliability</td><td>1 − CRC%</td><td>&gt; 0.95</td></tr>
+    <tr><td>3</td><td>Latency proxy</td><td>M/D/1: q<sub>d</sub> = 6u/(1−u); u = TotalCU/100</td><td>u &lt; 0.7</td></tr>
+    <tr><td>4</td><td>Connection Quality</td><td>avg SNR → MCS tier</td><td>SNR &gt; 25 dB → MCS ≥ 7</td></tr>
+    <tr><td>5</td><td>Capacity Headroom</td><td>1 − (TxCU + RxCU)/100</td><td>&gt; 0.30</td></tr>
+  </table>
+
+  <h3>Calibration Math — Gradient-Informed Inverse Calibration</h3>
+  <p>For each QoE dimension d, each iteration:</p>
+  <div class="eq-block">
+    <div class="eq-label">Calibration error per dimension</div>
+    <span class="eq-var">δ_d</span> = QoE_actual_d − QoE_predicted_d
+    <div class="eq-note">If δ_d &gt; 0: simulator under-predicts. If &lt; 0: over-predicts.</div>
+  </div>
+  <div class="eq-block">
+    <div class="eq-label">MC sensitivity oracle — Jacobian via finite difference</div>
+    sensitivity[i] = ∂QoE_d/∂θ_i ≈ (QoE(θ_i + 5%) − QoE(θ_i − 5%)) / (0.1 × θ_i)
+    <div class="eq-note">Run for every simulator physics param θ_i. Already implemented in v3 simulator JS — Python port needed for CalibrationAgent.</div>
+  </div>
+  <div class="eq-block">
+    <div class="eq-label">Highest-leverage parameter selection</div>
+    i* = argmax(|sensitivity[i]|)
+  </div>
+  <div class="eq-block">
+    <div class="eq-label">Gradient step — update physics param</div>
+    Δθ_i* = α × δ_d / sensitivity[i*]  &nbsp;&nbsp;(α ≈ 0.1, tune per dimension)
+    <div class="eq-note">Update θ_i* in SimulatorAgent. Reduces δ_calibration next iteration. CalibrationAgent fires alarm if |δ_d| &gt; 20% after update.</div>
+  </div>
+
+  <h3>Agent Architecture — Control + Data Plane</h3>
+  <table>
+    <tr><th>Agent</th><th>Control Plane</th><th>Data Plane</th><th>Sprint</th></tr>
+    <tr>
+      <td><strong>APCollectorAgent</strong></td>
+      <td>SSH poll every 5 s (Paramiko), 5-command CLI sequence, adaptive retry</td>
+      <td>RadioMetrics + ClientMetrics → DataStore (in-memory), CSV archive, SQLite (2a)</td>
+      <td class="td-done">Sprint 1 ✅</td>
+    </tr>
+    <tr>
+      <td><strong>SimulatorAgent</strong></td>
+      <td>Receives 15-param bridge snapshot + 45 DPM → runs Python physics equations</td>
+      <td>Outputs 5D QoE vector; MC sensitivity oracle via ±5% perturbation; QoE time series</td>
+      <td class="td-next">Sprint 3</td>
+    </tr>
+    <tr>
+      <td><strong>CalibrationAgent</strong></td>
+      <td>Receives δ_calibration per dimension → calls MC oracle → gradient step</td>
+      <td>Reads/writes simulator physics params θ_i; fires calibration_alarm if δ &gt; 20%</td>
+      <td class="td-next">Sprint 3</td>
+    </tr>
+    <tr>
+      <td><strong>OptimizerAgent</strong></td>
+      <td>Receives QoE_t1 + sensitivity_vector → coordinate ascent on OPT_SEARCH ranges</td>
+      <td>Outputs GS_N recommendation (12 proposed Δknobs), convergence verdict</td>
+      <td class="td-next">Sprint 3</td>
+    </tr>
+    <tr>
+      <td><strong>FederatedTwinAgent</strong></td>
+      <td>CONVERGENCE_CONFIG state machine, iteration counter, owns HITL gate</td>
+      <td>GS History ledger, δ_progress + δ_calibration time series, feeds Prius display</td>
+      <td class="td-next">Sprint 3</td>
+    </tr>
+    <tr>
+      <td><strong>FederatedDashboard</strong></td>
+      <td>Flask route /federated + JSON endpoints per component</td>
+      <td>Flow diagram state, per-iteration bridge snapshots, QoE convergence history</td>
+      <td class="td-next">Sprint 4</td>
+    </tr>
+  </table>
+
+  <h3>"Prius Display" — FederatedDashboard Design</h3>
+
+  <div class="callout-blue">
+    <p><strong>User request verbatim:</strong> "Think of this as the old hybrid engine displays for Prius, where one would see the chassis, then the flow between the battery, wheel, charge etc... the flow. If I clicked on a particular 'component' of this flow, a simulator window or an AP_window will pop up to show what's exactly in them."</p>
+  </div>
+
+  <pre class="blue">Flow diagram (Sprint 4, /federated route):
+
+  ┌──────────┐     ┌────────┐     ┌───────────┐     ┌─────────┐
+  │  AP3000  │────▶│ BRIDGE │────▶│ SIMULATOR │────▶│ QoE 5D  │
+  └──────────┘     └────────┘     └───────────┘     └─────────┘
+       ▲                                ▲
+       └──────────── Human (HITL) ──────┘</pre>
+
+  <table>
+    <tr><th>Component clicked</th><th>What opens</th><th>What you see</th></tr>
+    <tr><td>AP3000</td><td>Existing live AP dashboard (localhost:8050)</td><td>All 35+ metrics, radio tabs, client table, knob gauges</td></tr>
+    <tr><td>BRIDGE</td><td>Bridge inspector panel</td><td>15-param table: t1 value, t2 value, Δ, tier badge (AP Direct / Proxy / Unavailable)</td></tr>
+    <tr><td>SIMULATOR</td><td>Simulator state panel</td><td>All 60 params (15 dynamic filled, 45 static), 12 knob states, MC OPT_SEARCH progress, coordinate ascent step</td></tr>
+    <tr><td>QoE 5D</td><td>Convergence history panel</td><td>All 5 dimensions over iterations: QoE_actual (solid) vs QoE_predicted (dashed), δ_progress + δ_calibration per step, convergence/alarm status</td></tr>
+  </table>
+
+  <h3>E2E Debug Plan — <code>federated_debug.py</code> (Sprint 2c)</h3>
+  <p>E2E validation without Railway. Single local script:</p>
+  <pre class="green">python live_monitor/federated_debug.py [--replay data/session_20260609.csv]
+
+Step 1: Poll AP once via SSH (or replay CSV)
+Step 2: Extract 15 bridge params  →  print bridge table
+Step 3: Run SimulatorAgent       →  compute QoE_t1  →  print 5D vector
+Step 4: Run MC oracle            →  compute sensitivity_vector
+Step 5: Run coordinate ascent    →  print GS_1 recommendation (proposed Δknobs)
+Step 6: (optional) apply proposed knobs to simulator  →  compute QoE_predicted_t2
+Step 7: Print iteration summary: i, δ_progress, δ_calibration, alarm status</pre>
+
+  <div class="callout-green">
+    <p><strong>Why this comes before Railway:</strong> Validates SimulatorAgent + CalibrationAgent + FederatedTwinAgent in software loop. Any bug in the physics equations, calibration math, or optimizer logic is caught locally — before PostgreSQL, before remote deployment, before colleagues ever touch it.</p>
+  </div>
+
+  <h3>Revised Sprint Map</h3>
+  <table>
+    <tr><th>Sprint</th><th>Phase</th><th>Focus</th><th>Key deliverable</th></tr>
+    <tr><td class="td-next">2a</td><td>Foundation</td><td>SQLite storage</td><td>storage.py → digital_twin.db → session HTML auto-generated on Ctrl-C</td></tr>
+    <tr><td class="td-next">2b</td><td>Knobs panel</td><td>dash-daq gauges</td><td>4×3 gauge grid, 3 greyed-out (rxSop/fragThr/rtsThr), AP vs Sim Δ caption</td></tr>
+    <tr><td class="td-next">2c</td><td>E2E debug</td><td>federated_debug.py</td><td>Single script validates full loop locally; synthetic injection (--inject scenario.json)</td></tr>
+    <tr><td>3</td><td>Python agents</td><td>SimulatorAgent + Calibration + Optimizer + FederatedTwin</td><td>Full Python Digital Twin stack, all deltas computed in real time</td></tr>
+    <tr><td>4</td><td>Prius display</td><td>FederatedDashboard /federated</td><td>Clickable flow diagram, 4 drill-down panels, QoE convergence history</td></tr>
+    <tr><td>5</td><td>Railway deploy</td><td>PostgreSQL-backed DataStore</td><td>Colleagues view live dashboard; collector stays on Mac; AP never cloud-reachable</td></tr>
+  </table>
+
+  <div class="callout">
+    <p><strong>Key change from June 5 plan:</strong> Sprint 2c (E2E debug) inserted BEFORE Railway. Local validation first, Railway last. This avoids debugging Python agent logic across a cloud DB connection.</p>
+  </div>
+
+  <h3>CONVERGENCE_CONFIG (locked)</h3>
+  <pre>CONVERGENCE_CONFIG = {
+    "max_iterations":      5,
+    "progress_threshold":  0.10,   # 10% — minimum total QoE gain to continue
+    "min_improvement":     0.05,   # 5%  — minimum per-iteration gain to avoid stall
+    "calibration_alarm":   0.20,   # 20% — |δ_calibration| triggers model drift warning
+    "mode":                "HITL"  # Human-In-The-Loop gate before every AP push
+}</pre>
+</section>
+
 <section id="param-ref">
   <h2>Parameter Reference Document — Built June 9</h2>
 
@@ -576,7 +757,7 @@ Ctrl+A then K then y</pre>
 </section>
 
 <footer>
-  <p>© 2026 Khursheed Khan · DigitalTwinEngine EOD · June 5 (Sprint 1–3) + June 9 (Console + Parameter Reference) · AP3000 AH-556680</p>
+  <p>© 2026 Khursheed Khan · DigitalTwinEngine EOD · June 5 (Sprint 1–3) + June 9 (Console + Param Ref + Architecture + Prius Display) · AP3000 AH-556680</p>
 </footer>
 
 </body>
