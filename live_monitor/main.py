@@ -262,8 +262,9 @@ def main():
         Path(config.LOG_DIR).mkdir(parents=True, exist_ok=True)
         debug_log_path = os.path.join(config.LOG_DIR, 'debug_cli.log')
 
-    # ── SQLite storage (Sprint 2a) ─────────────────────────────────────────────
-    db_path    = os.path.join(config.LOG_DIR, 'digital_twin.db')
+    # ── SQLite storage — one DB file per session ──────────────────────────────
+    # session_20260609_1744.db  ↔  session_20260609_1744.html  (always session_id=1)
+    db_path    = os.path.join(config.LOG_DIR, f'session_{slug}.db')
     store      = _st.SQLiteStore(db_path)
     session_id = store.open_session(ap_ip=config.AP_IP)
     _st.init_health_clock()

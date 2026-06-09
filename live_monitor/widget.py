@@ -250,8 +250,9 @@ def _collector_loop(data_store: DataStore):
         Path(config.LOG_DIR).mkdir(parents=True, exist_ok=True)
         debug_path = os.path.join(config.LOG_DIR, 'debug_cli.log')
 
-    # Sprint 2a SQLite store
-    db_path    = os.path.join(config.LOG_DIR, 'digital_twin.db')
+    # One DB file per session — matches session_SLUG.html naming
+    slug       = session_ts.replace(':', '').replace('.', '').replace('+', '')[:15]
+    db_path    = os.path.join(config.LOG_DIR, f'session_{slug}.db')
     store      = _st.SQLiteStore(db_path)
     session_id = store.open_session(ap_ip=config.AP_IP)
     _st.init_health_clock()
