@@ -238,7 +238,7 @@ def generate_session_html(session_id: int, db_path: str, out_dir: str,
     chart_html = pio.to_html(fig, full_html=False, include_plotlyjs='cdn',
                              config={'displayModeBar': True, 'scrollZoom': True})
 
-    # ── JSON data for Explorer + DataTables ───────────────────────────────────
+    # ── JSON data for Explorer + table search/CSV ─────────────────────────────
     radio_cols  = list(polls[0].keys())   if polls   else []
     client_cols = list(clients[0].keys()) if clients else []
 
@@ -250,6 +250,23 @@ def generate_session_html(session_id: int, db_path: str, out_dir: str,
 
     n_radio_rows  = len(polls)
     n_client_rows = len(clients)
+
+    # ── Server-side rendered table rows (no JS dependency for display) ─────────
+    def _fmt_cell(v):
+        if v is None:
+            return '<td class="null-val">—</td>'
+        return f'<td>{v}</td>'
+
+    radio_thead = ''.join(f'<th>{c.replace("_"," ")}</th>' for c in radio_cols)
+    radio_tbody = ''.join(
+        '<tr>' + ''.join(_fmt_cell(row.get(c)) for c in radio_cols) + '</tr>'
+        for row in polls
+    )
+    client_thead = ''.join(f'<th>{c.replace("_"," ")}</th>' for c in client_cols)
+    client_tbody = ''.join(
+        '<tr>' + ''.join(_fmt_cell(row.get(c)) for c in client_cols) + '</tr>'
+        for row in clients
+    )
 
     # ── Explorer groups → JS constant ─────────────────────────────────────────
     explorer_groups_js = json.dumps({
@@ -420,14 +437,12 @@ footer{{margin-top:60px;border-top:1px solid #ddd;padding-top:16px;font-size:12p
     <input id="search-radio" class="raw-search" placeholder="Search radio data…"
            oninput="filterTable('search-radio','tbody-radio')">
     <button class="ex-btn" onclick="exportCSV('tbody-radio','thead-radio','radio_polls_{slug}')">⬇ CSV</button>
-    <span class="pg-info" id="pg-tbody-radio"></span>
+    <span class="pg-info" id="pg-tbody-radio">{n_radio_rows} rows</span>
   </div>
   <div style="overflow-x:auto">
     <table class="raw-tbl">
-      <thead id="thead-radio"><tr>
-        {''.join(f'<th>{c["title"]}</th>' for c in json.loads(radio_dt_cols))}
-      </tr></thead>
-      <tbody id="tbody-radio"></tbody>
+      <thead id="thead-radio"><tr>{radio_thead}</tr></thead>
+      <tbody id="tbody-radio">{radio_tbody}</tbody>
     </table>
   </div>
 </div>
@@ -436,14 +451,12 @@ footer{{margin-top:60px;border-top:1px solid #ddd;padding-top:16px;font-size:12p
     <input id="search-client" class="raw-search" placeholder="Search client data…"
            oninput="filterTable('search-client','tbody-client')">
     <button class="ex-btn" onclick="exportCSV('tbody-client','thead-client','client_polls_{slug}')">⬇ CSV</button>
-    <span class="pg-info" id="pg-tbody-client"></span>
+    <span class="pg-info" id="pg-tbody-client">{n_client_rows} rows</span>
   </div>
   <div style="overflow-x:auto">
     <table class="raw-tbl">
-      <thead id="thead-client"><tr>
-        {''.join(f'<th>{c["title"]}</th>' for c in json.loads(client_dt_cols))}
-      </tr></thead>
-      <tbody id="tbody-client"></tbody>
+      <thead id="thead-client"><tr>{client_thead}</tr></thead>
+      <tbody id="tbody-client">{client_tbody}</tbody>
     </table>
   </div>
 </div>
@@ -553,19 +566,6 @@ document.querySelectorAll('#metric-panel .mx-cb').forEach(cb =>
 buildExplorer();  // initial render
 
 /* ── Native tables (no CDN — works on file://) ───────────────────────────── */
-function fmtVal(v) {{
-  return (v === null || v === undefined || v === '')
-    ? '<span class="null-val">—</span>' : v;
-}}
-
-function buildTable(tbodyId, data, cols) {{
-  const tbody = document.getElementById(tbodyId);
-  if (!tbody) return;
-  tbody.innerHTML = data.map(row =>
-    '<tr>' + cols.map(c => `<td>${{fmtVal(row[c.data])}}</td>`).join('') + '</tr>'
-  ).join('');
-}}
-
 function filterTable(inputId, tbodyId) {{
   const q = document.getElementById(inputId).value.toLowerCase();
   document.querySelectorAll('#' + tbodyId + ' tr').forEach(tr => {{
@@ -589,22 +589,11 @@ function exportCSV(tbodyId, theadId, filename) {{
   a.click();
 }}
 
-function sortTable(tbodyId, data, cols, colIdx, asc) {{
-  const col = cols[colIdx].data;
-  const sorted = [...data].sort((a,b) => {{
-    const va = a[col], vb = b[col];
-    if (va == null) return 1; if (vb == null) return -1;
-    const cmp = typeof va === 'number' ? va - vb : String(va).localeCompare(String(vb));
-    return asc ? cmp : -cmp;
-  }});
-  buildTable(tbodyId, sorted, cols);
-  return sorted;
-}}
-
 function updatePageInfo(tbodyId) {{
+  const total   = document.querySelectorAll('#' + tbodyId + ' tr').length;
   const visible = document.querySelectorAll('#' + tbodyId + ' tr:not(.hidden)').length;
   const el = document.getElementById('pg-' + tbodyId);
-  if (el) el.textContent = visible + ' rows shown';
+  if (el) el.textContent = (visible < total ? visible + ' / ' : '') + total + ' rows';
 }}
 
 function switchTab(name, btn) {{
@@ -614,30 +603,30 @@ function switchTab(name, btn) {{
   btn.classList.add('active');
 }}
 
-/* init both tables */
-(function() {{
-  const radioState = {{ data: RADIO_DATA,  cols: RADIO_COLS,  asc: true, sortCol: 0 }};
-  const clientState= {{ data: CLIENT_DATA, cols: CLIENT_COLS, asc: true, sortCol: 0 }};
-
-  function initTable(state, tbodyId, theadId) {{
-    buildTable(tbodyId, state.data, state.cols);
-    updatePageInfo(tbodyId);
-    document.querySelectorAll('#' + theadId + ' th').forEach((th, i) => {{
-      th.addEventListener('click', () => {{
-        if (state.sortCol === i) state.asc = !state.asc;
-        else {{ state.sortCol = i; state.asc = true; }}
-        document.querySelectorAll('#' + theadId + ' th').forEach(t =>
-          t.classList.remove('sort-asc','sort-desc'));
-        th.classList.add(state.asc ? 'sort-asc' : 'sort-desc');
-        state.data = sortTable(tbodyId, state.data, state.cols, i, state.asc);
-        updatePageInfo(tbodyId);
+/* wire column-header sort on both tables */
+['radio','client'].forEach(name => {{
+  const theadId = 'thead-' + name;
+  const tbodyId = 'tbody-' + name;
+  let sortCol = -1, sortAsc = true;
+  document.querySelectorAll('#' + theadId + ' th').forEach((th, i) => {{
+    th.addEventListener('click', () => {{
+      if (sortCol === i) sortAsc = !sortAsc; else {{ sortCol = i; sortAsc = true; }}
+      document.querySelectorAll('#' + theadId + ' th').forEach(t =>
+        t.classList.remove('sort-asc','sort-desc'));
+      th.classList.add(sortAsc ? 'sort-asc' : 'sort-desc');
+      const rows = [...document.querySelectorAll('#' + tbodyId + ' tr')];
+      rows.sort((a, b) => {{
+        const va = a.cells[i]?.textContent.trim() ?? '';
+        const vb = b.cells[i]?.textContent.trim() ?? '';
+        const na = parseFloat(va), nb = parseFloat(vb);
+        const cmp = (!isNaN(na) && !isNaN(nb)) ? na - nb : va.localeCompare(vb);
+        return sortAsc ? cmp : -cmp;
       }});
+      const tbody = document.getElementById(tbodyId);
+      rows.forEach(r => tbody.appendChild(r));
     }});
-  }}
-
-  initTable(radioState,  'tbody-radio',  'thead-radio');
-  initTable(clientState, 'tbody-client', 'thead-client');
-}})();
+  }});
+}});
 </script>
 </body>
 </html>"""
