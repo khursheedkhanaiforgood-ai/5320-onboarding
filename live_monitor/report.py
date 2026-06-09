@@ -7,8 +7,8 @@ Output: {out_dir}/session_SLUG.html  (self-contained, CDN only)
 Sections:
   1. Stats header (polls, radios, duration, session ID)
   2. Main chart — Plotly 3-row: Throughput / CU+CRC+Link / Stations+SNR
-  3. Metric Explorer — user selects any of the 65 stored fields; dual Y-axis
-  4. Raw Data — DataTables with CSV export (radio_polls | client_polls tabs)
+  3. Metric Explorer — Radio tab (65 fields) + Client tab (per-MAC SNR/rates)
+  4. Raw Data — sortable/searchable tables + SQLite DB download link
 """
 import json
 import math
@@ -21,7 +21,7 @@ import plotly.graph_objects as go
 import plotly.io as pio
 
 
-# ── Metric groups for the Explorer panel ──────────────────────────────────────
+# ── Radio metric groups for the Explorer panel ────────────────────────────────
 # (field_name, display_label, 'left'|'right')  — right = dBm secondary y-axis
 
 _EXPLORER_GROUPS = {
@@ -100,6 +100,23 @@ _DEFAULT_EXPLORER = {
     'total_cu_pct', 'crc_error_pct', 'link_score', 'station_count',
 }
 
+# ── Client metric groups for the Explorer client tab ─────────────────────────
+
+_CLIENT_EXPLORER_GROUPS = {
+    'Signal & Rates': [
+        ('snr_db',         'SNR (dB)',          'right'),
+        ('tx_rate_mbps',   'Tx Rate (Mbps)',     'left'),
+        ('rx_rate_mbps',   'Rx Rate (Mbps)',     'left'),
+    ],
+    'Channel': [
+        ('chan',            'Channel',            'left'),
+        ('chan_width_mhz',  'Chan Width (MHz)',   'left'),
+        ('vlan_id',         'VLAN ID',            'left'),
+    ],
+}
+
+_DEFAULT_CLIENT_EXPLORER = {'snr_db', 'tx_rate_mbps', 'rx_rate_mbps'}
+
 
 def _safe(v):
     if isinstance(v, float) and (math.isnan(v) or math.isinf(v)):
@@ -110,8 +127,7 @@ def _safe(v):
 def generate_session_html(session_id: int, db_path: str, out_dir: str,
                           eod_url: Optional[str] = None) -> str:
     """
-    Build a full session HTML from digital_twin.db.
-    eod_url: optional relative/absolute URL to the EOD session log HTML.
+    Build a full session HTML from the per-session SQLite DB.
     Returns absolute path to the written file.
     """
     from storage import SQLiteStore
@@ -238,27 +254,24 @@ def generate_session_html(session_id: int, db_path: str, out_dir: str,
     chart_html = pio.to_html(fig, full_html=False, include_plotlyjs='cdn',
                              config={'displayModeBar': True, 'scrollZoom': True})
 
-    # ── JSON data for Explorer + table search/CSV ─────────────────────────────
+    # ── JSON data embedded in the page ────────────────────────────────────────
     radio_cols  = list(polls[0].keys())   if polls   else []
     client_cols = list(clients[0].keys()) if clients else []
 
     radio_json  = json.dumps([{c: _safe(row[c]) for c in radio_cols}  for row in polls])
     client_json = json.dumps([{c: _safe(row[c]) for c in client_cols} for row in clients])
 
-    radio_dt_cols  = json.dumps([{"data": c, "title": c.replace('_', ' ')} for c in radio_cols])
-    client_dt_cols = json.dumps([{"data": c, "title": c.replace('_', ' ')} for c in client_cols])
-
     n_radio_rows  = len(polls)
     n_client_rows = len(clients)
 
-    # ── Server-side rendered table rows (no JS dependency for display) ─────────
+    # ── Server-side rendered table rows ───────────────────────────────────────
     def _fmt_cell(v):
         if v is None:
             return '<td class="null-val">—</td>'
         return f'<td>{v}</td>'
 
-    radio_thead = ''.join(f'<th>{c.replace("_"," ")}</th>' for c in radio_cols)
-    radio_tbody = ''.join(
+    radio_thead  = ''.join(f'<th>{c.replace("_"," ")}</th>' for c in radio_cols)
+    radio_tbody  = ''.join(
         '<tr>' + ''.join(_fmt_cell(row.get(c)) for c in radio_cols) + '</tr>'
         for row in polls
     )
@@ -268,12 +281,18 @@ def generate_session_html(session_id: int, db_path: str, out_dir: str,
         for row in clients
     )
 
-    # ── Explorer groups → JS constant ─────────────────────────────────────────
+    # ── Explorer group JS data ─────────────────────────────────────────────────
     explorer_groups_js = json.dumps({
         grp: [[f, lbl, ax] for f, lbl, ax in fields]
         for grp, fields in _EXPLORER_GROUPS.items()
     })
     default_fields_js = json.dumps(list(_DEFAULT_EXPLORER))
+
+    client_explorer_groups_js = json.dumps({
+        grp: [[f, lbl, ax] for f, lbl, ax in fields]
+        for grp, fields in _CLIENT_EXPLORER_GROUPS.items()
+    })
+    default_client_fields_js = json.dumps(list(_DEFAULT_CLIENT_EXPLORER))
 
     # ── EOD back-link ─────────────────────────────────────────────────────────
     eod_top = (f'<p style="margin-bottom:8px">'
@@ -291,26 +310,47 @@ def generate_session_html(session_id: int, db_path: str, out_dir: str,
         slug = datetime.now(timezone.utc).strftime('%Y%m%d_%H%M')
 
     out_path = os.path.join(out_dir, f'session_{slug}.html')
+    db_filename = os.path.basename(db_path)
 
-    # ── Build checkbox panel HTML ──────────────────────────────────────────────
-    panel_html_parts = []
+    # ── Build radio checkbox panel HTML ───────────────────────────────────────
+    radio_panel_parts = []
     for grp, fields in _EXPLORER_GROUPS.items():
         checks = ''.join(
             f'<label style="display:flex;align-items:center;gap:5px;margin-bottom:4px;'
             f'font-size:11px;cursor:pointer;white-space:nowrap;">'
-            f'<input type="checkbox" class="mx-cb" value="{f}" '
+            f'<input type="checkbox" class="rx-cb" value="{f}" '
             f'{"checked" if f in _DEFAULT_EXPLORER else ""}> {lbl}'
             f'{"<span style=\'color:#999;font-size:9px\'> dBm</span>" if ax=="right" else ""}'
             f'</label>'
             for f, lbl, ax in fields
         )
-        panel_html_parts.append(
+        radio_panel_parts.append(
             f'<div style="margin-bottom:14px">'
             f'<div style="font-size:9px;font-weight:700;text-transform:uppercase;'
             f'letter-spacing:.08em;color:#888;margin-bottom:5px">{grp}</div>'
             f'{checks}</div>'
         )
-    panel_html = '\n'.join(panel_html_parts)
+    radio_panel_html = '\n'.join(radio_panel_parts)
+
+    # ── Build client checkbox panel HTML ──────────────────────────────────────
+    client_panel_parts = []
+    for grp, fields in _CLIENT_EXPLORER_GROUPS.items():
+        checks = ''.join(
+            f'<label style="display:flex;align-items:center;gap:5px;margin-bottom:4px;'
+            f'font-size:11px;cursor:pointer;white-space:nowrap;">'
+            f'<input type="checkbox" class="cx-cb" value="{f}" '
+            f'{"checked" if f in _DEFAULT_CLIENT_EXPLORER else ""}> {lbl}'
+            f'{"<span style=\'color:#999;font-size:9px\'> dB</span>" if ax=="right" else ""}'
+            f'</label>'
+            for f, lbl, ax in fields
+        )
+        client_panel_parts.append(
+            f'<div style="margin-bottom:14px">'
+            f'<div style="font-size:9px;font-weight:700;text-transform:uppercase;'
+            f'letter-spacing:.08em;color:#888;margin-bottom:5px">{grp}</div>'
+            f'{checks}</div>'
+        )
+    client_panel_html = '\n'.join(client_panel_parts)
 
     html = f"""<!DOCTYPE html>
 <html lang="en">
@@ -320,6 +360,7 @@ def generate_session_html(session_id: int, db_path: str, out_dir: str,
 <title>DT Session — {ap_name} · {slug}</title>
 <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&display=swap" rel="stylesheet">
 <style>
+*{{box-sizing:border-box}}
 body{{font-family:'Libre Baskerville',Georgia,serif;background:#fff;color:#1a1a1a;
      max-width:1400px;margin:0 auto;padding:36px 28px 80px}}
 h1{{font-size:1.5rem;font-weight:700;margin-bottom:4px}}
@@ -332,20 +373,31 @@ h2{{font-size:1.05rem;font-weight:700;margin:44px 0 12px;
 .stat-val{{font-size:1.35rem;font-weight:700}}
 .stat-lbl{{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:#666}}
 
-/* Explorer layout */
-.explorer-wrap{{display:flex;gap:16px;align-items:flex-start}}
+/* ── Explorer sub-tabs ── */
+.ex-subtab-bar{{display:flex;gap:0;border-bottom:2px solid #1a1a1a;margin-bottom:16px}}
+.ex-subtab-btn{{padding:7px 22px;font-family:'Inter','Helvetica Neue',Arial,sans-serif;
+               font-size:12px;font-weight:700;cursor:pointer;border:none;
+               background:#f5f5f5;color:#666;border-right:1px solid #ccc;
+               border-bottom:3px solid transparent;margin-bottom:-2px}}
+.ex-subtab-btn:first-child{{border-radius:4px 0 0 0}}
+.ex-subtab-btn.active{{background:#fff;color:#1a1a1a;border-bottom-color:#1a1a1a}}
+.ex-subtab-pane{{display:none}}.ex-subtab-pane.active{{display:block}}
+
+/* ── Explorer layout ── */
+.explorer-wrap{{display:flex;gap:16px;align-items:flex-start;width:100%}}
 .explorer-panel{{width:210px;min-width:210px;max-height:520px;overflow-y:auto;
                  border:1px solid #e5e7eb;border-radius:6px;padding:14px;
-                 background:#fafafa;font-family:'Inter','Helvetica Neue',Arial,sans-serif}}
+                 background:#fafafa;font-family:'Inter','Helvetica Neue',Arial,sans-serif;
+                 flex-shrink:0}}
 .explorer-panel input[type=checkbox]{{accent-color:#1a1a1a}}
-.explorer-chart{{flex:1;min-width:0}}
-.ex-btn{{font-family:inherit;font-size:11px;background:#1a1a1a;color:#fff;
+.explorer-chart-wrap{{flex:1;min-width:0;width:100%}}
+.ex-btn{{font-family:'Inter',sans-serif;font-size:11px;background:#1a1a1a;color:#fff;
          border:none;border-radius:3px;padding:4px 10px;cursor:pointer;margin-right:6px}}
 .ex-btn:hover{{background:#444}}
 .ex-hint{{font-size:11px;color:#888;margin-bottom:10px;
           font-family:'Inter','Helvetica Neue',Arial,sans-serif}}
 
-/* Raw data tables */
+/* ── Raw data tables ── */
 .tab-bar{{display:flex;border-bottom:2px solid #1a1a1a;margin-bottom:16px}}
 .tab-btn{{padding:8px 20px;font-family:inherit;font-size:13px;font-weight:700;
           cursor:pointer;border:none;background:transparent;color:#666;
@@ -368,6 +420,10 @@ h2{{font-size:1.05rem;font-weight:700;margin:44px 0 12px;
 .raw-tbl tbody tr.hidden{{display:none}}
 .null-val{{color:#bbb;font-style:italic}}
 .pg-info{{font-size:11px;color:#888;font-family:'Inter',sans-serif}}
+.db-link{{display:inline-block;margin-top:8px;padding:6px 14px;background:#0e7490;
+          color:#fff;font-family:'Inter',sans-serif;font-size:12px;border-radius:4px;
+          text-decoration:none;font-weight:600}}
+.db-link:hover{{background:#0c6280}}
 footer{{margin-top:60px;border-top:1px solid #ddd;padding-top:16px;font-size:12px;color:#999}}
 </style>
 </head>
@@ -396,32 +452,65 @@ footer{{margin-top:60px;border-top:1px solid #ddd;padding-top:16px;font-size:12p
 <!-- ── §2 Metric Explorer ────────────────────────────────────────────────── -->
 <h2>Metric Explorer</h2>
 <p class="ex-hint">
-  Select any combination of the 65 stored fields.
-  <strong>Left axis</strong> = % / count / score &nbsp;·&nbsp;
-  <strong>Right axis</strong> = dBm fields (marked) &nbsp;·&nbsp;
-  Both radios shown with distinct colours. Click legend to isolate a radio.
+  Select any fields to plot over time. Both radios shown in distinct colours.<br>
+  <strong>Left axis</strong> = % / count / score / Mbps &nbsp;·&nbsp;
+  <strong>Right axis</strong> = dBm / dB fields (marked). Click legend to isolate a radio.
 </p>
-<div style="margin-bottom:10px">
-  <button class="ex-btn" onclick="selectAll(true)">Select all</button>
-  <button class="ex-btn" onclick="selectAll(false)">Clear</button>
-  <button class="ex-btn" onclick="resetDefault()">Default</button>
+
+<!-- Sub-tabs: Radio / Client -->
+<div class="ex-subtab-bar">
+  <button class="ex-subtab-btn active" id="exbtn-radio"
+          onclick="switchExTab('radio',this)">📡 Radio Metrics</button>
+  <button class="ex-subtab-btn" id="exbtn-client"
+          onclick="switchExTab('client',this)">💻 Client Metrics</button>
 </div>
 
-<div class="explorer-wrap">
-  <div class="explorer-panel" id="metric-panel">
-{panel_html}
+<!-- ── Radio metrics explorer ── -->
+<div class="ex-subtab-pane active" id="ex-subtab-radio">
+  <div style="margin-bottom:10px">
+    <button class="ex-btn" onclick="selectAllRadio(true)">Select all</button>
+    <button class="ex-btn" onclick="selectAllRadio(false)">Clear</button>
+    <button class="ex-btn" onclick="resetDefaultRadio()">Default</button>
   </div>
-  <div class="explorer-chart">
-    <div id="explorer-chart"></div>
+  <div class="explorer-wrap">
+    <div class="explorer-panel" id="radio-metric-panel">
+{radio_panel_html}
+    </div>
+    <div class="explorer-chart-wrap">
+      <div id="explorer-chart" style="width:100%;min-height:440px"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Client metrics explorer ── -->
+<div class="ex-subtab-pane" id="ex-subtab-client">
+  <div style="margin-bottom:10px">
+    <button class="ex-btn" onclick="selectAllClient(true)">Select all</button>
+    <button class="ex-btn" onclick="selectAllClient(false)">Clear</button>
+    <button class="ex-btn" onclick="resetDefaultClient()">Default</button>
+  </div>
+  <p class="ex-hint" style="margin-top:4px">Each line = one client MAC. Colours distinguish clients.</p>
+  <div class="explorer-wrap">
+    <div class="explorer-panel" id="client-metric-panel">
+{client_panel_html}
+    </div>
+    <div class="explorer-chart-wrap">
+      <div id="client-explorer-chart" style="width:100%;min-height:440px"></div>
+    </div>
   </div>
 </div>
 
 <!-- ── §3 Raw Data ───────────────────────────────────────────────────────── -->
 <h2>Raw Database &mdash; radio_polls &amp; client_polls</h2>
-<p style="font-size:13px;color:#555;margin-bottom:16px;
-   font-family:'Inter',sans-serif">
-  All rows from <code>session_{slug}.db</code> for this session.
-  Sortable · Searchable · CSV export. Null = <span class="null-val">—</span>.
+<p style="font-size:13px;color:#555;margin-bottom:6px;font-family:'Inter',sans-serif">
+  All rows from the session DB. Sortable · Searchable · CSV export.
+  Null = <span class="null-val">—</span>.
+</p>
+<p style="font-family:'Inter',sans-serif;font-size:13px;margin-bottom:16px">
+  <a href="{db_filename}" class="db-link">⬇ Download SQLite DB ({db_filename})</a>
+  <span style="font-size:11px;color:#888;margin-left:10px">
+    Open with DB Browser for SQLite, TablePlus, or any SQLite viewer.
+  </span>
 </p>
 
 <div class="tab-bar">
@@ -435,7 +524,7 @@ footer{{margin-top:60px;border-top:1px solid #ddd;padding-top:16px;font-size:12p
 <div id="tab-radio" class="tab-pane active">
   <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap">
     <input id="search-radio" class="raw-search" placeholder="Search radio data…"
-           oninput="filterTable('search-radio','tbody-radio')">
+           oninput="filterTable('search-radio','tbody-radio','pg-tbody-radio')">
     <button class="ex-btn" onclick="exportCSV('tbody-radio','thead-radio','radio_polls_{slug}')">⬇ CSV</button>
     <span class="pg-info" id="pg-tbody-radio">{n_radio_rows} rows</span>
   </div>
@@ -449,7 +538,7 @@ footer{{margin-top:60px;border-top:1px solid #ddd;padding-top:16px;font-size:12p
 <div id="tab-client" class="tab-pane">
   <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap">
     <input id="search-client" class="raw-search" placeholder="Search client data…"
-           oninput="filterTable('search-client','tbody-client')">
+           oninput="filterTable('search-client','tbody-client','pg-tbody-client')">
     <button class="ex-btn" onclick="exportCSV('tbody-client','thead-client','client_polls_{slug}')">⬇ CSV</button>
     <span class="pg-info" id="pg-tbody-client">{n_client_rows} rows</span>
   </div>
@@ -467,47 +556,60 @@ footer{{margin-top:60px;border-top:1px solid #ddd;padding-top:16px;font-size:12p
 
 <!-- ── Scripts ───────────────────────────────────────────────────────────── -->
 <script>
-/* ── Embedded data ───────────────────────────────────────────────────────── */
-const RADIO_DATA    = {radio_json};
-const CLIENT_DATA   = {client_json};
-const RADIO_COLS    = {radio_dt_cols};
-const CLIENT_COLS   = {client_dt_cols};
-const EX_GROUPS     = {explorer_groups_js};
-const DEFAULT_FIELDS= new Set({default_fields_js});
+/* ── Embedded session data ───────────────────────────────────────────────── */
+const RADIO_DATA   = {radio_json};
+const CLIENT_DATA  = {client_json};
 
-/* ── Metric Explorer ─────────────────────────────────────────────────────── */
-const RADIO_COLORS = {{
-  wifi0: ['#2563eb','#93c5fd'],
-  wifi1: ['#16a34a','#86efac'],
-  wifi2: ['#7c3aed','#c4b5fd'],
+/* ── Explorer config ─────────────────────────────────────────────────────── */
+const EX_GROUPS    = {explorer_groups_js};
+const EX_DEFAULTS  = new Set({default_fields_js});
+const CL_GROUPS    = {client_explorer_groups_js};
+const CL_DEFAULTS  = new Set({default_client_fields_js});
+
+// flat field→[label, axis] lookups
+const RADIO_META = {{}};
+for (const rows of Object.values(EX_GROUPS))
+  for (const [f,l,a] of rows) RADIO_META[f] = [l, a];
+
+const CLIENT_META = {{}};
+for (const rows of Object.values(CL_GROUPS))
+  for (const [f,l,a] of rows) CLIENT_META[f] = [l, a];
+
+/* ── Per-radio colour palettes ───────────────────────────────────────────── */
+const RADIO_PAL = {{
+  wifi0: ['#1d4ed8','#2563eb','#3b82f6','#60a5fa','#93c5fd','#bfdbfe'],
+  wifi1: ['#15803d','#16a34a','#22c55e','#4ade80','#86efac','#bbf7d0'],
+  wifi2: ['#6d28d9','#7c3aed','#8b5cf6','#a78bfa','#c4b5fd','#ddd6fe'],
 }};
+const CLIENT_PAL = [
+  '#2563eb','#16a34a','#dc2626','#d97706','#7c3aed',
+  '#0891b2','#be185d','#15803d','#b45309','#1d4ed8',
+  '#059669','#9333ea','#ef4444','#f59e0b','#6366f1',
+];
 
-// flat map: field -> [label, axis]
-const FIELD_META = {{}};
-for (const [grp, rows] of Object.entries(EX_GROUPS))
-  for (const [f,l,a] of rows) FIELD_META[f] = [l, a];
-
-function buildExplorer() {{
-  const selected = [...document.querySelectorAll('#metric-panel .mx-cb:checked')]
-                   .map(i => i.value);
+/* ═══════════════════════════════════════════════════════════════════════════
+   RADIO METRIC EXPLORER
+   ═══════════════════════════════════════════════════════════════════════════ */
+function buildRadioExplorer() {{
+  const selected = [...document.querySelectorAll('#radio-metric-panel .rx-cb:checked')]
+                   .map(cb => cb.value);
   if (!selected.length) {{
     Plotly.purge('explorer-chart');
     return;
   }}
 
-  const radios = [...new Set(RADIO_DATA.map(r => r.radio))];
+  const radios = [...new Set(RADIO_DATA.map(r => r.radio))].filter(Boolean);
   const traces = [];
-  const shownFields = new Set();
 
   for (const radio of radios) {{
-    const rows  = RADIO_DATA.filter(r => r.radio === radio);
-    const ts    = rows.map(r => r.ts);
-    const [c1, c2] = RADIO_COLORS[radio] || ['#7c3aed','#c4b5fd'];
+    const rows = RADIO_DATA.filter(r => r.radio === radio);
+    const ts   = rows.map(r => r.ts);
+    const pal  = RADIO_PAL[radio] || RADIO_PAL.wifi2;
 
     selected.forEach((field, idx) => {{
-      if (!FIELD_META[field]) return;
-      const [label, axis] = FIELD_META[field];
-      const vals = rows.map(r => r[field]);
+      if (!RADIO_META[field]) return;
+      const [label, axis] = RADIO_META[field];
+      const vals = rows.map(r => (r[field] !== undefined ? r[field] : null));
       if (vals.every(v => v == null)) return;
 
       traces.push({{
@@ -515,64 +617,207 @@ function buildExplorer() {{
         name: radio + ' — ' + label,
         type: 'scatter', mode: 'lines',
         yaxis: axis === 'right' ? 'y2' : 'y',
-        line: {{ color: idx % 2 === 0 ? c1 : c2, width: 1.5 }},
+        line: {{ color: pal[idx % pal.length], width: 2 }},
+        connectgaps: false,
         hovertemplate: '%{{y:.2f}}<extra>' + radio + ' ' + label + '</extra>',
         legendgroup: radio,
       }});
-      shownFields.add(field);
     }});
   }}
 
-  const leftFields  = selected.filter(f => FIELD_META[f] && FIELD_META[f][1] === 'left');
-  const rightFields = selected.filter(f => FIELD_META[f] && FIELD_META[f][1] === 'right');
+  if (!traces.length) {{
+    Plotly.purge('explorer-chart');
+    document.getElementById('explorer-chart').innerHTML =
+      '<p style="text-align:center;padding:100px 0;color:#999;font-family:sans-serif">' +
+      'No data for the selected fields in this session.</p>';
+    return;
+  }}
+
+  const leftFields  = selected.filter(f => RADIO_META[f]?.[1] === 'left');
+  const rightFields = selected.filter(f => RADIO_META[f]?.[1] === 'right');
 
   Plotly.react('explorer-chart', traces, {{
-    height: 420,
-    margin: {{t:20, b:60, l:65, r: rightFields.length ? 65 : 20}},
+    height: 440,
+    margin: {{t:20, b:80, l:65, r: rightFields.length ? 65 : 20}},
     yaxis: {{
-      title: leftFields.length  ? '% / count / score' : '',
-      gridcolor: '#e5e7eb', zeroline: false, autorange: true,
+      title: leftFields.length ? '% / count / score / Mbps' : '',
+      gridcolor:'#e5e7eb', zeroline:false, autorange:true,
     }},
     yaxis2: {{
       title: rightFields.length ? 'dBm' : '',
-      overlaying: 'y', side: 'right',
-      gridcolor: '#e5e7eb', zeroline: false, autorange: true,
-      showgrid: false,
+      overlaying:'y', side:'right',
+      gridcolor:'#e5e7eb', zeroline:false, autorange:true, showgrid:false,
     }},
-    xaxis: {{ gridcolor: '#e5e7eb', tickformat: '%H:%M:%S' }},
+    xaxis: {{ gridcolor:'#e5e7eb', tickformat:'%H:%M:%S' }},
     hovermode: 'x unified',
-    legend: {{ orientation: 'h', y: -0.18 }},
-    paper_bgcolor: '#fff',
-    plot_bgcolor:  '#fafafa',
-    font: {{ family: 'Inter, Helvetica Neue, Arial, sans-serif', size: 12 }},
-  }}, {{responsive: true}});
+    legend: {{ orientation:'h', y:-0.2, font:{{size:11}} }},
+    paper_bgcolor:'#fff', plot_bgcolor:'#fafafa',
+    font:{{ family:'Inter, Helvetica Neue, Arial, sans-serif', size:12 }},
+    autosize: true,
+  }}, {{responsive:true, displayModeBar:true, scrollZoom:true}});
 }}
 
-function selectAll(val) {{
-  document.querySelectorAll('#metric-panel .mx-cb').forEach(cb => cb.checked = val);
-  buildExplorer();
+function selectAllRadio(val) {{
+  document.querySelectorAll('#radio-metric-panel .rx-cb').forEach(cb => cb.checked = val);
+  buildRadioExplorer();
 }}
-
-function resetDefault() {{
-  document.querySelectorAll('#metric-panel .mx-cb').forEach(cb => {{
-    cb.checked = DEFAULT_FIELDS.has(cb.value);
+function resetDefaultRadio() {{
+  document.querySelectorAll('#radio-metric-panel .rx-cb').forEach(cb => {{
+    cb.checked = EX_DEFAULTS.has(cb.value);
   }});
-  buildExplorer();
+  buildRadioExplorer();
+}}
+document.querySelectorAll('#radio-metric-panel .rx-cb').forEach(cb =>
+  cb.addEventListener('change', buildRadioExplorer));
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   CLIENT METRIC EXPLORER
+   ═══════════════════════════════════════════════════════════════════════════ */
+let _clientBuilt = false;
+
+function buildClientExplorer() {{
+  const selected = [...document.querySelectorAll('#client-metric-panel .cx-cb:checked')]
+                   .map(cb => cb.value);
+
+  if (!CLIENT_DATA.length) {{
+    document.getElementById('client-explorer-chart').innerHTML =
+      '<p style="text-align:center;padding:100px 0;color:#999;font-family:sans-serif">' +
+      'No client data recorded in this session.</p>';
+    return;
+  }}
+  if (!selected.length) {{
+    Plotly.purge('client-explorer-chart');
+    return;
+  }}
+
+  // Group rows by (mac + radio)
+  const groups = new Map();
+  for (const row of CLIENT_DATA) {{
+    const key = (row.mac || '?') + '|' + (row.radio || '?');
+    if (!groups.has(key)) groups.set(key, {{ mac: row.mac, radio: row.radio, rows: [] }});
+    groups.get(key).rows.push(row);
+  }}
+
+  // Assign a stable colour per MAC
+  const macColor = {{}};
+  let ci = 0;
+  for (const {{mac}} of groups.values())
+    if (!(mac in macColor)) macColor[mac] = CLIENT_PAL[ci++ % CLIENT_PAL.length];
+
+  const DASHES = ['solid','dot','dash','longdash','dashdot'];
+  const traces = [];
+
+  for (const [, {{mac, radio, rows}}] of groups) {{
+    const ts    = rows.map(r => r.ts);
+    const color = macColor[mac] || '#999';
+    const label = (mac || '?').slice(-8) + (radio ? ' (' + radio + ')' : '');
+
+    selected.forEach((field, fi) => {{
+      if (!CLIENT_META[field]) return;
+      const [fieldLabel, axis] = CLIENT_META[field];
+      const vals = rows.map(r => (r[field] !== undefined ? r[field] : null));
+      if (vals.every(v => v == null)) return;
+
+      traces.push({{
+        x: ts, y: vals,
+        name: label + ' — ' + fieldLabel,
+        type: 'scatter', mode: 'lines+markers',
+        yaxis: axis === 'right' ? 'y2' : 'y',
+        line: {{ color, width: 1.5, dash: DASHES[fi % DASHES.length] }},
+        marker: {{ size: 4, color }},
+        connectgaps: false,
+        hovertemplate: '%{{y:.1f}}<extra>' + (mac||'?') + ' ' + fieldLabel + '</extra>',
+        legendgroup: mac,
+      }});
+    }});
+  }}
+
+  if (!traces.length) {{
+    Plotly.purge('client-explorer-chart');
+    document.getElementById('client-explorer-chart').innerHTML =
+      '<p style="text-align:center;padding:100px 0;color:#999;font-family:sans-serif">' +
+      'No data for the selected fields.</p>';
+    return;
+  }}
+
+  const leftF  = selected.filter(f => CLIENT_META[f]?.[1] === 'left');
+  const rightF = selected.filter(f => CLIENT_META[f]?.[1] === 'right');
+
+  Plotly.react('client-explorer-chart', traces, {{
+    height: 440,
+    margin: {{t:20, b:80, l:65, r: rightF.length ? 65 : 20}},
+    yaxis: {{
+      title: leftF.length ? 'Mbps / channel' : '',
+      gridcolor:'#e5e7eb', zeroline:false, autorange:true,
+    }},
+    yaxis2: {{
+      title: rightF.length ? 'dB' : '',
+      overlaying:'y', side:'right',
+      gridcolor:'#e5e7eb', zeroline:false, autorange:true, showgrid:false,
+    }},
+    xaxis: {{ gridcolor:'#e5e7eb', tickformat:'%H:%M:%S' }},
+    hovermode: 'x unified',
+    legend: {{ orientation:'h', y:-0.22, font:{{size:10}} }},
+    paper_bgcolor:'#fff', plot_bgcolor:'#fafafa',
+    font:{{ family:'Inter, Helvetica Neue, Arial, sans-serif', size:12 }},
+    autosize: true,
+  }}, {{responsive:true, displayModeBar:true, scrollZoom:true}});
+
+  _clientBuilt = true;
 }}
 
-document.querySelectorAll('#metric-panel .mx-cb').forEach(cb =>
-  cb.addEventListener('change', buildExplorer));
+function selectAllClient(val) {{
+  document.querySelectorAll('#client-metric-panel .cx-cb').forEach(cb => cb.checked = val);
+  buildClientExplorer();
+}}
+function resetDefaultClient() {{
+  document.querySelectorAll('#client-metric-panel .cx-cb').forEach(cb => {{
+    cb.checked = CL_DEFAULTS.has(cb.value);
+  }});
+  buildClientExplorer();
+}}
+document.querySelectorAll('#client-metric-panel .cx-cb').forEach(cb =>
+  cb.addEventListener('change', buildClientExplorer));
 
-// defer so flex layout is painted before Plotly measures container width
-requestAnimationFrame(() => requestAnimationFrame(buildExplorer));
+/* ── Explorer sub-tab switch ─────────────────────────────────────────────── */
+function switchExTab(name, btn) {{
+  document.querySelectorAll('.ex-subtab-pane').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.ex-subtab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('ex-subtab-' + name).classList.add('active');
+  btn.classList.add('active');
 
-/* ── Native tables (no CDN — works on file://) ───────────────────────────── */
-function filterTable(inputId, tbodyId) {{
+  requestAnimationFrame(() => requestAnimationFrame(() => {{
+    if (name === 'radio') {{
+      const el = document.getElementById('explorer-chart');
+      if (el && el.data && el.data.length) Plotly.Plots.resize('explorer-chart');
+      else buildRadioExplorer();
+    }} else {{
+      if (_clientBuilt) Plotly.Plots.resize('client-explorer-chart');
+      else buildClientExplorer();
+    }}
+  }}));
+}}
+
+/* ── Raw Data tab switch ─────────────────────────────────────────────────── */
+function switchTab(name, btn) {{
+  document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  btn.classList.add('active');
+}}
+
+/* ── Table utilities ─────────────────────────────────────────────────────── */
+function filterTable(inputId, tbodyId, pgId) {{
   const q = document.getElementById(inputId).value.toLowerCase();
+  let visible = 0;
   document.querySelectorAll('#' + tbodyId + ' tr').forEach(tr => {{
-    tr.classList.toggle('hidden', q !== '' && !tr.textContent.toLowerCase().includes(q));
+    const hide = q !== '' && !tr.textContent.toLowerCase().includes(q);
+    tr.classList.toggle('hidden', hide);
+    if (!hide) visible++;
   }});
-  updatePageInfo(tbodyId);
+  const total = document.querySelectorAll('#' + tbodyId + ' tr').length;
+  const el = document.getElementById(pgId);
+  if (el) el.textContent = (visible < total ? visible + ' / ' : '') + total + ' rows';
 }}
 
 function exportCSV(tbodyId, theadId, filename) {{
@@ -583,36 +828,17 @@ function exportCSV(tbodyId, theadId, filename) {{
       const v = td.textContent.trim();
       return v === '—' ? '' : '"' + v.replace(/"/g,'""') + '"';
     }}).join(','));
-  const csv = [ths.join(','), ...rows].join('\n');
+  const csv = [ths.join(','), ...rows].join('\\n');
   const a = document.createElement('a');
   a.href = URL.createObjectURL(new Blob([csv], {{type:'text/csv'}}));
   a.download = filename + '.csv';
   a.click();
 }}
 
-function updatePageInfo(tbodyId) {{
-  const total   = document.querySelectorAll('#' + tbodyId + ' tr').length;
-  const visible = document.querySelectorAll('#' + tbodyId + ' tr:not(.hidden)').length;
-  const el = document.getElementById('pg-' + tbodyId);
-  if (el) el.textContent = (visible < total ? visible + ' / ' : '') + total + ' rows';
-}}
-
-function switchTab(name, btn) {{
-  document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById('tab-' + name).classList.add('active');
-  btn.classList.add('active');
-  // resize explorer chart in case it was rendered while hidden
-  if (document.getElementById('explorer-chart')?.data) {{
-    Plotly.Plots.resize('explorer-chart');
-  }}
-}}
-
-/* wire column-header sort on both tables */
+/* ── Column sort ─────────────────────────────────────────────────────────── */
 ['radio','client'].forEach(name => {{
-  const theadId = 'thead-' + name;
-  const tbodyId = 'tbody-' + name;
   let sortCol = -1, sortAsc = true;
+  const theadId = 'thead-' + name, tbodyId = 'tbody-' + name;
   document.querySelectorAll('#' + theadId + ' th').forEach((th, i) => {{
     th.addEventListener('click', () => {{
       if (sortCol === i) sortAsc = !sortAsc; else {{ sortCol = i; sortAsc = true; }}
@@ -632,6 +858,13 @@ function switchTab(name, btn) {{
     }});
   }});
 }});
+
+/* ── Initial render — wait for Plotly CDN then double-rAF ───────────────── */
+function _initExplorer() {{
+  if (typeof Plotly === 'undefined') {{ setTimeout(_initExplorer, 150); return; }}
+  requestAnimationFrame(() => requestAnimationFrame(buildRadioExplorer));
+}}
+_initExplorer();
 </script>
 </body>
 </html>"""
