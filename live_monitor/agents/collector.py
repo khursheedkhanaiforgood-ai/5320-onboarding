@@ -190,6 +190,8 @@ class PollResult:
     ap_model: str
     radios:   list = field(default_factory=list)   # list[RadioMetrics]
     clients:  list = field(default_factory=list)   # list[ClientMetrics]
+    # list of (command_tag, raw_text, radio_or_None) for raw_cli_snapshots table
+    raw_snapshots: list = field(default_factory=list)
 
 
 # ── Link score ────────────────────────────────────────────────────────────────
@@ -313,6 +315,7 @@ class CollectorAgent:
         _radio_profiles = AP3000_HARDWARE.get('radio_profiles', {})
         for radio, band in RADIO_BANDS.items():
             raw = self._exec(f'show interface {radio}')
+            result.raw_snapshots.append((f'show_interface_{radio}', raw, radio))
             if 'unknown keyword' in raw.lower() or 'invalid input' in raw.lower():
                 continue  # radio not present on this AP
             metrics = self._parse_interface(raw, radio, band, ts)
@@ -321,6 +324,7 @@ class CollectorAgent:
             profile_name = _radio_profiles.get(radio)
             if profile_name:
                 raw_profile = self._exec(f'show radio profile {profile_name}')
+                result.raw_snapshots.append((f'show_radio_profile_{radio}', raw_profile, radio))
                 if 'unknown keyword' not in raw_profile.lower() and 'invalid' not in raw_profile.lower():
                     self._parse_radio_profile(raw_profile, metrics)
 
@@ -352,6 +356,7 @@ class CollectorAgent:
 
         # Stations
         raw_sta = self._exec('show station')
+        result.raw_snapshots.append(('show_station', raw_sta, None))
         clients = self._parse_stations(raw_sta, ts)
         result.clients = clients
 
@@ -361,6 +366,7 @@ class CollectorAgent:
 
         # ACSP channel info
         raw_acsp = self._exec('show acsp channel-info')
+        result.raw_snapshots.append(('show_acsp_channel_info', raw_acsp, None))
         acsp = self._parse_acsp(raw_acsp)
         for rm in result.radios:
             if rm.radio in acsp:

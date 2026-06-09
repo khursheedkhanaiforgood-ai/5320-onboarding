@@ -302,6 +302,8 @@ def main():
                     client_fh.flush()
 
                     store.write_poll(session_id, result.radios, result.clients)
+                    for tag, text, radio in result.raw_snapshots:
+                        store.write_raw_snapshot(session_id, tag, text, radio=radio, ts=result.ts)
                     _st.update_health('ok', last_poll_ts=result.ts, session_id=session_id)
 
                     data_store.push(result)
