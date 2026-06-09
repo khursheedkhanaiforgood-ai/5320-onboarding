@@ -7,6 +7,7 @@ Outputs:
   • Plotly Dash browser dashboard → http://localhost:8050
   • CSV log per session (data/)
 """
+import numpy as np  # noqa: F401 — must be first to avoid Py3.14 circular import with plotly
 import csv
 import os
 import sys

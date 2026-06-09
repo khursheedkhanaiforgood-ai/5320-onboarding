@@ -8,6 +8,7 @@ import threading
 from collections import deque
 from datetime import datetime
 
+import numpy as np          # force full init before plotly threads start (Py3.14 circular import)
 from dash import Dash, dcc, html, Input, Output, dash_table
 from plotly.subplots import make_subplots
 import plotly.graph_objects as go
