@@ -291,7 +291,8 @@ def _collector_loop(data_store: DataStore):
         try:
             store.close_session(session_id)
             from report import generate_session_html
-            generate_session_html(session_id, db_path, config.LOG_DIR)
+            html_path = generate_session_html(session_id, db_path, config.LOG_DIR)
+            webbrowser.open(f'file://{html_path}')
         except Exception:
             pass
         finally:

@@ -361,6 +361,7 @@ def main():
             console.print(f'\n[bold green]═══════════════════════════════════[/bold green]')
             console.print(f'[bold green]  Session report → {html_path}[/bold green]')
             console.print(f'[bold green]═══════════════════════════════════[/bold green]\n')
+            webbrowser.open(f'file://{html_path}')
         except Exception as exc:
             console.print(f'[yellow]Report generation failed: {exc}[/yellow]')
         finally:
