@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DigitalTwinEngine — Algorithm Specification v1.0</title>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box}
+body{font-family:'Libre Baskerville',Georgia,serif;background:#fff;color:#1a1a1a;
+     max-width:1100px;margin:0 auto;padding:40px 32px 100px;line-height:1.7}
+h1{font-size:1.65rem;font-weight:700;margin-bottom:6px;letter-spacing:-.01em}
+h2{font-size:1.1rem;font-weight:700;margin:52px 0 14px;border-bottom:2px solid #1a1a1a;
+   padding-bottom:8px;letter-spacing:-.01em}
+h3{font-size:.95rem;font-weight:700;margin:32px 0 10px;
+   border-left:4px solid #1a1a1a;padding-left:10px}
+h4{font-size:.88rem;font-weight:700;margin:22px 0 8px;color:#333;
+   font-family:'Inter',sans-serif;text-transform:uppercase;letter-spacing:.06em}
+.meta{font-size:13px;color:#666;border-bottom:2px solid #1a1a1a;
+      padding-bottom:14px;margin-bottom:36px;font-family:'Inter',sans-serif}
+.version-badge{display:inline-block;background:#1a1a1a;color:#fff;
+               font-family:'Inter',sans-serif;font-size:10px;font-weight:700;
+               padding:2px 8px;border-radius:2px;margin-right:10px;
+               letter-spacing:.06em;text-transform:uppercase}
+.status-badge{display:inline-block;background:#16a34a;color:#fff;
+              font-family:'Inter',sans-serif;font-size:10px;font-weight:700;
+              padding:2px 8px;border-radius:2px;letter-spacing:.06em}
+
+/* Nav */
+nav{position:sticky;top:0;background:rgba(255,255,255,.97);border-bottom:1px solid #e5e7eb;
+    padding:10px 0;margin-bottom:32px;z-index:100;font-family:'Inter',sans-serif;
+    font-size:11px}
+nav a{color:#555;text-decoration:none;margin-right:18px;font-weight:600}
+nav a:hover{color:#1a1a1a}
+
+/* Pseudocode blocks */
+.algo{background:#f8f8f8;border:1px solid #e0e0e0;border-left:4px solid #1a1a1a;
+      border-radius:4px;padding:20px 24px;margin:16px 0;
+      font-family:'Inter','Courier New',monospace;font-size:12px;line-height:1.75;
+      overflow-x:auto;white-space:pre}
+.algo .kw{color:#1d4ed8;font-weight:700}      /* keywords */
+.algo .cmt{color:#6b7280;font-style:italic}   /* comments */
+.algo .fn{color:#7c3aed;font-weight:600}      /* function names */
+.algo .num{color:#dc2626}                      /* numbers/constants */
+.algo .var{color:#0e7490}                      /* variables */
+
+/* Tables */
+table{border-collapse:collapse;width:100%;margin:16px 0;font-family:'Inter',sans-serif;
+      font-size:12px}
+thead th{background:#f5f5f5;color:#333;font-weight:700;font-size:10px;
+         text-transform:uppercase;letter-spacing:.06em;border-bottom:2px solid #ccc;
+         padding:8px 12px;text-align:left}
+tbody td{padding:7px 12px;border-bottom:1px solid #eee;vertical-align:top}
+tbody tr:nth-child(even){background:#fafafa}
+tbody tr:hover{background:#fffbe6}
+code{font-family:'Inter','Courier New',monospace;font-size:11px;background:#f3f4f6;
+     padding:1px 5px;border-radius:3px;color:#1a1a1a}
+
+/* Callouts */
+.callout{border-radius:4px;padding:14px 18px;margin:16px 0;
+         font-family:'Inter',sans-serif;font-size:13px}
+.callout.warn{background:#fef9c3;border-left:4px solid #ca8a04}
+.callout.info{background:#eff6ff;border-left:4px solid #2563eb}
+.callout.critical{background:#fee2e2;border-left:4px solid #dc2626}
+.callout.ok{background:#f0fdf4;border-left:4px solid #16a34a}
+.callout strong{font-weight:700}
+
+/* Equation display */
+.eq{background:#f9f9f9;border:1px solid #e5e7eb;border-radius:4px;
+    padding:12px 20px;margin:12px 0;font-family:'Inter',monospace;font-size:13px;
+    color:#1a1a1a;text-align:center}
+
+/* Traceability */
+.trace-tag{display:inline-block;font-family:'Inter',sans-serif;font-size:10px;
+           font-weight:700;padding:1px 7px;border-radius:2px;margin-right:4px}
+.trace-py{background:#dbeafe;color:#1d4ed8}
+.trace-db{background:#d1fae5;color:#065f46}
+.trace-ui{background:#ede9fe;color:#5b21b6}
+.trace-tbd{background:#f3f4f6;color:#6b7280}
+
+footer{margin-top:72px;border-top:1px solid #ddd;padding-top:16px;
+       font-size:11px;color:#999;font-family:'Inter',sans-serif}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="../index.html">← Home</a>
+  <a href="session_summary_20260603_digital_twin.html">Sprint EOD</a>
+  <a href="dt_parameter_reference.html">Parameter Ref</a>
+  <a href="#a1">Algo 1: GS Loop</a>
+  <a href="#a2">Algo 2: MC Oracle</a>
+  <a href="#a3">Algo 3: Optimizer</a>
+  <a href="#a4">Algo 4: QoE Vector</a>
+  <a href="#bridge">Bridge Table</a>
+  <a href="#knobs">12 Knobs</a>
+  <a href="#config">Config</a>
+  <a href="#audit">Audit Trail</a>
+  <a href="#trace">Traceability</a>
+</nav>
+
+<h1>DigitalTwinEngine — Algorithm Specification</h1>
+<div class="meta">
+  <span class="version-badge">v1.0</span>
+  <span class="status-badge">APPROVED</span>
+  &nbsp;&nbsp;
+  Authored: 2026-06-09 &nbsp;·&nbsp; AP Platform: AP3000 HiveOS (WiFi 6) &nbsp;·&nbsp;
+  Scope: Sprint 2b–Sprint 4 &nbsp;·&nbsp;
+  Audit reference: <code>docs/dt_algorithm_spec.html</code>
+</div>
+
+<div class="callout info">
+  <strong>Purpose.</strong> This document is the authoritative algorithm specification for the
+  DigitalTwinEngine calibration loop. It serves three roles simultaneously:
+  (1) audit record for any third-party review of the optimization methodology,
+  (2) regression test oracle — every Sprint 3 unit test must produce outputs consistent with the
+  equations here, and (3) implementation contract — Sprint 3 code is written against this spec,
+  not the other way around.
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════════════════ -->
+<h2 id="overview">§1 — System Overview</h2>
+
+<p>
+  The DigitalTwinEngine operates three concurrent planes:
+</p>
+
+<table>
+  <thead><tr><th>Plane</th><th>Function</th><th>State Machine</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><strong>Data Plane</strong></td>
+      <td>AP3000 → SSH → APCollectorAgent → SQLite + Dash. What <em>is</em> happening on the radio.</td>
+      <td>Running continuously at POLL_INTERVAL (default 15 s)</td>
+    </tr>
+    <tr>
+      <td><strong>Control Plane</strong></td>
+      <td>FederatedTwinAgent orchestrates: MC oracle → optimizer → HITL gate → knob push.
+          What <em>should</em> change.</td>
+      <td>Triggered by user; runs one GS iteration at a time</td>
+    </tr>
+    <tr>
+      <td><strong>Management Plane</strong></td>
+      <td><code>/health</code> endpoint, watchdog, session audit log. Is the system <em>healthy</em>.</td>
+      <td>Always-on; independent of calibration state</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>The 60 / 15 / 12 Split</h3>
+<table>
+  <thead><tr><th>Set</th><th>Count</th><th>Source</th><th>Role</th></tr></thead>
+  <tbody>
+    <tr><td>All simulator params</td><td>60</td><td>DPM (Design Parameter Manifest)</td><td>Full input space</td></tr>
+    <tr><td>Dynamic bridge params</td><td>15</td><td>AP SSH poll at t<sub>n</sub></td><td>Real AP state populates simulator</td></tr>
+    <tr><td>Optimizer search knobs</td><td>12</td><td>Subset of the 15</td><td>Parameters the optimizer can propose changing</td></tr>
+    <tr><td>Static DPM params</td><td>45</td><td>User-supplied DPM</td><td>Site geometry, client types, apps — fixed during a session</td></tr>
+  </tbody>
+</table>
+
+<div class="callout warn">
+  <strong>Critical distinction.</strong> The 15-param bridge and the 12 search knobs are
+  <em>overlapping but not identical</em>. Every search knob is also a bridge param (the AP
+  reports its current value). But 3 bridge params are read-only observables
+  (noise floor, CRC error, station count) — the optimizer cannot propose changing them
+  because they are RF outcomes, not configuration choices.
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════════════════ -->
+<h2 id="a1">§2 — Algorithm 1: GS Convergence Loop</h2>
+
+<h4>Inputs / Outputs</h4>
+<table>
+  <thead><tr><th>Item</th><th>Type</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><code>AP_IP</code></td><td>string</td><td>SSH target</td></tr>
+    <tr><td><code>DPM_static</code></td><td>dict[45]</td><td>Static site/client/app params from user DPM</td></tr>
+    <tr><td><code>QoE_target</code></td><td>float[N_dim]</td><td>User-supplied target per active QoE dimension</td></tr>
+    <tr><td><code>CONVERGENCE_CONFIG</code></td><td>dict</td><td>See §6</td></tr>
+    <tr><td>→ <code>GS_history</code></td><td>list[GS_record]</td><td>All GS iterations written to DB</td></tr>
+    <tr><td>→ <code>convergence_verdict</code></td><td>enum</td><td>CONVERGED | PLATEAU | DIVERGED | MAX_ITER | USER_HALT</td></tr>
+  </tbody>
+</table>
+
+<div class="algo"><span class="kw">ALGORITHM</span> <span class="fn">GS_Convergence_Loop</span>(AP_IP, DPM_static, QoE_target, CONVERGENCE_CONFIG):
+
+  <span class="cmt">── Step 1: Establish baseline (GS_0) ────────────────────────────────────</span>
+  raw_metrics  ← <span class="fn">APCollectorAgent.poll</span>(AP_IP)          <span class="cmt">// SSH; 5 CLI commands</span>
+  GS_0         ← <span class="fn">build_bridge</span>(raw_metrics)               <span class="cmt">// Algorithm 4: extract 15 params</span>
+  QoE_actual_0 ← <span class="fn">compute_QoE_actual</span>(raw_metrics)         <span class="cmt">// Algorithm 4: 5D from AP outputs</span>
+  QoE_pred_0   ← <span class="fn">SimulatorAgent.run</span>(GS_0, DPM_static)     <span class="cmt">// 15 physics equations</span>
+
+  <span class="cmt">── Step 2: Calibration check ────────────────────────────────────────────</span>
+  δ_cal_0 ← <span class="fn">delta_per_dim</span>(QoE_pred_0, QoE_actual_0)    <span class="cmt">// |predicted − actual| per dimension</span>
+  <span class="kw">IF</span> <span class="fn">any</span>(δ_cal_0[d] > CONVERGENCE_CONFIG.calibration_alarm):
+      <span class="fn">emit_alert</span>(<span class="num">"MODEL_UNRELIABLE"</span>, δ_cal_0)
+      <span class="kw">RETURN</span> verdict=DIVERGED                           <span class="cmt">// Do NOT iterate — fix DPM first</span>
+
+  <span class="cmt">── Step 3: Initial progress measurement ─────────────────────────────────</span>
+  δ_prog_0 ← <span class="fn">delta_per_dim</span>(QoE_target, QoE_actual_0)
+  <span class="fn">write_gs_record</span>(n=<span class="num">0</span>, GS_0, QoE_actual_0, QoE_pred_0, δ_cal_0, δ_prog_0)
+
+  n ← <span class="num">0</span>
+
+  <span class="cmt">── Step 4: Convergence loop ─────────────────────────────────────────────</span>
+  <span class="kw">WHILE</span> n < CONVERGENCE_CONFIG.max_iterations:
+
+    <span class="cmt">── 4a. Compute MC sensitivity at current GS ──────────────────────────</span>
+    sensitivity ← <span class="fn">MC_Sensitivity_Oracle</span>(GS_n, DPM_static)   <span class="cmt">// Algorithm 2</span>
+
+    <span class="cmt">── 4b. Optimizer proposes next knob set ──────────────────────────────</span>
+    GS_n1       ← <span class="fn">Coordinate_Ascent_Optimizer</span>(            <span class="cmt">// Algorithm 3</span>
+                      GS_n, sensitivity, QoE_target,
+                      QoE_actual_n, CONVERGENCE_CONFIG)
+    QoE_pred_n1 ← <span class="fn">SimulatorAgent.run</span>(GS_n1, DPM_static)
+
+    <span class="cmt">── 4c. Human gate ────────────────────────────────────────────────────</span>
+    <span class="fn">present_to_user</span>(GS_n, GS_n1, QoE_pred_n1, QoE_actual_n)
+    <span class="cmt">// Show: knobs changed, predicted QoE improvement, generated CLI commands</span>
+    decision ← <span class="fn">await_user_decision</span>()   <span class="cmt">// APPROVE | REJECT | HALT</span>
+
+    <span class="kw">IF</span> decision == HALT:    <span class="kw">RETURN</span> verdict=USER_HALT
+    <span class="kw">IF</span> decision == REJECT:
+        <span class="fn">write_gs_record</span>(n+<span class="num">1</span>, GS_n1, None, QoE_pred_n1, None, None, status=<span class="num">"REJECTED"</span>)
+        <span class="kw">RETURN</span> verdict=USER_HALT
+
+    <span class="cmt">── 4d. Apply to AP and measure ───────────────────────────────────────</span>
+    cli_commands ← <span class="fn">generate_AP_cli</span>(GS_n, GS_n1)          <span class="cmt">// only changed knobs</span>
+    <span class="fn">push_to_AP</span>(cli_commands, AP_IP)                    <span class="cmt">// SSH exec; logged to audit</span>
+    <span class="fn">wait</span>(POLL_INTERVAL × <span class="num">3</span>)                            <span class="cmt">// stabilization window</span>
+    raw_n1       ← <span class="fn">APCollectorAgent.poll</span>(AP_IP)
+    QoE_actual_n1 ← <span class="fn">compute_QoE_actual</span>(raw_n1)
+
+    <span class="cmt">── 4e. Compute deltas for this iteration ─────────────────────────────</span>
+    δ_prog_n1 ← <span class="fn">delta_per_dim</span>(QoE_target, QoE_actual_n1)
+    δ_cal_n1  ← <span class="fn">delta_per_dim</span>(QoE_pred_n1, QoE_actual_n1)
+    improvement ← <span class="fn">norm</span>(δ_prog_n) − <span class="fn">norm</span>(δ_prog_n1)
+
+    <span class="fn">write_gs_record</span>(n+<span class="num">1</span>, GS_n1, QoE_actual_n1, QoE_pred_n1, δ_cal_n1, δ_prog_n1)
+
+    <span class="cmt">── 4f. Stopping conditions ───────────────────────────────────────────</span>
+    <span class="kw">IF</span> <span class="fn">all</span>(δ_prog_n1[d] < CONVERGENCE_CONFIG.progress_threshold):
+        <span class="kw">RETURN</span> verdict=CONVERGED                         <span class="cmt">// goal reached on all dimensions</span>
+
+    <span class="kw">IF</span> improvement < CONVERGENCE_CONFIG.min_improvement × <span class="fn">norm</span>(δ_prog_n):
+        <span class="kw">RETURN</span> verdict=PLATEAU                           <span class="cmt">// diminishing returns</span>
+
+    <span class="kw">IF</span> <span class="fn">any</span>(δ_cal_n1[d] > CONVERGENCE_CONFIG.calibration_alarm):
+        <span class="fn">emit_alert</span>(<span class="num">"MODEL_DRIFT"</span>, δ_cal_n1)
+        <span class="kw">RETURN</span> verdict=DIVERGED                          <span class="cmt">// model no longer tracks reality</span>
+
+    GS_n     ← GS_n1
+    QoE_actual_n ← QoE_actual_n1
+    δ_prog_n ← δ_prog_n1
+    n ← n + <span class="num">1</span>
+
+  <span class="kw">RETURN</span> verdict=MAX_ITER
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════════════════ -->
+<h2 id="a2">§3 — Algorithm 2: Monte Carlo Sensitivity Oracle</h2>
+
+<p>
+  The MC oracle computes the local gradient of QoE with respect to each of the
+  12 optimizer knobs at the current operating point GS_n. It uses central-difference
+  finite differences — not random sampling. The word "Monte Carlo" refers to the
+  repeated simulation runs (one per knob × 2 directions = 24 total per iteration),
+  not to random exploration of parameter space.
+</p>
+
+<div class="callout info">
+  <strong>Why central difference, not forward difference?</strong> Central difference
+  (<code>(f(x+h) − f(x−h)) / 2h</code>) achieves second-order accuracy with the same
+  number of function evaluations as forward difference. The simulator is cheap
+  (milliseconds), so 24 runs per iteration is acceptable.
+</div>
+
+<div class="algo"><span class="kw">ALGORITHM</span> <span class="fn">MC_Sensitivity_Oracle</span>(GS_n, DPM_static):
+
+  <span class="cmt">── Constants ─────────────────────────────────────────────────────────────</span>
+  h ← <span class="num">0.05</span>   <span class="cmt">// perturbation factor = ±5% of current value</span>
+  K ← <span class="num">12</span>    <span class="cmt">// number of search knobs</span>
+  D ← len(active_QoE_dimensions)
+
+  sensitivity ← zeros(K × D)   <span class="cmt">// output matrix: ∂QoE_d / ∂θ_i</span>
+
+  <span class="kw">FOR</span> i <span class="kw">IN</span> range(K):
+    knob_i    ← GS_n.knobs[i]
+    θ_current ← knob_i.value
+
+    <span class="kw">IF</span> knob_i.type == <span class="num">"continuous"</span>:
+      θ_plus  ← <span class="fn">clip</span>(θ_current × (<span class="num">1</span> + h), knob_i.min, knob_i.max)
+      θ_minus ← <span class="fn">clip</span>(θ_current × (<span class="num">1</span> - h), knob_i.min, knob_i.max)
+      dθ      ← θ_plus − θ_minus                         <span class="cmt">// actual denominator</span>
+
+    <span class="kw">ELIF</span> knob_i.type == <span class="num">"boolean"</span>:
+      θ_plus  ← <span class="num">1</span>     <span class="cmt">// feature ON</span>
+      θ_minus ← <span class="num">0</span>     <span class="cmt">// feature OFF</span>
+      dθ      ← <span class="num">1</span>
+
+    <span class="kw">ELIF</span> knob_i.type == <span class="num">"integer"</span>:
+      θ_plus  ← <span class="fn">clip</span>(<span class="fn">round</span>(θ_current × (<span class="num">1</span> + h)), knob_i.min, knob_i.max)
+      θ_minus ← <span class="fn">clip</span>(<span class="fn">round</span>(θ_current × (<span class="num">1</span> - h)), knob_i.min, knob_i.max)
+      dθ      ← <span class="fn">max</span>(<span class="num">1</span>, θ_plus − θ_minus)              <span class="cmt">// guard against 0 denominator</span>
+
+    GS_plus  ← <span class="fn">copy</span>(GS_n) with knobs[i].value = θ_plus
+    GS_minus ← <span class="fn">copy</span>(GS_n) with knobs[i].value = θ_minus
+
+    QoE_plus  ← <span class="fn">SimulatorAgent.run</span>(GS_plus,  DPM_static)
+    QoE_minus ← <span class="fn">SimulatorAgent.run</span>(GS_minus, DPM_static)
+
+    <span class="kw">FOR</span> d <span class="kw">IN</span> range(D):
+      sensitivity[i][d] ← (QoE_plus[d] − QoE_minus[d]) / dθ
+      <span class="cmt">// Units: ΔQoE_d per unit Δθ_i</span>
+
+  <span class="kw">RETURN</span> sensitivity   <span class="cmt">// shape: [12 × D]; written to gs_history.sensitivity_json</span>
+</div>
+
+<div class="callout warn">
+  <strong>Hardware ceiling enforcement.</strong> The <code>clip()</code> calls above enforce
+  AP3000 hardware limits defined in <code>AP3000_HARDWARE_LIMITS</code>
+  (e.g. max chan_width=80 MHz on wifi1, max_clients=100, MCS tier 0–11).
+  Perturbing beyond hardware limits produces meaningless sensitivity values.
+  Clip before every simulator call.
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════════════════ -->
+<h2 id="a3">§4 — Algorithm 3: Coordinate Ascent Optimizer</h2>
+
+<p>
+  The optimizer takes the sensitivity matrix from Algorithm 2 and proposes GS_n+1:
+  the next set of knob values that should move QoE closer to the user's target.
+  It uses coordinate ascent — adjusting one knob at a time, prioritised by leverage —
+  rather than simultaneous gradient descent on all 12 dimensions. This makes each
+  proposed change auditable: one knob → one reason.
+</p>
+
+<div class="algo"><span class="kw">ALGORITHM</span> <span class="fn">Coordinate_Ascent_Optimizer</span>(GS_n, sensitivity, QoE_target, QoE_actual_n, CONFIG):
+
+  <span class="cmt">── Constants ─────────────────────────────────────────────────────────────</span>
+  α       ← <span class="num">0.10</span>   <span class="cmt">// step size (learning rate) — 10% of gap per iteration</span>
+  K_top   ← <span class="num">3</span>     <span class="cmt">// max knobs changed per iteration (keep changes auditable)</span>
+  ε_bool  ← <span class="num">0.05</span>  <span class="cmt">// threshold: flip boolean knob only if |sensitivity| > this</span>
+
+  <span class="cmt">── Step 1: Compute per-dimension progress gap ────────────────────────────</span>
+  gap[d] ← QoE_target[d] − QoE_actual_n[d]   <span class="cmt">// signed: positive = below target</span>
+  gap_norm ← <span class="fn">norm</span>(gap)                       <span class="cmt">// for weight normalization</span>
+  <span class="kw">IF</span> gap_norm == <span class="num">0</span>: <span class="kw">RETURN</span> GS_n            <span class="cmt">// already at target</span>
+
+  <span class="cmt">── Step 2: Compute per-knob aggregate leverage score ─────────────────────</span>
+  <span class="kw">FOR</span> i <span class="kw">IN</span> range(K):
+    <span class="cmt">// Weight each dimension by how far we are from its target</span>
+    w[d] ← |gap[d]| / gap_norm               <span class="cmt">// larger gap → higher weight</span>
+
+    <span class="cmt">// Sign: does this knob move us TOWARD target on each dimension?</span>
+    aligned[i][d] ← <span class="fn">sign</span>(sensitivity[i][d]) == <span class="fn">sign</span>(gap[d])
+
+    score[i] ← Σ_d ( |sensitivity[i][d]| × w[d] × aligned[i][d] )
+    <span class="cmt">// Knobs that are both high-sensitivity AND moving toward all targets score highest</span>
+
+  <span class="cmt">── Step 3: Rank knobs; take top K_top ───────────────────────────────────</span>
+  priority ← <span class="fn">argsort</span>(score, descending=True)[:K_top]
+  GS_n1   ← <span class="fn">deepcopy</span>(GS_n)
+  changes ← []
+
+  <span class="cmt">── Step 4: Compute proposed change per selected knob ─────────────────────</span>
+  <span class="kw">FOR</span> i <span class="kw">IN</span> priority:
+    knob ← GS_n.knobs[i]
+
+    <span class="kw">IF</span> knob.type == <span class="num">"continuous"</span> <span class="kw">OR</span> knob.type == <span class="num">"integer"</span>:
+      <span class="cmt">// Gradient step: move each knob proportional to α × gap / sensitivity</span>
+      <span class="cmt">// Weighted average across dimensions</span>
+      Δθ ← Σ_d( w[d] × α × gap[d] / sensitivity[i][d] )  where sensitivity[i][d] ≠ 0
+
+      new_val ← <span class="fn">clip</span>(knob.value + Δθ, knob.min, knob.max)
+      <span class="kw">IF</span> knob.type == <span class="num">"integer"</span>: new_val ← <span class="fn">round</span>(new_val)
+
+    <span class="kw">ELIF</span> knob.type == <span class="num">"boolean"</span>:
+      <span class="cmt">// Flip only if aggregate sensitivity exceeds threshold</span>
+      net_sensitivity ← Σ_d( w[d] × sensitivity[i][d] × <span class="fn">sign</span>(gap[d]) )
+      <span class="kw">IF</span> |net_sensitivity| > ε_bool:
+        new_val ← <span class="num">1</span> <span class="kw">IF</span> net_sensitivity > <span class="num">0</span> <span class="kw">ELSE</span> <span class="num">0</span>
+      <span class="kw">ELSE</span>:
+        new_val ← knob.value   <span class="cmt">// no change — sensitivity too small to justify a flip</span>
+
+    GS_n1.knobs[i].value ← new_val
+    changes.append({knob: knob.name, from: knob.value, to: new_val,
+                    score: score[i], reason: <span class="fn">top_dimension</span>(sensitivity[i], w)})
+
+  GS_n1.changes   ← changes     <span class="cmt">// written to gs_history.changes_json for audit</span>
+  GS_n1.iteration ← n + <span class="num">1</span>
+
+  <span class="kw">RETURN</span> GS_n1
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════════════════ -->
+<h2 id="a4">§5 — Algorithm 4: QoE Vector Computation</h2>
+
+<h3>5a — QoE from Real AP Measurements (QoE_actual)</h3>
+
+<p>
+  The 5D QoE vector is computed from raw AP SSH poll outputs.
+  All dimensions are normalized to [0, 1] where 1 = best possible.
+</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>#</th><th>Dimension</th><th>Formula</th><th>AP Fields Used</th><th>Notes</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>d0</td>
+      <td><strong>Throughput</strong></td>
+      <td><code>Σ(tx_throughput_mbps) / (station_count × MCS11_peak)</code></td>
+      <td><code>tx_throughput_mbps, station_count</code></td>
+      <td>MCS11_peak = 1201 Mbps (80MHz 2×2 802.11ax). Normalized 0–1.</td>
+    </tr>
+    <tr>
+      <td>d1</td>
+      <td><strong>Reliability</strong></td>
+      <td><code>1 − (crc_error_pct / 100)</code></td>
+      <td><code>crc_error_pct</code></td>
+      <td>0% CRC → 1.0; 100% CRC → 0.0. CRC is the primary frame-loss signal.</td>
+    </tr>
+    <tr>
+      <td>d2</td>
+      <td><strong>Latency proxy</strong></td>
+      <td><code>1 / (1 + M_D_1(ρ))</code> where <code>M_D_1(ρ) = ρ / (1−ρ)</code> and <code>ρ = total_cu_pct / 100</code></td>
+      <td><code>total_cu_pct</code></td>
+      <td>M/D/1 queue model. ρ → 1 makes delay → ∞. Clamped: ρ = min(ρ, 0.95).</td>
+    </tr>
+    <tr>
+      <td>d3</td>
+      <td><strong>Connection quality</strong></td>
+      <td><code>MCS_tier(avg_snr_db) / 11</code></td>
+      <td><code>avg_snr_db</code> (from client_polls)</td>
+      <td>SNR → MCS tier via 802.11ax lookup table (see §5c). Normalized 0–1.</td>
+    </tr>
+    <tr>
+      <td>d4</td>
+      <td><strong>Capacity headroom</strong></td>
+      <td><code>1 − (tx_cu_pct + rx_cu_pct) / 100</code></td>
+      <td><code>tx_cu_pct, rx_cu_pct</code></td>
+      <td>Clamped to [0, 1]. Represents remaining airtime for burst traffic.</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="eq">QoE_actual = [ d0, d1, d2, d3, d4 ]    where each d ∈ [0.0, 1.0]</div>
+
+<div class="callout info">
+  <strong>Configurable dimensions.</strong> Any subset of {d0..d4} may be active per session.
+  Users prioritising video calls might weight d2 (latency) and d3 (SNR) highest.
+  A bulk-transfer session weights d0 (throughput) only. Default = all five, equal weight.
+</div>
+
+<h3>5b — SNR → MCS Tier Lookup (802.11ax, 80 MHz, 2×2)</h3>
+<table>
+  <thead><tr><th>MCS Tier</th><th>Min SNR (dB)</th><th>Modulation</th><th>Coding Rate</th><th>Peak rate (80MHz 2SS)</th></tr></thead>
+  <tbody>
+    <tr><td>0</td><td>0</td><td>BPSK</td><td>1/2</td><td>72.1 Mbps</td></tr>
+    <tr><td>1</td><td>5</td><td>QPSK</td><td>1/2</td><td>144.1 Mbps</td></tr>
+    <tr><td>2</td><td>9</td><td>QPSK</td><td>3/4</td><td>216.2 Mbps</td></tr>
+    <tr><td>3</td><td>13</td><td>16-QAM</td><td>1/2</td><td>288.2 Mbps</td></tr>
+    <tr><td>4</td><td>17</td><td>16-QAM</td><td>3/4</td><td>432.4 Mbps</td></tr>
+    <tr><td>5</td><td>21</td><td>64-QAM</td><td>2/3</td><td>576.5 Mbps</td></tr>
+    <tr><td>6</td><td>25</td><td>64-QAM</td><td>3/4</td><td>648.5 Mbps</td></tr>
+    <tr><td>7</td><td>28</td><td>64-QAM</td><td>5/6</td><td>720.6 Mbps</td></tr>
+    <tr><td>8</td><td>31</td><td>256-QAM</td><td>3/4</td><td>864.7 Mbps</td></tr>
+    <tr><td>9</td><td>34</td><td>256-QAM</td><td>5/6</td><td>960.8 Mbps</td></tr>
+    <tr><td>10</td><td>38</td><td>1024-QAM</td><td>3/4</td><td>1080.9 Mbps</td></tr>
+    <tr><td>11</td><td>41</td><td>1024-QAM</td><td>5/6</td><td>1201.0 Mbps</td></tr>
+  </tbody>
+</table>
+
+<h3>5c — δ Definitions (Two Deltas — Never Conflate)</h3>
+<table>
+  <thead><tr><th>Delta</th><th>Formula</th><th>Meaning</th><th>Action on alarm</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><code>δ_calibration_n</code></td>
+      <td><code>|QoE_predicted_n − QoE_actual_n|</code> per dimension</td>
+      <td>Is the simulator model accurately describing this AP?</td>
+      <td>If &gt; 20%: PAUSE loop, investigate DPM static params</td>
+    </tr>
+    <tr>
+      <td><code>δ_progress_n</code></td>
+      <td><code>|QoE_target − QoE_actual_n|</code> per dimension</td>
+      <td>Are we moving toward the user's QoE goal?</td>
+      <td>If &lt; 10% of target: declare CONVERGED</td>
+    </tr>
+  </tbody>
+</table>
+<div class="callout critical">
+  <strong>Invariant.</strong> A small δ_calibration does NOT imply a small δ_progress.
+  If the model is accurate but the AP is far from target, the correct action is
+  to change knobs — not to re-calibrate. These two paths must never be conflated in code.
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════════════════ -->
+<h2 id="bridge">§6 — The 15-Parameter Bridge (AP → Simulator)</h2>
+
+<p>
+  These 15 fields are read from the AP at every poll and passed to the SimulatorAgent
+  as the dynamic portion of its 60-param input vector.
+</p>
+
+<table>
+  <thead>
+    <tr><th>#</th><th>Bridge Param</th><th>AP CLI Source</th><th>DB Field</th><th>Knob?</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>B01</td><td>Channel width (wifi1)</td><td><code>show interface wifi1 → Channel width=</code></td><td><code>channel_width_mhz</code></td><td>✅ K04</td></tr>
+    <tr><td>B02</td><td>Tx power (wifi1)</td><td><code>show interface wifi1 → One Chain EIRP power=</code></td><td><code>tx_power_dbm</code></td><td>✅ K01</td></tr>
+    <tr><td>B03</td><td>OFDMA DL enabled</td><td><code>show interface wifi1 → HE OFDMA downlink=</code></td><td><code>ofdma_dl</code></td><td>✅ K07</td></tr>
+    <tr><td>B04</td><td>OFDMA UL enabled</td><td><code>show interface wifi1 → HE OFDMA uplink=</code></td><td><code>ofdma_ul</code></td><td>✅ K08</td></tr>
+    <tr><td>B05</td><td>MU-MIMO enabled</td><td><code>show interface wifi1 → MU-MIMO=</code></td><td><code>mu_mimo</code></td><td>✅ K09</td></tr>
+    <tr><td>B06</td><td>BSS Color</td><td><code>show interface wifi1 → BSS Color=</code></td><td><code>bss_color</code></td><td>✅ K10</td></tr>
+    <tr><td>B07</td><td>CW-min BE</td><td><code>show radio profile → AC=be; WMM min CW=</code></td><td><code>wmm_cw_min_be</code></td><td>✅ K05</td></tr>
+    <tr><td>B08</td><td>TXOP BE limit</td><td><code>show radio profile → AC=be; txoplimit=</code></td><td><code>wmm_txop_be</code></td><td>✅ K06</td></tr>
+    <tr><td>B09</td><td>Max clients (per radio)</td><td><code>show interface wifi1 → Max clients number=</code></td><td><code>max_clients</code> (via station_count proxy)</td><td>✅ K03</td></tr>
+    <tr><td>B10</td><td>LB airtime limit %</td><td><code>show radio profile → LB station airtime limit=</code></td><td><code>lb_airtime_limit_pct</code></td><td>✅ K11</td></tr>
+    <tr><td>B11</td><td>Weak SNR threshold</td><td><code>show radio profile → Weak SNR threshold=</code></td><td><code>weak_snr_threshold_db</code></td><td>✅ K12 (mcsFloor + minRSSI proxy)</td></tr>
+    <tr><td>B12</td><td>Dynamic channel width</td><td><code>show interface wifi1 → Dynamic channel width=</code></td><td><code>dynamic_chan_width</code></td><td>✅ K02</td></tr>
+    <tr><td>B13</td><td>Noise floor (dBm)</td><td><code>show interface wifi1 → Noise floor=</code></td><td><code>noise_floor_dbm</code></td><td>❌ read-only observable</td></tr>
+    <tr><td>B14</td><td>Station count</td><td><code>show station → station count</code></td><td><code>station_count</code></td><td>❌ read-only observable</td></tr>
+    <tr><td>B15</td><td>CRC error %</td><td><code>show interface wifi1 → CRC error airtime percent=</code></td><td><code>crc_error_pct</code></td><td>❌ read-only observable</td></tr>
+  </tbody>
+</table>
+
+
+<!-- ══════════════════════════════════════════════════════════════════════ -->
+<h2 id="knobs">§7 — The 12 Optimizer Knobs</h2>
+
+<table>
+  <thead>
+    <tr><th>Knob</th><th>Name</th><th>Type</th><th>AP3000 Range</th><th>Default (GS_0)</th><th>Simulator param</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>K01</td><td>Tx power (wifi1)</td><td>continuous</td><td>5–23 dBm</td><td>18 dBm</td><td><code>txPwr</code></td></tr>
+    <tr><td>K02</td><td>Dynamic chan width</td><td>boolean</td><td>OFF / ON</td><td>ON</td><td><code>dcw</code></td></tr>
+    <tr><td>K03</td><td>Max clients</td><td>integer</td><td>1–100</td><td>100</td><td><code>maxCli</code></td></tr>
+    <tr><td>K04</td><td>Channel width (wifi1)</td><td>integer</td><td>20 / 40 / 80 MHz</td><td>80 MHz</td><td><code>bw5g</code></td></tr>
+    <tr><td>K05</td><td>CW-min BE</td><td>integer</td><td>0–15 (exponent)</td><td>4</td><td><code>cwBe</code></td></tr>
+    <tr><td>K06</td><td>TXOP BE limit</td><td>integer</td><td>0–8192 µs</td><td>0</td><td><code>txopBe</code></td></tr>
+    <tr><td>K07</td><td>OFDMA DL</td><td>boolean</td><td>OFF / ON</td><td>OFF</td><td><code>ofdmaDl</code></td></tr>
+    <tr><td>K08</td><td>OFDMA UL</td><td>boolean</td><td>OFF / ON</td><td>OFF</td><td><code>ofdmaUl</code></td></tr>
+    <tr><td>K09</td><td>MU-MIMO DL</td><td>boolean</td><td>OFF / ON</td><td>OFF</td><td><code>muMimo</code></td></tr>
+    <tr><td>K10</td><td>BSS Color</td><td>integer</td><td>0=OFF, 1–63</td><td>0 (OFF)</td><td><code>bssColor</code></td></tr>
+    <tr><td>K11</td><td>LB airtime limit %</td><td>integer</td><td>0–50 %</td><td>4 %</td><td><code>atFair</code></td></tr>
+    <tr><td>K12</td><td>Weak SNR threshold</td><td>integer</td><td>0–40 dB</td><td>15 dB</td><td><code>minRSSI</code> / <code>mcsFloor</code></td></tr>
+  </tbody>
+</table>
+
+<div class="callout warn">
+  <strong>AP3000 hardware ceilings — enforced in clip().</strong>
+  Never propose: chan_width &gt; 80 MHz (wifi1) or &gt; 40 MHz (wifi0); MCS tier &gt; 11;
+  spatial streams &gt; 2; wifi2 / 6 GHz configs; TWT (disabled at chipset level on AP3000).
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════════════════ -->
+<h2 id="config">§8 — Convergence Configuration (CONVERGENCE_CONFIG)</h2>
+
+<table>
+  <thead><tr><th>Parameter</th><th>Default</th><th>Meaning</th><th>Regression test value</th></tr></thead>
+  <tbody>
+    <tr><td><code>max_iterations</code></td><td>5</td><td>Hard limit on GS cycles</td><td>3</td></tr>
+    <tr><td><code>progress_threshold</code></td><td>0.10</td><td>Declare CONVERGED when δ_progress &lt; 10% of target on ALL dimensions</td><td>0.05</td></tr>
+    <tr><td><code>min_improvement</code></td><td>0.05</td><td>Declare PLATEAU when iteration-to-iteration gain &lt; 5% of remaining gap</td><td>0.02</td></tr>
+    <tr><td><code>calibration_alarm</code></td><td>0.20</td><td>Pause and alert if δ_calibration exceeds 20% on ANY dimension</td><td>0.30</td></tr>
+    <tr><td><code>mode</code></td><td><code>HITL</code></td><td><code>HITL</code> = human approves every AP push; <code>auto</code> = Sprint 5 only</td><td><code>HITL</code></td></tr>
+    <tr><td><code>stabilization_polls</code></td><td>3</td><td>Wait this many poll intervals after AP knob push before measuring QoE_actual_n+1</td><td>1</td></tr>
+    <tr><td><code>step_size_alpha</code></td><td>0.10</td><td>Gradient step size for continuous/integer knobs</td><td>0.10</td></tr>
+    <tr><td><code>max_knobs_per_iter</code></td><td>3</td><td>Maximum knobs changed per GS iteration (audit control)</td><td>3</td></tr>
+    <tr><td><code>perturbation_factor</code></td><td>0.05</td><td>h for central-difference MC oracle (±5%)</td><td>0.05</td></tr>
+  </tbody>
+</table>
+
+
+<!-- ══════════════════════════════════════════════════════════════════════ -->
+<h2 id="audit">§9 — Audit Trail (What Gets Written to DB)</h2>
+
+<p>
+  Every GS iteration produces a complete audit record. The schema below is the
+  regression test ground truth — any re-run with the same GS_0, DPM_static, and
+  CONVERGENCE_CONFIG must reproduce the same GS_history records.
+</p>
+
+<table>
+  <thead>
+    <tr><th>Table</th><th>Written when</th><th>Key fields</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>sessions</code></td>
+      <td>Session open / close</td>
+      <td><code>id, ap_ip, ap_name, ap_model, start_ts, end_ts, config_snapshot_json</code></td>
+    </tr>
+    <tr>
+      <td><code>radio_polls</code></td>
+      <td>Every poll (POLL_INTERVAL)</td>
+      <td>All 65 data fields + <code>session_id, ts, radio, band</code></td>
+    </tr>
+    <tr>
+      <td><code>client_polls</code></td>
+      <td>Every poll</td>
+      <td><code>session_id, ts, radio, mac, snr_db, tx_rate_mbps, rx_rate_mbps, ...</code></td>
+    </tr>
+    <tr>
+      <td><code>knob_change_events</code></td>
+      <td>Sprint 2b: user manual change via knob panel<br>Sprint 3+: optimizer-proposed GS push (HITL approved)</td>
+      <td><code>session_id, ts, knob_name, old_value, new_value, source (user|optimizer), gs_iteration</code></td>
+    </tr>
+    <tr>
+      <td><code>gs_history</code> <em>(Sprint 3)</em></td>
+      <td>End of each GS iteration</td>
+      <td><code>session_id, iteration_n, gs_record_json, qoe_actual_json, qoe_predicted_json,
+      delta_calibration_json, delta_progress_json, sensitivity_json, changes_json,
+      verdict, ts_start, ts_end</code></td>
+    </tr>
+    <tr>
+      <td><code>raw_cli_snapshots</code></td>
+      <td>Every poll (debug mode)</td>
+      <td><code>session_id, ts, radio, tag, raw_text</code></td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="callout ok">
+  <strong>Regression test invariant.</strong> Given identical inputs
+  (<code>gs_history[n].gs_record_json</code> as GS_n, same DPM_static, same CONVERGENCE_CONFIG),
+  Algorithm 2 must produce identical <code>sensitivity_json</code>, and
+  Algorithm 3 must produce identical <code>changes_json</code> and GS_n+1.
+  The simulator must be deterministic (no random seeds in its physics equations).
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════════════════ -->
+<h2 id="trace">§10 — Traceability Matrix</h2>
+
+<table>
+  <thead>
+    <tr><th>Algorithm step</th><th>Sprint</th><th>Module</th><th>Test</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>AP SSH poll → 15 bridge params</td>
+      <td>1 ✅</td>
+      <td><span class="trace-tag trace-py">PY</span><code>live_monitor/agents/collector.py</code></td>
+      <td><code>test_bridge_extraction.py</code></td>
+    </tr>
+    <tr>
+      <td>QoE_actual from poll (5D)</td>
+      <td>2c</td>
+      <td><span class="trace-tag trace-py">PY</span><code>live_monitor/agents/collector.py · compute_qoe_actual()</code></td>
+      <td><code>test_qoe_actual.py</code> — verify d0–d4 against known inputs</td>
+    </tr>
+    <tr>
+      <td>SimulatorAgent physics equations</td>
+      <td>3</td>
+      <td><span class="trace-tag trace-py">PY</span><code>live_monitor/agents/simulator.py</code></td>
+      <td><code>test_simulator_deterministic.py</code> — same inputs → same QoE every run</td>
+    </tr>
+    <tr>
+      <td>MC Sensitivity Oracle (Algo 2)</td>
+      <td>3</td>
+      <td><span class="trace-tag trace-py">PY</span><code>live_monitor/agents/calibration_agent.py · mc_sensitivity()</code></td>
+      <td><code>test_mc_oracle.py</code> — verify central difference numerics, clip enforcement</td>
+    </tr>
+    <tr>
+      <td>Coordinate Ascent Optimizer (Algo 3)</td>
+      <td>3</td>
+      <td><span class="trace-tag trace-py">PY</span><code>live_monitor/agents/optimizer_agent.py · propose_gs()</code></td>
+      <td><code>test_optimizer.py</code> — verify K_top limit, boolean flip threshold, hardware ceiling</td>
+    </tr>
+    <tr>
+      <td>GS Convergence Loop (Algo 1)</td>
+      <td>3</td>
+      <td><span class="trace-tag trace-py">PY</span><code>live_monitor/agents/federated_twin_agent.py · run_loop()</code></td>
+      <td><code>test_convergence_verdicts.py</code> — all 5 stopping conditions triggered in isolation</td>
+    </tr>
+    <tr>
+      <td>HITL gate (user approve / reject)</td>
+      <td>3</td>
+      <td><span class="trace-tag trace-ui">UI</span><code>live_monitor/dashboard.py</code> + <span class="trace-tag trace-py">PY</span><code>federated_twin_agent.py</code></td>
+      <td>Manual test: reject → verdict=USER_HALT; approve → CLI commands emitted</td>
+    </tr>
+    <tr>
+      <td>knob_change_events (manual)</td>
+      <td>2b</td>
+      <td><span class="trace-tag trace-py">PY</span><code>live_monitor/knob_panel.py</code> + <span class="trace-tag trace-db">DB</span><code>storage.py</code></td>
+      <td><code>test_knob_events.py</code></td>
+    </tr>
+    <tr>
+      <td>gs_history audit record</td>
+      <td>3</td>
+      <td><span class="trace-tag trace-db">DB</span><code>live_monitor/storage.py · write_gs_record()</code></td>
+      <td><code>test_gs_history_schema.py</code> — all required fields present and non-null</td>
+    </tr>
+    <tr>
+      <td>federated_debug.py E2E</td>
+      <td>2c</td>
+      <td><span class="trace-tag trace-py">PY</span><code>live_monitor/federated_debug.py</code></td>
+      <td>Run with <code>--replay session.csv --scenario synthetic_congested.json</code></td>
+    </tr>
+    <tr>
+      <td>Prius FederatedDashboard</td>
+      <td>4</td>
+      <td><span class="trace-tag trace-ui">UI</span><code>live_monitor/dashboard.py · /federated route</code></td>
+      <td><span class="trace-tag trace-tbd">TBD</span> Sprint 4</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>Regression Test Inputs (Synthetic Scenarios)</h3>
+<table>
+  <thead><tr><th>Scenario file</th><th>Description</th><th>Expected verdict</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><code>scenarios/clean_lab.json</code></td>
+      <td>Low CRC (0.5%), low CU (10%), high SNR (35 dB), 3 stations. GS_0 = AP3000 defaults.</td>
+      <td>CONVERGED in ≤ 2 iterations (already near target)</td>
+    </tr>
+    <tr>
+      <td><code>scenarios/congested_venue.json</code></td>
+      <td>CRC 28%, CU 78%, SNR 12 dB, 45 stations. GS_0 = all WiFi 6 features disabled.</td>
+      <td>Optimizer enables OFDMA → PLATEAU or CONVERGED at max_iterations</td>
+    </tr>
+    <tr>
+      <td><code>scenarios/model_drift.json</code></td>
+      <td>Injected: QoE_predicted vs QoE_actual differ by 35% on d0 from iteration 2.</td>
+      <td>DIVERGED — calibration_alarm fires at iteration 2</td>
+    </tr>
+    <tr>
+      <td><code>scenarios/user_halt.json</code></td>
+      <td>Normal congestion, but HITL stub set to REJECT at iteration 1.</td>
+      <td>USER_HALT immediately</td>
+    </tr>
+  </tbody>
+</table>
+
+
+<footer>
+  © 2026 Khursheed Khan · DigitalTwinEngine Algorithm Specification v1.0 ·
+  <a href="dt_parameter_reference.html" style="color:#999">Parameter Reference</a> ·
+  <a href="session_summary_20260603_digital_twin.html" style="color:#999">Sprint EOD</a>
+</footer>
+
+</body>
+</html>
