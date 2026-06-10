@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DigitalTwinEngine · Calibration RAG Sources</title>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Source+Code+Pro:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Libre Baskerville', Georgia, serif; background: #fff; color: #1a1a1a; font-size: 16px; line-height: 1.75; max-width: 960px; margin: 0 auto; padding: 40px 32px 100px; }
+  header { border-bottom: 3px solid #1a1a1a; padding-bottom: 18px; margin-bottom: 12px; }
+  .dateline { font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: #666; margin-bottom: 6px; }
+  h1 { font-size: 2rem; font-weight: 700; line-height: 1.15; margin-bottom: 8px; }
+  .deck { font-size: 1rem; font-style: italic; color: #444; border-left: 3px solid #1a1a1a; padding-left: 14px; margin-top: 8px; }
+  nav#toc { position: sticky; top: 0; background: #fff; border-bottom: 1px solid #ddd; padding: 8px 0; margin: 16px 0 36px; z-index: 100; font-size: 11px; letter-spacing: 0.05em; display: flex; flex-wrap: wrap; gap: 4px 0; }
+  nav#toc a { color: #1a1a1a; text-decoration: none; margin-right: 14px; text-transform: uppercase; font-weight: 700; border-bottom: 2px solid transparent; padding-bottom: 2px; }
+  nav#toc a:hover { border-color: #1a1a1a; }
+  section { margin-bottom: 48px; }
+  h2 { font-size: 0.95rem; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 700; border-top: 2px solid #1a1a1a; padding-top: 12px; margin-bottom: 18px; }
+  h3 { font-size: 0.95rem; font-weight: 700; margin: 22px 0 6px; }
+  p { margin-bottom: 12px; font-size: 15px; }
+
+  table { width: 100%; border-collapse: collapse; margin: 14px 0 22px; font-size: 13.5px; }
+  th { background: #1a1a1a; color: #fff; text-align: left; padding: 8px 10px; font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; }
+  td { padding: 9px 10px; border-bottom: 1px solid #e8e8e8; vertical-align: top; line-height: 1.55; }
+  tr:nth-child(even) td { background: #fafafa; }
+  td a { color: #1a6fba; text-decoration: none; font-family: 'Source Code Pro', monospace; font-size: 12px; word-break: break-all; }
+  td a:hover { text-decoration: underline; }
+
+  .badge { display: inline-block; font-family: 'Source Code Pro', monospace; font-size: 10px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; padding: 2px 7px; border-radius: 3px; white-space: nowrap; }
+  .badge-free   { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+  .badge-login  { background: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
+  .badge-paywall{ background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+  .badge-local  { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+
+  .status-todo { color: #888; font-style: italic; }
+  .status-done { color: #155724; font-weight: 700; }
+
+  .callout { background: #fffbf0; border: 1px solid #e8d5a3; border-left: 5px solid #c9973a; padding: 14px 18px; margin: 16px 0; border-radius: 2px; font-size: 14.5px; }
+  .callout-blue { background: #f0f7ff; border: 1px solid #b8d4f0; border-left: 5px solid #1a6fba; padding: 14px 18px; margin: 16px 0; border-radius: 2px; font-size: 14.5px; }
+  .callout p:last-child, .callout-blue p:last-child { margin-bottom: 0; }
+
+  code { font-family: 'Source Code Pro', monospace; font-size: 13px; background: #f5f5f5; padding: 1px 5px; border-radius: 3px; color: #c7254e; }
+  footer { border-top: 2px solid #1a1a1a; padding-top: 16px; margin-top: 48px; font-size: 12px; color: #666; }
+  footer a { color: #1a6fba; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="dateline">DigitalTwinEngine · Calibration Sources · Compiled June 9, 2026</div>
+  <h1>Calibration RAG Source Library</h1>
+  <div class="deck">Public documents from Cisco, Juniper/Mist AI, Wi-Fi Alliance, Extreme Networks, Intel, MediaTek, and Anritsu — used to seed archetype GP priors before live AP3000 telemetry is available.</div>
+</header>
+
+<nav id="toc">
+  <a href="#s1">Cisco</a>
+  <a href="#s2">Mist AI / Juniper</a>
+  <a href="#s3">Wi-Fi Alliance</a>
+  <a href="#s4">Extreme Networks</a>
+  <a href="#s5">Chipset / PHY</a>
+  <a href="#s6">Venue Data</a>
+  <a href="#s7">Local WLPC Corpus</a>
+  <a href="#s8">How to Use</a>
+</nav>
+
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<section id="s1">
+<h2>§1 — Cisco</h2>
+<p>Cisco's High-Density and Connected Stadium design guides contain measured CU%, AP density recommendations, client admission thresholds, and channel plans validated against NFL/NBA/Olympics deployments.</p>
+
+<table>
+  <thead>
+    <tr><th>Document</th><th>URL</th><th>Access</th><th>Key Calibration Data</th><th>RAG Status</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>High Density Wi-Fi Design, Deployment, and Optimization</strong><br>CiscoLive 2025 — Matt Swartz</td>
+      <td><a href="https://www.ciscolive.com/c/dam/r/ciscolive/global-event/docs/2025/pdf/BRKEWN-2087.pdf" target="_blank">ciscolive.com/…/BRKEWN-2087.pdf</a></td>
+      <td><span class="badge badge-free">Free PDF</span></td>
+      <td>AP density formulas, C-ANT9104 beam steering, client admission RSSI thresholds, CU% targets for stadium</td>
+      <td class="status-todo">To ingest</td>
+    </tr>
+    <tr>
+      <td><strong>High Density Wi-Fi Design, Deployment, and Optimization</strong><br>CiscoLive 2024 version</td>
+      <td><a href="https://www.ciscolive.com/c/dam/r/ciscolive/global-event/docs/2024/pdf/BRKEWN-2087.pdf" target="_blank">ciscolive.com/…/2024/…BRKEWN-2087.pdf</a></td>
+      <td><span class="badge badge-free">Free PDF</span></td>
+      <td>Prior-year baseline — compare with 2025 for Wi-Fi 7 delta</td>
+      <td class="status-todo">To ingest</td>
+    </tr>
+    <tr>
+      <td><strong>Wireless High Client Density Design Guide</strong><br>Cisco IOS-XE 8.7 — Technical Note</td>
+      <td><a href="https://www.cisco.com/c/en/us/td/docs/wireless/controller/technotes/8-7/b_wireless_high_client_density_design_guide.html" target="_blank">cisco.com/…high_client_density_design_guide.html</a></td>
+      <td><span class="badge badge-free">Free HTML</span></td>
+      <td>MAC efficiency benchmarks, airtime fairness gain data, BSS Color deployment guidance, OFDMA scheduling tables</td>
+      <td class="status-todo">To ingest</td>
+    </tr>
+    <tr>
+      <td><strong>Design Guide CX — Wireless for Large Public Networks</strong><br>Catalyst 9800 series</td>
+      <td><a href="https://www.cisco.com/c/en/us/support/docs/wireless/catalyst-9800-series-wireless-controllers/222000-design-guide-cx-wireless-for-large-pub.html" target="_blank">cisco.com/…design-guide-cx-wireless-for-large-pub</a></td>
+      <td><span class="badge badge-free">Free HTML</span></td>
+      <td>Venue-grade config parameters, multicast suppression, proxy ARP settings, roaming cache tuning</td>
+      <td class="status-todo">To ingest</td>
+    </tr>
+    <tr>
+      <td><strong>Connected Stadium Wi-Fi Solution Data Sheet</strong></td>
+      <td><a href="https://www.cisco.com/c/dam/en/us/products/collateral/video/stadiumvision/c78-675063_dSheet.pdf" target="_blank">cisco.com/…c78-675063_dSheet.pdf</a></td>
+      <td><span class="badge badge-free">Free PDF</span></td>
+      <td>Stadium archetype: AP density specs, expected throughput per fan, capacity planning numbers</td>
+      <td class="status-todo">To ingest</td>
+    </tr>
+    <tr>
+      <td><strong>Cisco Meraki Wi-Fi 7 (802.11be) Technical Guide</strong></td>
+      <td><a href="https://documentation.meraki.com/Wireless/Design_and_Configure/Architecture_and_Best_Practices/Wi-Fi_7_(802.11be)_Technical_Guide" target="_blank">documentation.meraki.com/…Wi-Fi_7_Technical_Guide</a></td>
+      <td><span class="badge badge-free">Free HTML</span></td>
+      <td>802.11be MCS 12/13 SNR requirements, MLO gain measurements, 320 MHz channel considerations</td>
+      <td class="status-todo">To ingest</td>
+    </tr>
+  </tbody>
+</table>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<section id="s2">
+<h2>§2 — Juniper / Mist AI</h2>
+<p>Mist AI's SLE (Service Level Expectation) framework publishes per-archetype performance benchmarks: throughput, coverage, roaming, capacity, and AP health. These are the closest publicly available equivalent to our 5D QoE vector.</p>
+
+<table>
+  <thead>
+    <tr><th>Document</th><th>URL</th><th>Access</th><th>Key Calibration Data</th><th>RAG Status</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Wireless SLEs — Service Level Expectations</strong><br>Juniper Mist Documentation</td>
+      <td><a href="https://www.juniper.net/documentation/us/en/software/mist/mist-wireless/shared-content/topics/concept/service-level-expectations.html" target="_blank">juniper.net/…service-level-expectations.html</a></td>
+      <td><span class="badge badge-free">Free HTML</span></td>
+      <td>7 SLE metrics with threshold definitions: Throughput, Capacity, Coverage, Roaming, Time-to-Connect, Successful Connects, AP Health — maps directly to our 5D QoE vector</td>
+      <td class="status-todo">To ingest</td>
+    </tr>
+    <tr>
+      <td><strong>Mist AI Documentation Hub</strong></td>
+      <td><a href="https://www.juniper.net/documentation/product/us/en/mist/" target="_blank">juniper.net/documentation/…/mist/</a></td>
+      <td><span class="badge badge-free">Free HTML</span></td>
+      <td>Full Mist AI parameter reference: RRM settings, band steering thresholds, RSSI admission, airtime fairness configuration</td>
+      <td class="status-todo">To ingest</td>
+    </tr>
+    <tr>
+      <td><strong>Mist + Purple Wi-Fi Analytics Solution Brief</strong></td>
+      <td><a href="https://www.juniper.net/content/dam/www/assets/solution-briefs/us/en/network-automation/mist-and-purple-wi-fi-analytics.pdf" target="_blank">juniper.net/…mist-and-purple-wi-fi-analytics.pdf</a></td>
+      <td><span class="badge badge-free">Free PDF</span></td>
+      <td>Venue analytics: client density, dwell time, engagement metrics — useful for stadium archetype characterisation</td>
+      <td class="status-todo">To ingest</td>
+    </tr>
+    <tr>
+      <td><strong>Wi-Fi Assurance — HPE Juniper Networking</strong></td>
+      <td><a href="https://www.juniper.net/us/en/products/cloud-services/wi-fi-assurance.html" target="_blank">juniper.net/…wi-fi-assurance.html</a></td>
+      <td><span class="badge badge-free">Free HTML</span></td>
+      <td>AI-driven RRM: automatic channel, power, and client steering — parameter ranges used by Mist optimizer</td>
+      <td class="status-todo">To ingest</td>
+    </tr>
+    <tr>
+      <td><strong>Juniper Mist Network Monitoring Guide</strong><br>(Momentum, 2024)</td>
+      <td><a href="https://gomomentum.com/wp-content/uploads/2024/05/Juniper-MIST-Network-Monitoring.pdf" target="_blank">gomomentum.com/…Juniper-MIST-Network-Monitoring.pdf</a></td>
+      <td><span class="badge badge-free">Free PDF</span></td>
+      <td>Mist operational thresholds — channel utilisation alerts, SNR floor settings, roaming event counts</td>
+      <td class="status-todo">To ingest</td>
+    </tr>
+  </tbody>
+</table>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<section id="s3">
+<h2>§3 — Wi-Fi Alliance</h2>
+<p>The Wi-Fi Alliance publishes technology overview PDFs with measured gain data for each major feature (OFDMA, MU-MIMO, BSS Color, MLO). These are the most authoritative public source for <code>capMult()</code> calibration.</p>
+
+<table>
+  <thead>
+    <tr><th>Document</th><th>URL</th><th>Access</th><th>Key Calibration Data</th><th>RAG Status</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Wi-Fi CERTIFIED 7™ Technology Overview</strong><br>January 2024</td>
+      <td><a href="https://www.wi-fi.org/system/files/Wi-Fi_CERTIFIED_7_Technology_Overview_202401_0.pdf" target="_blank">wi-fi.org/…Wi-Fi_CERTIFIED_7_Technology_Overview_202401_0.pdf</a></td>
+      <td><span class="badge badge-free">Free PDF</span></td>
+      <td><strong>Direct calibration anchor:</strong> MLO gain curves, 320 MHz throughput measurements, MCS 12/13 SNR requirements, 4096-QAM performance data</td>
+      <td class="status-todo">To ingest</td>
+    </tr>
+    <tr>
+      <td><strong>Wi-Fi CERTIFIED 6™ Highlights</strong><br>December 2021</td>
+      <td><a href="https://www.wi-fi.org/system/files/Wi-Fi_CERTIFIED_6_Highlights_202112.pdf" target="_blank">wi-fi.org/…Wi-Fi_CERTIFIED_6_Highlights_202112.pdf</a></td>
+      <td><span class="badge badge-free">Free PDF</span></td>
+      <td>OFDMA DL/UL gain at various client counts, BSS Color CCA improvement, target wake time (TWT) latency reduction</td>
+      <td class="status-todo">To ingest</td>
+    </tr>
+    <tr>
+      <td><strong>Wi-Fi CERTIFIED Data Elements™ Technology Overview</strong><br>January 2024</td>
+      <td><a href="https://www.wi-fi.org/system/files/Wi-Fi_CERTIFIED_Data_Elements_Technology_Overview_202401.pdf" target="_blank">wi-fi.org/…Data_Elements_Technology_Overview_202401.pdf</a></td>
+      <td><span class="badge badge-free">Free PDF</span></td>
+      <td>Standardised radio telemetry data model — maps to our 15-parameter bridge field names</td>
+      <td class="status-todo">To ingest</td>
+    </tr>
+    <tr>
+      <td><strong>Wi-Fi CERTIFIED HaLow™ Technology Overview</strong><br>November 2021 (IoT/hospital reference)</td>
+      <td><a href="https://www.wi-fi.org/system/files/Wi-Fi_CERTIFIED_HaLow_Technology_Overview_20211102.pdf" target="_blank">wi-fi.org/…HaLow_Technology_Overview_20211102.pdf</a></td>
+      <td><span class="badge badge-free">Free PDF</span></td>
+      <td>IoT archetype: long-range, low-rate, power-save parameters — hospital/warehouse calibration reference</td>
+      <td class="status-todo">To ingest</td>
+    </tr>
+    <tr>
+      <td><strong>Wi-Fi Alliance — Explore All Technologies</strong></td>
+      <td><a href="https://www.wi-fi.org/explore-all-technologies" target="_blank">wi-fi.org/explore-all-technologies</a></td>
+      <td><span class="badge badge-free">Free HTML</span></td>
+      <td>Index of all certification programs and associated white papers</td>
+      <td class="status-todo">To ingest</td>
+    </tr>
+  </tbody>
+</table>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<section id="s4">
+<h2>§4 — Extreme Networks (our AP vendor)</h2>
+<p>This is our own vendor — the AP3000 and AP5060 are Extreme devices. Their published deployment guides contain the most directly applicable parameter ranges for our hardware.</p>
+
+<table>
+  <thead>
+    <tr><th>Document</th><th>URL</th><th>Access</th><th>Key Calibration Data</th><th>RAG Status</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Stadium Wi-Fi 7: Redefining High-Density Connectivity with the AP5060</strong><br>Extreme Networks Blog</td>
+      <td><a href="https://www.extremenetworks.com/resources/blogs/stadium-wi-fi-7-redefining-high-density-connectivity-with-ap5060" target="_blank">extremenetworks.com/…stadium-wi-fi-7-…-ap5060</a></td>
+      <td><span class="badge badge-free">Free HTML</span></td>
+      <td>AP5060 under-seat deployment specs, Broadcom chipset rTWT hardware enforcement, 6 GHz stadium channel plan, Ben Hill Griffin Stadium (The Swamp) real deployment data</td>
+      <td class="status-todo">To ingest</td>
+    </tr>
+    <tr>
+      <td><strong>NFL Stadium Wi-Fi Deployments</strong><br>Extreme Networks</td>
+      <td><a href="https://www.extremenetworks.com/solutions/sports-and-public-venues/nfl" target="_blank">extremenetworks.com/…sports-and-public-venues/nfl</a></td>
+      <td><span class="badge badge-free">Free HTML</span></td>
+      <td>Real NFL stadium data: clients/AP during game, CU% peaks, throughput per fan — direct stadium archetype ground truth</td>
+      <td class="status-todo">To ingest</td>
+    </tr>
+    <tr>
+      <td><strong>How NFL Fans Used Wi-Fi at Super Bowl LVII and Why It Matters</strong></td>
+      <td><a href="https://www.extremenetworks.com/resources/blogs/how-nfl-fans-used-wi-fi-at-super-bowl-lvii-and-why-it-matters" target="_blank">extremenetworks.com/…super-bowl-lvii-…</a></td>
+      <td><span class="badge badge-free">Free HTML</span></td>
+      <td>Super Bowl: peak concurrent users, data throughput, device mix, traffic breakdown (video/social/POS) — highest-quality stadium archetype dataset</td>
+      <td class="status-todo">To ingest</td>
+    </tr>
+  </tbody>
+</table>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<section id="s5">
+<h2>§5 — Chipset / PHY Layer (MediaTek, Intel, Anritsu)</h2>
+<p>These papers provide measured PHY-layer performance data that can validate or correct our <code>PHY1SS</code> table and <code>snrToMcs()</code> thresholds.</p>
+
+<table>
+  <thead>
+    <tr><th>Document</th><th>URL</th><th>Access</th><th>Key Calibration Data</th><th>RAG Status</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Key Advantages of Wi-Fi 7</strong><br>MediaTek White Paper WF70222</td>
+      <td><a href="https://www.mediatek.com/hubfs/MediaTek%20Assets/Pdfs/White_Papers/Key-Advantages-of-Wi-Fi-7_MediaTek-White-Paper-WF70222.pdf" target="_blank">mediatek.com/…Key-Advantages-of-Wi-Fi-7…WF70222.pdf</a></td>
+      <td><span class="badge badge-free">Free PDF</span></td>
+      <td>MCS 12/13 SNR sensitivity curves, 4096-QAM implementation, multi-RU OFDMA gain at client counts 1–64</td>
+      <td class="status-todo">To ingest</td>
+    </tr>
+    <tr>
+      <td><strong>Wi-Fi 7 MLO White Paper</strong><br>MediaTek WF7MLOWP0622</td>
+      <td><a href="https://www.mediatek.com/hubfs/MediaTek_Mar_2024/pdf/Wi-Fi-7-MLO-White-Paper-WF7MLOWP0622.pdf" target="_blank">mediatek.com/…Wi-Fi-7-MLO-White-Paper-WF7MLOWP0622.pdf</a></td>
+      <td><span class="badge badge-free">Free PDF</span></td>
+      <td>MLO gain curves: STR vs NSTR vs eMLSR latency and throughput — calibrates <code>MLO_GAIN</code> table in simulator</td>
+      <td class="status-todo">To ingest</td>
+    </tr>
+    <tr>
+      <td><strong>Wi-Fi Unleashed: Wi-Fi 7, 6 GHz, and Beyond</strong><br>Intel Technical Tutorial</td>
+      <td><a href="https://www.intel.com/content/dam/www/central-libraries/us/en/documents/2022-06/wi-fi-tutorial-long.pdf" target="_blank">intel.com/…wi-fi-tutorial-long.pdf</a></td>
+      <td><span class="badge badge-free">Free PDF</span></td>
+      <td>6 GHz band characteristics, coexistence with 5 GHz, guard interval efficiency tables — validates <code>GI_EFF</code> constants</td>
+      <td class="status-todo">To ingest</td>
+    </tr>
+    <tr>
+      <td><strong>White Paper: Key Technologies for IEEE 802.11be (Wi-Fi 7)</strong><br>Anritsu</td>
+      <td><a href="https://dl.cdn-anritsu.com/zh-tw/test-measurement/files/Brochures-Datasheets-Catalogs/White-Paper/wi-fi7-er1100.pdf" target="_blank">cdn-anritsu.com/…wi-fi7-er1100.pdf</a></td>
+      <td><span class="badge badge-free">Free PDF</span></td>
+      <td>Test-equipment validated EHT PHY rates, preamble puncturing overhead, MCS table with measured receiver sensitivities</td>
+      <td class="status-todo">To ingest</td>
+    </tr>
+  </tbody>
+</table>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<section id="s6">
+<h2>§6 — Real Venue Performance Data</h2>
+<p>Real measured data from stadium deployments — the most direct calibration signal for the stadium archetype.</p>
+
+<table>
+  <thead>
+    <tr><th>Source</th><th>URL</th><th>Access</th><th>Key Data</th><th>RAG Status</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Super Bowl LVIII — Per-Device Wi-Fi Data Record: 34.8 TB</strong><br>Stadium Tech Report</td>
+      <td><a href="https://stadiumtechreport.com/feature/super-bowl-lviii-sees-big-jump-in-per-device-wi-fi-data-used-en-route-to-new-total-record-of-34-8-tb/" target="_blank">stadiumtechreport.com/…super-bowl-lviii-…34-8-tb</a></td>
+      <td><span class="badge badge-free">Free HTML</span></td>
+      <td>Peak concurrent devices, data per device, throughput per AP, traffic mix — highest-fidelity stadium archetype data available publicly</td>
+      <td class="status-todo">To ingest</td>
+    </tr>
+    <tr>
+      <td><strong>Wi-Fi Scores 100× Data Increase at Super Bowl over 10 Years</strong><br>Stadium Tech Report</td>
+      <td><a href="https://stadiumtechreport.com/feature/wi-fi-scores-100x-data-increase-at-the-super-bowl-over-10-years-for-20x-less-money-than-5g/" target="_blank">stadiumtechreport.com/…wi-fi-scores-100x-…super-bowl</a></td>
+      <td><span class="badge badge-free">Free HTML</span></td>
+      <td>10-year trend: AP density evolution, throughput per fan growth, cost vs 5G comparison — archetype maturation curve</td>
+      <td class="status-todo">To ingest</td>
+    </tr>
+    <tr>
+      <td><strong>Digital Stadiums in Saudi Arabia</strong><br>PwC Digital 2024</td>
+      <td><a href="https://www.pwc.com/m1/en/publications/documents/2024/digital-stadiums-eng.pdf" target="_blank">pwc.com/…digital-stadiums-eng.pdf</a></td>
+      <td><span class="badge badge-free">Free PDF</span></td>
+      <td>FIFA WC 2026 venue spec requirements: connectivity SLAs, latency targets for POS/media/broadcast — direct match to our use case</td>
+      <td class="status-todo">To ingest</td>
+    </tr>
+  </tbody>
+</table>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<section id="s7">
+<h2>§7 — Local WLPC Corpus (Private — Never on GitHub)</h2>
+<p>The highest-quality source. 150+ practitioner documents already on disk at <code>/Users/khukhan/Downloads/WLPC Troubleshooting/</code>. T1 tier is directly relevant to calibration.</p>
+
+<div class="callout">
+  <p><strong>Do not publish or commit any of these paths.</strong> This corpus is private and must never appear in any public repo. Reference by local path only.</p>
+</div>
+
+<table>
+  <thead>
+    <tr><th>Tier</th><th>Local Path</th><th>Key Content</th><th>RAG Status</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>T1</strong><br>Highest priority</td>
+      <td><code>.../WLPC Troubleshooting/</code> — 802.11be-2024, Rev Wi-Fi, WLANPros Checklists v5</td>
+      <td>Real-world practitioner data, troubleshooting-validated parameter ranges, WLANPros extended checklist items 1–79</td>
+      <td class="status-todo">To ingest</td>
+    </tr>
+    <tr>
+      <td><strong>T2</strong></td>
+      <td><code>.../</code> — Aruba VHD, Apple Wi-Fi best practices</td>
+      <td>Aruba validated high-density design parameters, Apple device-specific Wi-Fi behaviour</td>
+      <td class="status-todo">To ingest</td>
+    </tr>
+    <tr>
+      <td><strong>T3</strong></td>
+      <td><code>.../</code> — WLANPi, Wireshark</td>
+      <td>Field measurement tooling — useful for building regression test scenarios</td>
+      <td class="status-todo">To ingest</td>
+    </tr>
+  </tbody>
+</table>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<section id="s8">
+<h2>§8 — How to Use These Sources in the RAG Pipeline</h2>
+
+<div class="callout-blue">
+  <p><strong>Phase 1 (now — pre-Sprint 3):</strong> Manual extraction. Read the 3 highest-priority documents (Cisco HD Design Guide 2025, Wi-Fi CERTIFIED 7 Overview, Extreme AP5060 stadium blog) and populate <code>archetype_priors.md</code> with min/max ranges for the 7 uncertain <code>capMult()</code> multipliers per archetype. One afternoon of work.</p>
+</div>
+
+<p><strong>What to extract per document:</strong></p>
+<ul>
+  <li>OFDMA DL gain at N clients (look for throughput improvement % vs baseline)</li>
+  <li>Airtime fairness gain (look for aggregate throughput improvement with mixed MCS clients)</li>
+  <li>MAC efficiency (look for "channel utilisation efficiency" or "throughput / PHY rate" ratio)</li>
+  <li>BSS Color gain (look for CCA improvement % in co-channel density)</li>
+  <li>MLO gain (look for latency reduction % and throughput increase vs single-link)</li>
+</ul>
+
+<p><strong>Phase 2 (Sprint 4+):</strong> Automated RAG ingestion using the existing <code>xiq-ep1-intelligence-engine</code> Playwright scraper pattern. Each URL above becomes a RAG corpus entry. The GP prior for each archetype gets seeded from the extracted min/max ranges. As AP3000 live data arrives, the posterior updates automatically.</p>
+
+<table>
+  <thead><tr><th>Archetype</th><th>Priority Source</th><th>Key Multiplier to Validate First</th></tr></thead>
+  <tbody>
+    <tr><td class="badge badge-free">Stadium</td><td>Extreme AP5060 blog + Cisco CiscoLive 2025 + Super Bowl LVIII data</td><td>MAC efficiency (confirmed too low at 0.45 → should be 0.58–0.68)</td></tr>
+    <tr><td>Enterprise</td><td>Cisco Wireless High Client Density Design Guide</td><td>OFDMA DL gain (×1.35 may be high for 20 clients — expect ×1.10–1.20)</td></tr>
+    <tr><td>Hospital</td><td>Wi-Fi Alliance HaLow Overview + Mist SLE docs</td><td>DTIM latency (our +8ms per DTIM period — needs validation)</td></tr>
+    <tr><td>Warehouse</td><td>Intel 6 GHz tutorial + WLANPros T1 corpus</td><td>BSS Color gain (×1.15 may be high for sparse deploy — expect ×1.02–1.05)</td></tr>
+    <tr><td>Residential</td><td>Wi-Fi CERTIFIED 7 Overview + MediaTek MLO paper</td><td>MLO gain (STR ×1.9 confirmed for 2-link; tri-link +12% needs validation)</td></tr>
+  </tbody>
+</table>
+
+<footer>
+  <p>DigitalTwinEngine · Calibration RAG Sources · Compiled June 9, 2026 · Khursheed Khan · Claude Sonnet 4.6</p>
+  <p style="margin-top:6px">
+    <a href="dt_algorithm_spec.html">Algorithm Spec v1.2</a> &nbsp;·&nbsp;
+    <a href="dt_parameter_reference.html">Parameter Reference</a> &nbsp;·&nbsp;
+    <a href="session_summary_20260609_digital_twin.html">June 9 EOD</a> &nbsp;·&nbsp;
+    <a href="../index-nyt.html">← Landing Page</a>
+  </p>
+  <p style="margin-top:8px;font-style:italic;color:#999">© 2026 Khursheed Khan. All rights reserved.</p>
+</footer>
+
+</section>
+</body>
+</html>
