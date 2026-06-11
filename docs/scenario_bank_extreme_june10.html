@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Extreme Networks Scenario Bank — 50 Socratic Exercises</title>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Libre+Franklin:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --text:#1a1a1a; --muted:#666; --border:#e5e5e5; --surface:#fafafa;
+    --red:#dc2626; --red-bg:#fef2f2; --red-border:#fca5a5;
+    --orange:#c2410c; --orange-bg:#fff7ed; --orange-border:#fdba74;
+    --yellow:#a16207; --yellow-bg:#fefce8; --yellow-border:#fde68a;
+    --green:#15803d; --green-bg:#f0fdf4; --green-border:#86efac;
+    --xn:#0052a5;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Libre Baskerville', Georgia, serif; background: #fff; color: var(--text); line-height: 1.6; }
+
+  .site-header { border-bottom: 3px double #1a1a1a; padding: 28px 40px 18px; position: sticky; top: 0; background: #fff; z-index: 100; }
+  .site-header .eyebrow { font-family: 'Libre Franklin', sans-serif; font-size: 0.72rem; color: var(--xn); font-weight: 700; text-transform: uppercase; letter-spacing: 0.14em; margin-bottom: 4px; }
+  .site-header h1 { font-size: 1.55rem; font-weight: 700; letter-spacing: -0.02em; }
+  .site-header .sub { font-family: 'Libre Franklin', sans-serif; font-size: 0.72rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.12em; margin-top: 4px; }
+  .site-header .legend { display: flex; gap: 18px; margin-top: 10px; flex-wrap: wrap; }
+  .site-header .legend span { font-family: 'Libre Franklin', sans-serif; font-size: 0.72rem; font-weight: 700; display: flex; align-items: center; gap: 5px; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+  .dot-red { background: var(--red); }
+  .dot-orange { background: #ea580c; }
+  .dot-yellow { background: #ca8a04; }
+  .dot-green { background: var(--green); }
+
+  .filter-bar { padding: 14px 40px; background: var(--surface); border-bottom: 1px solid var(--border); display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  .filter-label { font-family: 'Libre Franklin', sans-serif; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-right: 4px; }
+  .filter-btn { font-family: 'Libre Franklin', sans-serif; font-size: 0.72rem; font-weight: 700; padding: 5px 13px; border-radius: 3px; border: 1px solid var(--border); background: #fff; color: var(--text); cursor: pointer; letter-spacing: 0.04em; transition: all 0.15s; }
+  .filter-btn:hover { background: var(--surface); }
+  .filter-btn.active { background: #1a1a1a; color: #fff; border-color: #1a1a1a; }
+  .filter-btn.sev-red.active { background: var(--red); border-color: var(--red); color: #fff; }
+  .filter-btn.sev-orange.active { background: #ea580c; border-color: #ea580c; color: #fff; }
+  .filter-btn.sev-yellow.active { background: #ca8a04; border-color: #ca8a04; color: #fff; }
+  .filter-btn.sev-green.active { background: var(--green); border-color: var(--green); color: #fff; }
+  .filter-divider { width: 1px; height: 22px; background: var(--border); margin: 0 4px; }
+
+  .product-bar { padding: 10px 40px; background: #eff6ff; border-bottom: 1px solid #bfdbfe; display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  .filter-btn.prod.active { background: var(--xn); border-color: var(--xn); color: #fff; }
+
+  .stats-bar { padding: 8px 40px; border-bottom: 1px solid var(--border); font-family: 'Libre Franklin', sans-serif; font-size: 0.72rem; color: var(--muted); }
+  #visible-count { font-weight: 700; color: var(--text); }
+
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 20px; padding: 28px 40px 60px; max-width: 1400px; }
+  .card { border: 1px solid var(--border); border-radius: 6px; padding: 20px 22px; background: #fff; transition: box-shadow 0.15s; position: relative; }
+  .card:hover { box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
+  .card.hidden { display: none; }
+
+  .card::before { content: ''; position: absolute; top: 0; left: 0; bottom: 0; width: 4px; border-radius: 6px 0 0 6px; }
+  .card[data-severity="red"]::before { background: var(--red); }
+  .card[data-severity="orange"]::before { background: #ea580c; }
+  .card[data-severity="yellow"]::before { background: #ca8a04; }
+  .card[data-severity="green"]::before { background: var(--green); }
+
+  .card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+  .card-num { font-family: 'Libre Franklin', sans-serif; font-size: 0.65rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; }
+  .sev-badge { font-family: 'Libre Franklin', sans-serif; font-size: 0.68rem; font-weight: 700; padding: 3px 10px; border-radius: 12px; text-transform: uppercase; letter-spacing: 0.06em; }
+  .sev-red { background: var(--red-bg); color: var(--red); border: 1px solid var(--red-border); }
+  .sev-orange { background: var(--orange-bg); color: var(--orange); border: 1px solid var(--orange-border); }
+  .sev-yellow { background: var(--yellow-bg); color: var(--yellow); border: 1px solid var(--yellow-border); }
+  .sev-green { background: var(--green-bg); color: var(--green); border: 1px solid var(--green-border); }
+
+  .card h3 { font-size: 1rem; font-weight: 700; line-height: 1.3; margin-bottom: 8px; }
+  .card-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+  .tag { font-family: 'Libre Franklin', sans-serif; font-size: 0.65rem; font-weight: 700; padding: 2px 8px; border-radius: 2px; background: var(--surface); border: 1px solid var(--border); color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
+  .tag-product { color: var(--xn); border-color: #bfdbfe; background: #eff6ff; }
+  .tag-vertical { color: #6b21a8; border-color: #e9d5ff; background: #faf5ff; }
+
+  .card-situation { font-size: 0.9rem; line-height: 1.65; color: #333; }
+  .card-footer { margin-top: 14px; padding-top: 10px; border-top: 1px solid var(--border); font-family: 'Libre Franklin', sans-serif; font-size: 0.68rem; color: var(--muted); display: flex; justify-content: space-between; }
+
+  .page-footer { text-align: center; padding: 24px; font-family: 'Libre Franklin', sans-serif; font-size: 0.72rem; color: var(--muted); border-top: 1px solid var(--border); }
+</style>
+</head>
+<body>
+
+<div class="site-header">
+  <div class="eyebrow">Extreme Networks · XIQ · EP1 · EXOS · IQ Engine · AirDefense</div>
+  <h1>Extreme Networks Scenario Bank — 50 Exercises</h1>
+  <div class="sub">Socratic Diagnostic Training · June 10, 2026 · No solutions shown</div>
+  <div class="legend">
+    <span><span class="dot dot-red"></span> Red — Catastrophic, fix now</span>
+    <span><span class="dot dot-orange"></span> Orange — Serious, fix today</span>
+    <span><span class="dot dot-yellow"></span> Yellow — Moderate, schedule soon</span>
+    <span><span class="dot dot-green"></span> Green — Low, revisit tomorrow</span>
+  </div>
+</div>
+
+<div class="filter-bar">
+  <span class="filter-label">Severity</span>
+  <button class="filter-btn active" data-filter="all-sev">All</button>
+  <button class="filter-btn sev-red" data-filter="sev-red">🔴 Red</button>
+  <button class="filter-btn sev-orange" data-filter="sev-orange">🟠 Orange</button>
+  <button class="filter-btn sev-yellow" data-filter="sev-yellow">🟡 Yellow</button>
+  <button class="filter-btn sev-green" data-filter="sev-green">🟢 Green</button>
+  <span class="filter-divider"></span>
+  <span class="filter-label">Vertical</span>
+  <button class="filter-btn active" data-filter="all-vert">All</button>
+  <button class="filter-btn" data-filter="vert-healthcare">Healthcare</button>
+  <button class="filter-btn" data-filter="vert-education">Education</button>
+  <button class="filter-btn" data-filter="vert-stadium">Stadium</button>
+  <button class="filter-btn" data-filter="vert-retail">Retail</button>
+  <button class="filter-btn" data-filter="vert-banking">Banking</button>
+  <button class="filter-btn" data-filter="vert-federal">Federal</button>
+  <button class="filter-btn" data-filter="vert-enterprise">Enterprise</button>
+</div>
+
+<div class="product-bar">
+  <span class="filter-label">Product</span>
+  <button class="filter-btn prod active" data-filter="all-prod">All</button>
+  <button class="filter-btn prod" data-filter="prod-xiq">XIQ / EP1</button>
+  <button class="filter-btn prod" data-filter="prod-iqengine">IQ Engine / AP</button>
+  <button class="filter-btn prod" data-filter="prod-exos">EXOS / Switch</button>
+  <button class="filter-btn prod" data-filter="prod-voss">VOSS / Fabric</button>
+  <button class="filter-btn prod" data-filter="prod-airdefense">AirDefense</button>
+  <button class="filter-btn prod" data-filter="prod-ppsk">PPSK / Auth</button>
+</div>
+
+<div class="stats-bar">Showing <span id="visible-count">50</span> of 50 scenarios</div>
+
+<div class="grid" id="scenario-grid">
+
+<!-- ═══ XE-01 ═══ -->
+<!-- complexity: medium -->
+<div class="card" data-severity="orange" data-vertical="vert-enterprise" data-product="prod-xiq">
+  <div class="card-top"><span class="card-num">XE-01</span><span class="sev-badge sev-orange">🟠 Orange</span></div>
+  <h3>EP1 Policy Push: "Partial Success" — Same Policy, Half the APs Didn't Update</h3>
+  <div class="card-tags"><span class="tag tag-product">EP1 · XIQ</span><span class="tag tag-vertical">Enterprise Campus</span></div>
+  <p class="card-situation">A network admin pushed a new network policy in EP1 to 60 APs across a campus. The push returned "Partial Success." 35 APs show the new policy version; 25 show the previous version. There is no obvious pattern — the unupdated APs are spread across different buildings, different switches, different VLANs. A second push attempt returns the same result: the same 25 APs fail every time.</p>
+  <div class="card-footer"><span>EP1 Policy Engine · Partial push failure</span><span>XIQ / EP1</span></div>
+</div>
+
+<!-- ═══ XE-02 ═══ -->
+<!-- complexity: low -->
+<div class="card" data-severity="yellow" data-vertical="vert-enterprise" data-product="prod-xiq">
+  <div class="card-top"><span class="card-num">XE-02</span><span class="sev-badge sev-yellow">🟡 Yellow</span></div>
+  <h3>EP1 Radio Profile Change Saved — AP Still Running Old Channel Width</h3>
+  <div class="card-tags"><span class="tag tag-product">EP1 · Radio Profile</span><span class="tag tag-vertical">Enterprise</span></div>
+  <p class="card-situation">An admin updated the radio profile for wifi1 in EP1 from 40 MHz to 80 MHz channel width and pushed the policy. EP1 confirms "Device Updated Successfully." But SSHing into the AP and running <code>show interface wifi1</code> still shows 40 MHz. The radio profile name in EP1 matches what was changed. A second push produces the same result.</p>
+  <div class="card-footer"><span>EP1 Radio Profile · Profile binding vs profile definition</span><span>EP1 · IQ Engine</span></div>
+</div>
+
+<!-- ═══ XE-03 ═══ -->
+<!-- complexity: medium -->
+<div class="card" data-severity="yellow" data-vertical="vert-enterprise" data-product="prod-xiq">
+  <div class="card-top"><span class="card-num">XE-03</span><span class="sev-badge sev-yellow">🟡 Yellow</span></div>
+  <h3>Two Network Policies Assigned to One AP — Unpredictable SSID Behavior</h3>
+  <div class="card-tags"><span class="tag tag-product">XIQ · Network Policy</span><span class="tag tag-vertical">Enterprise</span></div>
+  <p class="card-situation">An AP is broadcasting an SSID that was supposed to be decommissioned last month. Checking XIQ, the AP correctly shows the new network policy assigned. But the old SSID is still visible to clients scanning nearby. No other APs in the building broadcast the old SSID. The AP is an AP410C deployed 8 months ago.</p>
+  <div class="card-footer"><span>XIQ Policy Assignment · Legacy policy residual</span><span>XIQ · IQ Engine</span></div>
+</div>
+
+<!-- ═══ XE-04 ═══ -->
+<!-- complexity: low -->
+<div class="card" data-severity="yellow" data-vertical="vert-enterprise" data-product="prod-xiq">
+  <div class="card-top"><span class="card-num">XE-04</span><span class="sev-badge sev-yellow">🟡 Yellow</span></div>
+  <h3>New SSID Added to EP1 Policy — Doesn't Broadcast on Any AP</h3>
+  <div class="card-tags"><span class="tag tag-product">EP1 · SSID · Device Template</span><span class="tag tag-vertical">Enterprise</span></div>
+  <p class="card-situation">A new SSID was created in EP1 and added to the network policy, which was then pushed to all 40 APs. EP1 shows the policy push as fully successful. But the new SSID is not visible to any client scanning in the building. The existing SSIDs continue to work perfectly. The new SSID is configured identically to the working ones — same security, same band settings.</p>
+  <div class="card-footer"><span>EP1 SSID · Device Template radio assignment</span><span>EP1 · IQ Engine</span></div>
+</div>
+
+<!-- ═══ XE-05 ═══ -->
+<!-- complexity: medium -->
+<div class="card" data-severity="orange" data-vertical="vert-enterprise" data-product="prod-xiq">
+  <div class="card-top"><span class="card-num">XE-05</span><span class="sev-badge sev-orange">🟠 Orange</span></div>
+  <h3>Supplemental CLI Hangs at 47% — Entire XIQ Policy Push Stalls</h3>
+  <div class="card-tags"><span class="tag tag-product">XIQ · Supplemental CLI · EXOS</span><span class="tag tag-vertical">Enterprise / Education</span></div>
+  <p class="card-situation">An XIQ network policy push to 20 EXOS switches is stalling at 47% — the same percentage every time. It eventually times out and rolls back. Some switches are in an indeterminate state: part of the config applied, part didn't. The policy includes a Supplemental CLI block that was copy-pasted from a working template used successfully on a different site last month.</p>
+  <div class="card-footer"><span>Supplemental CLI · EXOS idempotency</span><span>XIQ · EXOS</span></div>
+</div>
+
+<!-- ═══ XE-06 ═══ -->
+<!-- complexity: low -->
+<div class="card" data-severity="yellow" data-vertical="vert-enterprise" data-product="prod-xiq">
+  <div class="card-top"><span class="card-num">XE-06</span><span class="sev-badge sev-yellow">🟡 Yellow</span></div>
+  <h3>XIQ VLAN Probe Returns "DHCP Offer Not Received" — But Wired Clients Get IPs</h3>
+  <div class="card-tags"><span class="tag tag-product">XIQ · VLAN Probe · DHCP</span><span class="tag tag-vertical">Enterprise</span></div>
+  <p class="card-situation">Running the VLAN Probe tool on an AP for VLAN 50 (the new IoT SSID) returns "DHCP Discover sent — no DHCP Offer received." The DHCP server for VLAN 50 is up and responding: a wired laptop plugged into a VLAN 50 access port on the same switch gets an address in under 1 second. WiFi clients on the IoT SSID all get 169.254 addresses.</p>
+  <div class="card-footer"><span>XIQ VLAN Probe · 802.1Q trunk / allowed VLANs</span><span>XIQ · EXOS</span></div>
+</div>
+
+<!-- ═══ XE-07 ═══ -->
+<!-- complexity: medium -->
+<div class="card" data-severity="yellow" data-vertical="vert-enterprise" data-product="prod-xiq">
+  <div class="card-top"><span class="card-num">XE-07</span><span class="sev-badge sev-yellow">🟡 Yellow</span></div>
+  <h3>XIQ Scheduled Firmware Update: "Upgrade Scheduled" — APs Never Actually Upgraded</h3>
+  <div class="card-tags"><span class="tag tag-product">XIQ · Firmware Upgrade</span><span class="tag tag-vertical">Enterprise</span></div>
+  <p class="card-situation">An admin scheduled a firmware upgrade for 80 APs during a Sunday 2am maintenance window. Monday morning, XIQ shows all 80 APs are still on the previous firmware version. The scheduled job shows as "Completed" in the XIQ audit log. No error messages are visible anywhere. The APs are online and serving clients normally.</p>
+  <div class="card-footer"><span>XIQ Firmware Upgrade Scheduler · IQAgent version compatibility</span><span>XIQ · IQ Engine</span></div>
+</div>
+
+<!-- ═══ XE-08 ═══ -->
+<!-- complexity: low -->
+<div class="card" data-severity="green" data-vertical="vert-enterprise" data-product="prod-xiq">
+  <div class="card-top"><span class="card-num">XE-08</span><span class="sev-badge sev-green">🟢 Green</span></div>
+  <h3>XIQ Dashboard Shows 340 Connected Clients — Actual Count Is Under 50</h3>
+  <div class="card-tags"><span class="tag tag-product">XIQ · Dashboard · Telemetry</span><span class="tag tag-vertical">Enterprise</span></div>
+  <p class="card-situation">The XIQ dashboard client count widget is showing 340 active clients on a floor that physically holds 45 workstations. Walking the floor confirms no more than 40-50 devices are present. Other XIQ dashboards (channel utilization, AP health) look accurate. The inflated count persists across browser refreshes and appears the same from two different admin accounts.</p>
+  <div class="card-footer"><span>XIQ telemetry · Client association stale data</span><span>XIQ</span></div>
+</div>
+
+<!-- ═══ XE-09 ═══ -->
+<!-- complexity: medium -->
+<div class="card" data-severity="green" data-vertical="vert-retail" data-product="prod-xiq">
+  <div class="card-top"><span class="card-num">XE-09</span><span class="sev-badge sev-green">🟢 Green</span></div>
+  <h3>Custom CWP Logo and Colors Not Showing on APs — Default Extreme Branding Appears</h3>
+  <div class="card-tags"><span class="tag tag-product">XIQ · CWP · Captive Portal</span><span class="tag tag-vertical">Retail / Hospitality</span></div>
+  <p class="card-situation">A retail chain uploaded a custom logo and brand colors to their XIQ Captive Web Portal and pushed the updated policy to all store APs. The XIQ editor preview shows the correct branding. But guests at the stores see the default Extreme Networks-branded portal, not the custom one. The policy push completed with no errors. A factory-reset AP at one store also shows the default portal after being re-claimed and re-pushed.</p>
+  <div class="card-footer"><span>XIQ CWP · Asset hosting · Policy push CWP assets</span><span>XIQ</span></div>
+</div>
+
+<!-- ═══ XE-10 ═══ -->
+<!-- complexity: high -->
+<div class="card" data-severity="orange" data-vertical="vert-enterprise" data-product="prod-xiq">
+  <div class="card-top"><span class="card-num">XE-10</span><span class="sev-badge sev-orange">🟠 Orange</span></div>
+  <h3>XIQ Site Engine Integration Broken After EP1 Migration — Topology Maps Gone</h3>
+  <div class="card-tags"><span class="tag tag-product">XIQ Site Engine · EP1</span><span class="tag tag-vertical">Enterprise — NOC</span></div>
+  <p class="card-situation">After migrating the wireless management from classic XIQ to EP1, the XIQ Site Engine (formerly NetSight) no longer shows wireless clients or AP status on topology maps. The NOC uses Site Engine for unified wired + wireless monitoring. Wired switch data in Site Engine is still correct. The EP1 portal shows all APs and clients correctly. The integration was working until the migration was completed last week.</p>
+  <div class="card-footer"><span>XIQ Site Engine · EP1 API integration · Migration compatibility</span><span>XIQ · EP1</span></div>
+</div>
+
+<!-- ═══ XE-11 ═══ -->
+<!-- complexity: medium -->
+<div class="card" data-severity="orange" data-vertical="vert-enterprise" data-product="prod-iqengine">
+  <div class="card-top"><span class="card-num">XE-11</span><span class="sev-badge sev-orange">🟠 Orange</span></div>
+  <h3>wifi0 CRC Errors Spike to 45% Two Weeks After Neighbor AP Installed</h3>
+  <div class="card-tags"><span class="tag tag-product">IQ Engine · RF · CRC</span><span class="tag tag-vertical">Enterprise</span></div>
+  <p class="card-situation">An AP3000's wifi0 CRC error rate jumped from under 5% to 45% approximately two weeks ago. Nothing changed on your network. Client performance in the surrounding area has degraded significantly — users report slow downloads and frequent reconnects. The 5GHz radio (wifi1) CRC is normal at 3%. The building is an open-plan office shared with another company that moved in last month.</p>
+  <div class="card-footer"><span>IQ Engine · show interface wifi0 · CRC root cause</span><span>AP3000 · IQ Engine</span></div>
+</div>
+
+<!-- ═══ XE-12 ═══ -->
+<!-- complexity: medium -->
+<div class="card" data-severity="yellow" data-vertical="vert-enterprise" data-product="prod-iqengine">
+  <div class="card-top"><span class="card-num">XE-12</span><span class="sev-badge sev-yellow">🟡 Yellow</span></div>
+  <h3>AP4000 6GHz Radio Enabled — No Clients Connecting to It Despite WiFi 6E Devices Present</h3>
+  <div class="card-tags"><span class="tag tag-product">IQ Engine · WiFi 6E · 6GHz</span><span class="tag tag-vertical">Enterprise / Education</span></div>
+  <p class="card-situation">An AP4000 was deployed with the 6GHz radio enabled in EP1. The site has several confirmed WiFi 6E capable devices (MacBook Pro M2, Samsung Galaxy S23). None of them connect to the 6GHz radio — they all associate on 5GHz. The 6GHz SSID is visible on a WiFi 6E-capable analyzer. The EP1 config shows the 6GHz SSID using the same network policy as the 5GHz one, including the same security profile.</p>
+  <div class="card-footer"><span>AP4000 · 6GHz WPA3 requirement · PPSK incompatibility</span><span>AP4000 · IQ Engine</span></div>
+</div>
+
+<!-- ═══ XE-13 ═══ -->
+<!-- complexity: medium -->
+<div class="card" data-severity="yellow" data-vertical="vert-stadium" data-product="prod-iqengine">
+  <div class="card-top"><span class="card-num">XE-13</span><span class="sev-badge sev-yellow">🟡 Yellow</span></div>
+  <h3>Single AP at 90%+ Channel Utilization — All Others Normal, Same Client Count</h3>
+  <div class="card-tags"><span class="tag tag-product">IQ Engine · Channel Utilization · RF</span><span class="tag tag-vertical">Stadium / Large Venue</span></div>
+  <p class="card-situation">One specific AP410C in the south concourse is consistently showing 88-95% channel utilization on the 5GHz radio, while 12 identical APs in the same concourse with similar client counts are all at 20-35%. The saturated AP is not serving more clients. The admin physically swapped the AP with one from a nearby low-utilization position — the problem moved with the location, not the hardware.</p>
+  <div class="card-footer"><span>IQ Engine · Channel utilization · Non-WiFi interference / hidden interferer</span><span>AP410C · IQ Engine</span></div>
+</div>
+
+<!-- ═══ XE-14 ═══ -->
+<!-- complexity: high -->
+<div class="card" data-severity="yellow" data-vertical="vert-enterprise" data-product="prod-iqengine">
+  <div class="card-top"><span class="card-num">XE-14</span><span class="sev-badge sev-yellow">🟡 Yellow</span></div>
+  <h3>Hidden Node Problem: Two APs on Same Channel — High Retry Rate, No Obvious Cause</h3>
+  <div class="card-tags"><span class="tag tag-product">IQ Engine · RF · Hidden Node</span><span class="tag tag-vertical">Enterprise — Warehouse</span></div>
+  <p class="card-situation">Two AP3000s on the same channel are both showing 25-30% retry rates, even at low client loads. Each AP's RSSI for its own clients is excellent. The APs cannot "hear" each other — they're on opposite sides of a concrete RF barrier. Clients near either AP show strong signal and low SNR, yet throughput is well below expected. The channel utilization shows transmit busy time much higher than receive busy time.</p>
+  <div class="card-footer"><span>IQ Engine · Hidden node / NAV · CCA mechanism</span><span>AP3000 · IQ Engine</span></div>
+</div>
+
+<!-- ═══ XE-15 ═══ -->
+<!-- complexity: high -->
+<div class="card" data-severity="red" data-vertical="vert-enterprise" data-product="prod-iqengine">
+  <div class="card-top"><span class="card-num">XE-15</span><span class="sev-badge sev-red">🔴 Red</span></div>
+  <h3>30 APs Simultaneously Drop 5GHz — All Affected APs Were on DFS Channels</h3>
+  <div class="card-tags"><span class="tag tag-product">IQ Engine · DFS · 5GHz</span><span class="tag tag-vertical">Enterprise Campus</span></div>
+  <p class="card-situation">At 10:47am, 30 AP410Cs simultaneously dropped their 5GHz radios and began a channel scan. The disruption lasted 4-6 minutes for each AP. All affected APs were assigned to channels in the DFS range (100–140). All non-DFS APs (channels 36–64) continued operating without interruption. It is a clear morning with no weather events. The campus is in a suburban area with no military installations nearby — or so you thought.</p>
+  <div class="card-footer"><span>IQ Engine · DFS radar detection · 802.11h channel move event</span><span>AP410C · IQ Engine</span></div>
+</div>
+
+<!-- ═══ XE-16 ═══ -->
+<!-- complexity: medium -->
+<div class="card" data-severity="orange" data-vertical="vert-education" data-product="prod-iqengine">
+  <div class="card-top"><span class="card-num">XE-16</span><span class="sev-badge sev-orange">🟠 Orange</span></div>
+  <h3>Band Steering Overcrowds 5GHz — 2.4GHz Empty, 5GHz Saturated</h3>
+  <div class="card-tags"><span class="tag tag-product">IQ Engine · Band Steering</span><span class="tag tag-vertical">University — Lecture Hall</span></div>
+  <p class="card-situation">After enabling band steering in XIQ to push dual-band clients to 5GHz, the lecture hall AP is showing 5GHz at 85% utilization and 2.4GHz at nearly 0%. Students are reporting worse performance than before band steering was turned on. The lecture hall holds 200 students — all with dual-band laptops. Before band steering, performance was acceptable if not ideal.</p>
+  <div class="card-footer"><span>IQ Engine · Band steering threshold · 5GHz capacity ceiling</span><span>IQ Engine · XIQ</span></div>
+</div>
+
+<!-- ═══ XE-17 ═══ -->
+<!-- complexity: medium -->
+<div class="card" data-severity="yellow" data-vertical="vert-enterprise" data-product="prod-iqengine">
+  <div class="card-top"><span class="card-num">XE-17</span><span class="sev-badge sev-yellow">🟡 Yellow</span></div>
+  <h3>TX Power Set to Maximum Across Campus — Performance Worse Than Before</h3>
+  <div class="card-tags"><span class="tag tag-product">IQ Engine · TX Power · RRM</span><span class="tag tag-vertical">Enterprise Campus</span></div>
+  <p class="card-situation">A new IT admin, trying to improve coverage complaints, changed the transmit power on all 90 campus APs to maximum (30 dBm) via XIQ. Within 48 hours, complaints increased — users are now reporting slower speeds and more disconnects than before the change, even though signal strength at all locations is excellent (–40 to –55 dBm). CRC errors have increased across the board.</p>
+  <div class="card-footer"><span>IQ Engine · TX power / co-channel interference / SNR ceiling</span><span>IQ Engine · XIQ</span></div>
+</div>
+
+<!-- ═══ XE-18 ═══ -->
+<!-- complexity: medium -->
+<div class="card" data-severity="yellow" data-vertical="vert-enterprise" data-product="prod-iqengine">
+  <div class="card-top"><span class="card-num">XE-18</span><span class="sev-badge sev-yellow">🟡 Yellow</span></div>
+  <h3>Outdoor AP5050U: 5GHz Range Half of What the Datasheet Promised</h3>
+  <div class="card-tags"><span class="tag tag-product">IQ Engine · Outdoor AP · EIRP</span><span class="tag tag-vertical">Stadium / Outdoor Venue</span></div>
+  <p class="card-situation">An outdoor AP5050U was installed on a light pole to cover a parking lot. The datasheet shows 300-meter range on 5GHz. On-site testing shows usable signal only to about 120 meters. The AP is powered, connected to XIQ, and the 5GHz radio shows as active. Checking the AP config in EP1, the 5GHz radio profile is correctly set to 80 MHz, outdoor mode, and maximum regulatory power. The antenna is the model bundled with the AP.</p>
+  <div class="card-footer"><span>AP5050U · EIRP · Regulatory domain · Gain vs datasheet conditions</span><span>AP5050U · IQ Engine</span></div>
+</div>
+
+<!-- ═══ XE-19 ═══ -->
+<!-- complexity: high -->
+<div class="card" data-severity="orange" data-vertical="vert-education" data-product="prod-ppsk">
+  <div class="card-top"><span class="card-num">XE-19</span><span class="sev-badge sev-orange">🟠 Orange</span></div>
+  <h3>ExtremeControl NAC Quarantine Trapping Legitimate Users — Random, No Pattern</h3>
+  <div class="card-tags"><span class="tag tag-product">ExtremeControl · NAC · 802.1X</span><span class="tag tag-vertical">University</span></div>
+  <p class="card-situation">Since deploying ExtremeControl NAC last semester, approximately 5% of students are randomly placed in the quarantine VLAN after successfully authenticating with their university credentials. The same student with the same laptop may connect fine Monday, then land in quarantine Tuesday with no changes to their device. Quarantine release via self-service portal works and allows reconnection — until the next time.</p>
+  <div class="card-footer"><span>ExtremeControl · NAC assessment · Posture check timing</span><span>ExtremeControl · XIQ</span></div>
+</div>
+
+<!-- ═══ XE-20 ═══ -->
+<!-- complexity: medium -->
+<div class="card" data-severity="yellow" data-vertical="vert-enterprise" data-product="prod-ppsk">
+  <div class="card-top"><span class="card-num">XE-20</span><span class="sev-badge sev-yellow">🟡 Yellow</span></div>
+  <h3>PPSK PCG Enabled — Clients Can Still Ping Each Other Across the SSID</h3>
+  <div class="card-tags"><span class="tag tag-product">XIQ · PPSK · PCG</span><span class="tag tag-vertical">Hospitality / Enterprise</span></div>
+  <p class="card-situation">A hotel deployed PPSK with Private Client Groups (PCG) so each guest's devices are isolated from all other guests. The policy was pushed and XIQ confirms PCG is enabled. During a security audit, the auditor connects two laptops with different PPSK credentials to the same SSID and successfully pings between them. Client isolation — the key selling point for the hotel — is not working.</p>
+  <div class="card-footer"><span>XIQ PPSK · PCG / Private Client Group · L2 isolation enforcement</span><span>XIQ · IQ Engine</span></div>
+</div>
+
+<!-- ═══ XE-21 ═══ -->
+<!-- complexity: high -->
+<div class="card" data-severity="red" data-vertical="vert-enterprise" data-product="prod-ppsk">
+  <div class="card-top"><span class="card-num">XE-21</span><span class="sev-badge sev-red">🔴 Red</span></div>
+  <h3>All PPSK Keys Expire at 11:59pm Tonight — 800 Users Will Lose Access at Midnight</h3>
+  <div class="card-tags"><span class="tag tag-product">XIQ · PPSK · Expiry</span><span class="tag tag-vertical">Enterprise / Education</span></div>
+  <p class="card-situation">An admin discovers at 4pm that all 800 PPSK credentials in the XIQ user group were configured with the same expiry date — tonight at 11:59pm — when the PPSK program was set up 12 months ago. There is a scheduled overnight lab session with 40 students. Tomorrow is the first day of a major product launch requiring all 800 staff to be on WiFi by 8am. There is no bulk renewal option visible in the XIQ UI.</p>
+  <div class="card-footer"><span>XIQ PPSK · Bulk expiry · User group management</span><span>XIQ · PPSK</span></div>
+</div>
+
+<!-- ═══ XE-22 ═══ -->
+<!-- complexity: medium -->
+<div class="card" data-severity="orange" data-vertical="vert-healthcare" data-product="prod-ppsk">
+  <div class="card-top"><span class="card-num">XE-22</span><span class="sev-badge sev-orange">🟠 Orange</span></div>
+  <h3>MAC Authentication Bypass Rejecting Known Devices — Same MACs That Worked Yesterday</h3>
+  <div class="card-tags"><span class="tag tag-product">XIQ · MAB · MAC Auth</span><span class="tag tag-vertical">Hospital — IoT / Medical Devices</span></div>
+  <p class="card-situation">A hospital's medical device SSID uses MAC Authentication Bypass (MAB) — no password, just MAC address whitelisting for infusion pumps, monitors, and imaging devices. Since a policy update yesterday, 30% of the whitelisted devices are being rejected. The rejected MACs are confirmed correct in the XIQ user group (manually verified). Devices that were not in service yesterday and received no changes are being rejected today.</p>
+  <div class="card-footer"><span>XIQ MAB · MAC address format · Case sensitivity</span><span>XIQ · IQ Engine</span></div>
+</div>
+
+<!-- ═══ XE-23 ═══ -->
+<!-- complexity: high -->
+<div class="card" data-severity="yellow" data-vertical="vert-education" data-product="prod-ppsk">
+  <div class="card-top"><span class="card-num">XE-23</span><span class="sev-badge sev-yellow">🟡 Yellow</span></div>
+  <h3>802.1X EAP-TLS Pushed via XIQ MDM — Clients Get Certificate Error</h3>
+  <div class="card-tags"><span class="tag tag-product">XIQ · 802.1X · PKI</span><span class="tag tag-vertical">K-12 / University</span></div>
+  <p class="card-situation">A school district pushed an 802.1X EAP-TLS configuration to student Chromebooks via XIQ's MDM integration. The profile includes the client certificate and CA chain. Chromebooks receive the profile successfully (MDM shows applied). When connecting to the 802.1X SSID, every Chromebook gets a "Certificate error — server identity cannot be verified" prompt and refuses to connect. The RADIUS server certificate is valid and not expired.</p>
+  <div class="card-footer"><span>802.1X EAP-TLS · CA chain · Trust anchor on client side</span><span>XIQ · ExtremeControl</span></div>
+</div>
+
+<!-- ═══ XE-24 ═══ -->
+<!-- complexity: medium -->
+<div class="card" data-severity="yellow" data-vertical="vert-enterprise" data-product="prod-ppsk">
+  <div class="card-top"><span class="card-num">XE-24</span><span class="sev-badge sev-yellow">🟡 Yellow</span></div>
+  <h3>WPA3-SAE Fails on Windows 10 Laptops After EP1 Security Policy Update</h3>
+  <div class="card-tags"><span class="tag tag-product">IQ Engine · WPA3-SAE · EP1</span><span class="tag tag-vertical">Enterprise</span></div>
+  <p class="card-situation">After updating the security policy in EP1 from WPA2/WPA3 transition mode to WPA3-only (SAE), Windows 10 laptops can no longer connect to the corporate SSID. Windows 11 laptops, iPhones, and Androids connect without issue. The Windows 10 laptops are fully updated (latest patches applied). They can see the SSID but fail at the association stage. The IT team needs Windows 10 support for at least another 6 months.</p>
+  <div class="card-footer"><span>WPA3-SAE · Windows 10 SAE H2E support · Transition mode</span><span>EP1 · IQ Engine</span></div>
+</div>
+
+<!-- ═══ XE-25 ═══ -->
+<!-- complexity: medium -->
+<div class="card" data-severity="orange" data-vertical="vert-federal" data-product="prod-airdefense">
+  <div class="card-top"><span class="card-num">XE-25</span><span class="sev-badge sev-orange">🟠 Orange</span></div>
+  <h3>AirDefense Essentials Scanning Process Causing 15% AP CPU Spike</h3>
+  <div class="card-tags"><span class="tag tag-product">AirDefense · IQ Engine · AP Performance</span><span class="tag tag-vertical">Federal / Enterprise</span></div>
+  <p class="card-situation">Since enabling AirDefense Essentials on 60 AP410Cs, users in two buildings are reporting intermittent slow WiFi. Pulling AP CPU stats from XIQ shows all 60 APs spiking to 75-80% CPU every 30 seconds — with each spike lasting about 3-4 seconds. Before AirDefense was enabled, the same APs ran at 20-25% CPU under identical client loads. The spikes are perfectly synchronized across all APs.</p>
+  <div class="card-footer"><span>AirDefense · Scanning interval · AP background WIPS overhead</span><span>AirDefense · IQ Engine</span></div>
+</div>
+
+<!-- ═══ XE-26 ═══ -->
+<!-- complexity: low -->
+<div class="card" data-severity="yellow" data-vertical="vert-enterprise" data-product="prod-ppsk">
+  <div class="card-top"><span class="card-num">XE-26</span><span class="sev-badge sev-yellow">🟡 Yellow</span></div>
+  <h3>PPSK Device Limit: User Hitting 5-Device Cap — Home + Office Devices Combined</h3>
+  <div class="card-tags"><span class="tag tag-product">XIQ · PPSK · Device Limit</span><span class="tag tag-vertical">Enterprise — Hybrid Work</span></div>
+  <p class="card-situation">A senior manager is calling the helpdesk weekly because her PPSK says "device limit exceeded." The company deployed PPSK with a 5-device limit per credential. The manager works hybrid: she has a laptop, iPhone, iPad, and Apple Watch at the office — and the same devices at home, which also has the company PPSK for the home AP deployed by IT. She hasn't added any new devices.</p>
+  <div class="card-footer"><span>XIQ PPSK · Per-credential device count · Home AP deployment edge case</span><span>XIQ · PPSK</span></div>
+</div>
+
+<!-- ═══ XE-27 ═══ -->
+<!-- complexity: high -->
+<div class="card" data-severity="red" data-vertical="vert-enterprise" data-product="prod-iqengine">
+  <div class="card-top"><span class="card-num">XE-27</span><span class="sev-badge sev-red">🔴 Red</span></div>
+  <h3>Mass Client Deauthentication Loop — Clients Associate Then Immediately Disconnect</h3>
+  <div class="card-tags"><span class="tag tag-product">IQ Engine · 4-Way Handshake · Auth</span><span class="tag tag-vertical">Enterprise — All Buildings</span></div>
+  <p class="card-situation">Starting at 9:15am, clients across the entire campus are associating to APs and then being deauthenticated within 2-5 seconds, in a continuous loop. No one can stay connected. The AP event logs show a flood of "4-way handshake timeout" entries. This started immediately after the overnight XIQ policy push completed at 3am. Rolling back the push is not straightforward as the previous config is no longer available in XIQ history.</p>
+  <div class="card-footer"><span>IQ Engine · 4-way handshake · PSK mismatch / PMKID config error after policy push</span><span>IQ Engine · XIQ</span></div>
+</div>
+
+<!-- ═══ XE-28 ═══ -->
+<!-- complexity: medium -->
+<div class="card" data-severity="orange" data-vertical="vert-healthcare" data-product="prod-iqengine">
+  <div class="card-top"><span class="card-num">XE-28</span><span class="sev-badge sev-orange">🟠 Orange</span></div>
+  <h3>Sticky Client Holding –85 dBm Signal — Better AP 10 Meters Away, Client Won't Roam</h3>
+  <div class="card-tags"><span class="tag tag-product">IQ Engine · Roaming · Min RSSI</span><span class="tag tag-vertical">Hospital — Ward</span></div>
+  <p class="card-situation">A nurse's Windows laptop (used for charting at the bedside) is holding a –85 dBm connection to an AP at the other end of the ward. A second AP 10 meters away shows –55 dBm for the same client. The laptop has been in this state for 20 minutes and will not roam. Network performance on the laptop is severely degraded. The nurse has to log out of Epic and back in every time to recover a usable session.</p>
+  <div class="card-footer"><span>IQ Engine · Minimum RSSI threshold · Client roam refusal · Windows sticky client</span><span>IQ Engine · XIQ</span></div>
+</div>
+
+<!-- ═══ XE-29 ═══ -->
+<!-- complexity: medium -->
+<div class="card" data-severity="yellow" data-vertical="vert-education" data-product="prod-iqengine">
+  <div class="card-top"><span class="card-num">XE-29</span><span class="sev-badge sev-yellow">🟡 Yellow</span></div>
+  <h3>Band Steering Enabled — Dual-Band Clients Still Connecting to 2.4GHz Consistently</h3>
+  <div class="card-tags"><span class="tag tag-product">IQ Engine · Band Steering · XIQ</span><span class="tag tag-vertical">K-12 School</span></div>
+  <p class="card-situation">Band steering is enabled in XIQ. The school has 400 Chromebooks that are all dual-band capable. Despite the policy, 60% of Chromebooks are consistently connecting to 2.4GHz. When one is manually forced to 5GHz, it stays on 5GHz — signal is excellent. But after a brief disconnect and reconnect (e.g., waking from sleep), it returns to 2.4GHz. The band steering setting is confirmed active in the 2.4GHz radio profile.</p>
+  <div class="card-footer"><span>IQ Engine · Band steering · 2.4GHz probe suppression vs reconnect behavior</span><span>IQ Engine · XIQ</span></div>
+</div>
+
+<!-- ═══ XE-30 ═══ -->
+<!-- complexity: medium -->
+<div class="card" data-severity="yellow" data-vertical="vert-enterprise" data-product="prod-iqengine">
+  <div class="card-top"><span class="card-num">XE-30</span><span class="sev-badge sev-yellow">🟡 Yellow</span></div>
+  <h3>IPv6 Clients Get No Address — IPv4 Works Perfectly on Same SSID</h3>
+  <div class="card-tags"><span class="tag tag-product">IQ Engine · IPv6 · RA</span><span class="tag tag-vertical">Enterprise / University</span></div>
+  <p class="card-situation">After upgrading the campus network to dual-stack IPv4/IPv6, WiFi clients are only getting IPv4 addresses. Wired clients on the same VLANs get both IPv4 and IPv6 addresses correctly. IPv6 Router Advertisements are confirmed to be flowing correctly on the wired side. The SSID uses bridge mode. All APs are on the current IQ Engine firmware.</p>
+  <div class="card-footer"><span>IQ Engine · IPv6 RA / SLAAC · Bridge mode multicast forwarding</span><span>IQ Engine</span></div>
+</div>
+
+<!-- ═══ XE-31 ═══ -->
+<!-- complexity: medium -->
+<div class="card" data-severity="orange" data-vertical="vert-enterprise" data-product="prod-iqengine">
+  <div class="card-top"><span class="card-num">XE-31</span><span class="sev-badge sev-orange">🟠 Orange</span></div>
+  <h3>VoIP Softphone: Excellent on 5GHz, Terrible Jitter on 2.4GHz — Same AP, Same Room</h3>
+  <div class="card-tags"><span class="tag tag-product">IQ Engine · QoS · WMM · 2.4GHz</span><span class="tag tag-vertical">Enterprise / Call Center</span></div>
+  <p class="card-situation">A call center's agents use WiFi VoIP softphones on laptops. Agents sitting at 5GHz-connected desks have excellent call quality. Agents on 2.4GHz (same AP, adjacent desks) experience jitter and choppy audio every 2-3 minutes. Signal strength on 2.4GHz is –55 dBm — well within spec. WMM is enabled on the SSID. The issue is specific to 2.4GHz on every AP in the building.</p>
+  <div class="card-footer"><span>IQ Engine · 2.4GHz congestion · WMM AC_VO / channel utilization interaction</span><span>IQ Engine · XIQ</span></div>
+</div>
+
+<!-- ═══ XE-32 ═══ -->
+<!-- complexity: medium -->
+<div class="card" data-severity="orange" data-vertical="vert-banking" data-product="prod-ppsk">
+  <div class="card-top"><span class="card-num">XE-32</span><span class="sev-badge sev-orange">🟠 Orange</span></div>
+  <h3>PPSK Client Lands on Wrong VLAN — Gets General Internet Instead of Secure Banking VLAN</h3>
+  <div class="card-tags"><span class="tag tag-product">XIQ · PPSK · VLAN Assignment</span><span class="tag tag-vertical">Bank — Branch</span></div>
+  <p class="card-situation">Branch bank staff using PPSK credentials are landing on the guest VLAN (internet-only) instead of the secure banking VLAN that their PPSK user group should deliver. Personal visitors using guest credentials correctly land on the guest VLAN. The PPSK user groups and VLAN assignments look correct in XIQ. The problem started after a XIQ network policy was duplicated and renamed for a new branch last week.</p>
+  <div class="card-footer"><span>XIQ PPSK · VLAN per user group · Duplicated policy inheritance</span><span>XIQ · PPSK</span></div>
+</div>
+
+<!-- ═══ XE-33 ═══ -->
+<!-- complexity: medium -->
+<div class="card" data-severity="yellow" data-vertical="vert-enterprise" data-product="prod-iqengine">
+  <div class="card-top"><span class="card-num">XE-33</span><span class="sev-badge sev-yellow">🟡 Yellow</span></div>
+  <h3>AirPlay Stops Working After IQ Engine Firmware Upgrade — Was Fine Before</h3>
+  <div class="card-tags"><span class="tag tag-product">IQ Engine · Bonjour · mDNS</span><span class="tag tag-vertical">Enterprise / Education</span></div>
+  <p class="card-situation">Apple TV AirPlay was working across the conference room network for 6 months. After upgrading AP firmware to the latest IQ Engine release, AirPlay stopped discovering Apple TVs entirely. The Apple TVs are on the wired infrastructure VLAN; presenting MacBooks are on the wireless staff VLAN. The XIQ Bonjour gateway config has not changed. Wired-to-wired AirPlay between same-VLAN devices still works.</p>
+  <div class="card-footer"><span>IQ Engine · Bonjour gateway · mDNS proxy after firmware change</span><span>IQ Engine · XIQ</span></div>
+</div>
+
+<!-- ═══ XE-34 ═══ -->
+<!-- complexity: medium -->
+<div class="card" data-severity="yellow" data-vertical="vert-enterprise" data-product="prod-iqengine">
+  <div class="card-top"><span class="card-num">XE-34</span><span class="sev-badge sev-yellow">🟡 Yellow</span></div>
+  <h3>Specific Android Model Drops WiFi Every 45 Minutes — All Other Devices Fine</h3>
+  <div class="card-tags"><span class="tag tag-product">IQ Engine · Client Compatibility · GTK</span><span class="tag tag-vertical">Enterprise / Retail</span></div>
+  <p class="card-situation">Samsung Galaxy A54 devices are dropping WiFi every 44-46 minutes with near-clockwork regularity, then reconnecting after 15-30 seconds. It happens to all 20 units in the warehouse, but no other Android model. iPhones, Windows laptops, and older Samsung models on the same SSID are completely unaffected. The A54s are running the latest Android and Samsung firmware. The disruption is exactly correlated with a recurring AP process visible in the AP logs.</p>
+  <div class="card-footer"><span>IQ Engine · GTK rotation interval · Client GTK rekey compatibility</span><span>IQ Engine · XIQ</span></div>
+</div>
+
+<!-- ═══ XE-35 ═══ -->
+<!-- complexity: medium -->
+<div class="card" data-severity="yellow" data-vertical="vert-enterprise" data-product="prod-xiq">
+  <div class="card-top"><span class="card-num">XE-35</span><span class="sev-badge sev-yellow">🟡 Yellow</span></div>
+  <h3>AP Shows "Managed" in XIQ — But Clients Get No Traffic Despite Associating</h3>
+  <div class="card-tags"><span class="tag tag-product">XIQ · IQ Engine · CAPWAP</span><span class="tag tag-vertical">Enterprise</span></div>
+  <p class="card-situation">One AP410C shows a green "Managed" status in XIQ with a correct firmware version and no alerts. Clients associate to it, complete the 4-way handshake, and receive IP addresses. But no user traffic passes — HTTP requests time out, pings to the default gateway fail. Every other AP on the same switch and same VLAN works normally. Rebooting the AP from XIQ temporarily fixes it for about 2 hours before the problem returns.</p>
+  <div class="card-footer"><span>IQ Engine · CAPWAP data tunnel vs control tunnel · Split tunnel state</span><span>IQ Engine · XIQ</span></div>
+</div>
+
+<!-- ═══ XE-36 ═══ -->
+<!-- complexity: medium -->
+<div class="card" data-severity="orange" data-vertical="vert-enterprise" data-product="prod-iqengine">
+  <div class="card-top"><span class="card-num">XE-36</span><span class="sev-badge sev-orange">🟠 Orange</span></div>
+  <h3>AP Console Shows "CAPWAP State: Joining" in a Loop — Never Reaches "Run"</h3>
+  <div class="card-tags"><span class="tag tag-product">IQ Engine · CAPWAP · SSL</span><span class="tag tag-vertical">Enterprise / Federal</span></div>
+  <p class="card-situation">A serial console session on a newly deployed AP3000 shows the CAPWAP state machine cycling: Discovery → Joining → Discovery → Joining indefinitely. The AP gets a DHCP address and can resolve DNS. It reaches the XIQ redirector (no firewall blocking). The AP does not appear in XIQ at all — not even as unclaimed. The AP's serial number is already claimed in the XIQ organization. This is a replacement unit for one that died.</p>
+  <div class="card-footer"><span>IQ Engine · CAPWAP · Certificate / AP identity conflict — previously claimed serial</span><span>IQ Engine · XIQ</span></div>
+</div>
+
+<!-- ═══ XE-37 ═══ -->
+<!-- complexity: medium -->
+<div class="card" data-severity="yellow" data-vertical="vert-enterprise" data-product="prod-iqengine">
+  <div class="card-top"><span class="card-num">XE-37</span><span class="sev-badge sev-yellow">🟡 Yellow</span></div>
+  <h3>AP Running in Tunnel Mode — Should Be Bridge Mode Per Site Design</h3>
+  <div class="card-tags"><span class="tag tag-product">IQ Engine · Tunnel / Bridge Mode · EP1</span><span class="tag tag-vertical">Enterprise</span></div>
+  <p class="card-situation">A network audit reveals that 8 APs at a branch office are operating in CAPWAP tunnel mode, forwarding all client traffic back to the data center. The site design specifies bridge mode — all client traffic should exit locally at the branch. VLAN assignments look correct in XIQ. The site's WAN link is showing unexpectedly high utilization since these APs were deployed last month. Users report normal performance.</p>
+  <div class="card-footer"><span>IQ Engine · Tunnel vs bridge mode · Per-SSID forwarding profile in EP1</span><span>IQ Engine · EP1</span></div>
+</div>
+
+<!-- ═══ XE-38 ═══ -->
+<!-- complexity: low -->
+<div class="card" data-severity="yellow" data-vertical="vert-enterprise" data-product="prod-xiq">
+  <div class="card-top"><span class="card-num">XE-38</span><span class="sev-badge sev-yellow">🟡 Yellow</span></div>
+  <h3>AP Factory Reset by Mistake — Need to Recover Config Without Downtime</h3>
+  <div class="card-tags"><span class="tag tag-product">XIQ · IQ Engine · Recovery</span><span class="tag tag-vertical">Enterprise</span></div>
+  <p class="card-situation">A field technician accidentally held the reset button on an AP410C for 10 seconds while doing cabling work. The AP rebooted to factory defaults and is now broadcasting the default HiveAP SSID. It is no longer in XIQ. 40 users in that section of the office have lost connectivity. The AP's serial number is still in XIQ inventory. The configuration that was running on it was the same network policy applied to 50 other APs in the building.</p>
+  <div class="card-footer"><span>XIQ · AP re-onboarding · Reclaim from factory reset</span><span>XIQ · IQ Engine</span></div>
+</div>
+
+<!-- ═══ XE-39 ═══ -->
+<!-- complexity: medium -->
+<div class="card" data-severity="orange" data-vertical="vert-enterprise" data-product="prod-xiq">
+  <div class="card-top"><span class="card-num">XE-39</span><span class="sev-badge sev-orange">🟠 Orange</span></div>
+  <h3>"Reboot AP" Sent from XIQ — AP Never Came Back, Now Unreachable on Network</h3>
+  <div class="card-tags"><span class="tag tag-product">XIQ · IQ Engine · Recovery</span><span class="tag tag-vertical">Enterprise / Remote Site</span></div>
+  <p class="card-situation">An admin sent a "Reboot AP" command from XIQ to troubleshoot a client issue. The AP (an AP305C at a remote branch 200 miles away) went offline and never returned. XIQ shows it as offline. The branch has no local IT staff. Pings to the AP's IP address time out. The switch port the AP connects to shows as up/up. It has been 45 minutes. Users at the branch have no WiFi.</p>
+  <div class="card-footer"><span>IQ Engine · Remote AP recovery · Power cycle vs software reboot failure</span><span>IQ Engine · XIQ</span></div>
+</div>
+
+<!-- ═══ XE-40 ═══ -->
+<!-- complexity: high -->
+<div class="card" data-severity="red" data-vertical="vert-enterprise" data-product="prod-xiq">
+  <div class="card-top"><span class="card-num">XE-40</span><span class="sev-badge sev-red">🔴 Red</span></div>
+  <h3>New AP Auto-Claims to Wrong XIQ Organization — Neighbor Customer's Network</h3>
+  <div class="card-tags"><span class="tag tag-product">XIQ · AP Claiming · Organization</span><span class="tag tag-vertical">MSP / Multi-tenant</span></div>
+  <p class="card-situation">A managed service provider deployed a new AP3000 for Client A. When the AP came online, it appeared in Client B's XIQ organization instead of Client A's. Client B is a completely separate customer. The AP is now broadcasting Client B's SSIDs. Client A's sensitive PPSK credentials could potentially be accessible from Client B's admin account. The AP serial was pre-staged by the reseller. Client A's SSID is not live yet — but the question of what happened to the AP's identity is urgent.</p>
+  <div class="card-footer"><span>XIQ · AP pre-staging / org assignment · Reseller claim transfer gap</span><span>XIQ · IQ Engine</span></div>
+</div>
+
+<!-- ═══ XE-41 ═══ -->
+<!-- complexity: medium -->
+<div class="card" data-severity="orange" data-vertical="vert-enterprise" data-product="prod-exos">
+  <div class="card-top"><span class="card-num">XE-41</span><span class="sev-badge sev-orange">🟠 Orange</span></div>
+  <h3>EXOS Port VLAN vs XIQ Tagged VLAN Conflict — WiFi Clients on Wrong Segment</h3>
+  <div class="card-tags"><span class="tag tag-product">EXOS · XIQ · VLAN</span><span class="tag tag-vertical">Enterprise</span></div>
+  <p class="card-situation">WiFi clients on VLAN 30 (contractors) are appearing in the VLAN 1 (corporate) segment and getting corporate IP addresses. The XIQ network policy correctly tags VLAN 30 for the contractor SSID. The EXOS switch port connecting the AP is configured as an 802.1Q trunk with VLAN 30 tagged. Wired devices manually placed on VLAN 30 appear correctly. Only wireless VLAN 30 clients are affected.</p>
+  <div class="card-footer"><span>EXOS · Native VLAN / untagged VLAN on trunk · XIQ VLAN tagging interaction</span><span>EXOS · XIQ</span></div>
+</div>
+
+<!-- ═══ XE-42 ═══ -->
+<!-- complexity: medium -->
+<div class="card" data-severity="orange" data-vertical="vert-enterprise" data-product="prod-exos">
+  <div class="card-top"><span class="card-num">XE-42</span><span class="sev-badge sev-orange">🟠 Orange</span></div>
+  <h3>LLDP-MED Not Passing Power Class to Switch — AP 5GHz Radio Disabled</h3>
+  <div class="card-tags"><span class="tag tag-product">EXOS · PoE · LLDP-MED</span><span class="tag tag-vertical">Enterprise</span></div>
+  <p class="card-situation">A newly installed AP460C (a high-density WiFi 6 AP) connects to the network but XIQ shows only the 2.4GHz radio active — the 5GHz radio is listed as "disabled." Physical inspection shows the AP is powered and connected. The AP's console shows a message: "Insufficient power: 5GHz radio disabled." The EXOS switch port is set to "PoE auto." The same switch model and configuration successfully powers AP410Cs on adjacent ports.</p>
+  <div class="card-footer"><span>EXOS · PoE budget · LLDP-MED power negotiation · AP460C higher power class</span><span>EXOS · IQ Engine</span></div>
+</div>
+
+<!-- ═══ XE-43 ═══ -->
+<!-- complexity: medium -->
+<div class="card" data-severity="red" data-vertical="vert-stadium" data-product="prod-exos">
+  <div class="card-top"><span class="card-num">XE-43</span><span class="sev-badge sev-red">🔴 Red</span></div>
+  <h3>PoE Budget Exceeded at Peak Load — APs Randomly Powering Off During Events</h3>
+  <div class="card-tags"><span class="tag tag-product">EXOS · PoE · AP Power</span><span class="tag tag-vertical">Stadium / Large Venue</span></div>
+  <p class="card-situation">During sold-out events at an arena, random APs start going offline — 3-5 at a time, from different IDF closets, with no pattern to which ones. The outages last 30-60 seconds. Between events, when the building is empty, all APs are online and stable. Checking EXOS, the switch ports show normal PoE status. The same phenomenon was reported at the last three major events, never on quiet days.</p>
+  <div class="card-footer"><span>EXOS · PoE budget · Dynamic PoE draw · AP max transmit power at event load</span><span>EXOS · IQ Engine</span></div>
+</div>
+
+<!-- ═══ XE-44 ═══ -->
+<!-- complexity: medium -->
+<div class="card" data-severity="yellow" data-vertical="vert-enterprise" data-product="prod-exos">
+  <div class="card-top"><span class="card-num">XE-44</span><span class="sev-badge sev-yellow">🟡 Yellow</span></div>
+  <h3>Mirror Port Configured on AP Uplink — Clients Seeing Each Other's Traffic</h3>
+  <div class="card-tags"><span class="tag tag-product">EXOS · Port Mirroring · Security</span><span class="tag tag-vertical">Enterprise</span></div>
+  <p class="card-situation">During a routine security audit, the auditor finds that an EXOS switch has a port mirror configured: the AP uplink port is being mirrored to a server room port. The mirror was set up 6 months ago for a "troubleshooting session" and was never removed. All WiFi client traffic — including authentication frames — has been captured to that server room port for 6 months. The server at that port is a general-purpose file server with no logging controls.</p>
+  <div class="card-footer"><span>EXOS · Port mirroring · Data privacy / compliance exposure</span><span>EXOS</span></div>
+</div>
+
+<!-- ═══ XE-45 ═══ -->
+<!-- complexity: high -->
+<div class="card" data-severity="orange" data-vertical="vert-enterprise" data-product="prod-exos">
+  <div class="card-top"><span class="card-num">XE-45</span><span class="sev-badge sev-orange">🟠 Orange</span></div>
+  <h3>STP Topology Change Event — All APs Lose Connectivity for 30 Seconds Simultaneously</h3>
+  <div class="card-tags"><span class="tag tag-product">EXOS · STP · FDB</span><span class="tag tag-vertical">Enterprise Campus</span></div>
+  <p class="card-situation">Every few days, all campus APs simultaneously lose connectivity for exactly 25-35 seconds — every AP, in every building, at the same instant. Wired workstations are unaffected. XIQ shows a mass "offline" event for all APs, then a mass "online" recovery. The EXOS event logs show a Spanning Tree topology change event at the exact moment of each outage. The pattern is random — sometimes twice in one day, sometimes not for a week.</p>
+  <div class="card-footer"><span>EXOS · STP TCN / FDB flush · AP management VLAN dependency on core topology</span><span>EXOS · XIQ</span></div>
+</div>
+
+<!-- ═══ XE-46 ═══ -->
+<!-- complexity: medium -->
+<div class="card" data-severity="red" data-vertical="vert-enterprise" data-product="prod-xiq">
+  <div class="card-top"><span class="card-num">XE-46</span><span class="sev-badge sev-red">🔴 Red</span></div>
+  <h3>EP1 "Device Update Failed" for All 40 APs in Building C — Other Buildings Fine</h3>
+  <div class="card-tags"><span class="tag tag-product">EP1 · Device Update</span><span class="tag tag-vertical">Enterprise Campus</span></div>
+  <p class="card-situation">A network policy push to a campus of 200 APs fails for exactly the 40 APs in Building C. The other 160 APs across 4 buildings update successfully. Building C APs show "Device Update Failed" in EP1. Users in Building C still have WiFi — the old policy is running. Building C APs are all AP410Cs on the same firmware as the other buildings. The switch infrastructure in Building C was upgraded to new EXOS hardware last month.</p>
+  <div class="card-footer"><span>EP1 · Device Update Failed · MTU / fragmentation / management VLAN path</span><span>EP1 · EXOS</span></div>
+</div>
+
+<!-- ═══ XE-47 ═══ -->
+<!-- complexity: high -->
+<div class="card" data-severity="orange" data-vertical="vert-enterprise" data-product="prod-xiq">
+  <div class="card-top"><span class="card-num">XE-47</span><span class="sev-badge sev-orange">🟠 Orange</span></div>
+  <h3>XIQ Organization Migration — APs Drop Config, Revert to Default SSIDs</h3>
+  <div class="card-tags"><span class="tag tag-product">XIQ · EP1 · Organization</span><span class="tag tag-vertical">Enterprise — M&amp;A / Restructure</span></div>
+  <p class="card-situation">During a corporate acquisition, 150 APs were moved from the acquired company's XIQ organization to the parent company's XIQ organization. The move showed as "Successful" in XIQ. Within 2 hours, 60 of the 150 APs reverted to broadcasting the default HiveAP SSID — their assigned network policy was lost. The other 90 retained their config. Affected sites span 3 states.</p>
+  <div class="card-footer"><span>XIQ · Org migration · Policy re-assignment timing during device transfer</span><span>XIQ · IQ Engine</span></div>
+</div>
+
+<!-- ═══ XE-48 ═══ -->
+<!-- complexity: medium -->
+<div class="card" data-severity="orange" data-vertical="vert-enterprise" data-product="prod-xiq">
+  <div class="card-top"><span class="card-num">XE-48</span><span class="sev-badge sev-orange">🟠 Orange</span></div>
+  <h3>Automation Script Hitting XIQ API — Getting 429 Errors, APs Not Updating</h3>
+  <div class="card-tags"><span class="tag tag-product">XIQ API · EP1 · Automation</span><span class="tag tag-vertical">MSP / Enterprise IT</span></div>
+  <p class="card-situation">An MSP built an automation script that uses the XIQ API to push firmware updates and config changes to 500 customer APs every night. Last week the script started failing with HTTP 429 "Too Many Requests" errors after updating about 80 APs. The remaining 420 APs don't get updated. The script worked fine for 4 months before this started. No changes were made to the script. Extreme Networks sent no notification of API changes.</p>
+  <div class="card-footer"><span>XIQ API · Rate limiting · Throttle headers / exponential backoff</span><span>XIQ API</span></div>
+</div>
+
+<!-- ═══ XE-49 ═══ -->
+<!-- complexity: high -->
+<div class="card" data-severity="orange" data-vertical="vert-enterprise" data-product="prod-xiq">
+  <div class="card-top"><span class="card-num">XE-49</span><span class="sev-badge sev-orange">🟠 Orange</span></div>
+  <h3>Classic XIQ → EP1 Migration: Legacy Config Not Importable — Full Manual Rebuild</h3>
+  <div class="card-tags"><span class="tag tag-product">XIQ → EP1 Migration</span><span class="tag tag-vertical">Enterprise — Complex Config</span></div>
+  <p class="card-situation">A large enterprise begins migrating from classic XIQ to EP1. The XIQ export tool successfully exports the configuration. When the EP1 import is run, 40% of the config fails to import: specifically, all SSIDs using legacy MAC-OUI-based user profiles, custom Bonjour forwarding rules, and any radio profile using older ACS parameters. The migration deadline is in 3 weeks. XIQ will be sunset for this organization at that date.</p>
+  <div class="card-footer"><span>XIQ → EP1 · Config feature parity gap · Migration assessment</span><span>XIQ · EP1</span></div>
+</div>
+
+<!-- ═══ XE-50 ═══ -->
+<!-- complexity: medium -->
+<div class="card" data-severity="yellow" data-vertical="vert-enterprise" data-product="prod-airdefense">
+  <div class="card-top"><span class="card-num">XE-50</span><span class="sev-badge sev-yellow">🟡 Yellow</span></div>
+  <h3>AirDefense Spectrum Analysis Shows Strong Interference — Correct Source Identification</h3>
+  <div class="card-tags"><span class="tag tag-product">AirDefense · Spectrum · RF</span><span class="tag tag-vertical">Enterprise / Healthcare</span></div>
+  <p class="card-situation">AirDefense spectrum analysis on an AP3000's wifi0 radio (2.4GHz) shows a persistent non-WiFi interference signature spanning channels 1-6, centered around 2.43 GHz, with a 22 MHz swept bandwidth that cycles every 2-3 seconds. The signature was not present 6 weeks ago. A new building tenant moved into the floor below last month. Channel utilization on wifi0 is at 60% with only 8 clients connected. The interference is present 24/7 including weekends.</p>
+  <div class="card-footer"><span>AirDefense · Spectrum analysis · Non-WiFi interference identification · Frequency signature</span><span>AirDefense · IQ Engine</span></div>
+</div>
+
+</div><!-- /grid -->
+
+<div class="page-footer">© 2026 Khursheed Khan · Extreme Networks Training · Not for distribution · 50 scenarios · All severity ratings reflect business impact · Complexity intentionally hidden</div>
+
+<script>
+  const grid = document.getElementById('scenario-grid');
+  const cards = Array.from(grid.querySelectorAll('.card'));
+  const countEl = document.getElementById('visible-count');
+
+  let activeSev = 'all-sev';
+  let activeVert = 'all-vert';
+  let activeProd = 'all-prod';
+
+  function applyFilters() {
+    let visible = 0;
+    cards.forEach(c => {
+      const sevMatch = activeSev === 'all-sev' || c.dataset.severity === activeSev.replace('sev-','');
+      const vertMatch = activeVert === 'all-vert' || c.dataset.vertical === activeVert;
+      const prodMatch = activeProd === 'all-prod' || c.dataset.product === activeProd;
+      if (sevMatch && vertMatch && prodMatch) { c.classList.remove('hidden'); visible++; }
+      else { c.classList.add('hidden'); }
+    });
+    countEl.textContent = visible;
+  }
+
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    const f = btn.dataset.filter;
+    btn.addEventListener('click', () => {
+      if (['all-sev','sev-red','sev-orange','sev-yellow','sev-green'].includes(f)) {
+        document.querySelectorAll('[data-filter^="sev"],[data-filter="all-sev"]').forEach(b => b.classList.remove('active'));
+        activeSev = f;
+      } else if (f.startsWith('vert') || f === 'all-vert') {
+        document.querySelectorAll('[data-filter^="vert"],[data-filter="all-vert"]').forEach(b => b.classList.remove('active'));
+        activeVert = f;
+      } else {
+        document.querySelectorAll('[data-filter^="prod"],[data-filter="all-prod"]').forEach(b => b.classList.remove('active'));
+        activeProd = f;
+      }
+      btn.classList.add('active');
+      applyFilters();
+    });
+  });
+</script>
+</body>
+</html>
