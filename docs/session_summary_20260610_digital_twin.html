@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Session Summary — June 10 2026 · Digital Twin + AP3000 CLI</title>
+<style>
+  :root {
+    --bg: #faf9f7; --surface: #fff; --surface2: #f4f3f0;
+    --border: #e5e2dc; --text: #1a1a1a; --muted: #666;
+    --accent: #1a5276; --green: #1a7a40; --yellow: #8a6000;
+    --red: #8b1a1a; --blue: #1a4a8a; --purple: #5a1a7a;
+    --serif: 'Georgia', 'Libre Baskerville', serif;
+    --mono: 'JetBrains Mono', 'Cascadia Code', monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: var(--serif); font-size: 16px; line-height: 1.7; }
+
+  /* ── Layout ── */
+  .layout { display: flex; min-height: 100vh; }
+  nav { width: 260px; min-width: 260px; background: var(--surface); border-right: 1px solid var(--border); position: sticky; top: 0; height: 100vh; overflow-y: auto; padding: 24px 0; }
+  nav .logo { padding: 0 20px 20px; border-bottom: 1px solid var(--border); margin-bottom: 16px; }
+  nav .logo h2 { font-family: var(--serif); font-size: 13px; color: var(--accent); font-weight: 700; letter-spacing: .02em; }
+  nav .logo p { font-size: 11px; color: var(--muted); margin-top: 4px; font-family: sans-serif; }
+  nav a { display: block; padding: 5px 20px; color: var(--muted); text-decoration: none; font-size: 12.5px; font-family: sans-serif; border-left: 2px solid transparent; transition: all .15s; }
+  nav a:hover, nav a.active { color: var(--accent); border-left-color: var(--accent); background: rgba(26,82,118,.05); }
+  nav .sec { padding: 14px 20px 4px; font-size: 10px; color: #aaa; text-transform: uppercase; letter-spacing: .12em; font-family: sans-serif; }
+  main { flex: 1; padding: 48px 56px; max-width: 860px; }
+
+  /* ── Typography ── */
+  h1 { font-size: 28px; color: var(--accent); margin-bottom: 6px; font-weight: 700; }
+  .meta { font-size: 13px; color: var(--muted); font-family: sans-serif; margin-bottom: 36px; border-bottom: 1px solid var(--border); padding-bottom: 16px; }
+  h2 { font-size: 20px; margin: 48px 0 14px; padding-bottom: 8px; border-bottom: 2px solid var(--border); color: var(--accent); }
+  h3 { font-size: 15px; color: var(--text); margin: 24px 0 8px; font-weight: 700; }
+  p { margin-bottom: 10px; }
+
+  /* ── Code ── */
+  pre { background: #1a1a2e; border: 1px solid #333; border-radius: 6px; padding: 14px 16px; overflow-x: auto; margin: 10px 0 16px; line-height: 1.55; }
+  pre code { font-family: var(--mono); font-size: 12.5px; color: #a8d8a8; }
+  code { font-family: var(--mono); font-size: 13px; background: #f0ede8; padding: 1px 5px; border-radius: 3px; color: var(--accent); }
+
+  /* ── Callouts ── */
+  .note { background: rgba(26,82,118,.06); border-left: 3px solid var(--accent); padding: 10px 14px; margin: 12px 0; border-radius: 0 4px 4px 0; font-size: 14px; font-family: sans-serif; }
+  .win  { background: rgba(26,122,64,.06); border-left: 3px solid var(--green); padding: 10px 14px; margin: 12px 0; border-radius: 0 4px 4px 0; font-size: 14px; font-family: sans-serif; }
+  .warn { background: rgba(138,96,0,.06); border-left: 3px solid var(--yellow); padding: 10px 14px; margin: 12px 0; border-radius: 0 4px 4px 0; font-size: 14px; font-family: sans-serif; }
+  .block { background: rgba(139,26,26,.06); border-left: 3px solid var(--red); padding: 10px 14px; margin: 12px 0; border-radius: 0 4px 4px 0; font-size: 14px; font-family: sans-serif; }
+
+  /* ── Tables ── */
+  table { width: 100%; border-collapse: collapse; margin: 12px 0 20px; font-size: 13.5px; font-family: sans-serif; }
+  th { background: var(--surface2); text-align: left; padding: 7px 12px; font-weight: 700; font-size: 11px; text-transform: uppercase; letter-spacing: .05em; border-bottom: 2px solid var(--border); color: var(--muted); }
+  td { padding: 8px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  tr:hover td { background: var(--surface2); }
+  td.g { color: var(--green); font-weight: 700; }
+  td.r { color: var(--red); font-weight: 700; }
+  td.y { color: var(--yellow); font-weight: 700; }
+
+  /* ── Artifact linked-list ── */
+  .artifact-list { list-style: none; margin: 0; padding: 0; }
+  .artifact-list li { border: 1px solid var(--border); border-radius: 6px; margin-bottom: 10px; background: var(--surface); }
+  .artifact-list li a { display: block; padding: 14px 16px; text-decoration: none; color: var(--text); }
+  .artifact-list li a:hover { background: var(--surface2); border-radius: 6px; }
+  .artifact-list .af-title { font-family: var(--mono); font-size: 13px; color: var(--accent); font-weight: 700; }
+  .artifact-list .af-desc { font-family: sans-serif; font-size: 12.5px; color: var(--muted); margin-top: 4px; }
+  .artifact-list .af-meta { font-family: sans-serif; font-size: 11px; color: #aaa; margin-top: 3px; }
+  .artifact-list .af-tag { display: inline-block; font-size: 10px; padding: 1px 7px; border-radius: 10px; font-weight: 700; font-family: sans-serif; margin-right: 4px; }
+  .tag-live  { background: rgba(26,122,64,.15); color: var(--green); }
+  .tag-html  { background: rgba(26,82,118,.15); color: var(--accent); }
+  .tag-raw   { background: rgba(138,96,0,.15); color: var(--yellow); }
+
+  /* ── Console index ── */
+  .ci { border: 1px solid var(--border); border-radius: 6px; overflow: hidden; margin: 16px 0; font-family: sans-serif; }
+  .ci-header { background: #1a1a2e; padding: 10px 16px; display: flex; align-items: center; gap: 10px; }
+  .ci-header span { font-family: var(--mono); font-size: 13px; color: #7ec8e3; }
+  .ci-header em { font-size: 11px; color: #666; font-style: normal; }
+  .ci-row { display: flex; padding: 8px 16px; border-bottom: 1px solid var(--border); align-items: flex-start; gap: 16px; }
+  .ci-row:last-child { border-bottom: none; }
+  .ci-row:hover { background: var(--surface2); }
+  .ci-line { font-family: var(--mono); font-size: 11px; color: #aaa; min-width: 50px; padding-top: 2px; }
+  .ci-cmd  { font-family: var(--mono); font-size: 12.5px; color: var(--accent); }
+  .ci-note { font-size: 12.5px; color: var(--muted); flex: 1; }
+  .ci-badge { font-size: 10px; padding: 1px 6px; border-radius: 10px; font-weight: 700; white-space: nowrap; }
+  .cb-ok   { background: rgba(26,122,64,.15); color: var(--green); }
+  .cb-inv  { background: rgba(139,26,26,.15); color: var(--red); }
+  .cb-key  { background: rgba(26,82,118,.15); color: var(--accent); }
+
+  footer { margin-top: 64px; padding-top: 20px; border-top: 1px solid var(--border); color: var(--muted); font-size: 12px; font-family: sans-serif; }
+</style>
+</head>
+<body>
+<div class="layout">
+
+<!-- ── Sidebar ── -->
+<nav>
+  <div class="logo">
+    <h2>Session Summary</h2>
+    <p>June 10 2026 · Digital Twin + AP3000</p>
+  </div>
+  <span class="sec">Session</span>
+  <a href="#s1">Accomplished</a>
+  <a href="#s2">AP Identity &amp; State</a>
+  <span class="sec">Key Findings</span>
+  <a href="#s3">CRC + Interference</a>
+  <a href="#s4">802.11r/k/v Enablement</a>
+  <a href="#s5">80 MHz Fix — The Story</a>
+  <a href="#s6">pcap Architecture</a>
+  <span class="sec">Artifacts</span>
+  <a href="#s7">Files &amp; Links</a>
+  <a href="#s8">Console Session Index</a>
+  <span class="sec">Next</span>
+  <a href="#s9">Pending &amp; Sprint Map</a>
+</nav>
+
+<!-- ── Main ── -->
+<main>
+
+<h1>Digital Twin + AP3000 CLI</h1>
+<div class="meta">
+  June 10 2026 &nbsp;·&nbsp; AP: AH-556680 (AP3000-WW, IQ Engine 10.8r6) &nbsp;·&nbsp; Location: WC Seattle Lab &nbsp;·&nbsp;
+  Project: <code>5320-onboarding-agent/live_monitor</code>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════════════ -->
+<h2 id="s1">Accomplished</h2>
+
+<table>
+<thead><tr><th>Item</th><th>Outcome</th></tr></thead>
+<tbody>
+<tr><td><strong>AP3000 CLI Reference v1</strong> — 13-section dark-theme HTML</td><td class="g">✓ Created &amp; updated</td></tr>
+<tr><td><strong>CLAUDE.md</strong> — 5 structural changes applied globally</td><td class="g">✓ Applied</td></tr>
+<tr><td><strong>Live AP console session</strong> — serial + SSH, 3,874 lines captured</td><td class="g">✓ Archived</td></tr>
+<tr><td><strong>Retry Rate % tag</strong> — corrected POLLED → COMPUTED in HTML reference</td><td class="g">✓ Fixed</td></tr>
+<tr><td><strong>802.11r/k/v enabled</strong> — via XIQ Additional Settings → FTPSK confirmed</td><td class="g">✓ Live</td></tr>
+<tr><td><strong>wifi1 channel width → 80 MHz</strong> — via radio profile binding</td><td class="g">✓ Verified</td></tr>
+<tr><td><strong>CRC root cause identified</strong> — QFiberKK at −24 dBm, channel 11</td><td class="g">✓ Diagnosed</td></tr>
+<tr><td><strong>show 11k/v/r firmware gap</strong> — documented in reference with alternatives</td><td class="g">✓ Documented</td></tr>
+<tr><td><strong>EP1 radio profile deploy failure</strong> — root cause: profile exists but bind failed</td><td class="y">⚠ Pending EP1 fix</td></tr>
+<tr><td><strong>pcap remote sniffer architecture</strong> — confirmed correct path, SFTP dead</td><td class="g">✓ Confirmed</td></tr>
+</tbody>
+</table>
+
+<!-- ══════════════════════════════════════════════════════════════════════════ -->
+<h2 id="s2">AP Identity &amp; State</h2>
+
+<table>
+<thead><tr><th>Parameter</th><th>Value</th></tr></thead>
+<tbody>
+<tr><td>Hostname</td><td><code>AH-556680</code></td></tr>
+<tr><td>Platform</td><td>AP3000-WW</td></tr>
+<tr><td>Firmware</td><td>IQ Engine 10.8r6 build-2687fe7 (Feb 04 2026)</td></tr>
+<tr><td>Management IP</td><td>192.168.0.12</td></tr>
+<tr><td>CAPWAP Server</td><td>oh-cws-3.extremecloudiq.com · 3.145.235.84</td></tr>
+<tr><td>CAPWAP State</td><td>Connected securely · DTLS active · 1 keepalive lost / 4592 sent</td></tr>
+<tr><td>VHM</td><td>VHM-UOZZMDJP</td></tr>
+<tr><td>wifi0 (2.4 GHz)</td><td>Channel 11 · 20 MHz · Noise −93 dBm · Profile radio_ng_11ax-2g</td></tr>
+<tr><td>wifi1 (5 GHz)</td><td>Channel 149→157 · 20→80 MHz (fixed today) · Noise −90/−94 dBm · Profile 5G_Khursheed_80MHz</td></tr>
+<tr><td>eth0</td><td>Backhaul / uplink · VLAN tagged</td></tr>
+<tr><td>Active SSIDs</td><td>WC_Seattle-PPSK (VLAN 30) · WC_Seattle_Guest (VLAN 30)</td></tr>
+<tr><td>Active Clients</td><td>2 · 74a6:cd8b:1960 (10.30.0.101) · 867d:3eb3:90ec (10.30.0.103)</td></tr>
+</tbody>
+</table>
+
+<!-- ══════════════════════════════════════════════════════════════════════════ -->
+<h2 id="s3">CRC + Interference Analysis</h2>
+
+<h3>wifi0 — 47% CRC peak, root cause confirmed</h3>
+<p>ACSP neighbor scan showed <strong>QFiberKK at −24 dBm on channel 11</strong> — same channel as our AP, 1 foot away. This is inbound CoPer-channel interference. The CRC manifests as:</p>
+<ul style="margin-left:20px; line-height:2; font-family:sans-serif; font-size:14px;">
+  <li>Frames arriving at the AP with bit errors — CRC counter increments</li>
+  <li>AP's own TX power is <strong>irrelevant</strong> — interference is inbound, not outbound</li>
+  <li>Reducing TX power was confirmed ineffective (tried 1 dBm → no change to CRC)</li>
+  <li>Only real fix: channel change (1 or 6 are cleaner; channel 9 is NOT non-overlapping)</li>
+</ul>
+
+<div class="warn"><strong>Channel 9 is wrong.</strong> 2.4 GHz non-overlapping channels are <strong>1, 6, 11 only</strong>. Channel 9 overlaps both 6 and 11 — using it creates interference on two channels simultaneously.</div>
+
+<h3>ACSP scan — channel distribution (measured today)</h3>
+<table>
+<thead><tr><th>Channel</th><th>Count</th><th>Strongest RSSI</th><th>Verdict</th></tr></thead>
+<tbody>
+<tr><td>11 (our channel)</td><td>5+</td><td>−24 dBm (QFiberKK)</td><td class="r">Very dirty — CRC 47%</td></tr>
+<tr><td>1</td><td>9</td><td>−71 dBm</td><td class="y">Many APs, but weaker</td></tr>
+<tr><td>6</td><td>Multiple</td><td>varies</td><td class="y">Moderate</td></tr>
+<tr><td>149 (5 GHz)</td><td>2</td><td>−81 / −84 dBm</td><td class="g">Cleanest — recommended</td></tr>
+</tbody>
+</table>
+
+<h3>Channel width ↔ Noise floor (measured)</h3>
+<table>
+<thead><tr><th>Radio</th><th>Width</th><th>Noise Floor</th><th>Note</th></tr></thead>
+<tbody>
+<tr><td>wifi0</td><td>20 MHz</td><td>−93 dBm</td><td>Baseline 2.4 GHz</td></tr>
+<tr><td>wifi1</td><td>80 MHz → 20 MHz</td><td>−90 → −94 dBm</td><td>4 dB measured (theory = 6 dB; fixed noise component)</td></tr>
+<tr><td>wifi1</td><td>80 MHz (restored)</td><td>−90 dBm</td><td>Final state — every 2× bandwidth = +3 dB noise</td></tr>
+</tbody>
+</table>
+
+<!-- ══════════════════════════════════════════════════════════════════════════ -->
+<h2 id="s4">802.11r / k / v Enablement</h2>
+
+<p>All three protocols were disabled on SSID <code>WC_Seattle-PPSK</code> at session start. Confirmed via <code>show ssid WC_Seattle-PPSK</code>:</p>
+<pre><code>RRM state:    Disabled    ← 802.11k (neighbor reports)
+WNM state:    Disabled    ← 802.11v (BSS Transition)
+# 802.11r (FT) also disabled
+</code></pre>
+
+<p>Fix: XIQ → SSID → Additional Settings → enable Fast BSS Transition, RRM, WNM. After policy push:</p>
+<pre><code>RRM state:    Enabled
+WNM state:    Enabled
+</code></pre>
+
+<h3>Roaming cache — before &amp; after</h3>
+<table>
+<thead><tr><th>Time</th><th>Client</th><th>FT column</th><th>Meaning</th></tr></thead>
+<tbody>
+<tr><td>Before 802.11r push</td><td>74a6:cd8b:1960</td><td class="r">N</td><td>Standard re-auth required on roam</td></tr>
+<tr><td>Before 802.11r push</td><td>867d:3eb3:90ec</td><td class="r">N</td><td>Standard re-auth required on roam</td></tr>
+<tr><td>After 802.11r push</td><td>74a6:cd8b:1960</td><td class="g">FTPSK</td><td>802.11r active — Fast Transition with PSK key holder. Roam without full re-auth.</td></tr>
+<tr><td>After 802.11r push</td><td>867d:3eb3:90ec</td><td class="r">N</td><td>Client rejoined before FT capability was re-advertised — next reassoc will pick it up</td></tr>
+</tbody>
+</table>
+
+<div class="note"><strong>Firmware limitation confirmed:</strong> <code>show 11k</code>, <code>show 11v</code>, <code>show 11r</code> — all return <em>"unknown keyword or invalid input"</em> on IQ Engine 10.8r6. Use <code>_debug rm packet</code> and <code>_debug scd basic</code> instead. Updated in CLI Reference Section 6 + Section 9.</div>
+
+<!-- ══════════════════════════════════════════════════════════════════════════ -->
+<h2 id="s5">The 80 MHz Fix — Full Story</h2>
+
+<p>This is a case study in the EP1 ↔ AP config hierarchy.</p>
+
+<h3>Timeline</h3>
+<table>
+<thead><tr><th>Step</th><th>Action</th><th>Result</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>CLI: <code>radio profile radio_ng_11ax-5g channel-width 20</code></td><td>wifi1 dropped to 20 MHz · Noise floor: −90→−94 dBm (4 dB improvement)</td></tr>
+<tr><td>2</td><td>EP1 policy pushed (unrelated change)</td><td>EP1 overwrote CLI change — wifi1 stayed at 20 MHz (policy was already 20 MHz)</td></tr>
+<tr><td>3</td><td>User created radio profile <code>5G_Khursheed_80MHz</code> in EP1 with 80 MHz</td><td>EP1 pushed profile definition to AP — profile appeared in <code>show radio profile</code></td></tr>
+<tr><td>4</td><td>EP1 policy deploy failed: "Device update failed"</td><td>Profile definition pushed but <code>Bind interfaces= None</code> — AP didn't bind it to wifi1</td></tr>
+<tr><td>5</td><td>CLI: <code>interface wifi1 radio profile 5G_Khursheed_80MHz</code></td><td>Profile bound to wifi1 · Radio re-initialized · Both clients reconnected at 80 MHz · Tx rate 907–1134 Mbps</td></tr>
+</tbody>
+</table>
+
+<div class="win"><strong>Key insight:</strong> EP1 is the authoritative config source — CLI changes are temporary and get overwritten on next policy push. The EP1 deploy failure was the root issue. Profile definition was pushed (step 3) but the full policy including the binding failed (step 4). CLI fixed the binding immediately (step 5). EP1 deploy failure still needs investigation (likely SDR/firmware profile conflict).</div>
+
+<h3>Final wifi1 state (confirmed)</h3>
+<pre><code>Channel width=80Mhz
+Bind interfaces=Wifi1
+Dynamic channel width=disabled      ← WLANPros: DISABLE — breaks roaming
+CRC error rate=4%
+Clients: 867d @ 907 Mbps · 74a6 @ 1134 Mbps · SNR 29/47
+</code></pre>
+
+<!-- ══════════════════════════════════════════════════════════════════════════ -->
+<h2 id="s6">pcap Transfer Architecture — Discovery</h2>
+
+<p>The existing <code>CaptureAgent</code> in <code>capture_agent.py</code> uses SFTP to pull pcap files from the AP. This is broken on IQ Engine — SFTP subsystem is disabled. Today's investigation confirmed the correct architecture:</p>
+
+<table>
+<thead><tr><th>Method</th><th>Result</th><th>Why</th></tr></thead>
+<tbody>
+<tr><td>SFTP pull</td><td class="r">Fails — subsystem request failed on channel 0</td><td>HiveOS SFTP subsystem disabled</td></tr>
+<tr><td>SCP transfer</td><td class="r">Fails silently — 0 bytes transferred</td><td>SCP not supported properly</td></tr>
+<tr><td><code>ssh admin@AP 'cat /tmp/file.pcap'</code></td><td class="r">Empty — file not in /tmp/</td><td>AP stores captures in private partition, path unknown</td></tr>
+<tr><td><strong>Remote sniffer (TCP stream)</strong></td><td class="g">Works — live pcap stream to Mac</td><td>AP streams raw pcap frames over TCP; no file transfer needed</td></tr>
+</tbody>
+</table>
+
+<h3>Remote sniffer command</h3>
+<pre><code># On AP — start streaming to Mac
+exec capture remote-sniffer interface wifi1 host-allowed 192.168.0.x local-port 2003 promiscuous
+
+# On Mac — receive stream
+nc 192.168.0.12 2003 > cap_wifi1.pcap
+
+# Or open directly in Wireshark (real-time)
+# Capture → Manage Interfaces → Remote → 192.168.0.12:2003
+</code></pre>
+
+<div class="note"><strong>CaptureAgent fix needed (Sprint 2f Gap G_E):</strong> Replace SFTP block at lines 206–212 of <code>capture_agent.py</code> with remote sniffer TCP connection for <code>duration_s</code> seconds, saving stream to <code>local_path</code>.</div>
+
+<!-- ══════════════════════════════════════════════════════════════════════════ -->
+<h2 id="s7">Artifacts &amp; Files</h2>
+
+<ul class="artifact-list">
+  <li>
+    <a href="ap_cli_reference_v1_june10.html">
+      <div><span class="af-tag tag-html">HTML REFERENCE</span> <span class="af-tag tag-live">UPDATED TODAY</span></div>
+      <div class="af-title">ap_cli_reference_v1_june10.html</div>
+      <div class="af-desc">13-section AP3000 CLI reference — IQ Engine OS. Covers RF parameters, WiFi 6 features, 15 calibration parameters, QoE indicators, L2/L3↔PHY correlation, kdebug, session recording. Updated with firmware limitations (show 11k/v/r invalid) and FTPSK roaming cache example.</div>
+      <div class="af-meta">3,200+ lines · sections 1–13 · dark theme</div>
+    </a>
+  </li>
+  <li>
+    <a href="AP_console_session_20260610T161522.txt">
+      <div><span class="af-tag tag-raw">RAW SESSION LOG</span> <span class="af-tag tag-live">ARCHIVED TODAY</span></div>
+      <div class="af-title">AP_console_session_20260610T161522.txt</div>
+      <div class="af-desc">Complete AP3000 serial console session captured via <code>script</code> + <code>screen /dev/tty.usbserial-BG01WC92 115200</code>. Contains: full show cmd output (IQ Engine 10.8r6 command reference), show running-config, all three radio interfaces, PPSK table, roaming cache (before/after 802.11r), station counters, and the 80 MHz fix sequence.</div>
+      <div class="af-meta">3,874 lines · 16:15–17:30 · AH-556680 · June 10 2026</div>
+    </a>
+  </li>
+  <li>
+    <a href="../live_monitor/agents/capture_agent.py">
+      <div><span class="af-tag tag-raw">PYTHON</span></div>
+      <div class="af-title">live_monitor/agents/capture_agent.py</div>
+      <div class="af-desc">CaptureAgent — 10-step flow. SFTP block at lines 206–212 is broken on IQ Engine (SFTP disabled). Fix: replace with remote sniffer TCP stream. Gaps G_A (Wireshark at start), G_B (256-byte guard), G_E (remote sniffer) all still pending.</div>
+      <div class="af-meta">~280 lines · Sprint 2e complete · Sprint 2f gaps pending</div>
+    </a>
+  </li>
+</ul>
+
+<!-- ══════════════════════════════════════════════════════════════════════════ -->
+<h2 id="s8">Console Session — Annotated Index</h2>
+
+<p>All commands run in <code>AP_console_session_20260610T161522.txt</code>, in order. Line numbers are exact. Use these to jump to specific outputs in the raw file.</p>
+
+<div class="ci">
+  <div class="ci-header">
+    <span>AP_console_session_20260610T161522.txt</span>
+    <em>3,874 lines · script started 16:15:22</em>
+  </div>
+
+  <div class="ci-row">
+    <div class="ci-line">16</div>
+    <div>
+      <div class="ci-cmd">show cmd</div>
+      <div class="ci-note">Complete command reference for IQ Engine 10.8r6 — 1,800+ lines. Single most valuable output in this session. Covers all subsystems: AAA, QoS, forwarding engine, capture, interface, CAPWAP, roaming.</div>
+    </div>
+    <span class="ci-badge cb-key">REFERENCE</span>
+  </div>
+
+  <div class="ci-row">
+    <div class="ci-line">1810</div>
+    <div>
+      <div class="ci-cmd">show version</div>
+      <div class="ci-note">IQ Engine 10.8r6 build-2687fe7 · AP3000-WW · built Feb 04 2026</div>
+    </div>
+    <span class="ci-badge cb-ok">OK</span>
+  </div>
+
+  <div class="ci-row">
+    <div class="ci-line">1821</div>
+    <div>
+      <div class="ci-cmd">show hostname</div>
+      <div class="ci-note">Not supported — "unknown keyword or invalid input"</div>
+    </div>
+    <span class="ci-badge cb-inv">INVALID</span>
+  </div>
+
+  <div class="ci-row">
+    <div class="ci-line">1828</div>
+    <div>
+      <div class="ci-cmd">show capwap client</div>
+      <div class="ci-note">CAPWAP connected securely · DTLS active · oh-cws-3.extremecloudiq.com · 192.168.0.12 → 3.145.235.84</div>
+    </div>
+    <span class="ci-badge cb-ok">OK</span>
+  </div>
+
+  <div class="ci-row">
+    <div class="ci-line">1941</div>
+    <div>
+      <div class="ci-cmd">show config running</div>
+      <div class="ci-note">Full AP running configuration — 160+ lines. SSIDs, user-profiles, radio profiles, interface config, PPSK bindings, CAPWAP settings.</div>
+    </div>
+    <span class="ci-badge cb-key">REFERENCE</span>
+  </div>
+
+  <div class="ci-row">
+    <div class="ci-line">2140</div>
+    <div>
+      <div class="ci-cmd">show auth private-psk</div>
+      <div class="ci-note">PPSK table — client MAC bindings, VLAN assignments, user-profile IDs. UPID 50 = VLAN 30.</div>
+    </div>
+    <span class="ci-badge cb-ok">OK</span>
+  </div>
+
+  <div class="ci-row">
+    <div class="ci-line">2147</div>
+    <div>
+      <div class="ci-cmd">show interface wifi0</div>
+      <div class="ci-note">2.4 GHz full state: chan 11, 20 MHz, NF −93 dBm, CRC 36%, OFDMA disabled, MU-MIMO disabled, TWT disabled, BSS Color=0. Tx CU=1%, Rx CU=5%, Interference CU=4%.</div>
+    </div>
+    <span class="ci-badge cb-key">REFERENCE</span>
+  </div>
+
+  <div class="ci-row">
+    <div class="ci-line">2212</div>
+    <div>
+      <div class="ci-cmd">show interface wifi1</div>
+      <div class="ci-note">5 GHz full state: chan 149, 80 MHz, NF −90 dBm, CRC 8%, OFDMA disabled, MU-MIMO disabled, Dynamic channel width=enabled (WLANPros: DISABLE). Tx CU=2%, Rx CU=6%, Interference CU=0%.</div>
+    </div>
+    <span class="ci-badge cb-key">REFERENCE</span>
+  </div>
+
+  <div class="ci-row">
+    <div class="ci-line">2274</div>
+    <div>
+      <div class="ci-cmd">show interface eth0</div>
+      <div class="ci-note">Backhaul / uplink port state.</div>
+    </div>
+    <span class="ci-badge cb-ok">OK</span>
+  </div>
+
+  <div class="ci-row">
+    <div class="ci-line">2418</div>
+    <div>
+      <div class="ci-cmd">show radio profile radio_axa0</div>
+      <div class="ci-note">Factory 5 GHz radio profile — channel-width=80MHz, Dynamic channel width=enabled. This is the profile EP1 was using before today's fix.</div>
+    </div>
+    <span class="ci-badge cb-ok">OK</span>
+  </div>
+
+  <div class="ci-row">
+    <div class="ci-line">3082</div>
+    <div>
+      <div class="ci-cmd">interface wifi0 mode disable / off</div>
+      <div class="ci-note">All variants attempted — all invalid. Cannot disable wifi0 via CLI on this firmware. Must use EP1 radio profile to control radio state.</div>
+    </div>
+    <span class="ci-badge cb-inv">INVALID</span>
+  </div>
+
+  <div class="ci-row">
+    <div class="ci-line">3114</div>
+    <div>
+      <div class="ci-cmd">interface wifi0 radio txpower 1</div>
+      <div class="ci-note">Set TX power to 1 dBm. Confirmed via _per-chain output. CRC rate unchanged — proves TX power reduction does not fix inbound CoPer-channel interference.</div>
+    </div>
+    <span class="ci-badge cb-ok">OK</span>
+  </div>
+
+  <div class="ci-row">
+    <div class="ci-line">3259</div>
+    <div>
+      <div class="ci-cmd">show station</div>
+      <div class="ci-note">Full client table — both clients on wifi1 at 20 MHz (before fix). SNR 48/52. Chan-width=20MHz.</div>
+    </div>
+    <span class="ci-badge cb-ok">OK</span>
+  </div>
+
+  <div class="ci-row">
+    <div class="ci-line">3314</div>
+    <div>
+      <div class="ci-cmd">show station 74a6:cd8b:1960 counter</div>
+      <div class="ci-note">Per-client TX/RX frame counters — data frames, management frames, retry counts per client MAC.</div>
+    </div>
+    <span class="ci-badge cb-ok">OK</span>
+  </div>
+
+  <div class="ci-row">
+    <div class="ci-line">3465</div>
+    <div>
+      <div class="ci-cmd">show station ipv6</div>
+      <div class="ci-note">Clients with IPv6 addresses — both clients showing link-local + ULA addresses.</div>
+    </div>
+    <span class="ci-badge cb-ok">OK</span>
+  </div>
+
+  <div class="ci-row">
+    <div class="ci-line">3486</div>
+    <div>
+      <div class="ci-cmd">show client-info-collection ip 10.30.0.101</div>
+      <div class="ci-note">Returns no output — command exists in show cmd list but not functional on this build/config (web-security-proxy client-info-collection not enabled).</div>
+    </div>
+    <span class="ci-badge cb-inv">NO OUTPUT</span>
+  </div>
+
+  <div class="ci-row">
+    <div class="ci-line">3497</div>
+    <div>
+      <div class="ci-cmd">show roaming cache</div>
+      <div class="ci-note">First run — both clients: FT=N (802.11r not yet active). Shows PMK cache, PMKID, life=2592000s (30 days), authenticator MAC 00e6:0e55:66a4.</div>
+    </div>
+    <span class="ci-badge cb-ok">OK</span>
+  </div>
+
+  <div class="ci-row">
+    <div class="ci-line">3514</div>
+    <div>
+      <div class="ci-cmd">show roaming cache 74a6:cd8b:1960</div>
+      <div class="ci-note">Per-MAC syntax — NOT supported. Use <code>show roaming cache mac &lt;MAC&gt;</code> syntax instead (tested later, also invalid on this build).</div>
+    </div>
+    <span class="ci-badge cb-inv">INVALID</span>
+  </div>
+
+  <div class="ci-row">
+    <div class="ci-line">3516</div>
+    <div>
+      <div class="ci-cmd">show 11k · show 11v · show 11r</div>
+      <div class="ci-note">All three — "unknown keyword or invalid input". IQ Engine 10.8r6 does not expose these sub-commands in the restricted CLI shell. Documented in CLI reference Section 6 + 9.</div>
+    </div>
+    <span class="ci-badge cb-inv">INVALID</span>
+  </div>
+
+  <div class="ci-row">
+    <div class="ci-line">3522</div>
+    <div>
+      <div class="ci-cmd">show ssid WC_Seattle-PPSK</div>
+      <div class="ci-note">Full SSID profile — RRM=Disabled, WNM=Disabled (802.11k/v off). Rate sets include 11ax MCS 0–11 for 1SS and 2SS. MAC filter active. Bind interfaces=Wifi0.1 Wifi1.1.</div>
+    </div>
+    <span class="ci-badge cb-ok">OK</span>
+  </div>
+
+  <div class="ci-row">
+    <div class="ci-line">3576</div>
+    <div>
+      <div class="ci-cmd">show roaming cache (after 802.11r push)</div>
+      <div class="ci-note">Client 74a6 now shows FT=FTPSK — 802.11r Fast Transition with PSK active. Client 867d still FT=N (hasn't re-associated since 802.11r was enabled). PMK for 74a6 changed (n/a = fresh FT derivation).</div>
+    </div>
+    <span class="ci-badge cb-key">KEY FINDING</span>
+  </div>
+
+  <div class="ci-row">
+    <div class="ci-line">3735</div>
+    <div>
+      <div class="ci-cmd">show radio profile 5G_Khursheed_80MHz</div>
+      <div class="ci-note">Profile exists on AP (pushed by EP1 definition). Channel-width=80MHz confirmed. But: Bind interfaces=None — EP1 deploy failure left the profile unbound. This is why channel-width wasn't taking effect.</div>
+    </div>
+    <span class="ci-badge cb-key">ROOT CAUSE</span>
+  </div>
+
+  <div class="ci-row">
+    <div class="ci-line">3815</div>
+    <div>
+      <div class="ci-cmd">interface wifi1 radio profile 5G_Khursheed_80MHz</div>
+      <div class="ci-note">THE FIX. Binds the 80 MHz profile to wifi1. Radio re-initializes. Both clients drop and reconnect at 80 MHz within seconds. Tx rates: 907 Mbps and 1134 Mbps (11ax-5g, 2SS, MCS 9–11).</div>
+    </div>
+    <span class="ci-badge cb-key">THE FIX</span>
+  </div>
+
+  <div class="ci-row">
+    <div class="ci-line">3823</div>
+    <div>
+      <div class="ci-cmd">show radio profile 5G_Khursheed_80MHz | include Bind</div>
+      <div class="ci-note">Confirms: Bind interfaces=Wifi1. Profile successfully bound.</div>
+    </div>
+    <span class="ci-badge cb-ok">VERIFIED</span>
+  </div>
+
+  <div class="ci-row">
+    <div class="ci-line">3825</div>
+    <div>
+      <div class="ci-cmd">show station (post-fix)</div>
+      <div class="ci-note">Both clients back: 867d @ 907 Mbps / SNR 29 / 80 MHz. 74a6 @ 1134 Mbps / SNR 47 / 80 MHz. Channel 157. CRC wifi1 = 4%.</div>
+    </div>
+    <span class="ci-badge cb-ok">FINAL STATE</span>
+  </div>
+
+  <div class="ci-row">
+    <div class="ci-line">3856</div>
+    <div>
+      <div class="ci-cmd">exit</div>
+      <div class="ci-note">Session end.</div>
+    </div>
+    <span class="ci-badge cb-ok">END</span>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════════════ -->
+<h2 id="s9">Pending &amp; Sprint Map</h2>
+
+<h3>Immediate (next session)</h3>
+<ul style="margin-left:20px; line-height:2; font-family:sans-serif; font-size:14px;">
+  <li><strong>G_A</strong> — capture_agent.py: add <code>open -a Wireshark</code> at step 4 of _run()</li>
+  <li><strong>G_B</strong> — capture_agent.py: add 256-byte file size guard after capture pull</li>
+  <li><strong>G_C</strong> — main.py: session-end Wireshark loop for fault-tagged captures</li>
+  <li><strong>G_E</strong> — capture_agent.py: replace SFTP block with remote sniffer TCP stream</li>
+  <li><strong>EP1 deploy fix</strong> — investigate "Device update failed" for <code>5G_Khursheed_80MHz</code> binding. Check Monitor → Devices → AP3000 → Configuration audit log.</li>
+  <li><strong>Dynamic channel width</strong> — disable in EP1 radio profile (currently enabled on radio_axa0 — WLANPros recommendation)</li>
+</ul>
+
+<h3>Sprint Map</h3>
+<table>
+<thead><tr><th>Sprint</th><th>Deliverable</th><th>Status</th></tr></thead>
+<tbody>
+<tr><td>2a</td><td>storage.py + report.py + /health</td><td class="g">✓ Done</td></tr>
+<tr><td>2e</td><td>PacketCaptureAgent + Tab 2 dashboard</td><td class="g">✓ Done</td></tr>
+<tr><td>2b</td><td>knob_panel.py — dash-daq 4×3 optimizer gauge grid</td><td class="y">← NEXT</td></tr>
+<tr><td>2c</td><td>federated_debug.py + synthetic injection</td><td>Pending</td></tr>
+<tr><td>2f</td><td>pcap_library.db + rolling loop + remote sniffer architecture</td><td>Pending</td></tr>
+<tr><td>pre-3</td><td>docs/archetype_priors.md — calibration priors from Cisco/Mist</td><td>Pending</td></tr>
+<tr><td>3</td><td>SimulatorAgent + CalibrationAgent + CorrelationAgent</td><td>Pending</td></tr>
+<tr><td>ICD</td><td>icd_reference.html — all 8 ICDs + L2/L3↔PHY appendix</td><td>Pending</td></tr>
+<tr><td>4</td><td>Prius FederatedDashboard + /api/* endpoints</td><td>Pending</td></tr>
+</tbody>
+</table>
+
+<footer>
+  Session Summary · June 10 2026 · AH-556680 · AP3000-WW · IQ Engine 10.8r6<br>
+  Project: 5320-onboarding-agent / live_monitor · DigitalTwinEngine Sprint 2e complete<br>
+  © 2026 Khursheed Khan · Private — Not for distribution
+</footer>
+
+</main>
+</div>
+
+<script>
+const sections = document.querySelectorAll('h2[id]');
+const links    = document.querySelectorAll('nav a[href^="#"]');
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      links.forEach(l => l.classList.remove('active'));
+      const a = document.querySelector(`nav a[href="#${e.target.id}"]`);
+      if (a) a.classList.add('active');
+    }
+  });
+}, {rootMargin: '-10% 0px -80% 0px'});
+sections.forEach(s => obs.observe(s));
+</script>
+</body>
+</html>

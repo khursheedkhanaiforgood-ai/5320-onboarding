@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AP3000 CLI Reference — IQ Engine OS v1 · June 10 2026</title>
+<style>
+  :root {
+    --bg: #0d1117; --surface: #161b22; --surface2: #21262d;
+    --border: #30363d; --text: #c9d1d9; --muted: #8b949e;
+    --accent: #58a6ff; --green: #3fb950; --yellow: #d29922;
+    --orange: #f0883e; --red: #f85149; --purple: #bc8cff;
+    --cyan: #39d353;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; font-size: 14px; display: flex; }
+
+  /* Sidebar */
+  nav { width: 240px; min-width: 240px; background: var(--surface); border-right: 1px solid var(--border); height: 100vh; position: sticky; top: 0; overflow-y: auto; padding: 16px 0; }
+  nav h2 { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; padding: 0 16px 8px; }
+  nav a { display: block; padding: 5px 16px; color: var(--muted); text-decoration: none; font-size: 12.5px; line-height: 1.4; border-left: 2px solid transparent; transition: all .15s; }
+  nav a:hover, nav a.active { color: var(--accent); border-left-color: var(--accent); background: rgba(88,166,255,.06); }
+  nav .sec { padding: 12px 16px 4px; font-size: 10.5px; color: #444; text-transform: uppercase; letter-spacing: .1em; }
+
+  /* Main */
+  main { flex: 1; padding: 32px 40px; max-width: 960px; }
+  h1 { font-size: 22px; color: var(--accent); margin-bottom: 4px; }
+  .subtitle { color: var(--muted); font-size: 13px; margin-bottom: 32px; }
+  h2 { font-size: 16px; color: var(--text); margin: 40px 0 12px; padding-bottom: 8px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 8px; }
+  h2 .badge { font-size: 10px; background: var(--surface2); border: 1px solid var(--border); border-radius: 4px; padding: 2px 6px; color: var(--muted); font-weight: 400; }
+  h3 { font-size: 13.5px; color: var(--accent); margin: 20px 0 8px; }
+  p { line-height: 1.6; color: var(--text); margin-bottom: 8px; }
+
+  /* Code */
+  pre { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 14px 16px; overflow-x: auto; margin: 10px 0 16px; line-height: 1.55; }
+  code { font-family: 'JetBrains Mono', 'Cascadia Code', 'Fira Code', monospace; font-size: 12.5px; color: var(--green); }
+  pre code { color: var(--text); }
+  .cmd { color: var(--green); }
+  .cmt { color: #555; font-style: italic; }
+  .kw  { color: var(--accent); }
+  .val { color: var(--yellow); }
+  .hl  { color: var(--orange); }
+
+  /* Tables */
+  table { width: 100%; border-collapse: collapse; margin: 10px 0 20px; font-size: 12.5px; }
+  th { background: var(--surface2); color: var(--muted); text-align: left; padding: 7px 12px; font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: .05em; border-bottom: 1px solid var(--border); }
+  td { padding: 7px 12px; border-bottom: 1px solid var(--border); vertical-align: top; line-height: 1.5; }
+  tr:hover td { background: rgba(255,255,255,.02); }
+  td code { background: var(--surface2); padding: 1px 5px; border-radius: 3px; font-size: 11.5px; color: var(--cyan); }
+  td .g { color: var(--green); font-weight: 600; }
+  td .y { color: var(--yellow); font-weight: 600; }
+  td .r { color: var(--red); font-weight: 600; }
+
+  /* Callouts */
+  .note { background: rgba(88,166,255,.07); border-left: 3px solid var(--accent); padding: 10px 14px; margin: 10px 0; border-radius: 0 4px 4px 0; font-size: 13px; }
+  .warn { background: rgba(210,153,34,.07); border-left: 3px solid var(--yellow); padding: 10px 14px; margin: 10px 0; border-radius: 0 4px 4px 0; font-size: 13px; }
+  .danger { background: rgba(248,81,73,.07); border-left: 3px solid var(--red); padding: 10px 14px; margin: 10px 0; border-radius: 0 4px 4px 0; font-size: 13px; }
+
+  /* Badges inline */
+  .tag { font-size: 10px; padding: 1px 6px; border-radius: 10px; font-weight: 600; }
+  .tag-polled { background: rgba(63,185,80,.2); color: var(--green); }
+  .tag-computed { background: rgba(88,166,255,.2); color: var(--accent); }
+  .tag-config { background: rgba(210,153,34,.2); color: var(--yellow); }
+  .tag-flag { background: rgba(188,140,255,.2); color: var(--purple); }
+
+  footer { margin-top: 60px; padding-top: 20px; border-top: 1px solid var(--border); color: var(--muted); font-size: 11px; }
+</style>
+</head>
+<body>
+
+<!-- ── Sidebar ─────────────────────────────────────────────────────────────── -->
+<nav>
+  <h2>AP3000 CLI Reference</h2>
+  <span class="sec">Navigation</span>
+  <a href="#s1">1 · Session Setup</a>
+  <a href="#s2">2 · System Housekeeping</a>
+  <span class="sec">Radio Layer</span>
+  <a href="#s3">3 · Radio Config (wifi0/1/eth0)</a>
+  <a href="#s4">4 · RF Parameters</a>
+  <a href="#s5">5 · WiFi 6 Features</a>
+  <span class="sec">Client Layer</span>
+  <a href="#s6">6 · Client Commands</a>
+  <span class="sec">Calibration</span>
+  <a href="#s7">7 · 15 Calibration Parameters</a>
+  <a href="#s8">8 · QoE Indicators</a>
+  <span class="sec">L2/L3 ↔ PHY</span>
+  <a href="#s9">9 · Handoff Failure Signatures</a>
+  <a href="#s10">10 · 4-Way Handshake in pcap</a>
+  <a href="#s11">11 · PPSK pcap vs PHY</a>
+  <span class="sec">Advanced</span>
+  <a href="#s12">12 · kdebug Quick Reference</a>
+  <a href="#s13">13 · Session Recording</a>
+</nav>
+
+<!-- ── Main ───────────────────────────────────────────────────────────────── -->
+<main>
+
+<h1>AP3000 CLI Reference</h1>
+<p class="subtitle">IQ Engine OS (HiveOS) · AH-556680 · June 10 2026 &nbsp;|&nbsp; Pair with: reference_ap3000_command_themes.md · reference_dhcp_wifi_triage_runbook.md</p>
+
+<!-- ══════════════════════════════════════════════════════════════════════════ -->
+<h2 id="s1">1 · Session Setup <span class="badge">Always-first</span></h2>
+
+<pre><code><span class="cmt"># SSH into the AP</span>
+<span class="cmd">ssh admin@&lt;AP_IP&gt;</span>
+
+<span class="cmt"># MANDATORY: disable pagination — without this every command truncates after 24 lines</span>
+<span class="cmd">console page 0</span>
+
+<span class="cmt"># Verify you are on the right device</span>
+<span class="cmd">show version</span>       <span class="cmt"># → HiveOS 10.x, Platform=AP3000, Serial, Uptime</span>
+<span class="cmd">show hostname</span>      <span class="cmt"># → AH-556680 (or configured name)</span>
+</code></pre>
+
+<div class="note">The prompt <code>AH-556680#</code> means you are in privileged exec mode. No <code>enable</code> needed on HiveOS — SSH login lands directly in privileged mode.</div>
+
+<!-- ══════════════════════════════════════════════════════════════════════════ -->
+<h2 id="s2">2 · System Housekeeping</h2>
+
+<h3>Reboot</h3>
+<pre><code><span class="cmd">reboot</span>               <span class="cmt"># graceful reboot (waits for clients to deassociate)</span>
+<span class="cmd">reboot in 0</span>          <span class="cmt"># immediate reboot — cleanest syntax to avoid delay confusion</span>
+<span class="cmd">reboot cancel</span>        <span class="cmt"># cancel a scheduled reboot</span>
+</code></pre>
+<div class="warn">After reboot: run <code>ssh-keygen -R &lt;ip&gt;</code> on your laptop if host key error appears.</div>
+
+<h3>Watch CAPWAP (Cloud Backhaul)</h3>
+<pre><code><span class="cmd">show capwap</span>              <span class="cmt"># overall CAPWAP state — connected/disconnected + server</span>
+<span class="cmd">show capwap client</span>       <span class="cmt"># client-side connection state + DTLS session</span>
+<span class="cmd">show capwap timer</span>        <span class="cmt"># keepalive timers — if echo interval fires without response: reconnect</span>
+<span class="cmd">show capwap event-log</span>    <span class="cmt"># recent CAPWAP events (disconnects, reconnects, config pushes)</span>
+<span class="cmd">show capwap statistics</span>   <span class="cmt"># packet counters — good for proving latency/loss in backhaul</span>
+<span class="cmd">_debug capwap {error|basic|info|verbose|timer|dtls|all}</span>   <span class="cmt"># live debug stream</span>
+</code></pre>
+
+<h3>Configuration</h3>
+<pre><code><span class="cmd">show config running</span>              <span class="cmt"># full running config (SSID profiles, radio params, VLANs)</span>
+<span class="cmd">show config version</span>              <span class="cmt"># config revision number — note BEFORE changes</span>
+<span class="cmd">show running-config password</span>     <span class="cmt"># cleartext PSK / credential view (privileged)</span>
+<span class="cmd">show auth private-psk</span>            <span class="cmt"># PPSK key-to-MAC bindings — all registered PPSK entries</span>
+</code></pre>
+
+<!-- ══════════════════════════════════════════════════════════════════════════ -->
+<h2 id="s3">3 · Radio Configuration (wifi0 / wifi1 / eth0)</h2>
+
+<pre><code><span class="cmt"># Full radio state — this is your primary telemetry command</span>
+<span class="cmd">show interface wifi0</span>             <span class="cmt"># 2.4 GHz radio (AP3000)</span>
+<span class="cmd">show interface wifi1</span>             <span class="cmt"># 5 GHz radio (AP3000)</span>
+<span class="cmd">show interface eth0</span>              <span class="cmt"># wired uplink — link state, duplex, speed, VLAN tagging</span>
+
+<span class="cmt"># Radio profile (static config parameters: EDCA, thresholds)</span>
+<span class="cmd">show radio profile</span>               <span class="cmt"># list all profiles</span>
+<span class="cmd">show radio profile &lt;name&gt;</span>        <span class="cmt"># EDCA per-AC, safety-net SNR, ACSP thresholds, mode flags</span>
+
+<span class="cmt"># Channel planning</span>
+<span class="cmd">show interface wifi0 channel</span>     <span class="cmt"># current channel + width</span>
+<span class="cmd">show acsp</span>                         <span class="cmt"># ACSP state + current best channel selection</span>
+<span class="cmd">show acsp channel-info</span>           <span class="cmt"># per-channel cost + neighbor count (what ACSP sees)</span>
+<span class="cmd">show acsp _detail</span>                <span class="cmt"># full ACSP algorithm state</span>
+<span class="cmd">show ai-rrm</span>                      <span class="cmt"># AI Radio Resource Mgmt (cloud-driven override)</span>
+
+<span class="cmt"># Per-chain RSSI (MIMO diagnostic)</span>
+<span class="cmd">show interface wifi0 _per-chain</span>  <span class="cmt"># RSSI per spatial stream — unbalanced = antenna issue</span>
+
+<span class="cmt"># DFS (5 GHz — radar-eligible channels)</span>
+<span class="cmd">show interface wifi1 dfs</span>         <span class="cmt"># DFS state: passive scan / active / channel availability check</span>
+<span class="cmd">show interface wifi1 dfs _detail</span> <span class="cmt"># radar event history</span>
+
+<span class="cmt"># Spectral (RF environment snapshot)</span>
+<span class="cmd">show interface wifi0 _spectral</span>   <span class="cmt"># spectral scan — requires brief radio pause on some builds</span>
+</code></pre>
+
+<h3>eth0 Configuration</h3>
+<pre><code><span class="cmd">show interface eth0</span>              <span class="cmt"># → Link=up, Speed=1000Mb/s, Duplex=full, Native VLAN, tagged VLANs</span>
+<span class="cmd">show lldp</span>                        <span class="cmt"># what upstream switch port the AP sees (model, port ID, VLAN)</span>
+<span class="cmd">show cdp</span>                         <span class="cmt"># Cisco CDP neighbor (if enabled on switch)</span>
+</code></pre>
+
+<!-- ══════════════════════════════════════════════════════════════════════════ -->
+<h2 id="s4">4 · RF Parameters — Definitions, Ranges, Units, Commands</h2>
+
+<table>
+<thead>
+<tr>
+  <th>Parameter</th><th>Definition</th><th>Units</th><th>Range / Thresholds</th><th>CLI Command</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><strong>Noise Floor (NF)</strong> <span class="tag tag-polled">POLLED</span></td>
+  <td>Ambient RF energy in the channel when no 802.11 signal is being received. Sum of thermal noise (−174 dBm/Hz × bandwidth) + receiver noise figure + real-world interference. This is the denominator of SNR.</td>
+  <td>dBm</td>
+  <td>
+    <span class="g">−100 to −90</span> Excellent<br>
+    <span class="y">−89 to −80</span> Elevated — monitor<br>
+    <span class="r">&gt; −80</span> Severe — investigate interferer<br>
+    AP3000 clean lab: typically −95 to −92 dBm
+  </td>
+  <td><code>show interface wifi0</code><br><small>→ <em>Noise floor=−95dBm</em></small><br><small>Running avg + snapshot avg also shown</small></td>
+</tr>
+<tr>
+  <td><strong>TX Power (Pwr)</strong> <span class="tag tag-polled">POLLED</span></td>
+  <td>Transmit power per antenna chain (dBm) and total EIRP (Effective Isotropic Radiated Power = per-chain dBm + antenna gain dBi). WLANPros target: 7/13/16 dBm for 2.4/5/6 GHz to avoid CCI in dense deployments.</td>
+  <td>dBm</td>
+  <td>
+    Per-chain: 0–23 dBm (regulatory max varies by band/country)<br>
+    EIRP includes antenna gain: AP3000 = 4 dBi → EIRP ≈ chain + 4<br>
+    <span class="g">WLANPros target:</span> 7 / 13 / 16 dBm
+  </td>
+  <td><code>show interface wifi0</code><br><small>→ <em>One Chain EIRP power=22.00dBm(18dBm + 4.00dBi)</em></small></td>
+</tr>
+<tr>
+  <td><strong>Spatial Streams (Chains)</strong> <span class="tag tag-polled">POLLED</span></td>
+  <td>Number of independent MIMO data streams transmitted simultaneously. Each stream uses a separate antenna chain. AP3000 = 2×2 (2 TX, 2 RX chains). More streams = higher peak throughput but requires client support. Analogous to carrier aggregation in 5G.</td>
+  <td>count</td>
+  <td>
+    1 = SISO (legacy)<br>
+    2 = 2×2 MIMO (AP3000, most mid-range APs)<br>
+    4 = 4×4 MIMO (AP5020, AP5060 stadium)<br>
+    8 = 8×8 (enterprise high-density)
+  </td>
+  <td><code>show interface wifi0</code><br><small>→ <em>Tx Chain=static 2</em></small><br><code>show interface wifi0 _per-chain</code><br><small>→ per-stream RSSI</small></td>
+</tr>
+<tr>
+  <td><strong>CRC Error Rate</strong> <span class="tag tag-polled">POLLED</span></td>
+  <td>Percentage of received frames with Cyclic Redundancy Check failures. Frame was received but bit errors make it undecodable. Causes: low SNR, RF interference, multipath, hidden node. The AP discards the frame — client must retransmit → latency spike. Key calibration trigger for CorrelationAgent.</td>
+  <td>%</td>
+  <td>
+    <span class="g">&lt; 5%</span> Excellent<br>
+    <span class="y">5–15%</span> Fair — investigate<br>
+    <span class="r">&gt; 15%</span> Critical — CorrelationAgent triggers pcap<br>
+    AP3000 ACSP default CRC switch trigger: configurable in radio profile
+  </td>
+  <td><code>show interface wifi0</code><br><small>→ <em>CRC error rate=2.3%</em></small><br><small>→ <em>CRC error airtime percent=0.08%</em></small></td>
+</tr>
+<tr>
+  <td><strong>Channel Utilization — TX CU</strong> <span class="tag tag-polled">POLLED</span></td>
+  <td>Percentage of time the radio is transmitting (AP → clients). Includes data frames, ACKs, beacons, management frames. High TX CU = AP is the bottleneck (downlink-heavy load or too many clients).</td>
+  <td>%</td>
+  <td>
+    <span class="g">&lt; 40%</span> Healthy<br>
+    <span class="y">40–70%</span> Moderate load<br>
+    <span class="r">&gt; 70%</span> Saturated — consider client offload
+  </td>
+  <td><code>show interface wifi0</code><br><small>→ <em>Tx utilization=12%</em></small><br><small>Short-term + snapshot + running avg all available</small></td>
+</tr>
+<tr>
+  <td><strong>Channel Utilization — RX CU</strong> <span class="tag tag-polled">POLLED</span></td>
+  <td>Percentage of time the radio is receiving (clients → AP). High RX CU = uplink-heavy load. In OFDMA, multiple clients share the uplink simultaneously in Resource Units — RX CU improves per client vs non-OFDMA.</td>
+  <td>%</td>
+  <td>Same thresholds as TX CU. In balanced load: TX CU ≈ RX CU.</td>
+  <td><code>show interface wifi0</code><br><small>→ <em>Rx utilization=8%</em></small></td>
+</tr>
+<tr>
+  <td><strong>Interference CU</strong> <span class="tag tag-polled">POLLED</span></td>
+  <td>Percentage of time the channel is busy but no valid 802.11 frame is received. Sources: neighboring APs on same channel, microwave, Bluetooth, non-WiFi devices. Pure interference — no data moved. ACSP uses this to trigger channel changes.</td>
+  <td>%</td>
+  <td>
+    <span class="g">&lt; 5%</span> Clean<br>
+    <span class="y">5–20%</span> Elevated — identify source<br>
+    <span class="r">&gt; 20%</span> Severe interference — force channel change
+  </td>
+  <td><code>show interface wifi0</code><br><small>→ <em>Interference utilization=3%</em></small></td>
+</tr>
+<tr>
+  <td><strong>Total CU %</strong> <span class="tag tag-polled">POLLED</span></td>
+  <td>Sum: TX CU + RX CU + Interference CU. The single metric that best represents "how busy is this channel." ACSP DCS trigger default = 70% (WLANPros). &gt;70% = channel change likely. In 5G terms: PRB utilization.</td>
+  <td>%</td>
+  <td>
+    <span class="g">&lt; 50%</span> Healthy<br>
+    <span class="y">50–70%</span> Monitor — AutoRF may trigger<br>
+    <span class="r">&gt; 70%</span> DCS trigger zone<br>
+    Design SLA: &lt;50% per WLANPros
+  </td>
+  <td><code>show interface wifi0</code><br><small>→ <em>Total utilization=23%</em></small></td>
+</tr>
+<tr>
+  <td><strong>Retry Rate %</strong> <span class="tag tag-computed">COMPUTED</span></td>
+  <td>Percentage of frames that failed after all retries exhausted. AP3000 does NOT expose a direct retry rate field — it exposes raw counters (<em>Tx packets</em> + <em>errors</em>). The rate must be computed: <code>errors / Tx_packets × 100</code>. "Errors" = frames that were retried up to the retry limit and still failed. Intermediate retry attempts are not separately counted on this build.</td>
+  <td>%</td>
+  <td>
+    <span class="g">&lt; 5%</span> Good<br>
+    <span class="y">5–20%</span> Moderate — check client SNR<br>
+    <span class="r">&gt; 20%</span> ACSP retry trigger zone<br>
+    <em>Raw counters are polled; rate is derived — tag is COMPUTED not POLLED</em>
+  </td>
+  <td><code>show interface wifi0 | i "Tx packets"</code><br><small>→ <em>Tx packets=N; errors=N; dropped=N</em></small><br><small>Compute: errors/packets × 100</small></td>
+</tr>
+<tr>
+  <td><strong>RRM — ACSP</strong> <span class="tag tag-polled">POLLED</span></td>
+  <td>Advanced Channel Selection Protocol. Per-AP algorithm that monitors CRC%, CU%, retry rate, and neighbor RSSI to select the lowest-cost channel. Runs as background scan (BGSCAN). Not the same as cloud AI-RRM — ACSP is local fallback.</td>
+  <td>—</td>
+  <td>Channel cost: lower is better. Triggers: CRC threshold / CU threshold / interference threshold (all configurable in radio profile).</td>
+  <td><code>show acsp</code><br><code>show acsp channel-info</code><br><code>show acsp _detail</code><br><code>show ai-rrm</code></td>
+</tr>
+<tr>
+  <td><strong>BGSCAN</strong> <span class="tag tag-polled">POLLED</span></td>
+  <td>Background channel scanning. AP briefly (milliseconds) scans off-channel to measure neighbor RSSI and interference. Feeds ACSP + 802.11k neighbor reports. BGSCAN missed = AP was too busy to scan (high load). High missed% = RRM data quality degrades.</td>
+  <td>count</td>
+  <td>bgscan_missed / bgscan_requested × 100 = miss rate. &gt;20% miss rate → RRM data unreliable.</td>
+  <td><code>show interface wifi0</code><br><small>→ <em>Number of BGSCAN=6466; requested=7239; missed=773</em></small></td>
+</tr>
+</tbody>
+</table>
+
+<!-- ══════════════════════════════════════════════════════════════════════════ -->
+<h2 id="s5">5 · WiFi 6 (802.11ax) Feature Parameters</h2>
+
+<p>All of these are read from <code>show interface wifi0</code> output. The AP3000 supports 802.11ax on both radios. Each feature can be enabled/disabled via XIQ Radio Profile — the AP exposes current state via SSH.</p>
+
+<table>
+<thead>
+<tr><th>WiFi 6 Feature</th><th>Definition</th><th>State / Range</th><th>Impact on performance</th></tr>
+</thead>
+<tbody>
+<tr>
+  <td><strong>HE OFDMA DL</strong> <span class="tag tag-flag">FLAG</span></td>
+  <td>Orthogonal Frequency Division Multiple Access — Downlink. AP splits channel into Resource Units (RUs) and simultaneously transmits to multiple clients in a single PPDU. Analogous to 5G downlink scheduling.</td>
+  <td>enabled / disabled</td>
+  <td>+30–40% throughput in dense deployments. Requires clients that support HE OFDMA. capMult_ofdmaDL ×1.35 in simulator.</td>
+</tr>
+<tr>
+  <td><strong>HE OFDMA UL</strong> <span class="tag tag-flag">FLAG</span></td>
+  <td>OFDMA — Uplink. AP schedules multiple clients to transmit simultaneously in different RUs. More complex than DL — requires AP to send Trigger Frame first.</td>
+  <td>enabled / disabled</td>
+  <td>Reduces uplink airtime congestion. Less common than DL OFDMA in practice.</td>
+</tr>
+<tr>
+  <td><strong>MU-MIMO</strong> <span class="tag tag-flag">FLAG</span></td>
+  <td>Multi-User MIMO. AP uses spatial steering (beamforming) to transmit to multiple clients simultaneously on separate spatial streams. WiFi 6 supports 8-stream MU-MIMO (vs 4-stream in WiFi 5).</td>
+  <td>enabled / disabled</td>
+  <td>AP3000 = 2×2 so limited MU-MIMO benefit. Real gains on 4×4+ APs. Requires MU-MIMO capable clients.</td>
+</tr>
+<tr>
+  <td><strong>BSS Color</strong> <span class="tag tag-polled">POLLED</span></td>
+  <td>1-bit color tag in every 802.11ax frame header. Allows receivers to distinguish between frames from overlapping BSSs. Client that hears a frame with different BSS color → may not defer (spatial reuse). Reduces unnecessary deferrals. Analogous to 5G ICIC.</td>
+  <td>0 (disabled) or 1–63</td>
+  <td>Reduces collisions in high-density environments with many APs. Automatically managed by AP.</td>
+</tr>
+<tr>
+  <td><strong>TWT (Target Wake Time)</strong> <span class="tag tag-flag">FLAG</span></td>
+  <td>AP negotiates a specific wake schedule with each client. Client radios sleep between TWT windows — extends battery life. IoT and mobile devices benefit most. Analogous to 5G eDRX.</td>
+  <td>enabled / disabled</td>
+  <td>Battery life improvement for IoT/mobile. Slight overhead in negotiation. Not useful for latency-sensitive apps.</td>
+</tr>
+<tr>
+  <td><strong>Tx Beamforming</strong> <span class="tag tag-flag">FLAG</span></td>
+  <td>AP adjusts phase and amplitude per antenna chain to steer signal energy toward the target client. Improves SNR at client → higher MCS → higher throughput. Requires client feedback (CSI sounding).</td>
+  <td>enabled / disabled</td>
+  <td>+2–5 dB SNR improvement per client. Most impactful for edge clients (weak SNR).</td>
+</tr>
+<tr>
+  <td><strong>A-MPDU</strong> <span class="tag tag-flag">FLAG</span></td>
+  <td>Aggregate MAC Protocol Data Unit. Bundles multiple frames into a single transmission to amortize the overhead of 802.11 MAC headers, SIFS, ACK. Standard since 802.11n. A-MPDU is the primary driver of "MAC efficiency" in the simulator.</td>
+  <td>enabled / disabled</td>
+  <td>Critical for throughput. Disabling drops efficiency dramatically. Should always be enabled.</td>
+</tr>
+<tr>
+  <td><strong>Short Guard Interval</strong> <span class="tag tag-flag">FLAG</span></td>
+  <td>Guard interval is the silence between OFDM symbols to prevent inter-symbol interference (multipath delay). Short GI = 400 ns (vs 800 ns standard). WiFi 6 HE GI: 0.8/1.6/3.2 µs options. Shorter GI = higher throughput but more multipath sensitivity.</td>
+  <td>enabled / disabled</td>
+  <td>~11% throughput gain in clean environments. Risk: multipath-heavy environments (warehouse, concrete) may see more errors with short GI.</td>
+</tr>
+<tr>
+  <td><strong>Dynamic Channel Width</strong> <span class="tag tag-flag">FLAG</span></td>
+  <td>AP can dynamically narrow channel width (e.g. 80→40→20 MHz) based on interference. <strong>WLANPros: DISABLE this.</strong> Dynamic width breaks roaming — clients cached at 80 MHz try to reassociate on a 40 MHz channel and fail, causing a full de-auth/re-auth cycle.</td>
+  <td>enabled / disabled</td>
+  <td><strong class="r">DISABLE</strong> — breaks roaming. Set fixed channel width in design.</td>
+</tr>
+<tr>
+  <td><strong>Benchmark 11ax</strong> <span class="tag tag-polled">POLLED</span></td>
+  <td>AP3000 internal 802.11ax benchmark score (0–100). Composite internal metric combining HE feature adoption, MCS distribution quality, and frame efficiency. Higher = better WiFi 6 utilization.</td>
+  <td>0–100</td>
+  <td>Useful as a quick health indicator. Not standardized across vendors.</td>
+</tr>
+</tbody>
+</table>
+
+<!-- ══════════════════════════════════════════════════════════════════════════ -->
+<h2 id="s6">6 · Client Commands</h2>
+
+<pre><code><span class="cmt"># All associated clients (the most important command for client troubleshooting)</span>
+<span class="cmd">show station</span>
+<span class="cmd">show station &lt;MAC&gt;</span>               <span class="cmt"># single client detail</span>
+<span class="cmd">show station &lt;MAC&gt; counter</span>       <span class="cmt"># per-client TX/RX counters</span>
+<span class="cmd">show station ipv6</span>                 <span class="cmt"># clients with IPv6 addresses</span>
+
+<span class="cmt"># Full client picture (IP, policy, VLAN, roaming history)</span>
+<span class="cmd">show client-info-collection [ ip &lt;ip&gt; ]</span>  <span class="cmt"># ✗ invalid on AH-556680 firmware build</span>
+
+<span class="cmt"># Roaming state</span>
+<span class="cmd">show roaming cache</span>                <span class="cmt"># cached roaming candidates for all clients</span>
+<span class="cmd">show roaming cache mac &lt;MAC&gt;</span>     <span class="cmt"># single client roaming cache (802.11k neighbor list)</span>
+<span class="cmd">show 11k</span>                          <span class="cmt"># neighbor reports (radio measurement)</span>
+<span class="cmd">show 11v</span>                          <span class="cmt"># BSS transition management requests sent</span>
+<span class="cmd">show 11r</span>                          <span class="cmt"># Fast BSS Transition (FT) state</span>
+</code></pre>
+
+<div class="warn"><strong>Firmware limitation — AH-556680 (IQ Engine June 2026):</strong> <code>show 11k</code>, <code>show 11v</code>, and <code>show 11r</code> all return <em>"invalid command"</em> on this build. These sub-commands are not exposed in the restricted CLI shell. Use <code>_debug rm packet</code> and <code>_debug scd basic</code> for equivalent visibility. <br><br>
+<strong><code>show roaming cache</code> DOES work</strong> and confirms FT mode per client. Example output from AH-556680 (June 10 2026):<br>
+<pre style="margin:8px 0 0; background:var(--surface2); padding:10px; border-radius:4px; font-size:12px;"><code>Mac Addr        Roam mode    Cached APs
+74a6:cd8b:1960  FTPSK        (neighbor list populated)
+</code></pre>
+<code>FTPSK</code> = 802.11r Fast Transition with PSK/PPSK key holder — confirms 802.11r is active on this client. Enable via XIQ SSID → Additional Settings → Fast BSS Transition.</div>
+
+<h3>show station — Column Definitions</h3>
+<table>
+<thead>
+<tr><th>Field</th><th>Definition</th><th>Units / Values</th></tr>
+</thead>
+<tbody>
+<tr><td><strong>MAC</strong></td><td>Client hardware address (OUI + device-specific). On modern devices this is a randomized MAC — use in combination with IP to correlate with DHCP leases.</td><td>xx:xx:xx:xx:xx:xx</td></tr>
+<tr><td><strong>IP</strong></td><td>Client IP address from DHCP lease or static assignment. The AP learns this via ARP snooping — may show 0.0.0.0 briefly after association before DHCP completes.</td><td>IPv4 dotted decimal</td></tr>
+<tr><td><strong>Chan</strong></td><td>Channel the client is on. Should match the AP's current channel for that radio. Mismatch = roaming artifact (client associated to different channel via BSS Transition).</td><td>Integer (e.g. 6, 36, 149)</td></tr>
+<tr><td><strong>TxRate</strong></td><td>Negotiated downlink data rate (AP→client). Derived from the MCS index, spatial streams, channel width, and guard interval. This is the link rate — actual throughput is lower due to MAC overhead.</td><td>Mbps (e.g. 1201 = MCS 11 80MHz 2SS)</td></tr>
+<tr><td><strong>RxRate</strong></td><td>Negotiated uplink data rate (client→AP). Same MCS derivation. RxRate typically lower than TxRate because client TX power and antenna gain are lower.</td><td>Mbps</td></tr>
+<tr><td><strong>SNR</strong></td><td>Signal-to-Noise Ratio. Shown as RSSI(SNR) = e.g. -42(48). The 48 = SNR in dB = RSSI − Noise Floor. SNR determines which MCS index the AP selects. Below ~20dB → MCS drops, retries increase. Below ~10dB → association fails.</td><td>dB · <span class="g">≥25</span> good · <span class="y">15–24</span> fair · <span class="r">&lt;15</span> poor</td></tr>
+<tr><td><strong>A-Mode</strong></td><td>Authentication mode: wpa2-personal (PSK/PPSK), wpa3-sae (SAE handshake), open (no auth), wpa2-enterprise (802.1X).</td><td>String</td></tr>
+<tr><td><strong>Cipher</strong></td><td>Encryption cipher negotiated for this session. CCMP = AES-CCMP (WPA2 standard). GCMP = AES-GCMP (WPA3, stronger). TKIP = legacy (WPA1, avoid). GCMP provides authenticated encryption.</td><td>CCMP / GCMP / TKIP / None</td></tr>
+<tr><td><strong>A-Time</strong></td><td>Association duration — how long this client has been connected. Long A-Time + poor metrics = client is sticky (not roaming despite degraded signal).</td><td>HH:MM:SS</td></tr>
+<tr><td><strong>VLAN</strong></td><td>VLAN ID assigned to this client based on SSID policy or user-profile-policy (PPSK binding → VLAN). This is the VLAN on the wired side that the AP tags the client's frames with.</td><td>Integer (e.g. 1, 10, 30)</td></tr>
+<tr><td><strong>Auth</strong></td><td>Whether the client has completed 802.1X/EAPOL authentication. Yes = fully authenticated and data-passing. No = associated but pre-auth (rare in practice — usually a brief state).</td><td>Yes / No</td></tr>
+<tr><td><strong>UPID</strong></td><td>User Profile ID — maps to the user-profile-policy applied to this client. Determines QoS, VLAN, firewall rules, and rate limits for this specific client or PPSK user.</td><td>Integer</td></tr>
+<tr><td><strong>Phymode</strong></td><td>802.11 generation being used by this client: 11ax (WiFi 6), 11ac (WiFi 5), 11n (WiFi 4), 11g/11b (legacy). Determines which feature set (OFDMA, MCS ceiling) applies.</td><td>11ax / 11ac / 11n / 11g</td></tr>
+<tr><td><strong>LDPC</strong></td><td>Low-Density Parity Check coding. Advanced FEC that corrects bit errors before CRC check. Reduces effective CRC% at the same SNR. Yes = this client supports LDPC — good for noisy environments.</td><td>Yes / No</td></tr>
+<tr><td><strong>Chan-width</strong></td><td>Channel width negotiated for this client. Wider = more subcarriers = higher peak rate. But wider also means more exposure to interference and DFS events.</td><td>20 / 40 / 80 / 160 MHz</td></tr>
+<tr><td><strong>Station-state</strong></td><td>Current client state in the 802.11 state machine: <em>run</em> = fully associated and data-passing. <em>assoc</em> = associated but not authenticated. <em>auth</em> = authenticated but DHCP pending. The healthy state is <em>run</em>.</td><td>run / assoc / auth</td></tr>
+</tbody>
+</table>
+
+<!-- ══════════════════════════════════════════════════════════════════════════ -->
+<h2 id="s7">7 · The 15 Calibration Parameters</h2>
+
+<p>These are the parameters the simulator calibrates via live AP telemetry (Sprint 3). Split: <strong>12 optimizer knobs</strong> directly exposed by the AP CLI, plus <strong>3 simulator capMult() multipliers</strong> that require calibration against measured throughput data.</p>
+
+<h3>Group A — WiFi 6 Feature Flags (Knobs 1–6)</h3>
+<p>Read from <code>show interface wifi0/wifi1</code>. These are binary on/off but their <em>impact multipliers</em> in the simulator require calibration per archetype.</p>
+
+<table>
+<thead>
+<tr><th>#</th><th>Parameter</th><th>CLI Source</th><th>Simulator Role</th><th>AP3000 Default</th></tr>
+</thead>
+<tbody>
+<tr><td>1</td><td><strong>OFDMA DL</strong></td><td><code>HE OFDMA downlink=enabled</code></td><td>capMult_ofdmaDL — currently ×1.35, target calibration ±0.15</td><td>enabled</td></tr>
+<tr><td>2</td><td><strong>OFDMA UL</strong></td><td><code>HE OFDMA uplink=enabled</code></td><td>capMult_ofdmaUL — unlocks uplink gain modeling</td><td>enabled</td></tr>
+<tr><td>3</td><td><strong>MU-MIMO</strong></td><td><code>MU-MIMO=enabled</code></td><td>Spatial multiplexing gain factor (AP3000=2×2, low gain)</td><td>enabled</td></tr>
+<tr><td>4</td><td><strong>BSS Color</strong></td><td><code>BSS Color=N</code> (0=off)</td><td>Spatial reuse multiplier — reduces contention in dense scenarios</td><td>auto (1–63)</td></tr>
+<tr><td>5</td><td><strong>Beamforming</strong></td><td><code>Tx beamforming=enabled</code></td><td>SNR improvement factor (+2 to +5 dB per edge client)</td><td>enabled</td></tr>
+<tr><td>6</td><td><strong>A-MPDU</strong></td><td><code>A-MPDU=enabled</code></td><td>MAC aggregation efficiency — primary input to capMult_macEff</td><td>enabled</td></tr>
+</tbody>
+</table>
+
+<h3>Group B — ACSP / Policy Thresholds (Knobs 7–12)</h3>
+<p>Read from <code>show radio profile &lt;name&gt;</code>. These are the RRM trigger thresholds — they determine when the AP self-heals by changing channel/power.</p>
+
+<table>
+<thead>
+<tr><th>#</th><th>Parameter</th><th>CLI Source</th><th>Simulator Role</th></tr>
+</thead>
+<tbody>
+<tr><td>7</td><td><strong>Weak SNR Threshold</strong></td><td><code>Weak SNR threshold=20dB</code></td><td>Safety-net admission floor — clients below this SNR are deassociated. Proxy for minRSSI knob. Feeds SNR floor in link budget.</td></tr>
+<tr><td>8</td><td><strong>ACSP Interference Switch %</strong></td><td><code>Interference threshold=50%</code></td><td>Interference CU trigger for DCS. When interference_cu_pct &gt; this → channel change. Calibrated against actual ACSP event frequency.</td></tr>
+<tr><td>9</td><td><strong>ACSP CRC Switch %</strong></td><td><code>CRC error threshold=20%</code></td><td>CRC% trigger for DCS. Ties directly to CorrelationAgent rule phy_crc_spike. Key calibration point for noisy environments.</td></tr>
+<tr><td>10</td><td><strong>ACSP CU Switch %</strong></td><td><code>Channel utilization threshold=70%</code></td><td>Total CU trigger for channel change. WLANPros default 70%. Calibrate for high-density vs sparse archetypes.</td></tr>
+<tr><td>11</td><td><strong>Max ACSP TX Power</strong></td><td><code>Max ACSP tx power=23dBm</code></td><td>TPC ceiling — simulator uses this as max power constraint in link budget. Prevent over-provisioning.</td></tr>
+<tr><td>12</td><td><strong>LB Airtime Limit %</strong></td><td><code>LB station airtime limit=25%</code></td><td>Airtime fairness proxy. If client consumes &gt;N% of airtime → deprioritize. capMult_atFair calibration target (currently ×1.38).</td></tr>
+</tbody>
+</table>
+
+<h3>Group C — Simulator capMult() Multipliers (+3 calibration targets)</h3>
+<p>Not directly polled from the AP — these are simulator equations that require calibration against real measured throughput data.</p>
+
+<table>
+<thead>
+<tr><th>#</th><th>capMult Parameter</th><th>Current Value</th><th>Calibration Target</th><th>Calibration Source</th></tr>
+</thead>
+<tbody>
+<tr><td>13</td><td><strong>MAC Efficiency</strong> (capMult_macEff)</td><td>×0.45</td><td>[0.55, 0.68] for WiFi 6</td><td>Cisco CiscoLive 2025 HD Wi-Fi Guide: 58–68% measured in stadium. Current 0.45 is WiFi 4/5 era — <em>confirmed miscalibration</em>.</td></tr>
+<tr><td>14</td><td><strong>OFDMA DL Multiplier</strong> (capMult_ofdmaDL)</td><td>×1.35</td><td>[1.20, 1.50] per archetype</td><td>Wi-Fi Alliance WiFi 6 Highlights. Varies by client density: sparse=1.15, dense=1.45.</td></tr>
+<tr><td>15</td><td><strong>Airtime Fairness Multiplier</strong> (capMult_atFair)</td><td>×1.38</td><td>[1.25, 1.45]</td><td>Mist AI SLE docs + internal measurement. atFair strict mode prevents legacy clients from monopolizing channel — gain varies by client mix.</td></tr>
+</tbody>
+</table>
+
+<div class="note"><strong>How to calibrate:</strong> Sprint 3 CalibrationAgent compares simulator predicted throughput vs measured <code>tx_throughput_mbps + rx_throughput_mbps</code> from CollectorAgent. Bayesian Optimization (GP + BO Pre-Search) narrows each multiplier. Pre-Sprint 3 action: set MAC efficiency range to [0.55, 0.68] in stadium archetype.</div>
+
+<!-- ══════════════════════════════════════════════════════════════════════════ -->
+<h2 id="s8">8 · QoE Indicators</h2>
+
+<table>
+<thead>
+<tr><th>QoE Metric</th><th>Definition</th><th>Available from AP?</th><th>CLI / Derivation</th><th>Thresholds</th></tr>
+</thead>
+<tbody>
+<tr>
+  <td><strong>Throughput</strong></td>
+  <td>Actual data transferred per unit time. Downlink = AP→clients. Uplink = clients→AP. Distinguishes from link rate (negotiated max) — actual is always lower due to MAC overhead, retries, contention.</td>
+  <td><span class="tag tag-computed">COMPUTED</span></td>
+  <td>CollectorAgent: Δ(tx_bytes + rx_bytes) × 8 / Δt. Commands: <code>show interface wifi0</code> → <em>Tx bytes / Rx bytes</em> (cumulative since boot).</td>
+  <td><span class="g">Video conf: &gt;2 Mbps/client</span><br><span class="y">VoIP: &gt;100 kbps/client</span><br><span class="r">General degraded: &lt;1 Mbps aggregate</span></td>
+</tr>
+<tr>
+  <td><strong>Latency</strong></td>
+  <td>End-to-end round-trip delay. WiFi contributes: (1) CSMA/CA backoff wait = f(CU%), (2) retry delay = f(CRC%, retry_pct), (3) queuing = M/D/1 model f(CU%). Not directly measured by the AP — inferred.</td>
+  <td><span class="tag tag-computed">INFERRED</span></td>
+  <td>Not a direct AP command. Proxy: high total_cu_pct + high crc_error_pct → high latency. Real measurement: <code>ping &lt;client_IP&gt;</code> from a device on same VLAN, or WLANPi active test. kdebug for queuing stats: <code>_kdebug qos drop</code></td>
+  <td><span class="g">VoIP: &lt;20ms</span><br><span class="y">Video: &lt;50ms</span><br><span class="r">Web: &gt;200ms noticeable</span></td>
+</tr>
+<tr>
+  <td><strong>Jitter</strong></td>
+  <td>Variance in packet arrival time. In WiFi: CSMA/CA creates natural jitter as the backoff window varies. High CU% → larger backoff variance → more jitter. TWT and WMM Voice AC (low AIFSN) reduce jitter for latency-sensitive flows.</td>
+  <td><span class="tag tag-computed">INFERRED</span></td>
+  <td>Not a direct AP command. Proxy: variation in MCS over time (mcs_distribution in pcap) + crc bursts. WMM VO queue CWmin/AIFSN directly controls jitter window. <code>show qos counter user &lt;mac&gt;</code> shows per-AC frame counts.</td>
+  <td><span class="g">VoIP: &lt;5ms</span><br><span class="y">Video streaming: &lt;30ms</span></td>
+</tr>
+<tr>
+  <td><strong>Airtime Utilization</strong></td>
+  <td>Fraction of channel time consumed. The fundamental WiFi capacity constraint — analogous to PRB utilization in 5G. Split into TX / RX / Interference. Design target: &lt;50% total to maintain healthy headroom for bursts and management frames.</td>
+  <td><span class="tag tag-polled">POLLED</span></td>
+  <td><code>show interface wifi0</code> → Tx/Rx/Interference/Total utilization. Also: short-term (10s rolling), running average, and snapshot averages all available. CollectorAgent captures all four.</td>
+  <td>See Section 4 — Total CU thresholds</td>
+</tr>
+<tr>
+  <td><strong>Link Score (0–100)</strong></td>
+  <td>Composite quality score computed by CollectorAgent each poll. Four equal 25-pt buckets: CRC errors + retry rate + failed frames + channel utilization. 100 = perfect. 0 = all four buckets at critical. Useful for trending and CorrelationAgent triggers.</td>
+  <td><span class="tag tag-computed">COMPUTED</span></td>
+  <td>Not a native AP command. Computed in <code>_compute_link_score()</code> in collector.py. Displayed on dashboard Tab 1. CorrelationAgent triggers at &lt;40 sustained for 2 polls.</td>
+  <td><span class="g">75–100</span> Healthy<br><span class="y">40–74</span> Degraded<br><span class="r">&lt;40</span> Critical — pcap alert</td>
+</tr>
+</tbody>
+</table>
+
+<!-- ══════════════════════════════════════════════════════════════════════════ -->
+<h2 id="s9">9 · When Handoff Doesn't Occur — L2/L3 Signatures</h2>
+
+<p>A roaming failure is not always visible from the AP's side as an error — the client stays associated. You have to infer it from the combination of declining PHY metrics and the absence of expected 802.11 management frames in the pcap.</p>
+
+<h3>What to look for in PHY (AP polling)</h3>
+<ul style="line-height:2; margin-left:20px; margin-bottom:12px;">
+  <li><code>snr_db</code> for the stuck client falls below 20 dB but the client never de-associates</li>
+  <li><code>tx_rate_mbps</code> and <code>rx_rate_mbps</code> for the client drop progressively (MCS degradation)</li>
+  <li><code>crc_error_pct</code> increases on the radio the sticky client is on</li>
+  <li><code>station_state</code> stays <em>run</em> — the AP is still serving the client, it just isn't moving</li>
+</ul>
+
+<h3>What to look for in L2/L3 pcap</h3>
+<pre><code><span class="cmt"># Filter to see roaming management frames</span>
+<span class="kw">wlan.fc.type_subtype == 0x000d</span>   <span class="cmt"># Action frames (includes 802.11k, 802.11v, FT)</span>
+<span class="kw">wlan.fc.type_subtype == 0x0000</span>   <span class="cmt"># Association Request (new AP assoc)</span>
+<span class="kw">wlan.fc.type_subtype == 0x0002</span>   <span class="cmt"># Reassociation Request (this is what FT looks like)</span>
+<span class="kw">wlan.fc.type_subtype == 0x000c</span>   <span class="cmt"># Deauthentication (reason 3 = station left)</span>
+</code></pre>
+
+<p><strong>Stuck client (no handoff) signatures:</strong></p>
+<ul style="line-height:2; margin-left:20px; margin-bottom:12px;">
+  <li>No Reassociation Request frames from the client MAC</li>
+  <li>No BSS Transition Management (802.11v) Request/Response exchange</li>
+  <li>No FT Action frames (if 802.11r configured)</li>
+  <li>Increasing retry rate on data frames from/to this client MAC</li>
+  <li>Eventually: Deauthentication reason 8 (client-initiated) or reason 3 (AP-initiated safety-net)</li>
+</ul>
+
+<h3>AP CLI diagnostic commands</h3>
+<pre><code><span class="cmd">show roaming cache mac &lt;MAC&gt;</span>    <span class="cmt"># Did the AP even build a candidate list? ✓ WORKS on AH-556680</span>
+<span class="cmd">show 11k</span>                         <span class="cmt"># ✗ invalid on AH-556680 firmware — use _debug rm packet instead</span>
+<span class="cmd">show 11v</span>                         <span class="cmt"># ✗ invalid on AH-556680 firmware — use _debug scd basic instead</span>
+<span class="cmd">show band-steering</span>               <span class="cmt"># Is band steering active? (could be interfering)</span>
+<span class="cmd">show client-load-balance status</span>  <span class="cmt"># Is load balancing affecting this client?</span>
+<span class="cmt"># Debug roaming at kernel level (use these instead of show 11k/v on restricted builds)</span>
+<span class="cmd">_debug rm {error|basic|info|packet|all}</span>   <span class="cmt"># 802.11k radio measurement daemon</span>
+<span class="cmd">_debug scd {basic|info|naas|all}</span>           <span class="cmt"># Station Control Daemon (manages roaming decisions)</span>
+</code></pre>
+
+<!-- ══════════════════════════════════════════════════════════════════════════ -->
+<h2 id="s10">10 · 4-Way Handshake in pcap — L2/L3 Messages &amp; AP Poll Correlation</h2>
+
+<p>The 4-Way Handshake is the 802.11i/WPA2 protocol that establishes the Pairwise Transient Key (PTK) between AP and client after successful authentication. Every WiFi connection does this — it's the last step before data flows. You see it in pcap as EAPOL frames. You see its health in AP polling as station_state transitions and CRC spikes.</p>
+
+<table>
+<thead>
+<tr><th>Message</th><th>Direction</th><th>Contents</th><th>Wireshark Filter</th></tr>
+</thead>
+<tbody>
+<tr>
+  <td><strong>M1 — ANonce</strong></td>
+  <td>AP → Client</td>
+  <td>EAPOL Key, Authenticator Nonce (ANonce), no MIC. Starts the key derivation. AP sends PMK reference (the PPSK or network PMK is already known by both sides).</td>
+  <td><code>eapol &amp;&amp; wlan.fc.type == 2</code></td>
+</tr>
+<tr>
+  <td><strong>M2 — SNonce + MIC</strong></td>
+  <td>Client → AP</td>
+  <td>EAPOL Key, Supplicant Nonce (SNonce), MIC set (proves client has correct PMK). Includes RSNE (cipher suites). If MIC is wrong → AP sends Deauth reason 15 (MIC failure). This is where PPSK verification happens.</td>
+  <td><code>eapol</code> → look for Key Info flag MIC=1, ACK=0</td>
+</tr>
+<tr>
+  <td><strong>M3 — GTK</strong></td>
+  <td>AP → Client</td>
+  <td>EAPOL Key, GTK (Group Transient Key) encrypted with derived KEK, Install flag set, MIC set. Provides the broadcast/multicast key. Client must acknowledge within retry window.</td>
+  <td>Key Info: Install=1, MIC=1, ACK=1</td>
+</tr>
+<tr>
+  <td><strong>M4 — ACK</strong></td>
+  <td>Client → AP</td>
+  <td>EAPOL Key, empty payload, MIC set. Acknowledges M3. After this: PTK is installed on both sides, TK (Temporal Key) encrypts data frames. Station transitions to <em>run</em>.</td>
+  <td>Key Info: MIC=1, ACK=0 (after M3)</td>
+</tr>
+</tbody>
+</table>
+
+<h3>When the 4-Way Handshake fails — what you see</h3>
+<pre><code><span class="cmt"># pcap filter for EAPOL frames only</span>
+<span class="cmd">filter 1 l3 protocol 0x888e</span>      <span class="cmt"># EtherType 0x888E = EAPOL (802.1X)</span>
+<span class="cmd">capture interface wifi0 duration 60 filter and 1</span>
+
+<span class="cmt"># Or by error type</span>
+<span class="cmd">filter 2 l2 error mic</span>            <span class="cmt"># MIC failures = M2 had wrong MIC (wrong PSK)</span>
+<span class="cmd">filter 3 l2 error decrypt</span>        <span class="cmt"># decrypt errors = TK installed but frame undecodable</span>
+</code></pre>
+
+<p><strong>PHY correlation — what AP polling shows when 4-way fails:</strong></p>
+<ul style="line-height:2; margin-left:20px; margin-bottom:12px;">
+  <li>M2 fails → client MAC disappears from <code>show station</code> (deauth), reappears seconds later → retry loop</li>
+  <li>If M2 fails due to low SNR (RF caused bit error in EAPOL) → <code>crc_error_pct</code> spike on that radio</li>
+  <li>If M2 fails due to wrong key (wrong PPSK) → CRC will be clean, decrypt error in pcap, deauth reason 15</li>
+  <li>Multiple EAPOL sequences for same MAC within 30s = retry storm — see in <code>show station</code> as rapid state changes</li>
+  <li><code>_kdebug auth basic</code> + <code>_kdebug dot1x basic</code> — kernel-level auth trace shows exact EAPOL state machine step that failed</li>
+</ul>
+
+<!-- ══════════════════════════════════════════════════════════════════════════ -->
+<h2 id="s11">11 · PPSK in pcap vs Physical Layer</h2>
+
+<h3>What PPSK looks like in pcap</h3>
+<p>At the L2/L3 level, PPSK uses <strong>standard WPA2 4-Way Handshake</strong> — identical to WPA2-PSK. The difference is invisible to the pcap: each client derives a different PMK from their unique PPSK. The AP verifies M2 using the PMK for <em>that client's specific PPSK</em>, not a shared network key.</p>
+
+<pre><code><span class="cmt"># In Wireshark — PPSK looks exactly like WPA2-PSK. You will see:</span>
+<span class="kw">EAPOL M1 → M2 → M3 → M4</span>   <span class="cmt"># all four messages present = success</span>
+<span class="kw">EAPOL M1 → M2</span>              <span class="cmt"># then deauth reason 15 = wrong PPSK key used</span>
+<span class="kw">EAPOL M1 only</span>              <span class="cmt"># timeout = client has wrong passphrase, gave up</span>
+</code></pre>
+
+<h3>PPSK verification flow</h3>
+<pre><code><span class="cmt"># Check PPSK key bindings on AP</span>
+<span class="cmd">show auth private-psk</span>         <span class="cmt"># → table: client MAC | PPSK | VLAN | user-profile</span>
+<span class="cmd">show auth mac-binding &lt;ssid&gt;</span>  <span class="cmt"># MAC-locked PPSK entries for this SSID</span>
+
+<span class="cmt"># When a client fails PPSK auth — debug flow</span>
+<span class="cmd">_debug auth error</span>             <span class="cmt"># shows "MIC verify fail" or "PMK lookup fail"</span>
+<span class="cmd">_debug wpad wifi all</span>          <span class="cmt"># WPA daemon — shows full 4-way state machine</span>
+</code></pre>
+
+<h3>PHY correlation for PPSK failures</h3>
+<table>
+<thead>
+<tr><th>pcap observation</th><th>PHY layer correlation</th><th>Conclusion</th></tr>
+</thead>
+<tbody>
+<tr>
+  <td>MIC failure in M2 (deauth reason 15), CRC% clean</td>
+  <td>SNR for this client &gt;25 dB, noise floor normal</td>
+  <td><span class="r">Wrong PPSK key</span> — client has incorrect passphrase. RF is fine. Verify <code>show auth private-psk</code>.</td>
+</tr>
+<tr>
+  <td>MIC failure in M2, CRC% spike on that radio</td>
+  <td>SNR for this client 10–20 dB, NF elevated</td>
+  <td><span class="y">RF-induced bit error</span> in EAPOL frame. The PPSK may be correct but the MIC was corrupted in transit. Fix RF first — move client closer or reduce noise floor.</td>
+</tr>
+<tr>
+  <td>M1 sent, no M2, then deauth reason 2 (prev auth invalid)</td>
+  <td>Client MAC absent from <code>show station</code> after M1</td>
+  <td>Client does not recognize this SSID or PPSK entry is MAC-locked to a different MAC (random MAC issue on iOS 14+).</td>
+</tr>
+<tr>
+  <td>4-way completes but client VLAN wrong</td>
+  <td>UPID shows incorrect user-profile</td>
+  <td>PPSK-to-VLAN binding mismatch in XIQ. <code>show auth private-psk</code> → verify VLAN column for this MAC.</td>
+</tr>
+</tbody>
+</table>
+
+<!-- ══════════════════════════════════════════════════════════════════════════ -->
+<h2 id="s12">12 · kdebug Quick Reference</h2>
+
+<div class="danger"><strong>Always stop debug after use:</strong> <code>_debug stop</code> — debug streams eat CPU and flash. Left running can OOM the AP. Check what is active with <code>_debug show</code> before leaving.</div>
+
+<table>
+<thead>
+<tr><th>Scenario</th><th>Commands</th></tr>
+</thead>
+<tbody>
+<tr><td>EAPOL / WPA2 auth failures</td><td><code>_debug auth error</code><br><code>_kdebug dot1x basic</code><br><code>_debug wpad wifi all</code></td></tr>
+<tr><td>TK / GTK / decrypt-error tracing</td><td><code>_kdebug wifi-driver wifi0 msglevel wsec</code><br><code>_kdebug wifi-driver wifi0 msglevel wsec_dump</code></td></tr>
+<tr><td>Client association failures</td><td><code>_kdebug wifi-driver wifi0 msglevel assoc</code><br><code>_kdebug wifi detail</code></td></tr>
+<tr><td>DHCP failures (AP as relay)</td><td><code>_debug dhcpd all</code><br><code>_debug auth dhcp_fp</code></td></tr>
+<tr><td>Forwarding / VLAN / bridge</td><td><code>_kdebug fe vlan</code><br><code>_kdebug fe drop</code><br><code>_kdebug mac all</code></td></tr>
+<tr><td>QoS / WMM queue inspection</td><td><code>_kdebug qos drop</code><br><code>_kdebug qos schedule</code></td></tr>
+<tr><td>CAPWAP backhaul debug</td><td><code>_debug capwap verbose</code><br><code>_debug capwap dtls</code></td></tr>
+<tr><td>Roaming / 802.11k/v</td><td><code>_debug rm packet</code><br><code>_debug scd basic</code></td></tr>
+<tr><td>Check what's currently running</td><td><code>_show kdebug info</code><br><code>_debug show</code></td></tr>
+<tr><td>Stop all debug</td><td><code>_debug stop</code></td></tr>
+</tbody>
+</table>
+
+<!-- ══════════════════════════════════════════════════════════════════════════ -->
+<h2 id="s13">13 · Session Recording</h2>
+
+<p>The AP CLI does not have a native "log to file" command for interactive sessions. Best approach: wrap your SSH session in a <code>script</code> command on your laptop — everything echoed to your terminal is captured.</p>
+
+<pre><code><span class="cmt"># Method 1: script wrapper (RECOMMENDED — captures everything)</span>
+<span class="cmt"># Run this on your laptop BEFORE opening the SSH session</span>
+<span class="cmd">script -a ~/ap_session_$(date +%Y%m%dT%H%M%S).txt</span>
+<span class="cmd">ssh admin@&lt;AP_IP&gt;</span>
+<span class="cmt"># ... all AP output is logged to the .txt file in real time</span>
+<span class="cmt"># To end: Ctrl-D (exits script session, closes log file)</span>
+
+<span class="cmt"># Method 2: tee — SSH output to both terminal and file simultaneously</span>
+<span class="cmd">ssh admin@&lt;AP_IP&gt; | tee -a ap_session.log</span>
+<span class="cmt"># Note: input (your commands) not captured — only AP responses</span>
+
+<span class="cmt"># Method 3: AP console debug stream to terminal (then captured by Method 1)</span>
+<span class="cmt"># From INSIDE the AP CLI:</span>
+<span class="cmd">debug console all</span>
+<span class="cmd">debug console timestamp</span>    <span class="cmt"># adds timestamps to every debug line</span>
+<span class="cmt"># All debug output now streams to your SSH session — captured by script</span>
+<span class="cmd">debug console level info</span>   <span class="cmt"># reduce verbosity: emergency|alert|critical|error|warning|notification|info|debug</span>
+
+<span class="cmt"># Method 4: Syslog to remote server (persistent across reboots)</span>
+<span class="cmt"># Configure in XIQ: System → Syslog → Server IP + port 514</span>
+<span class="cmt"># All AP events sent to syslog server continuously</span>
+</code></pre>
+
+<div class="note"><strong>Best practice for diagnostic sessions:</strong> Always use <code>script -a</code> before SSH. The <code>-a</code> flag appends to the file (vs overwrite). Name the file with ISO timestamp. After the session: <code>grep 'error\|CRC\|decrypt\|deauth' ap_session_*.txt</code> to quickly find relevant events.</div>
+
+<footer>
+  AP3000 CLI Reference v1 · IQ Engine (HiveOS) OS · AH-556680 · June 10 2026<br>
+  Sources: AP1 SSH dump May 7 2026 · collector.py confirmed field names · reference_ap3000_command_themes.md · reference_dhcp_wifi_triage_runbook.md<br>
+  © 2026 Khursheed Khan · Private — Not for distribution
+</footer>
+
+</main>
+<script>
+// Active nav link on scroll
+const sections = document.querySelectorAll('h2[id]');
+const links    = document.querySelectorAll('nav a[href^="#"]');
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      links.forEach(l => l.classList.remove('active'));
+      const a = document.querySelector(`nav a[href="#${e.target.id}"]`);
+      if (a) a.classList.add('active');
+    }
+  });
+}, {rootMargin: '-20% 0px -75% 0px'});
+sections.forEach(s => obs.observe(s));
+</script>
+</body>
+</html>

@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WiFi Troubleshooting Scenarios — Extreme Networks · June 10 2026</title>
+<style>
+  :root {
+    --bg: #faf9f7; --surface: #fff; --surface2: #f4f3f0;
+    --border: #e5e2dc; --text: #1a1a1a; --muted: #666;
+    --accent: #1a5276; --green: #1a7a40; --yellow: #7a5c00;
+    --red: #8b1a1a; --purple: #4a1a6a;
+    --serif: 'Georgia', serif;
+    --sans: -apple-system, 'Segoe UI', sans-serif;
+    --mono: 'JetBrains Mono', 'Cascadia Code', monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: var(--serif); font-size: 16px; line-height: 1.7; }
+
+  /* Layout */
+  .layout { display: flex; min-height: 100vh; }
+  nav { width: 260px; min-width: 260px; background: var(--surface); border-right: 1px solid var(--border); position: sticky; top: 0; height: 100vh; overflow-y: auto; padding: 24px 0; }
+  nav .logo { padding: 0 20px 20px; border-bottom: 1px solid var(--border); margin-bottom: 16px; }
+  nav .logo h2 { font-family: var(--serif); font-size: 13px; color: var(--accent); font-weight: 700; }
+  nav .logo p { font-size: 11px; color: var(--muted); margin-top: 4px; font-family: var(--sans); }
+  nav a { display: block; padding: 5px 20px; color: var(--muted); text-decoration: none; font-size: 12.5px; font-family: var(--sans); border-left: 2px solid transparent; transition: all .15s; }
+  nav a:hover, nav a.active { color: var(--accent); border-left-color: var(--accent); background: rgba(26,82,118,.05); }
+  nav .sec { padding: 14px 20px 4px; font-size: 10px; color: #aaa; text-transform: uppercase; letter-spacing: .12em; font-family: var(--sans); }
+  main { flex: 1; padding: 48px 56px; max-width: 860px; }
+
+  /* Typography */
+  h1 { font-size: 28px; color: var(--accent); margin-bottom: 6px; }
+  .meta { font-size: 13px; color: var(--muted); font-family: var(--sans); margin-bottom: 36px; border-bottom: 1px solid var(--border); padding-bottom: 16px; }
+  h2 { font-size: 20px; margin: 48px 0 6px; color: var(--accent); }
+  .scenario-meta { font-family: var(--sans); font-size: 13px; color: var(--muted); margin-bottom: 16px; }
+  h3 { font-size: 14px; color: var(--text); margin: 24px 0 8px; font-weight: 700; font-family: var(--sans); text-transform: uppercase; letter-spacing: .05em; }
+  p { margin-bottom: 10px; font-size: 15.5px; }
+
+  /* Scenario premise */
+  .premise { background: var(--surface2); border-left: 3px solid var(--accent); padding: 14px 18px; margin: 0 0 24px; border-radius: 0 6px 6px 0; font-family: var(--sans); font-size: 14px; line-height: 1.6; }
+  .premise strong { color: var(--accent); }
+
+  /* Dialogue */
+  .dialogue { margin: 0 0 24px; }
+  .turn { display: flex; gap: 12px; margin-bottom: 10px; align-items: flex-start; }
+  .turn .who { font-family: var(--sans); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; min-width: 72px; padding-top: 3px; }
+  .turn.k .who { color: var(--accent); }
+  .turn.karl .who { color: var(--red); }
+  .turn .line { font-family: var(--sans); font-size: 14px; line-height: 1.6; flex: 1; }
+  .turn.k .line { color: #1a1a1a; }
+  .turn.karl .line { color: #444; }
+
+  /* Assessment */
+  .assessment { background: rgba(26,122,64,.05); border: 1px solid rgba(26,122,64,.2); border-radius: 6px; padding: 16px 20px; margin: 0 0 16px; font-family: var(--sans); font-size: 13.5px; line-height: 1.65; }
+  .assessment .label { font-weight: 700; color: var(--green); font-size: 11px; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 8px; }
+  .fix { background: rgba(26,82,118,.05); border: 1px solid rgba(26,82,118,.2); border-radius: 6px; padding: 14px 18px; margin: 0 0 16px; font-family: var(--sans); font-size: 13.5px; line-height: 1.65; }
+  .fix .label { font-weight: 700; color: var(--accent); font-size: 11px; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 8px; }
+  code { font-family: var(--mono); font-size: 12.5px; background: #f0ede8; padding: 1px 5px; border-radius: 3px; color: var(--accent); }
+
+  /* Scorecard */
+  table { width: 100%; border-collapse: collapse; margin: 16px 0 24px; font-size: 13.5px; font-family: var(--sans); }
+  th { background: var(--surface2); text-align: left; padding: 7px 12px; font-weight: 700; font-size: 11px; text-transform: uppercase; letter-spacing: .05em; border-bottom: 2px solid var(--border); color: var(--muted); }
+  td { padding: 8px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  tr:hover td { background: var(--surface2); }
+  .g { color: var(--green); font-weight: 700; }
+  .y { color: var(--yellow); font-weight: 700; }
+  .r { color: var(--red); font-weight: 700; }
+
+  /* Karl narrative */
+  .karl-box { background: rgba(139,26,26,.04); border: 1px solid rgba(139,26,26,.15); border-radius: 6px; padding: 16px 20px; margin: 24px 0; font-family: var(--sans); font-size: 14px; line-height: 1.65; }
+  .karl-box .label { font-weight: 700; color: var(--red); font-size: 11px; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 8px; }
+
+  /* Section divider */
+  .divider { border: none; border-top: 2px solid var(--border); margin: 48px 0 0; }
+
+  footer { margin-top: 64px; padding-top: 20px; border-top: 1px solid var(--border); color: var(--muted); font-size: 12px; font-family: var(--sans); }
+</style>
+</head>
+<body>
+<div class="layout">
+
+<nav>
+  <div class="logo">
+    <h2>WiFi Troubleshooting</h2>
+    <p>Extreme Networks · June 10 2026</p>
+  </div>
+  <span class="sec">Context</span>
+  <a href="#origin">Origin — Karl's Scenario</a>
+  <a href="#scorecard">Overall Scorecard</a>
+  <span class="sec">Scenarios</span>
+  <a href="#s1">1 · Voice Drops in Corridor</a>
+  <a href="#s2">2 · Half Building Can't Connect</a>
+  <a href="#s3">3 · EP1 Migration Split QoE</a>
+  <a href="#s4">4 · VLAN 50 No Traffic</a>
+  <a href="#s5">5 · Throughput Tanks at 20 Min</a>
+</nav>
+
+<main>
+
+<h1>WiFi Troubleshooting — Extreme Networks</h1>
+<div class="meta">June 10 2026 &nbsp;·&nbsp; AP3000 · XIQ · EP1 · WPA2-PPSK · WPA3-SAE &nbsp;·&nbsp; Prepared for Karl Benedict</div>
+
+<!-- ── Origin ── -->
+<h2 id="origin">Origin — The Karl Benedict Exercise</h2>
+
+<div class="karl-box">
+  <div class="label">Karl's Original Scenario</div>
+  <p>Users complaining about slow throughput and dropped calls when using WiFi calling on mobile devices. Not all users affected — some report the network is the best it has ever been. Single SSID, PPSK, single VLAN, 25 APs, single-story building. No changes except occasionally adding user keys to PPSK.</p>
+</div>
+
+<p>The root cause: <strong>locally stored PPSK keys</strong>. New keys were created for new users but not all 25 APs received a policy push afterward. New users could only associate to APs that had been updated — failing authentication on the rest. Old users whose keys were pushed previously — fine everywhere. The fix: push policy to all APs every time new PPSK keys are created.</p>
+
+<p>The lesson Karl taught: <em>"Policy applied to all APs"</em> and <em>"policy state is identical on all APs"</em> are not the same statement. The dashboard can show green while key tables are out of sync.</p>
+
+<p>The five scenarios below were built on the same discipline. Each one has a non-obvious mechanism hiding one level below the obvious layer.</p>
+
+<hr class="divider">
+
+<!-- ── Scorecard ── -->
+<h2 id="scorecard">Overall Scorecard</h2>
+
+<table>
+<thead><tr><th>#</th><th>Scenario</th><th>Questions</th><th>Hints</th><th>Verdict</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>Voice drops in corridor</td><td>3</td><td>0</td><td class="g">Clean</td></tr>
+<tr><td>2</td><td>Half building can't connect</td><td>3</td><td>0</td><td class="g">Perfect</td></tr>
+<tr><td>3</td><td>EP1 migration split QoE</td><td>8</td><td>2</td><td class="y">Got there — needed prompting</td></tr>
+<tr><td>4</td><td>VLAN 50 no traffic</td><td>4</td><td>0</td><td class="g">Clean</td></tr>
+<tr><td>5</td><td>Throughput tanks at 20 min</td><td>4</td><td>0</td><td class="g">Excellent</td></tr>
+</tbody>
+</table>
+
+<p>Scenario 3 is the one to revisit — the thread was Band Steering defaulting to 80/20 during EP1 migration. All others were sharp. The improvement from Karl's original exercise was clear: no drift into RF or client-device layers when the symptom pointed elsewhere.</p>
+
+<hr class="divider">
+
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<h2 id="s1">Scenario 1 — Voice Calls Dropping in the Corridor</h2>
+<div class="scenario-meta">Single-story office · 18 × AP3000 · Single SSID · WPA2-PPSK · Same XIQ policy all APs</div>
+
+<div class="premise">
+  <strong>Complaint:</strong> Users dropping voice calls every time they walk between the east and west wings. Stationary users — fine. Roaming users — drops every time.
+</div>
+
+<h3>Dialogue</h3>
+<div class="dialogue">
+  <div class="turn k"><span class="who">Khursheed</span><span class="line">How are the keys provisioned?</span></div>
+  <div class="turn karl"><span class="who">Karl</span><span class="line">Cloud.</span></div>
+  <div class="turn k"><span class="who">Khursheed</span><span class="line">802.11k/v/r enabled?</span></div>
+  <div class="turn karl"><span class="who">Karl</span><span class="line">All disabled.</span></div>
+  <div class="turn k"><span class="who">Khursheed</span><span class="line">For all APs?</span></div>
+  <div class="turn karl"><span class="who">Karl</span><span class="line">Yes. Same policy, all APs.</span></div>
+  <div class="turn k"><span class="who">Khursheed</span><span class="line">Then why only drops when walking between the wings and not elsewhere?</span></div>
+  <div class="turn karl"><span class="who">Karl</span><span class="line">The corridor is where AP coverage cells overlap — the roaming zone. Stationary users never trigger a reassociation.</span></div>
+  <div class="turn k"><span class="who">Khursheed</span><span class="line">802.11r/k/v need to be enabled.</span></div>
+</div>
+
+<div class="fix">
+  <div class="label">Root Cause</div>
+  802.11r disabled. Every roam in the corridor triggers a full 4-way handshake — 200–400ms minimum. VoIP jitter budget is 30ms. The call drops during reassociation. Stationary users never roam so they never hit it. Corridor-specific because it is the only AP boundary crossing point in the building.
+  <br><br>
+  <strong>Fix:</strong> XIQ → SSID → Additional Settings → enable Fast BSS Transition (802.11r) → push policy to all 18 APs.
+</div>
+
+<div class="assessment">
+  <div class="label">Assessment</div>
+  Clean. Confirmed cloud keys first (ruled out PPSK sync issue), then asked about 802.11r directly after identifying a roaming-specific symptom. Three questions, zero hints. Could have gone straight to 802.11r after confirming cloud provisioning and a corridor-only drop pattern — but the logic chain was tight.
+</div>
+
+<hr class="divider">
+
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<h2 id="s2">Scenario 2 — Half the Building Can't Connect After Adding 6 APs</h2>
+<div class="scenario-meta">Warehouse + office · 30 × AP3000 (24 existing + 6 new) · PPSK · No policy changes</div>
+
+<div class="premise">
+  <strong>Complaint:</strong> Since 6 new AP3000s were deployed in the warehouse last week, about half the users are getting password errors or can't associate. Users near the existing office APs — fine.
+</div>
+
+<h3>Dialogue</h3>
+<div class="dialogue">
+  <div class="turn k"><span class="who">Khursheed</span><span class="line">Where are the 6 new APs deployed?</span></div>
+  <div class="turn karl"><span class="who">Karl</span><span class="line">In the warehouse — west side of the building.</span></div>
+  <div class="turn k"><span class="who">Khursheed</span><span class="line">Where are the failures?</span></div>
+  <div class="turn karl"><span class="who">Karl</span><span class="line">Mostly in the warehouse — west side. East side users are fine.</span></div>
+  <div class="turn k"><span class="who">Khursheed</span><span class="line">How are PPSK keys provisioned?</span></div>
+  <div class="turn karl"><span class="who">Karl</span><span class="line">Local.</span></div>
+  <div class="turn k"><span class="who">Khursheed</span><span class="line">Have they been pushed onto the 6 new APs?</span></div>
+  <div class="turn karl"><span class="who">Karl</span><span class="line">No.</span></div>
+  <div class="turn k"><span class="who">Khursheed</span><span class="line">Let's do that.</span></div>
+</div>
+
+<div class="fix">
+  <div class="label">Root Cause</div>
+  The 6 new APs were claimed and received the policy template, but the local PPSK key table was last pushed before they were added. They have no record of any user keys — every client attempting to connect to a new AP fails authentication. The 24 existing APs already had the keys from previous pushes.
+  <br><br>
+  <strong>Fix:</strong> XIQ → push policy update explicitly to all 6 new APs to sync the PPSK key table. Going forward: push policy to all APs every time new APs are added or new keys are created.
+</div>
+
+<div class="assessment">
+  <div class="label">Assessment</div>
+  Perfect. Three questions, zero hints. Applied Karl's lesson directly — PPSK + local keys + new APs = key synchronization question. Geographic confirmation first, then provisioning model, then the specific gap. No drift into RF or client devices.
+</div>
+
+<hr class="divider">
+
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<h2 id="s3">Scenario 3 — EP1 Migration Split QoE</h2>
+<div class="scenario-meta">Mid-size office · 20 × AP3000 · Migrated XIQ → EP1 two weeks ago · Single SSID · WPA2-PSK</div>
+
+<div class="premise">
+  <strong>Complaint:</strong> Since the EP1 migration, about a third of users are noticeably slower. Two thirds are fine or improved. No SSID changes. CU looks normal in EP1 dashboard.
+</div>
+
+<h3>Dialogue</h3>
+<div class="dialogue">
+  <div class="turn k"><span class="who">Khursheed</span><span class="line">Where are the users with better QoE?</span></div>
+  <div class="turn karl"><span class="who">Karl</span><span class="line">Spread across the building — no particular zone.</span></div>
+  <div class="turn k"><span class="who">Khursheed</span><span class="line">And the ones who are worse?</span></div>
+  <div class="turn karl"><span class="who">Karl</span><span class="line">Also spread across the building — no geographic pattern.</span></div>
+  <div class="turn k"><span class="who">Khursheed</span><span class="line">Both groups had good QoE before the migration?</span></div>
+  <div class="turn karl"><span class="who">Karl</span><span class="line">Yes. No complaints before the migration.</span></div>
+  <div class="turn k"><span class="who">Khursheed</span><span class="line">What type of authentication?</span></div>
+  <div class="turn karl"><span class="who">Karl</span><span class="line">WPA2-PSK. Single SSID, one shared key.</span></div>
+  <div class="turn k"><span class="who">Khursheed</span><span class="line">Any new interference? Did the policy change?</span></div>
+  <div class="turn karl"><span class="who">Karl</span><span class="line">No new interference. Policy migrated as-is from XIQ to EP1 — no intentional changes.</span></div>
+  <div class="turn k"><span class="who">Khursheed</span><span class="line">How did we validate that the exact XIQ policy was replicated in EP1?</span></div>
+  <div class="turn karl"><span class="who">Karl</span><span class="line">EP1 dashboard showed the policy applied to all 20 APs.</span></div>
+  <div class="turn k"><span class="who">Khursheed</span><span class="line">Device same, RF unchanged, policy same… something changed that we haven't found yet.</span></div>
+  <div class="turn karl"><span class="who">Karl</span><span class="line">What else did EP1 touch during the migration that XIQ was managing before?</span></div>
+  <div class="turn k"><span class="who">Khursheed</span><span class="line">Band Steering?</span></div>
+  <div class="turn karl"><span class="who">Karl</span><span class="line">Yes. Check the EP1 Device Template — Band Steering set to Balanced, 80% 2.4 GHz / 20% 5 GHz.</span></div>
+  <div class="turn k"><span class="who">Khursheed</span><span class="line">That's backwards. Let's correct it.</span></div>
+</div>
+
+<div class="fix">
+  <div class="label">Root Cause</div>
+  During XIQ → EP1 migration, the Device Template defaulted Band Steering to Balanced 80/20 — 80% of clients steered to 2.4 GHz, 20% to 5 GHz. XIQ had no Band Steering configured; clients naturally preferred 5 GHz. EP1 actively overrode that. The two thirds reporting great performance landed on 5 GHz. The one third reporting degraded performance were steered to congested 2.4 GHz. No geographic pattern because Band Steering is per-client, not per-AP.
+  <br><br>
+  <strong>Key insight:</strong> "Policy applied to all APs" confirmed deployment. It did not confirm parity with the original XIQ behavior. The dashboard was green; the behavior was wrong.
+  <br><br>
+  <strong>Fix:</strong> EP1 → Device Template → WiFi0 → Band Steering → Encourage 5.0 GHz (or 20/80 distribution) → push policy. Validate post-push with <code>show station</code> on a sample AP — confirm majority of capable clients are on 5 GHz.
+</div>
+
+<div class="assessment">
+  <div class="label">Assessment</div>
+  Needed two hints. The correct thread after confirming no geographic pattern + migration event + split QoE was: what in the EP1 Device Template differs from the XIQ configuration? The right question was asked — "how did we validate the policy was replicated?" — but the answer (dashboard confirmation = deployment, not parity) wasn't pursued far enough. The key insight: XIQ doing nothing with Band Steering was accidentally better than EP1 doing it wrong.
+</div>
+
+<hr class="divider">
+
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<h2 id="s4">Scenario 4 — VLAN 50 No Traffic After Policy Push</h2>
+<div class="scenario-meta">Healthcare clinic · 12 × AP3000 · Three SSIDs: Staff VLAN 10 · Guest VLAN 30 · Medical Devices VLAN 50</div>
+
+<div class="premise">
+  <strong>Complaint:</strong> After a routine XIQ policy update last night, Medical Devices SSID connects fine but devices get no DHCP and can't reach the gateway. Staff and Guest SSIDs unaffected.
+</div>
+
+<h3>Dialogue</h3>
+<div class="dialogue">
+  <div class="turn k"><span class="who">Khursheed</span><span class="line">Are the ports enabled on the switch?</span></div>
+  <div class="turn karl"><span class="who">Karl</span><span class="line">Yes. All switch ports up. Staff and Guest VLANs passing traffic normally.</span></div>
+  <div class="turn k"><span class="who">Khursheed</span><span class="line">VLAN 50 no DHCP — no IP offered. Is ipforwarding enabled?</span></div>
+  <div class="turn karl"><span class="who">Karl</span><span class="line">Yes. And there's your thread — what was changed in last night's policy push?</span></div>
+  <div class="turn k"><span class="who">Khursheed</span><span class="line">What was updated in the policy push last night?</span></div>
+  <div class="turn karl"><span class="who">Karl</span><span class="line">The Supplemental CLI block — <code>enable ipforwarding</code> was added to the template.</span></div>
+  <div class="turn k"><span class="who">Khursheed</span><span class="line">That does not work with Supplemental CLI. It has to be done directly on the switch. Let's remove it from the template and re-push.</span></div>
+</div>
+
+<div class="fix">
+  <div class="label">Root Cause</div>
+  <code>enable ipforwarding</code> and <code>enable dhcp</code> are not idempotent on EXOS. Re-running them via Supplemental CLI on an already-configured switch hangs the push at 15%. The XIQ dashboard shows the push as complete but VLAN 50's configuration on eth0 is left in a partial state. Association works; DHCP and routing do not.
+  <br><br>
+  <strong>Fix:</strong> Remove <code>enable ipforwarding</code> from the Supplemental CLI template entirely. Run manually on the switch once post-factory-reset only. Re-push clean policy. Verify with <code>show interface eth0</code> on AP and <code>show fdb ports 1</code> on switch.
+</div>
+
+<div class="assessment">
+  <div class="label">Assessment</div>
+  Clean. Went straight to the infrastructure layer, confirmed switch ports and DHCP state, then identified the Supplemental CLI idempotency issue from direct experience. The question "what changed in last night's push" was the fastest path and was reached quickly. Four questions, zero hints.
+</div>
+
+<hr class="divider">
+
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<h2 id="s5">Scenario 5 — Throughput Tanks at 20 Minutes</h2>
+<div class="scenario-meta">University library · 8 × AP3000 · WPA3-SAE · Single SSID · Single VLAN</div>
+
+<div class="premise">
+  <strong>Complaint:</strong> Students connect and browse fine. After 20–30 minutes, throughput drops to near zero for specific clients. Other clients on the same AP unaffected. Reboot of the affected client restores service temporarily.
+</div>
+
+<h3>Dialogue</h3>
+<div class="dialogue">
+  <div class="turn k"><span class="who">Khursheed</span><span class="line">What client devices are used by those who drop vs those who don't?</span></div>
+  <div class="turn karl"><span class="who">Karl</span><span class="line">Dropping: MacBooks and iPhones. Unaffected: Windows laptops.</span></div>
+  <div class="turn k"><span class="who">Khursheed</span><span class="line">Did MacBooks and iPhones have issues in the past?</span></div>
+  <div class="turn karl"><span class="who">Karl</span><span class="line">No. This is a recent phenomenon — started about three weeks ago.</span></div>
+  <div class="turn k"><span class="who">Khursheed</span><span class="line">No policy or AP changes three weeks ago?</span></div>
+  <div class="turn karl"><span class="who">Karl</span><span class="line">One change — the GTK rotation interval was reduced from 86400 seconds to 60 seconds.</span></div>
+  <div class="turn k"><span class="who">Khursheed</span><span class="line">This change is not affecting Windows?</span></div>
+  <div class="turn karl"><span class="who">Karl</span><span class="line">Correct. Windows unaffected.</span></div>
+  <div class="turn k"><span class="who">Khursheed</span><span class="line">Let's take the GTK interval back to where it was.</span></div>
+</div>
+
+<div class="fix">
+  <div class="label">Root Cause</div>
+  GTK rotation at 60 seconds on WPA3-SAE. Apple devices (iOS and macOS) have a known sensitivity to rapid GTK rotations. At 60-second intervals, iOS and macOS clients intermittently fail to install the new GTK silently — the association stays up and RSSI looks normal, but broadcast and multicast frames start dropping. After 20–30 minutes of accumulated GTK events the client's key state desynchronizes from the AP. DHCP renewals fail, routing breaks, throughput drops to near zero. Reboot clears the key state temporarily. Windows handles rapid GTK rotation more gracefully.
+  <br><br>
+  <strong>Fix:</strong> XIQ → SSID → Security → GTK Update Interval → restore to 86400 (24 hours) → push policy. For WPA3-SAE with Apple-heavy environments also enable 802.11r FT to reduce re-key events on roam.
+</div>
+
+<div class="assessment">
+  <div class="label">Assessment</div>
+  Excellent. Device type first — the right instinct when the symptom is per-client with no geographic pattern and reboot resolves it. Identified the Apple-specific behavior, confirmed the timing correlation with the GTK change (three weeks = same timeframe as the symptom onset), and went straight to the fix. Four questions, zero hints. Fastest and cleanest of the five scenarios.
+</div>
+
+<hr class="divider">
+
+<footer>
+  WiFi Troubleshooting Scenarios — Extreme Networks AP3000 · XIQ · EP1<br>
+  June 10 2026 · Prepared by Khursheed Khan · For Karl Benedict<br>
+  © 2026 Khursheed Khan
+</footer>
+
+</main>
+</div>
+
+<script>
+const sections = document.querySelectorAll('h2[id]');
+const links = document.querySelectorAll('nav a[href^="#"]');
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      links.forEach(l => l.classList.remove('active'));
+      const a = document.querySelector(`nav a[href="#${e.target.id}"]`);
+      if (a) a.classList.add('active');
+    }
+  });
+}, { rootMargin: '-10% 0px -80% 0px' });
+sections.forEach(s => obs.observe(s));
+</script>
+</body>
+</html>
