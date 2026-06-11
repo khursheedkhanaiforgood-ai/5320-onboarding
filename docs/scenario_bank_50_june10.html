@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Enterprise WiFi Scenario Bank — 50 Socratic Exercises</title>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Libre+Franklin:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --text:#1a1a1a; --muted:#666; --border:#e5e5e5; --surface:#fafafa;
+    --red:#dc2626; --red-bg:#fef2f2; --red-border:#fca5a5;
+    --orange:#c2410c; --orange-bg:#fff7ed; --orange-border:#fdba74;
+    --yellow:#a16207; --yellow-bg:#fefce8; --yellow-border:#fde68a;
+    --green:#15803d; --green-bg:#f0fdf4; --green-border:#86efac;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Libre Baskerville', Georgia, serif; background: #fff; color: var(--text); line-height: 1.6; }
+
+  /* ── Header ── */
+  .site-header { border-bottom: 3px double #1a1a1a; padding: 28px 40px 18px; position: sticky; top: 0; background: #fff; z-index: 100; }
+  .site-header h1 { font-size: 1.55rem; font-weight: 700; letter-spacing: -0.02em; }
+  .site-header .sub { font-family: 'Libre Franklin', sans-serif; font-size: 0.72rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.12em; margin-top: 4px; }
+  .site-header .legend { display: flex; gap: 18px; margin-top: 10px; flex-wrap: wrap; }
+  .site-header .legend span { font-family: 'Libre Franklin', sans-serif; font-size: 0.72rem; font-weight: 700; display: flex; align-items: center; gap: 5px; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+  .dot-red { background: var(--red); }
+  .dot-orange { background: #ea580c; }
+  .dot-yellow { background: #ca8a04; }
+  .dot-green { background: var(--green); }
+
+  /* ── Filter Bar ── */
+  .filter-bar { padding: 14px 40px; background: var(--surface); border-bottom: 1px solid var(--border); display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  .filter-label { font-family: 'Libre Franklin', sans-serif; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-right: 4px; }
+  .filter-btn {
+    font-family: 'Libre Franklin', sans-serif; font-size: 0.72rem; font-weight: 700;
+    padding: 5px 13px; border-radius: 3px; border: 1px solid var(--border);
+    background: #fff; color: var(--text); cursor: pointer; letter-spacing: 0.04em;
+    transition: all 0.15s;
+  }
+  .filter-btn:hover { background: var(--surface); }
+  .filter-btn.active { background: #1a1a1a; color: #fff; border-color: #1a1a1a; }
+  .filter-btn.sev-red.active { background: var(--red); border-color: var(--red); color: #fff; }
+  .filter-btn.sev-orange.active { background: #ea580c; border-color: #ea580c; color: #fff; }
+  .filter-btn.sev-yellow.active { background: #ca8a04; border-color: #ca8a04; color: #fff; }
+  .filter-btn.sev-green.active { background: var(--green); border-color: var(--green); color: #fff; }
+  .filter-divider { width: 1px; height: 22px; background: var(--border); margin: 0 4px; }
+
+  /* ── Stats Bar ── */
+  .stats-bar { padding: 8px 40px; border-bottom: 1px solid var(--border); font-family: 'Libre Franklin', sans-serif; font-size: 0.72rem; color: var(--muted); }
+  #visible-count { font-weight: 700; color: var(--text); }
+
+  /* ── Card Grid ── */
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 20px; padding: 28px 40px 60px; max-width: 1400px; }
+  .card { border: 1px solid var(--border); border-radius: 6px; padding: 20px 22px; background: #fff; transition: box-shadow 0.15s; position: relative; }
+  .card:hover { box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
+  .card.hidden { display: none; }
+
+  /* Severity stripe on left */
+  .card::before { content: ''; position: absolute; top: 0; left: 0; bottom: 0; width: 4px; border-radius: 6px 0 0 6px; }
+  .card[data-severity="red"]::before { background: var(--red); }
+  .card[data-severity="orange"]::before { background: #ea580c; }
+  .card[data-severity="yellow"]::before { background: #ca8a04; }
+  .card[data-severity="green"]::before { background: var(--green); }
+
+  /* Card internals */
+  .card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+  .card-num { font-family: 'Libre Franklin', sans-serif; font-size: 0.65rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; }
+  .sev-badge { font-family: 'Libre Franklin', sans-serif; font-size: 0.68rem; font-weight: 700; padding: 3px 10px; border-radius: 12px; text-transform: uppercase; letter-spacing: 0.06em; }
+  .sev-red { background: var(--red-bg); color: var(--red); border: 1px solid var(--red-border); }
+  .sev-orange { background: var(--orange-bg); color: var(--orange); border: 1px solid var(--orange-border); }
+  .sev-yellow { background: var(--yellow-bg); color: var(--yellow); border: 1px solid var(--yellow-border); }
+  .sev-green { background: var(--green-bg); color: var(--green); border: 1px solid var(--green-border); }
+
+  .card h3 { font-size: 1rem; font-weight: 700; line-height: 1.3; margin-bottom: 8px; }
+  .card-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+  .tag { font-family: 'Libre Franklin', sans-serif; font-size: 0.65rem; font-weight: 700; padding: 2px 8px; border-radius: 2px; background: var(--surface); border: 1px solid var(--border); color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
+  .tag-vendor { color: #1e40af; border-color: #bfdbfe; background: #eff6ff; }
+  .tag-vertical { color: #6b21a8; border-color: #e9d5ff; background: #faf5ff; }
+
+  .card-situation { font-size: 0.9rem; line-height: 1.65; color: #333; }
+  .card-situation strong { font-weight: 700; }
+
+  .card-footer { margin-top: 14px; padding-top: 10px; border-top: 1px solid var(--border); font-family: 'Libre Franklin', sans-serif; font-size: 0.68rem; color: var(--muted); display: flex; justify-content: space-between; }
+
+  /* Footer */
+  .page-footer { text-align: center; padding: 24px; font-family: 'Libre Franklin', sans-serif; font-size: 0.72rem; color: var(--muted); border-top: 1px solid var(--border); }
+</style>
+</head>
+<body>
+
+<div class="site-header">
+  <div class="sub">Socratic Diagnostic Training · Enterprise WiFi · June 10, 2026</div>
+  <h1>Enterprise WiFi Scenario Bank — 50 Exercises</h1>
+  <div class="legend">
+    <span><span class="dot dot-red"></span> Red — Catastrophic, fix now</span>
+    <span><span class="dot dot-orange"></span> Orange — Serious, fix today</span>
+    <span><span class="dot dot-yellow"></span> Yellow — Moderate, schedule soon</span>
+    <span><span class="dot dot-green"></span> Green — Low, revisit tomorrow</span>
+  </div>
+</div>
+
+<div class="filter-bar">
+  <span class="filter-label">Severity</span>
+  <button class="filter-btn active" data-filter="all-sev">All</button>
+  <button class="filter-btn sev-red" data-filter="sev-red">🔴 Red</button>
+  <button class="filter-btn sev-orange" data-filter="sev-orange">🟠 Orange</button>
+  <button class="filter-btn sev-yellow" data-filter="sev-yellow">🟡 Yellow</button>
+  <button class="filter-btn sev-green" data-filter="sev-green">🟢 Green</button>
+  <span class="filter-divider"></span>
+  <span class="filter-label">Vertical</span>
+  <button class="filter-btn active" data-filter="all-vert">All</button>
+  <button class="filter-btn" data-filter="vert-healthcare">Healthcare</button>
+  <button class="filter-btn" data-filter="vert-education">Education</button>
+  <button class="filter-btn" data-filter="vert-stadium">Stadium</button>
+  <button class="filter-btn" data-filter="vert-retail">Retail</button>
+  <button class="filter-btn" data-filter="vert-banking">Banking</button>
+  <button class="filter-btn" data-filter="vert-federal">Federal</button>
+  <button class="filter-btn" data-filter="vert-enterprise">Enterprise</button>
+</div>
+
+<div class="stats-bar">Showing <span id="visible-count">50</span> of 50 scenarios</div>
+
+<div class="grid" id="scenario-grid">
+
+<!-- ═══════════════════════ S01 ═══════════════════════ -->
+<!-- complexity: medium | layer: cloud+client -->
+<div class="card" data-severity="yellow" data-vertical="vert-enterprise">
+  <div class="card-top"><span class="card-num">Scenario 01</span><span class="sev-badge sev-yellow">🟡 Yellow</span></div>
+  <h3>Staff PPSK Fails — But Only for Some People, Only Some Days</h3>
+  <div class="card-tags"><span class="tag tag-vendor">Extreme / XIQ</span><span class="tag tag-vertical">University</span></div>
+  <p class="card-situation">
+    A university IT helpdesk is flooded with tickets: staff are getting "incorrect password" on the staff SSID even though they haven't changed anything. It affects maybe 1 in 5 staff members — the others are fine. One professor noticed it started happening the same week he began wearing his new Apple Watch to work. Another affected user says it only happens after he charges his phone overnight.
+  </p>
+  <div class="card-footer"><span>Source: Extreme Community #95986, #65627</span><span>Extreme · XIQ</span></div>
+</div>
+
+<!-- ═══════════════════════ S02 ═══════════════════════ -->
+<!-- complexity: medium | layer: protocol+cloud -->
+<div class="card" data-severity="orange" data-vertical="vert-enterprise">
+  <div class="card-top"><span class="card-num">Scenario 02</span><span class="sev-badge sev-orange">🟠 Orange</span></div>
+  <h3>VIP Lounge Gets New APs — PPSK Stops Working for Half the Clients</h3>
+  <div class="card-tags"><span class="tag tag-vendor">Extreme / AP4000</span><span class="tag tag-vertical">Conference Center</span></div>
+  <p class="card-situation">
+    A conference center just upgraded its VIP lounge with AP4000 access points to support Wi-Fi 6E. The PPSK credentials that worked on the old AP410Cs still work for half the clients. The other half get authentication failures. There were no credential or policy changes. Looking at the clients that fail, they all seem to be newer high-end laptops and phones — exactly the devices you'd expect to work <em>better</em> on newer hardware.
+  </p>
+  <div class="card-footer"><span>Source: Extreme Community #96584, KB 000104788</span><span>Extreme · XIQ</span></div>
+</div>
+
+<!-- ═══════════════════════ S03 ═══════════════════════ -->
+<!-- complexity: medium | layer: RF+mobility+auth -->
+<div class="card" data-severity="yellow" data-vertical="vert-healthcare">
+  <div class="card-top"><span class="card-num">Scenario 03</span><span class="sev-badge sev-yellow">🟡 Yellow</span></div>
+  <h3>Nurses Drop VoWiFi Calls When Moving Between Wings</h3>
+  <div class="card-tags"><span class="tag tag-vendor">Extreme / IQ Engine</span><span class="tag tag-vertical">Hospital</span></div>
+  <p class="card-situation">
+    Nurses using hospital-issued iPhones for VoWiFi keep dropping calls when moving between wings. Signal is strong after the drop — the phone shows full bars. Toggling WiFi off and on reconnects immediately. The problem never happens when the nurse stays in a single room. It started after the IT team enabled 802.11r fast roaming as part of a planned network upgrade last month.
+  </p>
+  <div class="card-footer"><span>Source: Extreme KB 000110670</span><span>Extreme · IQ Engine</span></div>
+</div>
+
+<!-- ═══════════════════════ S04 ═══════════════════════ -->
+<!-- complexity: low | layer: network+firewall+cloud -->
+<div class="card" data-severity="orange" data-vertical="vert-federal">
+  <div class="card-top"><span class="card-num">Scenario 04</span><span class="sev-badge sev-orange">🟠 Orange</span></div>
+  <h3>12 New APs Deployed at Remote Office — Zero Show Up in Cloud</h3>
+  <div class="card-tags"><span class="tag tag-vendor">Extreme / XIQ</span><span class="tag tag-vertical">Federal Office</span></div>
+  <p class="card-situation">
+    An IT contractor deployed 12 brand-new APs at a remote federal office building. All 12 power on, all get DHCP leases, all can ping 8.8.8.8 from the console. None of them appear in XIQ — not even as "unclaimed." The same AP model was deployed at headquarters last month and connected to XIQ in under 2 minutes. The remote office has a Palo Alto firewall managed by a separate security team.
+  </p>
+  <div class="card-footer"><span>Source: Extreme KB 000057794, Community #97738</span><span>Extreme · XIQ</span></div>
+</div>
+
+<!-- ═══════════════════════ S05 ═══════════════════════ -->
+<!-- complexity: medium | layer: cloud+switch+routing -->
+<div class="card" data-severity="orange" data-vertical="vert-enterprise">
+  <div class="card-top"><span class="card-num">Scenario 05</span><span class="sev-badge sev-orange">🟠 Orange</span></div>
+  <h3>Post-Maintenance Push: 3 Switches Offline in XIQ, Users Still Passing Traffic</h3>
+  <div class="card-tags"><span class="tag tag-vendor">Extreme / EXOS + XIQ</span><span class="tag tag-vertical">Enterprise Campus</span></div>
+  <p class="card-situation">
+    A network team pushed a new policy to 18 EXOS switches during a 2am maintenance window. XIQ reported all updates successful. By 6am, 3 switches show red (offline) in XIQ. Interestingly, users on those 3 switches can still reach the network normally — nothing is broken for end users. Only cloud management is severed. The other 15 switches are fine.
+  </p>
+  <div class="card-footer"><span>Source: Extreme KB 000106544, KB 000093063</span><span>Extreme · XIQ</span></div>
+</div>
+
+<!-- ═══════════════════════ S06 ═══════════════════════ -->
+<!-- complexity: low | layer: cloud+firewall+timing -->
+<div class="card" data-severity="green" data-vertical="vert-education">
+  <div class="card-top"><span class="card-num">Scenario 06</span><span class="sev-badge sev-green">🟢 Green</span></div>
+  <h3>5 New Switches Claimed in XIQ — Stuck "Initializing" for 48 Hours</h3>
+  <div class="card-tags"><span class="tag tag-vendor">Extreme / 5320 + XIQ</span><span class="tag tag-vertical">K-12 School</span></div>
+  <p class="card-situation">
+    A school district deployed 5 new 5320 switches for a building addition. All 5 were claimed in XIQ, IQAgent shows a green heartbeat for all of them, but they've been stuck on "Device Initializing" in the XIQ portal for 48 hours. Any attempt to push config fails. The existing switches in the same building were deployed a year ago and work perfectly. The new switches are on the same subnet as the old ones.
+  </p>
+  <div class="card-footer"><span>Source: Extreme Community #100269</span><span>Extreme · XIQ</span></div>
+</div>
+
+<!-- ═══════════════════════ S07 ═══════════════════════ -->
+<!-- complexity: medium | layer: cloud+firmware -->
+<div class="card" data-severity="orange" data-vertical="vert-retail">
+  <div class="card-top"><span class="card-num">Scenario 07</span><span class="sev-badge sev-orange">🟠 Orange</span></div>
+  <h3>45 Store Switches Randomly Disappear from XIQ — No User Impact</h3>
+  <div class="card-tags"><span class="tag tag-vendor">Extreme / EXOS + XIQ</span><span class="tag tag-vertical">Retail Chain</span></div>
+  <p class="card-situation">
+    A retail chain's 45 EXOS switches across 12 stores started randomly going offline in XIQ last Tuesday — showing red for 30 to 120 minutes then coming back, with no end-user impact. IT is flooded with auto-alerts. The issue is fleet-wide and simultaneous, not isolated to one store. This started the morning after XIQ sent an automatic agent update notification. No one approved or initiated an update.
+  </p>
+  <div class="card-footer"><span>Source: Extreme KB 000126761, Community #113067</span><span>Extreme · XIQ</span></div>
+</div>
+
+<!-- ═══════════════════════ S08 ═══════════════════════ -->
+<!-- complexity: low | layer: RF+switch+L3 -->
+<div class="card" data-severity="orange" data-vertical="vert-enterprise">
+  <div class="card-top"><span class="card-num">Scenario 08</span><span class="sev-badge sev-orange">🟠 Orange</span></div>
+  <h3>New Guest SSID Deployed — Clients Connect But Can't Get IPs</h3>
+  <div class="card-tags"><span class="tag tag-vendor">Extreme / XIQ</span><span class="tag tag-vertical">Corporate Office</span></div>
+  <p class="card-situation">
+    A network team added a Guest SSID (VLAN 100) to their XIQ policy and pushed it to all APs. The SSID broadcasts, clients connect, the 4-way handshake completes — but every client ends up with a 169.254.x.x address. The staff SSID (VLAN 1) is working perfectly. The DHCP server for VLAN 100 is running and serving addresses correctly — a wired device plugged into a VLAN 100 port gets an address instantly.
+  </p>
+  <div class="card-footer"><span>Source: Extreme KB 000061856, Community #96158</span><span>Extreme · XIQ</span></div>
+</div>
+
+<!-- ═══════════════════════ S09 ═══════════════════════ -->
+<!-- complexity: medium | layer: AP firmware+cloud -->
+<div class="card" data-severity="orange" data-vertical="vert-enterprise">
+  <div class="card-top"><span class="card-num">Scenario 09</span><span class="sev-badge sev-orange">🟠 Orange</span></div>
+  <h3>6 New APs Appear in XIQ with No MAC Address — Unresponsive</h3>
+  <div class="card-tags"><span class="tag tag-vendor">Extreme / AP3000</span><span class="tag tag-vertical">Enterprise</span></div>
+  <p class="card-situation">
+    An IT team received 6 AP3000s from a reseller. When they try to claim them in XIQ using the serial numbers, 4 appear in inventory with only the serial number — no MAC address, no firmware version, no model detail. The LED on each is amber. They don't respond to pings. The other 2 APs from the same box claimed and connected normally. All 6 were connected to the same switch.
+  </p>
+  <div class="card-footer"><span>Source: Extreme Community #112850, KB 000092794</span><span>Extreme · AP3000</span></div>
+</div>
+
+<!-- ═══════════════════════ S10 ═══════════════════════ -->
+<!-- complexity: high | layer: AP firmware+cloud -->
+<div class="card" data-severity="red" data-vertical="vert-stadium">
+  <div class="card-top"><span class="card-num">Scenario 10</span><span class="sev-badge sev-red">🔴 Red</span></div>
+  <h3>Firmware Push Last Night — 60% of Stadium APs Offline, Game in 4 Hours</h3>
+  <div class="card-tags"><span class="tag tag-vendor">Extreme / XIQ</span><span class="tag tag-vertical">Stadium / Large Venue</span></div>
+  <p class="card-situation">
+    A stadium pushed an XIQ-recommended firmware update to 340 APs during an overnight maintenance window. This morning, 204 APs (60%) show red in XIQ. Some recover on their own after 10-30 minutes; others stay offline. The playoff game starts in 4 hours. Ticketing, POS, and broadcasting systems all depend on WiFi. The venue operations manager is standing in your office.
+  </p>
+  <div class="card-footer"><span>Source: Extreme Community #112727, #112958</span><span>Extreme · XIQ</span></div>
+</div>
+
+<!-- ═══════════════════════ S11 ═══════════════════════ -->
+<!-- complexity: high | layer: IoT+RF+auth -->
+<div class="card" data-severity="red" data-vertical="vert-healthcare">
+  <div class="card-top"><span class="card-num">Scenario 11</span><span class="sev-badge sev-red">🔴 Red</span></div>
+  <h3>Infusion Pumps Drop Off Monitoring Network — Twice in Two Weeks</h3>
+  <div class="card-tags"><span class="tag tag-vendor">Multi-vendor / Aruba</span><span class="tag tag-vertical">Hospital — Oncology Ward</span></div>
+  <p class="card-situation">
+    Three infusion pumps on the oncology ward went offline from the central nursing monitoring system at 2am. Staff noticed at 6am — 4 hours of autonomous operation without oversight. The pumps were physically powered on, administering medication correctly. This is the second occurrence in two weeks. Same ward, same pumps. The WiFi network underwent a security patch the week before the first incident. Other medical devices on the same ward remained connected.
+  </p>
+  <div class="card-footer"><span>Source: Industry — Healthcare IoT WiFi incident pattern</span><span>Multi-vendor</span></div>
+</div>
+
+<!-- ═══════════════════════ S12 ═══════════════════════ -->
+<!-- complexity: high | layer: RF+QoS+roaming -->
+<div class="card" data-severity="red" data-vertical="vert-healthcare">
+  <div class="card-top"><span class="card-num">Scenario 12</span><span class="sev-badge sev-red">🔴 Red</span></div>
+  <h3>Vocera Nurse Communication System: Calls Drop Every 3-4 Minutes</h3>
+  <div class="card-tags"><span class="tag tag-vendor">Aruba / HPE</span><span class="tag tag-vertical">Hospital — All Wards</span></div>
+  <p class="card-situation">
+    A hospital's Vocera nurse communication badges worked reliably for 2 years. Since the wireless infrastructure was upgraded to Aruba AP-655s last month, nurses drop calls every 3-4 minutes while walking the corridors. Standing still in a room, calls are clear. The clinical communication team is threatening to revert to overhead paging. The biomedical team confirms the Vocera server is healthy. Patient safety is flagged as a concern by the CNO.
+  </p>
+  <div class="card-footer"><span>Source: Aruba Community — Vocera QoS roaming pattern</span><span>Aruba / HPE</span></div>
+</div>
+
+<!-- ═══════════════════════ S13 ═══════════════════════ -->
+<!-- complexity: medium | layer: RF+QoS+L3 -->
+<div class="card" data-severity="orange" data-vertical="vert-healthcare">
+  <div class="card-top"><span class="card-num">Scenario 13</span><span class="sev-badge sev-orange">🟠 Orange</span></div>
+  <h3>Epic EHR Pages Take 8-12 Seconds on WiFi — Perfectly Fine on Wired</h3>
+  <div class="card-tags"><span class="tag tag-vendor">Cisco Meraki</span><span class="tag tag-vertical">Hospital — ER / ICU</span></div>
+  <p class="card-situation">
+    Epic EHR page load times spike from under 1 second to 8-12 seconds approximately every 20 minutes, lasting 2-3 minutes each time. Wired workstations load Epic instantly and consistently. WiFi signal at all affected workstations is strong (–55 dBm or better). The spikes happen on a completely regular schedule — almost like a timer. The problem is worse in the ER and ICU than in other wards.
+  </p>
+  <div class="card-footer"><span>Source: Cisco Meraki Community — EHR wireless latency pattern</span><span>Cisco Meraki</span></div>
+</div>
+
+<!-- ═══════════════════════ S14 ═══════════════════════ -->
+<!-- complexity: high | layer: RF+capacity+L3 -->
+<div class="card" data-severity="red" data-vertical="vert-stadium">
+  <div class="card-top"><span class="card-num">Scenario 14</span><span class="sev-badge sev-red">🔴 Red</span></div>
+  <h3>Stadium WiFi Collapses at Halftime — 22,000 Fans, POS Goes Down</h3>
+  <div class="card-tags"><span class="tag tag-vendor">Cisco Meraki</span><span class="tag tag-vertical">Stadium — Playoff Game</span></div>
+  <p class="card-situation">
+    During last weekend's playoff game (22,000 attendees), WiFi worked fine in the first half. At halftime, when everyone pulled out their phones simultaneously, the entire WiFi network collapsed. No one could connect for 15 minutes. Wired infrastructure was fine. Ticketing kiosks and POS systems — both on WiFi — went down with it. The stadium has 420 APs. Pre-game load testing was not performed.
+  </p>
+  <div class="card-footer"><span>Source: Large venue WiFi design post-mortem pattern</span><span>Cisco Meraki</span></div>
+</div>
+
+<!-- ═══════════════════════ S15 ═══════════════════════ -->
+<!-- complexity: low | layer: L3+DHCP -->
+<div class="card" data-severity="red" data-vertical="vert-stadium">
+  <div class="card-top"><span class="card-num">Scenario 15</span><span class="sev-badge sev-red">🔴 Red</span></div>
+  <h3>Convention Center: New Arrivals Can't Get WiFi — It's Day 1 of a 3-Day Show</h3>
+  <div class="card-tags"><span class="tag tag-vendor">Multi-vendor</span><span class="tag tag-vertical">Convention Center</span></div>
+  <p class="card-situation">
+    A 5,000-person trade show opened its doors at 9am. By 10am, anyone newly trying to join the event WiFi gets no IP address and no connectivity, while early arrivals stay connected without issue. The DHCP server dashboard shows exactly 5,000 active leases with a /22 pool. The event runs for 3 more days. The next concurrent show arrives tomorrow at 8am.
+  </p>
+  <div class="card-footer"><span>Source: Wi-Fi Now / WLPC — Large event DHCP design incident</span><span>Multi-vendor</span></div>
+</div>
+
+<!-- ═══════════════════════ S16 ═══════════════════════ -->
+<!-- complexity: medium | layer: L2+multicast+RF -->
+<div class="card" data-severity="orange" data-vertical="vert-stadium">
+  <div class="card-top"><span class="card-num">Scenario 16</span><span class="sev-badge sev-orange">🟠 Orange</span></div>
+  <h3>Premium Suite AirPlay Works — But East Wing AP CPU Is at 90%</h3>
+  <div class="card-tags"><span class="tag tag-vendor">Extreme / XIQ</span><span class="tag tag-vertical">Arena — Premium Suites</span></div>
+  <p class="card-situation">
+    An arena deployed Bonjour gateway so premium suite holders can use AirPlay to Apple TVs in each suite. AirPlay works. But two weeks after go-live, operations is complaining about sluggish general WiFi in the east wing. Checking XIQ, AP CPU utilization is 85-95% across the east wing during events — significantly higher than the west wing, which has an identical physical layout and the same number of clients.
+  </p>
+  <div class="card-footer"><span>Source: Extreme Community — Bonjour proxy / multicast flood pattern</span><span>Extreme · XIQ</span></div>
+</div>
+
+<!-- ═══════════════════════ S17 ═══════════════════════ -->
+<!-- complexity: medium | layer: client+MDM+RF -->
+<div class="card" data-severity="orange" data-vertical="vert-education">
+  <div class="card-top"><span class="card-num">Scenario 17</span><span class="sev-badge sev-orange">🟠 Orange</span></div>
+  <h3>Monday Morning: 800 School Chromebooks Won't Connect — Personal Devices Fine</h3>
+  <div class="card-tags"><span class="tag tag-vendor">Cisco Meraki</span><span class="tag tag-vertical">K-12 School District</span></div>
+  <p class="card-situation">
+    On Monday morning, none of the district's 800 school-issued Chromebooks can connect to the school WiFi. Teacher personal laptops and student personal phones connect fine. The Chromebooks were working perfectly on Friday. No network changes were made over the weekend. The Google Admin console shows a ChromeOS system update was pushed automatically on Friday evening.
+  </p>
+  <div class="card-footer"><span>Source: Google/Meraki education community — ChromeOS 802.1X client pattern</span><span>Cisco Meraki</span></div>
+</div>
+
+<!-- ═══════════════════════ S18 ═══════════════════════ -->
+<!-- complexity: medium | layer: auth+PKI -->
+<div class="card" data-severity="red" data-vertical="vert-education">
+  <div class="card-top"><span class="card-num">Scenario 18</span><span class="sev-badge sev-red">🔴 Red</span></div>
+  <h3>First Day of Term — All 400 Staff Laptops: "Can't Connect to Network"</h3>
+  <div class="card-tags"><span class="tag tag-vendor">Aruba / HPE</span><span class="tag tag-vertical">University</span></div>
+  <p class="card-situation">
+    First day back from summer break. Every staff member's laptop displays "Cannot connect to network" on the staff WiFi. Students on the student SSID (open + captive portal) are completely fine. Staff SSID uses 802.1X PEAP-MSCHAPv2 with an on-premise RADIUS server. Everything worked perfectly the last day of term in June. No network changes were made over the summer.
+  </p>
+  <div class="card-footer"><span>Source: Aruba / RADIUS certificate expiry pattern — university networks</span><span>Aruba / HPE</span></div>
+</div>
+
+<!-- ═══════════════════════ S19 ═══════════════════════ -->
+<!-- complexity: medium | layer: auth+federation -->
+<div class="card" data-severity="yellow" data-vertical="vert-education">
+  <div class="card-top"><span class="card-num">Scenario 19</span><span class="sev-badge sev-yellow">🟡 Yellow</span></div>
+  <h3>Visiting Professor from MIT: eduroam Works Everywhere Else — Fails Here Only</h3>
+  <div class="card-tags"><span class="tag tag-vendor">Multi-vendor</span><span class="tag tag-vertical">University — Eduroam</span></div>
+  <p class="card-situation">
+    A visiting professor from MIT cannot connect to your university's eduroam network. Her laptop successfully uses eduroam at MIT and at dozens of other institutions she's visited. At your campus, she gets an "authentication failed" error. Your own staff and students connect to eduroam fine. No changes were made to your eduroam configuration recently.
+  </p>
+  <div class="card-footer"><span>Source: eduroam troubleshooting guide / GÉANT federation patterns</span><span>Multi-vendor</span></div>
+</div>
+
+<!-- ═══════════════════════ S20 ═══════════════════════ -->
+<!-- complexity: medium | layer: L4-L7+policy -->
+<div class="card" data-severity="yellow" data-vertical="vert-education">
+  <div class="card-top"><span class="card-num">Scenario 20</span><span class="sev-badge sev-yellow">🟡 Yellow</span></div>
+  <h3>Middle Schoolers Bypass the Content Filter Using VPN Apps</h3>
+  <div class="card-tags"><span class="tag tag-vendor">Multi-vendor / XIQ</span><span class="tag tag-vertical">K-12 School</span></div>
+  <p class="card-situation">
+    The school's content filter blocks social media and gaming sites on the student WiFi. A group of 8th-graders discovered they can access anything blocked by installing free VPN apps on personal phones. The content filter vendor says "traffic is encrypted, we can't inspect it." Parents are complaining. The principal wants IT to fix it before the board meeting next week.
+  </p>
+  <div class="card-footer"><span>Source: K-12 network admin forums — VPN bypass / DNS-over-HTTPS pattern</span><span>Multi-vendor</span></div>
+</div>
+
+<!-- ═══════════════════════ S21 ═══════════════════════ -->
+<!-- complexity: high | layer: RF+capacity+timing -->
+<div class="card" data-severity="red" data-vertical="vert-retail">
+  <div class="card-top"><span class="card-num">Scenario 21</span><span class="sev-badge sev-red">🔴 Red</span></div>
+  <h3>POS Terminals Drop WiFi Every Friday and Saturday Afternoon — Only</h3>
+  <div class="card-tags"><span class="tag tag-vendor">Juniper Mist</span><span class="tag tag-vertical">Retail Flagship Store</span></div>
+  <p class="card-situation">
+    A flagship retail store's WiFi-connected POS terminals drop their network connection every Friday and Saturday between 2pm and 5pm, forcing cashiers to revert to manual card processing. The issue does not occur on weekdays or Sunday — even Sunday, which has similar traffic volume. WiFi signal is strong at all POS locations. The store manager has confirmed there are no scheduled events or deliveries on Fridays that could explain it.
+  </p>
+  <div class="card-footer"><span>Source: Juniper Mist Community — retail POS WiFi instability pattern</span><span>Juniper Mist</span></div>
+</div>
+
+<!-- ═══════════════════════ S22 ═══════════════════════ -->
+<!-- complexity: medium | layer: roaming+legacy client -->
+<div class="card" data-severity="orange" data-vertical="vert-retail">
+  <div class="card-top"><span class="card-num">Scenario 22</span><span class="sev-badge sev-orange">🟠 Orange</span></div>
+  <h3>Warehouse Scanners Lose Connectivity Roaming Between Two APs — iPhones Don't</h3>
+  <div class="card-tags"><span class="tag tag-vendor">Extreme / IQ Engine</span><span class="tag tag-vertical">Warehouse / Retail</span></div>
+  <p class="card-situation">
+    Warehouse staff use Symbol MC3300 barcode scanners running Windows CE. When staff walk from the receiving dock to the storage area — two APs on the same SSID, about 30 meters apart — the scanner loses connectivity for 30-60 seconds. During the same walk, an iPhone and Android device roam between the same two APs with zero interruption. The scanners have been in use for 3 years; the new APs were deployed 6 months ago.
+  </p>
+  <div class="card-footer"><span>Source: Extreme Community — legacy client / aggressive roaming threshold pattern</span><span>Extreme · IQ Engine</span></div>
+</div>
+
+<!-- ═══════════════════════ S23 ═══════════════════════ -->
+<!-- complexity: low | layer: cloud+captive portal+client -->
+<div class="card" data-severity="green" data-vertical="vert-retail">
+  <div class="card-top"><span class="card-num">Scenario 23</span><span class="sev-badge sev-green">🟢 Green</span></div>
+  <h3>Hotel Guest Portal: iPhone Users Stuck in Infinite Loop — Android Works Fine</h3>
+  <div class="card-tags"><span class="tag tag-vendor">Extreme / XIQ CWP</span><span class="tag tag-vertical">Hotel / Hospitality</span></div>
+  <p class="card-situation">
+    Hotel guests on iPhones are getting stuck in a redirect loop on the guest WiFi terms and conditions page. The CWP loads correctly, the guest taps "Accept," and the same page reloads — access is never granted. Android users and laptop users (Mac and Windows) complete the portal and get online without issue. The CWP has been in place for 8 months. No configuration changes were made recently.
+  </p>
+  <div class="card-footer"><span>Source: Extreme Community — iOS captive portal detection pattern</span><span>Extreme · XIQ</span></div>
+</div>
+
+<!-- ═══════════════════════ S24 ═══════════════════════ -->
+<!-- complexity: medium | layer: auth+PKI -->
+<div class="card" data-severity="red" data-vertical="vert-banking">
+  <div class="card-top"><span class="card-num">Scenario 24</span><span class="sev-badge sev-red">🔴 Red</span></div>
+  <h3>RADIUS Cert Renewed Over Weekend — Monday Morning: No Employee Can Auth to WiFi</h3>
+  <div class="card-tags"><span class="tag tag-vendor">Aruba / ClearPass</span><span class="tag tag-vertical">Bank — HQ</span></div>
+  <p class="card-situation">
+    The bank's IT team renewed the RADIUS server SSL certificate over Saturday night as part of a scheduled annual process. Monday morning, no employee can authenticate to the corporate WiFi. The ClearPass RADIUS server shows as "up and running." Wired 802.1X also stopped working. 200 mobile banking terminal operators need WiFi to open branches. The CISO is on the phone.
+  </p>
+  <div class="card-footer"><span>Source: Aruba / ClearPass PKI certificate renewal pattern</span><span>Aruba / ClearPass</span></div>
+</div>
+
+<!-- ═══════════════════════ S25 ═══════════════════════ -->
+<!-- complexity: high | layer: security+WIPS -->
+<div class="card" data-severity="red" data-vertical="vert-banking">
+  <div class="card-top"><span class="card-num">Scenario 25</span><span class="sev-badge sev-red">🔴 Red</span></div>
+  <h3>Rogue AP Transmitting Corporate SSID — Active on Trading Floor for 6 Hours</h3>
+  <div class="card-tags"><span class="tag tag-vendor">Multi-vendor / WIPS</span><span class="tag tag-vertical">Investment Bank — Trading Floor</span></div>
+  <p class="card-situation">
+    The WIPS system just sent a critical alert: an unauthorized AP connected to the wired network on the trading floor is transmitting on the same SSID as the corporate wireless network. The alert estimates it has been active for approximately 6 hours — meaning it was placed before the start of the trading day. You cannot immediately identify its physical location. Trading activity continues on the floor.
+  </p>
+  <div class="card-footer"><span>Source: Financial sector WIPS incident pattern / NIST 800-153</span><span>Multi-vendor</span></div>
+</div>
+
+<!-- ═══════════════════════ S26 ═══════════════════════ -->
+<!-- complexity: high | layer: VLAN+policy+audit -->
+<div class="card" data-severity="red" data-vertical="vert-banking">
+  <div class="card-top"><span class="card-num">Scenario 26</span><span class="sev-badge sev-red">🔴 Red</span></div>
+  <h3>PCI-DSS Auditor Pings POS Terminals from Guest WiFi — Your Policy Said They're Isolated</h3>
+  <div class="card-tags"><span class="tag tag-vendor">Multi-vendor / XIQ</span><span class="tag tag-vertical">Retail Bank / PCI Environment</span></div>
+  <p class="card-situation">
+    During a quarterly PCI-DSS compliance audit, the QSA assessor demonstrates she can ping POS terminal IP addresses directly from the guest WiFi network. Your XIQ policy clearly shows POS VLAN (10) and Guest VLAN (100) as separate network policies. No firewall alerts have triggered. The finding is documented as a critical PCI violation. Your card processing license could be suspended pending remediation.
+  </p>
+  <div class="card-footer"><span>Source: PCI-DSS v4.0 wireless segmentation audit failure pattern</span><span>Multi-vendor</span></div>
+</div>
+
+<!-- ═══════════════════════ S27 ═══════════════════════ -->
+<!-- complexity: high | layer: protocol+policy+client -->
+<div class="card" data-severity="red" data-vertical="vert-federal">
+  <div class="card-top"><span class="card-num">Scenario 27</span><span class="sev-badge sev-red">🔴 Red</span></div>
+  <h3>Cybersecurity Mandate Deployed WPA3-Enterprise + FIPS Mode — 400 Laptops Locked Out</h3>
+  <div class="card-tags"><span class="tag tag-vendor">Multi-vendor</span><span class="tag tag-vertical">Federal Agency</span></div>
+  <p class="card-situation">
+    A federal agency deployed a WPA3-Enterprise SSID with FIPS 140-2 cryptographic mode enabled, as required by a new OMB cybersecurity directive. All 400 government Windows 11 laptops now show "Can't connect to this network." Personal Android phones connect fine. The SSID broadcasts correctly and is visible. No changes were made to the laptops. The agency has a 30-day deadline on the mandate.
+  </p>
+  <div class="card-footer"><span>Source: CISA / NIST 800-153 WPA3 federal implementation issues</span><span>Multi-vendor</span></div>
+</div>
+
+<!-- ═══════════════════════ S28 ═══════════════════════ -->
+<!-- complexity: medium | layer: security+policy -->
+<div class="card" data-severity="orange" data-vertical="vert-federal">
+  <div class="card-top"><span class="card-num">Scenario 28</span><span class="sev-badge sev-orange">🟠 Orange</span></div>
+  <h3>CISA CVE on AP Firmware — Change Freeze Has 5 Weeks Left</h3>
+  <div class="card-tags"><span class="tag tag-vendor">Extreme / IQ Engine</span><span class="tag tag-vertical">Federal Classified Facility</span></div>
+  <p class="card-situation">
+    CISA just published an advisory for a critical CVE affecting the exact AP firmware version running on all 85 APs at a classified facility. The advisory cites active exploitation in the wild. The agency's change management board has a 6-week change freeze in effect for a major compliance audit. The ISSO is asking you what to do. You have no authority to bypass the freeze unilaterally.
+  </p>
+  <div class="card-footer"><span>Source: CISA Known Exploited Vulnerabilities Catalog / federal change management conflict</span><span>Extreme · IQ Engine</span></div>
+</div>
+
+<!-- ═══════════════════════ S29 ═══════════════════════ -->
+<!-- complexity: high | layer: security+L2 -->
+<div class="card" data-severity="red" data-vertical="vert-federal">
+  <div class="card-top"><span class="card-num">Scenario 29</span><span class="sev-badge sev-red">🔴 Red</span></div>
+  <h3>Active 802.11 Deauth Attack — Clients Knocked Off Every 30 Seconds, Still Ongoing</h3>
+  <div class="card-tags"><span class="tag tag-vendor">Multi-vendor / WIPS</span><span class="tag tag-vertical">Federal / Enterprise</span></div>
+  <p class="card-situation">
+    The WIPS system is generating hundreds of alerts per minute showing 802.11 deauthentication frames being injected from a MAC address spoofed to match your corporate BSSID. Clients are being knocked off the network every 30 seconds. The attack started 20 minutes ago and is continuous. Two conference rooms are currently hosting sensitive executive briefings on WiFi-dependent video calls. The attacker's signal appears to come from outside the building perimeter.
+  </p>
+  <div class="card-footer"><span>Source: 802.11 deauth flood / evil twin attack pattern — WLPC 2024</span><span>Multi-vendor</span></div>
+</div>
+
+<!-- ═══════════════════════ S30 ═══════════════════════ -->
+<!-- complexity: medium | layer: switching+L2 -->
+<div class="card" data-severity="orange" data-vertical="vert-enterprise">
+  <div class="card-top"><span class="card-num">Scenario 30</span><span class="sev-badge sev-orange">🟠 Orange</span></div>
+  <h3>Meraki Dashboard: 8 APs "Alerting" — Clients Connected, Can't Reach Anything Outside</h3>
+  <div class="card-tags"><span class="tag tag-vendor">Cisco Meraki</span><span class="tag tag-vertical">Corporate Office — East Wing</span></div>
+  <p class="card-situation">
+    Eight Meraki APs in the east wing suddenly show "Alerting" status in the dashboard. Clients can associate and get IP addresses. Two clients on the same AP can talk to each other. But nothing can reach the internet or any corporate server — DNS fails, pings to the default gateway fail. Wired devices in the same IDF closet as those APs work fine. The other wings are unaffected.
+  </p>
+  <div class="card-footer"><span>Source: Cisco Meraki Community — AP alerting / uplink loop pattern</span><span>Cisco Meraki</span></div>
+</div>
+
+<!-- ═══════════════════════ S31 ═══════════════════════ -->
+<!-- complexity: low | layer: RF+RRM -->
+<div class="card" data-severity="yellow" data-vertical="vert-enterprise">
+  <div class="card-top"><span class="card-num">Scenario 31</span><span class="sev-badge sev-yellow">🟡 Yellow</span></div>
+  <h3>Open-Plan Office: Brief WiFi Blips Multiple Times Daily — Auto-RF Is Changing Channels</h3>
+  <div class="card-tags"><span class="tag tag-vendor">Cisco Meraki</span><span class="tag tag-vertical">Corporate Open Office</span></div>
+  <p class="card-situation">
+    Staff in an open-plan office complain about brief WiFi disruptions several times per day. Checking the Meraki dashboard event log, the APs are automatically changing channels. The changes happen most frequently in the afternoon. Signal strength reports look excellent — no coverage gaps. The building is in a dense office park with multiple neighboring tenants.
+  </p>
+  <div class="card-footer"><span>Source: Cisco Meraki Community — Auto-RF / channel change disruption pattern</span><span>Cisco Meraki</span></div>
+</div>
+
+<!-- ═══════════════════════ S32 ═══════════════════════ -->
+<!-- complexity: medium | layer: firewall+RADIUS -->
+<div class="card" data-severity="orange" data-vertical="vert-enterprise">
+  <div class="card-top"><span class="card-num">Scenario 32</span><span class="sev-badge sev-orange">🟠 Orange</span></div>
+  <h3>New MX Firewalls Deployed — 30% of 802.1X Auth Attempts Randomly Fail</h3>
+  <div class="card-tags"><span class="tag tag-vendor">Cisco Meraki</span><span class="tag tag-vertical">Enterprise — Multi-branch</span></div>
+  <p class="card-situation">
+    After migrating from a third-party firewall to Meraki MX security appliances last week, 30% of 802.1X WiFi authentication attempts fail — but succeed on the next retry. The RADIUS server logs show no errors or rejections for the failed attempts. They simply never arrive at the RADIUS server. The other 70% authenticate without issue. The issue is random, affecting different users on different APs.
+  </p>
+  <div class="card-footer"><span>Source: Cisco Meraki Community — MX RADIUS proxy / UDP fragmentation pattern</span><span>Cisco Meraki</span></div>
+</div>
+
+<!-- ═══════════════════════ S33 ═══════════════════════ -->
+<!-- complexity: medium | layer: MDM+client+cloud -->
+<div class="card" data-severity="yellow" data-vertical="vert-enterprise">
+  <div class="card-top"><span class="card-num">Scenario 33</span><span class="sev-badge sev-yellow">🟡 Yellow</span></div>
+  <h3>MDM-Managed iPhones Loop Connect/Disconnect — Personal iPhones Fine</h3>
+  <div class="card-tags"><span class="tag tag-vendor">Cisco Meraki / SM</span><span class="tag tag-vertical">Enterprise</span></div>
+  <p class="card-situation">
+    After deploying Meraki Systems Manager MDM profiles to company iPhones, users are stuck in a connect/disconnect loop: the MDM profile pushes a WiFi configuration, the phone connects for 5-10 seconds, then disconnects and immediately tries to reconnect. Personal iPhones without the MDM profile connect to the same SSID with no issues. The loop only started appearing on devices that received the new MDM profile pushed last Tuesday.
+  </p>
+  <div class="card-footer"><span>Source: Cisco Meraki SM Community — MDM WiFi profile conflict pattern</span><span>Cisco Meraki</span></div>
+</div>
+
+<!-- ═══════════════════════ S34 ═══════════════════════ -->
+<!-- complexity: medium | layer: firewall+CAPWAP -->
+<div class="card" data-severity="orange" data-vertical="vert-enterprise">
+  <div class="card-top"><span class="card-num">Scenario 34</span><span class="sev-badge sev-orange">🟠 Orange</span></div>
+  <h3>SRX Firewall Upgraded Thursday — 12 Branch APs Disconnected from Mist Cloud</h3>
+  <div class="card-tags"><span class="tag tag-vendor">Juniper Mist / SRX</span><span class="tag tag-vertical">Enterprise — Branch Offices</span></div>
+  <p class="card-situation">
+    Juniper SRX WAN edge firewalls were upgraded at headquarters on Thursday. Since then, 12 APs across 4 branch offices show "Disconnected" in the Mist cloud portal. Main campus APs are fine — they connect directly without going through the SRX. Branch office users can still get network access from the APs (local forwarding works). Only cloud management and monitoring is severed.
+  </p>
+  <div class="card-footer"><span>Source: Juniper Mist Community — SRX upgrade blocking Mist control plane</span><span>Juniper Mist</span></div>
+</div>
+
+<!-- ═══════════════════════ S35 ═══════════════════════ -->
+<!-- complexity: medium | layer: RF+RRM+AI -->
+<div class="card" data-severity="yellow" data-vertical="vert-enterprise">
+  <div class="card-top"><span class="card-num">Scenario 35</span><span class="sev-badge sev-yellow">🟡 Yellow</span></div>
+  <h3>Marvis Keeps Recommending the Same Channel Change — 12 Times in 3 Days</h3>
+  <div class="card-tags"><span class="tag tag-vendor">Juniper Mist / Marvis</span><span class="tag tag-vertical">Enterprise — Lab Wing</span></div>
+  <p class="card-situation">
+    Marvis AI keeps generating "Channel Change Recommended" actions for the same 4 APs in the lab wing. The team accepts each action, Marvis changes the channel, and 2 hours later it recommends another change on the same APs. This has cycled 12 times in 3 days. Lab users report intermittent connectivity issues that coincide with each channel change. The lab is adjacent to a manufacturing floor with heavy industrial equipment.
+  </p>
+  <div class="card-footer"><span>Source: Juniper Mist Community — Marvis RRM loop / persistent interference source</span><span>Juniper Mist</span></div>
+</div>
+
+<!-- ═══════════════════════ S36 ═══════════════════════ -->
+<!-- complexity: low | layer: cloud+provisioning -->
+<div class="card" data-severity="orange" data-vertical="vert-enterprise">
+  <div class="card-top"><span class="card-num">Scenario 36</span><span class="sev-badge sev-orange">🟠 Orange</span></div>
+  <h3>New Batch of AP43s: "Device Not Found" When Claiming — Old AP43s Were Fine</h3>
+  <div class="card-tags"><span class="tag tag-vendor">Juniper Mist</span><span class="tag tag-vertical">Enterprise</span></div>
+  <p class="card-situation">
+    A new batch of 20 AP43 access points arrived for a campus expansion. When the team tries to claim them by serial number in the Mist cloud organization portal, every serial returns "Device not found" — despite verifying the serials match the packing slip exactly. The existing fleet of AP43s was claimed 6 months ago without any issues using the exact same process. The purchasing team confirms the order came from a different Juniper reseller than the first batch.
+  </p>
+  <div class="card-footer"><span>Source: Juniper Mist Community — cloud region / reseller claim gap pattern</span><span>Juniper Mist</span></div>
+</div>
+
+<!-- ═══════════════════════ S37 ═══════════════════════ -->
+<!-- complexity: high | layer: cloud+AP+auth -->
+<div class="card" data-severity="red" data-vertical="vert-enterprise">
+  <div class="card-top"><span class="card-num">Scenario 37</span><span class="sev-badge sev-red">🔴 Red</span></div>
+  <h3>Mist SLE "Successful Connects" Drops to 0% — Monday 9am, Entire Campus</h3>
+  <div class="card-tags"><span class="tag tag-vendor">Juniper Mist</span><span class="tag tag-vertical">Enterprise Campus</span></div>
+  <p class="card-situation">
+    The Mist SLE dashboard just hit 0% for "Successful Connects" across the entire main campus — all buildings, all APs. The alert fired 10 minutes ago. No configuration changes were made. It is 9am Monday — peak association time. Authentication requests are being submitted but not completed. The Mist cloud portal itself is accessible and shows the APs as "Connected."
+  </p>
+  <div class="card-footer"><span>Source: Juniper Mist Community — SLE 0% / RADIUS or cloud auth plane failure</span><span>Juniper Mist</span></div>
+</div>
+
+<!-- ═══════════════════════ S38 ═══════════════════════ -->
+<!-- complexity: high | layer: RADIUS+auth+cloud -->
+<div class="card" data-severity="red" data-vertical="vert-enterprise">
+  <div class="card-top"><span class="card-num">Scenario 38</span><span class="sev-badge sev-red">🔴 Red</span></div>
+  <h3>ClearPass: All Policy Services in Timeout State — 2,800 WiFi Devices Expiring</h3>
+  <div class="card-tags"><span class="tag tag-vendor">Aruba / ClearPass</span><span class="tag tag-vertical">Enterprise — Multi-building</span></div>
+  <p class="card-situation">
+    ClearPass Policy Manager is showing all policy services as "timeout." Authentication requests are queuing but not processing. Your entire wireless network — 2,800 devices across 6 buildings — requires 802.1X. As sessions expire over the next 30-60 minutes, users will progressively lose WiFi access. This started 25 minutes ago. No ClearPass configuration changes were made. Servers hosting ClearPass show normal CPU and memory.
+  </p>
+  <div class="card-footer"><span>Source: Aruba ClearPass Community — policy service deadlock / database connection pool</span><span>Aruba / HPE</span></div>
+</div>
+
+<!-- ═══════════════════════ S39 ═══════════════════════ -->
+<!-- complexity: medium | layer: L2+VLAN+tunnel -->
+<div class="card" data-severity="orange" data-vertical="vert-enterprise">
+  <div class="card-top"><span class="card-num">Scenario 39</span><span class="sev-badge sev-orange">🟠 Orange</span></div>
+  <h3>Post-Migration: Voice VLAN Gets No DHCP — Staff and Guest VLANs Fine</h3>
+  <div class="card-tags"><span class="tag tag-vendor">Aruba / HPE Central</span><span class="tag tag-vertical">Enterprise Campus</span></div>
+  <p class="card-situation">
+    After migrating from Aruba Instant (distributed, bridge mode) to Aruba Central with a Mobility Controller (tunnel mode) last weekend, users on VLAN 20 (voice/unified communications) cannot get DHCP. VLAN 1 (staff) and VLAN 30 (guest) work normally. Voice VLAN functioned perfectly in the old Instant environment. VoIP handsets are stranded with no IP addresses.
+  </p>
+  <div class="card-footer"><span>Source: Aruba Community — tunnel vs bridge mode VLAN forwarding pattern</span><span>Aruba / HPE</span></div>
+</div>
+
+<!-- ═══════════════════════ S40 ═══════════════════════ -->
+<!-- complexity: low | layer: RF+RRM -->
+<div class="card" data-severity="yellow" data-vertical="vert-enterprise">
+  <div class="card-top"><span class="card-num">Scenario 40</span><span class="sev-badge sev-yellow">🟡 Yellow</span></div>
+  <h3>ARM Keeps Bouncing 4 Server Room APs Between Channels 36 and 44</h3>
+  <div class="card-tags"><span class="tag tag-vendor">Aruba / ARM</span><span class="tag tag-vertical">Enterprise — Data Center / Server Room</span></div>
+  <p class="card-situation">
+    Adaptive Radio Management keeps flipping 4 APs in the server room between channels 36 and 44 every 15-20 minutes. The server room has no WiFi clients — it's IT-only coverage for occasional laptop access. Every channel flip causes a 10-15 second disruption. ARM is presumably trying to optimize, but it's making things worse. The behavior has been occurring for 2 weeks and users are frustrated.
+  </p>
+  <div class="card-footer"><span>Source: Aruba Community — ARM oscillation / no client anchor pattern</span><span>Aruba / HPE</span></div>
+</div>
+
+<!-- ═══════════════════════ S41 ═══════════════════════ -->
+<!-- complexity: medium | layer: RADIUS+L2+client -->
+<div class="card" data-severity="orange" data-vertical="vert-banking">
+  <div class="card-top"><span class="card-num">Scenario 41</span><span class="sev-badge sev-orange">🟠 Orange</span></div>
+  <h3>Dynamic VLAN from RADIUS Works for Laptops — iOS and Android Always Land on Wrong VLAN</h3>
+  <div class="card-tags"><span class="tag tag-vendor">Aruba / HPE</span><span class="tag tag-vertical">Bank — Branch Network</span></div>
+  <p class="card-situation">
+    The bank's RADIUS server sends a Tunnel-Private-Group-Id attribute during 802.1X authentication to dynamically assign clients to VLANs. It works correctly for all Windows and macOS laptops — they land on the right VLAN. But iOS and Android devices consistently land on the default VLAN regardless of the RADIUS response. All devices use the same SSID and the same RADIUS policy. The RADIUS logs show the attribute being sent for all clients.
+  </p>
+  <div class="card-footer"><span>Source: Aruba Community — RADIUS dynamic VLAN / client supplicant attribute handling</span><span>Aruba / HPE</span></div>
+</div>
+
+<!-- ═══════════════════════ S42 ═══════════════════════ -->
+<!-- complexity: medium | layer: RF+L2 -->
+<div class="card" data-severity="yellow" data-vertical="vert-enterprise">
+  <div class="card-top"><span class="card-num">Scenario 42</span><span class="sev-badge sev-yellow">🟡 Yellow</span></div>
+  <h3>2.4GHz Spectrum at 70% Utilization at 2am — With Zero Clients Connected</h3>
+  <div class="card-tags"><span class="tag tag-vendor">Multi-vendor</span><span class="tag tag-vertical">Corporate Office</span></div>
+  <p class="card-situation">
+    An RF analyzer shows 2.4GHz channel utilization consistently at 65-75% — even at 2am when no users are present and no client devices are connected. XIQ/Meraki confirms zero client associations overnight. The site has few neighboring APs and no visible external interference. No changes were made to the wireless infrastructure recently.
+  </p>
+  <div class="card-footer"><span>Source: WLPC 2024 — hidden node / hidden SSID probe storm / non-WiFi interference</span><span>Multi-vendor</span></div>
+</div>
+
+<!-- ═══════════════════════ S43 ═══════════════════════ -->
+<!-- complexity: low | layer: RF+rates -->
+<div class="card" data-severity="yellow" data-vertical="vert-healthcare">
+  <div class="card-top"><span class="card-num">Scenario 43</span><span class="sev-badge sev-yellow">🟡 Yellow</span></div>
+  <h3>Radiology WiFi: Half the Throughput of Everywhere Else — Identical Setup</h3>
+  <div class="card-tags"><span class="tag tag-vendor">Multi-vendor / XIQ</span><span class="tag tag-vertical">Hospital — Radiology</span></div>
+  <p class="card-situation">
+    WiFi performance in the radiology department is consistently half what it is in other hospital departments with identical AP models, identical client counts, and identical signal strength. Checking the AP stats in XIQ, the minimum connected client data rate in radiology shows 1 Mbps. In every other department, the minimum connected rate is 12 Mbps or higher.
+  </p>
+  <div class="card-footer"><span>Source: WLPC / WLANPros — legacy client BSS drag / minimum rate enforcement</span><span>Multi-vendor</span></div>
+</div>
+
+<!-- ═══════════════════════ S44 ═══════════════════════ -->
+<!-- complexity: high | layer: RF+RRM+multi-vendor -->
+<div class="card" data-severity="orange" data-vertical="vert-stadium">
+  <div class="card-top"><span class="card-num">Scenario 44</span><span class="sev-badge sev-orange">🟠 Orange</span></div>
+  <h3>Two Tenants, Two Vendors, Overlapping Coverage — Both Networks Degraded</h3>
+  <div class="card-tags"><span class="tag tag-vendor">Extreme + Cisco Meraki</span><span class="tag tag-vertical">Shared Convention Space</span></div>
+  <p class="card-situation">
+    A convention center has two permanent tenants in adjacent booths: one running Extreme Networks APs with Automatic Channel Selection (ACS), the other running Cisco Meraki with Auto-RF enabled. Both networks have significant coverage overlap. Both vendors' channel utilization reports show the other as the primary interferer. Both networks are degraded compared to when either operated alone. Each vendor's support team is blaming the other.
+  </p>
+  <div class="card-footer"><span>Source: WLPC — multi-vendor RRM conflict / co-channel interference spiral</span><span>Multi-vendor</span></div>
+</div>
+
+<!-- ═══════════════════════ S45 ═══════════════════════ -->
+<!-- complexity: medium | layer: security+IoT+protocol -->
+<div class="card" data-severity="orange" data-vertical="vert-healthcare">
+  <div class="card-top"><span class="card-num">Scenario 45</span><span class="sev-badge sev-orange">🟠 Orange</span></div>
+  <h3>Security Patch Applied — 40 IoT Devices (Thermostats, Badge Readers) Go Offline</h3>
+  <div class="card-tags"><span class="tag tag-vendor">Multi-vendor</span><span class="tag tag-vertical">Healthcare / Retail</span></div>
+  <p class="card-situation">
+    After applying a firmware security patch to the wireless infrastructure that addressed a known WPA2 vulnerability, 40 IoT devices — smart thermostats, wireless badge readers, and environmental sensors — went offline. Laptops and phones on the same SSID are completely unaffected. All 40 devices use WPA2-Personal. The devices have no web console or display to show error messages, and most are physically inaccessible (ceiling-mounted or behind panels).
+  </p>
+  <div class="card-footer"><span>Source: Industry — KRACK / PMF enforcement / IoT WPA2 client compatibility</span><span>Multi-vendor</span></div>
+</div>
+
+<!-- ═══════════════════════ S46 ═══════════════════════ -->
+<!-- complexity: medium | layer: L2+multicast+VLAN -->
+<div class="card" data-severity="yellow" data-vertical="vert-education">
+  <div class="card-top"><span class="card-num">Scenario 46</span><span class="sev-badge sev-yellow">🟡 Yellow</span></div>
+  <h3>AirPrint Printers Visible from Wired — Invisible from WiFi Student VLAN</h3>
+  <div class="card-tags"><span class="tag tag-vendor">Multi-vendor / XIQ</span><span class="tag tag-vertical">University / K-12</span></div>
+  <p class="card-situation">
+    Faculty and students cannot print to network printers from WiFi. Wired printing works fine. Printers are on VLAN 5 (wired infrastructure), students are on VLAN 20 (student WiFi), and there is no Bonjour/mDNS proxy configured in the network. Printers occasionally appear in the AirPrint list on WiFi clients, but disappear after a few minutes and can't reliably be selected. The printers have valid IPs and respond to pings from wired devices.
+  </p>
+  <div class="card-footer"><span>Source: WLPC / Airheads — mDNS proxy / inter-VLAN Bonjour propagation</span><span>Multi-vendor</span></div>
+</div>
+
+<!-- ═══════════════════════ S47 ═══════════════════════ -->
+<!-- complexity: medium | layer: RF+DFS -->
+<div class="card" data-severity="yellow" data-vertical="vert-enterprise">
+  <div class="card-top"><span class="card-num">Scenario 47</span><span class="sev-badge sev-yellow">🟡 Yellow</span></div>
+  <h3>Every Few Days, 10-15 Clients Lose Connectivity for 60 Seconds — Same APs Each Time</h3>
+  <div class="card-tags"><span class="tag tag-vendor">Multi-vendor</span><span class="tag tag-vertical">Enterprise — Near Airport</span></div>
+  <p class="card-situation">
+    Every few days, 10-15 clients on specific 5GHz APs suddenly lose connectivity for 30-60 seconds. It always affects the same subset of APs. Reviewing the AP event logs, those APs perform a channel change at exactly the moment of each disruption. The campus is approximately 3 miles from an international airport and has an FAA weather radar installation 8 miles to the south. The APs are configured to use channels 100-140.
+  </p>
+  <div class="card-footer"><span>Source: WLPC / Wi-Fi Alliance — DFS radar detection / channel move event</span><span>Multi-vendor</span></div>
+</div>
+
+<!-- ═══════════════════════ S48 ═══════════════════════ -->
+<!-- complexity: medium | layer: captive portal+client+TLS -->
+<div class="card" data-severity="yellow" data-vertical="vert-retail">
+  <div class="card-top"><span class="card-num">Scenario 48</span><span class="sev-badge sev-yellow">🟡 Yellow</span></div>
+  <h3>iOS 14+ Users: Captive Portal Never Appears — Older iPhones and Android Are Fine</h3>
+  <div class="card-tags"><span class="tag tag-vendor">Multi-vendor / CWP</span><span class="tag tag-vertical">Hotel / Retail</span></div>
+  <p class="card-situation">
+    Guests on iPhones running iOS 14 or later connect to the guest SSID but the captive portal login page never appears. Older iPhones (iOS 13) and all Android devices get the portal correctly and connect successfully. When iOS 14+ users manually open a browser, they see a "This connection is not private" security warning and cannot bypass it. The captive portal was working for all devices before iOS 14 was released.
+  </p>
+  <div class="card-footer"><span>Source: WLPC 2021 / Apple WWDC — HSTS preload / iOS captive portal mini-browser TLS pattern</span><span>Multi-vendor</span></div>
+</div>
+
+<!-- ═══════════════════════ S49 ═══════════════════════ -->
+<!-- complexity: high | layer: RF+protocol+legacy client -->
+<div class="card" data-severity="orange" data-vertical="vert-enterprise">
+  <div class="card-top"><span class="card-num">Scenario 49</span><span class="sev-badge sev-orange">🟠 Orange</span></div>
+  <h3>WiFi 6 APs Deployed — Older Intel Laptops Show High Packet Loss; New Ones Are Fine</h3>
+  <div class="card-tags"><span class="tag tag-vendor">Multi-vendor / WiFi 6</span><span class="tag tag-vertical">Enterprise — Mixed Client Fleet</span></div>
+  <p class="card-situation">
+    A campus just deployed WiFi 6 APs with OFDMA enabled. A wave of complaints arrived from users with older laptops — specifically those with Intel Wireless-AC 7265 and 8265 adapters. These clients associate, get an IP, but experience severe packet loss (30-50%). Laptops with Intel AX200 or later WiFi 6 adapters on the same APs work perfectly. The affected laptops worked fine on the previous WiFi 5 APs.
+  </p>
+  <div class="card-footer"><span>Source: Intel WiFi driver / 802.11ax OFDMA trigger frame compatibility — community reports 2022</span><span>Multi-vendor</span></div>
+</div>
+
+<!-- ═══════════════════════ S50 ═══════════════════════ -->
+<!-- complexity: medium | layer: cloud+policy+time -->
+<div class="card" data-severity="orange" data-vertical="vert-education">
+  <div class="card-top"><span class="card-num">Scenario 50</span><span class="sev-badge sev-orange">🟠 Orange</span></div>
+  <h3>Every Night at Midnight, Students Get Kicked Off — And Morning Firewall Rules Are Wrong</h3>
+  <div class="card-tags"><span class="tag tag-vendor">Extreme / XIQ · Multi-vendor</span><span class="tag tag-vertical">K-12 School District</span></div>
+  <p class="card-situation">
+    Two compounding issues: (1) every night at midnight, students connected to the after-hours study lab SSID get disconnected, even though the SSID is supposed to be available 24/7. (2) More seriously, every morning when classes begin at 6am, the student SSID shows the wrong firewall rule set — students can access social media and gaming sites that should be blocked during school hours. Both patterns are 100% reproducible and have been occurring for two weeks since a policy refresh was pushed in XIQ.
+  </p>
+  <div class="card-footer"><span>Source: XIQ time-based policy / role reversion pattern — education district</span><span>Extreme · XIQ</span></div>
+</div>
+
+</div><!-- /grid -->
+
+<div class="page-footer">© 2026 Khursheed Khan · Extreme Networks Training · Not for distribution · 50 scenarios · All severity ratings reflect business impact, not technical complexity</div>
+
+<script>
+  const grid = document.getElementById('scenario-grid');
+  const cards = Array.from(grid.querySelectorAll('.card'));
+  const countEl = document.getElementById('visible-count');
+
+  let activeSev = 'all-sev';
+  let activeVert = 'all-vert';
+
+  function applyFilters() {
+    let visible = 0;
+    cards.forEach(c => {
+      const sevMatch = activeSev === 'all-sev' || c.dataset.severity === activeSev.replace('sev-','');
+      const vertMatch = activeVert === 'all-vert' || c.dataset.vertical === activeVert;
+      if (sevMatch && vertMatch) { c.classList.remove('hidden'); visible++; }
+      else { c.classList.add('hidden'); }
+    });
+    countEl.textContent = visible;
+  }
+
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const f = btn.dataset.filter;
+      if (['all-sev','sev-red','sev-orange','sev-yellow','sev-green'].includes(f)) {
+        document.querySelectorAll('[data-filter^="sev"],[data-filter="all-sev"]').forEach(b => b.classList.remove('active'));
+        activeSev = f;
+      } else {
+        document.querySelectorAll('[data-filter^="vert"],[data-filter="all-vert"]').forEach(b => b.classList.remove('active'));
+        activeVert = f;
+      }
+      btn.classList.add('active');
+      applyFilters();
+    });
+  });
+</script>
+</body>
+</html>
