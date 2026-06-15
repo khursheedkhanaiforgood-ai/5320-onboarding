@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Session Summary — June 11–12 2026 · AP CLI + Networking Fundamentals</title>
+<style>
+  :root {
+    --bg: #faf9f7; --surface: #fff; --surface2: #f4f3f0;
+    --border: #e5e2dc; --text: #1a1a1a; --muted: #666;
+    --accent: #1a5276; --green: #1a7a40; --yellow: #8a6000;
+    --red: #8b1a1a; --blue: #1a4a8a; --purple: #5a1a7a;
+    --serif: 'Georgia', 'Libre Baskerville', serif;
+    --mono: 'JetBrains Mono', 'Cascadia Code', monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: var(--serif); font-size: 16px; line-height: 1.7; }
+
+  /* ── Layout ── */
+  .layout { display: flex; min-height: 100vh; }
+  nav { width: 260px; min-width: 260px; background: var(--surface); border-right: 1px solid var(--border); position: sticky; top: 0; height: 100vh; overflow-y: auto; padding: 24px 0; }
+  nav .logo { padding: 0 20px 20px; border-bottom: 1px solid var(--border); margin-bottom: 16px; }
+  nav .logo h2 { font-family: var(--serif); font-size: 13px; color: var(--accent); font-weight: 700; letter-spacing: .02em; }
+  nav .logo p { font-size: 11px; color: var(--muted); margin-top: 4px; font-family: sans-serif; }
+  nav a { display: block; padding: 5px 20px; color: var(--muted); text-decoration: none; font-size: 12.5px; font-family: sans-serif; border-left: 2px solid transparent; transition: all .15s; }
+  nav a:hover, nav a.active { color: var(--accent); border-left-color: var(--accent); background: rgba(26,82,118,.05); }
+  nav .sec { padding: 14px 20px 4px; font-size: 10px; color: #aaa; text-transform: uppercase; letter-spacing: .12em; font-family: sans-serif; }
+  main { flex: 1; padding: 48px 56px; max-width: 860px; }
+
+  /* ── Typography ── */
+  h1 { font-size: 28px; color: var(--accent); margin-bottom: 6px; font-weight: 700; }
+  .meta { font-size: 13px; color: var(--muted); font-family: sans-serif; margin-bottom: 36px; border-bottom: 1px solid var(--border); padding-bottom: 16px; }
+  h2 { font-size: 20px; margin: 48px 0 14px; padding-bottom: 8px; border-bottom: 2px solid var(--border); color: var(--accent); }
+  h3 { font-size: 15px; color: var(--text); margin: 24px 0 8px; font-weight: 700; }
+  p { margin-bottom: 10px; }
+  ul { margin-left: 20px; line-height: 2; font-family: sans-serif; font-size: 14px; margin-bottom: 10px; }
+
+  /* ── Code ── */
+  pre { background: #1a1a2e; border: 1px solid #333; border-radius: 6px; padding: 14px 16px; overflow-x: auto; margin: 10px 0 16px; line-height: 1.55; }
+  pre code { font-family: var(--mono); font-size: 12.5px; color: #a8d8a8; }
+  code { font-family: var(--mono); font-size: 13px; background: #f0ede8; padding: 1px 5px; border-radius: 3px; color: var(--accent); }
+
+  /* ── Callouts ── */
+  .note { background: rgba(26,82,118,.06); border-left: 3px solid var(--accent); padding: 10px 14px; margin: 12px 0; border-radius: 0 4px 4px 0; font-size: 14px; font-family: sans-serif; }
+  .win  { background: rgba(26,122,64,.06); border-left: 3px solid var(--green); padding: 10px 14px; margin: 12px 0; border-radius: 0 4px 4px 0; font-size: 14px; font-family: sans-serif; }
+  .warn { background: rgba(138,96,0,.06); border-left: 3px solid var(--yellow); padding: 10px 14px; margin: 12px 0; border-radius: 0 4px 4px 0; font-size: 14px; font-family: sans-serif; }
+  .block { background: rgba(139,26,26,.06); border-left: 3px solid var(--red); padding: 10px 14px; margin: 12px 0; border-radius: 0 4px 4px 0; font-size: 14px; font-family: sans-serif; }
+
+  /* ── Tables ── */
+  table { width: 100%; border-collapse: collapse; margin: 12px 0 20px; font-size: 13.5px; font-family: sans-serif; }
+  th { background: var(--surface2); text-align: left; padding: 7px 12px; font-weight: 700; font-size: 11px; text-transform: uppercase; letter-spacing: .05em; border-bottom: 2px solid var(--border); color: var(--muted); }
+  td { padding: 8px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  tr:hover td { background: var(--surface2); }
+  td.g { color: var(--green); font-weight: 700; }
+  td.r { color: var(--red); font-weight: 700; }
+  td.y { color: var(--yellow); font-weight: 700; }
+
+  /* ── Step list ── */
+  .steps { counter-reset: step; list-style: none; margin: 0 0 16px; padding: 0; }
+  .steps li { counter-increment: step; display: flex; gap: 14px; margin-bottom: 12px; font-family: sans-serif; font-size: 14px; }
+  .steps li::before { content: counter(step); min-width: 26px; height: 26px; background: var(--accent); color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; flex-shrink: 0; margin-top: 2px; }
+
+  /* ── Shopping list ── */
+  .shop { border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin: 16px 0; }
+  .shop-header { background: var(--surface2); padding: 10px 16px; font-family: sans-serif; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+  .shop-row { display: flex; justify-content: space-between; padding: 10px 16px; border-bottom: 1px solid var(--border); font-family: sans-serif; font-size: 14px; }
+  .shop-row:last-child { border-bottom: none; }
+  .shop-row .item { color: var(--text); }
+  .shop-row .price { color: var(--green); font-weight: 700; }
+  .shop-total { background: var(--surface2); padding: 10px 16px; display: flex; justify-content: space-between; font-family: sans-serif; font-size: 14px; font-weight: 700; }
+
+  /* ── CLI table ── */
+  .cli-table { border: 1px solid var(--border); border-radius: 6px; overflow: hidden; margin: 12px 0 20px; }
+  .cli-table .cli-header { background: #1a1a2e; padding: 8px 14px; font-family: var(--mono); font-size: 12px; color: #7ec8e3; }
+  .cli-row { display: flex; padding: 8px 14px; border-bottom: 1px solid var(--border); gap: 16px; align-items: flex-start; }
+  .cli-row:last-child { border-bottom: none; }
+  .cli-row:hover { background: var(--surface2); }
+  .cli-cmd { font-family: var(--mono); font-size: 12.5px; color: var(--accent); min-width: 280px; }
+  .cli-note { font-family: sans-serif; font-size: 13px; color: var(--muted); flex: 1; }
+  .badge { display: inline-block; font-size: 10px; padding: 1px 7px; border-radius: 10px; font-weight: 700; font-family: sans-serif; margin-left: 6px; }
+  .b-ok  { background: rgba(26,122,64,.15); color: var(--green); }
+  .b-inv { background: rgba(139,26,26,.15); color: var(--red); }
+  .b-key { background: rgba(26,82,118,.15); color: var(--accent); }
+
+  footer { margin-top: 64px; padding-top: 20px; border-top: 1px solid var(--border); color: var(--muted); font-size: 12px; font-family: sans-serif; }
+</style>
+</head>
+<body>
+<div class="layout">
+
+<!-- ── Sidebar ── -->
+<nav>
+  <div class="logo">
+    <h2>Session Summary</h2>
+    <p>June 11–12 2026 · AP CLI + Networking</p>
+  </div>
+  <span class="sec">Session</span>
+  <a href="#s1">Accomplished</a>
+  <a href="#s2">AP Identity</a>
+  <span class="sec">AP CLI Learnings</span>
+  <a href="#s3">Pagination &amp; Filtering</a>
+  <a href="#s4">_debug vs _kdebug</a>
+  <a href="#s5">show station + VLAN</a>
+  <a href="#s6">Capture + ADSP</a>
+  <span class="sec">Networking</span>
+  <a href="#s7">EP1 Reverse Tunnel</a>
+  <a href="#s8">Serial Console</a>
+  <span class="sec">Customer Issue</span>
+  <a href="#s9">VoIP Basic Rate</a>
+  <a href="#s10">Stationary Drops</a>
+  <span class="sec">WLAN Pi R4</span>
+  <a href="#s11">Web UI Exploration</a>
+  <span class="sec">Home Lab VPN</span>
+  <a href="#s12">Shopping List</a>
+  <a href="#s13">Setup Guide</a>
+  <span class="sec">Next</span>
+  <a href="#s14">Blockers &amp; Pending</a>
+</nav>
+
+<!-- ── Main ── -->
+<main>
+
+<h1>AP CLI + Networking Fundamentals</h1>
+<div class="meta">
+  June 11–12 2026 &nbsp;·&nbsp; AP: AH-556680 (AP3000-WW, IQ Engine 10.8r6) &nbsp;·&nbsp; Location: WC Seattle Lab &nbsp;·&nbsp;
+  Project: <code>5320-onboarding-agent</code>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════════════ -->
+<h2 id="s1">Accomplished</h2>
+
+<table>
+<thead><tr><th>Item</th><th>Outcome</th></tr></thead>
+<tbody>
+<tr><td><strong>IQ Engine CLI corrections</strong> — pagination, filter pipe, debug commands</td><td class="g">✓ Learned &amp; documented</td></tr>
+<tr><td><strong>_debug / _kdebug mechanics</strong> — two-layer diagnostic architecture explained</td><td class="g">✓ Documented</td></tr>
+<tr><td><strong>show station + VLAN mapping</strong> — UPID column confirmed, | i filter working</td><td class="g">✓ Verified on AP</td></tr>
+<tr><td><strong>EP1 reverse tunnel SSH</strong> — understood why hotel SSH works, direct does not</td><td class="g">✓ Understood</td></tr>
+<tr><td><strong>Serial console access to AP1</strong> — /dev/tty.usbserial-BG01WC92 at 115200</td><td class="g">✓ Working</td></tr>
+<tr><td><strong>VoIP basic rate / stickiness</strong> — customer issue analysed (basic rate → beacon threshold → roam)</td><td class="g">✓ Analysed</td></tr>
+<tr><td><strong>Stationary call drops</strong> — root cause narrowed to GTK/DTIM rhythm vs RF environment</td><td class="g">✓ Narrowed</td></tr>
+<tr><td><strong>WLAN Pi R4 web UI</strong> — accessible at 169.254.42.1 via USB OTG, Cockpit live</td><td class="g">✓ Accessible</td></tr>
+<tr><td><strong>Home lab VPN plan</strong> — Raspberry Pi 4 + Tailscale, shopping list &amp; setup guide written</td><td class="g">✓ Ready to execute</td></tr>
+<tr><td><strong>pcap from AP</strong> — blocked by ADSP sensor mode on all interfaces</td><td class="r">✗ Blocked</td></tr>
+<tr><td><strong>WLAN Pi SSH access</strong> — password unknown, Cockpit login fails</td><td class="r">✗ Blocked</td></tr>
+</tbody>
+</table>
+
+<!-- ══════════════════════════════════════════════════════════════════════════ -->
+<h2 id="s2">AP Identity &amp; State</h2>
+
+<table>
+<thead><tr><th>Parameter</th><th>Value</th></tr></thead>
+<tbody>
+<tr><td>Hostname</td><td><code>AH-556680</code></td></tr>
+<tr><td>Platform</td><td>AP3000-WW</td></tr>
+<tr><td>Firmware</td><td>IQ Engine 10.8r6</td></tr>
+<tr><td>Management IP</td><td>192.168.0.12</td></tr>
+<tr><td>wifi0 (2.4 GHz)</td><td>Channel Down / 20 MHz — no clients</td></tr>
+<tr><td>wifi1 (5 GHz)</td><td>Channel 157 / 80 MHz — Profile: 5G_Khursheed_80MHz</td></tr>
+<tr><td>Active SSIDs</td><td>WC_Seattle-PPSK (wifi1.1) · WC_Seattle_Guest (wifi1.2)</td></tr>
+<tr><td>VLAN map</td><td>TeamUSA→10 · TeamAUS→20 · Guest→30</td></tr>
+</tbody>
+</table>
+
+<!-- ══════════════════════════════════════════════════════════════════════════ -->
+<h2 id="s3">Pagination &amp; Filtering on IQ Engine</h2>
+
+<div class="block"><strong>terminal length</strong> is Cisco IOS syntax — it returns <code>unknown keyword or invalid input</code> on IQ Engine. Do not use it.</div>
+
+<h3>Alternatives</h3>
+
+<div class="cli-table">
+  <div class="cli-header">AH-556680# — filtering &amp; scoping</div>
+  <div class="cli-row"><span class="cli-cmd">show log buffered 100</span><span class="cli-note">Last 100 lines of log buffer</span></div>
+  <div class="cli-row"><span class="cli-cmd">show log buffered</span><span class="cli-note">Full log buffer (may scroll)</span></div>
+  <div class="cli-row"><span class="cli-cmd">show running-config | i vlan</span><span class="cli-note"><code>| i</code> = case-insensitive grep (IQ Engine's filter pipe)</span></div>
+  <div class="cli-row"><span class="cli-cmd">show running-config | i ssid</span><span class="cli-note">Filter any keyword from running config</span></div>
+</div>
+
+<div class="note">The <code>| i</code> pipe is IQ Engine's equivalent of <code>grep -i</code>. It works on any show command output. Use it to scope long configs instead of scrolling.</div>
+
+<p>Practical workaround for long outputs: enable session logging in your terminal emulator (SecureCRT, iTerm2) before running the command, then scroll the buffer after.</p>
+
+<!-- ══════════════════════════════════════════════════════════════════════════ -->
+<h2 id="s4">_debug vs _kdebug</h2>
+
+<table>
+<thead><tr><th></th><th>_debug</th><th>_kdebug</th></tr></thead>
+<tbody>
+<tr><td><strong>Layer</strong></td><td>Userspace daemon</td><td>Kernel / radio driver</td></tr>
+<tr><td><strong>Targets</strong></td><td>auth, dhcp, roaming, amrp</td><td>802.11 frame events, key exchange, association state</td></tr>
+<tr><td><strong>Verbosity</strong></td><td>Moderate</td><td>Very high — can flood console</td></tr>
+<tr><td><strong>Default output</strong></td><td>Live to console</td><td>Live to console</td></tr>
+<tr><td><strong>Use case</strong></td><td>Auth failures, DHCP, roaming</td><td>Frame-level, MIC failures, TK desync, retry storms</td></tr>
+</tbody>
+</table>
+
+<div class="warn"><strong>Key insight:</strong> Debug detail does not exist until you turn the flag on. The AP is not silently buffering this data in the background — you must be watching when the event occurs.</div>
+
+<h3>Workflow</h3>
+<ol class="steps">
+  <li>Clean slate: <code>no _debug all</code> &nbsp;/&nbsp; <code>no _kdebug wifi0 all</code></li>
+  <li>Start debug: <code>_debug auth all</code> or <code>_kdebug wifi0 mgmt</code></li>
+  <li>Trigger the event (client connects, roams, fails auth)</li>
+  <li>Stop: <code>no _debug all</code></li>
+  <li>Review: <code>show log buffered 200</code></li>
+</ol>
+
+<h3>Save to file (survives until reboot)</h3>
+<pre><code>_debug auth all logfile /tmp/auth_debug.log
+show file /tmp/auth_debug.log</code></pre>
+
+<div class="warn"><code>/tmp</code> is RAM only — lost on reboot. Pull the file before power cycling.</div>
+
+<div class="note">Prefer scoped flags: <code>_kdebug wifi0 mgmt</code> (management frames only) over <code>_kdebug wifi0 all</code> on a busy AP. The <code>all</code> flag can produce thousands of lines per second.</div>
+
+<!-- ══════════════════════════════════════════════════════════════════════════ -->
+<h2 id="s5">show station + VLAN Mapping</h2>
+
+<pre><code>AH-556680# show station</code></pre>
+<p style="font-family:sans-serif;font-size:14px;">Shows all associated clients. Key columns: <strong>Mac Addr · IP Addr · Chan · VLAN · Auth · UPID</strong></p>
+
+<pre><code>AH-556680# show station &lt;mac-address&gt;</code></pre>
+<p style="font-family:sans-serif;font-size:14px;">Per-client detail — confirms exactly which VLAN and user-profile a client landed on.</p>
+
+<h3>UPID → VLAN mapping (this AP)</h3>
+<table>
+<thead><tr><th>User Profile</th><th>VLAN</th><th>UPID (attribute)</th></tr></thead>
+<tbody>
+<tr><td>WC_TeamUSA</td><td>10</td><td>53</td></tr>
+<tr><td>WC_TeamAUS</td><td>20</td><td>54</td></tr>
+<tr><td>WC_Seattle_Guest</td><td>30</td><td>50</td></tr>
+</tbody>
+</table>
+
+<div class="note">The <strong>UPID</strong> column in <code>show station</code> maps directly to the <code>attribute</code> number in <code>show running-config | i user-profile</code>. This lets you verify PPSK-to-VLAN assignment without needing the switch.</div>
+
+<h3>How the VLAN config looks in running-config</h3>
+<pre><code>AH-556680# show running-config | i vlan
+user-profile WC_TeamUSA qos-policy def-user-qos vlan-id 10 attribute 53
+user-profile WC_TeamAUS qos-policy def-user-qos vlan-id 20 attribute 54
+user-profile WC_Seattle_Guest qos-policy def-user-qos vlan-id 30 attribute 50
+interface eth0 native-vlan 1</code></pre>
+
+<!-- ══════════════════════════════════════════════════════════════════════════ -->
+<h2 id="s6">Packet Capture &amp; ADSP Blocker</h2>
+
+<h3>Correct capture syntax (IQ Engine)</h3>
+<pre><code># Step 1 — set save file
+capture save interface wifi1 /tmp/test_capture.pcap
+
+# Step 2 — start capture
+capture interface wifi1 duration 30
+
+# Step 3 — verify file
+show file /tmp/test_capture.pcap</code></pre>
+
+<h3>Capture options available</h3>
+<div class="cli-table">
+  <div class="cli-header">capture interface wifi1 [option]</div>
+  <div class="cli-row"><span class="cli-cmd">count &lt;n&gt;</span><span class="cli-note">Capture n frames then stop</span></div>
+  <div class="cli-row"><span class="cli-cmd">duration &lt;seconds&gt;</span><span class="cli-note">Capture for n seconds</span></div>
+  <div class="cli-row"><span class="cli-cmd">filter &lt;expression&gt;</span><span class="cli-note">BPF-style frame filter</span></div>
+  <div class="cli-row"><span class="cli-cmd">promiscuous</span><span class="cli-note">Enable promiscuous mode during capture</span></div>
+  <div class="cli-row"><span class="cli-cmd">size &lt;bytes&gt;</span><span class="cli-note">Max saved file size</span></div>
+</div>
+
+<div class="block"><strong>ADSP Blocker:</strong> Both wifi0 and wifi1 return <em>"Packet capture cannot be set as ADSP sensor mode is enabled on this interface"</em>. ADSP (AirDefense Sensor Protocol) uses the radio for continuous WIDS/WIPS scanning — this is architecturally incompatible with packet capture on the same radio. Fix: disable ADSP in EP1 → Radio Profile → WIDS settings → push config → then capture. Re-enable ADSP when done.</div>
+
+<!-- ══════════════════════════════════════════════════════════════════════════ -->
+<h2 id="s7">EP1 Reverse Tunnel SSH</h2>
+
+<p style="font-family:sans-serif;font-size:14px;">From a hotel network, direct SSH to <code>192.168.0.12</code> times out — the hotel router has no route to your home's private subnet. EP1 solves this transparently.</p>
+
+<table>
+<thead><tr><th>Scenario</th><th>Path</th><th>Works?</th></tr></thead>
+<tbody>
+<tr><td>Home on QF_Modem</td><td>Same subnet → direct SSH port 22</td><td class="g">✓ Always</td></tr>
+<tr><td>Hotel WiFi → direct</td><td>Different network, no route to 192.168.0.0/24</td><td class="r">✗ Timeout</td></tr>
+<tr><td>Hotel WiFi → EP1</td><td>EP1 cloud port (e.g. 3.145.235.126:20197) → IQAgent tunnel → AP SSH</td><td class="g">✓ Works</td></tr>
+<tr><td>Anywhere with VPN home</td><td>Encrypted tunnel back to home subnet</td><td class="g">✓ Works</td></tr>
+</tbody>
+</table>
+
+<h3>How the EP1 tunnel works</h3>
+<p style="font-family:sans-serif;font-size:14px;">The AP makes a persistent <strong>outbound</strong> connection to EP1's cloud (IQAgent/CAPWAP tunnel). When you click SSH in EP1, it allocates a temporary ephemeral port on its cloud infrastructure and bridges it back through that existing tunnel. The AP never needs an inbound port open — it works through any NAT or firewall. The port closes when you end the EP1 session.</p>
+
+<div class="note">This is the same NAT-traversal principle as the Tailscale VPN we're building — the device calls home, not the other way around.</div>
+
+<!-- ══════════════════════════════════════════════════════════════════════════ -->
+<h2 id="s8">Serial Console Access</h2>
+
+<h3>Managing multiple console sessions with screen</h3>
+
+<table>
+<thead><tr><th>Command</th><th>Purpose</th></tr></thead>
+<tbody>
+<tr><td><code>ls /dev/tty.usb*</code></td><td>List connected USB serial adapters</td></tr>
+<tr><td><code>screen /dev/tty.usbserial-XXXX 115200</code></td><td>Open serial console session at 115200 baud</td></tr>
+<tr><td><code>Ctrl+A then D</code></td><td>Detach from current screen session (keeps it alive)</td></tr>
+<tr><td><code>screen -ls</code></td><td>List all running screen sessions</td></tr>
+<tr><td><code>screen -r &lt;id&gt;</code></td><td>Reattach to a detached session</td></tr>
+</tbody>
+</table>
+
+<div class="win"><strong>AP1 console confirmed:</strong> <code>/dev/tty.usbserial-BG01WC92</code> at <strong>115200 baud</strong>. Connected successfully via <code>screen</code> once SW1's cable was disconnected (only one adapter was plugged in at a time).</div>
+
+<!-- ══════════════════════════════════════════════════════════════════════════ -->
+<h2 id="s9">VoIP Basic Rate + Stickiness</h2>
+
+<p style="font-family:sans-serif;font-size:14px;"><em>Customer issue: WiFi calling drops on 5 GHz. They asked about changing basic data rates from 6 → 12 → 24 Mbps.</em></p>
+
+<h3>Why basic rate affects stickiness</h3>
+<p style="font-family:sans-serif;font-size:14px;">Beacons are always transmitted at the lowest <strong>basic</strong> (mandatory) rate. A client stays associated as long as it can decode beacons — so the basic rate sets the effective cell edge.</p>
+
+<table>
+<thead><tr><th>Basic Rate</th><th>Beacon threshold</th><th>Client disconnects at</th><th>Stickiness</th></tr></thead>
+<tbody>
+<tr><td>6 Mbps</td><td>~−82 dBm</td><td>−82 dBm</td><td class="r">Very sticky</td></tr>
+<tr><td>12 Mbps</td><td>~−79 dBm</td><td>−79 dBm</td><td class="y">Moderate</td></tr>
+<tr><td>24 Mbps</td><td>~−74 dBm</td><td>−74 dBm</td><td class="g">Least sticky</td></tr>
+</tbody>
+</table>
+
+<div class="warn"><strong>VoIP minimum RSSI = −67 dBm.</strong> At 6 Mbps basic rate, a client at −80 dBm is still "connected" — 13 dB below the VoIP quality floor. The call is failing and the client will not roam.</div>
+
+<h3>Coverage shrinkage formula</h3>
+<p style="font-family:sans-serif;font-size:14px;">Each doubling of basic rate costs exactly <strong>3 dB</strong> of coverage at the cell edge:</p>
+
+<pre><code>ΔdB = 10 · log₁₀(new_rate / old_rate)
+
+6 → 12 Mbps : 10·log(2) = 3.01 dB
+12 → 24 Mbps : 10·log(2) = 3.01 dB
+6 → 24 Mbps : 10·log(4) = 6.02 dB</code></pre>
+
+<table>
+<thead><tr><th>Path loss exponent</th><th>Environment</th><th>3 dB → range shrink</th><th>Area shrink</th></tr></thead>
+<tbody>
+<tr><td>n = 2</td><td>Free space / outdoors</td><td>~29%</td><td>~50%</td></tr>
+<tr><td>n = 3</td><td>Typical indoor</td><td>~21%</td><td>~38%</td></tr>
+<tr><td>n = 4</td><td>Dense indoor / obstructed</td><td>~16%</td><td>~29%</td></tr>
+</tbody>
+</table>
+
+<div class="note"><strong>Recommendation:</strong> Start with 12 Mbps basic rate on 5 GHz for VoIP profiles — 3 dB tighter cell, meaningfully less sticky, minimal coverage impact if AP spacing is adequate. 24 Mbps only for very dense deployments (AP spacing ≤15m).</div>
+
+<!-- ══════════════════════════════════════════════════════════════════════════ -->
+<h2 id="s10">Stationary Call Drops — Diagnosis</h2>
+
+<p style="font-family:sans-serif;font-size:14px;">Customer confirmed drops occur while <strong>stationary</strong> — not during roaming. This eliminates stickiness as the root cause entirely. The call degrades and dies while the client stays associated to the same AP.</p>
+
+<h3>Suspects — ranked by likelihood</h3>
+
+<table>
+<thead><tr><th>Suspect</th><th>Mechanism</th><th>Key diagnostic question</th></tr></thead>
+<tbody>
+<tr><td><strong>GTK rotation</strong></td><td>Key-state desync causes ~2–4s decrypt failure window</td><td>Are drops rhythmic / periodic?</td></tr>
+<tr><td><strong>DTIM / power save</strong></td><td>VoIP packets buffered until DTIM beacon → jitter spike</td><td>Is phone in power save mode? What is DTIM interval?</td></tr>
+<tr><td><strong>Marginal RSSI</strong></td><td>Client at −72 to −75 dBm — any spike crosses VoIP floor</td><td>What is RSSI at time of drop?</td></tr>
+<tr><td><strong>High channel utilization</strong></td><td>Beacon overhead at low basic rate + CCI saturates airtime</td><td>What is CU% on that AP?</td></tr>
+<tr><td><strong>WMM / QoS off</strong></td><td>VoIP (AC_VO) competes with best-effort traffic</td><td>Is WMM enabled on the SSID?</td></tr>
+</tbody>
+</table>
+
+<div class="win"><strong>Key diagnostic:</strong> "Are the drops happening at regular intervals — like every 2–3 minutes?"<br>
+Rhythmic = GTK rotation or DTIM. Random = interference / SNR / channel utilization.</div>
+
+<!-- ══════════════════════════════════════════════════════════════════════════ -->
+<h2 id="s11">WLAN Pi R4 — Web UI Exploration</h2>
+
+<table>
+<thead><tr><th>Parameter</th><th>Value</th></tr></thead>
+<tbody>
+<tr><td>Device</td><td>WLAN Pi R4 — Raspberry Pi CM4 + MT7922 (Wi-Fi 6E)</td></tr>
+<tr><td>Hostname</td><td><code>wlanpi-7ce</code></td></tr>
+<tr><td>USB OTG IP</td><td>169.254.42.1</td></tr>
+<tr><td>Connection method</td><td>USB-C to MacBook — creates RNDIS/USB Ethernet interface</td></tr>
+<tr><td>Web UI</td><td><code>http://169.254.42.1</code> — accessible without auth</td></tr>
+<tr><td>Apps</td><td>Speed Test (LibreSpeed) · Profiler · Network · Kismet · Grafana · Cockpit</td></tr>
+<tr><td>LibreSpeed result</td><td>297 Mbps DL · 1ms ping · 0.69ms jitter (over USB link)</td></tr>
+<tr><td>SSH status</td><td class="r">Blocked — password unknown, all defaults rejected</td></tr>
+<tr><td>Cockpit login</td><td class="r">Blocked — same password issue</td></tr>
+<tr><td>eth0 / eth1</td><td class="y">Both down — not plugged into QF_Modem yet</td></tr>
+</tbody>
+</table>
+
+<div class="block"><strong>SSH password reset blocked:</strong> WLAN Pi R4 uses CM4 with eMMC storage (soldered) — no physical SD card to pull. Console reset requires a monitor + keyboard. Password unknown; all defaults (wlanpi/wlanpi, wlanpi/raspberry, pi/raspberry) rejected.</div>
+
+<div class="note"><strong>Strategic value:</strong> Once SSH access is restored, the WLAN Pi R4's MT7922 adapter (monitor-mode capable) becomes the preferred pcap tool — external passive observer on channel 157/80MHz. No ADSP conflict, more complete frame capture than AP-side capture.</div>
+
+<!-- ══════════════════════════════════════════════════════════════════════════ -->
+<h2 id="s12">Home Lab VPN — Shopping List</h2>
+
+<p style="font-family:sans-serif;font-size:14px;">Goal: SSH to <code>192.168.0.12</code> from any network (hotel, customer site, coffee shop) without EP1. Solution: Raspberry Pi 4 running Tailscale with subnet routing. No programming required — copy-paste CLI only.</p>
+
+<div class="shop">
+  <div class="shop-header">Raspberry Pi 4 + Tailscale — Hardware</div>
+  <div class="shop-row"><span class="item">Raspberry Pi 4 (2GB RAM) — CanaKit or official</span><span class="price">~$45</span></div>
+  <div class="shop-row"><span class="item">SanDisk MicroSD 32GB (Class 10 / A1 rated)</span><span class="price">~$8</span></div>
+  <div class="shop-row"><span class="item">USB-C power supply (5V/3A — official Pi supply)</span><span class="price">~$10</span></div>
+  <div class="shop-row"><span class="item">Short ethernet cable (Cat5e/Cat6) — likely already have one</span><span class="price">$0</span></div>
+  <div class="shop-total"><span>Total</span><span>~$63</span></div>
+</div>
+
+<h3>Where to buy same-day</h3>
+<ul>
+  <li>Micro Center (if local) — best Pi prices in-store</li>
+  <li>Best Buy / Canada Computers — CanaKit bundle ~$80 all-in (Pi + SD + PSU + case)</li>
+  <li>Amazon Prime same-day if available</li>
+</ul>
+
+<div class="note"><strong>CanaKit Raspberry Pi 4 Starter Kit</strong> (~$80) bundles Pi, SD card, power supply, and case in one box — grab it if available. Saves hunting for individual parts.</div>
+
+<!-- ══════════════════════════════════════════════════════════════════════════ -->
+<h2 id="s13">Home Lab VPN — Setup Guide</h2>
+
+<p style="font-family:sans-serif;font-size:14px;">Total time: ~20 minutes. After setup: <code>ssh admin@192.168.0.12</code> works from anywhere.</p>
+
+<h3>Step 1 — Flash SD card (10 min)</h3>
+<ol class="steps">
+  <li>Download <strong>Raspberry Pi Imager</strong>: raspberrypi.com/software</li>
+  <li>Insert microSD into Mac via adapter</li>
+  <li>Select OS: <strong>Raspberry Pi OS Lite (64-bit)</strong> — no desktop needed</li>
+  <li>Click gear icon ⚙ → enable SSH → set username: <code>pi</code> → set password → set hostname: <code>lab-pi</code></li>
+  <li>Click Write → wait → eject</li>
+</ol>
+
+<h3>Step 2 — First boot (5 min)</h3>
+<ol class="steps">
+  <li>Insert SD into Pi → plug ethernet into QF_Modem → plug USB-C power</li>
+  <li>Wait 60 seconds for boot</li>
+  <li>From MacBook: <code>ssh pi@lab-pi.local</code> (or find IP in QF_Modem DHCP table)</li>
+  <li>Run: <code>sudo apt update && sudo apt upgrade -y</code></li>
+</ol>
+
+<h3>Step 3 — Install Tailscale (2 min)</h3>
+<pre><code>curl -fsSL https://tailscale.com/install.sh | sh
+sudo tailscale up --advertise-routes=192.168.0.0/24 --accept-routes</code></pre>
+<p style="font-family:sans-serif;font-size:14px;">Click the auth URL in the output → sign in with your Google account.</p>
+
+<h3>Step 4 — Approve subnet route (1 min)</h3>
+<ol class="steps">
+  <li>Go to <strong>login.tailscale.com</strong> → Machines → lab-pi</li>
+  <li>Click "…" → Edit route settings → enable <code>192.168.0.0/24</code></li>
+  <li>Click "…" → Disable key expiry (so Pi stays connected without periodic re-auth)</li>
+</ol>
+
+<h3>Step 5 — Laptop setup (2 min)</h3>
+<ol class="steps">
+  <li>Download Tailscale app: tailscale.com/download</li>
+  <li>Sign in with same Google account</li>
+  <li>Toggle on</li>
+</ol>
+
+<h3>Step 6 — Test from any network</h3>
+<pre><code>ping 192.168.0.12        # confirm routing
+ssh admin@192.168.0.12   # AP — works from hotel, coffee shop, anywhere</code></pre>
+
+<table>
+<thead><tr><th>Item</th><th>Detail</th></tr></thead>
+<tbody>
+<tr><td>Ongoing maintenance</td><td>None — Pi runs headless 24/7 on ~4W</td></tr>
+<tr><td>Remote reboot Pi</td><td><code>sudo reboot</code> over SSH</td></tr>
+<tr><td>Keep Pi IP stable</td><td>Set DHCP reservation for Pi's MAC address in QF_Modem admin</td></tr>
+<tr><td>Why no port forwarding</td><td>Tailscale uses outbound NAT traversal — same principle as EP1 IQAgent tunnel</td></tr>
+</tbody>
+</table>
+
+<!-- ══════════════════════════════════════════════════════════════════════════ -->
+<h2 id="s14">Blockers &amp; Pending</h2>
+
+<h3>Active Blockers</h3>
+<table>
+<thead><tr><th>Blocker</th><th>Fix</th></tr></thead>
+<tbody>
+<tr><td>pcap from AP — ADSP sensor mode on all interfaces</td><td>EP1 → Radio Profile → WIDS/sensor settings → disable → push config → capture → re-enable</td></tr>
+<tr><td>WLAN Pi SSH password unknown</td><td>Connect monitor + keyboard for console access → <code>passwd wlanpi</code></td></tr>
+</tbody>
+</table>
+
+<h3>Pending Next Session</h3>
+<ul>
+  <li>Disable ADSP from EP1, run pcap test (CaptureAgent G_A / G_B / G_C gaps)</li>
+  <li>AP CLI reference cleanup — invalid commands to batch-fix (<code>show 11k</code>, <code>show 11r</code>, <code>show 11v</code>, <code>terminal length</code>)</li>
+  <li>Purchase + set up Raspberry Pi 4 → Tailscale home lab VPN</li>
+  <li>WLAN Pi R4 SSH password reset via console</li>
+  <li>Sprint 2b — <code>knob_panel.py</code> (dash-daq 4×3 optimizer gauge grid)</li>
+  <li>Third scenario bank — <code>scenario_bank_realworld_june11.html</code> (77 real Extreme trouble tickets)</li>
+  <li>100-problem Socratic session — S01–S50 + XE-01–XE-50 (4 hours)</li>
+</ul>
+
+<footer>
+  © 2026 Khursheed Khan · 5320-onboarding-agent · Session June 11–12 2026 ·
+  <a href="../index.html" style="color:var(--accent);">Landing Page</a>
+</footer>
+
+</main>
+</div>
+</body>
+</html>
