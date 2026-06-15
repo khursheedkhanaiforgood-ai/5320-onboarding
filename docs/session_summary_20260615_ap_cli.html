@@ -215,6 +215,7 @@
   <a href="#roaming">Roaming Cache</a>
   <a href="#ep1">EP1 Actions</a>
   <a href="#scenarios">XE Scenarios</a>
+  <a href="#grade">Grade</a>
   <a href="#pending">Pending</a>
 </nav>
 
@@ -393,6 +394,42 @@
 
     <h3>Karl Scenario Style — Adopted</h3>
     <p>For all future scenario sessions: brief situation statement, user asks all questions, one-word or one-sentence answers only, no hints unless user is stuck, no volunteered information. User reaches root cause independently through questioning. This is the method used by Karl Benedict in real customer escalations.</p>
+  </section>
+
+  <!-- GRADE -->
+  <section id="grade">
+    <h2>Root-Cause Analysis Grade</h2>
+
+    <p style="font-family:'Source Sans 3',sans-serif;font-size:15px;background:#f4f8fb;border-left:4px solid #1a5276;padding:14px 20px;margin-bottom:24px;">
+      <strong>Overall: B+ &nbsp;·&nbsp; 8.2 / 10</strong> &nbsp;·&nbsp; 8 XE scenarios · Karl Method Socratic · June 15 2026
+    </p>
+
+    <h3>Strengths</h3>
+    <ul>
+      <li><strong>RF intuition is solid.</strong> On XE-11, XE-17, and the 2.4GHz/5GHz asymmetry, correctly anchored on noise floor, CRC, and MCS degradation without prompting. SNR is the variable, RSSI is just one input — right mental model.</li>
+      <li><strong>Layer awareness.</strong> On XE-20 (PPSK PCG), immediately went to VLAN then L3 enforcement — two-layer thinking (AP does L2, firewall does L3) is exactly right and non-obvious.</li>
+      <li><strong>DFS reasoning was strong.</strong> Identified simultaneous drop → common source → nearby radar correctly and quickly.</li>
+      <li><strong>Show tech / running config read.</strong> Asked the right questions on roaming hops, DHCP alignment, and three-way timer consistency. Three-way alignment insight (DHCP + PMK + roaming cache) is something many engineers miss.</li>
+    </ul>
+
+    <h3>Areas to Sharpen</h3>
+    <ul>
+      <li><strong>Ask the config question earlier.</strong> On Karl and XE-19, spent rounds on RF and physical before asking what the policy/config difference was between affected and unaffected users. Rule: when symptoms are sporadic and selective, go to config differences before RF.</li>
+      <li><strong>6GHz security requirement.</strong> Needed a hint to arrive at WPA3 on XE-12. Should be automatic: 6GHz = WPA3 mandatory, full stop. No exceptions.</li>
+      <li><strong>Capacity math before band steering.</strong> On XE-16 went straight to "disable band steering" and "add APs" — both correct — but without framing it as a capacity calculation first. How many clients per radio is the ceiling? That framing makes the answer structural, not reactive.</li>
+      <li><strong>Retry rate as a metric.</strong> Identified CU and CRC but needed a prompt for retry rate. Add it to the standard RF health checklist alongside CU and CRC.</li>
+    </ul>
+
+    <h3>Standard RF Health Checklist</h3>
+    <table>
+      <tr><th>#</th><th>Metric</th><th>Threshold</th><th>What it tells you</th></tr>
+      <tr><td>1</td><td>Channel Utilization (CU)</td><td>&gt;75% = concern</td><td>Airtime saturation</td></tr>
+      <tr><td>2</td><td>CRC error rate</td><td>&gt;5% = investigate</td><td>Noise floor / interference / SNR collapse</td></tr>
+      <tr><td>3</td><td>Retry rate</td><td>&gt;20% = concern</td><td>RF quality — frames not received first attempt</td></tr>
+      <tr><td>4</td><td>Client count</td><td>Context-dependent</td><td>Capacity headroom</td></tr>
+      <tr><td>5</td><td>Noise floor</td><td>&gt;-85 dBm = concern</td><td>Environmental interference baseline</td></tr>
+      <tr><td colspan="4" style="font-style:italic;color:#555;">Then: config differences between affected and unaffected users</td></tr>
+    </table>
   </section>
 
   <!-- PENDING -->
