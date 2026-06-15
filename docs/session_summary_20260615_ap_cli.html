@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>June 15 2026 — AP1 Deep Dive + XE Socratic Bank</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Source+Sans+3:wght@400;600&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Libre Baskerville', Georgia, serif;
+    background: #fff;
+    color: #121212;
+    line-height: 1.75;
+    font-size: 18px;
+  }
+
+  /* NAV */
+  nav {
+    position: sticky;
+    top: 0;
+    background: #fff;
+    border-bottom: 2px solid #121212;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    gap: 0;
+    overflow-x: auto;
+    padding: 0 24px;
+  }
+  nav a {
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: #121212;
+    text-decoration: none;
+    padding: 14px 16px;
+    white-space: nowrap;
+    border-bottom: 3px solid transparent;
+    transition: border-color 0.15s;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  nav a:hover { border-bottom-color: #121212; }
+
+  /* HEADER */
+  header {
+    max-width: 780px;
+    margin: 56px auto 0;
+    padding: 0 24px;
+    text-align: center;
+  }
+  .kicker {
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #666;
+    margin-bottom: 16px;
+  }
+  h1 {
+    font-size: clamp(28px, 4vw, 42px);
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 20px;
+  }
+  .dateline {
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: 14px;
+    color: #888;
+    border-top: 1px solid #ddd;
+    border-bottom: 1px solid #ddd;
+    padding: 10px 0;
+    margin-bottom: 40px;
+  }
+
+  /* BODY */
+  main {
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 0 24px 80px;
+  }
+
+  section { margin-bottom: 56px; }
+
+  h2 {
+    font-size: 22px;
+    font-weight: 700;
+    border-top: 3px solid #121212;
+    padding-top: 16px;
+    margin-bottom: 20px;
+    scroll-margin-top: 60px;
+  }
+
+  h3 {
+    font-size: 17px;
+    font-weight: 700;
+    margin: 28px 0 10px;
+  }
+
+  p { margin-bottom: 16px; }
+
+  ul, ol {
+    padding-left: 24px;
+    margin-bottom: 16px;
+  }
+  li { margin-bottom: 6px; }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: 15px;
+  }
+  th {
+    background: #121212;
+    color: #fff;
+    padding: 10px 14px;
+    text-align: left;
+    font-weight: 600;
+  }
+  td {
+    padding: 9px 14px;
+    border-bottom: 1px solid #e5e5e5;
+    vertical-align: top;
+  }
+  tr:nth-child(even) td { background: #f9f9f9; }
+
+  .xe-card {
+    border-left: 4px solid #1a5276;
+    background: #f4f8fb;
+    padding: 16px 20px;
+    margin: 20px 0;
+    border-radius: 0 4px 4px 0;
+  }
+  .xe-num {
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #1a5276;
+    margin-bottom: 4px;
+  }
+  .xe-title {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+  .xe-body {
+    font-size: 15px;
+    font-family: 'Source Sans 3', sans-serif;
+    line-height: 1.6;
+  }
+  .xe-lesson {
+    margin-top: 10px;
+    font-style: italic;
+    font-size: 15px;
+    color: #333;
+  }
+
+  .badge {
+    display: inline-block;
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 2px 10px;
+    border-radius: 20px;
+    margin-right: 6px;
+    vertical-align: middle;
+  }
+  .badge-red { background: #fde8e8; color: #c0392b; }
+  .badge-orange { background: #fef0e6; color: #c0641a; }
+  .badge-yellow { background: #fefce6; color: #9a7d0a; }
+  .badge-green { background: #e8f8f1; color: #1e8449; }
+
+  code {
+    font-family: 'Courier New', monospace;
+    font-size: 14px;
+    background: #f0f0f0;
+    padding: 2px 6px;
+    border-radius: 3px;
+  }
+
+  .action-box {
+    background: #fff8e6;
+    border: 1px solid #f0c040;
+    border-left: 4px solid #d4a017;
+    padding: 16px 20px;
+    margin: 20px 0;
+    border-radius: 0 4px 4px 0;
+  }
+  .action-box strong { display: block; margin-bottom: 8px; font-family: 'Source Sans 3', sans-serif; }
+
+  footer {
+    text-align: center;
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: 13px;
+    color: #aaa;
+    padding: 32px 24px;
+    border-top: 1px solid #ddd;
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="#accomplished">Accomplished</a>
+  <a href="#showtech">Show Tech</a>
+  <a href="#runconfig">Running Config</a>
+  <a href="#roaming">Roaming Cache</a>
+  <a href="#ep1">EP1 Actions</a>
+  <a href="#scenarios">XE Scenarios</a>
+  <a href="#pending">Pending</a>
+</nav>
+
+<header>
+  <p class="kicker">5320 Onboarding · June 15 2026</p>
+  <h1>AP1 Deep Dive + Eight XE Socratic Scenarios</h1>
+  <p class="dateline">Monday, June 15 2026 &nbsp;·&nbsp; AP3000 · IQ Engine · EP1 · Extreme Networks</p>
+</header>
+
+<main>
+
+  <!-- ACCOMPLISHED -->
+  <section id="accomplished">
+    <h2>Accomplished</h2>
+    <ul>
+      <li>Read and analyzed AP1 show tech — 5 key lessons extracted</li>
+      <li>Reviewed AP1 running config — 8 key findings documented</li>
+      <li>Reviewed roaming cache table — PMK timing and hop count aligned</li>
+      <li>Documented all EP1 priority actions (5 items)</li>
+      <li>Adopted Karl Scenario Socratic style for all future scenario sessions</li>
+      <li>Completed 8 XE scenarios: XE-11, 12, 15, 16, 17, 19, 20, 21</li>
+      <li>Confirmed wifi0 admin disabled on AP1; wifi1 5GHz healthy (CRC 7%, CU 17%)</li>
+    </ul>
+  </section>
+
+  <!-- SHOW TECH -->
+  <section id="showtech">
+    <h2>AP1 Show Tech — Key Lessons</h2>
+    <p>Source: <code>device_support_logs_2026-Jun-15-16_57_08/core_dump41/show_tech_result.txt</code></p>
+
+    <h3>1. Reboot Pattern — Config Rollback Loop</h3>
+    <p>3 reboots on June 10 (15:41, 15:59, 16:11) plus multiple on May 20-21. Root cause: config rollback is enabled. When EP1 pushes a policy and the CAPWAP session drops mid-push, the AP rolls back to prior config and reboots. Short DHCP lease (3600s) on the management IP exacerbates this — lease expiry during an EP1 push causes CAPWAP drop → rollback → reboot cycle.</p>
+
+    <h3>2. RadSec SSL Timeouts</h3>
+    <p>Recurring SSL read timeouts to <code>oh-idmauth.extremecloudiq.com</code> on May 20, June 9, June 10, and June 15 overnight. When the TLS session to the RadSec proxy drops, PPSK authentication fails for all clients — the AP cannot validate credentials without cloud connectivity.</p>
+
+    <h3>3. Walled-Garden DNS Slow</h3>
+    <p>Guest CWP (Captive Web Portal) shows slow DNS responses for the walled-garden domain list. Manifests as delayed redirect when guests first connect — portal takes 5-10s to appear instead of immediate.</p>
+
+    <h3>4. DHCP Lease Too Short</h3>
+    <p>AP management IP (192.168.0.12) has a 3600s (1hr) lease from QF_Modem. On lease renewal failure, the AP loses its management IP → CAPWAP session drops → config rollback → reboot. Fix: set DHCP static reservation + extend lease to 86400s (24hr) on QF_Modem.</p>
+
+    <h3>5. Location-Essentials Load</h3>
+    <p>Location-Essentials enabled → hundreds of <code>Locn-essential</code> CAPWAP events per minute. Normal behavior but contributes to AP CPU load and CAPWAP session traffic volume. Console login failures on June 10 were our own serial session (backspace escape characters appearing in log — not an intrusion).</p>
+  </section>
+
+  <!-- RUNNING CONFIG -->
+  <section id="runconfig">
+    <h2>AP1 Running Config — Key Findings</h2>
+    <p>Source: <code>AP1_RunningConfig_June15.docx</code> · AP serial: AH-556680</p>
+
+    <table>
+      <tr><th>Finding</th><th>Current</th><th>Target</th></tr>
+      <tr><td>Basic rate (both SSIDs)</td><td>6 Mbps</td><td>12 Mbps</td></tr>
+      <tr><td>CRC threshold</td><td>35% (saw 47%)</td><td>Verify ACSP not overridden by EP1</td></tr>
+      <tr><td>Config rollback</td><td>Enabled</td><td>Disable or extend CAPWAP timeout</td></tr>
+      <tr><td>ADSP</td><td>EP1-pushed (not in local config)</td><td>Disable in EP1 radio profile → enables pcap</td></tr>
+      <tr><td>Default fallback UPID</td><td>attr 7 → VLAN 30</td><td>Safe — keep</td></tr>
+      <tr><td>SNR steering</td><td>Active on PPSK SSID</td><td>Monitor — OK for now</td></tr>
+      <tr><td>RadSec target</td><td>oh-idmauth.extremecloudiq.com</td><td>Cloud dependency — no local fix</td></tr>
+      <tr><td>DHCP lease</td><td>3600s (1hr)</td><td>86400s (24hr) via QF_Modem</td></tr>
+    </table>
+
+    <p><strong>ADSP note:</strong> <code>show running-config | i adsp</code> returns nothing because ADSP is pushed from EP1 cloud policy — it doesn't appear in the local running config. To disable it, go to EP1 → radio profile → WIDS/sensor settings.</p>
+  </section>
+
+  <!-- ROAMING CACHE -->
+  <section id="roaming">
+    <h2>Roaming Cache Review</h2>
+    <p>Source: <code>Roaming Cache Table.docx</code></p>
+
+    <table>
+      <tr><th>Parameter</th><th>Current</th><th>Target</th><th>Why</th></tr>
+      <tr><td>PMK Max Caching Time</td><td>3600s (1hr)</td><td>86400s (24hr)</td><td>Align with DHCP lease</td></tr>
+      <tr><td>Roaming Hops</td><td>1</td><td>2</td><td>PMK cache reaches one level further</td></tr>
+      <tr><td>Update Interval</td><td>60s</td><td>Keep</td><td>Fine</td></tr>
+      <tr><td>Broadcast</td><td>Access backhaul</td><td>Keep</td><td>Fine</td></tr>
+    </table>
+
+    <h3>Roaming Hops + Client Speed</h3>
+    <p>Roaming hops controls how far the PMK cache pre-propagates to neighboring APs. It is indirectly tied to client mobility speed:</p>
+    <ul>
+      <li><strong>1 hop:</strong> PMK shared only with directly adjacent APs. Fast walkers who skip a neighbor and land on a non-adjacent AP hit full re-auth → 200-500ms gap → VoIP drop.</li>
+      <li><strong>2 hops:</strong> Cache pre-positioned one level further. Covers normal office walking pace. Confirmed setting for this lab.</li>
+      <li><strong>3 hops:</strong> For high-mobility environments — carts, forklifts, jogging.</li>
+    </ul>
+
+    <h3>Three-Way Alignment Required</h3>
+    <p>All three must match or the shortest timer becomes the failure point:</p>
+    <ul>
+      <li>DHCP lease time (QF_Modem) → 86400s</li>
+      <li>PMK max caching time (EP1 roaming settings) → 86400s</li>
+      <li>Roaming cache max caching time (AP roaming profile) → 86400s</li>
+    </ul>
+    <p>Currently all three at 3600s — a 1-hour lease expiry on the AP management IP cascades into CAPWAP drop → config rollback → reboot.</p>
+  </section>
+
+  <!-- EP1 ACTIONS -->
+  <section id="ep1">
+    <h2>EP1 Priority Actions</h2>
+
+    <div class="action-box">
+      <strong>Five changes to make in EP1 — in priority order:</strong>
+      <ol>
+        <li><strong>Disable ADSP</strong> on radio profiles (5G_Khursheed_80MHz + radio_ng_11ax-2g) → unblocks pcap capture on wifi0 and wifi1</li>
+        <li><strong>Raise basic rate to 12 Mbps</strong> on both SSIDs → reduces stickiness, improves VoIP handoff, nudges edge clients toward 5GHz</li>
+        <li><strong>PMK max caching time → 86400s</strong> (24hr) → aligns with DHCP lease</li>
+        <li><strong>Roaming hops → 2</strong> (confirmed) → PMK cache pre-propagates one level further for fast walkers</li>
+        <li><strong>QF_Modem: DHCP static reservation + 24hr lease</strong> for 192.168.0.12 → eliminates management IP expiry reboot cycle</li>
+      </ol>
+    </div>
+
+    <p>Note: wifi0 (2.4GHz) is currently admin disabled on AP1. Re-enable via EP1 radio profile → radio_ng_11ax-2g → enable radio. Do not attempt via CLI — admin state is policy-driven.</p>
+  </section>
+
+  <!-- XE SCENARIOS -->
+  <section id="scenarios">
+    <h2>XE Socratic Scenarios — June 15</h2>
+    <p>8 scenarios completed using Karl Scenario Socratic method: brief situation, user asks questions, terse answers, user reaches root cause independently.</p>
+
+    <div class="xe-card">
+      <p class="xe-num">XE-11 <span class="badge badge-orange">Orange</span></p>
+      <p class="xe-title">wifi0 CRC Errors Spike to 45% — Neighbor Company Moved In</p>
+      <p class="xe-body">wifi0 (2.4GHz) CRC jumped from &lt;5% to 45%. wifi1 (5GHz) clean at 3%. Another company moved into shared office last month. Root cause: 2.4GHz interference from neighbor's WiFi raised the noise floor — CRC climbs, MCS drops, edge clients degrade or disconnect.</p>
+      <p class="xe-lesson">Fix: raise MBR to 12 Mbps on 2.4GHz, enable band steering to nudge clients to 5GHz, verify 5GHz CU + retry rate + client count has headroom, change to non-overlapping 2.4GHz channel (or enable ACSP).</p>
+    </div>
+
+    <div class="xe-card">
+      <p class="xe-num">XE-12 <span class="badge badge-yellow">Yellow</span></p>
+      <p class="xe-title">AP4000 6GHz Radio — No WiFi 6E Clients Connecting</p>
+      <p class="xe-body">6GHz SSID visible on analyzer. MacBook M2 and Samsung S23 both connect to 5GHz only. Root cause: same security profile used on 6GHz as 5GHz. 6GHz requires WPA3-SAE only — PPSK is WPA2-based and is incompatible with 6GHz.</p>
+      <p class="xe-lesson">Fix: create a separate 6GHz SSID with WPA3 security profile. Note: 5GHz beacons advertise 6GHz BSS via Reduced Neighbor Report (RNR) — clients read RNR to discover 6GHz without scanning all channels.</p>
+    </div>
+
+    <div class="xe-card">
+      <p class="xe-num">XE-15 <span class="badge badge-red">Red</span></p>
+      <p class="xe-title">30 APs Simultaneously Drop 5GHz — DFS Channels 100–140</p>
+      <p class="xe-body">10:47am, 30 AP410Cs simultaneously drop 5GHz radios and begin channel scan. All on DFS channels 100-140. Non-DFS APs (36-64) unaffected. Root cause: TDWR (Terminal Doppler Weather Radar) — operates around 5.6 GHz, overlaps channels 120/124/128. A single radar pulse strong enough to be detected by all 30 APs simultaneously triggered 802.11h channel move events.</p>
+      <p class="xe-lesson">Fix: migrate to non-DFS channels 36-64 (UNII-1 + UNII-2a). Or migrate eligible devices to 6GHz. Avoid channels 100-140 if any airport/weather radar within line-of-sight range.</p>
+    </div>
+
+    <div class="xe-card">
+      <p class="xe-num">XE-16 <span class="badge badge-yellow">Yellow</span></p>
+      <p class="xe-title">Band Steering Overcrowds 5GHz — 200-Student Lecture Hall</p>
+      <p class="xe-body">Band steering enabled on one AP, 200 dual-band laptops, all forced to 5GHz. 5GHz now at 85% CU, 2.4GHz empty. Performance worse than before. Root cause: single AP cannot serve 200 clients on one 5GHz radio — CU saturation kills throughput.</p>
+      <p class="xe-lesson">Fix: add more APs, disable or threshold band steering (don't steer past 5GHz CU limit), enable client load balancing across APs. AP-level max client cap per radio is the simplest control.</p>
+    </div>
+
+    <div class="xe-card">
+      <p class="xe-num">XE-17 <span class="badge badge-yellow">Yellow</span></p>
+      <p class="xe-title">TX Power at Max — RSSI Great, Performance Worse</p>
+      <p class="xe-body">New admin set all 90 APs to max TX power (30 dBm). RSSI everywhere -40 to -55 dBm. CRC up across the board. Users report slower speeds and disconnects. Root cause: co-channel interference — every AP now overpowers adjacent co-channel APs. RSSI is high but SINR collapses. CRC climbs, MCS drops, throughput falls.</p>
+      <p class="xe-lesson">Fix: reduce TX power to allow ACSP to assign appropriate power levels, enable ACSP for automatic channel and power optimization. Verify CU, CRC, retry rate after adjustment.</p>
+    </div>
+
+    <div class="xe-card">
+      <p class="xe-num">XE-19 <span class="badge badge-orange">Orange</span></p>
+      <p class="xe-title">ExtremeControl NAC Quarantine — Random 5% of Students</p>
+      <p class="xe-body">5% of students randomly quarantined after successful authentication. Same device, same credentials — passes Monday, quarantined Tuesday. Self-service portal releases them until next time. Root cause: posture assessment timeout. NAC agent check (AV, patch level, agent version) doesn't complete within the timeout window — device load or network latency varies — NAC fails closed into quarantine.</p>
+      <p class="xe-lesson">Fix: increase posture assessment timeout window, audit what checks are being run (remove non-critical checks), verify ExtremeControl agent is current on affected devices.</p>
+    </div>
+
+    <div class="xe-card">
+      <p class="xe-num">XE-20 <span class="badge badge-yellow">Yellow</span></p>
+      <p class="xe-title">PPSK PCG Enabled — Clients Still Ping Each Other</p>
+      <p class="xe-body">Hotel deployed PPSK with Private Client Groups for guest isolation. XIQ confirms PCG on. Security auditor pings between two laptops with different PPSK keys — succeeds. Root cause: PCG enforces L2 isolation at the AP level only. Traffic routing through the upstream switch/router in the same subnet is not blocked by PCG — the router forwards L3 traffic between guests regardless of AP-level isolation.</p>
+      <p class="xe-lesson">Fix: ACL on upstream firewall/router blocking intra-VLAN client-to-client traffic. PCG = L2 enforcement at AP; firewall = L3 enforcement past the AP. Both layers needed for true guest isolation.</p>
+    </div>
+
+    <div class="xe-card">
+      <p class="xe-num">XE-21 <span class="badge badge-red">Red</span></p>
+      <p class="xe-title">800 PPSK Keys Expire at Midnight — Product Launch Tomorrow</p>
+      <p class="xe-body">4pm discovery: all 800 PPSK credentials in one XIQ user group expire tonight at 11:59pm. Overnight lab session + 800-person product launch at 8am tomorrow. No bulk renewal visible in UI. Root cause: all credentials set with same expiry date 12 months ago when program was configured.</p>
+      <p class="xe-lesson">Fix: edit expiry date on the user group before midnight, push policy update to all APs. Lesson: never configure all credentials with the same expiry date — stagger expiry across user groups. Always maintain a renewal playbook.</p>
+    </div>
+
+    <h3>Karl Scenario Style — Adopted</h3>
+    <p>For all future scenario sessions: brief situation statement, user asks all questions, one-word or one-sentence answers only, no hints unless user is stuck, no volunteered information. User reaches root cause independently through questioning. This is the method used by Karl Benedict in real customer escalations.</p>
+  </section>
+
+  <!-- PENDING -->
+  <section id="pending">
+    <h2>Pending</h2>
+    <ul>
+      <li><strong>EP1 changes</strong> — 5 items above (ADSP, basic rate, PMK time, roaming hops, QF_Modem DHCP)</li>
+      <li><strong>wifi0 re-enable</strong> — via EP1 radio profile (not CLI)</li>
+      <li><strong>pcap capture test</strong> — blocked until ADSP disabled; CaptureAgent gaps G_A/G_B/G_C pending</li>
+      <li><strong>Sprint 2b</strong> — knob_panel.py (dash-daq 4×3 optimizer gauge grid)</li>
+      <li><strong>Third scenario bank</strong> — docs/scenario_bank_realworld_june11.html (77 real Extreme trouble tickets)</li>
+      <li><strong>Raspberry Pi 4</strong> — Tailscale + subnet routing setup (hardware purchase pending)</li>
+      <li><strong>WLAN Pi R4 SSH</strong> — needs monitor + keyboard console to reset password</li>
+      <li><strong>100-problem Socratic</strong> — S01–S50 + XE-01–XE-50 (XE-08 done in prior session, XE-11/12/15/16/17/19/20/21 done today)</li>
+    </ul>
+  </section>
+
+</main>
+
+<footer>
+  &copy; 2026 Khursheed Khan · 5320 Onboarding · June 15 2026
+</footer>
+
+</body>
+</html>
