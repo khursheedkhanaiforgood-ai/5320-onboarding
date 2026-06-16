@@ -30,6 +30,7 @@ from rich import box
 import config
 import storage as _st
 from agents.collector import CollectorAgent, PollResult, RadioMetrics
+from agents.capture_agent import CaptureAgent
 from dashboard import DataStore, create_app, find_free_port
 from report import generate_session_html
 
@@ -271,11 +272,21 @@ def main():
     _st.init_health_clock()
     _st.update_health('starting', session_id=session_id)
 
-    data_store = DataStore()
-    port       = find_free_port(8050)
+    data_store     = DataStore()
+    port           = find_free_port(8050)
+    capture_agent  = CaptureAgent(config.AP_IP, config.AP_USER, config.AP_PASS,
+                                  log_dir=config.LOG_DIR)
+
+    # on_complete: persist to SQLite + push to DataStore for live tab update
+    def _on_capture_complete(result):
+        try:
+            store.write_pcap_capture(session_id, result)
+        except Exception:
+            pass
+        data_store.push_capture(result)
 
     # ── Dash + /health route ───────────────────────────────────────────────────
-    dash_app = create_app(data_store)
+    dash_app = create_app(data_store, capture_agent, _on_capture_complete)
 
     @dash_app.server.route('/health')
     def _health_route():

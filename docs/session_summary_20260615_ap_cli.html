@@ -207,6 +207,11 @@
 </style>
 </head>
 <body>
+<div id="ai-warning-banner" style="background:#b91c1c;color:#fff;text-align:center;padding:12px 16px;font-family:monospace;font-size:13px;font-weight:bold;position:sticky;top:0;z-index:99999;letter-spacing:0.04em;animation:warnpulse 1.2s ease-in-out infinite;">
+⚠️&nbsp; CLAUDE MAKES ERRORS &nbsp;—&nbsp; VERIFY WITH SME FIRST &nbsp;—&nbsp; DO NOT USE IN PRODUCTION &nbsp;—&nbsp; THIS IS A TRAINING GUIDE ON WHAT NOT TO DO &nbsp;—&nbsp; JUNE 15 2026 &nbsp;⚠️
+</div>
+<style>@keyframes warnpulse{0%,100%{background:#b91c1c}50%{background:#ef4444}}</style>
+
 
 <nav>
   <a href="#accomplished">Accomplished</a>
@@ -216,6 +221,7 @@
   <a href="#ep1">EP1 Actions</a>
   <a href="#scenarios">XE Scenarios</a>
   <a href="#grade">Grade</a>
+  <a href="#sw1">SW1 DHCP</a>
   <a href="#pending">Pending</a>
 </nav>
 
@@ -432,6 +438,52 @@
     </table>
   </section>
 
+  <!-- SW1 NETWORKING -->
+  <section id="sw1">
+    <h2>SW1 DHCP + Networking — June 15 Aside</h2>
+
+    <h3>Problem: iPhone Not Getting DHCP After SW1 Reboot</h3>
+    <p>SW1 rebooted. Old VLANs (Ten, Twenty, Thirty, Forty, Fifty) persisted in config but new EP1 Supplemental CLI couldn't push new VLANs (TeamUSA, TeamAUS, Guest, VIP, POS) because the old VLANs were holding the same VLAN tags (10, 20, 30, 40, 50). Tag conflict silently blocked the create commands.</p>
+
+    <h3>Fix: Delete Old VLANs in Supplemental CLI</h3>
+    <p>Added these lines at the top of EP1 Supplemental CLI before the create commands:</p>
+    <pre style="background:#f0f0f0;padding:14px;font-size:13px;overflow-x:auto;"><code>delete vlan Ten
+delete vlan Twenty
+delete vlan Thirty
+delete vlan Forty
+delete vlan Fifty</code></pre>
+    <p>Re-push succeeded. All 5 VLANs created with correct names, IPs, and DHCP ranges.</p>
+
+    <h3>DHCP Enable — Correct EXOS Syntax</h3>
+    <p><code>enable dhcp-server</code> and <code>enable dhcp-server ports</code> are invalid on EXOS SwitchEngine. Correct command discovered via <code>enable dhcp ?</code>:</p>
+    <pre style="background:#f0f0f0;padding:14px;font-size:13px;overflow-x:auto;"><code>enable dhcp ports 3,5 vlan TeamUSA
+enable dhcp ports 3,5 vlan TeamAUS
+enable dhcp ports 3,5 vlan Guest
+enable dhcp ports 3,5 vlan VIP
+enable dhcp ports 3,5 vlan POS</code></pre>
+    <p>Run manually from CLI. Not idempotent — do not put in Supplemental CLI.</p>
+
+    <h3>No Internet — Fixed by enable ipforwarding</h3>
+    <p>DHCP worked but clients had no internet. Root cause: IP forwarding was not enabled on SW1 after VLAN rebuild. Fix: <code>enable ipforwarding</code> run manually from CLI. Not idempotent — stalls EP1 push at 15% if run via Supplemental CLI on a switch where it's already enabled.</p>
+
+    <h3>Idempotent — Definition</h3>
+    <p>Running the same command twice produces the same result without errors. <code>enable ipforwarding</code> and <code>enable dhcp</code> on EXOS are NOT idempotent — second run throws an error. EP1 Supplemental CLI runs on every policy push, so non-idempotent commands must stay out of it and be run once manually after reset.</p>
+
+    <h3>Port 5 PoE — AP Dark</h3>
+    <p>New AP on port 5 showed no LEDs despite <code>show inline-power ports 5</code> reporting "delivering class4 at 1.1W." Normal AP draw is 15-25W — 1.1W suggests the AP is not fully powering on. Possible causes: cable issue, AP hardware fault. Deferred — to reseat cable and retry.</p>
+
+    <h3>Key Commands Used</h3>
+    <table>
+      <tr><th>Command</th><th>Purpose</th></tr>
+      <tr><td><code>show vlan</code></td><td>Confirmed old VLANs + tag conflicts</td></tr>
+      <tr><td><code>show dhcp-server</code></td><td>Confirmed DHCP ranges after EP1 push</td></tr>
+      <tr><td><code>enable dhcp ?</code></td><td>Discovered correct DHCP enable syntax</td></tr>
+      <tr><td><code>enable dhcp ports 3,5 vlan &lt;name&gt;</code></td><td>Enable DHCP server per VLAN per port</td></tr>
+      <tr><td><code>enable ipforwarding</code></td><td>Enable inter-VLAN routing — one time, manual only</td></tr>
+      <tr><td><code>show inline-power ports 5</code></td><td>Verify PoE delivery to AP on port 5</td></tr>
+    </table>
+  </section>
+
   <!-- PENDING -->
   <section id="pending">
     <h2>Pending</h2>
@@ -453,5 +505,8 @@
   &copy; 2026 Khursheed Khan · 5320 Onboarding · June 15 2026
 </footer>
 
+<div style="background:#b91c1c;color:#fff;text-align:center;padding:12px 16px;font-family:monospace;font-size:13px;font-weight:bold;letter-spacing:0.04em;animation:warnpulse 1.2s ease-in-out infinite;">
+⚠️&nbsp; CLAUDE MAKES ERRORS &nbsp;—&nbsp; VERIFY WITH SME FIRST &nbsp;—&nbsp; DO NOT USE IN PRODUCTION &nbsp;—&nbsp; THIS IS A TRAINING GUIDE ON WHAT NOT TO DO &nbsp;—&nbsp; JUNE 15 2026 &nbsp;⚠️
+</div>
 </body>
 </html>

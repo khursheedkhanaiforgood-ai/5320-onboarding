@@ -3,13 +3,15 @@ DigitalTwinEngine — Live Browser Dashboard
 Plotly Dash app. Reads from DataStore (thread-safe deque of PollResults).
 Run via main.py or widget.py — do not run standalone.
 """
+import os
 import re
+import subprocess
 import threading
 from collections import deque
 from datetime import datetime
 
 import numpy as np          # force full init before plotly threads start (Py3.14 circular import)
-from dash import Dash, dcc, html, Input, Output, dash_table
+from dash import Dash, dcc, html, Input, Output, State, ALL, ctx, no_update, dash_table
 from plotly.subplots import make_subplots
 import plotly.graph_objects as go
 
@@ -23,6 +25,8 @@ class DataStore:
         self._lock   = threading.Lock()
         self._polls  = deque(maxlen=self.MAX_POLLS)
         self._header: dict = {}
+        # Capture events — populated by CaptureAgent on_complete callbacks
+        self._captures: list = []
 
     def push(self, poll) -> None:
         with self._lock:
@@ -41,6 +45,14 @@ class DataStore:
     def header(self) -> dict:
         with self._lock:
             return dict(self._header)
+
+    def push_capture(self, result) -> None:
+        with self._lock:
+            self._captures.append(result)
+
+    def captures(self) -> list:
+        with self._lock:
+            return list(self._captures)
 
 
 # ── Metric registry ───────────────────────────────────────────────────────────
@@ -407,9 +419,76 @@ def _legend_row():
                                    'flexWrap': 'wrap'})
 
 
+# ── Capture tab UI ────────────────────────────────────────────────────────────
+
+def _capture_tab_layout() -> html.Div:
+    _lbl = {'color': _DIM, 'fontSize': '11px', 'fontWeight': '600',
+            'textTransform': 'uppercase', 'letterSpacing': '0.05em',
+            'marginBottom': '4px', 'display': 'block'}
+    _btn = {'backgroundColor': '#6366f1', 'color': '#fff', 'border': 'none',
+            'borderRadius': '6px', 'padding': '8px 18px', 'cursor': 'pointer',
+            'fontWeight': '600', 'fontSize': '13px',
+            'fontFamily': '"Inter", Arial, sans-serif'}
+
+    return html.Div([
+        _card([
+            html.Div('Packet Capture', style={
+                'color': _TEXT, 'fontWeight': '700', 'fontSize': '15px',
+                'marginBottom': '16px',
+            }),
+            html.Div([
+                html.Div([
+                    html.Label('Interface', style=_lbl),
+                    dcc.Dropdown(id='cap-interface',
+                                 options=['wifi0', 'wifi1', 'eth0'], value='wifi0',
+                                 clearable=False,
+                                 style={'width': '140px', 'fontSize': '13px'}),
+                ], style={'marginRight': '20px'}),
+                html.Div([
+                    html.Label('Filter Preset', style=_lbl),
+                    dcc.Dropdown(id='cap-filter',
+                                 options=['all', 'data_only', 'dhcp', 'decrypt_errors'],
+                                 value='data_only', clearable=False,
+                                 style={'width': '165px', 'fontSize': '13px'}),
+                ], style={'marginRight': '20px'}),
+                html.Div([
+                    html.Label('​', style=_lbl),
+                    html.Button('▶  Start 60s Capture', id='cap-start-btn',
+                                n_clicks=0, style=_btn),
+                ], style={'marginRight': '30px'}),
+                html.Div([
+                    html.Label('Auto-Trigger', style=_lbl),
+                    dcc.Checklist(
+                        id='cap-auto-trigger',
+                        options=[{'label': '  on calibration deviation',
+                                  'value': 'auto'}],
+                        value=[],
+                        style={'color': _DIM, 'fontSize': '12px'},
+                    ),
+                ]),
+            ], style={'display': 'flex', 'alignItems': 'flex-start',
+                      'flexWrap': 'wrap', 'gap': '8px'}),
+            html.Div(id='cap-status', children='● IDLE',
+                     style={'marginTop': '14px', 'fontSize': '13px',
+                            'fontWeight': '600', 'color': _DIM}),
+        ]),
+        _card([
+            html.Div('Captured Files', style={
+                'color': _TEXT, 'fontWeight': '700', 'fontSize': '14px',
+                'marginBottom': '10px',
+            }),
+            html.Div(id='cap-file-list',
+                     children=html.Div('No captures yet.',
+                                       style={'color': _DIM, 'fontSize': '12px'})),
+        ]),
+        html.Div(id='cap-wireshark-out', style={'display': 'none'}),
+    ], style={'padding': '12px', 'maxWidth': '1200px'})
+
+
 # ── Dash app factory ──────────────────────────────────────────────────────────
 
-def create_app(data_store: DataStore) -> Dash:
+def create_app(data_store: DataStore, capture_agent=None,
+               on_capture_complete=None) -> Dash:
     app = Dash(
         __name__,
         title='DigitalTwinEngine',
@@ -423,6 +502,20 @@ def create_app(data_store: DataStore) -> Dash:
     )
 
     all_chk_ids = [_group_id(g) for g in _GROUPS]
+
+    _tab_style = {
+        'color': _DIM, 'backgroundColor': _CARD,
+        'borderColor': _BORDER, 'padding': '8px 18px', 'fontSize': '13px',
+        'fontFamily': '"Inter", Arial, sans-serif',
+    }
+    _tab_selected = {
+        'color': _TEXT, 'backgroundColor': _BG,
+        'borderTop': '2px solid #6366f1', 'borderColor': _BORDER,
+        'padding': '8px 18px', 'fontSize': '13px',
+        'fontFamily': '"Inter", Arial, sans-serif',
+        'fontWeight': '600',
+    }
+    _tab_capture_selected = {**_tab_selected, 'borderTop': '2px solid #06b6d4'}
 
     app.layout = html.Div([
         # ── Header ──
@@ -443,30 +536,48 @@ def create_app(data_store: DataStore) -> Dash:
             'justifyContent': 'space-between',
         }),
 
-        # ── Body ──
-        html.Div([
-            _sidebar(),
-            html.Div([
-                _card(dcc.Graph(
-                    id='main-chart',
-                    config={'displayModeBar': True, 'scrollZoom': True},
-                    style={'minHeight': '200px'},
-                )),
-                _card(html.Div(id='status-row')),
-                _card([
-                    _legend_row(),
-                    html.Div(id='feature-flags'),
-                ]),
-                _card(html.Div(id='client-table')),
-            ], id='main-area', style={'flex': '1', 'padding': '12px',
-                                       'overflowX': 'hidden'}),
-        ], style={'display': 'flex', 'height': 'calc(100vh - 45px)',
-                  'overflow': 'hidden'}),
+        # ── Tabs ──
+        dcc.Tabs(id='main-tabs', value='tab-metrics',
+                 colors={'border': _BORDER, 'primary': '#6366f1',
+                         'background': _CARD},
+                 style={'borderBottom': f'1px solid {_BORDER}'},
+                 children=[
+            dcc.Tab(label='📡  Live Metrics', value='tab-metrics',
+                    style=_tab_style, selected_style=_tab_selected,
+                    children=[
+                        html.Div([
+                            _sidebar(),
+                            html.Div([
+                                _card(dcc.Graph(
+                                    id='main-chart',
+                                    config={'displayModeBar': True,
+                                            'scrollZoom': True},
+                                    style={'minHeight': '200px'},
+                                )),
+                                _card(html.Div(id='status-row')),
+                                _card([
+                                    _legend_row(),
+                                    html.Div(id='feature-flags'),
+                                ]),
+                                _card(html.Div(id='client-table')),
+                            ], id='main-area', style={'flex': '1', 'padding': '12px',
+                                                       'overflowX': 'hidden'}),
+                        ], style={'display': 'flex',
+                                  'height': 'calc(100vh - 90px)',
+                                  'overflow': 'hidden'}),
+                    ]),
+            dcc.Tab(label='🔍  Packet Capture', value='tab-capture',
+                    style=_tab_style, selected_style=_tab_capture_selected,
+                    children=[_capture_tab_layout()]),
+        ]),
 
+        # ── Shared state / timers ──
         # Store aggregates all checklist selections — decouples chart callback
         # from checklist count, preventing IndexError on layout changes
         dcc.Store(id='selected-metrics', data=list(_DEFAULT_ON)),
-        dcc.Interval(id='interval', interval=5_000, n_intervals=0),
+        dcc.Interval(id='interval',         interval=5_000, n_intervals=0),
+        dcc.Interval(id='capture-interval', interval=2_000, n_intervals=0),
+        dcc.Store(id='cap-trigger', data=0),
     ], style=_CSS_BASE)
 
     # ── Callbacks ─────────────────────────────────────────────────────────────
@@ -745,6 +856,138 @@ def create_app(data_store: DataStore) -> Dash:
             ],
         )
 
+    # ── Capture tab callbacks ─────────────────────────────────────────────────
+
+    @app.callback(
+        Output('cap-trigger', 'data'),
+        Input('cap-start-btn', 'n_clicks'),
+        State('cap-interface', 'value'),
+        State('cap-filter', 'value'),
+        prevent_initial_call=True,
+    )
+    def _start_capture(_n, interface, filter_preset):
+        if capture_agent and not capture_agent.is_busy():
+            cb = on_capture_complete or data_store.push_capture
+            capture_agent.start(
+                interface=interface or 'wifi0',
+                duration_s=60,
+                filter_preset=filter_preset or 'data_only',
+                trigger='manual',
+                on_complete=cb,
+                open_wireshark=True,
+            )
+        return _n
+
+    @app.callback(
+        Output('cap-status', 'children'),
+        Output('cap-status', 'style'),
+        Output('cap-file-list', 'children'),
+        Input('capture-interval', 'n_intervals'),
+    )
+    def _update_capture_tab(_n):
+        if capture_agent:
+            state   = capture_agent.state
+            elapsed = capture_agent.elapsed
+            if state == 'capturing':
+                remaining   = max(0, 60 - int(elapsed))
+                status_txt  = f'⏺  CAPTURING  —  {remaining}s remaining'
+                status_col  = '#ef4444'
+            elif state == 'transferring':
+                status_txt  = '⇩  TRANSFERRING  —  pulling .pcap via SFTP…'
+                status_col  = '#f59e0b'
+            else:
+                status_txt  = '● IDLE'
+                status_col  = _DIM
+        else:
+            status_txt  = '● No CaptureAgent (AP offline / demo mode)'
+            status_col  = _DIM
+
+        status_style = {'marginTop': '14px', 'fontSize': '13px',
+                        'fontWeight': '600', 'color': status_col}
+
+        captures = data_store.captures()
+        if not captures:
+            file_list = html.Div('No captures yet.',
+                                 style={'color': _DIM, 'fontSize': '12px'})
+        else:
+            _col = lambda w: {'width': w, 'display': 'inline-block',
+                              'fontSize': '11px', 'flexShrink': '0'}
+            header = html.Div([
+                html.Span('Time',      style={**_col('145px'), 'color': _DIM,
+                          'fontWeight': '600', 'textTransform': 'uppercase'}),
+                html.Span('Interface', style={**_col('65px'),  'color': _DIM,
+                          'fontWeight': '600', 'textTransform': 'uppercase'}),
+                html.Span('Filter',    style={**_col('165px'), 'color': _DIM,
+                          'fontWeight': '600', 'textTransform': 'uppercase'}),
+                html.Span('Size',      style={**_col('70px'),  'color': _DIM,
+                          'fontWeight': '600', 'textTransform': 'uppercase'}),
+                html.Span('Trigger',   style={**_col('95px'),  'color': _DIM,
+                          'fontWeight': '600', 'textTransform': 'uppercase'}),
+                html.Span('Status',    style={'color': _DIM, 'flex': '1',
+                          'fontSize': '11px', 'fontWeight': '600',
+                          'textTransform': 'uppercase'}),
+            ], style={'display': 'flex', 'alignItems': 'center', 'gap': '8px',
+                      'padding': '4px 4px 8px',
+                      'borderBottom': f'2px solid {_BORDER}'})
+
+            rows = [header]
+            for i, r in enumerate(reversed(captures)):
+                real_idx = len(captures) - 1 - i
+                ok  = r.error is None
+                sz  = f'{r.file_bytes / 1024:.1f} KB' if r.file_bytes else '—'
+                ts_fmt = r.ts[:19].replace('T', ' ')
+                rows.append(html.Div([
+                    html.Span(ts_fmt,      style={**_col('145px'), 'color': _DIM}),
+                    html.Span(r.interface, style={**_col('65px'),
+                              'color': '#6366f1', 'fontWeight': '600'}),
+                    html.Span(r.filter_desc, style={**_col('165px'), 'color': _TEXT}),
+                    html.Span(sz,          style={**_col('70px'),  'color': _DIM}),
+                    html.Span(r.trigger,   style={**_col('95px'),  'color': _DIM}),
+                    html.Span(r.error or '✓',
+                              style={'color': '#ef4444' if r.error else '#22c55e',
+                                     'flex': '1', 'fontSize': '11px'}),
+                    html.Button('🦈 Open',
+                                id={'type': 'wireshark-btn', 'index': real_idx},
+                                n_clicks=0, disabled=not ok,
+                                style={
+                                    'backgroundColor': '#06b6d4' if ok else '#374151',
+                                    'color': '#fff', 'border': 'none',
+                                    'borderRadius': '4px', 'padding': '4px 10px',
+                                    'cursor': 'pointer' if ok else 'default',
+                                    'fontSize': '11px', 'fontWeight': '600',
+                                }),
+                ], style={'display': 'flex', 'alignItems': 'center', 'gap': '8px',
+                          'padding': '6px 4px',
+                          'borderBottom': f'1px solid {_BORDER}'}))
+
+            file_list = html.Div(rows)
+
+        return status_txt, status_style, file_list
+
+    @app.callback(
+        Output('cap-wireshark-out', 'children'),
+        Input({'type': 'wireshark-btn', 'index': ALL}, 'n_clicks'),
+        prevent_initial_call=True,
+    )
+    def _open_wireshark_click(n_clicks_list):
+        if not ctx.triggered_id:
+            return no_update
+        idx = ctx.triggered_id['index']
+        captures = data_store.captures()
+        if idx < len(captures):
+            r = captures[idx]
+            if r.error is None and os.path.exists(r.local_path):
+                for cmd in (['wireshark', r.local_path],
+                            ['open', '-a', 'Wireshark', r.local_path]):
+                    try:
+                        subprocess.Popen(cmd, stdout=subprocess.DEVNULL,
+                                         stderr=subprocess.DEVNULL)
+                        return ''
+                    except FileNotFoundError:
+                        continue
+                subprocess.Popen(['open', r.local_path])
+        return no_update
+
     return app
 
 
@@ -779,8 +1022,9 @@ def find_free_port(start: int = 8050) -> int:
 
 # ── Entry point ───────────────────────────────────────────────────────────────
 
-def run_dashboard(data_store: DataStore, port: int = 8050) -> None:
-    app = create_app(data_store)
+def run_dashboard(data_store: DataStore, port: int = 8050,
+                  capture_agent=None) -> None:
+    app = create_app(data_store, capture_agent)
     import logging
     log = logging.getLogger('werkzeug')
     log.setLevel(logging.ERROR)

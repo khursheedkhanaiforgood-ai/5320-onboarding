@@ -227,6 +227,21 @@ class SQLiteStore:
         CREATE INDEX IF NOT EXISTS ix_rcs_session_ts  ON raw_cli_snapshots(session_id, ts);
         CREATE INDEX IF NOT EXISTS ix_rcs_cmd         ON raw_cli_snapshots(session_id, command_tag);
 
+        CREATE TABLE IF NOT EXISTS pcap_captures (
+            id           INTEGER PRIMARY KEY AUTOINCREMENT,
+            session_id   INTEGER NOT NULL REFERENCES sessions(id),
+            ts           TEXT    NOT NULL,
+            interface    TEXT    NOT NULL,
+            duration_s   INTEGER NOT NULL,
+            filter_desc  TEXT,
+            local_path   TEXT    NOT NULL,
+            file_bytes   INTEGER,
+            trigger      TEXT    NOT NULL DEFAULT 'manual',
+            error        TEXT
+        );
+
+        CREATE INDEX IF NOT EXISTS ix_pcap_session ON pcap_captures(session_id, ts);
+
         COMMIT;
         """)
 
@@ -330,6 +345,32 @@ class SQLiteStore:
             )
         except Exception:
             _log.error("write_knob_event failed", exc_info=True)
+
+    def write_pcap_capture(self, session_id: int, result) -> None:
+        """Record a completed (or failed) packet capture burst."""
+        try:
+            self._conn.execute(
+                "INSERT INTO pcap_captures"
+                "(session_id,ts,interface,duration_s,filter_desc,"
+                " local_path,file_bytes,trigger,error) "
+                "VALUES (?,?,?,?,?,?,?,?,?)",
+                (session_id, result.ts, result.interface, result.duration_s,
+                 result.filter_desc, result.local_path, result.file_bytes,
+                 result.trigger, result.error),
+            )
+        except Exception:
+            _log.error("write_pcap_capture failed", exc_info=True)
+
+    def list_pcap_captures(self, session_id: int) -> list:
+        rows = self._conn.execute(
+            "SELECT ts,interface,duration_s,filter_desc,local_path,"
+            "file_bytes,trigger,error "
+            "FROM pcap_captures WHERE session_id=? ORDER BY ts DESC",
+            (session_id,),
+        ).fetchall()
+        keys = ('ts','interface','duration_s','filter_desc','local_path',
+                'file_bytes','trigger','error')
+        return [dict(zip(keys, r)) for r in rows]
 
     def write_raw_snapshot(self, session_id: int, command_tag: str,
                            raw_text: str, radio: str = None,
