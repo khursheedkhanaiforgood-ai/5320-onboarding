@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>June 16 2026 — AP2 Onboarding + Client Association Debug</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Source+Sans+3:wght@400;600&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Libre Baskerville', Georgia, serif;
+    background: #fff;
+    color: #121212;
+    line-height: 1.75;
+    font-size: 18px;
+  }
+
+  nav {
+    position: sticky;
+    top: 0;
+    background: #fff;
+    border-bottom: 2px solid #121212;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    overflow-x: auto;
+    padding: 0 24px;
+  }
+  nav a {
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: #121212;
+    text-decoration: none;
+    padding: 14px 16px;
+    white-space: nowrap;
+    border-bottom: 3px solid transparent;
+    transition: border-color 0.15s;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  nav a:hover { border-bottom-color: #121212; }
+
+  header {
+    max-width: 780px;
+    margin: 56px auto 0;
+    padding: 0 24px;
+    text-align: center;
+  }
+  .kicker {
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #666;
+    margin-bottom: 16px;
+  }
+  h1 { font-size: clamp(28px, 4vw, 42px); font-weight: 700; line-height: 1.2; margin-bottom: 20px; }
+  .dateline {
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: 14px;
+    color: #888;
+    border-top: 1px solid #ddd;
+    border-bottom: 1px solid #ddd;
+    padding: 10px 0;
+    margin-bottom: 40px;
+  }
+
+  main { max-width: 780px; margin: 0 auto; padding: 0 24px 80px; }
+  section { margin-bottom: 56px; }
+  h2 { font-size: 22px; font-weight: 700; border-top: 3px solid #121212; padding-top: 16px; margin-bottom: 20px; scroll-margin-top: 60px; }
+  h3 { font-size: 17px; font-weight: 700; margin: 28px 0 10px; }
+  p { margin-bottom: 16px; }
+  ul, ol { padding-left: 24px; margin-bottom: 16px; }
+  li { margin-bottom: 6px; }
+
+  table { width: 100%; border-collapse: collapse; margin: 20px 0; font-family: 'Source Sans 3', sans-serif; font-size: 15px; }
+  th { background: #121212; color: #fff; padding: 10px 14px; text-align: left; font-weight: 600; }
+  td { padding: 9px 14px; border-bottom: 1px solid #e5e5e5; vertical-align: top; }
+  tr:nth-child(even) td { background: #f9f9f9; }
+
+  code { font-family: 'Courier New', monospace; font-size: 14px; background: #f0f0f0; padding: 2px 6px; border-radius: 3px; }
+  pre { background: #f0f0f0; padding: 14px; font-size: 13px; overflow-x: auto; margin: 16px 0; border-radius: 4px; }
+
+  .finding {
+    border-left: 4px solid #1a5276;
+    background: #f4f8fb;
+    padding: 16px 20px;
+    margin: 20px 0;
+    border-radius: 0 4px 4px 0;
+  }
+
+  .warn {
+    border-left: 4px solid #c0392b;
+    background: #fdf2f2;
+    padding: 16px 20px;
+    margin: 20px 0;
+    border-radius: 0 4px 4px 0;
+  }
+
+  footer { text-align: center; font-family: 'Source Sans 3', sans-serif; font-size: 13px; color: #aaa; padding: 32px 24px; border-top: 1px solid #ddd; }
+</style>
+</head>
+<body>
+<div id="ai-warning-banner" style="background:#b91c1c;color:#fff;text-align:center;padding:12px 16px;font-family:monospace;font-size:13px;font-weight:bold;position:sticky;top:0;z-index:99999;letter-spacing:0.04em;animation:warnpulse 1.2s ease-in-out infinite;width:100%;box-sizing:border-box;display:block;">
+⚠️&nbsp; CLAUDE MAKES ERRORS &nbsp;—&nbsp; VERIFY WITH SME FIRST &nbsp;—&nbsp; DO NOT USE IN PRODUCTION &nbsp;—&nbsp; THIS IS A TRAINING GUIDE ON WHAT NOT TO DO &nbsp;—&nbsp; JUNE 15 2026 &nbsp;⚠️
+</div>
+<style>@keyframes warnpulse{0%,100%{background:#b91c1c}50%{background:#ef4444}}</style>
+
+<nav>
+  <a href="#accomplished">Accomplished</a>
+  <a href="#ap2">AP2 Onboard</a>
+  <a href="#sw1">SW1 DHCP</a>
+  <a href="#stalecache">Stale Cache</a>
+  <a href="#commands">Commands</a>
+  <a href="#pending">Pending</a>
+</nav>
+
+<header>
+  <p class="kicker">5320 Onboarding · June 16 2026</p>
+  <h1>AP2 Onboarding + Client Association Debug</h1>
+  <p class="dateline">Tuesday, June 16 2026 &nbsp;·&nbsp; AP3000 · IQ Engine · EP1 · EXOS SW1</p>
+</header>
+
+<main>
+
+  <section id="accomplished">
+    <h2>Accomplished</h2>
+    <ul>
+      <li>AP2 (AH-565780) factory reset via serial console and onboarded to VIQ</li>
+      <li>AP2 CAPWAP connected — RUN state, DTLS Connected, server 3.145.235.68</li>
+      <li>Network policy pushed to AP2 — both SSIDs active (WC_Seattle_Guest + WC_Seattle-PPSK)</li>
+      <li>SW1 port 5 tagged to all 5 VLANs (TeamUSA/AUS/Guest/VIP/POS)</li>
+      <li>SW1 Supplemental CLI updated to include port 5 alongside port 3</li>
+      <li>DHCP + ipforwarding enabled manually on SW1 — clients getting IPs, internet working</li>
+      <li>Identified EP1 stale cache + MAC randomization as dual cause of missing client in show station</li>
+    </ul>
+  </section>
+
+  <section id="ap2">
+    <h2>AP2 Onboarding — AH-565780</h2>
+
+    <h3>Problem: AP Dark on Port 5</h3>
+    <p>AP2 was plugged into SW1 port 5. <code>show inline-power info ports 5</code> showed "delivering class4 at 1.1W" but AP LEDs were dark. 1.1W = detection current only, not operational. Cable reseat resolved — AP booted normally (orange → white).</p>
+
+    <h3>Wrong VIQ</h3>
+    <p>AP2 was previously registered on a different VIQ. After boot it entered SULKING state (900s pause) after failing to reach the old CAPWAP server. Factory reset performed via serial console:</p>
+    <pre><code>reset config</code></pre>
+    <p>Default credentials post-reset: <strong>admin / aerohive</strong> (or Aerohive1).</p>
+
+    <h3>Serial Number Mix-up</h3>
+    <p>First claim attempt in EP1 used wrong serial number — a different AP (AH-901340) briefly appeared in EP1 with IP 172.16.0.147 (from old VIQ). Correct serial confirmed via console prompt: <strong>AH-565780</strong>. Re-claimed with correct serial, reset config again, AP connected immediately.</p>
+
+    <h3>CAPWAP Connection Sequence</h3>
+    <table>
+      <tr><th>State</th><th>Meaning</th></tr>
+      <tr><td>DISCOVERY</td><td>Sending UDP packets to redirector.aerohive.com</td></tr>
+      <tr><td>SULKING</td><td>3 discovery attempts failed — pausing 900s before retry</td></tr>
+      <tr><td>RUN — Connected securely</td><td>DTLS connected, heartbeat active — fully online</td></tr>
+    </table>
+
+    <h3>Post-Connect Reboot</h3>
+    <p>AP2 rebooted ~3 minutes after first connecting to VIQ. No network policy was manually pushed. Likely cause: EP1 auto-pushed a firmware upgrade on first claim. Normal behavior — wait for reboot to complete and re-verify connection.</p>
+
+    <h3>Port 5 VLAN Config</h3>
+    <p>EP1 Supplemental CLI only had port 3 tagged. Manually added port 5 and updated Supplemental CLI:</p>
+    <pre><code>configure vlan TeamUSA add ports 5 tagged
+configure vlan TeamAUS add ports 5 tagged
+configure vlan Guest   add ports 5 tagged
+configure vlan VIP     add ports 5 tagged
+configure vlan POS     add ports 5 tagged</code></pre>
+    <p>Supplemental CLI updated to <code>add ports 3,5 tagged</code> for all 5 VLANs.</p>
+  </section>
+
+  <section id="sw1">
+    <h2>SW1 DHCP + ipforwarding</h2>
+
+    <h3>VLAN Tag Conflict</h3>
+    <p>Old VLANs (Ten=tag10, Twenty=tag20, etc.) blocked EP1 Supplemental CLI from creating new VLANs (TeamUSA=tag10, etc.). Fix: added delete commands at top of Supplemental CLI before create commands.</p>
+
+    <h3>DHCP Enable — Correct Syntax</h3>
+    <p><code>enable dhcp-server</code> is invalid on EXOS. Correct command:</p>
+    <pre><code>enable dhcp ports 3,5 vlan TeamUSA
+enable dhcp ports 3,5 vlan TeamAUS
+enable dhcp ports 3,5 vlan Guest
+enable dhcp ports 3,5 vlan VIP
+enable dhcp ports 3,5 vlan POS</code></pre>
+
+    <h3>ipforwarding = Internet</h3>
+    <p>Clients had DHCP but no internet. Fix: <code>enable ipforwarding</code> — enables inter-VLAN routing and default gateway forwarding. Run once manually. Not idempotent — stalls EP1 push if included in Supplemental CLI.</p>
+
+    <div class="warn">
+      <strong>Idempotent:</strong> A command that produces the same result whether run once or many times. <code>enable ipforwarding</code> and <code>enable dhcp</code> on EXOS are NOT idempotent — second run throws an error. EP1 Supplemental CLI runs on every push — non-idempotent commands must be run once manually only.
+    </div>
+  </section>
+
+  <section id="stalecache">
+    <h2>EP1 Stale Cache + MAC Randomization</h2>
+
+    <p>Real-world XE-08 scenario played out in the lab with a second complication.</p>
+
+    <h3>What Happened</h3>
+    <ul>
+      <li>EP1 showed phone and MacBook associated to AP1 (192.168.0.12)</li>
+      <li>SSH to AP1 → <code>show station</code> → NO clients</li>
+      <li>SSH to AP2 → <code>show station</code> → NO clients</li>
+      <li>MacBook confirmed on correct SSID with valid IP 10.30.0.102</li>
+      <li>Both APs physically 6 inches apart — client must be on one of them</li>
+    </ul>
+
+    <h3>Dual Root Cause</h3>
+    <ol>
+      <li><strong>EP1 stale cache</strong> — AP2 came online, client may have roamed. EP1 still showed old association on AP1 and hadn't refreshed.</li>
+      <li><strong>macOS MAC randomization</strong> — macOS rotates MAC address per SSID on reconnect. The cached MAC <code>74a6:cd8b:1960</code> was no longer the MAC the MacBook was using. New MAC discoverable via <code>networksetup -getmacaddress en0</code>.</li>
+    </ol>
+
+    <div class="finding">
+      <strong>Rule: <code>show station</code> on the AP is always authoritative.</strong> EP1 client view is cached and can lag. When EP1 and AP disagree, trust the AP. When a client is missing, check all APs and verify current MAC on the client device.
+    </div>
+
+    <h3>Diagnostic Chain for Missing Client</h3>
+    <ol>
+      <li><code>show station</code> on ALL APs — not just the one EP1 points to</li>
+      <li><code>networksetup -getmacaddress en0</code> on MacBook — get actual current MAC</li>
+      <li><code>show fdb ports 3,5</code> on SW1 — authoritative L2 MAC table</li>
+      <li><code>show iparp vlan Guest</code> on SW1 — cached MAC→IP even after roam</li>
+    </ol>
+  </section>
+
+  <section id="commands">
+    <h2>Command Reference — June 16</h2>
+    <table>
+      <tr><th>Command</th><th>Where</th><th>Purpose</th></tr>
+      <tr><td><code>show inline-power info ports 5</code></td><td>SW1</td><td>PoE delivery status per port</td></tr>
+      <tr><td><code>show capwap client</code></td><td>AP CLI</td><td>CAPWAP state — DISCOVERY/SULKING/RUN</td></tr>
+      <tr><td><code>reset config</code></td><td>AP CLI</td><td>Factory reset — clears VIQ registration</td></tr>
+      <tr><td><code>show version</code></td><td>AP CLI</td><td>Serial number confirmation</td></tr>
+      <tr><td><code>ssh-keygen -R &lt;ip&gt;</code></td><td>MacBook</td><td>Clear stale SSH host key after AP reset</td></tr>
+      <tr><td><code>enable dhcp ports 3,5 vlan &lt;name&gt;</code></td><td>SW1</td><td>Enable DHCP server per port per VLAN</td></tr>
+      <tr><td><code>enable ipforwarding</code></td><td>SW1</td><td>Enable inter-VLAN routing — manual only</td></tr>
+      <tr><td><code>networksetup -getmacaddress en0</code></td><td>MacBook</td><td>Get actual current MAC (may be randomized)</td></tr>
+      <tr><td><code>show fdb ports 3,5</code></td><td>SW1</td><td>Authoritative L2 MAC table</td></tr>
+      <tr><td><code>show iparp vlan Guest</code></td><td>SW1</td><td>ARP cache — MAC→IP per VLAN</td></tr>
+    </table>
+  </section>
+
+  <section id="pending">
+    <h2>Pending</h2>
+    <ul>
+      <li><strong>Client association debug</strong> — MacBook not showing in show station on either AP; turn WiFi off/on and re-check with current MAC</li>
+      <li><strong>EP1 actions</strong> — ADSP disable, basic rate 12Mbps, PMK 86400s, roaming hops 2, QF_Modem DHCP 24hr</li>
+      <li><strong>wifi0 re-enable on AP1</strong> — admin disabled, re-enable via EP1 radio profile</li>
+      <li><strong>pcap capture test</strong> — blocked until ADSP disabled</li>
+      <li><strong>XE scenarios</strong> — 41 remaining in bank</li>
+      <li><strong>Sprint 2b</strong> — knob_panel.py</li>
+      <li><strong>Third scenario bank</strong> — 77 real Extreme trouble tickets</li>
+      <li><strong>Raspberry Pi 4</strong> — Tailscale + subnet routing (hardware pending)</li>
+    </ul>
+  </section>
+
+</main>
+
+<div style="background:#b91c1c;color:#fff;text-align:center;padding:12px 16px;font-family:monospace;font-size:13px;font-weight:bold;letter-spacing:0.04em;animation:warnpulse 1.2s ease-in-out infinite;width:100%;box-sizing:border-box;display:block;">
+⚠️&nbsp; CLAUDE MAKES ERRORS &nbsp;—&nbsp; VERIFY WITH SME FIRST &nbsp;—&nbsp; DO NOT USE IN PRODUCTION &nbsp;—&nbsp; THIS IS A TRAINING GUIDE ON WHAT NOT TO DO &nbsp;—&nbsp; JUNE 15 2026 &nbsp;⚠️
+</div>
+
+<footer>
+  &copy; 2026 Khursheed Khan · 5320 Onboarding · June 16 2026
+</footer>
+
+</body>
+</html>
