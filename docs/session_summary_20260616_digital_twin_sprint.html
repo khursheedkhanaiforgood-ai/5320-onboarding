@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>June 16 2026 — WiFi 7 Digital Twin Sprint Plan + ns3-Sionna + NVIDIA GPU Stack</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Source+Sans+3:wght@400;600&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Libre Baskerville', Georgia, serif;
+    background: #fff;
+    color: #121212;
+    line-height: 1.75;
+    font-size: 18px;
+  }
+
+  nav {
+    position: sticky;
+    top: 0;
+    background: #fff;
+    border-bottom: 2px solid #121212;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    overflow-x: auto;
+    padding: 0 24px;
+  }
+  nav a {
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: #121212;
+    text-decoration: none;
+    padding: 14px 16px;
+    white-space: nowrap;
+    border-bottom: 3px solid transparent;
+    transition: border-color 0.15s;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  nav a:hover { border-bottom-color: #121212; }
+
+  header {
+    max-width: 780px;
+    margin: 56px auto 0;
+    padding: 0 24px;
+    text-align: center;
+  }
+  .kicker {
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #666;
+    margin-bottom: 16px;
+  }
+  h1 { font-size: clamp(28px, 4vw, 42px); font-weight: 700; line-height: 1.2; margin-bottom: 20px; }
+  .dateline {
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: 14px;
+    color: #888;
+    border-top: 1px solid #ddd;
+    border-bottom: 1px solid #ddd;
+    padding: 10px 0;
+    margin-bottom: 40px;
+  }
+
+  main { max-width: 780px; margin: 0 auto; padding: 0 24px 80px; }
+  section { margin-bottom: 56px; }
+  h2 { font-size: 22px; font-weight: 700; border-top: 3px solid #121212; padding-top: 16px; margin-bottom: 20px; scroll-margin-top: 60px; }
+  h3 { font-size: 17px; font-weight: 700; margin: 28px 0 10px; }
+  p { margin-bottom: 16px; }
+  ul, ol { padding-left: 24px; margin-bottom: 16px; }
+  li { margin-bottom: 6px; }
+  a { color: #1a5276; }
+  a:hover { text-decoration: underline; }
+
+  table { width: 100%; border-collapse: collapse; margin: 20px 0; font-family: 'Source Sans 3', sans-serif; font-size: 15px; }
+  th { background: #121212; color: #fff; padding: 10px 14px; text-align: left; font-weight: 600; }
+  td { padding: 9px 14px; border-bottom: 1px solid #e5e5e5; vertical-align: top; }
+  tr:nth-child(even) td { background: #f9f9f9; }
+
+  code { font-family: 'Courier New', monospace; font-size: 14px; background: #f0f0f0; padding: 2px 6px; border-radius: 3px; }
+  pre { background: #f0f0f0; padding: 14px; font-size: 13px; overflow-x: auto; margin: 16px 0; border-radius: 4px; line-height: 1.5; }
+
+  .finding {
+    border-left: 4px solid #1a5276;
+    background: #f4f8fb;
+    padding: 16px 20px;
+    margin: 20px 0;
+    border-radius: 0 4px 4px 0;
+  }
+
+  .warn {
+    border-left: 4px solid #c0392b;
+    background: #fdf2f2;
+    padding: 16px 20px;
+    margin: 20px 0;
+    border-radius: 0 4px 4px 0;
+  }
+
+  .source-card {
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    padding: 20px 24px;
+    margin: 16px 0;
+    background: #fafafa;
+  }
+  .source-card h4 {
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #888;
+    margin-bottom: 8px;
+  }
+  .source-card h3 { margin: 0 0 8px; font-size: 16px; }
+  .source-card p { font-size: 15px; margin-bottom: 0; }
+
+  .phase-gate {
+    border-left: 4px solid #059669;
+    background: #f0fdf4;
+    padding: 12px 16px;
+    margin: 12px 0;
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: 14px;
+    border-radius: 0 4px 4px 0;
+  }
+  .phase-gate strong { color: #059669; }
+
+  .risk-high { color: #c0392b; font-weight: 700; }
+  .risk-med  { color: #b45309; font-weight: 700; }
+  .risk-low  { color: #059669; font-weight: 700; }
+
+  footer { text-align: center; font-family: 'Source Sans 3', sans-serif; font-size: 13px; color: #aaa; padding: 32px 24px; border-top: 1px solid #ddd; }
+</style>
+</head>
+<body>
+
+<div id="ai-warning-banner" style="background:#b91c1c;color:#fff;text-align:center;padding:12px 16px;font-family:monospace;font-size:13px;font-weight:bold;position:sticky;top:0;z-index:99999;letter-spacing:0.04em;animation:warnpulse 1.2s ease-in-out infinite;width:100%;box-sizing:border-box;display:block;">
+&#9888;&nbsp; CLAUDE MAKES ERRORS &nbsp;&mdash;&nbsp; VERIFY WITH SME FIRST &nbsp;&mdash;&nbsp; DO NOT USE IN PRODUCTION &nbsp;&mdash;&nbsp; THIS IS A TRAINING GUIDE ON WHAT NOT TO DO &nbsp;&mdash;&nbsp; JUNE 15 2026 &nbsp;&#9888;
+</div>
+<style>@keyframes warnpulse{0%,100%{background:#b91c1c}50%{background:#ef4444}}</style>
+
+<nav>
+  <a href="#accomplished">Accomplished</a>
+  <a href="#papers">Source Papers</a>
+  <a href="#physics">Physics Review</a>
+  <a href="#ns3sionna">ns3-Sionna</a>
+  <a href="#gemini">NVIDIA Dialogue</a>
+  <a href="#sprint">Sprint Plan</a>
+  <a href="#risks">Risks</a>
+  <a href="#checklist">Phase 0 Checklist</a>
+  <a href="#pending">Pending</a>
+</nav>
+
+<header>
+  <p class="kicker">5320 Onboarding &middot; WiFi Digital Twin &middot; June 16 2026</p>
+  <h1>WiFi 7 Digital Twin — Sprint Plan + ns3-Sionna Deep Dive + NVIDIA GPU Stack</h1>
+  <p class="dateline">Tuesday, June 16 2026 &nbsp;&middot;&nbsp; Omniverse &rarr; Sionna RT &rarr; ns3-Sionna &rarr; Streamlit QoE &nbsp;&middot;&nbsp; 1 AP &middot; 1 MacBook &middot; CPU Docker</p>
+</header>
+
+<main>
+
+  <section id="accomplished">
+    <h2>Accomplished</h2>
+    <ul>
+      <li>Reviewed two foundational source documents (ns3-Sionna paper + NVIDIA Gemini 95-page dialogue) — details in sections below</li>
+      <li>Confirmed E2E pipeline architecture: Omniverse USD &rarr; Mitsuba XML &rarr; Sionna RT &rarr; ns3-Sionna IPC &rarr; ns-3 802.11be MAC &rarr; Streamlit QoE</li>
+      <li>Confirmed MacBook CPU-mode feasibility: 1 AP + 1 static client = 1 link trajectory = ~1.2s per CIR on CPU, cached for entire static simulation</li>
+      <li>Confirmed Docker path: <code>FROM tensorflow/tensorflow:2.16.1-gpu</code> runs LLVM/Dr.JIT fallback on Apple Silicon under Rosetta; <code>--gpus all</code> on cloud/DGX, no code change</li>
+      <li>Resolved AP2 client association mystery: root cause was ghost device AH-901340 (wrong serial from onboarding) still active in VIQ &mdash; removed, client reappeared immediately</li>
+      <li>Full E2E sprint plan built: Phase 0&ndash;4 with phase gates, risk register, first-session checklist</li>
+      <li>Physics review: identified 3 errors in NotebookLLM session (mu vs lambda, Rayleigh scattering vs fading, particle vs wave diffraction)</li>
+    </ul>
+  </section>
+
+  <section id="papers">
+    <h2>Source Papers &amp; Documents</h2>
+
+    <div class="source-card">
+      <h4>Academic Paper &middot; TU Berlin &middot; arXiv:2412.20524v1 &middot; Dec 2024</h4>
+      <h3>ns-3 meets Sionna: Using Realistic Channels in Network Simulation</h3>
+      <p>Fabian Eckermann, Niklas Vatheuer, Carsten Smeenk, Henning Maier, Christoph Canneau &mdash; TU Berlin. 25 pages. Integration layer connecting ns-3 C++ packet simulator (CSMA/CA, MAC, routing) with Sionna RT GPU ray tracer (CIR, CFR, spatially-consistent propagation). Available at <code>github.com/tkn-tub/ns3sionna</code> (GPL). Key contribution: the four optimizations (reciprocity, coherence caching, far-receiver pruning, predictive P2MP batching) that make the GPU overhead acceptable at scale.</p>
+    </div>
+
+    <div class="source-card">
+      <h4>AI Research Dialogue &middot; Google Gemini &middot; June 16 2026 &middot; 95 Pages</h4>
+      <h3>NVIDIA AI Programming &mdash; WiFi Digital Twin v1</h3>
+      <p>Khursheed Khan &mdash; exploratory dialogue with Google Gemini covering the full NVIDIA GPU stack (Omniverse, cuRF, Sionna, ns3-Sionna) for WiFi digital twin development. Culminates in a concrete 1-AP + 1-client E2E prototype specification: Dockerfile, <code>src/main.cpp</code>, <code>ui/dashboard.py</code>, <code>config/static_office.xml</code>, <code>run_twin.sh</code>. Key final exchange: <em>&ldquo;First we test with one E2E complete setup that runs. Then we add any more complexities.&rdquo;</em> Private document &mdash; not publicly linked.</p>
+    </div>
+  </section>
+
+  <section id="physics">
+    <h2>Physics Review &mdash; NotebookLLM Session Critique</h2>
+
+    <p>Reviewed a physics study session on frequency vs. propagation distance. Three errors identified in the explanation:</p>
+
+    <h3>Error 1 &mdash; Symbol Confusion: &mu; vs &lambda;</h3>
+    <p>Used &mu; (mu) as the wavelength symbol. Correct symbol is <strong>&lambda; (lambda)</strong>. The relation is <code>c = &lambda;&nu;</code> (speed of light = wavelength &times; frequency). &mu; is micro- prefix (10&sup6;) or mean in statistics &mdash; not a wave variable.</p>
+
+    <h3>Error 2 &mdash; Rayleigh Scattering vs Rayleigh Fading</h3>
+    <p>These are two distinct phenomena that share a name &mdash; a common conflation:</p>
+    <table>
+      <tr><th>Term</th><th>What It Is</th><th>Domain</th></tr>
+      <tr><td>Rayleigh Scattering</td><td>Physical process: particles much smaller than wavelength scatter light proportional to 1/&lambda;&sup4; (explains blue sky at visible light, negligible in WiFi bands)</td><td>Atmospheric optics / physics</td></tr>
+      <tr><td>Rayleigh Fading</td><td>Statistical model: received signal amplitude follows Rayleigh distribution when there is no dominant LoS path (many small multipath components)</td><td>Wireless communications / 802.11</td></tr>
+    </table>
+
+    <h3>Error 3 &mdash; Wave Diffraction Explained as Particle Behavior</h3>
+    <p>Low-frequency waves bending around corners is <strong>wave diffraction</strong>, not a particle phenomenon. The correct explanation: diffraction angle &theta; &asymp; &lambda;/d. Larger &lambda; (lower frequency) &rarr; more diffraction &rarr; bends around obstacles. This is a fundamental wave property (Huygens&rsquo; principle), not a particle-speed effect.</p>
+
+    <div class="finding">
+      <strong>Key RF propagation formulas (verified):</strong><br>
+      FSPL = (4&pi;d&nu;/c)&sup2; &mdash; Free-space path loss; geometric spreading + antenna aperture effect, NOT air absorption<br>
+      A<sub>e</sub> = &lambda;&sup2;/4&pi; &mdash; Antenna effective aperture; smaller at higher frequency = less intercepted power<br>
+      T<sub>C</sub> = (9/16&pi;) &middot; (c/v&middot;f) &mdash; Coherence time; at 5 GHz, walking pace 1 m/s &rarr; T<sub>C</sub> &asymp; 10.7 ms
+    </div>
+  </section>
+
+  <section id="ns3sionna">
+    <h2>ns3-Sionna Paper Deep Dive</h2>
+
+    <h3>Architecture</h3>
+    <p>ns-3 (C++ event-driven packet simulator) and Sionna RT (Python GPU ray tracer, TensorFlow + Mitsuba 3) are separate processes connected via ZeroMQ + protobuf IPC. ns-3 acts as the ZMQ client; Sionna Python server responds with CIR (channel impulse response) on demand. The key extension: a custom C++ <code>PropagationLossModel</code> subclass in ns-3 that calls out to Sionna instead of using a static log-normal model.</p>
+
+    <h3>The Core Problem ns3-Sionna Solves</h3>
+    <p>Standard ns-3 channel models are <strong>spatially inconsistent</strong> (path loss is a random draw at simulation start, fixed forever) and <strong>geometry-blind</strong> (no walls, no reflections). Sionna RT computes physically-accurate CIRs from a 3D scene, giving spatially-consistent, position-dependent channels that update as nodes move.</p>
+
+    <h3>Four Performance Optimizations</h3>
+    <table>
+      <tr><th>Optimization</th><th>How</th><th>Effect</th></tr>
+      <tr><td>Channel Reciprocity</td><td>A&rarr;B CIR = B&rarr;A CIR (reuse one computation)</td><td>2&times; reduction in Sionna calls</td></tr>
+      <tr><td>Coherence Time Caching</td><td>Cache CIR for T<sub>C</sub> ms; reuse if node hasn&rsquo;t moved past coherence distance</td><td>Cache hit rate 95&ndash;99% at scale</td></tr>
+      <tr><td>Far-Receiver Pruning</td><td>Skip Sionna call for pairs beyond a distance threshold (use path loss only)</td><td>Eliminates distant pairs entirely</td></tr>
+      <tr><td>Predictive P2MP Batching</td><td>Pre-compute CIRs for nearby APs before client arrives (batch GPU call)</td><td>14.25&times; speedup on Tesla V100 for large batches</td></tr>
+    </table>
+
+    <h3>The GPU Paradox (Table I Results)</h3>
+    <div class="warn">
+      <strong>RTX 3060 is 3.5&ndash;6.5&times; SLOWER than Ryzen 7 CPU for single P2P link computation.</strong> GPU only wins for large batches (R &ge; ~50 receivers). Implication for our 1 AP + 1 client test: CPU mode on MacBook is not just a fallback &mdash; it is the correct choice for this geometry.
+    </div>
+
+    <table>
+      <tr><th>Scenario</th><th>Ryzen 7 CPU</th><th>RTX 3060 GPU</th><th>Tesla V100 (predictive)</th></tr>
+      <tr><td>Free-space (single P2P)</td><td>0.06 s</td><td>0.21 s</td><td>&mdash;</td></tr>
+      <tr><td>Indoor room</td><td>1.2 s</td><td>4.2 s</td><td>&mdash;</td></tr>
+      <tr><td>Outdoor Munich (P2MP, R=50)</td><td>5.32 s</td><td>1.84 s</td><td>0.37 s</td></tr>
+    </table>
+
+    <h3>Performance Overhead vs Pure ns-3</h3>
+    <ul>
+      <li>Stationary nodes: 3.6&ndash;73&times; overhead (cache hits high once warmed)</li>
+      <li>Low-mobility (pedestrian): 1,400&times; overhead</li>
+      <li>High-mobility (vehicular): 6,200&times; overhead</li>
+      <li>At scale with caching: cache hit rate 95&ndash;99% &rarr; overhead shrinks toward the stationary case</li>
+    </ul>
+
+    <div class="finding">
+      <strong>Why this matters for our sprint:</strong> 1 AP + 1 static MacBook = 1 link trajectory, computed once, cached forever. The stationary case (3.6&times; overhead) runs in real time on MacBook CPU. This is the correct starting point.
+    </div>
+
+    <h3>Validation</h3>
+    <p>Free-space ns3-Sionna CIR matches ns-3 <code>FriisPropagationLossModel</code> exactly &mdash; validates the physics integration. Confirmed in Figure 3 of the paper.</p>
+  </section>
+
+  <section id="gemini">
+    <h2>NVIDIA Gemini Dialogue Deep Dive (95 Pages)</h2>
+
+    <h3>Four-Layer E2E Pipeline</h3>
+    <table>
+      <tr><th>Layer</th><th>Tool</th><th>Output</th></tr>
+      <tr><td>Physical / RF</td><td>NVIDIA Omniverse USD Composer (3D scene) &rarr; export Mitsuba XML &rarr; Sionna RT (GPU ray tracing)</td><td>CIR, SINR, path loss per position</td></tr>
+      <tr><td>Wi-Fi MAC (L2)</td><td>ns-3 802.11be module via ns3-Sionna &rarr; MLO, 4096-QAM, preamble puncturing, CSMA/CA</td><td>Frame delivery, retransmissions, MAC-layer delays</td></tr>
+      <tr><td>Network (L3)</td><td>ns-3 IP routing stack &rarr; QoS, WMM</td><td>End-to-end packet delivery, queue depths</td></tr>
+      <tr><td>Application / QoE</td><td>FlowMonitor + PCAP &rarr; latency, jitter, packet loss &rarr; Streamlit dashboard</td><td>Live telemetry JSON, QoE metrics, PCAP file</td></tr>
+    </table>
+
+    <h3>MacBook Constraint &amp; Docker Solution</h3>
+    <p>Apple Silicon = Metal architecture, NOT CUDA. Sionna RT falls back to LLVM/Dr.JIT CPU mode automatically when no CUDA device is present. The Docker image <code>FROM tensorflow/tensorflow:2.16.1-gpu</code> runs on MacBook CPU under Rosetta (amd64 emulation). The <strong>same container image</strong> gets <code>--gpus all</code> on a cloud/DGX instance &mdash; no code change required. The platform flag <code>--platform=linux/amd64</code> is required on Apple Silicon.</p>
+
+    <h3>Key Final Convergence in the Dialogue</h3>
+    <blockquote style="border-left:3px solid #ccc;padding-left:16px;color:#555;font-style:italic;margin:20px 0">
+      &ldquo;No, first we test with one E2E complete setup, that runs. Then we add any more complexities.&rdquo;
+    </blockquote>
+    <p>This is the sprint constraint: 1 AP + 1 static MacBook, no MLO, no mobility, no RRM, no multi-AP &mdash; until the full pipeline runs end-to-end once and all four phases are green.</p>
+
+    <h3>Repository Structure (from Dialogue)</h3>
+    <pre><code>wifi-7-twin/
+├── Dockerfile                   # TF 2.16.1-gpu base + ns3sionna build
+├── run_twin.sh                  # One-click launcher
+├── config/
+│   └── static_office.xml        # Mitsuba 3.x XML — 10x10x3m room, 1 AP, 1 client
+├── src/
+│   └── main.cpp                 # ns-3 C++ simulation (802.11be, Sionna, FlowMonitor)
+├── ui/
+│   └── dashboard.py             # Streamlit QoE dashboard (200ms poll)
+└── output/                      # live_telemetry.json + .pcap (gitignored)</code></pre>
+
+    <h3>Omniverse Clarification</h3>
+    <p>Omniverse USD Composer is a <strong>3D visual editor for building room geometry</strong>. It exports to Mitsuba XML (or OpenUSD/Collada). Sionna reads that XML file. Omniverse does NOT run during simulation &mdash; it is an offline scene-authoring step. For Phase 0&ndash;3, Omniverse is bypassed: <code>static_office.xml</code> is hand-written.</p>
+
+    <h3>DGX Spark Note</h3>
+    <p>NVIDIA DGX Spark (~$3&ndash;4k): GB10 Grace Blackwell, 128 GB LPDDR5x RAM, 4 TB SSD, 1 petaflop local AI. This is the eventual upgrade path after the MacBook CPU phase validates the E2E pipeline.</p>
+  </section>
+
+  <section id="sprint">
+    <h2>E2E Sprint Plan &mdash; Phases 0&ndash;4</h2>
+
+    <div class="finding">
+      <strong>Done =</strong> <code>./run_twin.sh</code> produces a 60 s simulation, dashboard at <code>http://localhost:8501</code> updates live, PCAP opens in Wireshark. No multi-AP, no mobility, no RRM until this is green.
+    </div>
+
+    <table>
+      <tr><th>Phase</th><th>Description</th><th>Key Files</th><th>Gate</th><th>Est.</th></tr>
+      <tr>
+        <td><strong>0</strong></td>
+        <td>Docker environment — create repo, write Dockerfile, build base image</td>
+        <td><code>Dockerfile</code>, <code>.gitignore</code>, <code>BACKLOG.md</code></td>
+        <td><code>docker run wifi7-twin-prod ns3 --version</code> exits 0 AND <code>import sionna.rt</code> prints ok</td>
+        <td>2&ndash;3 h</td>
+      </tr>
+      <tr>
+        <td><strong>0.5</strong></td>
+        <td>ns3sionna API surface verification — find real propagation loss class name</td>
+        <td><code>docs/ns3sionna_api_notes.md</code></td>
+        <td>Exact class name + header path documented before any <code>main.cpp</code> is written</td>
+        <td>30 min</td>
+      </tr>
+      <tr>
+        <td><strong>1</strong></td>
+        <td>Static Mitsuba scene — 10x10x3m room, AP at (1,1,2.5), MacBook at (5,5,1.2)</td>
+        <td><code>config/static_office.xml</code></td>
+        <td><code>sionna.rt.load_scene()</code> lists &ge;6 shapes without exception</td>
+        <td>1&ndash;1.5 h</td>
+      </tr>
+      <tr>
+        <td><strong>2</strong></td>
+        <td>ns-3 simulation backend — 802.11be, Sionna loss model, FlowMonitor, JSON output, PCAP</td>
+        <td><code>src/main.cpp</code></td>
+        <td>60 s run produces &ge;250 JSON lines AND <code>*.pcap</code> opens in Wireshark</td>
+        <td>2&ndash;3 h</td>
+      </tr>
+      <tr>
+        <td><strong>3</strong></td>
+        <td>Streamlit dashboard — tail JSON at 200 ms, 3 metric cards, line chart; sidebar sliders</td>
+        <td><code>ui/dashboard.py</code></td>
+        <td>With stub JSON file, <code>localhost:8501</code> loads + chart updates on file append</td>
+        <td>1&ndash;1.5 h</td>
+      </tr>
+      <tr>
+        <td><strong>4</strong></td>
+        <td>Integration — <code>run_twin.sh</code> / docker-compose, full 60 s E2E, Ctrl-C cleanup</td>
+        <td><code>run_twin.sh</code>, <code>docker-compose.yml</code></td>
+        <td>Full run completes; PCAP + JSON both exist; dashboard shows completed run</td>
+        <td>1&ndash;1.5 h</td>
+      </tr>
+    </table>
+
+    <p><strong>Note:</strong> Phase 3 is independent of Phase 2 and can run in parallel using a stub telemetry file.</p>
+  </section>
+
+  <section id="risks">
+    <h2>Risk Register</h2>
+
+    <table>
+      <tr><th>#</th><th>Risk</th><th>Likelihood</th><th>Mitigation</th></tr>
+      <tr>
+        <td>R1</td>
+        <td><code>ns3sionna ./ns3 configure</code> fails on TF 2.16.1 / pybind11 ABI mismatch</td>
+        <td class="risk-high">High</td>
+        <td>Pin TF 2.15 + pybind11 2.11 as fallback; capture full configure log; escape hatch: stub propagation loss for Phase 2 dry-run</td>
+      </tr>
+      <tr>
+        <td>R2</td>
+        <td>Sionna defaults to CUDA; Dr.JIT LLVM fallback not auto-selected on Mac</td>
+        <td class="risk-high">High</td>
+        <td>Set <code>ENV SIONNA_NO_GPU=1</code> + <code>DRJIT_LIBLLVM_PATH</code> in Dockerfile ENV</td>
+      </tr>
+      <tr>
+        <td>R3</td>
+        <td><code>SionnaSpectrumPropagationLossModel</code> not in upstream <code>tkn-tub/ns3sionna</code></td>
+        <td class="risk-med">Medium</td>
+        <td>Phase 0.5 grep before any C++ written; use repo&rsquo;s actual class name</td>
+      </tr>
+      <tr>
+        <td>R4</td>
+        <td><code>RealtimeSimulatorImpl</code> runs slower than wall clock on CPU</td>
+        <td class="risk-med">Medium</td>
+        <td>Start with <code>DefaultSimulatorImpl</code>; swap to Realtime only in Phase 4</td>
+      </tr>
+      <tr>
+        <td>R5</td>
+        <td>Mitsuba XML schema mismatch (2.0 vs 3.x) &mdash; Sionna RT uses Mitsuba 3</td>
+        <td class="risk-high">High</td>
+        <td>Use Mitsuba 3.x syntax (<code>version="3.0.0"</code>); validate with <code>mi.load_file()</code> before Sionna</td>
+      </tr>
+      <tr>
+        <td>R6</td>
+        <td><code>tensorflow:2.16.1-gpu</code> is linux/amd64 only; Rosetta slowdown on Apple Silicon</td>
+        <td class="risk-high">High</td>
+        <td>Always use <code>--platform=linux/amd64</code>; budget 40 min build time (not 20)</td>
+      </tr>
+      <tr>
+        <td>R7</td>
+        <td>ZeroMQ port collision between sim and dashboard containers</td>
+        <td class="risk-low">Low</td>
+        <td>Use Docker bridge network (<code>wifi7-twin-net</code>), expose port 5555 explicitly</td>
+      </tr>
+      <tr>
+        <td>R8</td>
+        <td>Source code is from an LLM dialogue (not battle-tested)</td>
+        <td class="risk-high">High</td>
+        <td>Treat Gemini dialogue code as scaffold; verify each file compiles in isolation at its phase gate before proceeding</td>
+      </tr>
+    </table>
+  </section>
+
+  <section id="checklist">
+    <h2>Phase 0 &mdash; First-Session Checklist (Tomorrow)</h2>
+
+    <p>Sequential. Do not skip steps. Each has a verifiable exit condition.</p>
+
+    <ol>
+      <li>
+        <strong>Create repo skeleton</strong> (5 min)
+        <pre><code>mkdir -p /Users/khukhan/wifi-7-twin/{config,src,ui,output,docs}
+cd /Users/khukhan/wifi-7-twin && git init
+touch output/.gitkeep</code></pre>
+      </li>
+      <li>
+        <strong>Write <code>.gitignore</code></strong>: <code>output/*.pcap</code>, <code>output/*.json</code>, <code>!output/.gitkeep</code>, <code>.DS_Store</code>
+      </li>
+      <li>
+        <strong>Write BACKLOG.md</strong> (5 min) &mdash; Sprint / Immediate / Deferred / Completed sections
+      </li>
+      <li>
+        <strong>Write Dockerfile</strong> (15 min) &mdash; use drafted version PLUS:
+        <pre><code>FROM --platform=linux/amd64 tensorflow/tensorflow:2.16.1-gpu
+ENV SIONNA_NO_GPU=1
+ENV TF_CPP_MIN_LOG_LEVEL=2</code></pre>
+        <em>Do NOT guess sionna version &mdash; look up current release before pinning.</em>
+      </li>
+      <li>
+        <strong>First build</strong> (40 min, mostly wait)
+        <pre><code>docker build --platform=linux/amd64 -t wifi7-twin-prod . 2>&amp;1 | tee docs/build_log_phase0.txt</code></pre>
+        <div class="warn">If build fails on <code>./ns3 configure</code>, STOP. Read log, document error in <code>docs/ns3sionna_api_notes.md</code>, surface to user. Do not retry blindly.</div>
+      </li>
+      <li>
+        <strong>Phase 0 Gate 1 &mdash; ns-3 binary works</strong>
+        <div class="phase-gate"><strong>Gate:</strong> <code>docker run --rm --platform=linux/amd64 wifi7-twin-prod /workspace/ns3sionna/ns3 --version</code> exits 0</div>
+      </li>
+      <li>
+        <strong>Phase 0 Gate 2 &mdash; Sionna imports without CUDA</strong>
+        <div class="phase-gate"><strong>Gate:</strong> <code>docker run --rm wifi7-twin-prod python3 -c "import sionna.rt; print('ok')"</code> prints <code>ok</code></div>
+      </li>
+      <li>
+        <strong>Commit Phase 0</strong>
+        <pre><code>git add -A &amp;&amp; git commit -m "Phase 0: Docker environment green — ns-3 + Sionna CPU"</code></pre>
+      </li>
+      <li>
+        <strong>Phase 0.5 immediately after</strong> (30 min &mdash; do not defer)
+        <pre><code>docker run --rm wifi7-twin-prod bash -c \
+  "find /workspace/ns3sionna -name '*.h' | xargs grep -l -i 'sionna' | head"
+docker run --rm wifi7-twin-prod bash -c \
+  "grep -r 'class.*PropagationLoss' /workspace/ns3sionna/src/"</code></pre>
+        Document actual class names found in <code>docs/ns3sionna_api_notes.md</code>.
+      </li>
+      <li>
+        <strong>Stop and brief user</strong> before Phase 1. Confirm: room dimensions, AP/client coordinates, material choices (concrete/drywall), any scene complexity changes.
+      </li>
+    </ol>
+  </section>
+
+  <section id="pending">
+    <h2>Pending</h2>
+
+    <h3>WiFi Digital Twin (new sprint)</h3>
+    <ul>
+      <li><strong>Tomorrow &mdash; Phase 0:</strong> Create <code>/Users/khukhan/wifi-7-twin/</code> repo, write Dockerfile, <code>docker build</code> (~40 min), verify ns-3 + Sionna CPU gates</li>
+      <li><strong>Phase 0.5:</strong> grep ns3sionna for actual propagation loss class name &mdash; must complete before any <code>main.cpp</code> is written</li>
+      <li><strong>Phases 1&ndash;4:</strong> Static scene &rarr; ns-3 backend &rarr; Streamlit dashboard &rarr; <code>run_twin.sh</code> integration</li>
+      <li><strong>Omniverse scene (deferred):</strong> Hand-write <code>static_office.xml</code> for Phase 0&ndash;3; Omniverse USD authoring deferred until full pipeline is green</li>
+      <li><strong>Cloud/DGX upgrade path (deferred):</strong> Same Docker image + <code>--gpus all</code> after MacBook E2E validates</li>
+    </ul>
+
+    <h3>AP Lab (from June 16 AP2 session)</h3>
+    <ul>
+      <li><strong>EP1 actions:</strong> Disable ADSP (enables pcap), raise basic rate 12 Mbps, PMK caching 86400s, roaming hops 2, QF_Modem DHCP 24hr</li>
+      <li><strong>wifi0 re-enable on AP1:</strong> Admin disabled &mdash; re-enable via EP1 radio profile (not CLI)</li>
+      <li><strong>pcap capture test:</strong> Blocked until ADSP disabled</li>
+      <li><strong>XE Socratic bank:</strong> 41 scenarios remaining (9 complete)</li>
+      <li><strong>Sprint 2b:</strong> knob_panel.py (DigitalTwinEngine)</li>
+      <li><strong>Raspberry Pi 4 + Tailscale:</strong> Hardware pending, setup guide ready</li>
+    </ul>
+  </section>
+
+</main>
+
+<div style="background:#b91c1c;color:#fff;text-align:center;padding:12px 16px;font-family:monospace;font-size:13px;font-weight:bold;letter-spacing:0.04em;animation:warnpulse 1.2s ease-in-out infinite;width:100%;box-sizing:border-box;display:block;">
+&#9888;&nbsp; CLAUDE MAKES ERRORS &nbsp;&mdash;&nbsp; VERIFY WITH SME FIRST &nbsp;&mdash;&nbsp; DO NOT USE IN PRODUCTION &nbsp;&mdash;&nbsp; THIS IS A TRAINING GUIDE ON WHAT NOT TO DO &nbsp;&mdash;&nbsp; JUNE 15 2026 &nbsp;&#9888;
+</div>
+
+<footer>
+  &copy; 2026 Khursheed Khan &middot; 5320 Onboarding &middot; WiFi Digital Twin Sprint &middot; June 16 2026
+</footer>
+
+</body>
+</html>
