@@ -153,6 +153,10 @@
   <a href="#physics">Physics Review</a>
   <a href="#ns3sionna">ns3-Sionna</a>
   <a href="#gemini">NVIDIA Dialogue</a>
+  <a href="#architecture">Architecture</a>
+  <a href="#phases">3-Phase CPU Plan</a>
+  <a href="#80211be">802.11be Status</a>
+  <a href="#calibration">Calibration Goal</a>
   <a href="#sprint">Sprint Plan</a>
   <a href="#risks">Risks</a>
   <a href="#checklist">Phase 0 Checklist</a>
@@ -307,6 +311,161 @@
 
     <h3>DGX Spark Note</h3>
     <p>NVIDIA DGX Spark (~$3&ndash;4k): GB10 Grace Blackwell, 128 GB LPDDR5x RAM, 4 TB SSD, 1 petaflop local AI. This is the eventual upgrade path after the MacBook CPU phase validates the E2E pipeline.</p>
+  </section>
+
+  <section id="architecture">
+    <h2>Pipeline Architecture &mdash; Finalized</h2>
+
+    <h3>Terminology Clarification</h3>
+    <p>Throughout this project, <strong>&ldquo;ns3-Sionna&rdquo;</strong> refers to the integrated framework from TU Berlin (<code>github.com/tkn-tub/ns3sionna</code>) &mdash; ns-3 as the 802.11 MAC/PHY/IP event simulator with Sionna RT injected as the channel model via ZMQ. When reading code references to &ldquo;ns-3&rdquo; in this context, they always mean ns3-Sionna. Bare ns-3 (without Sionna) is used only in the <code>example-ns3.cc</code> baseline comparison.</p>
+
+    <h3>Four-Layer Stack</h3>
+    <table>
+      <tr><th>Layer</th><th>Tool</th><th>Status</th></tr>
+      <tr><td><strong>1. Scene / RF Environment</strong></td><td>NVIDIA Omniverse USD Composer &rarr; export Mitsuba 2.1.0 XML + OBJ meshes</td><td><em>Mocked</em> &mdash; use bundled <code>simple_room.xml</code> from repo (no GPU needed for scene authoring)</td></tr>
+      <tr><td><strong>2. Physical Channel</strong></td><td>Sionna RT (<code>ns3sionna_server.py</code>) &mdash; ray tracing, spatially consistent CIR, path loss, delay</td><td>CPU mode via <code>requirements_cpuonly.txt</code></td></tr>
+      <tr><td><strong>3. MAC / PHY / IP</strong></td><td>ns-3 3.40 802.11ax (C++ client, ZMQ to Sionna)</td><td>Implemented in <code>src/wifi7_twin.cc</code></td></tr>
+      <tr><td><strong>4. GUI + QoE</strong></td><td>Streamlit dashboard &mdash; user sets ns3-Sionna parameters, plots live QoE metrics</td><td>Implemented in <code>ui/dashboard.py</code></td></tr>
+    </table>
+
+    <h3>Omniverse = Offline Scene Authoring Tool</h3>
+    <p>Omniverse&rsquo;s only job in the pipeline is to author the 3D room geometry and export it as Mitsuba XML + OBJ mesh files. It does not run during simulation. For CPU phases 1&ndash;3, the bundled <code>simple_room.xml</code> (two rooms, open door, ITU brick/concrete materials) is the Omniverse stand-in. When a GPU is available, open Omniverse USD Composer, design the actual space, export XML, drop it in <code>scenes/</code> &mdash; <strong>zero other code changes.</strong></p>
+
+    <h3>GPU Upgrade = One Flag</h3>
+    <pre><code># CPU (today):
+docker build -f Dockerfile.cpu -t ns3sionna-cpu .
+docker run ns3sionna-cpu ...
+
+# GPU (when available):
+docker build -f Dockerfile -t ns3sionna-gpu .
+docker run --gpus all ns3sionna-gpu ...</code></pre>
+    <p>The Python server, ns-3 C++ code, scene files, and Streamlit dashboard are identical between CPU and GPU. The GPU Dockerfile uses the CUDA TensorFlow base and <code>requirements.txt</code> instead of <code>requirements_cpuonly.txt</code>. The repo ships both Dockerfiles.</p>
+
+    <h3>ZMQ Two-Process Architecture</h3>
+    <pre><code>Process 1 — Python (Sionna server):
+  source /opt/sionna-venv/bin/activate
+  cd .../contrib/sionna/model/ns3sionna/
+  PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION=python python ns3sionna_server.py
+  # Listens on tcp://localhost:5555
+
+Process 2 — C++ (ns-3 client):
+  cd /opt/ns-allinone-3.40/ns-3.40/
+  ./ns3 run scratch/wifi7_twin
+  # Sends ZMQ requests to port 5555 on each packet transmission</code></pre>
+    <p>ZMQ pattern is synchronous request-response &mdash; ensures discrete ns-3 simulation time is preserved. IPC messages: <code>seed, scene, freq, BW, FFT, node info</code> at start; then per-packet: <code>TX nodeId, sim time</code> &rarr; response: <code>TTL, delay, loss, CFR</code>.</p>
+  </section>
+
+  <section id="phases">
+    <h2>Three-Phase CPU Plan &mdash; All Phases Before Any GPU Work</h2>
+
+    <div class="finding">
+      <strong>Constraint:</strong> Complete all three CPU phases and AP3000 calibration before switching to GPU. GPU adds speed, not capability, for this problem size.
+    </div>
+
+    <table>
+      <tr><th>Phase</th><th>Scenario</th><th>New Complexity</th><th>QoE Target</th></tr>
+      <tr>
+        <td><strong>Phase 1 &mdash; Static</strong></td>
+        <td>1 AP, 1 MacBook client, fixed positions in <code>simple_room</code></td>
+        <td>E2E plumbing: Sionna &rarr; ns3 &rarr; GUI &rarr; PCAP. Baseline QoE numbers.</td>
+        <td>Throughput, latency, packet drops, RSSI vs. distance</td>
+      </tr>
+      <tr>
+        <td><strong>Phase 2 &mdash; Multi-AP / Multi-Client / Multi-Service</strong></td>
+        <td>2&ndash;3 APs, 5&ndash;10 clients (laptops + phones), concurrent traffic types</td>
+        <td>Add: P2MP channel batch, per-client QoS class, UDP video + VoIP + best-effort data flows</td>
+        <td>Per-service latency/jitter (VoIP &lt;30ms), throughput fairness, RSSI heatmap per AP</td>
+      </tr>
+      <tr>
+        <td><strong>Phase 3 &mdash; Mobility</strong></td>
+        <td>Same multi-AP/client setup + clients walk random paths inside room geometry</td>
+        <td>Enable <code>SionnaMobilityModel</code> random walk; coherence-time cache becomes active; channel recomputed on movement</td>
+        <td>Roaming handoff latency, RSSI over time (spatial + temporal correlation), VoIP drop rate during walk</td>
+      </tr>
+    </table>
+
+    <p>Each phase gate = full E2E run producing: PCAP + <code>live_telemetry.json</code> + Streamlit dashboard rendering live. Phase 3 completion = CPU digital twin is validated.</p>
+
+    <h3>GUI Parameter Inputs (from Gemini Dialogue)</h3>
+    <p>The Streamlit sidebar exposes ns3-Sionna parameters the user can tune per run:</p>
+    <ul>
+      <li><strong>TX Power</strong> (dBm) &mdash; slider 10&ndash;30 dBm</li>
+      <li><strong>Channel Width</strong> (MHz) &mdash; select 20 / 40 / 80 / 160</li>
+      <li><strong>Channel Number / Band</strong> &mdash; select 2.4 GHz / 5 GHz / 6 GHz</li>
+      <li><strong>Traffic type</strong> &mdash; select VoIP / Video / Best-Effort / Mixed</li>
+      <li><strong>Number of STAs</strong> &mdash; slider 1&ndash;10 (Phase 2+)</li>
+      <li><strong>Mobility speed</strong> (m/s) &mdash; slider 0 (static) to 3 (Phase 3)</li>
+    </ul>
+    <p>GUI writes <code>output/control.json</code> before launch; ns-3 reads it via <code>CommandLine</code>. This is the mechanism that turns the Streamlit sidebar into live simulation knobs.</p>
+  </section>
+
+  <section id="80211be">
+    <h2>802.11be Status in ns3-Sionna &mdash; What Is and Isn&rsquo;t Open</h2>
+
+    <div class="warn">
+      <strong>Critical finding from GitHub source:</strong> The ns3-Sionna repo&rsquo;s highest tested WiFi standard is <code>WIFI_STANDARD_80211ax</code> (Wi-Fi 6 / 802.11ax). The spectrum model example has an explicit comment: <em>&ldquo;AZu: ac/VHT has incorrect tone plan&rdquo;</em> and uses ax. The <code>SionnaPhasedArraySpectrumPropagationLossModel</code> header contains: <strong>&ldquo;TODO: not yet implemented&rdquo;</strong>. 802.11be is not tested in the repo.
+    </div>
+
+    <h3>What This Means for Our Sprint</h3>
+    <p>This is actually <strong>ideal for calibration</strong>: the AP3000 in the lab runs 802.11ax (Wi-Fi 6). Using <code>WIFI_STANDARD_80211ax</code> in ns3-Sionna matches both the paper&rsquo;s validated standard AND the real hardware we are calibrating against.</p>
+
+    <table>
+      <tr><th>Parameter</th><th>Status in ns3-Sionna</th><th>Notes</th></tr>
+      <tr><td>802.11ax (Wi-Fi 6)</td><td style="color:#059669;font-weight:700">Supported &amp; tested</td><td>What the spectrum model example uses; matches AP3000</td></tr>
+      <tr><td>802.11g/n/ac</td><td style="color:#059669;font-weight:700">Supported</td><td>Used in basic example; ac has tone plan issue per author comment</td></tr>
+      <tr><td>802.11be (Wi-Fi 7)</td><td style="color:#b45309;font-weight:700">Untested</td><td>ns-3 3.40 has partial 802.11be support; ns3-Sionna has no example or validation for it</td></tr>
+      <tr><td>SISO (single antenna)</td><td style="color:#059669;font-weight:700">Supported</td><td>Both <code>SionnaPropagationLossModel</code> (YansWifi) and <code>SionnaSpectrumPropagationLossModel</code></td></tr>
+      <tr><td>MIMO / phased array</td><td style="color:#c0392b;font-weight:700">TODO &mdash; not implemented</td><td><code>SionnaPhasedArraySpectrumPropagationLossModel</code> class exists but is empty</td></tr>
+      <tr><td>MLO (Multi-Link Operation)</td><td style="color:#c0392b;font-weight:700">Not in repo</td><td>Would require multiple Sionna server instances, one per link/band</td></tr>
+      <tr><td>TX Power</td><td style="color:#059669;font-weight:700">Open</td><td><code>TxPowerStart</code>, <code>TxPowerEnd</code> on YansWifiPhy</td></tr>
+      <tr><td>Channel width (BW)</td><td style="color:#059669;font-weight:700">Open</td><td>Passed to <code>sionnaHelper.Configure()</code> &mdash; affects FFT size sent to Sionna</td></tr>
+      <tr><td>Center frequency</td><td style="color:#059669;font-weight:700">Open</td><td>Sionna RT uses this for path loss scaling (wavelength &lambda; = c/f)</td></tr>
+      <tr><td>MCS / data rate</td><td style="color:#059669;font-weight:700">Open</td><td>ns-3 rate adaptation (Minstrel-HT) selects MCS based on SNR from Sionna</td></tr>
+      <tr><td>Number of STAs</td><td style="color:#059669;font-weight:700">Open</td><td>P2MP batch — all receiver CIRs computed in one Sionna call</td></tr>
+      <tr><td>Caching / coherence time</td><td style="color:#059669;font-weight:700">Open</td><td><code>propagationCache->SetCaching(true/false)</code>; TTL = T<sub>C</sub> from velocity</td></tr>
+      <tr><td>Ray tracing depth / samples</td><td style="color:#059669;font-weight:700">Open (server-side)</td><td>Configured in <code>ns3sionna_server.py</code> SionnaEnv constructor; <code>rt_fast=True</code> reduces depth to 3</td></tr>
+      <tr><td>Scene / geometry</td><td style="color:#059669;font-weight:700">Open</td><td>Pass any Mitsuba 2.1.0 XML to <code>SionnaHelper()</code> constructor</td></tr>
+    </table>
+
+    <h3>802.11be Upgrade Path (Post-Calibration)</h3>
+    <p>After AP3000 calibration is done with 802.11ax, switching to 802.11be is a single line change in <code>wifi7_twin.cc</code>: <code>WIFI_STANDARD_80211ax</code> &rarr; <code>WIFI_STANDARD_80211be</code>. The Sionna channel model is standard-agnostic &mdash; it computes CIR from geometry, not from MAC layer. The 802.11be-specific gains (wider channels, higher MCS) then flow automatically through ns-3&rsquo;s EHT PHY layer.</p>
+  </section>
+
+  <section id="calibration">
+    <h2>Calibration Goal &mdash; Digital Twin vs. Real AP3000</h2>
+
+    <p>The digital twin&rsquo;s primary value is reproducing what we observe on the physical AP3000. Phase 1&ndash;3 QoE outputs will be compared against real measurements to calibrate the 15-parameter model from the DigitalTwinEngine sprint (June 9&ndash;10 2026).</p>
+
+    <h3>Calibration Loop</h3>
+    <pre><code>Real AP3000 measurements          Digital Twin (ns3-Sionna)
+─────────────────────────         ─────────────────────────
+show station → RSSI, MCS,    ←→   Sionna CIR → path loss → SNR
+  spatial streams, VLAN            ns-3 rate adaptation → MCS
+show tech → CRC%, retries,   ←→   FlowMonitor → retransmissions,
+  channel utilization               channel utilization
+CollectorAgent (5s PHY poll) ←→   live_telemetry.json (per-sim-second)
+PCAP decrypt errors          ←→   ns-3 PCAP + PHY drop traces</code></pre>
+
+    <h3>15 Parameters to Calibrate</h3>
+    <p>From the June 9 DigitalTwinEngine calibration theory session. The twin must reproduce these within acceptable tolerance for the model to be considered valid:</p>
+    <ul>
+      <li><strong>RF layer (Sionna):</strong> RSSI (dBm), noise floor (dBm), SNR (dB), path loss vs. distance curve, LOS/NLoS determination</li>
+      <li><strong>MAC layer (ns-3):</strong> Throughput (Mbps), latency (ms), jitter (ms), packet loss rate (%), retry rate (%), MCS distribution, channel utilization (%)</li>
+      <li><strong>PHY layer (joint):</strong> CRC error rate, FCS fail rate, spatial streams in use, beacon interval alignment</li>
+    </ul>
+
+    <div class="finding">
+      <strong>Why 802.11ax is the right choice:</strong> AP3000 = Wi-Fi 6 (802.11ax). ns3-Sionna&rsquo;s highest validated standard = 802.11ax. Using ax for calibration gives us an apples-to-apples comparison. 802.11be upgrade happens <em>after</em> the model is calibrated and trusted.
+    </div>
+
+    <h3>Calibration Session Inputs Needed</h3>
+    <ul>
+      <li>AP3000 <code>show station</code> snapshot with known client positions (distance from AP in meters)</li>
+      <li>AP3000 <code>show tech</code> export &mdash; CRC%, retries, channel utilization</li>
+      <li>CollectorAgent CSV from a known traffic session (throughput + latency over time)</li>
+      <li>Room geometry (dimensions, wall materials) &mdash; to build the Mitsuba scene that matches the real room</li>
+    </ul>
+    <p>The Mitsuba scene matching the real AP3000 room replaces <code>simple_room.xml</code> as Phase 3 matures. At that point Omniverse enters the picture: model the real room in Omniverse, export XML, re-run the twin, compare QoE delta.</p>
   </section>
 
   <section id="sprint">
@@ -480,13 +639,24 @@ docker run --rm wifi7-twin-prod bash -c \
   <section id="pending">
     <h2>Pending</h2>
 
-    <h3>WiFi Digital Twin (new sprint)</h3>
+    <h3>WiFi Digital Twin &mdash; CPU Sprint (starting June 17)</h3>
     <ul>
-      <li><strong>Tomorrow &mdash; Phase 0:</strong> Create <code>/Users/khukhan/wifi-7-twin/</code> repo, write Dockerfile, <code>docker build</code> (~40 min), verify ns-3 + Sionna CPU gates</li>
-      <li><strong>Phase 0.5:</strong> grep ns3sionna for actual propagation loss class name &mdash; must complete before any <code>main.cpp</code> is written</li>
-      <li><strong>Phases 1&ndash;4:</strong> Static scene &rarr; ns-3 backend &rarr; Streamlit dashboard &rarr; <code>run_twin.sh</code> integration</li>
-      <li><strong>Omniverse scene (deferred):</strong> Hand-write <code>static_office.xml</code> for Phase 0&ndash;3; Omniverse USD authoring deferred until full pipeline is green</li>
-      <li><strong>Cloud/DGX upgrade path (deferred):</strong> Same Docker image + <code>--gpus all</code> after MacBook E2E validates</li>
+      <li><strong>Tomorrow &mdash; Phase 0:</strong> Create <code>/Users/khukhan/wifi-7-twin/</code>, copy <code>Dockerfile.cpu</code> verbatim from repo, <code>docker build -f Dockerfile.cpu</code>, verify both gates</li>
+      <li><strong>Phase 0.5:</strong> Sionna server smoke test &mdash; confirm ZMQ port 5555 binds, <code>import sionna.rt</code> clean</li>
+      <li><strong>Phase 1 (CPU &mdash; Static):</strong> 1 AP + 1 MacBook, <code>simple_room.xml</code>, 802.11ax, GUI sidebar, live QoE chart, PCAP</li>
+      <li><strong>Phase 2 (CPU &mdash; Multi):</strong> 2&ndash;3 APs, 5&ndash;10 clients, VoIP + video + data, per-service QoE</li>
+      <li><strong>Phase 3 (CPU &mdash; Mobility):</strong> <code>SionnaMobilityModel</code> random walk, coherence-time cache active, roaming QoE</li>
+      <li><strong>AP3000 calibration:</strong> After Phase 3, compare twin QoE against real AP3000 measurements (15 parameters)</li>
+      <li><strong>GPU upgrade (after all CPU phases + calibration):</strong> Switch to <code>Dockerfile</code> + <code>--gpus all</code> &mdash; no code changes</li>
+    </ul>
+
+    <h3>Parked &mdash; Research Later</h3>
+    <ul>
+      <li><strong>ns3-Sionna I/O specification:</strong> Full list of inputs (scene XML, ZMQ messages, ns-3 config params) and outputs (CIR, CFR, path loss, delay, telemetry JSON) &mdash; needed for GUI wiring and calibration mapping</li>
+      <li><strong>Omniverse I/O specification:</strong> What Omniverse USD Composer exports (USD, Mitsuba XML, OBJ), what Sionna RT needs to import, workflow for real-room scene authoring</li>
+      <li><strong>Omniverse real room scene:</strong> Model actual AP3000 deployment room in Omniverse for calibration-grade geometry &mdash; deferred until Phase 3 is green</li>
+      <li><strong>802.11be upgrade:</strong> Single line change after calibration validates 802.11ax model</li>
+      <li><strong>MIMO / phased array:</strong> <code>SionnaPhasedArraySpectrumPropagationLossModel</code> is TODO in repo &mdash; watch upstream for implementation</li>
     </ul>
 
     <h3>AP Lab (from June 16 AP2 session)</h3>
