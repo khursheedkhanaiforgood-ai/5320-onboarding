@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>June 30 2026 — RADIUS Migration · Tagged vs Untagged · Remote Passive Capture</title>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Libre Baskerville', Georgia, serif;
+    background: #fff;
+    color: #121212;
+    line-height: 1.75;
+    font-size: 18px;
+  }
+
+  nav {
+    position: sticky;
+    top: 0;
+    background: #fff;
+    border-bottom: 2px solid #121212;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    overflow-x: auto;
+    padding: 0 24px;
+  }
+  nav a {
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: #121212;
+    text-decoration: none;
+    padding: 14px 16px;
+    white-space: nowrap;
+    border-bottom: 3px solid transparent;
+    transition: border-color 0.15s;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  nav a:hover { border-bottom-color: #121212; }
+
+  header {
+    max-width: 780px;
+    margin: 56px auto 0;
+    padding: 0 24px;
+    text-align: center;
+  }
+  .kicker {
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #666;
+    margin-bottom: 16px;
+  }
+  h1 { font-size: clamp(26px, 4vw, 40px); font-weight: 700; line-height: 1.2; margin-bottom: 20px; }
+  .dateline {
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: 14px;
+    color: #888;
+    border-top: 1px solid #ddd;
+    border-bottom: 1px solid #ddd;
+    padding: 10px 0;
+    margin-bottom: 40px;
+  }
+
+  main { max-width: 780px; margin: 0 auto; padding: 0 24px 80px; }
+  section { margin-bottom: 56px; }
+  h2 { font-size: 22px; font-weight: 700; border-top: 3px solid #121212; padding-top: 16px; margin-bottom: 20px; scroll-margin-top: 60px; }
+  h3 { font-size: 17px; font-weight: 700; margin: 28px 0 10px; }
+  h4 { font-size: 15px; font-weight: 700; font-style: italic; margin: 18px 0 8px; color: #333; }
+  p { margin-bottom: 16px; }
+  ul, ol { padding-left: 24px; margin-bottom: 16px; }
+  li { margin-bottom: 6px; }
+
+  table { width: 100%; border-collapse: collapse; margin: 20px 0; font-family: 'Source Sans 3', sans-serif; font-size: 15px; }
+  th { background: #121212; color: #fff; padding: 10px 14px; text-align: left; font-weight: 600; letter-spacing: 0.04em; font-size: 13px; }
+  td { padding: 10px 14px; border-bottom: 1px solid #e5e5e5; vertical-align: top; }
+  tr:nth-child(even) td { background: #fafafa; }
+
+  code { font-family: 'Source Code Pro', 'Courier New', monospace; font-size: 14px; background: #f3f3f3; padding: 2px 6px; border-radius: 3px; color: #b91c1c; }
+  pre {
+    font-family: 'Source Code Pro', 'Courier New', monospace;
+    font-size: 13px;
+    background: #1e1e1e;
+    color: #d4d4d4;
+    padding: 18px 20px;
+    border-radius: 4px;
+    overflow-x: auto;
+    margin: 14px 0 20px;
+    line-height: 1.6;
+  }
+  pre.green { background: #052e16; color: #86efac; }
+  pre.amber { background: #1c1003; color: #fcd34d; }
+  pre.red   { background: #1c0404; color: #fca5a5; }
+
+  .callout {
+    border-left: 4px solid #1a5276;
+    background: #f0f7ff;
+    padding: 14px 18px;
+    margin: 16px 0;
+    border-radius: 0 4px 4px 0;
+  }
+  .callout-green {
+    border-left: 4px solid #166534;
+    background: #f0fdf4;
+    padding: 14px 18px;
+    margin: 16px 0;
+    border-radius: 0 4px 4px 0;
+  }
+  .callout-amber {
+    border-left: 4px solid #b45309;
+    background: #fffbeb;
+    padding: 14px 18px;
+    margin: 16px 0;
+    border-radius: 0 4px 4px 0;
+  }
+  .callout-red {
+    border-left: 4px solid #b91c1c;
+    background: #fff5f5;
+    padding: 14px 18px;
+    margin: 16px 0;
+    border-radius: 0 4px 4px 0;
+  }
+  .callout p:last-child, .callout-green p:last-child, .callout-amber p:last-child, .callout-red p:last-child { margin-bottom: 0; }
+
+  .milestone {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    margin: 10px 0;
+  }
+  .milestone-icon { font-size: 1.2rem; flex-shrink: 0; margin-top: 2px; }
+  .milestone-text { font-family: 'Source Sans 3', sans-serif; font-size: 15px; line-height: 1.5; }
+  .milestone-text strong { font-weight: 700; }
+
+  .state-flow {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin: 12px 0 16px;
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: 14px;
+  }
+  .state {
+    display: inline-block;
+    padding: 5px 12px;
+    border-radius: 4px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+  }
+  .state-red   { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
+  .state-amber { background: #fef3c7; color: #92400e; border: 1px solid #fcd34d; }
+  .state-green { background: #d1fae5; color: #065f46; border: 1px solid #6ee7b7; }
+  .arrow { color: #9ca3af; font-size: 16px; }
+
+  footer {
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 24px 24px 48px;
+    border-top: 1px solid #ddd;
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: 13px;
+    color: #888;
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="#accomplished">Accomplished</a>
+  <a href="#capwap">CAPWAP Journey</a>
+  <a href="#vlan">Tagged vs Untagged</a>
+  <a href="#capture">Remote Capture</a>
+  <a href="#pending">Pending</a>
+  <a href="../index-nyt.html">&#8592; Index</a>
+</nav>
+
+<header>
+  <div class="kicker">End-of-Day &nbsp;&bull;&nbsp; June 30, 2026 &nbsp;&bull;&nbsp; Extreme Networks Lab</div>
+  <h1>RADIUS Migration, VLAN Architecture, and the Remote AP Blind Spot</h1>
+  <div class="dateline">
+    Khursheed Khan &nbsp;&mdash;&nbsp; Monday, June 30 2026 &nbsp;&mdash;&nbsp;
+    AP2 &rarr; Karl&rsquo;s VIQ &middot; CAPWAP debug &middot; Tagged vs Untagged deep-dive &middot; Sacramento passive capture strategy
+  </div>
+</header>
+
+<main>
+
+<!-- ═══ SECTION 1: ACCOMPLISHED ═══ -->
+<section id="accomplished">
+  <h2>Accomplished</h2>
+
+  <div class="milestone">
+    <div class="milestone-icon">&#9989;</div>
+    <div class="milestone-text"><strong>AP2 moved to Karl&rsquo;s VIQ</strong> — CAPWAP reached RUN state (VHM-SXJUBHJO, server 3.145.235.74). Both SSIDs broadcasting. RADIUS policy pushed via EP1.</div>
+  </div>
+  <div class="milestone">
+    <div class="milestone-icon">&#9989;</div>
+    <div class="milestone-text"><strong>RADIUS debug observed live</strong> — <code>_debug auth basic</code> + <code>debug console</code> on AP2 console confirmed server reachability; rejection was credential-side (user not enrolled in Karl&rsquo;s RADIUS). Deferred to post-PTO.</div>
+  </div>
+  <div class="milestone">
+    <div class="milestone-icon">&#9989;</div>
+    <div class="milestone-text"><strong>Tagged vs Untagged VLANs clarified end-to-end</strong> — AP tagging model, inter-station scope, EP1 firewall L3-only limitation, and the &ldquo;no-tagging client requirement&rdquo; trade-off all fully reasoned through.</div>
+  </div>
+  <div class="milestone">
+    <div class="milestone-icon">&#9989;</div>
+    <div class="milestone-text"><strong>Remote passive capture strategy designed</strong> — three remote options for Sacramento HPE switch environment where the old AP has no SSH, no policy history, and the switch is unreachable.</div>
+  </div>
+</section>
+
+<!-- ═══ SECTION 2: AP2 CAPWAP JOURNEY ═══ -->
+<section id="capwap">
+  <h2>AP2 &rarr; Karl&rsquo;s VIQ — CAPWAP Debug Journey</h2>
+
+  <p>The goal was to move AP2 (AH-565780) from the homelab VIQ (VHM-UOZZMDJP) into Karl&rsquo;s VIQ (VHM-SXJUBHJO) to test RADIUS 802.1X authentication against Karl&rsquo;s RADIUS server. What looked like a simple re-claim turned into a multi-step redirect debugging session.</p>
+
+  <h3>CAPWAP State Machine</h3>
+
+  <div class="state-flow">
+    <span class="state state-red">SULKING</span>
+    <span class="arrow">&rarr;</span>
+    <span class="state state-amber">DTLS Handshaking</span>
+    <span class="arrow">&rarr;</span>
+    <span class="state state-green">RUN</span>
+  </div>
+
+  <p>An AP in <strong>SULKING</strong> state means it cannot reach a cloud controller — it retries with exponential backoff. DTLS Handshaking means it found a server and is negotiating the secure tunnel. RUN means it is fully registered and receiving policy.</p>
+
+  <div class="callout-amber">
+    <p><strong>Key mechanism:</strong> The Aerohive/IQ Engine redirector at <code>redirector.aerohive.com</code> maps a serial number to an organization&rsquo;s cloud VHM ID. Whichever VIQ has claimed that serial number is where the AP redirects on boot — regardless of the AP&rsquo;s previous state.</p>
+  </div>
+
+  <h3>Root Causes Diagnosed</h3>
+
+  <table>
+    <thead>
+      <tr><th>Symptom</th><th>Root Cause</th><th>Fix</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>AP still showing on homelab VIQ after &ldquo;delete&rdquo;</td>
+        <td>Deleted from Devices list but not from EP1 inventory — redirector still mapped to homelab org</td>
+        <td>EP1 &rarr; Onboard &rarr; Devices &rarr; full delete from inventory</td>
+      </tr>
+      <tr>
+        <td>AP not appearing on Karl&rsquo;s VIQ after claim</td>
+        <td>Karl added serial in <strong>XIQ Classic</strong> — redirector only responds to <strong>EP1</strong> claims</td>
+        <td>Karl re-adds serial in EP1 (extremeplatformone.com), not XIQ Classic</td>
+      </tr>
+      <tr>
+        <td>Wrong redirect target even after EP1 claim</td>
+        <td>Serial number entered incorrectly — transposed digit</td>
+        <td>Read S/N directly from physical AP label; confirmed with <code>show version</code></td>
+      </tr>
+      <tr>
+        <td>Console login failed after reboot</td>
+        <td>Policy pushed a new device admin password via EP1; old <code>aerohive</code> default no longer valid</td>
+        <td>Use the password configured in EP1 device admin policy</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="callout-red">
+    <p><strong>XIQ Classic vs EP1 distinction:</strong> These are two separate systems. XIQ Classic (<code>extremecloudiq.com</code>) and Extreme Platform One (<code>extremeplatformone.com</code>) maintain separate device registries. The CAPWAP redirector only follows EP1 claims. Adding a device in XIQ Classic has no effect on where the AP points.</p>
+  </div>
+
+  <h3>RADIUS Debug Commands</h3>
+
+  <p>Once AP2 was in RUN state and RADIUS policy pushed, these commands on the AP2 console revealed the authentication exchange:</p>
+
+  <pre class="amber">
+# Enable auth debug (userspace)
+_debug auth basic
+
+# Stream debug output to console
+debug console</pre>
+
+  <p>The debug output confirmed the AP was reaching Karl&rsquo;s RADIUS server and receiving an <strong>Access-Reject</strong> — the server responded but refused the credentials because the test user account was not enrolled in Karl&rsquo;s RADIUS database. This is a credential management task, not a network configuration issue. Deferred to after PTO.</p>
+
+  <h3>SSID Status at End of Session</h3>
+
+  <pre class="green">
+# show ssid (AP2)
+Wifi0.1: SSID "Radius" — ch11 (2.4GHz) — broadcasting ✓
+Wifi1.1: SSID "Radius" — ch149 (5GHz)  — broadcasting ✓
+
+# CAPWAP state
+CAPWAP client state: RUN
+VHM ID: VHM-SXJUBHJO (Karl's org)
+Server: 3.145.235.74</pre>
+
+  <div class="callout">
+    <p><strong>Next step (after PTO):</strong> Karl adds user credentials to RADIUS server &rarr; re-test 802.1X auth flow. Also align VLAN IDs in EP1 RADIUS policy to match SW1 port config.</p>
+  </div>
+</section>
+
+<!-- ═══ SECTION 3: TAGGED vs UNTAGGED ═══ -->
+<section id="vlan">
+  <h2>Tagged vs Untagged VLANs — The Complete Mental Model</h2>
+
+  <p>This came up from Karl&rsquo;s client requirement: <em>&ldquo;no VLAN tagging on the AP side.&rdquo;</em> Understanding exactly what that means — and what you lose — required working through the full data path from wireless client to switch.</p>
+
+  <h3>Who Tags Frames?</h3>
+
+  <p>Wireless clients (MacBooks, iPhones) <strong>never tag</strong> Ethernet frames with 802.1Q VLAN IDs. They send plain untagged Ethernet. The AP is the entity that adds (or strips) VLAN tags before forwarding traffic to the wired switch port.</p>
+
+  <table>
+    <thead>
+      <tr><th>Entity</th><th>Does it tag?</th><th>What it does</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Wireless client (MacBook, iPhone)</td>
+        <td>Never</td>
+        <td>Sends 802.11 frames to AP; AP handles the rest</td>
+      </tr>
+      <tr>
+        <td>AP (IQ Engine)</td>
+        <td>Yes — when configured for trunk</td>
+        <td>Maps each SSID to a VLAN; adds 802.1Q tag before sending to switch</td>
+      </tr>
+      <tr>
+        <td>Switch port (access/untagged)</td>
+        <td>No tagging added</td>
+        <td>Accepts untagged frames; assigns to native VLAN</td>
+      </tr>
+      <tr>
+        <td>Switch port (trunk/tagged)</td>
+        <td>Expects tags from AP</td>
+        <td>Routes each tagged frame to correct VLAN</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>Untagged Port Scenario</h3>
+
+  <div class="callout-amber">
+    <p>When the AP&rsquo;s switch port is configured as an <strong>access (untagged) port</strong>, all traffic from all SSIDs lands on the native VLAN — typically VLAN 1. There is no VLAN separation at any layer below L3. Staff and Guest traffic are indistinguishable at the switch.</p>
+  </div>
+
+  <table>
+    <thead>
+      <tr><th>Scenario</th><th>Staff SSID</th><th>Guest SSID</th><th>Switch sees</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Untagged / Access port</td>
+        <td>Untagged &rarr; VLAN 1</td>
+        <td>Untagged &rarr; VLAN 1</td>
+        <td>Everything on VLAN 1 — no separation</td>
+      </tr>
+      <tr>
+        <td>Tagged / Trunk port</td>
+        <td>Tag VLAN 20</td>
+        <td>Tag VLAN 10</td>
+        <td>VLAN 10 and VLAN 20 separate — full isolation possible</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>Why You Cannot Isolate SSIDs Without Tags</h3>
+
+  <p>Three isolation mechanisms that seem like options but do not solve the untagged problem:</p>
+
+  <h4>Inter-station blocking</h4>
+  <p>Only blocks clients <em>within the same VAP/SSID</em> from communicating with each other. A Staff client and a Guest client on different SSIDs are on different VAPs — inter-station blocking does not apply across SSIDs. And even if it did, they are still on the same VLAN 1 subnet, so the restriction is only at the AP data-path level, not enforced by the switch.</p>
+
+  <h4>EP1 Firewall</h4>
+  <p>EP1&rsquo;s policy firewall operates at the <strong>L3 routing boundary</strong> — it controls what routed traffic can flow between different subnets/VLANs. When all clients are on the same VLAN 1, all communication is pure L2 switching within one broadcast domain. There is no L3 routing boundary for the firewall to intercept.</p>
+
+  <h4>Switch-level VLAN filtering</h4>
+  <p>The switch would need to know which client belongs to which VLAN — but without tags, all frames arrive identical. The switch has no basis for filtering.</p>
+
+  <div class="callout-red">
+    <p><strong>Bottom line on no-tagging:</strong> If a client requires untagged AP ports and runs multiple SSIDs, accept that all users share the same VLAN and subnet. The only per-SSID differentiation available is QoS class and SSID authentication type — not network isolation. Scope this clearly with the client before deployment.</p>
+  </div>
+
+  <h3>What Tagged Frames Look Like in Wireshark</h3>
+
+  <p>A tagged (802.1Q) frame has an extra 4-byte header inserted between the source MAC and the EtherType:</p>
+
+  <pre>
+Source MAC  →  Destination MAC  →  [802.1Q: VLAN ID=20]  →  EtherType  →  Payload</pre>
+
+  <table>
+    <thead>
+      <tr><th>Wireshark observation</th><th>What it means</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>vlan</code> filter returns results; Protocol = 802.1Q</td>
+        <td>Switch port is trunk — AP is tagging</td>
+      </tr>
+      <tr>
+        <td><code>vlan</code> filter returns nothing</td>
+        <td>Switch port is access — no tags present</td>
+      </tr>
+      <tr>
+        <td>Frame details show <code>VLAN ID: 10</code></td>
+        <td>That specific frame belongs to VLAN 10</td>
+      </tr>
+      <tr>
+        <td>Laptop on switch port gets APIPA (169.254.x.x)</td>
+        <td>Trunk port — laptop&rsquo;s untagged frames rejected; smoking-gun for trunk</td>
+      </tr>
+      <tr>
+        <td>Laptop gets real DHCP IP</td>
+        <td>Access port — native VLAN is serving DHCP</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ═══ SECTION 4: REMOTE PASSIVE CAPTURE ═══ -->
+<section id="capture">
+  <h2>Live Client: Sacramento Remote Passive Capture Strategy</h2>
+
+  <h3>The Problem</h3>
+
+  <p>A live client site in Sacramento has old APs (last accessed 2019, no SSH capability, lost admin password, no XIQ or radio policy history) connected to HPE switches that are also inaccessible remotely. The task is to understand the existing network configuration well enough to rebuild and redeploy policy — before touching a single device.</p>
+
+  <div class="callout-amber">
+    <p><strong>Two-phase approach:</strong> Phase 1 = passive observation (remote, no changes, no on-site visit). Phase 2 = factory reset + EP1 claim + policy build (requires hands-on, potentially on-site for the AP reset).</p>
+  </div>
+
+  <h3>Phase 1 — What to Tell the Sacramento Client to Run</h3>
+
+  <h4>Step 1: Beacon scan (what the AP is advertising)</h4>
+
+  <p><strong>Windows:</strong></p>
+  <pre class="green">netsh wlan show networks mode=bssid</pre>
+
+  <p><strong>macOS:</strong> Hold Option key, click Wi-Fi menu icon in menu bar.</p>
+
+  <p>From this output you get: SSID name(s), authentication type (WPA2-Personal / WPA2-Enterprise / Open), encryption, BSSID (AP MAC address &rarr; OUI &rarr; vendor and AP generation).</p>
+
+  <h4>Step 2: Plug laptop into the switch port the AP uses</h4>
+
+  <p>Ask the client to temporarily unplug the AP and plug in a laptop. Then run:</p>
+
+  <pre class="green">
+# Windows
+ipconfig /all
+
+# macOS
+ipconfig getifaddr en0
+networksetup -getinfo "Wi-Fi"</pre>
+
+  <table>
+    <thead>
+      <tr><th>Result</th><th>Interpretation</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Gets real DHCP IP (e.g. 192.168.1.x)</td>
+        <td>Access port — native VLAN, DHCP is live on that VLAN</td>
+      </tr>
+      <tr>
+        <td>Gets APIPA (169.254.x.x)</td>
+        <td><strong>Trunk port</strong> — laptop&rsquo;s untagged frames aren&rsquo;t accepted; AP was doing VLAN tagging</td>
+      </tr>
+      <tr>
+        <td>No IP, no APIPA</td>
+        <td>Port may be shut down or require specific VLAN tag</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h4>Step 3: Wireshark capture on the switch port (adds precision)</h4>
+
+  <p>Client installs Wireshark (free), captures 30 seconds on the Ethernet port, sends you the <code>.pcapng</code> file. Apply filter:</p>
+
+  <pre>vlan</pre>
+
+  <ul>
+    <li><strong>802.1Q frames visible, VLAN IDs shown</strong> &rarr; trunk port; VLAN IDs tell you exactly what to configure in the new policy</li>
+    <li><strong>No 802.1Q frames</strong> &rarr; access port; single VLAN, check <code>ipconfig</code> for subnet</li>
+  </ul>
+
+  <h3>Three Remote Options (Ranked by Effort)</h3>
+
+  <table>
+    <thead>
+      <tr><th>Option</th><th>What client does</th><th>What you get</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>1 &mdash; ipconfig only</td>
+        <td>Unplug AP, plug laptop, run <code>ipconfig /all</code>, send screenshot</td>
+        <td>80% — native VLAN subnet, DHCP server, gateway. APIPA = trunk confirmation.</td>
+      </tr>
+      <tr>
+        <td>2 &mdash; Screen share</td>
+        <td>Share screen via Zoom/Teams while you talk them through Wireshark</td>
+        <td>95% — you read Wireshark live; see VLAN IDs in real time</td>
+      </tr>
+      <tr>
+        <td>3 &mdash; Client runs Wireshark, sends pcap</td>
+        <td>Install Wireshark, capture 30s, email <code>.pcapng</code> to you</td>
+        <td>100% — full frame-level truth; you analyze locally at your own pace</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>What You Need Back from Them</h3>
+
+  <ol>
+    <li>Screenshot of <code>netsh wlan show networks mode=bssid</code> or Option+Wi-Fi menu output</li>
+    <li>Screenshot of <code>ipconfig /all</code> from the switch port (with AP unplugged)</li>
+    <li>Wireshark pcapng file (30-second capture, no filter applied, from switch port)</li>
+  </ol>
+
+  <p>With these three artifacts you can determine: number of SSIDs and encryption type (drives RADIUS vs PSK decision), native VLAN and subnet (drives SW1/HPE switch policy), and tagged vs untagged (drives whether AP template needs VLAN bindings or not).</p>
+
+  <h3>Phase 2 — After You Have the Data</h3>
+
+  <div class="callout-green">
+    <p>Factory reset the old AP (console cable required — <em>this may need an on-site visit</em>), claim serial in EP1, build an AP policy matching what the HPE switch expects (access or trunk, correct VLAN IDs), push via EP1. The config becomes a fill-in-the-blank exercise once Phase 1 data is in hand.</p>
+  </div>
+
+  <div class="callout-amber">
+    <p><strong>On-site trigger:</strong> If the AP truly has no console access and no SSH, the only remaining option is a physical button reset (paperclip reset hole on most Aerohive APs). That requires someone physically on site.</p>
+  </div>
+</section>
+
+<!-- ═══ SECTION 5: PENDING ═══ -->
+<section id="pending">
+  <h2>Pending</h2>
+
+  <table>
+    <thead>
+      <tr><th>Item</th><th>Blocker</th><th>Next Action</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>RADIUS auth test with Karl</td>
+        <td>User credentials not in Karl&rsquo;s RADIUS server</td>
+        <td>After PTO: Karl adds user to RADIUS; re-run <code>_debug auth basic</code></td>
+      </tr>
+      <tr>
+        <td>VLAN alignment in EP1 RADIUS policy</td>
+        <td>EP1 policy VLAN IDs not yet matched to SW1 port config</td>
+        <td>After PTO: verify SW1 VLAN for AP2 port; update EP1 user-profile VLAN assignment</td>
+      </tr>
+      <tr>
+        <td>Sacramento passive capture</td>
+        <td>Waiting for client to run captures</td>
+        <td>Send 3-step instruction set; receive screenshots + pcapng</td>
+      </tr>
+      <tr>
+        <td>Old AP Phase 2 (factory reset + EP1 claim)</td>
+        <td>Depends on Phase 1 data</td>
+        <td>After receiving passive capture artifacts; may require on-site visit</td>
+      </tr>
+      <tr>
+        <td>AP1 EP1 actions</td>
+        <td>Deferred from previous session</td>
+        <td>Disable ADSP, raise basic rate 12Mbps, PMK caching 86400s, roaming hops 2, QF_Modem DHCP 24hr</td>
+      </tr>
+      <tr>
+        <td>WiFi 7 Digital Twin Phase 0</td>
+        <td>Repo not yet created</td>
+        <td><code>/Users/khukhan/wifi-7-twin/</code> — Dockerfile.cpu, ns-3.40, Phase 1 static</td>
+      </tr>
+      <tr>
+        <td>XE Socratic bank continuation</td>
+        <td>41 scenarios remaining</td>
+        <td>Continue XE-bank or build <code>scenario_bank_realworld_june11.html</code></td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+</main>
+
+<footer>
+  <span>Khursheed Khan &nbsp;&bull;&nbsp; Extreme Networks 5320 Lab &nbsp;&bull;&nbsp; June 30 2026</span>
+  <span>&copy; 2026 Khursheed Khan</span>
+</footer>
+
+</body>
+</html>
