@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DPM Golden Parameters, EN vs Cisco RRM &amp; the 4-Way Handshake, Live — July 13 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Source+Code+Pro:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Libre Baskerville', Georgia, serif;
+    background: #fff;
+    color: #1a1a1a;
+    font-size: 17px;
+    line-height: 1.75;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 48px 32px 120px;
+  }
+  header { border-bottom: 3px solid #1a1a1a; padding-bottom: 20px; margin-bottom: 12px; }
+  .dateline { font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: #666; margin-bottom: 8px; }
+  h1 { font-size: 2.4rem; font-weight: 700; line-height: 1.15; margin-bottom: 10px; }
+  .deck { font-size: 1.1rem; font-style: italic; color: #444; border-left: 3px solid #1a1a1a; padding-left: 16px; margin-top: 10px; }
+  nav#toc {
+    position: sticky; top: 0; background: #fff; border-bottom: 1px solid #ddd;
+    padding: 10px 0; margin: 20px 0 40px; z-index: 100;
+    font-size: 12px; letter-spacing: 0.05em; display: flex; flex-wrap: wrap; gap: 4px 0;
+  }
+  nav#toc a { color: #1a1a1a; text-decoration: none; margin-right: 16px; text-transform: uppercase; font-weight: 700; border-bottom: 2px solid transparent; padding-bottom: 2px; transition: border-color 0.15s; }
+  nav#toc a:hover { border-color: #1a1a1a; }
+  section { margin-bottom: 56px; }
+  h2 { font-size: 1.05rem; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 700; border-top: 2px solid #1a1a1a; padding-top: 14px; margin-bottom: 20px; color: #1a1a1a; }
+  h3 { font-size: 1rem; font-weight: 700; margin: 28px 0 8px; }
+  h4 { font-size: 0.95rem; font-weight: 700; font-style: italic; margin: 18px 0 6px; color: #333; }
+  p { margin-bottom: 14px; }
+  ul, ol { margin: 10px 0 16px 24px; }
+  li { margin-bottom: 6px; }
+
+  .milestone { border: 2px solid #1a1a1a; padding: 20px 24px; margin: 24px 0; position: relative; }
+  .milestone-label { position: absolute; top: -11px; left: 16px; background: #fff; padding: 0 8px; font-family: 'Source Code Pro', monospace; font-size: 11px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: #1a1a1a; }
+  .milestone-green  { border-color: #1a7a3a; }
+  .milestone-green .milestone-label { color: #1a7a3a; }
+  .milestone-blue   { border-color: #1a6fba; }
+  .milestone-blue .milestone-label { color: #1a6fba; }
+  .milestone-gold   { border-color: #b8860b; }
+  .milestone-gold .milestone-label { color: #b8860b; }
+  .milestone-red    { border-color: #b91c1c; }
+  .milestone-red .milestone-label { color: #b91c1c; }
+
+  .callout { background: #fffbf0; border: 1px solid #e8d5a3; border-left: 5px solid #c9973a; padding: 16px 20px; margin: 18px 0; border-radius: 2px; }
+  .callout-blue { background: #f0f7ff; border: 1px solid #b8d4f0; border-left: 5px solid #1a6fba; padding: 16px 20px; margin: 18px 0; border-radius: 2px; }
+  .callout-green { background: #f0fff4; border: 1px solid #a8dfb8; border-left: 5px solid #1a7a3a; padding: 16px 20px; margin: 18px 0; border-radius: 2px; }
+  .callout-red { background: #fef2f2; border: 1px solid #f3b8b8; border-left: 5px solid #b91c1c; padding: 16px 20px; margin: 18px 0; border-radius: 2px; }
+  .callout p:last-child, .callout-blue p:last-child, .callout-green p:last-child, .callout-red p:last-child { margin-bottom: 0; }
+
+  code { font-family: 'Source Code Pro', monospace; font-size: 14px; background: #f5f5f5; padding: 1px 5px; border-radius: 3px; color: #c7254e; }
+  pre { font-family: 'Source Code Pro', monospace; font-size: 13px; background: #f8f8f8; border: 1px solid #e0e0e0; border-left: 4px solid #1a1a1a; padding: 16px 18px; overflow-x: auto; margin: 14px 0 20px; line-height: 1.55; }
+  pre.green { border-left-color: #1a7a3a; background: #f0fff4; }
+  pre.blue  { border-left-color: #1a6fba; background: #f0f7ff; }
+
+  table { width: 100%; border-collapse: collapse; margin: 16px 0 24px; font-size: 0.88rem; }
+  th { background: #1a1a1a; color: #fff; padding: 8px 12px; text-align: left; font-family: 'Source Code Pro', monospace; font-size: 0.72rem; letter-spacing: 0.06em; text-transform: uppercase; }
+  td { padding: 8px 12px; border-bottom: 1px solid #e0e0e0; vertical-align: top; }
+  tr:nth-child(even) td { background: #fafafa; }
+
+  .pcap-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 20px 0; }
+  @media(max-width:600px){ .pcap-grid { grid-template-columns: 1fr; } }
+  .pcap-card { border: 1px solid #ddd; border-left: 4px solid #1a6fba; padding: 16px 18px; border-radius: 2px; }
+  .pcap-card .pcap-label { font-family: 'Source Code Pro', monospace; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #1a6fba; margin-bottom: 6px; }
+  .pcap-card h4 { font-style: normal; margin: 0 0 6px; font-size: 0.9rem; }
+  .pcap-card p { font-size: 0.82rem; color: #555; margin-bottom: 10px; }
+  .pcap-card.gold { border-left-color: #b8860b; }
+  .pcap-card.gold .pcap-label { color: #b8860b; }
+  .pcap-card.green { border-left-color: #1a7a3a; }
+  .pcap-card.green .pcap-label { color: #1a7a3a; }
+
+  footer { border-top: 1px solid #ddd; padding-top: 20px; font-size: 13px; color: #888; margin-top: 60px; }
+</style>
+</head>
+<body>
+<div id="ai-warning-banner" style="background:#b91c1c;color:#fff;text-align:center;padding:12px 16px;font-family:monospace;font-size:13px;font-weight:bold;position:sticky;top:0;z-index:99999;letter-spacing:0.04em;animation:warnpulse 1.2s ease-in-out infinite;width:100%;box-sizing:border-box;display:block;">
+⚠️&nbsp; CLAUDE MAKES ERRORS &nbsp;—&nbsp; VERIFY WITH SME FIRST &nbsp;—&nbsp; DO NOT USE IN PRODUCTION &nbsp;—&nbsp; THIS IS A TRAINING GUIDE ON WHAT NOT TO DO &nbsp;—&nbsp; JULY 13 2026 &nbsp;⚠️
+</div>
+<style>@keyframes warnpulse{0%,100%{background:#b91c1c}50%{background:#ef4444}}</style>
+
+<header>
+  <div class="dateline">Monday, July 13, 2026 &nbsp;&bull;&nbsp; Khursheed Khan &nbsp;&bull;&nbsp; Extreme Networks 5320 Lab &nbsp;&bull;&nbsp; cisco-en-cli-agent session</div>
+  <h1>Golden Parameters, EN vs Cisco RRM &amp; the 4-Way Handshake, Live</h1>
+  <div class="deck">A full-day session spanning repo housekeeping, the DigitalTwinEngine's 64-parameter Design Manifest, a full EN radio-profile audit against Cisco/Aerohive reference material, and a ground-up Wireshark study of client association through the WPA2 4-way handshake and GTK mechanics.</div>
+</header>
+
+<nav id="toc">
+  <a href="#housekeeping">§1 Housekeeping</a>
+  <a href="#dpm">§2 Golden Parameters</a>
+  <a href="#radio-profiles">§3 Radio Profiles</a>
+  <a href="#rrm">§4 RRM &amp; QoE Gap</a>
+  <a href="#4way-live">§5 4-Way Handshake, Live</a>
+  <a href="#pcap-library">§6 pcap Library</a>
+  <a href="#linkedin">§7 LinkedIn Review</a>
+  <a href="#pending">§8 Pending</a>
+</nav>
+
+<!-- ══ §1 HOUSEKEEPING ══ -->
+<section id="housekeeping">
+  <h2>§1 — Repository &amp; Config Housekeeping</h2>
+
+  <h3>Full Claude-file audit + a live security finding</h3>
+  <p>Scanned the whole home directory for Claude-related files and projects. Along the way, re-verified the April 2 security assessment for <code>cisco-en-cli-agent</code> against the actual current code — nothing had been fixed in over 3 months.</p>
+
+  <div class="milestone milestone-red">
+    <div class="milestone-label">Still Open</div>
+    <p><strong>T-001</strong> GitHub PAT still live in <code>.env</code> &middot; <strong>T-002</strong> plaintext password comparison in <code>auth.py</code> &middot; <strong>T-004</strong> SQL injection via f-string in <code>search.py</code> &middot; <strong>T-007</strong> CORS/XSRF disabled in <code>.streamlit/config.toml</code>. Also found a second live PAT embedded in <code>cricket-guide-gui</code>'s git remote URL.</p>
+  </div>
+
+  <h3>claude-global-config repo — cloned, synced, integrated</h3>
+  <p>The repo referenced at the top of <code>~/.claude/CLAUDE.md</code> had never been cloned locally, and was stale since the April 6 synthesis. Cloned it, synced 3+ months of local drift, then studied its <code>README.md</code> + all 5 <code>synthesis/*.md</code> files and found several high-leverage items had been dropped during condensing rather than summarized — notably a <strong>Security Non-Negotiables table</strong> that would have flagged every T-00x finding above, had it been loaded.</p>
+  <table>
+    <tr><th>Added to CLAUDE.md</th><th>Source</th></tr>
+    <tr><td>Etzioni's Ownership Test, Taggart's 3 sharpest rules, Security Non-Negotiables table</td><td><code>05-quality-gates.md</code></td></tr>
+    <tr><td>"Power Trio" (Worktrees+batch+Hooks), <code>/remote-control</code>, <code>/multi-plan</code></td><td><code>02-claude-code-power-commands.md</code></td></tr>
+    <tr><td><code>.claude/plugins/</code> anatomy row, two-scope distinction, hook-events table, message-count context heuristic</td><td>Cross-checked against user's own cheat-sheet docx</td></tr>
+  </table>
+  <p>2 commits pushed to <code>khursheedkhanaiforgood-ai/claude-global-config</code> main: <code>b4aa805</code> (initial sync) and <code>e461ce8</code> (synthesis integration).</p>
+</section>
+
+<!-- ══ §2 GOLDEN PARAMETERS ══ -->
+<section id="dpm">
+  <h2>§2 — DigitalTwinEngine: "Golden Parameters" &amp; the 12/15/64 Accounting</h2>
+
+  <p>Clarified that "Golden Parameters" refers to the <strong>GS (Golden Set) Convergence Protocol</strong> — the unbuilt Sprint 4 capstone of the AP3000 live-calibration DigitalTwinEngine, distinct from the WiFi 7 ns3-Sionna twin (which was confirmed never started — repo doesn't exist).</p>
+
+  <table>
+    <tr><th>Sprint</th><th>Status</th></tr>
+    <tr><td>1 (Collector, dashboard, widget)</td><td>&#10003; Built</td></tr>
+    <tr><td>2a (SQLite storage, session HTML)</td><td>&#10003; Built</td></tr>
+    <tr><td>2e (PacketCaptureAgent)</td><td>&#10003; Built</td></tr>
+    <tr><td>2b/2c/2f (knob panel, debug harness, rolling capture)</td><td>&#10008; Not built</td></tr>
+    <tr><td>3 (SimulatorAgent/CalibrationAgent/OptimizerAgent)</td><td>&#10008; Not built</td></tr>
+    <tr><td>4 — GS Convergence Protocol ("Golden Parameters")</td><td>&#10008; Design-only, zero code</td></tr>
+  </table>
+
+  <h3>64-parameter Design Parameter Manifest</h3>
+  <p>Full list confirmed across 7 sections (A&ndash;G): Site &amp; Environment (10), Client Devices (12), Applications (6), Network Design (13), Channel Planning (7), Security &amp; SSID (7), RRM &amp; AutoRF (9) &mdash; 64 total, vs. the "~60" shorthand used elsewhere in memory.</p>
+
+  <h3>15&rarr;12 optimizer knob distillation</h3>
+  <p>Of the 12 <code>OPT_SEARCH</code> knobs: 6 have clear direct QoE links (txPwr, bw5g, atFair, maxCli, cwBe, txopBe), 2 collapse into 1 (mcsFloor/minRSSI share a field), 1 is a proxy not the real variable (dtim), and 3 are inert on this specific AP3000 (rxSop, fragThr, rtsThr &mdash; not exposed or defaulted-disabled).</p>
+
+  <div class="callout-red">
+    <p><strong>Critical honesty check:</strong> the "12 knobs affect QoE" claim was never empirically validated. It's a design hypothesis from the June 9 architecture dialogue. The Monte Carlo sensitivity oracle that would prove it &mdash; part of the unbuilt Sprint 3 <code>SimulatorAgent</code> &mdash; has never run.</p>
+  </div>
+
+  <h3>WMM/EDCA deep dive</h3>
+  <p>Cross-checked the EP1 WMM QoS panel (4 Access Categories &times; 5 fields = 20 params) against the 12-knob list &mdash; only 2 overlap (<code>cwBe</code>, <code>txopBe</code>, both Best-effort only). Resolved an old ambiguity: the EP1 GUI's "(1-15)" field range confirms CWmin/CWmax are exponent values, and all 4 ACs match the industry-standard WMM default table exactly &mdash; this AP is running stock defaults, not custom tuning. Background AC was documented for the first time ever in any local memory.</p>
+</section>
+
+<!-- ══ §3 RADIO PROFILES ══ -->
+<section id="radio-profiles">
+  <h2>§3 — EN Radio Profile Audit: 6GHz / 5GHz / 2.4GHz + 802.11be</h2>
+
+  <p>Built a full section-by-section comparison matrix from the actual <code>radio_ng_11ax-6g/5g/2g</code> EP1 templates, then added an 802.11be (WiFi 7) column for architectural context.</p>
+
+  <table>
+    <tr><th>Finding</th><th>Verified against</th></tr>
+    <tr><td>ZeroWait DFS is inert on this AP3000 (needs 3-4 spatial streams; AP3000 is 2&times;2)</td><td>EN User Guide p.355</td></tr>
+    <tr><td>6GHz SP/LPI power mode is inert (no 6GHz radio hardware on AP3000 at all)</td><td>EN User Guide p.116, 5492-5519</td></tr>
+    <tr><td>6GHz profile lacks Short-GI/Beamforming toggles &mdash; HE uses a 3-value GI scheme (800/1600/3200ns), not the legacy binary toggle</td><td>Public web search (Cisco/Silicon Labs docs)</td></tr>
+    <tr><td>2.4GHz Region/Channel-Model selector (USA=1/6/11) is a literal EP1 GUI default, not just a WLANPros recommendation</td><td>EP1 template + WLANPros Top20 #2</td></tr>
+  </table>
+
+  <h3>Preamble &amp; Frame Burst &mdash; genuinely new gaps found</h3>
+  <p>Cross-checked the EP1 "Radio Settings" panel against the user's own <code>dt_parameter_reference.html</code> (built June 9) &mdash; that reference already had correct IEEE clauses for BSS Color, Beamforming, A-MPDU, TWT, and Guard Interval. Only <strong>Preamble</strong> and <strong>Frame Burst</strong> were genuinely undocumented anywhere. Traced Preamble to <strong>802.11-2020 &sect;16.2.2.3</strong> (verified by converting and grepping the full local standard PDF). Frame Burst has <em>no</em> IEEE clause &mdash; it's a proprietary Aerohive/HiveOS term, closest formal concept is TXOP under EDCA. Also corrected the Guard Interval default: <strong>800ns</strong>, not 400ns &mdash; 400ns is the optional short setting, not the baseline.</p>
+
+  <h3>802.11be column (WiFi 7, architectural context only &mdash; AP3000 is WiFi 6 hardware)</h3>
+  <p>320MHz channel width (6GHz only), 4096-QAM (12 bits/subcarrier vs 10), Preamble Puncturing (only above 80MHz), MLO (Multi-Link Operation &mdash; an entirely new cross-band dimension), and new WPA3-Personal AKMs 24/25 with mandatory beacon protection.</p>
+</section>
+
+<!-- ══ §4 RRM & QOE GAP ══ -->
+<section id="rrm">
+  <h2>§4 — Cisco RRM Logic, EN's Validation Gap &amp; the Aerohive Legacy Find</h2>
+
+  <h3>Cisco's published RRM algorithm (the "logic, not values" ask)</h3>
+  <p>Read the DCA and TPC sections of a Cisco RRM White Paper already sitting in the local WLPC corpus.</p>
+  <pre class="blue">DCA: single Cost Metric (CCI + foreign-channel + noise + channel load)
+     &rarr; CPCI (worst AP first, then random) &rarr; evaluate 1st/2nd-hop neighbors only
+     &rarr; NCCF gate (only change if CPCI improves AND neighbors don't regress)
+     &rarr; 10-20dB sensitivity threshold (hysteresis, prevents flip-flopping)
+
+TPC: Tx_ideal = Tx_max + (Power_Threshold − RSSI_3rd_neighbor)
+     Power derived from the 3rd-loudest neighboring AP, not client RSSI</pre>
+
+  <div class="callout">
+    <p><strong>EN vs. Cisco RRM &mdash; deficiency analysis, with a caveat:</strong> everything confirmed about EN's AutoRF is simpler &mdash; independent flat thresholds (35%/35%/35%) instead of one weighted Cost Metric, no documented neighbor-impact gating, no documented dynamic TX-power formula. But this may partly reflect <strong>documentation opacity</strong> (Cisco publishes an algorithm; EN's public docs describe configurable fields, not XIQ Cloud RRM's actual cloud-side logic) rather than proven algorithmic inferiority.</p>
+  </div>
+
+  <h3>The EN validation gap &mdash; confirmed empirically, not assumed</h3>
+  <p>Grepped the entire 33,261-line <code>Extreme_Platform_ONE_Networking_25_9_0_User_Guide.pdf</code> for "capacity planning," "predict," "site survey," "mall," "retail," "dense urban" &mdash; <strong>zero hits on every term.</strong> EN's own "Client SLA" mechanism is a reactive, post-hoc, per-client health-scoring system (Rate/Success/Usage targets + Log/Boost-Airtime actions) &mdash; not a pre-deployment predictive tool.</p>
+
+  <h3>Major find: the Aerohive 2013 High-Density Wi-Fi Design Guide</h3>
+  <p>AP3000 is Aerohive/HiveOS-heritage hardware. Found and read a legacy Aerohive design guide (Andrew von Nagy &mdash; same author as the Revolution Wi-Fi Capacity Planner already in the local corpus) with a real capacity-forecasting formula and a documented forecast&rarr;verify loop via predictive RF site survey.</p>
+  <pre>airtime_per_device = throughput_target &divide; max_achievable_throughput
+devices_per_radio  = 80% &divide; airtime_per_device
+radios_required    = (device_count &times; airtime_per_device) &divide; 80%</pre>
+  <p>Also revealed the SLA remediation toolkit is actually 3-pronged (airtime boost + band steering + client load balancing &mdash; the engine is literally named <strong>"Dynamic Airtime Scheduling"</strong>), broader than what current EP1 docs describe. This methodology appears to have been dropped from current EN/XIQ documentation &mdash; the old Aerohive docs URL now 301-redirects to a generic support landing page.</p>
+
+  <div class="callout-gold" style="background:#fffbf0;border:1px solid #e8d5a3;border-left:5px solid #b8860b;padding:16px 20px;margin:18px 0;border-radius:2px;">
+    <p><strong>Open gap flagged:</strong> the DigitalTwinEngine's 5 existing archetypes (Stadium, Enterprise, Hospital, Warehouse, Residential) don't include <strong>dense-urban retail/mall</strong> &mdash; the scenario actually discussed. Worth adding as a 6th archetype.</p>
+  </div>
+</section>
+
+<!-- ══ §5 4-WAY HANDSHAKE LIVE ══ -->
+<section id="4way-live">
+  <h2>§5 — The 4-Way Handshake, Live: A Ground-Up Wireshark Study</h2>
+
+  <p>Opened Wireshark and walked a single reference capture, <code>wpa-4way-handshake.pcap</code>, from Beacon through encrypted data &mdash; rejecting two other candidate files (<code>lab11.pcapng</code>, <code>intuitibits.pcapng</code>) after <code>tshark</code> analysis showed both were scattered multi-client aggregates rather than one coherent story.</p>
+
+  <h3>The corrected sequence (client repeatedly reconstructed it, corrected each time with evidence)</h3>
+  <pre class="green">Beacon (always on, continuous)
+  &rarr; Probe Request/Response          (#58-74,  t&asymp;5.18-5.33s)
+  &rarr; Authentication (open, empty)    (#78, 80, t&asymp;5.64s)
+  &rarr; Association Request/Response    (#82, 84, t&asymp;5.645-5.647s)
+  &rarr; 4-way EAPOL handshake           (#87-94,  t&asymp;5.65-5.66s)
+  &rarr; Encrypted data                  (#99+)</pre>
+
+  <h3>Association vs. Probe &mdash; the distinguishing elements</h3>
+  <p>Pulled real field content via <code>tshark -V</code>. The two elements that exist <em>only</em> in Association Response, never in Probe Req/Resp:</p>
+  <table>
+    <tr><th>Field</th><th>Value (frame #84)</th><th>Significance</th></tr>
+    <tr><td>Status Code</td><td>Successful (0x0000)</td><td>Explicit accept/reject &mdash; Probe has no such concept</td></tr>
+    <tr><td>Association ID</td><td>0x0001</td><td>Unique per-client handle the AP now tracks &mdash; real state creation</td></tr>
+  </table>
+
+  <h3>The full handshake, byte by byte</h3>
+  <table>
+    <tr><th>Msg</th><th>Real fields (tshark -V)</th><th>What it proves</th></tr>
+    <tr><td>1 (#87)</td><td>ANonce sent, Key ACK=Set, MIC=Not set</td><td>No MIC yet &mdash; KCK doesn't exist until both nonces are exchanged</td></tr>
+    <tr><td>2 (#89)</td><td>SNonce + MIC=Set, 22-byte plaintext Key Data (client's RSN IE)</td><td>First real proof-of-PSK-knowledge; RSN IE re-sent to defeat downgrade attacks on the unprotected Association exchange</td></tr>
+    <tr><td>3 (#92)</td><td>Install=Set, MIC=Set, <strong>Encrypted Key Data=Set</strong>, 80 bytes</td><td>Encrypted GTK delivered, wrapped in KEK &mdash; the <em>only</em> message with real encryption, not just signing</td></tr>
+    <tr><td>4 (#94)</td><td>MIC=Set, Nonce=all-zero, Key Data Length=0</td><td>Pure confirmation &mdash; both sides now install PTK+GTK, controlled port opens</td></tr>
+  </table>
+
+  <h3>Five corrected misconceptions</h3>
+  <ol>
+    <li><strong>PTK is never transmitted.</strong> Both sides independently derive it &mdash; client right after Msg1 (needs KCK for Msg2's MIC), AP right after Msg2 (needs KCK+KEK for Msg3).</li>
+    <li><strong>MIC does not encrypt.</strong> It's a signature (KCK-based). The RSN IE in Msg2 travels in plaintext, readable directly in Wireshark.</li>
+    <li><strong>GTK is not derived from PTK.</strong> Separate root key &mdash; the GMK, generated independently by the AP: <code>GTK = KDF(GMK, AP_MAC || GNonce)</code>. PTK's KEK sub-key is only the delivery wrapper.</li>
+    <li><strong>GTK delivery is per-client, not one broadcast.</strong> New clients get it in their own Msg3; already-connected clients get a rotated GTK via a separate, shorter 2-message Group Key Handshake.</li>
+    <li><strong>GTK isn't continuously regenerated</strong> &mdash; event-triggered (timer or client departure), static in between.</li>
+  </ol>
+
+  <div class="callout-green">
+    <p><strong>CCMP Key Index &mdash; the on-the-wire proof of which key was applied:</strong> Key Index 0 = pairwise (PTK), always, universally. Key Index 1-3 = group (GTK). Confirmed directly: frame #102 (unicast AP&rarr;client) shows Key Index 0; every AP-originated broadcast frame in this capture (10 instances checked, all to the 802.1D bridge-group address <code>01:80:c2:00:00:00</code>) consistently shows Key Index 2. Along the way, found that the AP uses <em>two different source MACs</em> &mdash; one for beacons/handshake (<code>...b2:55</code>), a separate one for actual data-plane traffic (<code>...b2:53</code>) &mdash; a real multi-radio addressing quirk that broke the first filter attempt.</p>
+  </div>
+
+  <h3>Why a client needs GTK despite already having PTK</h3>
+  <p>PTK is architecturally one-to-one; using it for broadcast would require N separate transmissions per frame, defeating the entire purpose of broadcast. GTK is one shared secret &mdash; encrypt once, every client (each with a different PTK) decrypts the same transmission. Required for ARP, DHCP broadcast stages, and multicast (mDNS, IPv6 ND).</p>
+
+  <h3>GTK rekey overhead in dense networks</h3>
+  <p>GTK delivery fan-out scales linearly with client count (&asymp;2&times;N frames per rekey event), and the rotation timer typically fires BSS-wide simultaneously &mdash; a burst that contends with the WMM/EDCA mechanics from earlier in the day, and can desync clients via the same lost-ACK/retry mechanism observed directly in this capture's Probe Response forensics (a Probe Response was retransmitted 7 times &mdash; matching the standard 802.11 short-retry-limit convention). This is exactly the kind of second-order effect the still-missing mall/retail archetype (&sect;4) would need to model.</p>
+</section>
+
+<!-- ══ §6 PCAP LIBRARY ══ -->
+<section id="pcap-library">
+  <h2>§6 — pcap Library</h2>
+  <p>New study folder created at <code>~/pcaps/</code> (outside any git repo &mdash; personal reference material), with 14 downloaded public reference captures plus a README pointing back to the local incident/training captures already in this repo.</p>
+
+  <div class="pcap-grid">
+    <div class="pcap-card green">
+      <div class="pcap-label">This session's primary file</div>
+      <h4>WPA2 PSK — Clean 4-Way</h4>
+      <p>The complete story: Beacon &rarr; Probe &rarr; Auth &rarr; Assoc &rarr; EAPOL (4/4) &rarr; encrypted data. SSID <code>Coherer</code>. Filter <code>eapol</code> isolates the handshake.</p>
+      <a href="data/pcaps/wpa-4way-handshake.pcap" download style="display:inline-block;font-family:'Source Code Pro',monospace;font-size:12px;font-weight:700;color:#1a7a3a;text-decoration:none;border:1px solid #1a7a3a;padding:4px 12px;border-radius:3px;">Download wpa-4way-handshake.pcap</a>
+    </div>
+    <div class="pcap-card gold">
+      <div class="pcap-label">External — Mathy Vanhoef (KRACK/FragAttacks)</div>
+      <h4>8 files: SAE, EAP-PWD, WPA3 transition</h4>
+      <p>Isolated WPA3 SAE handshake, EAP-PWD, WNM sleep mode, WPA3 transition mode (2.4/5GHz) &mdash; keys included in filenames.</p>
+      <a href="https://github.com/vanhoefm/wifi-example-captures" target="_blank" style="display:inline-block;font-family:'Source Code Pro',monospace;font-size:12px;font-weight:700;color:#b8860b;text-decoration:none;border:1px solid #b8860b;padding:4px 12px;border-radius:3px;">github.com/vanhoefm</a>
+    </div>
+    <div class="pcap-card">
+      <div class="pcap-label">External — Wireshark official test suite</div>
+      <h4>6 files: GTK rekey, MFP, SAE, MLO</h4>
+      <p><code>wpa1-gtk-rekey.pcapng</code> directly relevant to the May 6 incident; <code>wpa3-mlo.pcapng</code> covers 802.11be Multi-Link Operation.</p>
+      <a href="https://github.com/wireshark/wireshark/tree/master/test/captures" target="_blank" style="display:inline-block;font-family:'Source Code Pro',monospace;font-size:12px;font-weight:700;color:#1a6fba;text-decoration:none;border:1px solid #1a6fba;padding:4px 12px;border-radius:3px;">github.com/wireshark/wireshark</a>
+    </div>
+    <div class="pcap-card">
+      <div class="pcap-label">Local — not yet opened</div>
+      <h4>RADIUS Wireless / Ethernet (VLAN via Tunnel-Private-Group-ID)</h4>
+      <p>Queued for the next session &mdash; the concrete answer to "how do I see VLAN assignment in a capture."</p>
+      <a href="Capture 08 - RADIUS over Wireless.pcapng" download style="display:inline-block;font-family:'Source Code Pro',monospace;font-size:12px;font-weight:700;color:#1a6fba;text-decoration:none;border:1px solid #1a6fba;padding:4px 12px;border-radius:3px;">Queued for next session</a>
+    </div>
+  </div>
+
+  <h3>Filters used this session</h3>
+  <pre>wlan.fc.type_subtype == 8            # Beacon
+wlan.fc.type_subtype == 4 / == 5     # Probe Request / Response
+wlan.fc.type_subtype == 11           # Authentication
+wlan.fc.type_subtype == 0 / == 1     # Association Request / Response
+eapol                                # isolate the 4-way handshake (all 4 msgs)
+wlan_rsna_eapol.keydes.msgnr == N    # jump to a specific handshake message (1-4)
+wlan.addr==&lt;mac&gt; && wlan.fc.type==2  # data frames for one station</pre>
+</section>
+
+<!-- ══ §7 LINKEDIN REVIEW ══ -->
+<section id="linkedin">
+  <h2>§7 — LinkedIn Post Review</h2>
+  <p>Reviewed a post by Harish Kumar sharing a 7-rule custom system prompt for Claude, built around the thesis "a wrong answer delivered confidently is worse than no answer."</p>
+  <div class="callout-blue">
+    <p><strong>Strongest point, proven live in this exact session:</strong> Rule 6 ("never invent function names/API syntax") &mdash; earlier in &sect;5, <code>eapol.keydes.msgnr</code> was guessed as a Wireshark field name and was wrong. The real field, <code>wlan_rsna_eapol.keydes.msgnr</code>, was only found by running <code>tshark -G fields</code> and verifying before it was handed over. That's the rule working in its strongest form: actual verification, not verbal hedging.</p>
+  </div>
+  <p><strong>Weaknesses flagged:</strong> "Claude stops lying to you" mischaracterizes hallucination as intentional deception rather than miscalibrated confidence. "Works in every chat, forever" oversells a system prompt's reliability. Rule 7 (always ask clarifying questions), applied indiscriminately, has a real usability cost for low-stakes questions. Packaging is standard engagement-bait, orthogonal to content quality.</p>
+  <p><em>Capability correction along the way:</em> earlier in this same project's memory (Part 9, this session), LinkedIn access was stated as generally restricted &mdash; this fetch succeeded, contradicting that blanket claim.</p>
+</section>
+
+<!-- ══ §8 PENDING ══ -->
+<section id="pending">
+  <h2>§8 — Pending / Next</h2>
+  <ul>
+    <li><strong>Security remediation, still open:</strong> revoke the GitHub PAT in <code>cisco-en-cli-agent/.env</code> and the one embedded in <code>cricket-guide-gui</code>'s git remote; fix SQL injection, plaintext password comparison, CORS/XSRF.</li>
+    <li><code>claude-global-config</code> repo's <code>synthesis/*.md</code> subfolder is now stale relative to the updated <code>CLAUDE.md</code> &mdash; separate content-authoring task.</li>
+    <li>Sprint 2b (<code>knob_panel.py</code>) is the actual next unbuilt step before any Golden Set/Sprint 4 work can start on the DigitalTwinEngine.</li>
+    <li>Add "dense-urban retail/mall" as a 6th DigitalTwinEngine archetype.</li>
+    <li>Next pcap study session: <code>Capture 08 - RADIUS over Wireless.pcapng</code> for the VLAN/<code>Tunnel-Private-Group-ID</code> walkthrough, then 802.11r roaming (<code>wpa2-ft-psk.pcapng</code>).</li>
+    <li>Consider adding the pluggable-RRM-strategy design (Cisco-logic vs. EN-logic, same simulated environment) to the Sprint 3 architecture &mdash; discussed, deliberately held for a later session.</li>
+  </ul>
+</section>
+
+<footer>
+  <p>Khursheed Khan &nbsp;&bull;&nbsp; July 13, 2026 &nbsp;&bull;&nbsp; Extreme Networks 5320 Lab &nbsp;&bull;&nbsp; Session: DPM Golden Parameters, EN vs Cisco RRM, 4-Way Handshake deep-dive</p>
+  <p style="margin-top:6px">&copy; 2026 Khursheed Khan. Lab notes and pcap analysis for professional development.</p>
+</footer>
+
+<div style="background:#b91c1c;color:#fff;text-align:center;padding:12px 16px;font-family:monospace;font-size:13px;font-weight:bold;letter-spacing:0.04em;animation:warnpulse 1.2s ease-in-out infinite;width:100%;box-sizing:border-box;display:block;">
+⚠️&nbsp; CLAUDE MAKES ERRORS &nbsp;—&nbsp; VERIFY WITH SME FIRST &nbsp;—&nbsp; DO NOT USE IN PRODUCTION &nbsp;—&nbsp; THIS IS A TRAINING GUIDE ON WHAT NOT TO DO &nbsp;—&nbsp; JULY 13 2026 &nbsp;⚠️
+</div>
+</body>
+</html>
