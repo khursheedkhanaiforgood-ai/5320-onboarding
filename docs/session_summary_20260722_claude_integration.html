@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>July 22 2026 — CLAUDE.md Integration, Delta Analysis, Memory Consolidation</title>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Libre Baskerville', Georgia, serif;
+    background: #fff;
+    color: #121212;
+    line-height: 1.75;
+    font-size: 18px;
+  }
+
+  nav {
+    position: sticky;
+    top: 0;
+    background: #fff;
+    border-bottom: 2px solid #121212;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    overflow-x: auto;
+    padding: 0 24px;
+  }
+  nav a {
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: #121212;
+    text-decoration: none;
+    padding: 14px 16px;
+    white-space: nowrap;
+    border-bottom: 3px solid transparent;
+    transition: border-color 0.15s;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  nav a:hover { border-bottom-color: #121212; }
+
+  header {
+    max-width: 780px;
+    margin: 56px auto 0;
+    padding: 0 24px;
+    text-align: center;
+  }
+  .kicker {
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #666;
+    margin-bottom: 16px;
+  }
+  h1 { font-size: clamp(26px, 4vw, 40px); font-weight: 700; line-height: 1.2; margin-bottom: 20px; }
+  .dateline {
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: 14px;
+    color: #888;
+    border-top: 1px solid #ddd;
+    border-bottom: 1px solid #ddd;
+    padding: 10px 0;
+    margin-bottom: 40px;
+  }
+
+  main { max-width: 780px; margin: 0 auto; padding: 0 24px 80px; }
+  section { margin-bottom: 56px; }
+  h2 { font-size: 22px; font-weight: 700; border-top: 3px solid #121212; padding-top: 16px; margin-bottom: 20px; scroll-margin-top: 60px; }
+  h3 { font-size: 17px; font-weight: 700; margin: 28px 0 10px; }
+  h4 { font-size: 15px; font-weight: 700; font-style: italic; margin: 18px 0 8px; color: #333; }
+  p { margin-bottom: 16px; }
+  ul, ol { padding-left: 24px; margin-bottom: 16px; }
+  li { margin-bottom: 6px; }
+
+  table { width: 100%; border-collapse: collapse; margin: 20px 0; font-family: 'Source Sans 3', sans-serif; font-size: 15px; }
+  th { background: #121212; color: #fff; padding: 10px 14px; text-align: left; font-weight: 600; letter-spacing: 0.04em; font-size: 13px; }
+  td { padding: 10px 14px; border-bottom: 1px solid #e5e5e5; vertical-align: top; }
+  tr:nth-child(even) td { background: #fafafa; }
+
+  code { font-family: 'Source Code Pro', 'Courier New', monospace; font-size: 14px; background: #f3f3f3; padding: 2px 6px; border-radius: 3px; color: #b91c1c; }
+  pre {
+    font-family: 'Source Code Pro', 'Courier New', monospace;
+    font-size: 13px;
+    background: #1e1e1e;
+    color: #d4d4d4;
+    padding: 18px 20px;
+    border-radius: 4px;
+    overflow-x: auto;
+    margin: 14px 0 20px;
+    line-height: 1.6;
+  }
+  pre.green { background: #052e16; color: #86efac; }
+  pre.amber { background: #1c1003; color: #fcd34d; }
+  pre.red   { background: #1c0404; color: #fca5a5; }
+
+  .callout {
+    border-left: 4px solid #1a5276;
+    background: #f0f7ff;
+    padding: 14px 18px;
+    margin: 16px 0;
+    border-radius: 0 4px 4px 0;
+  }
+  .callout-green {
+    border-left: 4px solid #166534;
+    background: #f0fdf4;
+    padding: 14px 18px;
+    margin: 16px 0;
+    border-radius: 0 4px 4px 0;
+  }
+  .callout-amber {
+    border-left: 4px solid #b45309;
+    background: #fffbeb;
+    padding: 14px 18px;
+    margin: 16px 0;
+    border-radius: 0 4px 4px 0;
+  }
+  .callout-red {
+    border-left: 4px solid #b91c1c;
+    background: #fff5f5;
+    padding: 14px 18px;
+    margin: 16px 0;
+    border-radius: 0 4px 4px 0;
+  }
+  .callout p:last-child, .callout-green p:last-child, .callout-amber p:last-child, .callout-red p:last-child { margin-bottom: 0; }
+
+  .delta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 20px 0; }
+  @media(max-width:600px) { .delta-grid { grid-template-columns: 1fr; } }
+  .delta-card { border: 1px solid #e0e0e0; border-left: 4px solid #1a5276; padding: 16px 18px; border-radius: 2px; }
+  .delta-card.new { border-left-color: #166534; background: #f0fdf4; }
+  .delta-card.changed { border-left-color: #b45309; background: #fffbeb; }
+  .delta-card.gap { border-left-color: #b91c1c; background: #fff5f5; }
+  .delta-card h4 { margin-top: 0; }
+
+  footer {
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 24px 24px 48px;
+    border-top: 1px solid #ddd;
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: 13px;
+    color: #888;
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="#accomplished">Accomplished</a>
+  <a href="#integration">Integration</a>
+  <a href="#delta">Delta Analysis</a>
+  <a href="#memory">Memory System</a>
+  <a href="#implications">Implications</a>
+  <a href="#next">Next Steps</a>
+  <a href="../index-nyt.html">&#8592; Index</a>
+</nav>
+
+<header>
+  <div class="kicker">End-of-Day &nbsp;&bull;&nbsp; July 22, 2026 &nbsp;&bull;&nbsp; Extreme Networks Lab</div>
+  <h1>CLAUDE.md Integration, Delta Analysis, Memory Consolidation</h1>
+  <div class="dateline">
+    Khursheed Khan &nbsp;&mdash;&nbsp; Tuesday, July 22 2026 &nbsp;&mdash;&nbsp;
+    New lab specifications file &middot; Status briefing across 4 parallel streams &middot; Critical gap analysis &middot; Memory system updates
+  </div>
+</header>
+
+<main>
+
+<!-- ═══ SECTION 1: ACCOMPLISHED ═══ -->
+<section id="accomplished">
+  <h2>§1 — Accomplished</h2>
+
+  <h3>1.1 Status Briefing Across 4 Streams</h3>
+  <p>Analyzed current state across parallel work:</p>
+  <ul>
+    <li><strong>5320-Onboarding (primary):</strong> Latest work July 13 (DPM + RRM + 4-way handshake). 9 session HTMLs in <code>docs/</code>. Landing page stale (March 25 on gh-pages).</li>
+    <li><strong>Blocking issue:</strong> Index parity gap — May 22 + May 11 EOD cards exist but unlinked from landing pages.</li>
+    <li><strong>Sprint C EP1 Traverser:</strong> xcloud parcel mount issue; org context doesn't persist. Waiting for root-cause fix before restart.</li>
+    <li><strong>deep-research-engine Phase 1:</strong> Phase 0 complete (8/8 tests, commit 4cd6b90). Architecture review must happen before Phase 1 launch.</li>
+    <li><strong>WiFi 802.11 Mastery Curriculum:</strong> Phase 1 Day 1 (OFDM subcarrier spacing Socratic session) queued, not started.</li>
+  </ul>
+
+  <h3>1.2 File Integration Strategy</h3>
+  <p>Integrated new CLAUDE.md specifications while preserving independence:</p>
+  <ul>
+    <li><strong>Home directory:</strong> <code>~/CLAUDE_5320_lab_specifications_20260722.md</code> — source spec file, unchanged from Downloads</li>
+    <li><strong>Project directory:</strong> <code>/Users/khukhan/5320-onboarding-agent/CLAUDE.md</code> — integrated version with site parity tracking</li>
+    <li><strong>Cross-pointers:</strong> Both files reference each other; neither duplicates content</li>
+    <li><strong>Precedent:</strong> Matches .claude/ anatomy principle — project CLAUDE.md can extend home-directory global CLAUDE.md</li>
+  </ul>
+
+</section>
+
+<!-- ═══ SECTION 2: INTEGRATION ═══ -->
+<section id="integration">
+  <h2>§2 — CLAUDE.md Integration</h2>
+
+  <h3>2.1 File Creation</h3>
+  <table>
+    <tr>
+      <th>File</th>
+      <th>Location</th>
+      <th>Status</th>
+      <th>Purpose</th>
+    </tr>
+    <tr>
+      <td><code>CLAUDE_5320_lab_specifications_20260722.md</code></td>
+      <td><code>~/</code></td>
+      <td>✓ Created</td>
+      <td>Source spec: operator, constraints, topology, projects, backlog, environment</td>
+    </tr>
+    <tr>
+      <td><code>CLAUDE.md</code></td>
+      <td>Project root</td>
+      <td>✓ Created</td>
+      <td>Project-integrated: adds site parity, reference files, .git structure</td>
+    </tr>
+    <tr>
+      <td><code>constraints_hard_5320_lab.md</code></td>
+      <td><code>memory/</code></td>
+      <td>✓ Created</td>
+      <td>5 never-violate rules with Why/How-to-apply for each</td>
+    </tr>
+    <tr>
+      <td><code>project_5320_lab_topology.md</code></td>
+      <td><code>memory/</code></td>
+      <td>✓ Created</td>
+      <td>Wiring diagram, IPs, VLANs, I-SIDs, known issues, reference commands</td>
+    </tr>
+    <tr>
+      <td><code>MEMORY.md</code></td>
+      <td><code>memory/</code></td>
+      <td>✓ Updated</td>
+      <td>Index now categorized: 🔥 Critical, 🏗️ Architecture, 📋 Context</td>
+    </tr>
+  </table>
+
+  <h3>2.2 Project CLAUDE.md Structure</h3>
+  <p>Project CLAUDE.md adds these sections to the home spec:</p>
+  <ul>
+    <li><strong>Site Index Parity:</strong> Blocking issue, card details for May 22/11, gh-pages sync status</li>
+    <li><strong>Key Reference Files:</strong> CHANGELOG.md, BACKLOG.md, journey_to_the_digital_twin.html, docs/, .claude/settings.local.json</li>
+    <li><strong>Cross-reference header:</strong> Points to home-directory spec file (~/CLAUDE_5320_lab_specifications_20260722.md)</li>
+  </ul>
+
+</section>
+
+<!-- ═══ SECTION 3: DELTA ANALYSIS ═══ -->
+<section id="delta">
+  <h2>§3 — Delta Analysis: New CLAUDE.md vs Existing Files</h2>
+
+  <h3>3.1 Tier 1 — Critical Gaps (HIGH IMPACT)</h3>
+
+  <div class="delta-grid">
+    <div class="delta-card new">
+      <h4>Hard Constraints (5 rules)</h4>
+      <p><strong>Before:</strong> Zero documented rules</p>
+      <p><strong>After:</strong> 5 explicit never-violate constraints with incident history and application guidance</p>
+      <p><strong>Impact:</strong> Can now recommend config changes safely</p>
+    </div>
+
+    <div class="delta-card new">
+      <h4>Lab Topology (Structured)</h4>
+      <p><strong>Before:</strong> Zero detail in BACKLOG</p>
+      <p><strong>After:</strong> Exact IPs, VLANs→I-SID maps, IS-IS config, port taxonomy, reference commands</p>
+      <p><strong>Impact:</strong> Full wiring diagram for any topology work</p>
+    </div>
+
+    <div class="delta-card gap">
+      <h4>IPE lan1 IP (CRITICAL UNKNOWN)</h4>
+      <p><strong>Status:</strong> Unconfirmed — BLOCKS SW2 default route</p>
+      <p><strong>Required action:</strong> Verify before proceeding with L3 config</p>
+      <p><strong>Impact:</strong> Cannot complete SW2 safe block until this is known</p>
+    </div>
+
+    <div class="delta-card changed">
+      <h4>Backlog Reprioritization</h4>
+      <p><strong>Before:</strong> Index parity (immediate), deferred items</p>
+      <p><strong>After:</strong> 12 ranked items: #1 = Fix 17 simulator bugs (C1/C2/C3)</p>
+      <p><strong>Impact:</strong> Reframes entire work: simulator = critical path, index parity = decoupled</p>
+    </div>
+  </div>
+
+  <h3>3.2 Tier 2 — Architectural Detail (MEDIUM IMPACT)</h3>
+
+  <table>
+    <tr>
+      <th>Domain</th>
+      <th>New Detail</th>
+    </tr>
+    <tr>
+      <td><strong>WiFi Digital Twin</strong></td>
+      <td>5 archetypes (Stadium, Dense, Sparse, Retail, Latency-Critical) · 6-phase agent · ~60 Broadcom params · 4-tier V&V (config verify → IEEE model → limited calib → full archetype)</td>
+    </tr>
+    <tr>
+      <td><strong>EP1/XIQ Mappings</strong></td>
+      <td><code>radio_ng_11ax-5g</code> profile specifics (WMM/EDCA, Band Steering, Load Balancing, DCS, OFDMA, BSS Coloring, TWT, PHY) · Traceability chain · Doc sources (EP1 v25.10.0 PDF reliable)</td>
+    </tr>
+    <tr>
+      <td><strong>Simulator Physics</strong></td>
+      <td>17 total bugs; critical 3: C1 (spatial gain double-count) · C2 (4.62× unbounded, no saturation) · C3 (airtime vs goodput capacity base mismatch)</td>
+    </tr>
+  </table>
+
+  <h3>3.3 Tier 3 — Context (LOW IMPACT)</h3>
+
+  <ul>
+    <li><strong>Enterprise SSO migration:</strong> khukhan@extremenetworks.com as of 2026-07-22. Cloud sessions/scheduled tasks did NOT migrate — recreate if needed.</li>
+    <li><strong>EP1 terminology:</strong> Extreme Platform One (on-prem controller), NOT IPE-40AX (cloud). Clarification matters for API selection.</li>
+    <li><strong>Hardware:</strong> AP5020 dropped DSSS/CCK — legacy 2.4GHz scanners may need replacement for client support.</li>
+    <li><strong>Windows packet capture:</strong> No native monitor mode. Workarounds: Alfa RTL8812AU / MT7921AUN; Acrylic WiFi Home ≈ macOS Scan tab.</li>
+  </ul>
+
+  <h3>3.4 What's Missing from CLAUDE.md</h3>
+
+  <p>These items remain only in BACKLOG.md (not replicated in CLAUDE.md):</p>
+  <ul>
+    <li>Index parity card details (accent colors, links for May 22 #7c3aed and May 11 #1d4ed8)</li>
+    <li>Completed items log (May 22 EOD HTML, Sprint B scrape, CLI safety rules, May 11 EOD HTML)</li>
+    <li>Apr 22 dedup flag (session_summary_20260422.html appears twice on all 3 index pages)</li>
+  </ul>
+
+</section>
+
+<!-- ═══ SECTION 4: MEMORY SYSTEM ═══ -->
+<section id="memory">
+  <h2>§4 — Memory System Updates</h2>
+
+  <h3>4.1 New Memory Files Created</h3>
+
+  <p><strong>constraints_hard_5320_lab.md</strong> — 5 Never-Violate Rules</p>
+  <pre class="green">1. AP native VLAN separation (May 6 incident: CAPWAP broke)
+2. Optimization ≠ Calibration (semantic clarity)
+3. Simulator physics blocker (17 bugs, C1/C2/C3 critical)
+4. VOSS ACL co-location (Guest isolation on BOTH switches)
+5. Live lab uncertainty (ask before config changes)</pre>
+
+  <p><strong>project_5320_lab_topology.md</strong> — Full Wiring Diagram</p>
+  <ul>
+    <li>Network map with trunk paths</li>
+    <li>Device table: SW1, SW2, IPE-40AX-V2 with all port/VLAN/I-SID assignments</li>
+    <li>VLAN plan (rows 1, 10, 20, 30, 4047, 4048, 70/80 planned)</li>
+    <li>Known issues & workarounds</li>
+    <li>VOSS/EXOS reference commands</li>
+  </ul>
+
+  <p><strong>session_20260722_claude_integration.md</strong> — This Session's Work</p>
+  <ul>
+    <li>Status briefing summary</li>
+    <li>What was done (all 5 steps)</li>
+    <li>Files created/updated</li>
+    <li>Key findings & blocking issues</li>
+    <li>Ready-for list</li>
+  </ul>
+
+  <h3>4.2 MEMORY.md Index Reorganization</h3>
+
+  <p>Now categorized by concern:</p>
+  <pre class="amber">## Index
+
+### 🔥 Critical Constraints
+- [Hard constraints: 5320 lab](constraints_hard_5320_lab.md)
+
+### 🏗️ Architecture & Topology
+- [5320 lab topology](project_5320_lab_topology.md)
+
+### 📋 Engagement Context
+- [AP330 replacement client engagement]
+- [NPS deployment: user drives]
+- [Khursheed's background]</pre>
+
+  <p><strong>Benefit:</strong> Future sessions load critical constraints first, then topology, then context. No risk of missing hard rules.</p>
+
+</section>
+
+<!-- ═══ SECTION 5: IMPLICATIONS ═══ -->
+<section id="implications">
+  <h2>§5 — Strategic Implications</h2>
+
+  <h3>5.1 Backlog Inversion</h3>
+
+  <div class="callout-amber">
+    <p><strong>BEFORE (BACKLOG.md):</strong> Index parity sprint (immediate)</p>
+    <p><strong>AFTER (CLAUDE.md):</strong> Fix 17 simulator bugs → Execute 4-tier V&V → VOSS/Fabric Connect deep dive → SW2 safe block → (then index parity)</p>
+  </div>
+
+  <p><strong>Interpretation:</strong> Index parity is still needed and unblocked, but it's <strong>decoupled from the critical path</strong>. The simulator work must complete before any optimizer or calibration can run.</p>
+
+  <h3>5.2 IPE lan1 IP as Blocking Issue</h3>
+
+  <div class="callout-red">
+    <p><strong>Unknown:</strong> IPE-40AX-V2 lan1 IP address</p>
+    <p><strong>Impact:</strong> Cannot write SW2 default route until this is verified</p>
+    <p><strong>Status:</strong> Blocking SW2 safe block configuration</p>
+    <p><strong>Action:</strong> Verify this before next SW2 L3 work</p>
+  </div>
+
+  <h3>5.3 Hard Constraints as Guard Rails</h3>
+
+  <p>The 5 hard constraints now in memory eliminate recurring mistakes:</p>
+  <ul>
+    <li><strong>AP VLAN separation:</strong> Prevents May 6 incident from repeating</li>
+    <li><strong>Simulator physics:</strong> Blocks optimizer runs against broken models</li>
+    <li><strong>VOSS ACL rule:</strong> Ensures Guest isolation is complete, not partial</li>
+  </ul>
+
+  <p>These are load-bearing rules. Future sessions will load them first and be reminded before making risky changes.</p>
+
+</section>
+
+<!-- ═══ SECTION 6: NEXT STEPS ═══ -->
+<section id="next">
+  <h2>§6 — Next Steps</h2>
+
+  <h3>6.1 Immediate (Unblocked)</h3>
+
+  <ul>
+    <li><strong>Index parity work:</strong> Add May 22 + May 11 EOD cards to all 3 index pages. Push to gh-pages.</li>
+    <li><strong>Enumerate 17 simulator bugs:</strong> Full list with C1/C2/C3 prioritized. Scoping for fixes.</li>
+    <li><strong>Verify IPE lan1 IP:</strong> Check lab documentation or live device. Required before SW2 L3 config.</li>
+  </ul>
+
+  <h3>6.2 Blocked (Waiting For)</h3>
+
+  <ul>
+    <li><strong>SW2 safe block:</strong> Depends on simulator work + IPE IP verification</li>
+    <li><strong>VOSS/Fabric Connect deep dive:</strong> Scheduled Jul–Aug 2026</li>
+    <li><strong>Sprint C EP1 Traverser:</strong> Waiting for xcloud mount issue root-cause</li>
+  </ul>
+
+  <h3>6.3 Sessions Queued</h3>
+
+  <ul>
+    <li>Phase 1 Day 1: WiFi 802.11 Mastery curriculum (OFDM subcarrier spacing Socratic)</li>
+    <li>deep-research-engine architecture review</li>
+  </ul>
+
+</section>
+
+</main>
+
+<footer>
+  <div>End-of-day summary — July 22 2026 — Khursheed Khan</div>
+  <div><a href="https://github.com/khursheedkhanaiforgood-ai/5320-onboarding-agent" target="_blank">5320-onboarding-agent repo</a></div>
+</footer>
+
+<div id="ai-warning-banner" style="background:#b91c1c;color:#fff;text-align:center;padding:12px 16px;font-family:monospace;font-size:13px;font-weight:bold;position:fixed;bottom:0;left:0;right:0;z-index:99999;letter-spacing:0.04em;animation:warnpulse 1.2s ease-in-out infinite;width:100%;box-sizing:border-box;display:block;">
+⚠️&nbsp; CLAUDE MAKES ERRORS &nbsp;—&nbsp; VERIFY WITH SME FIRST &nbsp;—&nbsp; DO NOT USE IN PRODUCTION &nbsp;—&nbsp; THIS IS A TRAINING GUIDE &nbsp;—&nbsp; JULY 22 2026 &nbsp;⚠️
+</div>
+<style>@keyframes warnpulse{0%,100%{background:#b91c1c}50%{background:#ef4444}}</style>
+
+</body>
+</html>
