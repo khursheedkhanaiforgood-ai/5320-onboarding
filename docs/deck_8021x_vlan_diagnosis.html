@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>802.1X VLAN Assignment Failure — Pcap Forensics</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --border: #30363d;
+    --accent: #8b5cf6;
+    --accent2: #06b6d4;
+    --green: #22c55e;
+    --red: #ef4444;
+    --yellow: #f59e0b;
+    --text: #e6edf3;
+    --muted: #8b949e;
+    --code-bg: #0d1117;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+    min-height: 100vh;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    background: rgba(13,17,23,0.95);
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 0;
+    padding: 0;
+    backdrop-filter: blur(8px);
+  }
+  nav .brand {
+    padding: 14px 24px;
+    font-size: 13px; font-weight: 600; color: var(--accent);
+    letter-spacing: .05em; text-transform: uppercase; border-right: 1px solid var(--border);
+    white-space: nowrap;
+  }
+  nav a {
+    padding: 14px 18px;
+    font-size: 12px; color: var(--muted); text-decoration: none;
+    border-right: 1px solid var(--border); white-space: nowrap;
+    transition: color .15s, background .15s;
+  }
+  nav a:hover, nav a.active { color: var(--text); background: var(--surface); }
+
+  /* SLIDES */
+  .slide {
+    min-height: 100vh; padding: 100px 60px 60px;
+    max-width: 1100px; margin: 0 auto;
+    display: flex; flex-direction: column; justify-content: center;
+  }
+
+  .slide-num {
+    font-size: 11px; color: var(--accent); letter-spacing: .15em;
+    text-transform: uppercase; font-weight: 600; margin-bottom: 16px;
+  }
+  .slide h1 {
+    font-size: 42px; font-weight: 700; line-height: 1.15;
+    margin-bottom: 10px; color: var(--text);
+  }
+  .slide h2 {
+    font-size: 28px; font-weight: 600; color: var(--text); margin-bottom: 24px;
+  }
+  .subtitle {
+    font-size: 16px; color: var(--muted); margin-bottom: 48px;
+  }
+  .divider {
+    width: 48px; height: 3px; background: var(--accent); margin-bottom: 36px; border-radius: 2px;
+  }
+
+  /* CARDS */
+  .card-row { display: grid; gap: 20px; margin-bottom: 32px; }
+  .card-row.col2 { grid-template-columns: 1fr 1fr; }
+  .card-row.col3 { grid-template-columns: 1fr 1fr 1fr; }
+  .card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 24px;
+  }
+  .card.accent { border-color: var(--accent); }
+  .card.green  { border-color: var(--green); }
+  .card.red    { border-color: var(--red); }
+  .card.yellow { border-color: var(--yellow); }
+  .card h3 {
+    font-size: 13px; font-weight: 600; letter-spacing: .08em;
+    text-transform: uppercase; margin-bottom: 14px;
+  }
+  .card.accent h3 { color: var(--accent); }
+  .card.green  h3 { color: var(--green); }
+  .card.red    h3 { color: var(--red); }
+  .card.yellow h3 { color: var(--yellow); }
+  .card p { font-size: 14px; color: var(--muted); line-height: 1.65; }
+  .card ul { list-style: none; padding: 0; }
+  .card li { font-size: 14px; color: var(--muted); padding: 5px 0; border-bottom: 1px solid var(--border); line-height: 1.5; }
+  .card li:last-child { border-bottom: none; }
+  .card li strong { color: var(--text); }
+
+  /* QUOTE BLOCK */
+  .quote {
+    background: #1a1040;
+    border-left: 4px solid var(--accent);
+    border-radius: 6px;
+    padding: 20px 24px;
+    margin-bottom: 20px;
+  }
+  .quote .who {
+    font-size: 11px; font-weight: 600; letter-spacing: .12em;
+    text-transform: uppercase; color: var(--accent); margin-bottom: 10px;
+  }
+  .quote p {
+    font-size: 15px; font-style: italic; color: #c9b8f0; line-height: 1.7;
+  }
+
+  /* TABLE */
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th {
+    text-align: left; padding: 10px 14px;
+    background: #1c2230; color: var(--accent2);
+    font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase;
+    border-bottom: 1px solid var(--border);
+  }
+  td { padding: 10px 14px; border-bottom: 1px solid var(--border); color: var(--muted); vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--surface); }
+  .tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; }
+  .tag.green  { background: #14532d; color: var(--green); }
+  .tag.red    { background: #450a0a; color: var(--red); }
+  .tag.yellow { background: #451a03; color: var(--yellow); }
+  .tag.blue   { background: #0c4a6e; color: var(--accent2); }
+  .tag.purple { background: #2e1065; color: var(--accent); }
+
+  /* CODE / PCAP */
+  .pcap-block {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 24px;
+    font-family: 'SF Mono', 'Fira Mono', 'Consolas', monospace;
+  }
+  .pcap-header {
+    background: #1c2230;
+    padding: 10px 16px;
+    display: flex; align-items: center; gap: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+  .pcap-filename { font-size: 12px; font-weight: 600; color: var(--accent2); }
+  .pcap-meta { font-size: 11px; color: var(--muted); margin-left: auto; }
+  .pcap-body { padding: 16px; overflow-x: auto; }
+  .pcap-body table { font-size: 12px; }
+  .pcap-body th { background: transparent; color: var(--muted); font-size: 10px; padding: 4px 10px; }
+  .pcap-body td { padding: 4px 10px; border-bottom: 1px solid #1a1a2e; color: #a0aec0; }
+  .pcap-body tr:last-child td { border-bottom: none; }
+  .pcap-body .vlan5  { color: var(--red); font-weight: 600; }
+  .pcap-body .vlan6  { color: var(--yellow); font-weight: 600; }
+  .pcap-body .notag  { color: var(--muted); }
+  .pcap-body .offered { color: var(--green); font-weight: 600; }
+  .pcap-body .silence { color: var(--red); font-style: italic; }
+  .pcap-body .radius  { color: var(--accent); }
+
+  /* CALLOUT */
+  .callout {
+    border-radius: 8px; padding: 16px 20px; margin-bottom: 20px;
+    display: flex; gap: 14px; align-items: flex-start;
+    font-size: 14px; line-height: 1.6;
+  }
+  .callout.info  { background: #0c1a2e; border: 1px solid #1e40af; color: #93c5fd; }
+  .callout.warn  { background: #1a1000; border: 1px solid #92400e; color: var(--yellow); }
+  .callout.ok    { background: #052e16; border: 1px solid #166534; color: var(--green); }
+  .callout.fail  { background: #1a0000; border: 1px solid #7f1d1d; color: var(--red); }
+  .callout .icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+  .callout strong { color: inherit; display: block; margin-bottom: 3px; }
+
+  /* CHAIN */
+  .chain { display: flex; align-items: center; gap: 0; flex-wrap: wrap; margin-bottom: 24px; }
+  .chain-box {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 8px; padding: 14px 18px; text-align: center;
+    min-width: 140px;
+  }
+  .chain-box .top { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing:.08em; margin-bottom:4px; }
+  .chain-box .label { font-size: 13px; font-weight: 600; color: var(--text); }
+  .chain-box.ok { border-color: var(--green); }
+  .chain-box.ok .label { color: var(--green); }
+  .chain-box.fail { border-color: var(--red); }
+  .chain-box.fail .label { color: var(--red); }
+  .chain-arrow { padding: 0 10px; color: var(--muted); font-size: 18px; }
+  .chain-arrow.fail { color: var(--red); }
+
+  /* PAGE SEPARATOR */
+  .page-sep {
+    border: none; border-top: 1px solid var(--border);
+    margin: 0; padding: 0;
+  }
+
+  /* APPENDIX */
+  .appendix-label {
+    font-size: 11px; font-weight: 600; letter-spacing: .12em;
+    text-transform: uppercase; color: var(--accent2);
+    margin-bottom: 10px; display: block;
+  }
+  .annotation {
+    background: #0a1628; border: 1px solid #1e3a5f;
+    border-radius: 6px; padding: 12px 16px; margin-top: 8px;
+    font-size: 12px; color: #7dd3fc; line-height: 1.6;
+  }
+  .annotation strong { color: #38bdf8; }
+
+  /* FOOTER */
+  footer {
+    text-align: center; padding: 40px;
+    font-size: 11px; color: var(--muted); border-top: 1px solid var(--border);
+  }
+
+  @media(max-width: 768px) {
+    .slide { padding: 90px 24px 40px; }
+    .card-row.col2, .card-row.col3 { grid-template-columns: 1fr; }
+    .slide h1 { font-size: 28px; }
+    .chain { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="brand">802.1X Forensics</div>
+  <a href="#s1" class="active">Problem</a>
+  <a href="#s2">Hypothesis</a>
+  <a href="#s3">Evidence</a>
+  <a href="#appendix-a">Appendix A</a>
+  <a href="#appendix-b">Appendix B</a>
+  <a href="#appendix-c">Appendix C</a>
+</nav>
+
+<!-- ═══════════════════════════════════════════════════════ SLIDE 1 -->
+<section class="slide" id="s1">
+  <div class="slide-num">Slide 01 / 03 &nbsp;·&nbsp; Problem Statement</div>
+  <h1>802.1X VLAN Assignment<br>Silently Fails in Production</h1>
+  <div class="subtitle">
+    AP: AH-AP3000 (00:E6:0E:55:66:80) &nbsp;·&nbsp; Switch: EN_5320 (VOSS/FabricEngine) &nbsp;·&nbsp; Auth: EAP-PEAP/MSCHAPv2 via NPS &nbsp;·&nbsp; Date: 2026-08-07
+  </div>
+  <div class="divider"></div>
+
+  <div class="card-row col3">
+    <div class="card accent">
+      <h3>Expected Behaviour</h3>
+      <ul>
+        <li>User authenticates via 802.1X</li>
+        <li>NPS returns RADIUS Accept + VLAN 5 attributes</li>
+        <li>EP1 classifies user → Staff policy</li>
+        <li>AP tags eth0 uplink frames: <strong>802.1Q VLAN 5</strong></li>
+        <li>Client receives DHCP on Staff VLAN 5</li>
+      </ul>
+    </div>
+    <div class="card red">
+      <h3>Actual Behaviour</h3>
+      <ul>
+        <li>User authenticates via 802.1X ✓</li>
+        <li>RADIUS Accept arrives ✓</li>
+        <li>EP1 classification fires ✓ (sometimes)</li>
+        <li>AP tags eth0 with VLAN 5 ✓ <em>(proven by pcap)</em></li>
+        <li>Client gets <strong>no DHCP Offer</strong> — stuck</li>
+      </ul>
+    </div>
+    <div class="card yellow">
+      <h3>Observed Fallback</h3>
+      <ul>
+        <li>When EP1 classification does not fire</li>
+        <li>Frames go out <strong>untagged</strong></li>
+        <li>Client falls to native VLAN 1</li>
+        <li>DHCP succeeds on VLAN 1 (10.153.4.x)</li>
+        <li>Staff user silently lands on wrong VLAN</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="card-row col2">
+    <div class="card">
+      <h3>Topology</h3>
+      <p style="margin-bottom:14px">
+        <strong>AP (eth0)</strong> → <strong>EN_5320 port</strong> → <strong>VOSS Fabric</strong><br>
+        NPS RADIUS server: 10.152.0.11 &nbsp;|&nbsp; AP mgmt: 10.153.4.6
+      </p>
+      <div class="chain">
+        <div class="chain-box ok"><div class="top">Wireless</div><div class="label">Client ↔ AP</div></div>
+        <div class="chain-arrow">→</div>
+        <div class="chain-box ok"><div class="top">AP Uplink</div><div class="label">eth0 VLAN-tags</div></div>
+        <div class="chain-arrow fail">→✗</div>
+        <div class="chain-box fail"><div class="top">Switch Port</div><div class="label">Drops VLAN 5</div></div>
+        <div class="chain-arrow">→</div>
+        <div class="chain-box"><div class="top">Fabric</div><div class="label">Never reached</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3>Two Compounding Issues</h3>
+      <ul>
+        <li><strong>Issue A (switch)</strong> — EN_5320 AP uplink port not configured to carry VLAN 5 as tagged. Switch silently drops 802.1Q VLAN 5 frames.</li>
+        <li style="margin-top:8px"><strong>Issue B (NPS)</strong> — RADIUS attributes from NPS are malformed: wrong Tunnel-Type, multiple Tunnel-Private-Group-Id values, Filter-Id mismatch. EP1 "Radius Attribute" classification rule does not fire reliably.</li>
+        <li style="margin-top:8px"><strong>This deck</strong> — forensic proof for Issue A via 5 captured pcap files.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<hr class="page-sep">
+
+<!-- ═══════════════════════════════════════════════════════ SLIDE 2 -->
+<section class="slide" id="s2">
+  <div class="slide-num">Slide 02 / 03 &nbsp;·&nbsp; Hypothesis &amp; Test Design</div>
+  <h2>Designing a Controlled Experiment</h2>
+  <div class="divider"></div>
+
+  <div class="quote">
+    <div class="who">Khursheed Khan — verbatim hypothesis (2026-08-07)</div>
+    <p>"The likely cause of the problem is untagged VLANs on the Fabric_Switch_Port."</p>
+  </div>
+
+  <div class="quote">
+    <div class="who">Decoding the EP1 Classification Methods</div>
+    <p>"Radius → in EP1 I tag the Radius_Attribute. TVG → In EP1 I tag the third of the three attributes returning from NPS (5). Radius does not work… I know it. But TVG does."</p>
+  </div>
+
+  <div class="quote">
+    <div class="who">The Falsifiability Test — verbatim</div>
+    <p>"TVG → 5, then have the user get dhcp through VLAN1_default, then 'try to push it onto VLAN5'. So, if you see .1Q with VLAN5 uplink on eth0 from AP, then my hypothesis holds true, EP1 rightsly configures AP with policy but Fabric_Switch cannot take tagged_VLAN5 and is therefore dropping."</p>
+  </div>
+
+  <div class="card-row col2" style="margin-top:8px">
+    <div class="card">
+      <h3>EP1 Classification: Two Methods Tested</h3>
+      <ul>
+        <li>
+          <strong>RADIUS</strong> — EP1 rule matches on RADIUS Attribute directly (Filter-Id / Tunnel-* as returned by NPS).<br>
+          <span style="color:var(--red);font-size:12px">→ Does not fire. NPS attributes malformed. No VLAN tag applied.</span>
+        </li>
+        <li style="margin-top:10px">
+          <strong>TVG (Tunnel-Private-Group-Id)</strong> — EP1 rule matches on the 3rd tunnel attribute returned by NPS: Tunnel-Private-Group-Id = <code>5</code>.<br>
+          <span style="color:var(--green);font-size:12px">→ FIRES correctly. AP tags eth0 with 802.1Q VLAN per policy.</span>
+        </li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>Test Protocol</h3>
+      <ul>
+        <li><strong>Step 1</strong> — Connect client with TVG5 rule active; let EP1 assign VLAN policy</li>
+        <li><strong>Step 2</strong> — Capture AP eth0 uplink simultaneously</li>
+        <li><strong>Step 3</strong> — Observe whether 802.1Q VLAN 5 tag appears on wire</li>
+        <li><strong>Step 4</strong> — If tagged frames present but DHCP fails → switch drops them</li>
+        <li><strong>Control</strong> — Same test without TVG: frames untagged, DHCP succeeds on VLAN 1</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="card-row col3" style="margin-top:4px">
+    <div class="card">
+      <h3>Prediction: IF Hypothesis True</h3>
+      <p>TVG5 fires → AP tags eth0 with VLAN 5 → 802.1Q frames appear on wire → DHCP Discovers sent tagged → <strong>zero DHCP Offers return</strong> → switch drops.</p>
+    </div>
+    <div class="card green">
+      <h3>Result After Test</h3>
+      <p>VLAN5_No_DHCP pcap: <strong>169 frames tagged VLAN 5</strong> on eth0. 22 DHCP requests all tagged VLAN 5. <strong>Zero DHCP Offers returned.</strong> Prediction confirmed.</p>
+    </div>
+    <div class="card">
+      <h3>Control Result</h3>
+      <p>VLAN1 pcap: <strong>zero tagged frames.</strong> DHCP Offer received. Client gets 10.153.4.11. Proves AP uplink itself is healthy — problem is VLAN-specific.</p>
+    </div>
+  </div>
+</section>
+
+<hr class="page-sep">
+
+<!-- ═══════════════════════════════════════════════════════ SLIDE 3 -->
+<section class="slide" id="s3">
+  <div class="slide-num">Slide 03 / 03 &nbsp;·&nbsp; Evidence</div>
+  <h2>Five Captures — One Verdict</h2>
+  <div class="subtitle">All from AP eth0 (00:E6:0E:55:66:80) · 2026-08-07 18:31–18:58 UTC</div>
+  <div class="divider"></div>
+
+  <table style="margin-bottom:32px">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Filename (pcap)</th>
+        <th>EP1 Method</th>
+        <th>Frames</th>
+        <th>Tagged</th>
+        <th>VLAN on Wire</th>
+        <th>DHCP Offers</th>
+        <th>Verdict</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>1</td>
+        <td><code>eth0_VLAN5_No_DHCP</code></td>
+        <td>TVG5</td>
+        <td>841</td>
+        <td>169</td>
+        <td><span class="tag red">VLAN 5</span></td>
+        <td><span class="tag red">0 Offers</span></td>
+        <td><span class="tag red">Switch drops</span></td>
+      </tr>
+      <tr>
+        <td>2</td>
+        <td><code>eth0_VLAN1</code></td>
+        <td>None (baseline)</td>
+        <td>5,227</td>
+        <td>0</td>
+        <td><span class="tag blue">Untagged</span></td>
+        <td><span class="tag green">Success</span></td>
+        <td><span class="tag green">VLAN 1 works</span></td>
+      </tr>
+      <tr>
+        <td>3</td>
+        <td><code>eth0_Radius5_VLAN6</code></td>
+        <td>Radius Attribute</td>
+        <td>41,303</td>
+        <td>0</td>
+        <td><span class="tag blue">Untagged</span></td>
+        <td><span class="tag green">Success (VLAN 1)</span></td>
+        <td><span class="tag yellow">Rule never fired</span></td>
+      </tr>
+      <tr>
+        <td>4</td>
+        <td><code>eth0_TVG5_VLAN6</code></td>
+        <td>TVG5 → VLAN 6</td>
+        <td>735</td>
+        <td>114</td>
+        <td><span class="tag yellow">VLAN 6</span></td>
+        <td><span class="tag red">0 Offers</span></td>
+        <td><span class="tag red">Switch drops</span></td>
+      </tr>
+      <tr>
+        <td>5</td>
+        <td><code>eth0_TVG5_VLAN1-Staff</code></td>
+        <td>TVG5 (Staff profile)</td>
+        <td>38,439</td>
+        <td>0</td>
+        <td><span class="tag blue">Untagged</span></td>
+        <td><span class="tag green">Success (VLAN 1)</span></td>
+        <td><span class="tag yellow">Tag push failed</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="callout fail">
+    <div class="icon">⛔</div>
+    <div>
+      <strong>Root Cause Confirmed</strong>
+      Files 1 &amp; 4 are the smoking guns. TVG fires, EP1 correctly instructs AP, AP tags eth0 with 802.1Q VLAN 5 (or 6). Switch receives tagged frames — no DHCP Offer ever returns. EN_5320 AP uplink port does not have VLAN 5 or 6 in its trunk allowed list and silently discards all tagged frames for those VLANs.
+    </div>
+  </div>
+
+  <div class="callout ok">
+    <div class="icon">✅</div>
+    <div>
+      <strong>Fix Required — Single Action on EN_5320</strong>
+      Add VLAN 5 (Staff) as a tagged member on the AP uplink port. The entire EP1 → AP → RADIUS chain is working correctly. The only break is at the VOSS switch port configuration.
+    </div>
+  </div>
+
+  <div class="callout warn">
+    <div class="icon">⚠️</div>
+    <div>
+      <strong>Secondary Fix — NPS RADIUS Attributes</strong>
+      The "Radius Attribute" EP1 method (File 3) never fires. NPS is sending wrong Tunnel-Type (GRE instead of VLAN=13), wrong Tunnel-Medium-Type (IPv4 instead of 802=6), and multiple conflicting Tunnel-Private-Group-Id values. Fix NPS network policy attributes before retiring the TVG workaround.
+    </div>
+  </div>
+</section>
+
+<hr class="page-sep">
+
+<!-- ═══════════════════════════════════════════════════════ APPENDIX A -->
+<section class="slide" id="appendix-a">
+  <div class="slide-num">Appendix A &nbsp;·&nbsp; Smoking Gun — Tagged VLAN 5, Zero DHCP Offers</div>
+  <h2>File: <code>eth0_VLAN5_No_DHCP.pcap</code></h2>
+  <div class="subtitle">2026-08-07-183112UTC · 841 frames · 88.5s · TVG5 rule active</div>
+  <div class="divider"></div>
+
+  <div class="pcap-block">
+    <div class="pcap-header">
+      <span class="pcap-filename">2026-08-07-183112UTC-00E60E556680-eth0_VLAN5_No_DHCP.pcap</span>
+      <span class="pcap-meta">841 frames &nbsp;|&nbsp; 169 tagged VLAN 5 &nbsp;|&nbsp; 0 DHCP Offers</span>
+    </div>
+    <div class="pcap-body">
+      <table>
+        <thead>
+          <tr><th>Frame</th><th>VLAN Tag</th><th>Src IP</th><th>Dst IP</th><th>Protocol</th><th>Info</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>7</td>   <td class="notag">untagged</td><td>10.153.4.6</td><td>10.152.0.11</td><td class="radius">RADIUS</td><td>Access-Request (EAP-PEAP)</td></tr>
+          <tr><td>9</td>   <td class="notag">untagged</td><td>10.152.0.11</td><td>10.153.4.6</td><td class="radius">RADIUS</td><td>Access-Challenge</td></tr>
+          <tr><td>13</td>  <td class="notag">untagged</td><td>10.152.0.11</td><td>10.153.4.6</td><td class="radius">RADIUS</td><td>Access-Challenge</td></tr>
+          <tr><td>…</td>   <td class="notag">untagged</td><td>—</td><td>—</td><td class="radius">RADIUS</td><td>EAP handshake continues…</td></tr>
+          <tr style="background:#1a0a0a"><td><strong>76</strong></td><td class="vlan5">VLAN 5 ◄</td><td>0.0.0.0</td><td>255.255.255.255</td><td>DHCP</td><td class="silence">Discover — no Offer ever returned</td></tr>
+          <tr style="background:#1a0a0a"><td><strong>96</strong></td><td class="vlan5">VLAN 5 ◄</td><td>0.0.0.0</td><td>255.255.255.255</td><td>DHCP</td><td class="silence">Discover — no Offer ever returned</td></tr>
+          <tr style="background:#1a0a0a"><td><strong>121</strong></td><td class="vlan5">VLAN 5 ◄</td><td>0.0.0.0</td><td>255.255.255.255</td><td>DHCP</td><td class="silence">Discover — no Offer ever returned</td></tr>
+          <tr style="background:#1a0a0a"><td><strong>173</strong></td><td class="vlan5">VLAN 5 ◄</td><td>0.0.0.0</td><td>255.255.255.255</td><td>DHCP</td><td class="silence">Discover — no Offer ever returned</td></tr>
+          <tr style="background:#1a0a0a"><td><strong>282</strong></td><td class="vlan5">VLAN 5 ◄</td><td>0.0.0.0</td><td>255.255.255.255</td><td>DHCP</td><td class="silence">Discover — no Offer ever returned</td></tr>
+          <tr style="background:#1a0a0a"><td>…</td><td class="vlan5">VLAN 5 ◄</td><td>0.0.0.0</td><td>255.255.255.255</td><td>DHCP</td><td class="silence">22 total DHCP requests · 0 Offers · client never gets IP</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="annotation">
+    <strong>What a student should notice:</strong><br>
+    (1) RADIUS handshake (frames 7–~50) is untagged — AP management traffic always rides native VLAN. That is correct and expected.<br>
+    (2) The moment DHCP begins (frame 76+), frames are tagged <strong>VLAN 5</strong>. This proves EP1 successfully pushed the VLAN 5 policy to the AP after authentication completed.<br>
+    (3) Every DHCP frame has <code>yiaddr = 0.0.0.0</code> — meaning only client-originated Discovers/Requests are present. There is <em>not a single DHCP Offer</em> in this entire 88-second capture.<br>
+    (4) The silence after each Discover is the switch dropping the tagged frame. The switch has no VLAN 5 in its trunk allowed list for this port, so it discards the frame before it can reach the DHCP server.<br>
+    (5) In Wireshark: filter with <code>vlan.id == 5</code> to isolate these frames. Apply <code>dhcp</code> on top to see the unanswered Discovers.
+  </div>
+</section>
+
+<hr class="page-sep">
+
+<!-- ═══════════════════════════════════════════════════════ APPENDIX B -->
+<section class="slide" id="appendix-b">
+  <div class="slide-num">Appendix B &nbsp;·&nbsp; Control — Untagged, DHCP Succeeds</div>
+  <h2>File: <code>eth0_VLAN1.pcap</code> vs <code>eth0_TVG5_VLAN6.pcap</code></h2>
+  <div class="subtitle">Control pair: untagged works, tagged fails — same AP, same 27-minute window</div>
+  <div class="divider"></div>
+
+  <span class="appendix-label">Control: VLAN1 — untagged, both clients get IPs</span>
+  <div class="pcap-block">
+    <div class="pcap-header">
+      <span class="pcap-filename">2026-08-07-183658UTC-00E60E556680-eth0_VLAN1.pcap</span>
+      <span class="pcap-meta">5,227 frames &nbsp;|&nbsp; 0 tagged frames &nbsp;|&nbsp; DHCP success</span>
+    </div>
+    <div class="pcap-body">
+      <table>
+        <thead>
+          <tr><th>Frame</th><th>VLAN Tag</th><th>Src IP</th><th>Dst IP</th><th>Protocol</th><th>Info</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>1</td><td class="notag">untagged</td><td>10.153.4.6</td><td>10.152.0.11</td><td class="radius">RADIUS</td><td>Access-Request</td></tr>
+          <tr><td>2</td><td class="notag">untagged</td><td>10.152.0.11</td><td>10.153.4.6</td><td class="radius">RADIUS</td><td>Access-Challenge</td></tr>
+          <tr><td>181</td><td class="notag">untagged</td><td>10.153.4.6</td><td>10.152.0.11</td><td class="radius">RADIUS</td><td>Code-4 (→ Accept sequence)</td></tr>
+          <tr><td>183</td><td class="notag">untagged</td><td>10.152.0.11</td><td>10.153.4.6</td><td class="radius">RADIUS</td><td>Code-5 (Accept)</td></tr>
+          <tr><td>206</td><td class="notag">untagged</td><td>0.0.0.0</td><td>255.255.255.255</td><td>DHCP</td><td>Discover (iPhone)</td></tr>
+          <tr style="background:#052e16"><td><strong>383</strong></td><td class="notag">untagged</td><td class="offered">10.153.4.6</td><td class="offered">10.153.4.11</td><td>DHCP</td><td class="offered">Offer ✓ → iPhone gets 10.153.4.11</td></tr>
+          <tr><td>858</td><td class="notag">untagged</td><td>0.0.0.0</td><td>255.255.255.255</td><td>DHCP</td><td>Discover (MacBook)</td></tr>
+          <tr style="background:#052e16"><td><strong>1128</strong></td><td class="notag">untagged</td><td class="offered">10.153.4.6</td><td class="offered">10.153.4.7</td><td>DHCP</td><td class="offered">Offer ✓ → MacBook gets 10.153.4.7</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="annotation">
+    <strong>Control read:</strong> No 802.1Q tag on any frame. AP management and client traffic all ride native VLAN 1 untagged. DHCP Offers return at frames 383 and 1128 — both clients get IPs. The AP uplink, cable, and switch port are all healthy. The failure is <em>exclusively</em> triggered by the VLAN tag.
+  </div>
+
+  <span class="appendix-label" style="margin-top:28px;display:block">VLAN 6 repeat: same failure as VLAN 5</span>
+  <div class="pcap-block">
+    <div class="pcap-header">
+      <span class="pcap-filename">2026-08-07-185347UTC-00E60E556680-eth0_TVG5_VLAN6.pcap</span>
+      <span class="pcap-meta">735 frames &nbsp;|&nbsp; 114 tagged VLAN 6 &nbsp;|&nbsp; 0 DHCP Offers</span>
+    </div>
+    <div class="pcap-body">
+      <table>
+        <thead>
+          <tr><th>Frame</th><th>VLAN Tag</th><th>Src IP</th><th>Dst IP</th><th>Protocol</th><th>Info</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>31</td><td class="notag">untagged</td><td>10.153.4.6</td><td>10.152.0.11</td><td class="radius">RADIUS</td><td>Access-Request</td></tr>
+          <tr><td>32–64</td><td class="notag">untagged</td><td>—</td><td>—</td><td class="radius">RADIUS</td><td>EAP-PEAP challenge/response sequence</td></tr>
+          <tr style="background:#1a0a0a"><td><strong>91</strong></td><td class="vlan6">VLAN 6 ◄</td><td>0.0.0.0</td><td>255.255.255.255</td><td>DHCP</td><td class="silence">Discover — no Offer (VLAN 6 dropped by switch)</td></tr>
+          <tr style="background:#1a0a0a"><td><strong>103</strong></td><td class="vlan6">VLAN 6 ◄</td><td>0.0.0.0</td><td>255.255.255.255</td><td>DHCP</td><td class="silence">Discover — no Offer</td></tr>
+          <tr style="background:#1a0a0a"><td>…</td><td class="vlan6">VLAN 6 ◄</td><td>—</td><td>—</td><td>DHCP</td><td class="silence">21 total DHCP requests · 0 Offers</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="annotation">
+    <strong>Why this matters:</strong> VLAN 6 was not in the original lab design — this test used a different EP1 policy mapping TVG attribute "5" to VLAN 6. The result is identical to VLAN 5: tagged frames, zero responses. This proves the switch port rejects <em>any</em> tagged VLAN, not just VLAN 5 specifically. The trunk allowed list is either empty or only contains the native (untagged) VLAN.
+  </div>
+</section>
+
+<hr class="page-sep">
+
+<!-- ═══════════════════════════════════════════════════════ APPENDIX C -->
+<section class="slide" id="appendix-c">
+  <div class="slide-num">Appendix C &nbsp;·&nbsp; Student Reference — How to Read This in Wireshark</div>
+  <h2>Diagnostic Framework</h2>
+  <div class="divider"></div>
+
+  <div class="card-row col2">
+    <div class="card">
+      <h3>Wireshark Filters — Cheat Sheet</h3>
+      <ul>
+        <li><code>vlan</code> — show all 802.1Q tagged frames</li>
+        <li><code>vlan.id == 5</code> — isolate VLAN 5 traffic</li>
+        <li><code>dhcp</code> — show all DHCP messages</li>
+        <li><code>dhcp &amp;&amp; vlan</code> — DHCP on a tagged VLAN</li>
+        <li><code>bootp.option.dhcp == 2</code> — DHCP Offers only</li>
+        <li><code>bootp.option.dhcp == 1</code> — DHCP Discovers only</li>
+        <li><code>radius</code> — RADIUS authentication traffic</li>
+        <li><code>!vlan &amp;&amp; dhcp</code> — DHCP on untagged/native</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>What Each File Proves</h3>
+      <ul>
+        <li><strong>VLAN5_No_DHCP</strong> — EP1→AP signaling works; switch is the break</li>
+        <li><strong>VLAN1</strong> — AP uplink, cable, and DHCP server all healthy</li>
+        <li><strong>Radius5_VLAN6</strong> — "Radius Attribute" EP1 method is broken</li>
+        <li><strong>TVG5_VLAN6</strong> — Switch drops ALL tagged VLANs, not just VLAN 5</li>
+        <li><strong>TVG5_VLAN1-Staff</strong> — Staff identity confirmed; VLAN enforcement fails</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="card-row col3">
+    <div class="card red">
+      <h3>Pattern: Switch Drops</h3>
+      <p>Tagged DHCP Discovers present. yiaddr = 0.0.0.0 on every frame. Zero Offers in entire capture. Client retries indefinitely.</p>
+      <p style="margin-top:8px;font-size:12px"><em>Files 1, 4</em></p>
+    </div>
+    <div class="card green">
+      <h3>Pattern: Working</h3>
+      <p>Zero tagged frames. DHCP Discover → Offer sequence visible. yiaddr returns non-zero IP. Client associated and routed.</p>
+      <p style="margin-top:8px;font-size:12px"><em>Files 2, 3, 5</em></p>
+    </div>
+    <div class="card yellow">
+      <h3>Pattern: Rule Not Firing</h3>
+      <p>RADIUS Accept visible. Zero tagged frames post-auth. Client falls to native VLAN 1. Staff user on wrong VLAN — no error shown.</p>
+      <p style="margin-top:8px;font-size:12px"><em>Files 3, 5</em></p>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:4px">
+    <h3>The Decision Tree (for any 802.1X VLAN failure)</h3>
+    <ol style="padding-left:20px;line-height:2.2;font-size:14px;color:var(--muted)">
+      <li>Open eth0 pcap. Does <code>vlan</code> filter return any frames post-auth? <br><strong>No →</strong> EP1/AP never received or acted on VLAN attribute. Check EP1 classification rule + NPS attributes. <br><strong>Yes →</strong> proceed.</li>
+      <li>Run <code>dhcp &amp;&amp; vlan</code>. Are there Discovers? <br><strong>Yes, but no Offers →</strong> AP is tagging correctly. <strong>Switch port is the problem.</strong> Check trunk allowed VLANs on AP uplink port. <br><strong>No DHCP at all →</strong> client never got past auth. Check EAP sequence.</li>
+      <li>Run <code>bootp.option.dhcp == 2</code> (Offers). Is yiaddr the expected VLAN pool? <br><strong>Wrong subnet →</strong> DHCP server wrong, or client landed on wrong VLAN despite tagging. <br><strong>Right subnet →</strong> success — verify end-to-end.</li>
+    </ol>
+  </div>
+
+  <div class="callout info" style="margin-top:24px">
+    <div class="icon">📌</div>
+    <div>
+      <strong>Key Lesson</strong>
+      Wireshark on the AP <em>uplink</em> (eth0) is the most powerful single diagnostic tool for 802.1X VLAN assignment failures. It sits exactly at the boundary between the wireless/EP1 domain (what the AP was told to do) and the wired/switch domain (whether the switch accepted it). A tagged Discover with no Offer is unambiguous: the AP did its job; the switch did not.
+    </div>
+  </div>
+</section>
+
+<footer>
+  © 2026 Khursheed Khan · Extreme Networks Lab · 802.1X VLAN Forensics · AP: AH-AP3000 (00:E6:0E:55:66:80) · All pcap files captured 2026-08-07
+</footer>
+
+<script>
+  // Highlight nav on scroll
+  const sections = document.querySelectorAll('section[id], div[id^="appendix"]');
+  const navLinks = document.querySelectorAll('nav a');
+  window.addEventListener('scroll', () => {
+    let cur = '';
+    sections.forEach(s => {
+      if (window.scrollY >= s.offsetTop - 80) cur = s.id;
+    });
+    navLinks.forEach(a => {
+      a.classList.toggle('active', a.getAttribute('href') === '#' + cur);
+    });
+  });
+</script>
+</body>
+</html>
