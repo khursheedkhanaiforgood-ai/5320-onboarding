@@ -1,0 +1,74 @@
+# EXOS_PPSK Base Configuration
+# Device: EN_5320 (EXOS_PPSK)
+# Lab: khukhan+lab VIQ
+# Date: 2026-08-13
+#
+# PRODUCTION NOTE: Students VLAN → /21 or /20 for 200-1000 students (3 devices/student, 24h leases)
+#
+# WARNING: Run enable ipforwarding + enable dhcp MANUALLY at console ONLY
+#          NEVER push these via XIQ Supplemental CLI — hangs XIQ at 15%
+# ============================================================
+
+# --- VLANs ---
+create vlan Staff tag 10
+create vlan Students tag 20
+create vlan Devices tag 30
+create vlan Guests tag 100
+
+# --- Gateway IPs ---
+configure vlan Default ipaddress 192.168.1.1/24
+configure vlan Staff ipaddress 10.10.10.1/24
+configure vlan Students ipaddress 10.20.20.1/24
+configure vlan Devices ipaddress 10.30.30.1/24
+configure vlan Guests ipaddress 10.100.100.1/24
+
+# --- AP_PPSK on port 3 (tagged for all data VLANs) ---
+configure vlan Staff add ports 3 tagged
+configure vlan Students add ports 3 tagged
+configure vlan Devices add ports 3 tagged
+configure vlan Guests add ports 3 tagged
+
+# --- IP Forwarding (MANUAL ONLY — never via Supplemental CLI) ---
+enable ipforwarding vlan Staff
+enable ipforwarding vlan Students
+enable ipforwarding vlan Devices
+enable ipforwarding vlan Guests
+
+# --- DHCP Server Ranges (per-VLAN syntax, spaces around hyphen required) ---
+configure vlan Staff dhcp-address-range 10.10.10.100 - 10.10.10.200
+configure vlan Staff dhcp-options default-gateway 10.10.10.1
+configure vlan Staff dhcp-options dns-server primary 8.8.8.8
+configure vlan Staff dhcp-options dns-server secondary 8.8.4.4
+enable dhcp vlan Staff
+
+configure vlan Students dhcp-address-range 10.20.20.100 - 10.20.20.200
+configure vlan Students dhcp-options default-gateway 10.20.20.1
+configure vlan Students dhcp-options dns-server primary 8.8.8.8
+configure vlan Students dhcp-options dns-server secondary 8.8.4.4
+enable dhcp vlan Students
+
+configure vlan Devices dhcp-address-range 10.30.30.100 - 10.30.30.200
+configure vlan Devices dhcp-options default-gateway 10.30.30.1
+configure vlan Devices dhcp-options dns-server primary 8.8.8.8
+configure vlan Devices dhcp-options dns-server secondary 8.8.4.4
+enable dhcp vlan Devices
+
+configure vlan Guests dhcp-address-range 10.100.100.100 - 10.100.100.200
+configure vlan Guests dhcp-options default-gateway 10.100.100.1
+configure vlan Guests dhcp-options dns-server primary 8.8.8.8
+configure vlan Guests dhcp-options dns-server secondary 8.8.4.4
+enable dhcp vlan Guests
+
+# --- Save ---
+save configuration
+
+# ============================================================
+# VERIFICATION COMMANDS (run after config applied)
+# ============================================================
+# show vlan Staff
+# show vlan Students
+# show vlan Devices
+# show vlan Guests
+# show dhcp-server
+# show ipconfig
+# show fdb

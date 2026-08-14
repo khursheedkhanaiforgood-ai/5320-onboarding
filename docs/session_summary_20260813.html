@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Session Summary — August 13, 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #fff; color: #111; font-family: 'Libre Baskerville', Georgia, serif; font-size: 17px; line-height: 1.75; }
+  nav#toc { position: sticky; top: 0; z-index: 100; background: #fff; border-bottom: 2px solid #326891; padding: 10px 40px; display: flex; gap: 24px; flex-wrap: wrap; font-family: 'Source Sans 3', sans-serif; font-size: 13px; font-weight: 600; }
+  nav#toc a { color: #326891; text-decoration: none; white-space: nowrap; }
+  nav#toc a:hover { text-decoration: underline; }
+  .wrapper { max-width: 860px; margin: 0 auto; padding: 40px 24px 80px; }
+  .top-rule { border-top: 6px solid #111; padding-top: 18px; margin-bottom: 4px; }
+  .kicker { font-family: 'Source Sans 3', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: #326891; margin-bottom: 10px; }
+  h1 { font-size: 2.2rem; font-weight: 700; line-height: 1.2; margin-bottom: 12px; }
+  .subtitle { font-style: italic; font-size: 1.1rem; color: #444; margin-bottom: 14px; border-bottom: 1px solid #ddd; padding-bottom: 14px; }
+  .byline { font-family: 'Source Sans 3', sans-serif; font-size: 13px; color: #666; margin-bottom: 32px; }
+  .byline span { font-weight: 700; color: #111; }
+  h2 { font-size: 1.35rem; font-weight: 700; margin: 40px 0 12px; border-bottom: 2px solid #326891; padding-bottom: 6px; color: #111; }
+  h3 { font-size: 1.1rem; font-weight: 700; margin: 28px 0 8px; color: #222; }
+  p { margin-bottom: 16px; }
+  ul, ol { margin: 0 0 16px 24px; }
+  li { margin-bottom: 6px; }
+  pre, code { font-family: 'Courier New', monospace; font-size: 13px; }
+  pre { background: #f4f6f9; border-left: 4px solid #326891; padding: 16px 18px; margin: 16px 0; overflow-x: auto; border-radius: 2px; line-height: 1.5; }
+  code { background: #f0f3f7; padding: 1px 5px; border-radius: 2px; font-size: 13px; }
+  .box { border-left: 4px solid #326891; background: #eef4fb; padding: 14px 18px; margin: 20px 0; border-radius: 2px; font-size: 15px; }
+  .box.ok { border-color: #2e7d32; background: #f1f8f1; }
+  .box.warn { border-color: #e65100; background: #fff8f2; }
+  .box.blocked { border-color: #c62828; background: #fff5f5; }
+  .box strong { display: block; margin-bottom: 4px; font-family: 'Source Sans 3', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; }
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 16px; margin: 24px 0; }
+  .stat { border: 1px solid #ddd; border-top: 3px solid #326891; padding: 14px 16px; text-align: center; }
+  .stat .num { font-size: 2rem; font-weight: 700; color: #326891; font-family: 'Source Sans 3', sans-serif; }
+  .stat .lbl { font-family: 'Source Sans 3', sans-serif; font-size: 12px; color: #666; margin-top: 2px; }
+  table { width: 100%; border-collapse: collapse; margin: 16px 0 24px; font-size: 14px; font-family: 'Source Sans 3', sans-serif; }
+  th { background: #326891; color: #fff; padding: 9px 12px; text-align: left; font-weight: 600; }
+  td { padding: 8px 12px; border-bottom: 1px solid #e8e8e8; vertical-align: top; }
+  tr:nth-child(even) td { background: #f9f9f9; }
+  .copyright { font-family: 'Source Sans 3', sans-serif; font-size: 12px; color: #999; margin-top: 60px; border-top: 1px solid #ddd; padding-top: 16px; }
+</style>
+</head>
+<body>
+
+<nav id="toc">
+  <a href="#overview">Overview</a>
+  <a href="#naming">Naming</a>
+  <a href="#vlan">VLAN Design</a>
+  <a href="#reset">Factory Reset</a>
+  <a href="#exos-config">EXOS Config</a>
+  <a href="#dhcp-debug">DHCP Debug</a>
+  <a href="#modem">Modem Issue</a>
+  <a href="#idm">IDM Green</a>
+  <a href="#architecture">Architecture</a>
+  <a href="#ppsk">PPSK Scenario 1</a>
+  <a href="#pending">Pending</a>
+</nav>
+
+<div class="wrapper">
+
+  <div class="top-rule"></div>
+  <div class="kicker">5320 PPSK Lab &nbsp;·&nbsp; August 13, 2026</div>
+  <h1>PPSK Lab Infrastructure Complete — Cloud PPSK Scenario 1 Verified</h1>
+  <p class="subtitle">Factory reset both devices, provisioned EXOS_PPSK from scratch, debugged DHCP syntax and modem routing, confirmed IDM green on TCP 2083, and successfully tested Cloud-based PPSK end to end.</p>
+  <p class="byline">By <span>Khursheed Khan</span> &nbsp;·&nbsp; khukhan+lab VIQ &nbsp;·&nbsp; Claude Sonnet 4.6</p>
+
+  <div class="stats">
+    <div class="stat"><div class="num">2</div><div class="lbl">Devices Reset</div></div>
+    <div class="stat"><div class="num">4</div><div class="lbl">VLANs Provisioned</div></div>
+    <div class="stat"><div class="num">3</div><div class="lbl">DHCP Syntax Fixes</div></div>
+    <div class="stat"><div class="num">1</div><div class="lbl">Modem Route Fixed</div></div>
+    <div class="stat"><div class="num">✓</div><div class="lbl">IDM Green</div></div>
+    <div class="stat"><div class="num">1/6</div><div class="lbl">Scenarios Done</div></div>
+  </div>
+
+  <!-- SECTION 1 -->
+  <h2 id="overview">Session Overview</h2>
+  <p>Full lab build from scratch. Starting point: two factory-default devices, no config, no VIQ registration. Ending point: EXOS_PPSK fully provisioned with 4 VLANs and DHCP, AP_PPSK onboarded with IDM green, internet confirmed on all client VLANs, and Cloud-based PPSK Scenario 1 tested and verified.</p>
+
+  <!-- SECTION 2 -->
+  <h2 id="naming">Device Naming — Locked</h2>
+  <table>
+    <tr><th>Name</th><th>Device</th><th>Role</th><th>VIQ</th></tr>
+    <tr><td>AP_PPSK</td><td>AP3000 (IQ Engine)</td><td>Single AP for all 6 PPSK scenarios</td><td>khukhan+lab</td></tr>
+    <tr><td>EXOS_PPSK</td><td>EN_5320-16P (SwitchEngine)</td><td>L3 router, DHCP server, uplink to modem</td><td>khukhan+lab</td></tr>
+  </table>
+
+  <p>The second AP (on IQ_Controller/SiteEngine/SDWAN path in RDU) was left completely untouched — too many moving parts to untangle safely for this lab.</p>
+
+  <!-- SECTION 3 -->
+  <h2 id="vlan">VLAN Design — Final</h2>
+  <table>
+    <tr><th>VLAN</th><th>Name</th><th>Subnet</th><th>Gateway</th><th>DHCP Range</th></tr>
+    <tr><td>1</td><td>Default (Mgmt)</td><td>192.168.0.x/24</td><td>192.168.0.1 (modem)</td><td>From modem</td></tr>
+    <tr><td>10</td><td>Staff</td><td>10.10.10.0/24</td><td>10.10.10.1</td><td>.100–.200</td></tr>
+    <tr><td>20</td><td>Students</td><td>10.20.20.0/24</td><td>10.20.20.1</td><td>.100–.200</td></tr>
+    <tr><td>30</td><td>Devices</td><td>10.30.30.0/24</td><td>10.30.30.1</td><td>.100–.200</td></tr>
+    <tr><td>100</td><td>Guests</td><td>10.100.100.0/24</td><td>10.100.100.1</td><td>.100–.200</td></tr>
+  </table>
+
+  <div class="box">
+    <strong>Production Note</strong>
+    Students VLAN → /21 or /20 for 200–1000 students (plan 3 devices/student, 24h DHCP leases). DHCP range .100–.200 = 101 addresses, sufficient for lab. Static space .1–.99 reserved per VLAN for gateways, APs, printers.
+  </div>
+
+  <!-- SECTION 4 -->
+  <h2 id="reset">Factory Reset Sequence</h2>
+
+  <div class="box blocked">
+    <strong>Do This First — Always</strong>
+    Delete both devices from VIQ in EP1 before any physical reset. If serial numbers remain registered, devices auto-reconnect to old VIQ after reset.
+  </div>
+
+  <h3>AP_PPSK Reset</h3>
+  <pre># Console credentials after factory reset:
+# Username: admin
+# Password: aerohive    ← NOT Extreme@123
+
+# From console (preferred over pin):
+reset config
+
+# Clear SSH host key after reset:
+ssh-keygen -R &lt;ap-ip&gt;</pre>
+
+  <h3>EXOS_PPSK Reset</h3>
+  <pre># Must have console open before running — network lost immediately
+unconfigure switch all
+# Confirm: y
+# Default login after reboot: admin / &lt;blank password&gt;</pre>
+
+  <div class="box warn">
+    <strong>EXOS vs VOSS — Never Swap</strong>
+    EXOS = <code>unconfigure switch all</code> &nbsp;|&nbsp; VOSS = <code>delete /intflash/config.cfg</code>
+  </div>
+
+  <!-- SECTION 5 -->
+  <h2 id="exos-config">EXOS Base Config — What EP1 Pushed vs Manual</h2>
+
+  <h3>Pushed via EP1 (Network Policy)</h3>
+  <pre>create vlan Staff tag 10
+create vlan Students tag 20
+create vlan Devices tag 30
+create vlan Guests tag 100
+configure vlan Default ipaddress 192.168.0.28/24   # kept as-is from modem DHCP
+configure vlan Staff ipaddress 10.10.10.1/24
+configure vlan Students ipaddress 10.20.20.1/24
+configure vlan Devices ipaddress 10.30.30.1/24
+configure vlan Guests ipaddress 10.100.100.1/24
+configure vlan Staff add ports 2-3 tagged           # EP1 added port 2 — cleaned up
+configure vlan Students add ports 2-3 tagged
+configure vlan Devices add ports 2-3 tagged
+configure vlan Guests add ports 2-3 tagged
+configure trusted-ports 1-3 trust-for dhcp-server
+# IP forwarding also enabled by EP1 on all 4 data VLANs</pre>
+
+  <div class="box">
+    <strong>Port 1 Cleanup</strong>
+    EP1 initially tagged data VLANs on ports 1-3. Port 1 is the uplink to modem — data VLANs on port 1 are unnecessary (modem drops tagged frames). Removed port 1 from all data VLANs via EP1 port configuration. Final: data VLANs on ports 2-3 only.
+  </div>
+
+  <div class="box warn">
+    <strong>VLAN_0040 and VLAN_0050</strong>
+    Two unexpected VLANs appeared after EP1 push — both had only port 1 tagged (old policy remnant). Deleted manually: <code>delete vlan VLAN_0040</code> / <code>delete vlan VLAN_0050</code>.
+  </div>
+
+  <h3>DHCP — Configured via Console (CLI Only)</h3>
+  <p>Supplemental CLI was not accessible in EP1 (global toggle not findable under VIQ Management — likely account permission or UI version). All DHCP config applied directly at EXOS console.</p>
+
+  <!-- SECTION 6 -->
+  <h2 id="dhcp-debug">DHCP Syntax Debug — Three Wrong Turns</h2>
+
+  <div class="box blocked">
+    <strong>Wrong Syntax #1 — Named Range Objects (Invalid)</strong>
+    <code>create dhcp-address-range Staff-Range ipaddress 10.10.10.100-10.10.10.200</code><br>
+    EXOS does not use named DHCP range objects. This command does not exist in SwitchEngine 33.x.
+  </div>
+
+  <div class="box blocked">
+    <strong>Wrong Syntax #2 — DHCP Client Command</strong>
+    <code>enable dhcp vlan Staff</code><br>
+    This enables the DHCP <strong>client</strong> on that VLAN (switch requests an IP from upstream). Rejected with error: "Can't enable BOOTP/DHCP client, as an IP address is configured."
+  </div>
+
+  <div class="box blocked">
+    <strong>Wrong Syntax #3 — DHCP Server Per Port</strong>
+    <code>enable dhcp ports 3 vlan Staff</code><br>
+    External AI source said this enables DHCP client on port 3 — incorrect. EXOS <code>?</code> help confirmed: <code>ports</code> = "Specify port(s) to configure DHCP server for." This IS the correct server activation.
+  </div>
+
+  <div class="box ok">
+    <strong>Correct DHCP Syntax — Verified on EXOS SwitchEngine 33.x</strong>
+  </div>
+
+  <pre># Per-VLAN DHCP server configuration (spaces around hyphen required):
+configure vlan Staff dhcp-address-range 10.10.10.100 - 10.10.10.200
+configure vlan Staff dhcp-options default-gateway 10.10.10.1
+configure vlan Staff dhcp-options dns-server primary 8.8.8.8
+configure vlan Staff dhcp-options dns-server secondary 8.8.4.4
+enable dhcp ports 3 vlan Staff
+
+configure vlan Students dhcp-address-range 10.20.20.100 - 10.20.20.200
+configure vlan Students dhcp-options default-gateway 10.20.20.1
+configure vlan Students dhcp-options dns-server primary 8.8.8.8
+configure vlan Students dhcp-options dns-server secondary 8.8.4.4
+enable dhcp ports 3 vlan Students
+
+configure vlan Devices dhcp-address-range 10.30.30.100 - 10.30.30.200
+configure vlan Devices dhcp-options default-gateway 10.30.30.1
+configure vlan Devices dhcp-options dns-server primary 8.8.8.8
+configure vlan Devices dhcp-options dns-server secondary 8.8.4.4
+enable dhcp ports 3 vlan Devices
+
+configure vlan Guests dhcp-address-range 10.100.100.100 - 10.100.100.200
+configure vlan Guests dhcp-options default-gateway 10.100.100.1
+configure vlan Guests dhcp-options dns-server primary 8.8.8.8
+configure vlan Guests dhcp-options dns-server secondary 8.8.4.4
+enable dhcp ports 3 vlan Guests
+
+save configuration</pre>
+
+  <div class="box warn">
+    <strong>Critical DHCP Distinction</strong>
+    <code>enable dhcp ports X vlan Y</code> = DHCP <strong>server</strong> active on port X for VLAN Y ← correct<br>
+    <code>enable dhcp vlan Y</code> = DHCP <strong>client</strong> on VLAN Y ← wrong for this use case
+  </div>
+
+  <!-- SECTION 7 -->
+  <h2 id="modem">Modem Routing Issue — Solved</h2>
+
+  <h3>Symptom</h3>
+  <p>All 4 VLANs getting correct DHCP IPs. EXOS could ping 8.8.8.8 from its own management IP (192.168.0.28). But clients on 10.x.x.x could not reach internet. AP could not ping 10.100.100.1 (Guests gateway).</p>
+
+  <h3>Root Cause</h3>
+  <p>CenturyLink modem had no route back to 10.x.x.x subnets. Client traffic from 10.x.x.x reached the modem, the modem forwarded it to internet, but return traffic had no route back from the modem to EXOS → dropped.</p>
+
+  <h3>Fix</h3>
+  <p>Added static route on CenturyLink modem admin page:</p>
+  <pre>Destination: 10.0.0.0/8
+Gateway:     192.168.0.28    (EXOS_PPSK Default VLAN IP)</pre>
+
+  <p>Modem needed time to apply/refresh the route after saving. Once active, all 10.x.x.x VLAN clients confirmed internet access.</p>
+
+  <div class="box">
+    <strong>Why 10.0.0.0/8</strong>
+    Covers all four lab subnets (10.10.10.x, 10.20.20.x, 10.30.30.x, 10.100.100.x) in a single route. More specific /24 routes per VLAN would also work but require four entries. The /8 is the cleaner lab choice.
+  </div>
+
+  <h3>EXOS Forwarding Confirmed</h3>
+  <pre># All VLANs confirmed with flag f (IP Forwarding Enabled):
+Interface    IP Address          Flags
+Default      192.168.0.28    /24 EUf--R--g---
+Devices      10.30.30.1      /24 EUf--R--g---
+Guests       10.100.100.1    /24 EUf--R--g---
+Staff        10.10.10.1      /24 EUf--R--g---
+Students     10.20.20.1      /24 EUf--R--g---</pre>
+
+  <!-- SECTION 8 -->
+  <h2 id="idm">IDM — Green</h2>
+
+  <pre>AH-556680# show idm
+IDM client: Enabled Per SSID
+IDM Proxy IP: 192.168.0.12
+IDM proxy: Enabled
+IDM server: oh-idmauth.extremecloudiq.com
+IDM server IP: 3.145.235.65
+RUN state: Connected securely to the IDM server    ← GO
+IDM transport mode: TCP
+Server destination Port: 2083
+RadSec Certificate state: Valid
+RadSec Certificate Issued: 2026-08-13 22:39:38 GMT
+RadSec Certificate Expires: 2027-08-13 22:39:38 GMT</pre>
+
+  <div class="box ok">
+    <strong>What IDM Green Means</strong>
+    TCP 2083 tunnel to XIQ cloud is open and mutually authenticated (TLS). Every PPSK key created in EP1 is instantly checkable by AP_PPSK. Dynamic VLAN assignment active. PPSK auth pipe is live.
+  </div>
+
+  <p>Note: IDM server IP changed between two checks (3.145.235.64 → 3.145.235.65) — normal. XIQ cloud uses multiple IPs behind the same hostname. DNS round-robin, not an issue.</p>
+
+  <!-- SECTION 9 -->
+  <h2 id="architecture">AP/Switch Cloud Architecture — Clarified</h2>
+
+  <table>
+    <tr><th>Service</th><th>AP_PPSK</th><th>EXOS_PPSK</th></tr>
+    <tr><td>OS</td><td>IQ Engine</td><td>SwitchEngine (EXOS)</td></tr>
+    <tr><td>Cloud agent</td><td>CAPWAP client</td><td>IQAgent (software daemon)</td></tr>
+    <tr><td>Config push from EP1</td><td>CAPWAP UDP 5246/5247</td><td>HTTPS TCP 443</td></tr>
+    <tr><td>Telemetry / MIB to XIQ</td><td>HTTPS TCP 443</td><td>HTTPS TCP 443</td></tr>
+    <tr><td>PPSK authentication</td><td>RadSec TCP 2083</td><td>N/A</td></tr>
+    <tr><td>Time sync</td><td>NTP UDP 123</td><td>NTP UDP 123</td></tr>
+    <tr><td>Direction</td><td>AP calls home (outbound)</td><td>EXOS calls home (outbound)</td></tr>
+  </table>
+
+  <p><strong>Key insight:</strong> EXOS_PPSK simultaneously plays two independent roles — it is a <strong>managed device</strong> (IQAgent reports to XIQ, receives config from EP1) AND a <strong>router</strong> (transparently forwarding AP_PPSK's CAPWAP and RadSec traffic to the cloud). Neither connection depends on the other.</p>
+
+  <p><strong>IQAgent</strong> is not the OS and not a protocol — it is a software service running on top of SwitchEngine. It translates EP1 policy objects into EXOS CLI commands and reports switch telemetry back to XIQ over the same HTTPS connection.</p>
+
+  <!-- SECTION 10 -->
+  <h2 id="ppsk">PPSK Scenario 1 — Cloud-Based PPSK ✓</h2>
+
+  <div class="box ok">
+    <strong>Scenario 1 Complete</strong>
+    Cloud-based PPSK fully tested and verified. Client authenticated via RadSec (TCP 2083), landed on correct VLAN, confirmed internet access. Auth pipe proven end to end.
+  </div>
+
+  <h3>Remaining Scenarios — Tomorrow</h3>
+  <table>
+    <tr><th>#</th><th>Scenario</th><th>SSID</th><th>Status</th></tr>
+    <tr><td>1</td><td>Standard PPSK — Cloud DB</td><td>PPSK-Cloud-Standard</td><td>✓ Done</td></tr>
+    <tr><td>2</td><td>Standard PPSK — Local DB</td><td>PPSK-Local-Standard</td><td>⏳ Tomorrow</td></tr>
+    <tr><td>3</td><td>PPSK Classification (geo-based)</td><td>PPSK-Geos</td><td>✗ Needs 2 APs</td></tr>
+    <tr><td>4</td><td>MAC Binding</td><td>PPSK-MAC-Binding-Demo</td><td>⏳ Tomorrow</td></tr>
+    <tr><td>5</td><td>Key-Based PCG (peer isolation)</td><td>PPSK-Cloud-PCG-Key-Based</td><td>⏳ Tomorrow</td></tr>
+    <tr><td>6</td><td>Guest CWP — Dual SSID</td><td>Business-Guest + Onboarding</td><td>⏳ Tomorrow</td></tr>
+    <tr><td>7</td><td>Guest CWP — Single SSID</td><td>Business-Guest-Single</td><td>⏳ Tomorrow</td></tr>
+  </table>
+
+  <!-- SECTION 11 -->
+  <h2 id="pending">Pending</h2>
+  <table>
+    <tr><th>Item</th><th>Status</th><th>Notes</th></tr>
+    <tr><td>PPSK Scenarios 2–7</td><td>⏳ Tomorrow</td><td>Infrastructure ready, just build in EP1</td></tr>
+    <tr><td>Supplemental CLI in EP1</td><td>⚠️ Not resolved</td><td>Global toggle under VIQ Management not findable — check account permissions or EP1 version</td></tr>
+    <tr><td>Azure AD App Registration</td><td>⏳ Pending</td><td>Graph API: Group.Read.All + User.Read.All</td></tr>
+    <tr><td>XIQ_Azure_AD_Sync script</td><td>⏳ Pending</td><td>ExtremeNetworksSA/XIQ_Azure_AD_Sync — config.py setup</td></tr>
+    <tr><td>Wall plate AP (AP150W/AP302W)</td><td>⚠️ Confirm hardware</td><td>Required for AP-Based PCG scenario</td></tr>
+    <tr><td>Demo storyboard (Karl/James)</td><td>⏳ Deferred</td><td>Tomorrow or after PPSK scenarios complete</td></tr>
+    <tr><td>May 22 + May 11 EOD index cards</td><td>⏳ Backlog</td><td>Missing from all 3 index pages</td></tr>
+  </table>
+
+  <p class="copyright">© 2026 Khursheed Khan &nbsp;·&nbsp; Extreme Networks &nbsp;·&nbsp; Generated with Claude Sonnet 4.6 &nbsp;·&nbsp; Session Aug 13, 2026</p>
+
+</div>
+</body>
+</html>
