@@ -108,6 +108,10 @@
   <a href="#d9">D9</a>
   <a href="#isid-transit">I-SID Routing</a>
   <a href="#sdwan">SD-WAN Alarms</a>
+  <a href="#mixed-mode">Mixed Mode</a>
+  <a href="#campus">Campus Design</a>
+  <a href="#autosense-fa">Auto-Sense + FA</a>
+  <a href="#ap-policy-push">AP Policy Push</a>
   <a href="#lab">Lab Topology</a>
   <a href="#next">Next Steps</a>
 </nav>
@@ -738,6 +742,151 @@ show ip dhcp-server binding  # clients getting IPs?</pre>
       SE and EP1 do not talk to each other. SPBM parameters (manual-area, ethertype, I-SID map) must be manually aligned between the two tools. Mismatch = IS-IS adjacency fails silently. Rule: <strong>Configure → Verify each switch independently → Cable NNI last.</strong>
     </div>
 
+  </section>
+
+  <!-- MIXED MODE -->
+  <section id="mixed-mode">
+    <h2>Mixed Mode — VOSS Core + EXOS Edge</h2>
+
+    <p>Can a campus run both fabric and EXOS switches simultaneously? Yes. VOSS and EXOS coexist via a clean boundary: 802.1Q trunk between the last VOSS BEB and the first EXOS access switch. The fabric terminates at the BEB; EXOS sees a conventional trunk.</p>
+
+    <table>
+      <thead><tr><th>Layer</th><th>Technology</th><th>Knows About Fabric?</th></tr></thead>
+      <tbody>
+        <tr><td>VOSS BEB (edge)</td><td>MAC-in-MAC encap/decap</td><td>Yes — full IS-IS + SPB participant</td></tr>
+        <tr><td>VOSS BCB (transit)</td><td>B-DA forward only</td><td>Topology only — not services</td></tr>
+        <tr><td>EXOS access switch</td><td>802.1Q trunk to BEB</td><td>No — sees normal VLANs only</td></tr>
+        <tr><td>AP on EXOS port</td><td>Standard association</td><td>No — treated as ordinary wired client</td></tr>
+      </tbody>
+    </table>
+
+    <div class="box warn">
+      <div class="box-label warn">Trade-off</div>
+      APs on EXOS ports do not get Fabric Attach auto-provision. Their SSIDs must be mapped to VLANs manually on the EXOS trunk, then the BEB maps VLAN → I-SID at the boundary. FA plug-and-play is a fabric-edge-only feature.
+    </div>
+
+    <div class="box ok">
+      <div class="box-label ok">Use Case</div>
+      Legacy hardware in branch offices keeps running EXOS. New core switches run VOSS. Transition is incremental — swap edge switches one building at a time, moving the fabric boundary outward.
+    </div>
+  </section>
+
+  <!-- CAMPUS DESIGN -->
+  <section id="campus">
+    <h2>Campus Network Design — No Dedicated Core</h2>
+
+    <p>A campus of 10 buildings, 20 switches: does fabric need a dedicated core switch? No. IS-IS adapts to whatever physical topology you cable. Every VOSS switch is either a BEB (has client-facing ports) or a BCB (transit-only). The roles emerge from the topology, not from explicit configuration.</p>
+
+    <div class="box">
+      <div class="box-label info">The Rule</div>
+      IS-IS treats all VOSS switches equally. A ring, a star, a partial mesh — same configuration on every switch. IS-IS discovers the topology and computes shortest paths. No "core" designation, no hierarchy to configure.
+    </div>
+
+    <table>
+      <thead><tr><th>Scenario</th><th>What IS-IS Does</th><th>Result</th></tr></thead>
+      <tbody>
+        <tr><td>New switch cabled</td><td>IS-IS hello → LSDB floods → Dijkstra re-runs</td><td>All paths updated automatically — no manual routing changes</td></tr>
+        <tr><td>Link failure</td><td>IS-IS detects adjacency loss → Dijkstra re-runs</td><td>Traffic re-routes in seconds — no spanning tree blocking</td></tr>
+        <tr><td>New building added</td><td>Cable one NNI port → IS-IS discovers automatically</td><td>New BEB joins fabric — no configuration on existing switches</td></tr>
+        <tr><td>Multiple paths to same BEB</td><td>SPB computes equal-cost paths → both active</td><td>All-active multipath — no VRRP, no STP blocked ports</td></tr>
+      </tbody>
+    </table>
+
+    <blockquote>
+      "Once you provision the switches, cabling a new building is the same as cabling a new port. IS-IS does the rest."
+      <cite>— Aug 20 2026 discussion</cite>
+    </blockquote>
+  </section>
+
+  <!-- AUTO-SENSE + FA PLUG-AND-PLAY -->
+  <section id="autosense-fa">
+    <h2>Auto-Sense + Fabric Attach — Plug-and-Play</h2>
+
+    <p>Auto-Sense and Fabric Attach together eliminate manual port VLAN configuration on AP-facing ports. The switch listens, classifies the device, and provisions automatically.</p>
+
+    <h3>How the Switch Tells an AP from a Laptop</h3>
+    <table>
+      <thead><tr><th>Device</th><th>LLDP Signal</th><th>Switch Response</th></tr></thead>
+      <tbody>
+        <tr><td><strong>AP (e.g. AP3000)</strong></td><td>Sends LLDP-FA TLVs: device type = WAP Type 1, requested I-SIDs listed</td><td>Auto-Sense: applies AP profile → FA auto-provisions VLAN/I-SID on that port</td></tr>
+        <tr><td><strong>Laptop</strong></td><td>Sends LLDP (if at all), no FA TLVs</td><td>Auto-Sense: applies client profile → maps to client I-SID, may trigger 802.1X</td></tr>
+        <tr><td><strong>IP Phone</strong></td><td>LLDP with voice VLAN TLV</td><td>Auto-Sense: applies phone profile → voice VLAN, QoS marking</td></tr>
+        <tr><td><strong>Unknown</strong></td><td>No LLDP or unrecognized TLVs</td><td>Auto-Sense: applies default profile or blocks port</td></tr>
+      </tbody>
+    </table>
+
+    <h3>The FA Handshake Sequence</h3>
+    <pre>AP powers on → boots with EP1 policy already pushed
+  ↓
+AP sends LLDP-FA TLVs: "WAP Type 1, I need I-SID 100070 (Corp_New)"
+  ↓
+Switch auto-sense sees FA TLVs → looks up AP profile
+  ↓
+I-SID 100070 exists on this switch (from SE/EP1 switch policy) → provisions VLAN on this port
+  ↓
+AP gets DHCP → clients associate to Corp_New SSID → fabric delivers traffic</pre>
+
+    <div class="box ok">
+      <div class="box-label ok">Plug-and-Play Promise</div>
+      <strong>Fabric does the plumbing. Auto-Sense reads the label on the pipe.</strong><br>
+      New AP physically plugged in → no port config changes on the switch. The AP declares what it needs via LLDP-FA; the switch delivers it automatically — as long as the I-SID exists on the fabric.
+    </div>
+
+    <div class="box warn">
+      <div class="box-label warn">Prerequisite</div>
+      Auto-sense ports must have <code>auto-sense enable</code> + <code>fa enable</code>. Auto-sense profiles (AP, laptop, phone, unknown) must be defined in EP1 or SE. Without profiles, auto-sense listens but doesn't know what to provision.
+    </div>
+  </section>
+
+  <!-- AP POLICY PUSH — TWO-PUSH RULE -->
+  <section id="ap-policy-push">
+    <h2>AP Policy Push — The Two-Push Rule</h2>
+
+    <p>After provisioning the switches, a second, separate push to the APs is required. Two independent pushes: one to the switches, one to the APs. Both are necessary; neither is sufficient alone.</p>
+
+    <table>
+      <thead><tr><th>Push</th><th>Tool</th><th>Configures</th><th>What happens without it</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>1 — Switch Policy</strong></td>
+          <td>SE → VOSS Domain<br>or<br>EP1 → Network Policy → Switching</td>
+          <td>IS-IS, SPBM, I-SIDs, Anycast Gateway SVIs, DHCP, port roles</td>
+          <td>Fabric doesn't know these I-SIDs exist. APs cannot request what isn't there.</td>
+        </tr>
+        <tr>
+          <td><strong>2 — AP Network Policy</strong></td>
+          <td>EP1 → Network Policy → Wireless</td>
+          <td>SSIDs, radio profiles (WMM, DCS, BSS coloring, TWT), <strong>SSID → I-SID mapping</strong></td>
+          <td>AP boots and gets an IP, but sends no FA TLVs. Switch auto-sense cannot provision. No wireless clients get service.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>Why the AP Needs Its Own Push</h3>
+    <p>The AP needs to know two things before it can participate in the fabric:</p>
+    <ol style="margin: 0 0 14px 24px;">
+      <li style="margin-bottom:8px"><strong>Which SSIDs to broadcast</strong> — defined in the EP1 Wireless Network Policy</li>
+      <li style="margin-bottom:8px"><strong>Which I-SID each SSID maps to</strong> — the EP1 SSID→I-SID binding tells the AP what to put in its LLDP-FA TLVs</li>
+    </ol>
+    <p>Without push 2, the AP broadcasts no SSIDs (or wrong ones) and sends no FA TLVs. The switch is ready, the fabric is ready — but the AP has nothing to request.</p>
+
+    <h3>Correct Push Sequence</h3>
+    <pre>Step 1: SE  → VOSS Domain → 5320_fabric_se   → Enforce Policy  (defines I-SIDs on fabric)
+Step 2: EP1 → Network Policy (Switching)      → 5320_Exos_EP1  → Complete Config Update
+Step 3: EP1 → Network Policy (Wireless)       → AP3000_1, AP3000_2 → push  ← DO NOT SKIP
+Step 4: Cable NNI between switches
+Step 5: Verify:
+  show isis neighbors          # adjacency UP?
+  show vlan i-sid              # I-SIDs provisioned?
+  show fa assignment           # APs got their I-SIDs?
+  show ip dhcp-server binding  # clients getting IPs?</pre>
+
+    <div class="box">
+      <div class="box-label info">Mental Model</div>
+      <strong>Switch policy = "I have I-SID 100070 ready on this fabric."</strong><br>
+      <strong>AP policy = "When you boot, request I-SID 100070 for SSID Corp_New."</strong><br>
+      Both sides of the conversation must be configured before the FA handshake can happen.
+    </div>
   </section>
 
   <section id="next">
