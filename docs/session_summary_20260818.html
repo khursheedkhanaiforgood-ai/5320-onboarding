@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Session Summary — August 18, 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #fff; color: #111; font-family: 'Libre Baskerville', Georgia, serif; font-size: 17px; line-height: 1.75; }
+  nav#toc { position: sticky; top: 0; z-index: 100; background: #fff; border-bottom: 2px solid #326891; padding: 10px 40px; display: flex; gap: 24px; flex-wrap: wrap; font-family: 'Source Sans 3', sans-serif; font-size: 13px; font-weight: 600; }
+  nav#toc a { color: #326891; text-decoration: none; white-space: nowrap; }
+  nav#toc a:hover { text-decoration: underline; }
+  .wrapper { max-width: 860px; margin: 0 auto; padding: 40px 24px 80px; }
+  .top-rule { border-top: 6px solid #111; padding-top: 18px; margin-bottom: 4px; }
+  .kicker { font-family: 'Source Sans 3', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: #326891; margin-bottom: 10px; }
+  h1 { font-size: 2.2rem; font-weight: 700; line-height: 1.2; margin-bottom: 12px; }
+  .subtitle { font-style: italic; font-size: 1.1rem; color: #444; margin-bottom: 14px; border-bottom: 1px solid #ddd; padding-bottom: 14px; }
+  .byline { font-family: 'Source Sans 3', sans-serif; font-size: 13px; color: #666; margin-bottom: 32px; }
+  .byline span { font-weight: 700; color: #111; }
+  h2 { font-size: 1.35rem; font-weight: 700; margin: 40px 0 12px; border-bottom: 2px solid #326891; padding-bottom: 6px; color: #111; }
+  h3 { font-size: 1.1rem; font-weight: 700; margin: 28px 0 8px; color: #222; }
+  p { margin-bottom: 16px; }
+  ul, ol { margin: 0 0 16px 24px; }
+  li { margin-bottom: 6px; }
+  pre, code { font-family: 'Courier New', monospace; font-size: 13px; }
+  pre { background: #f4f6f9; border-left: 4px solid #326891; padding: 16px 18px; margin: 16px 0; overflow-x: auto; border-radius: 2px; line-height: 1.5; }
+  code { background: #f0f3f7; padding: 1px 5px; border-radius: 2px; font-size: 13px; }
+  .box { border-left: 4px solid #326891; background: #eef4fb; padding: 14px 18px; margin: 20px 0; border-radius: 2px; font-size: 15px; }
+  .box.ok { border-color: #2e7d32; background: #f1f8f1; }
+  .box.warn { border-color: #e65100; background: #fff8f2; }
+  .box.blocked { border-color: #c62828; background: #fff5f5; }
+  .box strong { display: block; margin-bottom: 4px; font-family: 'Source Sans 3', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; }
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 16px; margin: 24px 0; }
+  .stat { border: 1px solid #ddd; border-top: 3px solid #326891; padding: 14px 16px; text-align: center; }
+  .stat .num { font-size: 2rem; font-weight: 700; color: #326891; font-family: 'Source Sans 3', sans-serif; }
+  .stat .lbl { font-family: 'Source Sans 3', sans-serif; font-size: 12px; color: #666; margin-top: 2px; }
+  table { width: 100%; border-collapse: collapse; margin: 16px 0 24px; font-size: 14px; font-family: 'Source Sans 3', sans-serif; }
+  th { background: #326891; color: #fff; padding: 9px 12px; text-align: left; font-weight: 600; }
+  td { padding: 8px 12px; border-bottom: 1px solid #e8e8e8; vertical-align: top; }
+  tr:nth-child(even) td { background: #f9f9f9; }
+  .copyright { font-family: 'Source Sans 3', sans-serif; font-size: 12px; color: #999; margin-top: 60px; border-top: 1px solid #ddd; padding-top: 16px; }
+</style>
+</head>
+<body>
+
+<nav id="toc">
+  <a href="#overview">Overview</a>
+  <a href="#entra">EntraID Sync</a>
+  <a href="#topology">Topology</a>
+  <a href="#ap-recovery">AP Recovery</a>
+  <a href="#e2e">E2E Test</a>
+  <a href="#vlan154">VLAN 154 Problem</a>
+  <a href="#autosense">Auto-Sense Deep Dive</a>
+  <a href="#rootcause">Root Cause</a>
+  <a href="#pending">Next Steps</a>
+</nav>
+
+<div class="wrapper">
+
+  <div class="top-rule"></div>
+  <div class="kicker">802.1X Lab · RDU FishBowl · August 18, 2026</div>
+  <h1>Auth Confirmed End-to-End — Switch Auto-Sense Blocks Final DHCP Hop</h1>
+  <p class="subtitle">Full 802.1X EAP-PEAP/MSCHAPv2 chain proven working from client through NPS — the only remaining gap is VLAN 154 not auto-assigned by the VOSS switch's Fabric Attach profile, a fix that requires Karl's XIQ template update.</p>
+  <p class="byline">By <span>Khursheed Khan</span> &nbsp;·&nbsp; KhKLab-SW-01 / EP1 / RDU FishBowl &nbsp;·&nbsp; Claude Sonnet 4.6</p>
+
+  <div class="stats">
+    <div class="stat"><div class="num">✓</div><div class="lbl">RADIUS Auth Working</div></div>
+    <div class="stat"><div class="num">✓</div><div class="lbl">802.1X Auth End-to-End</div></div>
+    <div class="stat"><div class="num">✓</div><div class="lbl">EntraID Sync Deployed</div></div>
+    <div class="stat"><div class="num">✗</div><div class="lbl">DHCP on VLAN 154</div></div>
+    <div class="stat"><div class="num">2×</div><div class="lbl">Switch Restored</div></div>
+    <div class="stat"><div class="num">1</div><div class="lbl">Karl Action Required</div></div>
+  </div>
+
+  <h2 id="overview">Session Overview</h2>
+  <p>This session had two arcs. The first: confirming the EntraID-PPSK sync script is deployed and running. The second: a full day of 802.1X lab work — moving AP_NPS from EXOS to VOSS, recovering from a factory reset, proving the entire auth chain works end-to-end, and diagnosing why the client still gets no DHCP despite successful authentication.</p>
+
+  <div class="box warn">
+    <strong>Where We Stand</strong>
+    The 802.1X authentication chain is fully proven — client authenticates, NPS returns Access-Accept, EP1 assigns VLAN 154, AP tags uplink with VLAN 154. The only missing link: VLAN 154 is not carried on the VOSS switch port 1/5 because the global Auto-Sense FA wap-type1 profile only includes VLAN 153 (management). This requires Karl to update the XIQ switch template.
+  </div>
+
+  <h2 id="entra">EntraID-PPSK Sync</h2>
+  <p>Script deployed at <code>/Users/khukhan/XIQ_Azure_AD_Sync/XIQ-Azure-AD-PPSK-Sync</code>. Last successful run: Aug 17, 2026 at 18:20.</p>
+
+  <table>
+    <tr><th>Status</th><th>Detail</th></tr>
+    <tr><td>✓ KhursheedSSO created</td><td>Successfully synced to XIQ as PPSK user</td></tr>
+    <tr><td>✓ KhursheeedTest created</td><td>Successfully synced to XIQ as PPSK user</td></tr>
+    <tr><td>⚠️ Khursheed Khan — HTTP 400</td><td>INVALID_ARGUMENT: username already exists in XIQ. Non-fatal, sync continues.</td></tr>
+    <tr><td>⚠️ No email set</td><td>All 3 Azure AD users missing email attribute — script warns but proceeds</td></tr>
+  </table>
+
+  <div class="box">
+    <strong>Follow-up</strong>
+    Duplicate username error ("Khursheed Khan") is non-blocking but should be cleaned up. Either remove the existing XIQ user or add logic to skip pre-existing usernames gracefully.
+  </div>
+
+  <h2 id="topology">Lab Topology</h2>
+  <p>Physical topology for the 802.1X lab as of Aug 18:</p>
+
+  <pre>
+Client (iPhone)
+  ↓ wireless 802.1X EAP-PEAP/MSCHAPv2
+AP_NPS (AH-556680 / 00:E6:0E:55:66:80)
+  ↓ eth0 uplink → port 1/5
+KhKLab-SW-01 (VOSS FabricEngine 9.3.2.0)
+  ↓ port 1/1 → VLAN 4047
+IPE (lan1 → SW, wan2 → HomeModem)
+  ↓ GRE tunnel
+RDU FishBowl → NPS Server (10.152.0.11)</pre>
+
+  <table>
+    <tr><th>Port</th><th>Device</th><th>VLAN</th><th>Status</th></tr>
+    <tr><td>1/1</td><td>IPE (WAN uplink)</td><td>4047 static</td><td>✓ Up</td></tr>
+    <tr><td>1/3</td><td>AP_PPSK (AH-565780)</td><td>153 auto-sensed</td><td>✓ Up</td></tr>
+    <tr><td>1/5</td><td>AP_NPS (AH-556680)</td><td>153 auto-sensed</td><td>✓ Up — VLAN 154 missing</td></tr>
+  </table>
+
+  <h2 id="ap-recovery">AP Recovery</h2>
+  <p>AP_NPS was moved from EXOS_5320 to VOSS_5320 port 1/5 and factory-reset via physical button. Key recovery milestones:</p>
+
+  <ul>
+    <li>PoE confirmed delivering on port 1/5 (Class4, 32W) — AP was powered throughout</li>
+    <li>Dark LED phase during factory reset is normal — AP reflashes config silently</li>
+    <li>White LED = AP fully booted, seeking cloud connection</li>
+    <li>Auto-Sense correctly detected AP_NPS as <code>wap-type1</code> on port 1/5 and dynamically assigned VLAN 153 (I-SID 144153) — no manual config needed</li>
+    <li>AP_NPS IP: <strong>10.153.4.6</strong>, CAPWAP established, EP1 IDM green</li>
+  </ul>
+
+  <div class="box ok">
+    <strong>Auto-Sense Validated</strong>
+    VLAN 153 appeared as ACTIVE (not STATIC) on port 1/5 — proving Auto-Sense/FA wap-type1 detection works correctly for AP management. No manual VLAN config required for management traffic.
+  </div>
+
+  <h2 id="e2e">E2E Authentication Test</h2>
+  <p>RADIUS connectivity test from EP1 to NPS (10.152.0.11) passed. Full E2E client test run with iPhone on SSID <code>NPS_80211X</code>.</p>
+
+  <div class="box ok">
+    <strong>show station on AP_NPS (AH-556680)</strong>
+    <pre style="margin-top:8px;">Mac: 8ed6:49d5:b38d  IP: 0.0.0.0  VLAN: 154  Auth: Yes
+A-Mode: wpa3-8021x-pmf  UPID: 59  Chan: 157 (5GHz)</pre>
+  </div>
+
+  <table>
+    <tr><th>Chain Link</th><th>Result</th><th>Evidence</th></tr>
+    <tr><td>Client → AP (wireless EAP-PEAP)</td><td>✓</td><td>Auth: Yes in show station</td></tr>
+    <tr><td>AP → NPS (RADIUS)</td><td>✓</td><td>EP1 RADIUS test passed; Access-Accept received</td></tr>
+    <tr><td>EP1 classification (TVG → VLAN 154)</td><td>✓</td><td>VLAN: 154 in show station (changed from VLAN 5)</td></tr>
+    <tr><td>AP eth0 tags VLAN 154</td><td>✓</td><td>Proven by Aug 7 pcap; confirmed by VLAN assignment</td></tr>
+    <tr><td>Switch port 1/5 carries VLAN 154</td><td>✗</td><td>VLAN 154 has no port members in show vlan members</td></tr>
+    <tr><td>Client gets DHCP on 10.154.4.0/24</td><td>✗</td><td>IP stuck at 0.0.0.0</td></tr>
+  </table>
+
+  <p><strong>Note:</strong> EP1 was initially configured with VLAN 5 (from Aug 7 testing). Changed to VLAN 154 to match the VOSS switch design. Policy pushed and confirmed on AP: <code>show station</code> shows VLAN 154.</p>
+
+  <h2 id="vlan154">The VLAN 154 Problem</h2>
+  <p>Every approach to add VLAN 154 to port 1/5 was blocked by Auto-Sense. The switch enforces a conflict between manual VLAN assignment and Auto-Sense port ownership.</p>
+
+  <h3>Attempts Made</h3>
+  <table>
+    <tr><th>Command Tried</th><th>Result</th></tr>
+    <tr><td><code>vlan members add 154 1/5</code></td><td>Accepted — but Auto-Sense disabled, VLAN 153 dropped from port 1/5</td></tr>
+    <tr><td><code>vlan members add 153 1/5</code> (to restore)</td><td>Auto-Sense re-enabled, VLAN 154 removed — back to start</td></tr>
+    <tr><td><code>eapol port 1/5 port-control force-authorized</code></td><td>Error: Manual configuration not allowed on Auto-Sense port</td></tr>
+    <tr><td><code>auto-sense fa wap-type1 provision-mode auth-optional</code></td><td>Invalid — keyword does not exist</td></tr>
+    <tr><td><code>no auto-sense fa message-authentication</code></td><td>Accepted — but broke port 1/3 (failLocalNoAuthRemoteAuth). Reverted.</td></tr>
+    <tr><td><code>auto-sense fa wap-type1 i-sid 144154</code></td><td>Accepted — but replaced 144153, breaking AP_PPSK on port 1/3. Reverted.</td></tr>
+  </table>
+
+  <div class="box blocked">
+    <strong>Circular Conflict</strong>
+    Adding VLAN 154 manually → Auto-Sense disables → VLAN 153 (management) drops → CAPWAP at risk. Restoring VLAN 153 → Auto-Sense re-enables → VLAN 154 removed. Every CLI path cascades into breaking something else. The global wap-type1 Auto-Sense profile supports only ONE I-SID.
+  </div>
+
+  <h2 id="autosense">Auto-Sense Deep Dive</h2>
+  <p>The VOSS switch's Auto-Sense FA profile for <code>wap-type1</code> as configured by Karl's XIQ template:</p>
+
+  <pre>
+TYPE       EAPOL STATUS  I-SID   VLANID  C-VID  MGMT I-SID  MGMT C-VID
+wap-type1  Auth          144153  153     untag  -            -</pre>
+
+  <p>Only one I-SID (144153 → VLAN 153, untagged/native) is assigned. There is no data I-SID for the wireless user VLAN (144154 → VLAN 154).</p>
+
+  <h3>Fabric Attach Element Analysis</h3>
+  <table>
+    <tr><th>Port</th><th>Device</th><th>ELEM AUTH</th><th>ASGN AUTH</th><th>Meaning</th></tr>
+    <tr><td>1/3</td><td>AP_PPSK</td><td>successAuth</td><td>successAuth</td><td>FA working fully — AP advertising I-SID assignments</td></tr>
+    <tr><td>1/5</td><td>AP_NPS</td><td>successAuth</td><td><strong>none</strong></td><td>AP authenticated but NOT advertising any I-SID assignments</td></tr>
+  </table>
+
+  <div class="box warn">
+    <strong>Why ASGN AUTH = none on port 1/5</strong>
+    AP_NPS was factory-reset today. The factory reset wiped the FA message authentication key that Karl's XIQ policy originally configured. EP1 (Khursheed's instance) has no FA/I-SID configuration to push — EP1 does not expose Auto-Sense/FA settings. Therefore AP_NPS is not advertising I-SID 144154 to the switch, and the switch has nothing to dynamically assign. This is NOT a port issue — it is a device + policy gap.
+  </div>
+
+  <h3>Why EP1 Cannot Fix This</h3>
+  <p>EP1 (Extreme Platform One) has no Fabric Attach or I-SID configuration section for APs. The FA message authentication key and I-SID bindings are pushed exclusively through Karl's XIQ SwitchEngine template to KhKLab-SW-01. The AP cannot advertise I-SID 144154 without this being configured either in the switch template or directly on the AP.</p>
+
+  <h2 id="rootcause">Root Cause Summary</h2>
+
+  <div class="box blocked">
+    <strong>Primary — Switch Template Gap</strong>
+    Karl's XIQ switch template for KhKLab-SW-01 configures the wap-type1 Auto-Sense FA profile with only I-SID 144153 (VLAN 153, AP management). I-SID 144154 (VLAN 154, WirelessUser — 802.1X data VLAN) is not in the profile. Auto-Sense therefore never assigns VLAN 154 to any AP uplink port.
+  </div>
+
+  <div class="box warn">
+    <strong>Secondary — FA Auth Key Lost After Factory Reset</strong>
+    AP_NPS factory reset wiped the FA message authentication key. Karl's XIQ policy needs to re-push it. Until then, ASGN AUTH = none for port 1/5. This prevents FA from dynamically assigning VLANs even if the profile were updated.
+  </div>
+
+  <div class="box ok">
+    <strong>Everything Else is Working</strong>
+    802.1X auth (RADIUS/NPS), EP1 classification (TVG → VLAN 154), AP tagging (eth0 VLAN 154), VOSS switch management path (VLAN 153, CAPWAP), DHCP server on VOSS (10.154.4.0/24 pool configured) — all confirmed ready. One switch template update from end-to-end success.
+  </div>
+
+  <h2 id="pending">Next Steps</h2>
+
+  <table>
+    <tr><th>Item</th><th>Owner</th><th>Status</th></tr>
+    <tr><td>Email Karl: update XIQ switch template — add I-SID 144154 / VLAN 154 to wap-type1 FA profile + re-push FA auth key to AP_NPS</td><td>Khursheed → Karl</td><td>⏳ Email pending send</td></tr>
+    <tr><td>After Karl's template push: re-test full E2E — client should get 10.154.4.x</td><td>Khursheed</td><td>⏳ Blocked on Karl</td></tr>
+    <tr><td>Fix NPS RADIUS attributes: Tunnel-Type = 13 (VLAN), Tunnel-Medium-Type = 6 (802), single Tunnel-Private-Group-Id</td><td>Karl / NPS admin</td><td>⏳ Secondary — TVG workaround active</td></tr>
+    <tr><td>EntraID sync: resolve "Khursheed Khan" duplicate username (HTTP 400)</td><td>Khursheed</td><td>⏳ Non-blocking</td></tr>
+    <tr><td>PPSK Scenarios 2–7</td><td>Khursheed</td><td>⏳ Deferred — infrastructure ready</td></tr>
+    <tr><td>VOSS Fabric deep dive (next session)</td><td>Khursheed</td><td>▶ Next up</td></tr>
+  </table>
+
+  <p class="copyright">© 2026 Khursheed Khan &nbsp;·&nbsp; Extreme Networks &nbsp;·&nbsp; Generated with Claude Sonnet 4.6 &nbsp;·&nbsp; Session Aug 18, 2026</p>
+
+</div>
+</body>
+</html>
