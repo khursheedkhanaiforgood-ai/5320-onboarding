@@ -106,6 +106,7 @@
   <a href="#d6">D6</a>
   <a href="#d7">D7</a>
   <a href="#d9">D9</a>
+  <a href="#isid-transit">I-SID Routing</a>
   <a href="#sdwan">SD-WAN Alarms</a>
   <a href="#lab">Lab Topology</a>
   <a href="#next">Next Steps</a>
@@ -574,6 +575,171 @@ Result: SD-WAN overlay broken — purple map line dead</pre>
   </section>
 
   <!-- NEXT STEPS -->
+  <!-- CROSS-I-SID + PROVISIONING -->
+  <section id="isid-transit">
+    <h2>Cross-I-SID Routing + Provisioning</h2>
+
+    <h3>Scenario — AP on I-SID 100020, Laptop on I-SID 100030</h3>
+    <p>I-SID boundaries are structural L2 isolation — the fabric will not carry traffic between them directly. The BEB is the only crossing point, via L3 routing between the two VLAN SVIs.</p>
+
+    <pre>AP client (10.0.20.50, I-SID 100020)
+    → sends to default gateway 10.0.20.1
+    → hits BEB Anycast Gateway SVI for VLAN 20
+    → BEB L3 routing: destination 10.0.30.50 → VLAN 30 / I-SID 100030
+    → delivers to laptop
+
+Fabric sees two separate flows:
+    Flow 1: AP client → BEB        (inside I-SID 100020)
+    Flow 2: BEB → laptop           (inside I-SID 100030)
+I-SID boundary crossed ONLY inside the BEB routing engine — never in the fabric core.</pre>
+
+    <div class="box">
+      <div class="box-label info">BEB Wears Two Hats</div>
+      Ingress BEB for I-SID 100020 → L3 Router (routes between VLAN 20 and VLAN 30 SVIs) → Egress BEB for I-SID 100030. One physical switch, three logical roles simultaneously.
+    </div>
+
+    <h3>CLI — Full Two-Switch Provisioning (Both Switches)</h3>
+    <pre>enable
+configure terminal
+
+# VLAN + I-SID bindings
+vlan create 20 type port-mstprstp 0
+vlan create 30 type port-mstprstp 0
+vlan name 20 Corp
+vlan name 30 Guest
+vlan i-sid 20 100020
+vlan i-sid 30 100030
+
+# Anycast Gateway SVIs — SAME IP on both switches
+interface vlan 20
+  ip address 10.0.20.1/24
+  ip dhcp-server enable
+exit
+interface vlan 30
+  ip address 10.0.30.1/24
+  ip dhcp-server enable
+exit
+
+# IP Shortcuts — SW2 learns SW1 default route via IS-IS
+router isis
+  ip-shortcut
+exit
+
+# NNI port
+interface gigabitEthernet 1/10
+  isis enable
+  isis spbm 1
+  no shutdown
+exit
+
+# AP ports (both 1/3 and 1/5)
+fa enable
+interface gigabitEthernet 1/3
+  auto-sense enable
+  fa enable
+  no shutdown
+exit
+interface gigabitEthernet 1/5
+  auto-sense enable
+  fa enable
+  no shutdown
+exit
+
+save config</pre>
+
+    <h3>CLI — DHCP Pools (SW1 Only)</h3>
+    <pre>ip dhcp-server enable
+
+ip dhcp-server pool Corp
+  network-address 10.0.20.0 255.255.255.0
+  range 10.0.20.100 10.0.20.200
+  default-router 10.0.20.1
+  dns-server 8.8.8.8 8.8.4.4
+exit
+
+ip dhcp-server pool Guest
+  network-address 10.0.30.0 255.255.255.0
+  range 10.0.30.100 10.0.30.200
+  default-router 10.0.30.1
+  dns-server 8.8.8.8 8.8.4.4
+exit
+save config</pre>
+
+    <h3>Adding a New I-SID (Zero Port Changes)</h3>
+    <p>Ports 1/3 and 1/5 already have <code>auto-sense enable</code> + <code>fa enable</code>. Adding a new service requires only a switch-level binding and an AP SSID update — no port config changes.</p>
+    <pre># Both switches — new service only
+vlan create 40 type port-mstprstp 0
+vlan name 40 NewService
+vlan i-sid 40 100040
+interface vlan 40
+  ip address 10.0.40.1/24
+  ip dhcp-server enable
+exit
+save config
+
+# SW1 only — DHCP pool
+ip dhcp-server pool NewService
+  network-address 10.0.40.0 255.255.255.0
+  range 10.0.40.100 10.0.40.200
+  default-router 10.0.40.1
+  dns-server 8.8.8.8 8.8.4.4
+exit
+save config</pre>
+
+    <div class="box ok">
+      <div class="box-label ok">FA Auto-Provision</div>
+      AP on 1/3 boots → LLDP-FA TLV: "I need I-SID 100040" → switch: I-SID 100040 exists ✓ → provisions VLAN 40 on 1/3 automatically. Same on 1/5. Zero port config changes.
+    </div>
+
+    <h3>Guest Isolation ACL (Block Cross-I-SID)</h3>
+    <pre># Both switches — ACL on Guest SVI
+ip filter create GUEST_ISOLATION
+ip filter global GUEST_ISOLATION entry 10 deny ip 10.0.30.0/24 10.0.20.0/24
+ip filter global GUEST_ISOLATION entry 20 permit ip any any
+interface vlan 30
+  ip filter GUEST_ISOLATION in
+exit
+save config
+# Verify exact ip filter syntax with ? on your switch before pushing</pre>
+
+    <h3>EP1 / Site Engine vs CLI — The Right Model</h3>
+    <div class="box">
+      <div class="box-label info">Operational Rule</div>
+      <strong>CLI = verification + emergency only.</strong> EP1/SE is the source of truth. Manual CLI changes on auto-sense ports will fail ("Manual configuration not allowed on Auto-Sense port") and orchestrator pushes will overwrite CLI changes on managed ports.
+    </div>
+
+    <table>
+      <thead><tr><th>Config</th><th>Tool</th><th>Where in UI</th></tr></thead>
+      <tbody>
+        <tr><td>VLAN creation + I-SID bindings</td><td>EP1 or SE</td><td>Network Policy → Switching → Fabric Attach</td></tr>
+        <tr><td>Anycast Gateway SVI IPs</td><td>EP1 or SE</td><td>Switch Template → VLAN Interface</td></tr>
+        <tr><td>IP Shortcuts</td><td>EP1 or SE</td><td>Switch Template → IS-IS settings</td></tr>
+        <tr><td>DHCP pools</td><td>EP1 or SE</td><td>Switch Template → DHCP Server</td></tr>
+        <tr><td>Port roles (NNI / FA / UNI)</td><td>EP1 or SE</td><td>Switch Template → Port Assignment</td></tr>
+        <tr><td>AP SSIDs → VLAN mapping</td><td>EP1</td><td>Network Policy → Wireless → SSID config</td></tr>
+        <tr><td>SSID → I-SID mapping</td><td>EP1</td><td>Network Policy → Switching → Fabric Attach</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Two-Orchestrator Push Sequence</h3>
+    <pre>Step 1: SE  → VOSS Domain → 5320_fabric_se → Enforce Policy
+Step 2: EP1 → Network Policy (Switching) → 5320_Exos_EP1 → Complete Config Update
+Step 3: EP1 → Network Policy (Wireless) → both APs → push
+Step 4: Cable NNI → verify with CLI (show commands only)
+
+# CLI verification only — no config changes
+show isis neighbors          # adjacency UP?
+show vlan i-sid              # I-SIDs provisioned?
+show fa assignment           # APs got their VLANs?
+show ip dhcp-server binding  # clients getting IPs?</pre>
+
+    <div class="box warn">
+      <div class="box-label warn">Two-Orchestrator Coordination</div>
+      SE and EP1 do not talk to each other. SPBM parameters (manual-area, ethertype, I-SID map) must be manually aligned between the two tools. Mismatch = IS-IS adjacency fails silently. Rule: <strong>Configure → Verify each switch independently → Cable NNI last.</strong>
+    </div>
+
+  </section>
+
   <section id="next">
     <h2>Next Steps</h2>
 
