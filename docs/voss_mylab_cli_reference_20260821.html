@@ -236,6 +236,11 @@
       (2) B-VID missing: <code>spbm 1 b-vid 4051 primary 4051</code> was absent from Group 2. XIQ ZTD may assign different B-VIDs on a fresh VOSS deploy — without this line explicitly matching Karl's 4051-4052, IS-IS adjacency forms but SPBM fabric does not.
     </div>
 
+    <div class="box warn">
+      <strong>DNS Missing from DHCP Pool — Discovered Aug 21 2026</strong>
+      Group 7 (DHCP Server) was missing <code>ip dhcp-server domain-name-servers 8.8.8.8 8.8.4.4</code>. A fresh AP received an IP and gateway but could not resolve <code>oh-cwm.extremecloudiq.com</code> — CAPWAP stayed in DISCOVERY with no visible error on the switch. Added as Group 11. Run this before saving config on any new VOSS deploy.
+    </div>
+
     <div class="box">
       <strong>A-Priori VLAN → I-SID Convention</strong>
       I-SID = VLAN + 10000. VLAN 10 (Staff) → I-SID 10010. VLAN 20 (Guest) → I-SID 10020. This mapping is hard-coded on every switch — the AP never needs to know the I-SID number.
@@ -365,6 +370,13 @@ ip route 0.0.0.0/0 192.168.0.1 weight 1 enable</pre></td>
 
         <tr>
           <td class="group-num">11</td>
+          <td class="group-name">DNS for DHCP</td>
+          <td class="cli-block"><pre class="cli">ip dhcp-server domain-name-servers 8.8.8.8 8.8.4.4</pre></td>
+          <td class="comment-col"><strong>The missing piece.</strong> Without this, a fresh AP gets a DHCP address and a gateway but cannot resolve <code>oh-cwm.extremecloudiq.com</code> — CAPWAP stays in DISCOVERY forever with no visible error. This is a global DHCP server command (not per-subnet), so it applies to both VLAN 10 and VLAN 20 pools simultaneously. Identified after observing AP stuck at <code>ip route 192.168.0.0/16 on mgt0</code> with no default route because DNS lookup returned nothing.</td>
+        </tr>
+
+        <tr>
+          <td class="group-num">12</td>
           <td class="group-name">Persist</td>
           <td class="cli-block"><pre class="cli">save config</pre></td>
           <td class="comment-col">Writes everything to flash. Without this, a reboot wipes all groups above. Run this last, after verifying IS-IS adjacency forms and AP registers correctly.</td>
@@ -385,6 +397,7 @@ ip route 0.0.0.0/0 192.168.0.1 weight 1 enable</pre></td>
         <li><strong>Group 8 — FA:</strong> <code>show fa</code> or <code>show auto-sense</code> → is AP sending FA TLVs and getting I-SID 10010?</li>
         <li><strong>Group 9 — Routing:</strong> <code>show isis lsdb</code> → are 10.0.10.0/24 and 10.0.20.0/24 visible in Karl's LSDB?</li>
         <li><strong>Group 10 — Reachability:</strong> Can you SSH to <code>192.168.0.29</code>? Does <code>ping 192.168.0.1</code> succeed from the switch?</li>
+        <li><strong>Group 11 — DNS:</strong> From a DHCP client, run <code>nslookup oh-cwm.extremecloudiq.com</code> or from the AP CLI: does <code>capwap show client</code> show DTLS Connected within ~60s? If still DISCOVERY, DNS is the first suspect.</li>
       </ol>
     </div>
   </section>
@@ -419,7 +432,7 @@ ip route 0.0.0.0/0 192.168.0.1 weight 1 enable</pre></td>
 </main>
 
 <footer>
-  Horizon Lab · 5320 Onboarding Program · Generated Aug 21 2026 · <code>5320_voss_mylab</code> Supplemental CLI Reference v1.0
+  Horizon Lab · 5320 Onboarding Program · Generated Aug 21 2026 · <code>5320_voss_mylab</code> Supplemental CLI Reference v1.1 — DNS group added
 </footer>
 
 </body>
