@@ -120,6 +120,7 @@
   <a href="#campus">Campus Design</a>
   <a href="#autosense-fa">Auto-Sense + FA</a>
   <a href="#ap-policy-push">AP Policy Push</a>
+  <a href="#ep1-why">Why EP1 Has No VOSS</a>
   <a href="#xiq-findings">XIQ Findings</a>
   <a href="#supplemental-cli">Supplemental CLI</a>
   <a href="#deploy-sequence">Deploy Sequence</a>
@@ -978,6 +979,88 @@ Step 5: Verify:
       <strong>AP policy = "When you boot, request I-SID 100070 for SSID Corp_New."</strong><br>
       Both sides of the conversation must be configured before the FA handshake can happen.
     </div>
+  </section>
+
+  <!-- WHY EP1 HAS NO VOSS -->
+  <section id="ep1-why">
+    <h2>Why EP1 Has No VOSS/Fabric Connect Config — Deep Research</h2>
+
+    <p>Deep research across Extreme Networks documentation, community posts, and release notes (Aug 20 2026) produced a definitive answer. This is architectural, not a gap.</p>
+
+    <h3>The Root Cause — Management Plane Architecture</h3>
+    <table>
+      <thead><tr><th>Tool</th><th>How it talks to the switch</th><th>What it can configure</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>EP1 / XIQ Classic</strong></td>
+          <td><strong>IQAgent</strong> — lightweight cloud telemetry + config agent running on-switch</td>
+          <td>Onboarding, monitoring, firmware, device templates (ports, VLANs, NTP, SSH, SNMP). Cannot model IS-IS topology.</td>
+        </tr>
+        <tr>
+          <td><strong>Site Engine + Fabric Manager</strong></td>
+          <td><strong>SNMP + SSH CLI + Fabric Manager virtual appliance</strong> — full-stack on-premises</td>
+          <td>IS-IS adjacency awareness, SPBM B-MAC tables, I-SID global namespace, L2VSN/L3VSN service provisioning, DVR, Zero Touch Fabric nickname server.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <blockquote>
+      "Fabric Connect requires IS-IS adjacency awareness, B-VLAN coordination across all nodes, and I-SID global namespace management. This complexity is hosted in the Fabric Manager engine, which runs as part of Site Engine — not as part of EP1 or XIQ Classic."
+      <cite>— Extreme Networks architecture, confirmed Aug 20 2026 research</cite>
+    </blockquote>
+
+    <h3>Official Extreme Position</h3>
+    <div class="box">
+      <div class="box-label info">Official Statement</div>
+      "Extreme's Fabric Connect portfolio is managed by the ExtremeCloud IQ – Site Engine suite of applications, with ongoing integration into our ExtremeCloud IQ platform."
+      <br><br>
+      Site Engine is <strong>not EOL</strong> — release 26.06.10 shipped June 2026. The only EOL action was ending support for pre-24.2 MySQL-based versions. PostgreSQL-based Site Engine is fully supported and actively updated.
+    </div>
+
+    <h3>What EP1 Cannot Do (Today)</h3>
+    <table>
+      <thead><tr><th>Capability</th><th>EP1</th><th>XIQ Classic</th><th>Site Engine</th></tr></thead>
+      <tbody>
+        <tr><td>IS-IS topology management</td><td>Visualization only (2026)</td><td>✗</td><td>✓</td></tr>
+        <tr><td>SPBM B-VLAN configuration</td><td>✗</td><td>✗</td><td>✓</td></tr>
+        <tr><td>I-SID service provisioning (L2VSN/L3VSN)</td><td>✗</td><td>✗</td><td>✓</td></tr>
+        <tr><td>Fabric Connect core config</td><td>✗</td><td>✗</td><td>✓ (Fabric Manager)</td></tr>
+        <tr><td>Zero Touch Fabric (nickname server)</td><td>✗</td><td>✗</td><td>✓</td></tr>
+        <tr><td>DVR (Distributed Virtual Routing)</td><td>✗</td><td>✗</td><td>✓</td></tr>
+        <tr><td>Site Engine devices visible in EP1</td><td>✗</td><td>Partial (connected mode)</td><td>✓</td></tr>
+        <tr><td>Onboard, monitor, firmware (Universal HW)</td><td>✓</td><td>✓</td><td>✓</td></tr>
+        <tr><td>OS change (EXOS ↔ VOSS)</td><td>✓</td><td>✓</td><td>✗</td></tr>
+        <tr><td>AP SSID + wireless policy</td><td>✓</td><td>✓</td><td>✗</td></tr>
+      </tbody>
+    </table>
+
+    <h3>EP1 Roadmap — What's Coming</h3>
+    <p>Announced at Extreme Connect 2026 (May 2026):</p>
+    <ul style="margin: 0 0 14px 24px;">
+      <li style="margin-bottom:6px"><strong>Fabric visualization</strong> — living topology across wired, wireless, fabric, SD-WAN. Monitoring only, not configuration.</li>
+      <li style="margin-bottom:6px"><strong>Intent profiles for fabric</strong> — "define once and push everywhere, with EP1 monitoring configuration drift." Progressive Fabric Engine management expansion.</li>
+      <li style="margin-bottom:6px"><strong>Agent ONE Operator</strong> — autonomous workflow execution, Q4 CY2026.</li>
+      <li style="margin-bottom:6px"><strong>XIQ Classic UI retiring Q2 CY2027</strong> — but Site Engine itself is a separate product and is NOT retiring.</li>
+    </ul>
+    <p>No announced date for EP1 to subsume full IS-IS/SPBM/I-SID/Fabric Connect management from Site Engine.</p>
+
+    <div class="box warn">
+      <div class="box-label warn">Critical Field Notice — FN-2023-486</div>
+      Config enforce from Site Engine against VOSS/Fabric Engine switches with Auto-sense enabled can trigger IS-IS disable. Always verify IS-IS adjacency after a Site Engine config push. Source: <a href="https://extreme-networks.my.site.com/ExtrArticleDetail?an=000111539" target="_blank">FN-2023-486 ↗</a>
+    </div>
+
+    <h3>Sources</h3>
+    <table>
+      <thead><tr><th>Source</th><th>Link</th></tr></thead>
+      <tbody>
+        <tr><td>Community: Site Engine devices not in EP1</td><td><a href="https://community.extremenetworks.com/t5/extreme-platform-one-networking/extremecloud-iq-site-engine-and-devices-managed-through-it-do/m-p/121130" target="_blank">Post 121130 ↗</a></td></tr>
+        <tr><td>Site Engine Fabric overview</td><td><a href="https://emc.extremenetworks.com/content/oneview/docs/network/fabric/c_fabric_overview.htm" target="_blank">Open ↗</a></td></tr>
+        <tr><td>Best Practice: Fabric Engine Management</td><td><a href="https://extreme-networks.my.site.com/ExtrArticleDetail?an=000131176" target="_blank">KB 000131176 ↗</a></td></tr>
+        <tr><td>XIQ Classic v25.10.0 Release Notes</td><td><a href="https://documentation.extremenetworks.com/ExtremeCloud%20IQ%20Classic%20v25.10.0-103%20Release%20Notes/ExtremeCloud_IQ/XIQ_release_notes/topics/new_features_container.shtml" target="_blank">Open ↗</a></td></tr>
+        <tr><td>Extreme Connect 2026 — EP1 fabric direction</td><td><a href="https://siliconangle.com/2026/05/06/extreme-connect-2026-agentic-ai-platform-one-next-phase-enterprise-networking/" target="_blank">SiliconAngle ↗</a></td></tr>
+        <tr><td>FN-2023-486 IS-IS/auto-sense warning</td><td><a href="https://extreme-networks.my.site.com/ExtrArticleDetail?an=000111539" target="_blank">Field Notice ↗</a></td></tr>
+      </tbody>
+    </table>
   </section>
 
   <!-- XIQ FINDINGS -->
