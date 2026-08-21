@@ -120,6 +120,9 @@
   <a href="#campus">Campus Design</a>
   <a href="#autosense-fa">Auto-Sense + FA</a>
   <a href="#ap-policy-push">AP Policy Push</a>
+  <a href="#xiq-findings">XIQ Findings</a>
+  <a href="#supplemental-cli">Supplemental CLI</a>
+  <a href="#deploy-sequence">Deploy Sequence</a>
   <a href="#lab">Lab Topology</a>
   <a href="#next">Next Steps</a>
 </nav>
@@ -974,6 +977,139 @@ Step 5: Verify:
       <strong>Switch policy = "I have I-SID 100070 ready on this fabric."</strong><br>
       <strong>AP policy = "When you boot, request I-SID 100070 for SSID Corp_New."</strong><br>
       Both sides of the conversation must be configured before the FA handshake can happen.
+    </div>
+  </section>
+
+  <!-- XIQ FINDINGS -->
+  <section id="xiq-findings">
+    <h2>XIQ / EP1 — What Can and Cannot Configure VOSS</h2>
+
+    <div class="box blocked">
+      <div class="box-label blocked">EP1 Finding</div>
+      EP1 (Extreme Platform One) has <strong>no VOSS/FabricEngine fabric configuration options</strong> — no IS-IS, no SPBM, no I-SID bindings, no Anycast Gateway. EP1 is scoped to wireless policy and EXOS switching. VOSS fabric infrastructure is out of scope for EP1 entirely.
+    </div>
+
+    <div class="box warn">
+      <div class="box-label warn">XIQ Pilot Finding</div>
+      XIQ Pilot has a <strong>Fabric Engine and VOSS</strong> network policy type and switch templates for 5320-16P-4XE. It can push edge settings (STP, MTU, IGMP, PoE) and port types — but no IS-IS, SPBM ethertype, nick-name, I-SID bindings, or Anycast Gateway SVIs in the GUI.
+    </div>
+
+    <h3>Tool Split — What Each System Controls</h3>
+    <table>
+      <thead><tr><th>Config Layer</th><th>EP1</th><th>XIQ Pilot</th><th>Site Engine</th><th>CLI</th></tr></thead>
+      <tbody>
+        <tr><td>IS-IS system-id, manual-area, nick-name</td><td>✗</td><td>✗ GUI / ✓ Supplemental CLI</td><td>✓</td><td>✓</td></tr>
+        <tr><td>SPBM ethertype, instance</td><td>✗</td><td>✗ GUI / ✓ Supplemental CLI</td><td>✓</td><td>✓</td></tr>
+        <tr><td>I-SID bindings (VLAN → I-SID)</td><td>✗</td><td>✗ GUI / ✓ Supplemental CLI</td><td>✓</td><td>✓</td></tr>
+        <tr><td>Anycast Gateway SVIs</td><td>✗</td><td>✗ GUI / ✓ Supplemental CLI</td><td>✓</td><td>✓</td></tr>
+        <tr><td>Port type (Auto-sense / NNI / Access)</td><td>✗</td><td>✓ GUI</td><td>✓</td><td>✓</td></tr>
+        <tr><td>STP off, MTU 1950, IGMP off</td><td>✗</td><td>✓ GUI</td><td>✓</td><td>✓</td></tr>
+        <tr><td>AP SSIDs + I-SID mapping (wireless)</td><td>✓</td><td>✓</td><td>✗</td><td>✗</td></tr>
+        <tr><td>OS change (EXOS → VOSS)</td><td>✗</td><td>✓</td><td>✗</td><td>✗ (boot menu)</td></tr>
+      </tbody>
+    </table>
+
+    <h3>XIQ Port Configuration — Port Types Available</h3>
+    <p>Discovered in XIQ Switch Template → Port Configuration → Port Type dropdown on each port:</p>
+    <table>
+      <thead><tr><th>XIQ Port Type</th><th>VOSS CLI equivalent</th><th>Use for</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Auto-sense Port</strong></td><td><code>auto-sense enable</code> + <code>fa enable</code></td><td>AP ports (1/3), wired clients, NNI (auto-detects IS-IS neighbor)</td></tr>
+        <tr><td><strong>Access Port</strong></td><td>Static VLAN membership</td><td>Non-fabric wired devices — no VLAN assignment GUI for VOSS</td></tr>
+        <tr><td><strong>Trunk Port</strong></td><td>802.1Q tagged trunk</td><td>Mixed-mode EXOS uplinks</td></tr>
+        <tr><td><strong>Onboarding Port</strong></td><td>ZTP+ onboarding VLAN</td><td>Initial switch discovery</td></tr>
+        <tr><td><strong>Disabled Port</strong></td><td><code>shutdown</code></td><td>Unused ports</td></tr>
+      </tbody>
+    </table>
+
+    <div class="box ok">
+      <div class="box-label ok">Key Finding — NNI via Auto-sense</div>
+      All ports set to <strong>Auto-sense</strong> in XIQ is correct. Auto-sense is smart enough to detect IS-IS hellos from the neighboring VOSS switch on Port 1/10 and auto-transition that port to NNI mode — no explicit NNI port type needed in XIQ.
+    </div>
+
+    <div class="box ok">
+      <div class="box-label ok">Modem Port (1/1) — No VLAN 100 Needed</div>
+      In EXOS, Port 1/1 was untagged in VLAN 1 (Default) for the internet exit. In VOSS, Auto-sense on Port 1/1 sees no LLDP/FA TLVs from the modem → port stays on VLAN 1 (management) naturally. Same subnet (192.168.0.x), same gateway — no Transit VLAN 100 required. Simpler and consistent with the EXOS baseline.
+    </div>
+  </section>
+
+  <!-- SUPPLEMENTAL CLI -->
+  <section id="supplemental-cli">
+    <h2>Supplemental CLI — The Game Changer</h2>
+
+    <p>XIQ Advanced Settings → Supplemental CLI allows arbitrary CLI commands to be pushed to the switch on policy deploy. This bridges the gap — IS-IS, SPBM, I-SID bindings, and DHCP can all be delivered from XIQ without a console cable.</p>
+
+    <div class="box">
+      <div class="box-label info">Rules (from XIQ UI)</div>
+      1. Config commands only — no <code>show</code> commands<br>
+      2. Max 8192 characters<br>
+      3. Variable substitution supported: <code>${ip:name}</code> and <code>${vlan:name}</code><br>
+      4. Full config push triggered every time Supplemental CLI changes — not a delta
+    </div>
+
+    <h3>Supplemental CLI — Full VOSS Fabric Config Block</h3>
+    <pre>router isis
+  system-id 0000.0000.0001
+  manual-area 00.0001
+exit
+spbm 1
+  spbm ethertype 0x8100
+  spbm nick-name 0.00.01
+exit
+router isis enable
+vlan create 20,30 type port-mstprstp 0
+vlan i-sid 20 100020
+vlan i-sid 30 100030
+vlan name 20 Corp_New
+vlan name 30 Guest_New
+interface vlan 20
+  ip address 10.0.20.1/24
+  ip dhcp-server enable
+exit
+interface vlan 30
+  ip address 10.0.30.1/24
+  ip dhcp-server enable
+exit
+ip dhcp-server enable
+interface vlan 1
+  ip address 192.168.0.28/24
+exit
+ip route 0.0.0.0/0 192.168.0.1 weight 1 enable
+router isis
+  ip-shortcut
+exit
+save config</pre>
+
+    <div class="box warn">
+      <div class="box-label warn">Verify Before Pasting</div>
+      <strong>192.168.0.28</strong> = switch IP on modem subnet (was SW1 EXOS IP — carries forward)<br>
+      <strong>192.168.0.1</strong> = modem gateway (confirmed live Aug 20)<br>
+      Verify with <code>show vlan Default</code> on EXOS before OS change, and <code>ping 192.168.0.1</code> from switch.
+    </div>
+  </section>
+
+  <!-- DEPLOY SEQUENCE -->
+  <section id="deploy-sequence">
+    <h2>Home Lab Deploy Sequence — Aug 21</h2>
+
+    <table>
+      <thead><tr><th>Step</th><th>Action</th><th>Tool</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>Back up EXOS config</td><td>XIQ + CLI</td><td>XIQ: Manage → Devices → Backups → Create Backup. CLI: <code>save configuration as-script exos_backup_pre_voss.xsf</code></td></tr>
+        <tr><td>2</td><td>Configure XIQ Network Policy fully</td><td>XIQ</td><td>Port types (all Auto-sense), Supplemental CLI block ready, AP Network Policy (SSIDs + I-SID mappings) ready</td></tr>
+        <tr><td>3</td><td>Unplug AP3000</td><td>Physical</td><td>PoE off → AP powers down. Do before OS change.</td></tr>
+        <tr><td>4</td><td>OS change: EXOS → VOSS</td><td>XIQ</td><td>Manage → Devices → Actions → Change OS → VOSS. Switch reboots, wipes config, comes up factory-default VOSS.</td></tr>
+        <tr><td>5</td><td>Deploy VOSS Network Policy</td><td>XIQ</td><td>Switch reconnects via IQAgent (VLAN 1 → modem DHCP). Push policy: Auto-sense ports + Supplemental CLI = full fabric config in one push.</td></tr>
+        <tr><td>6</td><td>Configure fabric_se via Site Engine</td><td>Site Engine</td><td>VOSS Domain → same SPBM params (manual-area 00.0001, ethertype 0x8100, nick-name 0.00.02). Must match exactly.</td></tr>
+        <tr><td>7</td><td>Cable NNI Port 1/10</td><td>Physical</td><td>Connect both switches. Auto-sense detects IS-IS hellos → NNI auto-configures. Cable LAST.</td></tr>
+        <tr><td>8</td><td>Plug AP3000 back in</td><td>Physical</td><td>AP boots → CAPWAP → EP1/XIQ pushes AP Network Policy → FA TLVs → switch provisions VLAN/I-SID.</td></tr>
+        <tr><td>9</td><td>Verify all four layers</td><td>CLI (read-only)</td><td>show spbm · show isis adj · show isis spbm unicast-tree · show fa assignment</td></tr>
+      </tbody>
+    </table>
+
+    <div class="box ok">
+      <div class="box-label ok">What XIQ Now Handles End-to-End</div>
+      OS change → Port types (Auto-sense) → STP off / MTU 1950 → IS-IS + SPBM + I-SIDs (Supplemental CLI) → AP Network Policy. <strong>No console cable needed for initial deployment.</strong>
     </div>
   </section>
 
