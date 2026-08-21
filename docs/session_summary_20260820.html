@@ -1319,6 +1319,11 @@ save config
 # Guest → Internet: ALLOWED  (entry 20)
 # Staff → Guest:    ALLOWED  (ACL is inbound on VLAN 30 only — add mirror rule to block both ways)</pre>
 
+    <div class="box ok">
+      <div class="box-label ok">The Simplest Isolation — No SVI</div>
+      If you do not configure <code>interface vlan 30 ip address</code> on the BEB, I-SID 100030 is a sealed L2 bubble. Cross-I-SID routing is <strong>physically impossible</strong> — not blocked by a rule, but structurally absent. No ACL needed. No policy overhead. The absence of a gateway IS the isolation. ACLs are only relevant after you have already provisioned both SVIs and chosen to allow routing.
+    </div>
+
     <div class="box warn">
       <div class="box-label warn">ACL Must Live on Both Switches</div>
       VOSS hard constraint: wherever the Anycast Gateway SVI lives, the Guest isolation ACL must also live — on BOTH switches. If one switch is missing the ACL, a Guest client that associates to that switch bypasses isolation entirely.
