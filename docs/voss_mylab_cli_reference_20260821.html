@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VOSS MyLab CLI Reference — 5320_voss_mylab Supplemental CLI</title>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Libre Baskerville', Georgia, serif;
+    background: #fff;
+    color: #1a1a1a;
+    font-size: 16px;
+    line-height: 1.7;
+  }
+
+  /* Header */
+  .header-rule { border-top: 4px solid #1a1a1a; margin-bottom: 0; }
+  header {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 24px 24px 0;
+    border-bottom: 1px solid #ccc;
+    margin-bottom: 32px;
+  }
+  .kicker {
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #326891;
+    margin-bottom: 10px;
+  }
+  h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 10px;
+  }
+  .subtitle {
+    font-style: italic;
+    color: #444;
+    font-size: 1.05rem;
+    margin-bottom: 14px;
+  }
+  .byline {
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: 13px;
+    color: #555;
+    border-top: 1px solid #ddd;
+    padding-top: 10px;
+    margin-top: 10px;
+    padding-bottom: 18px;
+  }
+
+  /* TOC */
+  nav#toc {
+    position: sticky;
+    top: 0;
+    background: #fff;
+    border-bottom: 2px solid #326891;
+    z-index: 100;
+    padding: 10px 24px;
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: 13px;
+  }
+  nav#toc a {
+    color: #326891;
+    text-decoration: none;
+    margin-right: 18px;
+    font-weight: 600;
+  }
+  nav#toc a:hover { text-decoration: underline; }
+
+  /* Main */
+  main {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 24px 60px;
+  }
+
+  h2 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin: 40px 0 14px;
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 6px;
+  }
+
+  p { margin-bottom: 14px; }
+
+  /* Callout boxes */
+  .box {
+    border-left: 4px solid #326891;
+    background: #f0f6fb;
+    padding: 14px 18px;
+    margin: 20px 0;
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: 14px;
+  }
+  .box.ok   { border-color: #2e7d32; background: #f1f8f1; }
+  .box.warn { border-color: #e65100; background: #fff8f0; }
+  .box strong { display: block; margin-bottom: 4px; font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; }
+
+  /* CLI table */
+  table.cli-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: 13.5px;
+    margin: 24px 0 40px;
+  }
+  table.cli-table thead tr {
+    background: #326891;
+    color: #fff;
+  }
+  table.cli-table th {
+    padding: 10px 14px;
+    text-align: left;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+  }
+  table.cli-table td {
+    padding: 10px 14px;
+    vertical-align: top;
+    border-bottom: 1px solid #e0e0e0;
+  }
+  table.cli-table tr:nth-child(even) td { background: #f8f8f8; }
+  table.cli-table tr:hover td { background: #eef4fb; }
+
+  td.group-num {
+    font-weight: 700;
+    color: #326891;
+    white-space: nowrap;
+    width: 32px;
+  }
+  td.group-name {
+    font-weight: 700;
+    white-space: nowrap;
+    width: 180px;
+  }
+  td.cli-block {
+    width: 340px;
+  }
+  pre.cli {
+    background: #1e1e2e;
+    color: #cdd6f4;
+    padding: 10px 14px;
+    border-radius: 4px;
+    font-family: 'Menlo', 'Consolas', monospace;
+    font-size: 11.5px;
+    line-height: 1.6;
+    overflow-x: auto;
+    white-space: pre;
+  }
+  td.comment-col {
+    color: #333;
+    line-height: 1.6;
+  }
+
+  /* Debug sequence */
+  .debug-seq {
+    background: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 16px 20px;
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: 14px;
+    margin: 20px 0;
+  }
+  .debug-seq ol { padding-left: 20px; }
+  .debug-seq li { margin-bottom: 6px; }
+  .debug-seq code {
+    background: #eee;
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-family: 'Menlo', 'Consolas', monospace;
+    font-size: 12px;
+  }
+
+  /* Reference */
+  .ref-list {
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: 13.5px;
+    padding-left: 20px;
+  }
+  .ref-list li { margin-bottom: 8px; }
+
+  footer {
+    max-width: 900px;
+    margin: 40px auto 0;
+    padding: 20px 24px;
+    border-top: 1px solid #ccc;
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: 12px;
+    color: #888;
+  }
+</style>
+</head>
+<body>
+
+<div class="header-rule"></div>
+
+<header>
+  <div class="kicker">Horizon Lab · VOSS Migration · Aug 21 2026</div>
+  <h1>5320_voss_mylab — Supplemental CLI Reference</h1>
+  <p class="subtitle">Thematic breakdown of every command group pushed via XIQ Supplemental CLI during VOSS fabric bring-up, with debug intent for each group.</p>
+  <div class="byline">Khursheed Khan · Senior Systems Architect, Extreme Networks &nbsp;|&nbsp; 5320-onboarding program &nbsp;|&nbsp; Pre-flight baseline: <code>voss_se_dump_202650821.txt</code></div>
+</header>
+
+<nav id="toc">
+  <a href="#context">Context</a>
+  <a href="#table">CLI Table</a>
+  <a href="#debug">Debug Sequence</a>
+  <a href="#baseline">SE Baseline</a>
+</nav>
+
+<main>
+
+  <section id="context">
+    <h2>Context</h2>
+
+    <p>This document captures the <strong>Supplemental CLI block</strong> pushed to <code>5320_voss_mylab</code> (nick-name <code>0.00.01</code>) via XIQ Advanced Settings → Supplemental CLI after OS conversion from EXOS to VOSS. The peer switch is <code>5320_voss_se</code> (KhKLab-SW-01, nick-name <code>0.00.02</code>), running VOSS 9.3.2.0, pre-flight dumped and verified Aug 21 2026.</p>
+
+    <div class="box ok">
+      <strong>I-SID Namespace Clear</strong>
+      Pre-flight on 5320_voss_se confirmed I-SIDs 10010 and 10020 are not in use. Karl's switch uses 144153–144156, 15999999, 16777001. MyLab namespace is safe.
+    </div>
+
+    <div class="box warn">
+      <strong>Two Bugs Caught and Corrected</strong>
+      (1) Auto-sense syntax: earlier drafts had <code>auto-sense i-sid data 10010</code> — wrong keyword order. Correct syntax confirmed from Karl's running config: <code>auto-sense data i-sid 10010</code>.<br><br>
+      (2) B-VID missing: <code>spbm 1 b-vid 4051 primary 4051</code> was absent from Group 2. XIQ ZTD may assign different B-VIDs on a fresh VOSS deploy — without this line explicitly matching Karl's 4051-4052, IS-IS adjacency forms but SPBM fabric does not.
+    </div>
+
+    <div class="box">
+      <strong>A-Priori VLAN → I-SID Convention</strong>
+      I-SID = VLAN + 10000. VLAN 10 (Staff) → I-SID 10010. VLAN 20 (Guest) → I-SID 10020. This mapping is hard-coded on every switch — the AP never needs to know the I-SID number.
+    </div>
+  </section>
+
+  <section id="table">
+    <h2>CLI Command Groups</h2>
+
+    <table class="cli-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Group</th>
+          <th>CLI Commands</th>
+          <th>What It Does</th>
+        </tr>
+      </thead>
+      <tbody>
+
+        <tr>
+          <td class="group-num">1</td>
+          <td class="group-name">IS-IS Identity</td>
+          <td class="cli-block"><pre class="cli">router isis
+  sys-name "KhKLab-SW-02"
+  is-type l1
+  ip-source-address 10.0.0.1
+exit</pre></td>
+          <td class="comment-col">Names the switch in the IS-IS topology. <code>is-type l1</code> = Level 1 only, matching Karl's switch. The source address is the loopback — this is what other BEBs use to reach this switch via fabric IP shortcuts. Must match the loopback interface created in Group 6.</td>
+        </tr>
+
+        <tr>
+          <td class="group-num">2</td>
+          <td class="group-name">SPBM Instance</td>
+          <td class="cli-block"><pre class="cli">spbm 1 nick-name 0.00.01
+spbm 1 b-vid 4051 primary 4051
+spbm 1 multicast enable
+spbm 1 ip enable
+router isis enable</pre></td>
+          <td class="comment-col">Defines SPBM instance 1. Nick-name <code>0.00.01</code> uniquely identifies this BEB in the fabric — Karl's is <code>0.00.02</code>, must not collide. <code>b-vid 4051 primary 4051</code> explicitly sets B-VLANs to match Karl's switch — XIQ ZTD may assign different defaults on a fresh deploy, so this must be hardcoded. <code>ip enable</code> = fabric carries IP shortcuts between BEBs. <code>multicast enable</code> = SPBM multicast forwarding active.</td>
+        </tr>
+
+        <tr>
+          <td class="group-num">3</td>
+          <td class="group-name">Area Membership</td>
+          <td class="cli-block"><pre class="cli">manual-area 49.b0b1</pre></td>
+          <td class="comment-col">Joins this switch to IS-IS area <code>49.b0b1</code>. Karl's switch learned this dynamically from a neighbor — this switch declares it explicitly. Both sides must be in the same area for IS-IS adjacency to form. If adjacency fails, verify this matches on both ends.</td>
+        </tr>
+
+        <tr>
+          <td class="group-num">4</td>
+          <td class="group-name">VLAN + I-SID Binding</td>
+          <td class="cli-block"><pre class="cli">vlan create 10,20 type port-mstprstp 0
+vlan i-sid 10 10010
+vlan i-sid 20 10020
+vlan name 10 Staff
+vlan name 20 Guest</pre></td>
+          <td class="comment-col">Creates service VLANs and hard-codes the a-priori binding. <code>vlan i-sid 10 10010</code> is the single line that makes the architect's intent real — once it exists, the fabric knows VLAN 10 = I-SID 10010 on every switch. Every other BEB that sees I-SID 10010 in the LSDB treats it as Staff. The AP only needs to tag with VLAN 10; the switch resolves to 10010 automatically.</td>
+        </tr>
+
+        <tr>
+          <td class="group-num">5</td>
+          <td class="group-name">Anycast Gateway SVIs</td>
+          <td class="cli-block"><pre class="cli">interface Vlan 10
+  ip address 10.0.10.1 255.255.255.0 2
+exit
+interface Vlan 20
+  ip address 10.0.20.1 255.255.255.0 3
+exit</pre></td>
+          <td class="comment-col">Creates the L3 gateway for each VLAN on this BEB. Clients on VLAN 10/20 use these as their default gateway. <strong>Architecture lever:</strong> presence of both SVIs = cross-VLAN routing is possible. Remove one SVI = that I-SID becomes an isolated L2 bubble. No ACL needed for isolation — it's structurally absent.</td>
+        </tr>
+
+        <tr>
+          <td class="group-num">6</td>
+          <td class="group-name">Loopback (IS-IS Source)</td>
+          <td class="cli-block"><pre class="cli">interface loopback 1
+  ip address 1 10.0.0.1/255.255.255.255
+exit</pre></td>
+          <td class="comment-col">Creates the loopback that IS-IS uses as its source address. Must match <code>ip-source-address 10.0.0.1</code> in Group 1. Without this interface, IS-IS may not start or will use a suboptimal source. Karl's equivalent: loopback <code>10.159.4.1/32</code>, CLIP <code>10.158.4.1/32</code>.</td>
+        </tr>
+
+        <tr>
+          <td class="group-num">7</td>
+          <td class="group-name">DHCP Server</td>
+          <td class="cli-block"><pre class="cli">ip dhcp-server subnet 10.0.10.0/24
+pool 10.0.10.100 10.0.10.200
+router 10.0.10.1
+lease-time 86400
+exit
+ip dhcp-server subnet 10.0.20.0/24
+pool 10.0.20.100 10.0.20.200
+router 10.0.20.1
+lease-time 86400
+exit
+ip dhcp-server enable</pre></td>
+          <td class="comment-col">Local DHCP for Staff and Guest clients. This switch serves addresses directly — no relay needed for first-pass test. Karl's switch uses relay (fwd-path to CLIP) because his DHCP server is centralised. For mylab, local server is simpler and self-contained.</td>
+        </tr>
+
+        <tr>
+          <td class="group-num">8</td>
+          <td class="group-name">Auto-Sense / FA</td>
+          <td class="cli-block"><pre class="cli">auto-sense data i-sid 10010
+auto-sense fa wap-type1 i-sid 10010</pre></td>
+          <td class="comment-col">Tells auto-sense what to do when an FA-capable AP connects. <code>wap-type1</code> = FA AP profile (AP3000). Switch advertises I-SID 10010 to the AP via FA TLVs over LLDP. AP uses this to tag its management traffic into the fabric. Syntax confirmed from Karl's running config — keyword order matters.</td>
+        </tr>
+
+        <tr>
+          <td class="group-num">9</td>
+          <td class="group-name">Route Redistribution</td>
+          <td class="cli-block"><pre class="cli">router isis
+  redistribute direct
+  redistribute direct enable
+exit
+isis apply redistribute direct</pre></td>
+          <td class="comment-col">Injects directly connected subnets (VLANs 10/20, loopback) into IS-IS so Karl's switch can reach them via fabric IP shortcuts. Without this, only L2 fabric works — routed reachability between BEBs is absent. The <code>isis apply</code> line activates the redistribution immediately without a reboot.</td>
+        </tr>
+
+        <tr>
+          <td class="group-num">10</td>
+          <td class="group-name">Management + Default Route</td>
+          <td class="cli-block"><pre class="cli">interface vlan 1
+  ip address 192.168.0.29 255.255.255.0 1
+exit
+ip route 0.0.0.0/0 192.168.0.1 weight 1 enable</pre></td>
+          <td class="comment-col">In-band management IP on VLAN 1 — use <code>192.168.0.29</code> to avoid conflict with Karl's switch on the home LAN. Default route via modem (<code>192.168.0.1</code>) for internet reachability. Verify <code>.29</code> is free on your subnet before pushing. DHCP must not be serving this address from another device.</td>
+        </tr>
+
+        <tr>
+          <td class="group-num">11</td>
+          <td class="group-name">Persist</td>
+          <td class="cli-block"><pre class="cli">save config</pre></td>
+          <td class="comment-col">Writes everything to flash. Without this, a reboot wipes all groups above. Run this last, after verifying IS-IS adjacency forms and AP registers correctly.</td>
+        </tr>
+
+      </tbody>
+    </table>
+  </section>
+
+  <section id="debug">
+    <h2>Debug Sequence</h2>
+    <p>If something breaks post-deployment, walk these groups in order — each group is a layer of the stack:</p>
+    <div class="debug-seq">
+      <ol>
+        <li><strong>Group 3 — Area:</strong> <code>show isis</code> → is <code>manual-area 49.b0b1</code> present and adjacency forming?</li>
+        <li><strong>Group 2 — SPBM:</strong> <code>show isis spbm</code> → is nick-name <code>0.00.01</code> visible? Is ORIGIN <code>static</code> (not dynamic)?</li>
+        <li><strong>Group 4 — I-SIDs:</strong> <code>show vlan i-sid</code> → are 10010/10020 bound correctly?</li>
+        <li><strong>Group 8 — FA:</strong> <code>show fa</code> or <code>show auto-sense</code> → is AP sending FA TLVs and getting I-SID 10010?</li>
+        <li><strong>Group 9 — Routing:</strong> <code>show isis lsdb</code> → are 10.0.10.0/24 and 10.0.20.0/24 visible in Karl's LSDB?</li>
+        <li><strong>Group 10 — Reachability:</strong> Can you SSH to <code>192.168.0.29</code>? Does <code>ping 192.168.0.1</code> succeed from the switch?</li>
+      </ol>
+    </div>
+  </section>
+
+  <section id="baseline">
+    <h2>5320_voss_se Baseline (Pre-Flight Reference)</h2>
+    <p>Captured Aug 21 2026 from KhKLab-SW-01 before mylab conversion. Key parameters your mylab must be compatible with:</p>
+
+    <table class="cli-table">
+      <thead>
+        <tr>
+          <th>Parameter</th>
+          <th>5320_voss_se (Karl's)</th>
+          <th>5320_voss_mylab (yours)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>Nick-name</td><td><code>0.00.02</code> (static in config)</td><td><code>0.00.01</code></td></tr>
+        <tr><td>IS-IS Area</td><td><code>49.b0b1</code> (dynamically learned)</td><td><code>49.b0b1</code> (manual-area set)</td></tr>
+        <tr><td>Ethertype</td><td><code>0x8100</code></td><td><code>0x8100</code></td></tr>
+        <tr><td>B-VIDs</td><td><code>4051-4052</code></td><td>Learned from peer via IS-IS</td></tr>
+        <tr><td>IS-IS source IP</td><td><code>10.159.4.1</code> (loopback)</td><td><code>10.0.0.1</code> (loopback)</td></tr>
+        <tr><td>CLIP / Mgmt</td><td><code>10.158.4.1/32</code></td><td>VLAN 1: <code>192.168.0.29</code></td></tr>
+        <tr><td>Service VLANs</td><td>153/154/155/156 → 144153–144156</td><td>10/20 → 10010/10020</td></tr>
+        <tr><td>DHCP model</td><td>Local server + relay to CLIP</td><td>Local server only</td></tr>
+        <tr><td>RADIUS/EAP</td><td>Enabled (10.152.0.114)</td><td>Not configured (first-pass)</td></tr>
+        <tr><td>SW version</td><td>9.3.2.0</td><td>TBD post-conversion</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+</main>
+
+<footer>
+  Horizon Lab · 5320 Onboarding Program · Generated Aug 21 2026 · <code>5320_voss_mylab</code> Supplemental CLI Reference v1.0
+</footer>
+
+</body>
+</html>
