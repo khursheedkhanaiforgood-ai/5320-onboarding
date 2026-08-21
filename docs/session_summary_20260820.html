@@ -124,6 +124,8 @@
   <a href="#xiq-findings">XIQ Findings</a>
   <a href="#supplemental-cli">Supplemental CLI</a>
   <a href="#deploy-sequence">Deploy Sequence</a>
+  <a href="#isid-design">I-SID Design</a>
+  <a href="#cross-isid-routing">Cross-I-SID Routing</a>
   <a href="#lab">Lab Topology</a>
   <a href="#next">Next Steps</a>
 </nav>
@@ -1193,6 +1195,133 @@ save config</pre>
     <div class="box ok">
       <div class="box-label ok">What XIQ Now Handles End-to-End</div>
       OS change → Port types (Auto-sense) → STP off / MTU 1950 → IS-IS + SPBM + I-SIDs (Supplemental CLI) → AP Network Policy. <strong>No console cable needed for initial deployment.</strong>
+    </div>
+  </section>
+
+  <!-- I-SID DESIGN — A-PRIORI KNOWLEDGE -->
+  <section id="isid-design">
+    <h2>I-SID Design — The Architect's A-Priori Knowledge Model</h2>
+
+    <p>The I-SID is the architect's design decision, not the AP's. The AP is a pipe — it declares a VLAN and asks the switch to sort it out. The switch holds the authoritative VLAN-to-I-SID binding. The fabric carries the I-SID as the service identity across every switch.</p>
+
+    <h3>How VLAN 20 Gets Mapped to I-SID 100020 — The Full Flow</h3>
+    <pre># Architect's CLI decision (Supplemental CLI — same on every switch):
+vlan i-sid 20 100020   ← this IS the binding. Done.
+
+# AP Policy (XIQ/EP1) — AP only needs the VLAN number:
+SSID Staff → VLAN 20   ← no I-SID knowledge required
+
+# FA Handshake at runtime:
+AP sends LLDP-FA TLV: "I need VLAN 20"
+Switch looks up VLAN 20 → finds vlan i-sid 20 100020
+Switch provisions VLAN 20 on AP port → mapped to I-SID 100020
+Automatic. The AP never knew the I-SID existed.</pre>
+
+    <div class="box ok">
+      <div class="box-label ok">The A-Priori Convention</div>
+      Hardcode VLAN = I-SID − 100000 across the entire network:<br><br>
+      <strong>VLAN 20 → I-SID 100020 (Staff) — on every switch, always</strong><br>
+      <strong>VLAN 30 → I-SID 100030 (Guest) — on every switch, always</strong><br><br>
+      Every AP provisioned with VLAN 20 finds I-SID 100020 on any switch it connects to. No per-AP I-SID knowledge needed. The convention is the contract.
+    </div>
+
+    <h3>What Each Layer Knows</h3>
+    <table>
+      <thead><tr><th>Layer</th><th>Knows</th><th>Does NOT need to know</th></tr></thead>
+      <tbody>
+        <tr><td><strong>AP</strong></td><td>VLAN number (20, 30)</td><td>I-SID number — the switch resolves it</td></tr>
+        <tr><td><strong>Switch (BEB)</strong></td><td>VLAN → I-SID binding (CLI). All I-SIDs in the fabric (via IS-IS)</td><td>AP's internal SSID names or client intent</td></tr>
+        <tr><td><strong>Fabric (BCB)</strong></td><td>B-MAC → port (B-FIB). I-SID membership</td><td>VLANs, SSIDs, clients — only sees MAC-in-MAC envelope</td></tr>
+        <tr><td><strong>Architect</strong></td><td>Everything — VLAN, I-SID, subnet, service intent. Must design and pre-provision all of it.</td><td>—</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Dual-SSID FA — How Both Services Provision on One AP Port</h3>
+    <pre># Switch CLI — both I-SIDs provisioned:
+vlan i-sid 20 100020   ← Staff
+vlan i-sid 30 100030   ← Guest
+
+# AP sends TWO FA TLVs:
+"I need VLAN 20"  → switch: VLAN 20 = I-SID 100020 → provision Staff on this port
+"I need VLAN 30"  → switch: VLAN 30 = I-SID 100030 → provision Guest on this port
+
+# Result: two tagged VLANs on Port 1/3, two separate fabric services, two subnets
+show fa assignment
+→ Port 1/3  VLAN 20  I-SID 100020  ACTIVE  DYNAMIC
+→ Port 1/3  VLAN 30  I-SID 100030  ACTIVE  DYNAMIC</pre>
+  </section>
+
+  <!-- CROSS-I-SID ROUTING VS ISOLATION -->
+  <section id="cross-isid-routing">
+    <h2>Cross-I-SID Routing vs Isolation — The Architect's Control Lever</h2>
+
+    <blockquote>
+      "So if I don't want the I-SIDs to talk to each other, don't do this. But if I did, then I provision for Anycast — and voilà, it works."
+      <cite>— Khursheed Khan, Aug 20 2026</cite>
+    </blockquote>
+
+    <p>The Anycast Gateway SVI is the on/off switch for cross-I-SID routing. The architect decides per service pair whether routing is permitted.</p>
+
+    <table>
+      <thead><tr><th>Design Choice</th><th>What to configure</th><th>Result</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>Hard isolation</strong><br>(I-SIDs cannot reach each other)</td>
+          <td>Only configure SVI for own I-SID. No SVI for the other.</td>
+          <td>Traffic physically cannot cross — no route exists. Guest cannot reach Staff even if a client tries.</td>
+        </tr>
+        <tr>
+          <td><strong>Full routing</strong><br>(I-SIDs can reach each other)</td>
+          <td>Configure Anycast SVI for BOTH I-SIDs on every BEB.</td>
+          <td>BEB routes between SVIs automatically. Staff ↔ Guest traffic flows. No ACL needed.</td>
+        </tr>
+        <tr>
+          <td><strong>Selective routing + ACL</strong><br>(internet yes, cross-I-SID no)</td>
+          <td>Configure both SVIs + ACL on Guest SVI blocking Staff subnet.</td>
+          <td>Both reach internet. Guest cannot reach Staff. Staff can reach Guest (if ACL is one-way) or block both ways.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>How Cross-I-SID Routing Works at the Ingress BEB</h3>
+    <pre>Staff client (10.0.20.5) wants to reach Guest client (10.0.30.8)
+       ↓
+Sends to default gateway: 10.0.20.1  ← hits ingress BEB Anycast GW
+       ↓
+Ingress BEB: "10.0.30.0/24 is directly connected on VLAN 30 SVI"
+  → routes packet internally (L3 decision at the BEB)
+  → wraps in MAC-in-MAC → I-SID 100030 fabric service
+       ↓
+Egress BEB: strips MAC-in-MAC envelope → delivers to Guest client
+
+# The fabric sees TWO separate flows:
+# Flow 1: Staff client → ingress BEB (I-SID 100020)
+# Flow 2: ingress BEB → Guest client (I-SID 100030)
+# The BEB is the routing point between them.</pre>
+
+    <div class="box">
+      <div class="box-label info">Why Anycast Makes This Seamless</div>
+      Both SVIs exist on ALL BEBs simultaneously. Whichever switch the client connects to is already the router — no tromboning to a central gateway, no VRRP, no single point of failure. The client roams, the nearest BEB answers and routes.
+    </div>
+
+    <h3>Guest Isolation ACL — Block Cross-I-SID, Allow Internet</h3>
+    <pre># On both switches — applied to Guest SVI (VLAN 30):
+ip filter create GUEST_ISOLATION
+ip filter global GUEST_ISOLATION entry 10 deny ip 10.0.30.0/24 10.0.20.0/24
+ip filter global GUEST_ISOLATION entry 20 permit ip any any
+interface vlan 30
+  ip filter GUEST_ISOLATION in
+exit
+save config
+
+# Result:
+# Guest → Staff:    BLOCKED  (entry 10)
+# Guest → Internet: ALLOWED  (entry 20)
+# Staff → Guest:    ALLOWED  (ACL is inbound on VLAN 30 only — add mirror rule to block both ways)</pre>
+
+    <div class="box warn">
+      <div class="box-label warn">ACL Must Live on Both Switches</div>
+      VOSS hard constraint: wherever the Anycast Gateway SVI lives, the Guest isolation ACL must also live — on BOTH switches. If one switch is missing the ACL, a Guest client that associates to that switch bypasses isolation entirely.
     </div>
   </section>
 
