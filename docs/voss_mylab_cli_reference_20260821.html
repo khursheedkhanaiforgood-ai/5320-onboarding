@@ -75,6 +75,37 @@
   }
   nav#toc a:hover { text-decoration: underline; }
 
+  /* E2E script block */
+  .e2e-wrap {
+    background: #1e1e2e;
+    border-radius: 6px;
+    padding: 0;
+    margin: 24px 0;
+    overflow-x: auto;
+  }
+  .e2e-wrap pre {
+    color: #cdd6f4;
+    font-family: 'Menlo', 'Consolas', monospace;
+    font-size: 12px;
+    line-height: 1.7;
+    padding: 20px 24px;
+    white-space: pre;
+  }
+  .e2e-wrap pre .comment { color: #6c7086; }
+  .e2e-wrap pre .group-hdr { color: #89b4fa; font-weight: bold; }
+  .e2e-wrap pre .keyword { color: #cba6f7; }
+  .e2e-wrap-header {
+    background: #313244;
+    border-radius: 6px 6px 0 0;
+    padding: 8px 20px;
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: 12px;
+    color: #a6adc8;
+    letter-spacing: 0.05em;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+
   /* Main */
   main {
     max-width: 900px;
@@ -213,6 +244,7 @@
 
 <nav id="toc">
   <a href="#context">Context</a>
+  <a href="#e2e">E2E Script</a>
   <a href="#table">CLI Table</a>
   <a href="#debug">Debug Sequence</a>
   <a href="#baseline">SE Baseline</a>
@@ -245,6 +277,120 @@
       <strong>A-Priori VLAN → I-SID Convention</strong>
       I-SID = VLAN + 10000. VLAN 10 (Staff) → I-SID 10010. VLAN 20 (Guest) → I-SID 10020. This mapping is hard-coded on every switch — the AP never needs to know the I-SID number.
     </div>
+  </section>
+
+  <section id="e2e">
+    <h2>E2E Clean Deploy Script — Paste in Sequence</h2>
+
+    <div class="box ok">
+      <strong>Battle-Tested — Aug 21 2026</strong>
+      All 13 groups verified in lab. Two fixes incorporated: <code>ip dhcp-server ha-role primary</code> (Group 8) and <code>ip dhcp-server domain-name-servers 8.8.8.8 8.8.4.4</code> (Group 8). Port 1/3 is NOT touched — auto-sense and FA manage it automatically. Never manually configure port 1/3.
+    </div>
+
+    <div class="box warn">
+      <strong>No Guessing Rule</strong>
+      Every command in this script is verified in lab. Do not modify syntax without verification. If a command is not in this reference, do not guess it.
+    </div>
+
+    <div class="e2e-wrap">
+      <div class="e2e-wrap-header">VOSS Clean Deploy · KhKLab-SW-02 · 5320-16P-2MXT-2X · VOSS 9.4.0.0</div>
+      <pre><span class="comment"># ============================================================
+# VOSS CLEAN DEPLOY — KhK Lab SW2 — 2026-08-21
+# DO NOT touch port 1/3 — auto-sense/FA manage it
+# ============================================================</span>
+
+<span class="group-hdr"># GROUP 1: Loopback</span>
+interface loopback 1
+ip address 1 10.0.0.1/255.255.255.255
+exit
+
+<span class="group-hdr"># GROUP 2: MGMT CLIP</span>
+mgmt clip vrf GlobalRouter
+ip address 10.0.0.2/32
+enable
+exit
+
+<span class="group-hdr"># GROUP 3: IS-IS Identity</span>
+router isis
+sys-name "KhKLab-SW-02"
+ip-source-address 10.0.0.1
+exit
+
+<span class="group-hdr"># GROUP 4: SPBM Instance</span>
+router isis
+spbm 1 nick-name 0.00.01
+spbm 1 ip enable
+spbm 1 multicast enable
+exit
+
+<span class="group-hdr"># GROUP 5: Area Membership</span>
+router isis
+manual-area 49.b0b1
+exit
+
+<span class="group-hdr"># GROUP 6: VLAN + I-SID Binding</span>
+vlan create 10 name Staff type port-mstprstp 0
+vlan create 20 name Guest type port-mstprstp 0
+vlan i-sid 10 10010
+vlan i-sid 20 10020
+
+<span class="group-hdr"># GROUP 7: Anycast Gateway SVIs</span>
+interface Vlan 10
+ip address 10.0.10.1 255.255.255.0 2
+exit
+interface Vlan 20
+ip address 10.0.20.1 255.255.255.0 3
+exit
+
+<span class="group-hdr"># GROUP 8: DHCP Server</span>
+ip dhcp-server subnet 10.0.10.0/24
+pool 10.0.10.100 10.0.10.200
+router 10.0.10.1
+lease-time 86400
+exit
+ip dhcp-server subnet 10.0.20.0/24
+pool 10.0.20.100 10.0.20.200
+router 10.0.20.1
+lease-time 86400
+exit
+ip dhcp-server enable
+ip dhcp-server ha-role primary
+ip dhcp-server domain-name-servers 8.8.8.8 8.8.4.4
+
+<span class="group-hdr"># GROUP 9: Auto-Sense / FA</span>
+auto-sense data i-sid 10010
+auto-sense fa wap-type1 i-sid 10010
+
+<span class="group-hdr"># GROUP 10: Route Redistribution</span>
+router isis
+redistribute direct
+redistribute direct enable
+exit
+isis apply redistribute direct
+
+<span class="group-hdr"># GROUP 11: Port 1/1 Management Fix (HOME LAB ONLY)</span>
+interface GigabitEthernet 1/1
+no auto-sense enable
+exit
+vlan members add 1 1/1 portmember
+
+<span class="group-hdr"># GROUP 12: Management IP + Default Route (HOME LAB ONLY)</span>
+interface vlan 1
+ip address 192.168.0.29 255.255.255.0 1
+exit
+ip route 0.0.0.0/0 192.168.0.1 weight 1
+
+<span class="group-hdr"># GROUP 13: Persist</span>
+save config</pre>
+    </div>
+
+    <p style="font-family:'Source Sans 3',sans-serif;font-size:13px;color:#555;margin-top:12px;">
+      After paste — verify before touching anything:<br>
+      <code style="background:#eee;padding:2px 6px;border-radius:3px;font-size:12px;">show ip dhcp-server</code> → role = primary, DNS 1: 8.8.8.8 &nbsp;|&nbsp;
+      <code style="background:#eee;padding:2px 6px;border-radius:3px;font-size:12px;">show ip interface</code> → Vlan 10 UP, Vlan 20 UP &nbsp;|&nbsp;
+      <code style="background:#eee;padding:2px 6px;border-radius:3px;font-size:12px;">show fa agent</code> → FA active on port 1/3 &nbsp;|&nbsp;
+      <code style="background:#eee;padding:2px 6px;border-radius:3px;font-size:12px;">show i-sid</code> → 10010 and 10020 present
+    </p>
   </section>
 
   <section id="table">
@@ -335,8 +481,9 @@ pool 10.0.20.100 10.0.20.200
 router 10.0.20.1
 lease-time 86400
 exit
-ip dhcp-server enable</pre></td>
-          <td class="comment-col">Local DHCP for Staff and Guest clients. This switch serves addresses directly — no relay needed for first-pass test. Karl's switch uses relay (fwd-path to CLIP) because his DHCP server is centralised. For mylab, local server is simpler and self-contained.</td>
+ip dhcp-server enable
+ip dhcp-server ha-role primary</pre></td>
+          <td class="comment-col">Local DHCP for Staff and Guest clients. <strong>ha-role primary is mandatory</strong> — default is standby, which means the server accepts leases but never responds. Confirmed Aug 21 2026: switching to primary immediately resolved zero-response issue. This switch serves addresses directly — no relay needed for first-pass test. Karl's switch uses relay (fwd-path to CLIP) because his DHCP server is centralised. For mylab, local server is simpler and self-contained.</td>
         </tr>
 
         <tr>
@@ -364,7 +511,7 @@ isis apply redistribute direct</pre></td>
           <td class="cli-block"><pre class="cli">interface vlan 1
   ip address 192.168.0.29 255.255.255.0 1
 exit
-ip route 0.0.0.0/0 192.168.0.1 weight 1 enable</pre></td>
+ip route 0.0.0.0/0 192.168.0.1 weight 1</pre></td>
           <td class="comment-col">In-band management IP on VLAN 1 — use <code>192.168.0.29</code> to avoid conflict with Karl's switch on the home LAN. Default route via modem (<code>192.168.0.1</code>) for internet reachability. Verify <code>.29</code> is free on your subnet before pushing. DHCP must not be serving this address from another device.</td>
         </tr>
 
@@ -432,7 +579,7 @@ ip route 0.0.0.0/0 192.168.0.1 weight 1 enable</pre></td>
 </main>
 
 <footer>
-  Horizon Lab · 5320 Onboarding Program · Generated Aug 21 2026 · <code>5320_voss_mylab</code> Supplemental CLI Reference v1.1 — DNS group added
+  Horizon Lab · 5320 Onboarding Program · Generated Aug 21 2026 · <code>5320_voss_mylab</code> Supplemental CLI Reference v1.2 — E2E script added, ha-role primary + DNS fixes, default route enable bug corrected
 </footer>
 
 </body>
